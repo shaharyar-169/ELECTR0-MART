@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/crystalsol/static/css/main.dd830569.css",
+    "main.js": "/crystalsol/static/js/main.7b9611af.js",
+    "static/media/homeapp.jpg": "/crystalsol/static/media/homeapp.9176551daf77401613d1.jpg",
+    "static/media/bootstrap-icons.woff?": "/crystalsol/static/media/bootstrap-icons.39795c0b4513de014cf8.woff",
+    "static/media/bootstrap-icons.woff2?": "/crystalsol/static/media/bootstrap-icons.b7bcc075b395c14ce8c2.woff2",
+    "static/media/logo.png": "/crystalsol/static/media/logo.e59842faa0b58f33958e.png",
+    "static/media/utilitimenu.png": "/crystalsol/static/media/utilitimenu.09d914fbaa0c85b10b35.png",
+    "static/media/man.png": "/crystalsol/static/media/man.ca6e16baaa2863c2795e.png",
+    "static/media/transactionmenu.png": "/crystalsol/static/media/transactionmenu.c34c545d62568d314e91.png",
+    "static/media/Dashboard1.png": "/crystalsol/static/media/Dashboard1.7b52f3194e04fce3f4ee.png",
+    "static/media/keys.png": "/crystalsol/static/media/keys.c87af3db0ab80c85a3d9.png",
+    "static/media/reportmenu.png": "/crystalsol/static/media/reportmenu.bd6ecba7fc29a91740f9.png",
+    "static/media/filemenu.png": "/crystalsol/static/media/filemenu.e243d6512347d91e48a1.png",
+    "static/media/logowithname.jpeg": "/crystalsol/static/media/logowithname.e831a235b42a41bf1b0c.jpeg",
+    "index.html": "/crystalsol/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.dd830569.css",
+    "static/js/main.7b9611af.js"
+  ]
+}

@@ -1,0 +1,24 @@
+/* .HomePage1{
+    overflow-x: hidden;
+} */
+
+/* .container-fluid {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  } */
+
+  .buttondesign{
+    height: 40px;
+    margin-top: 20px;
+    margin-left: 20px;
+    border-top: 3px solid black;
+    border-bottom: 3px solid black;
+    padding: 5px;
+ 
+  }
+
+
+  /* body {
+    overflow-x: hidden;
+  } */
