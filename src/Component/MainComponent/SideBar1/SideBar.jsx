@@ -123,6 +123,7 @@ const SideBar1 = () => {
 
   const [expanded, setExpanded] = useState(true);
   const [menuData, setMenuData] = useState([]);
+  console.log('menu Data')
   const [openMenu, setOpenMenu] = useState({}); // To track open/closed top-level menus
   const [openSubMenu, setOpenSubMenu] = useState({}); // To track open/closed sub-menus
   const [isToggled, setIsToggled] = useState(true);
@@ -214,16 +215,23 @@ const SideBar1 = () => {
     });
   });
 
+  
   const renderSubSubMenu = (topLevel, middleLevel, subItems) => {
+    // Exclude the first item if it is meant to be a header or non-clickable
     const filteredSubItems = subItems.slice(1);
 
     return filteredSubItems.map((subItem, index) => (
       <ListItem
         button
         key={index}
-        component="a"
-        href={subItem.disabledd ? "" : subItem.to}
-        disabled={subItem.disabled}
+        onClick={() => {
+          if (!subItem.disabledd) {
+            navigate(subItem.to); 
+          } else {
+            console.log("This menu item is disabled");
+          }
+        }}
+        disabled={subItem.disabledd}
         sx={{
           pl: 9,
           height: "30px",
@@ -253,7 +261,6 @@ const SideBar1 = () => {
       </ListItem>
     ));
   };
-
   const renderSubMenu = (topLevel, middleLevelItems) => {
     return Object.keys(middleLevelItems)
       .filter((middleLevel) => middleLevel !== "000")
