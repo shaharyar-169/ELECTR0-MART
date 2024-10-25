@@ -118,7 +118,7 @@ background: transparent !important;
   background: #C6DAF7;
   border-radius: 5px;
   height:40px;
-  width: 400px;
+  width: 500px;
   margin: auto;
   text-align: center;
   line-height: 40px;
@@ -221,3 +221,25 @@ background: transparent !important;
  tbody tr:nth-child(even) {
   background-color: #021A33 !important
 }
+
+
+/* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */
+
+
+
+.table-scroll::-webkit-scrollbar {
+  width: 13px; 
+}
+.table-scroll::-webkit-scrollbar-track {
+  background: #021A33; 
+}
+.table-scroll::-webkit-scrollbar-thumb {
+  background-color: #3368B5; 
+  border-radius: 10px; 
+  
+ }
+.table-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+/* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */

@@ -10,6 +10,7 @@ import Select from "react-select";
 import { components } from 'react-select';
 import { BsCalendar } from 'react-icons/bs';
 import DatePicker from "react-datepicker";
+import 'react-datepicker/dist/react-datepicker.css';
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -51,14 +52,15 @@ export default function GeneralLedger() {
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
-    const GlobalfromDate = new Date(2024, 0, 1); // Months are zero-indexed, so January is 0
-    const GlobalfromDate1 = new Date(2024, 0, 1);
 
-   const GlobaltoDate = new Date(2024, 11, 31); // December is 11 because months are zero-indexed
-const GlobaltoDate1 = new Date(2024, 11, 31);
+    const GlobalfromDate = new Date(2024, 0, 1);
+    const GlobalfromDate1 = `${String(GlobalfromDate.getDate()).padStart(2, '0')}-${String(GlobalfromDate.getMonth() + 1).padStart(2, '0')}-${GlobalfromDate.getFullYear()}`;
 
+    const GlobaltoDate = new Date(2024, 11, 31);
+    const GlobaltoDate1 = `${String(GlobaltoDate.getDate()).padStart(2, '0')}-${String(GlobaltoDate.getMonth() + 1).padStart(2, '0')}-${GlobaltoDate.getFullYear()}`;
 
     const comapnyname = 'ELECTRO-MART'
+
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
 
 
@@ -83,6 +85,48 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
     const handlefromInputChange = (e) => {
         setfromInputDate(e.target.value);
     };
+
+    // const handlefromKeyPress = (e) => {
+    //     const input = e.target;
+    //     let inputValue = input.value.replace(/\D/g, ''); // Remove non-numeric characters
+
+    //     if (inputValue.length > 8) {
+    //         inputValue = inputValue.substring(0, 8); // Limit to 8 digits
+    //     }
+
+    //     // Automatically add dashes after 2nd and 4th digits for the format dd-mm-yyyy
+    //     if (inputValue.length > 2 && inputValue.length <= 4) {
+    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2)}`;
+    //     } else if (inputValue.length > 4) {
+    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2, 4)}-${inputValue.slice(4)}`;
+    //     }
+
+    //     input.value = inputValue; // Set formatted value
+
+    //     // Perform validation only when the full date is entered
+    //     if (inputValue.length === 10) {
+    //         const [day, month, year] = inputValue.split('-').map(Number);
+    //         const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
+    //         if (!datePattern.test(inputValue)) {
+    //             alert("Please enter a valid date format: dd-mm-yyyy.");
+    //             input.style.border = "2px solid red";
+    //             return;
+    //         }
+
+    //         const daysInMonth = new Date(year, month, 0).getDate();
+    //         if (day > daysInMonth || day === 0) {
+    //             alert(`Please enter a valid day for month ${month}.`);
+    //             input.style.border = "2px solid red";
+    //             return;
+    //         }
+
+    //         input.style.border = "1px solid black"; // Reset border on valid input
+
+    //         // You can now handle the date logic as needed (e.g., submit form, compare dates, etc.)
+    //     }
+    // };
+
     const handlefromKeyPress = (e, inputId) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -93,7 +137,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
             if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
                 const [day, month, year] = formattedInput.split('-').map(Number);
 
-                if (month > 12 || month === 0) {
+                if (month > 12 || month === 0) { 
                     alert('Please enter a valid month (MM) between 01 and 12');
                     return;
                 }
@@ -111,51 +155,11 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
 
                 // Check if the entered date is less than GlobaltoDate
                 if (GlobalfromDate && enteredDate < GlobalfromDate) {
-                    document.getElementById('someElementId').innerHTML = `
-					<div class="custom-message">
-					<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-							  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-						  </svg>
-                      Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-                      To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-						  <button class='alert_button'  id="close-btn" onclick="closeAlert('formvalidation')"  cursor: pointer;">
-						 
-						  <i class="bi bi-x  cross_icon_styling"></i>
-					  </button>
-				  </div>
-					`;
-                    // Focus the button after it is added to the DOM
-                    setTimeout(() => {
-                        const closeButton = document.getElementById('close-btn');
-                        if (closeButton) {
-                            closeButton.focus();
-                        }
-                    }, 0);
-                    fromDateElement.style.border = "2px solid red"; // Add red border to the input
+                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
                     return;
                 }
                 if (GlobalfromDate && enteredDate > GlobaltoDate) {
-                    document.getElementById('someElementId').innerHTML = `
-					<div class="custom-message">
-					<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-							  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-						  </svg>
-                      Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-                      To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-						  <button class='alert_button'  id="close-btn" onclick="closeAlert('formvalidation')"  cursor: pointer;">
-						 
-						  <i class="bi bi-x  cross_icon_styling"></i>
-					  </button>
-				  </div>
-					`;
-                    // Focus the button after it is added to the DOM
-                    setTimeout(() => {
-                        const closeButton = document.getElementById('close-btn');
-                        if (closeButton) {
-                            closeButton.focus();
-                        }
-                    }, 0);
-                    fromDateElement.style.border = "2px solid red"; // Add red border to the input
+                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
                     return;
                 }
 
@@ -170,30 +174,11 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                     document.getElementById('submitButton').click(); // Trigger form submission
                 }
             } else {
-                document.getElementById('someElementId').innerHTML = `
-					<div class="custom-message">
-					<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-							  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-						  </svg>
-                      Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-                      To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-						  <button class='alert_button'  id="close-btn" onclick="closeAlert('formvalidation')"  cursor: pointer;">
-						 
-						  <i class="bi bi-x  cross_icon_styling"></i>
-					  </button>
-				  </div>
-					`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                fromDateElement.style.border = "2px solid red"; // Add red border to the input
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
             }
         }
     };
+   
     const handleToKeyPress = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -219,52 +204,12 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                 const enteredDate = new Date(year, month - 1, day); // Month in JavaScript Date starts from 0 (0 - January, 1 - February, ...)
 
                 if (GlobaltoDate && enteredDate > GlobaltoDate) {
-                    document.getElementById('someElementId').innerHTML = `
-					<div class="custom-message">
-					<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-							  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-						  </svg>
-                      Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-                      To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-						  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-						 
-						  <i class="bi bi-x  cross_icon_styling"></i>
-					  </button>
-				  </div>
-					`;
-                    // Focus the button after it is added to the DOM
-                    setTimeout(() => {
-                        const closeButton = document.getElementById('close-btn');
-                        if (closeButton) {
-                            closeButton.focus();
-                        }
-                    }, 0);
-                    toDateElement.style.border = "2px solid red"; // Add red border to the input
+                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
                     return;
                 }
 
                 if (GlobaltoDate && enteredDate < GlobalfromDate) {
-                    document.getElementById('someElementId').innerHTML = `
-					<div class="custom-message">
-					<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-							  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-						  </svg>
-                      Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-                      To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-						  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-						 
-						  <i class="bi bi-x  cross_icon_styling"></i>
-					  </button>
-				  </div>
-					`;
-                    // Focus the button after it is added to the DOM
-                    setTimeout(() => {
-                        const closeButton = document.getElementById('close-btn');
-                        if (closeButton) {
-                            closeButton.focus();
-                        }
-                    }, 0);
-                    toDateElement.style.border = "2px solid red"; // Add red border to the input
+                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
                     return;
                 }
 
@@ -272,27 +217,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                 if (fromInputDate) {
                     const fromDate = new Date(fromInputDate.split('-').reverse().join('-'));
                     if (enteredDate <= fromDate) {
-                        document.getElementById('someElementId').innerHTML = `
-						<div class="custom-message">
-						<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-								  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-							  </svg>
-						  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-						  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-							  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-							 
-							  <i class="bi bi-x  cross_icon_styling"></i>
-						  </button>
-					  </div>
-						`;
-                        // Focus the button after it is added to the DOM
-                        setTimeout(() => {
-                            const closeButton = document.getElementById('close-btn');
-                            if (closeButton) {
-                                closeButton.focus();
-                            }
-                        }, 0);
-                        toDateElement.style.border = "2px solid red"; // Add red border to the input
+                        showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
                         return;
                     }
                 }
@@ -307,27 +232,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                 }
 
             } else {
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                toDateElement.style.border = "2px solid red"; // Add red border to the input
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
             }
         }
     };
@@ -339,7 +244,6 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
     const handleToInputChange = (e) => {
         settoInputDate(e.target.value);
     };
-
     const handleSaleKeypress = (event, inputId) => {
         if (event.key === 'Enter') {
             const selectedOption = saleSelectRef.current.state.selectValue;
@@ -364,14 +268,36 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
             }
         }
     };
+    const showAlertMessage = (elementId, message, fromDate, toDate, fromDateElement, errortype) => {
+        document.getElementById(elementId).innerHTML = `
+		  <div class="custom-message">
+			<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
+			  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
+			</svg>
+			${message} <span style="font-size: 12px; font-weight: bold;">${fromDate}</span> 
+			To <span style="font-size: 12px; font-weight: bold;">${toDate}</span>
+			<button class='alert_button' id="close-btn" onclick="closeAlert('${errortype}')" style="cursor: pointer;">
+			  <i class="bi bi-x cross_icon_styling"></i>
+			</button>
+		  </div>
+		`;
 
+        // Focus the button after it is added to the DOM
+        setTimeout(() => {
+            const closeButton = document.getElementById('close-btn');
+            if (closeButton) {
+                closeButton.focus();
+            }
+        }, 0);
+
+        fromDateElement.style.border = "2px solid red"; // Add red border to the input
+    };
     function closeAlert(errorType) {
 
         const alertElement = document.getElementById('someElementId');
         alertElement.innerHTML = ''; // Clears the alert content
         if (errorType === 'saleType') {
             saleSelectRef.current.focus();
-
         }
         if (errorType === 'formvalidation') {
             fromRef.current.select();
@@ -383,10 +309,11 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
     // Bind to window
     window.closeAlert = closeAlert;
 
-
     function fetchGeneralLedger() {
 
-        const fromDateElement = document.getElementById('fromdatevalidation')
+        const fromDateElement = document.getElementById('fromdatevalidation');
+        const toDateElement = document.getElementById('todatevalidation');
+
         const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
         let hasError = false;
@@ -465,220 +392,39 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
 
 
             case 'fromDate':
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
 
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('formvalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-
-                fromDateElement.style.border = "2px solid red";
                 return;
             case 'toDate':
-                document.getElementById('someElementId').innerHTML = `
-						<div class="custom-message">
-						<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-								  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-							  </svg>
-						  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-						  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-							  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-							 
-							  <i class="bi bi-x  cross_icon_styling"></i>
-						  </button>
-					  </div>
-						`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                document.getElementById('todatevalidation').style.border = "2px solid red";
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
 
                 return;
             case 'fromDateInvalid':
-                document.getElementById('someElementId').innerHTML = `
-					<div class="custom-message">
-					<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-							  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-						  </svg>
-                      Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-                      To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-						  <button class='alert_button'  id="close-btn" onclick="closeAlert('formvalidation')"  cursor: pointer;">
-						 
-						  <i class="bi bi-x  cross_icon_styling"></i>
-					  </button>
-				  </div>
-					`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                document.getElementById('fromdatevalidation').style.border = "2px solid red";
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
 
                 return;
             case 'toDateInvalid':
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                document.getElementById('todatevalidation').style.border = "2px solid red";
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+
                 return;
             case 'fromDateBeforeGlobal':
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('formvalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-
-                document.getElementById('fromdatevalidation').style.border = "2px solid red";
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
 
                 return;
             case 'fromDateAfterGlobal':
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('formvalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-
-                document.getElementById('fromdatevalidation').style.border = "2px solid red";
-
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
                 return;
             case 'toDateAfterGlobal':
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                document.getElementById('todatevalidation').style.border = "2px solid red";
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
 
                 return;
             case 'toDateBeforeGlobal':
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                document.getElementById('todatevalidation').style.border = "2px solid red";
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+
                 return;
             case 'toDateBeforeFromDate':
-                document.getElementById('someElementId').innerHTML = `
-				<div class="custom-message">
-				<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-						  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-					  </svg>
-				  Date must be from <span style="font-size: 12px; font-weight: bold;">${GlobalfromDate1}</span> 
-				  To <span style="font-size: 12px; font-weight: bold;">${GlobaltoDate1}</span>	
-					  <button class='alert_button'  id="close-btn" onclick="closeAlert('todatevalidation')"  cursor: pointer;">
-					 
-					  <i class="bi bi-x  cross_icon_styling"></i>
-				  </button>
-			  </div>
-				`;
-                // Focus the button after it is added to the DOM
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.focus();
-                    }
-                }, 0);
-                document.getElementById('todatevalidation').style.border = "2px solid red";
+                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+
                 return;
             default:
                 break;
@@ -1390,16 +1136,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
         return filteredData;
     };
 
-    // const firstColWidth = { width: "6%" };
-    // const secondColWidth = { width: "10%" };
-    // const thirdColWidth = { width: "20%" };
-    // // const forthColWidth = { width: "11%" };
-    // const fifthColWidth = { width: "8%" };
-    // const sixthColWidth = { width: "8%" };
-    // const seventhColWidth = { width: "11%" };
-    // const eighthColWidth = { width: "21%" };
-    // const ninthColWidth = { width: "6%" };
-
+   
     const firstColWidth = {
         width: "10%",
     };
@@ -1471,6 +1208,79 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
         fontFamily: '"Poppins", sans-serif',
     };
 
+    //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
+    const [isFilterApplied, setIsFilterApplied] = useState(false);
+    useEffect(() => {
+        if (isFilterApplied || tableData.length > 0) {
+            setSelectedIndex(0); // Set the selected index to the first row
+            rowRefs.current[0]?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        } else {
+            setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
+        }
+    }, [tableData, isFilterApplied]);
+
+    let totalEnteries = 0;
+    const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
+
+    // state initialize for table row highlight
+    const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
+    const rowRefs = useRef([]); // Array of refs for rows
+    const handleRowClick = (index) => {
+        setSelectedIndex(index);
+        // setSelectedRowId(getFilteredTableData[index].tcmpdsc); // Save the selected row's tctgcod
+    };
+    useEffect(() => {
+        if (selectedRowId !== null) {
+            const newIndex = tableData.findIndex(
+                (item) => item.tcmpcod === selectedRowId
+            );
+            setSelectedIndex(newIndex);
+        }
+    }, [tableData, selectedRowId]);
+    const handleKeyDown = (e) => {
+        if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+            scrollToSelectedRow();
+        } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setSelectedIndex((prevIndex) =>
+                Math.min(prevIndex + 1, tableData.length - 1)
+            );
+            scrollToSelectedRow();
+        }
+    };
+    const scrollToSelectedRow = () => {
+        if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
+            rowRefs.current[selectedIndex].scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }
+    };
+    useEffect(() => {
+        window.addEventListener("keydown", handleKeyDown);
+
+        // Cleanup event listener on component unmount
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [selectedIndex]); // Add selectedIndex as a dependency
+    useEffect(() => {
+        // Scroll the selected row into view
+        if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
+            rowRefs.current[selectedIndex].scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }
+    }, [selectedIndex]); // Add selectedIndex as a dependency
+    //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
+
     return (
         <>
             <div id="someElementId"></div>
@@ -1486,98 +1296,6 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                     }}
                 >
                     <NavComponent textdata="General Ledger" />
-                    {/* <div className="my-1 mx-3" >
-            <div className="col-12 d-flex justify-content-between mt-1">
-              <div className="col-4 d-flex justify-content-start" >
-                <label
-                  className="col-3 text-end"
-                
-                >
-                  <strong>Search: &nbsp;&nbsp;</strong>
-                </label>
-                <input
-                  type="text"
-                  className="col-6"
-                  onChange={handleSearch}
-                  placeholder="Search by Name"
-                  value={selectedSearch}
-                  style={{
-                    height: "22px",
-                    // fontSize: "0.8rem",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    color: fontcolor,
-                    "::placeholder": {
-                      color: "white",
-                      opacity: 5,
-                    },
-                  }}
-                />
-               
-              </div>
-
-              <div className="col-4 d-flex justify-content-end" >
-                <label
-                  className="col-3 text-end"
-                
-                >
-                  <strong>Search: &nbsp;&nbsp;</strong>
-                </label>
-                <input
-                  type="text"
-                  className="col-6"
-                  onChange={handleSearch}
-                  placeholder="Search by Name"
-                  value={selectedSearch}
-                  style={{
-                    height: "22px",
-                    // fontSize: "0.8rem",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    color: fontcolor,
-                    "::placeholder": {
-                      color: "white",
-                      opacity: 5,
-                    },
-                  }}
-                />
-               
-              </div>
-
-            </div>
-         
-         
-            <div className="col-12 d-flex justify-content-between mt-1">
-              <div className="col-4 d-flex justify-content-start">
-                <label
-                  className="col-3 text-end"
-                  // style={{ fontSize: "0.8rem" }}
-                >
-                  <strong>Search: &nbsp;&nbsp;</strong>
-                </label>
-                <input
-                  type="text"
-                  className="col-6"
-                  onChange={handleSearch}
-                  placeholder="Search by Name"
-                  value={selectedSearch}
-                  style={{
-                    height: "22px",
-                    // fontSize: "0.8rem",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    color: fontcolor,
-                    "::placeholder": {
-                      color: "white",
-                      opacity: 5,
-                    },
-                  }}
-                />
-               
-              </div>
-            </div>
-          </div> */}
-
                     <div className="row " style={{ height: '20px', marginTop: '6px', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0px', padding: '0px' }}>
 
@@ -1711,7 +1429,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                                         onChange={handlefromInputChange}
                                         // onKeyPress={handlefromKeyPress}
                                         onKeyDown={(e) => handlefromKeyPress(e, 'toDatePicker')}
-                                        // onKeyDown={(e) => handleKeyPressBoth(e, 'toDatePicker')}
+                                        // onKeyUp={(e) => handlefromKeyPress(e, 'toDatePicker')}
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="Date Input"
@@ -1723,8 +1441,8 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                                         dateFormat="dd-MM-yyyy"
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
-                                        showMonthDropdown
-                                        showYearDropdown
+                                        // showMonthDropdown
+                                        // showYearDropdown
                                         open={fromCalendarOpen}
                                         dropdownMode="select"
                                         customInput={
@@ -1859,7 +1577,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                         <div
                             style={{
                                 overflowY: "auto",
-                                width: "98.3%",
+                                width: "98.8%",
                             }}
                         >
                             <table
@@ -1914,6 +1632,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                         </div>
 
                         <div
+                            className="table-scroll"
                             style={{
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
@@ -1937,10 +1656,10 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                                 <tbody style={{ backgroundColor: "white" }}>
                                     {isLoading ? (
                                         <>
-                                            <tr 
-                                             style={{
-                                                backgroundColor:getcolor
-                                             }}
+                                            <tr
+                                                style={{
+                                                    backgroundColor: getcolor
+                                                }}
                                             >
                                                 <td colSpan="7" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
@@ -1976,18 +1695,18 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                                     ) : (
                                         <>
                                             {tableData.map((item, i) => {
-                                                // totalEnteries += 1;
+                                                totalEnteries += 1;
                                                 return (
                                                     <tr
                                                         key={i}
-                                                        // ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
-                                                        // onClick={() => handleRowClick(i)}
+                                                        ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
+                                                        onClick={() => handleRowClick(i)}
                                                         style={{
-                                                            // backgroundColor: selectedIndex === i ? "#ADD8E6" : "white",
-                                                            // fontWeight: selectedIndex === i ? "bold" : "",
+                                                            backgroundColor:
+                                                                selectedIndex === i ? "#50C5FF" : "",
+                                                            fontWeight: selectedIndex === i ? "bold" : "",
+                                                            color: selectedIndex === i ? "black" : "",
                                                             fontSize: "12px !important",
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
@@ -2046,7 +1765,7 @@ const GlobaltoDate1 = new Date(2024, 11, 31);
                         </div>
                     </div>
 
-                    <div style={{ width: '100.3%', borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{ width: '100.7%', borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>

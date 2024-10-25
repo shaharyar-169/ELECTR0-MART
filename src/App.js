@@ -65,7 +65,7 @@ function App() {
                 <Route exact path="/CapacityMaintenance" element={<Capacity_Maintenance />} />
                 <Route exact path="/UserManagement" element={<UserMaintenance />} />
                 {/* Rountes for ledgers reports */}
-                <Route exact path="/GeneralLedger" element={<GeneralLedger globadata={globadata} />} />
+                <Route exact path="/GeneralLedger1" element={<GeneralLedger />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
