@@ -1113,10 +1113,12 @@ export default function GeneralLedger() {
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
 
-    useEffect(() => {
-        setTableData(data);
-        dispatch(fetchGetUser(organisation && organisation.code));
-    }, [dispatch, organisation.code]);
+    // useEffect(() => {
+    //     setTableData(data);
+    //     dispatch(fetchGetUser(organisation && organisation.code));
+    // }, [dispatch, organisation.code]);
+
+
 
     const handleSearch = (e) => {
         setSelectedSearch(e.target.value);
@@ -1209,6 +1211,7 @@ export default function GeneralLedger() {
         fontFamily: '"Poppins", sans-serif',
     };
 
+    
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1282,6 +1285,8 @@ export default function GeneralLedger() {
     }, [selectedIndex]); // Add selectedIndex as a dependency
     //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
 
+
+
     return (
         <>
             <div id="someElementId"></div>
@@ -1306,7 +1311,7 @@ export default function GeneralLedger() {
                                 </div>
                                 <div style={{ marginLeft: '3px' }} >
                                     <Select
-
+                                          
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1640,7 +1645,7 @@ export default function GeneralLedger() {
                                 maxHeight: "45vh",
                                 width: "100%",
                                 wordBreak: "break-word",
-                                zIndex: 1
+                              
 
                             }}
                         >
@@ -1653,7 +1658,7 @@ export default function GeneralLedger() {
                                     position: "relative",
                                 }}
                             >
-                                <tbody id="tablebody"  style={{ backgroundColor: "white" }}>
+                                <tbody id="tablebody" >
                                     {isLoading ? (
                                         <>
                                             <tr
@@ -1665,7 +1670,7 @@ export default function GeneralLedger() {
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
-                                            {Array.from({ length: Math.max(0, 30 - 3) }).map(
+                                            {Array.from({ length: Math.max(0, 30 - 5) }).map(
                                                 (_, rowIndex) => (
                                                     <tr key={`blank-${rowIndex}`}
                                                         style={{
@@ -1695,17 +1700,17 @@ export default function GeneralLedger() {
                                     ) : (
                                         <>
                                             {tableData.map((item, i) => {
-                                                totalEnteries += 1;
+                                              totalEnteries += 1;
                                                 return (
                                                     <tr
-                                                        key={i}
+                                                        key={`${i}-${selectedIndex}`}
                                                         // ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
                                                         onClick={() => handleRowClick(i)}
-                                                        style={{
-                                                            backgroundColor:
-                                                                selectedIndex === i ? "#50C5FF" : "",
-                                                            fontWeight: selectedIndex === i ? "bold" : "",
+                                                        // className={selectedIndex === i ? "selected-background" : ""}
+                                                       style={{
+                                                            backgroundColor: selectedIndex === i ? "#50C5FF" : "",
                                                             color: selectedIndex === i ? "black" : "",
+                                                            fontWeight: selectedIndex === i ? "bold" : "",
                                                             fontSize: "12px !important",
                                                         }}
                                                     >

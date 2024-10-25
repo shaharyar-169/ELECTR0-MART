@@ -220,6 +220,10 @@ background: transparent !important;
 
 
 
+ .selected-background {
+  background-color: #50C5FF !important;
+}
+
  /* tbody tr:nth-child(even) {
   background-color: #021A33 !important
 } */
@@ -227,6 +231,9 @@ background: transparent !important;
 #tablebody tr:nth-child(even){
   background-color: #021A33 !important;
 }
+/* #tablebody tr:nth-child(odd){
+  background-color: #021A33 !important;
+} */
 
 
 /* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */
@@ -292,3 +299,11 @@ h2.react-datepicker__current-month {
 }
 
 /* /////////////////// styeling for date-picker cellender /////////////////////// */
+
+.css-166bipr-Input{
+  color: #FFFFFF !important;
+}
+
+.css-166bipr-Input{
+  color: #FFFFFF !important;
+}
