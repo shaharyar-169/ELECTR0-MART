@@ -218,8 +218,14 @@ background: transparent !important;
   color: white !important;
  }
 
- tbody tr:nth-child(even) {
+
+
+ /* tbody tr:nth-child(even) {
   background-color: #021A33 !important
+} */
+
+#tablebody tr:nth-child(even){
+  background-color: #021A33 !important;
 }
 
 
@@ -243,3 +249,46 @@ background: transparent !important;
 }
 
 /* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */
+
+/* /////////////////// styeling for date-picker cellender /////////////////////// */
+
+.react-datepicker {
+  font-family: "Helvetica Neue", helvetica, arial, sans-serif;
+  font-size: 0.8rem;
+  background-color: #fff;
+  color: #000;
+  /* border: 1.4px solid #3368B5 !important; */
+  border-radius: 0.3rem;
+  display: inline-block;
+  position: relative;
+  line-height: initial;
+  background: #021A33 !important;
+  /* box-shadow: #3368B5 3px 3px 1px; */
+}
+.react-datepicker__day{
+    cursor: pointer;         
+    color: white;
+}
+.react-datepicker__day:not([aria-disabled=true]):hover {
+    border-radius: 0.3rem;
+    background-color: #f0f0f0;               
+    color: black !important;
+}
+.react-datepicker__header{
+  background-color: #3368B5 !important;
+} 
+h2.react-datepicker__current-month {
+  padding: 0;
+  margin: 0;         
+  color: white;
+}
+.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name {
+  color: white !important;
+  display: inline-block;
+  width: 1.7rem;
+  line-height: 1.7rem;       
+  text-align: center;
+  margin: 0.166rem;
+}
+
+/* /////////////////// styeling for date-picker cellender /////////////////////// */

@@ -137,7 +137,7 @@ export default function GeneralLedger() {
             if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
                 const [day, month, year] = formattedInput.split('-').map(Number);
 
-                if (month > 12 || month === 0) { 
+                if (month > 12 || month === 0) {
                     alert('Please enter a valid month (MM) between 01 and 12');
                     return;
                 }
@@ -178,7 +178,7 @@ export default function GeneralLedger() {
             }
         }
     };
-   
+
     const handleToKeyPress = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -286,9 +286,9 @@ export default function GeneralLedger() {
         setTimeout(() => {
             const closeButton = document.getElementById('close-btn');
             if (closeButton) {
-                closeButton.focus();
+                closeButton.click();
             }
-        }, 0);
+        }, 3000);
 
         fromDateElement.style.border = "2px solid red"; // Add red border to the input
     };
@@ -383,9 +383,10 @@ export default function GeneralLedger() {
                 setTimeout(() => {
                     const closeButton = document.getElementById('close-btn');
                     if (closeButton) {
-                        closeButton.focus();
+                        closeButton.click();
+
                     }
-                }, 0);
+                }, 3000);
 
                 hasError = true;
                 return customStyles1(hasError);
@@ -1136,7 +1137,7 @@ export default function GeneralLedger() {
         return filteredData;
     };
 
-   
+
     const firstColWidth = {
         width: "10%",
     };
@@ -1518,8 +1519,8 @@ export default function GeneralLedger() {
                                         dateFormat="dd-MM-yyyy"
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
-                                        showMonthDropdown
-                                        showYearDropdown
+                                        // showMonthDropdown
+                                        // showYearDropdown
                                         open={toCalendarOpen}
                                         dropdownMode="select"
                                         customInput={
@@ -1549,7 +1550,6 @@ export default function GeneralLedger() {
                                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                                     // onKeyDown={(e) => handlesearchKeypress(e, 'searchsubmit')}
                                     type="text"
-                                    // id="searchInput"
                                     id="searchsubmit"
                                     placeholder="Item description"
                                     value={searchQuery}
@@ -1653,7 +1653,7 @@ export default function GeneralLedger() {
                                     position: "relative",
                                 }}
                             >
-                                <tbody style={{ backgroundColor: "white" }}>
+                                <tbody id="tablebody"  style={{ backgroundColor: "white" }}>
                                     {isLoading ? (
                                         <>
                                             <tr
@@ -1699,7 +1699,7 @@ export default function GeneralLedger() {
                                                 return (
                                                     <tr
                                                         key={i}
-                                                        ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
+                                                        // ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
                                                         onClick={() => handleRowClick(i)}
                                                         style={{
                                                             backgroundColor:
@@ -1789,6 +1789,7 @@ export default function GeneralLedger() {
                         }}
                     >
                         <SingleButton
+                            to="/MainPage"
                             text="Return"
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
@@ -1803,11 +1804,15 @@ export default function GeneralLedger() {
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
                         <SingleButton
+                            id="searchsubmit"
                             text="SELECT"
                             ref={input3Ref}
                             onClick={fetchGeneralLedger}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
+                          {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
+                    Select
+                </button>{" "} */}
 
                     </div>
                 </div>
