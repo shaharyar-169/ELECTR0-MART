@@ -102,11 +102,13 @@ background: transparent !important;
 }
 
 .mobileledger_total{
+  font-family: Verdana !important;
   height: 100% !important;
   display: flex;
   justify-content: end;
   align-items: center;
-  font-weight: bold;
+  /* font-weight: bold; */
+  font-size: 12px !important;
   padding-right: 2px !important;
 }
 
@@ -220,20 +222,28 @@ background: transparent !important;
 
 
 
- .selected-background {
-  background-color: #50C5FF !important;
-}
+
 
  /* tbody tr:nth-child(even) {
   background-color: #021A33 !important
 } */
 
-#tablebody tr:nth-child(even){
+/* #tablebody tr:nth-child(even){
   background-color: #021A33 !important;
 }
-/* #tablebody tr:nth-child(odd){
+#tablebody tr:nth-child(odd){
+  background-color: #021A33 ;
+} */
+
+/* #tablebody tr {
   background-color: #021A33 !important;
 } */
+
+.selected-background {
+  background-color: #3368B5 !important;
+  color: white !important;
+  /* font-weight: bold !important; */
+}
 
 
 /* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */
@@ -300,10 +310,17 @@ h2.react-datepicker__current-month {
 
 /* /////////////////// styeling for date-picker cellender /////////////////////// */
 
-.css-166bipr-Input{
+/* .css-166bipr-Input{
   color: #FFFFFF !important;
+  text-align: left !important;
 }
 
 .css-166bipr-Input{
   color: #FFFFFF !important;
+  text-align: left !important;
+} */
+
+.css-1dimb5e-singleValue {
+  color: white !important;
+  text-align: left;
 }

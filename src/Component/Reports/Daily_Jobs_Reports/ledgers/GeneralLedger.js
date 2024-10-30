@@ -34,7 +34,7 @@ export default function GeneralLedger() {
 
     const [saleType, setSaleType] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
-    const [transectionType, settransectionType] = useState('All');
+    const [transectionType, settransectionType] = useState('');
     const [supplierList, setSupplierList] = useState([])
 
     const [totalQnty, setTotalQnty] = useState(0);
@@ -445,7 +445,8 @@ export default function GeneralLedger() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: 'EMART'
+            code: 'EMART',
+
         }).toString();
 
         axios
@@ -1144,24 +1145,23 @@ export default function GeneralLedger() {
         width: "10%",
     };
     const secondColWidth = {
-        width: "6%",
+        width: "7%",
     };
     const thirdColWidth = {
-        width: "5%",
+        width: "4%",
     };
     const forthColWidth = {
-        width: "35%",
+        width: "32.5%",
     };
     const fifthColWidth = {
         width: "15%",
     };
     const sixthColWidth = {
-        width: "12%",
+        width: "15%",
     };
     const seventhColWidth = {
         width: "15%",
     };
-
 
     // Adjust the content width based on sidebar state
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1187,10 +1187,10 @@ export default function GeneralLedger() {
     } = useTheme();
     const contentStyle = {
         backgroundColor: getcolor,
-        height: "100vh",
-        width: isSidebarVisible ? "calc(100vw - 5%)" : "100vw",
+        // height: "100vh",
+        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
         position: "relative",
-        top: "50%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1298,6 +1298,7 @@ export default function GeneralLedger() {
                         width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
+
 
                     }}
                 >
@@ -1475,7 +1476,7 @@ export default function GeneralLedger() {
                             </div>
 
                             {/* To Date */}
-                            <div className='d-flex align-items-center' >
+                            <div className='d-flex align-items-center' style={{marginLeft:'15px'}}>
                                 <div style={{ width: '60px', display: 'flex', justifyContent: 'end' }}>
                                     <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>To :</span>  <br /></label>
                                 </div>
@@ -1617,7 +1618,7 @@ export default function GeneralLedger() {
                                             Trn#
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Type
+                                            Typ
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
                                             Description
@@ -1704,20 +1705,15 @@ export default function GeneralLedger() {
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
-                                                        // ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
+                                                        ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
                                                         onClick={() => handleRowClick(i)}
-                                                        // className={selectedIndex === i ? "selected-background" : ""}
-                                                       style={{
-                                                            backgroundColor: selectedIndex === i ? "#50C5FF" : "",
-                                                            color: selectedIndex === i ? "black" : "",
-                                                            fontWeight: selectedIndex === i ? "bold" : "",
-                                                            fontSize: "12px !important",
-                                                        }}
+                                                        className={selectedIndex === i ? "selected-background" : ""}
+                                                        style={{backgroundColor:'#021A33'}}
                                                     >
-                                                        <td className="text-start" style={firstColWidth}>
+                                                        <td className="text-center" style={firstColWidth}>
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-end" style={secondColWidth}>
+                                                        <td className="text-center" style={secondColWidth}>
                                                             {item["Trn#"]}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
@@ -1770,7 +1766,7 @@ export default function GeneralLedger() {
                         </div>
                     </div>
 
-                    <div style={{ width: '100.7%', borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{  borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
