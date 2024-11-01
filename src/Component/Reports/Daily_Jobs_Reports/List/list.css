@@ -1,0 +1,326 @@
+
+.css-hlgwow {
+    height: 24px !important;
+}
+.css-qign31-control {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+.css-1vthhew-control {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+.css-lkdo6b-control{
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+.css-1qpv3db-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+
+.css-1asae0k-control:hover {
+  border-color: red !important;
+}
+.css-lkdo6b-control :focus-within{
+  border-color: red !important;
+  box-shadow:0px 0px 0px red !important;
+}
+
+
+  .child1{
+    width: 850px !important;
+  }
+
+  .child2{
+    width: 850px !important;
+  }
+
+  .child2forsupplier{
+    width: 1140px !important;
+  }
+
+  .child1forsupplier{
+    width: 1140px !important;
+  }
+
+
+
+.validation-error-styling{
+margin: auto !important;
+width: 400px !important;
+height: 40px !important;
+position: relative !important;
+ }
+
+ .btn-close:focus {
+  box-shadow: none !important;
+ }
+
+ .alert_styling {
+  
+  position: fixed;
+  top: 0px; /* Adjust as necessary */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999; /* Ensures it's above most other content */
+}
+
+/* .alert_modal_styling{
+  margin: auto !important;
+width: 400px !important;
+height: 40px !important;
+position: relative !important;
+background: transparent !important;
+} */
+.footer_styling{
+  border-top: 1px black !important;
+}
+.progress_footer{
+  display: flex;
+  justify-content: center !important;
+  align-items: center !important;
+  font-size: 12px !important;
+  width: 100% !important;
+  font-weight: bold !important;
+  color: rgb(65, 64, 64);
+  background: white !important; 
+
+}
+.progress_footer1{
+  display: flex;
+  justify-content: end !important;
+  align-items: center !important;
+  font-size: 12px !important;
+  width: 100% !important;
+  font-weight: bold !important;
+  color: rgb(65, 64, 64);
+  padding-right: 5px !important;
+  background: white !important;
+}
+
+.mobileledger_total{
+  font-family: Verdana !important;
+  height: 100% !important;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  /* font-weight: bold; */
+  font-size: 12px !important;
+  padding-right: 2px !important;
+}
+
+
+/* /////////////////////   SUNDAY CODE ///////////////////////// */
+
+
+.custom-message {
+  background: #C6DAF7;
+  border-radius: 5px;
+  height:40px;
+  width: 500px;
+  margin: auto;
+  text-align: center;
+  line-height: 40px;
+  position: fixed;
+  top: 65px; /* Adjust as necessary */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999; /* Ensures it's above most other content */
+  display: flex !important;
+  justify-content: space-between;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.custom-message p{
+  line-height: 0px !important;
+}
+
+#close-btn{
+ margin-top: 10px;
+  height: 20px;
+  color: red; 
+
+}
+
+.alert_icon{
+  height: 40px !important;
+ }
+
+ .alert_button{
+  margin: 0px !important;
+  padding: 0px !important;
+  line-height: 0px !important;
+  border: 0px !important;
+  background: #C6DAF7 !important;
+  height: 30px !important;
+  width: 30px !important;
+  margin-top: 5px !important;
+ 
+ }
+
+ .cross_icon_styling{
+  color: black;
+  font-size: 30px;
+ }
+
+ .Globaldate_styling{
+  font-size: 12px !important;
+  font-weight: bold !important;
+ }
+
+ .alert_button :focus(){
+  border: none !important;
+  background-color: red !important;
+ }
+
+ .alert_button :hover(){
+  border: 0px !important;
+  background-color: red !important;
+ }
+ 
+ #ContainerStylingGeneralLedger{
+  width: 70% !important;
+  margin-bottom: 50px !important;
+  margin-left: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+ }
+
+ .css-592obd-control{
+  display: flex !important;
+  flex-wrap: nowrap !important;
+ }
+
+ .css-14pdaos-control{
+  display: flex !important;
+  flex-wrap: nowrap !important;
+ }
+ .css-43xjfr-control{
+  display: flex !important;
+  flex-wrap: nowrap !important;
+ }
+
+ .css-184twxf-control{
+  display: flex !important;
+  flex-wrap: nowrap !important;
+ }
+ .css-184twxf-control:hover {
+  border-color: white !important;
+}
+
+.css-592obd-control:hover {
+    border-color: red !important;
+}
+
+ .css-1dimb5e-singleValue{
+  color: white !important;
+ }
+
+
+
+
+
+ /* tbody tr:nth-child(even) {
+  background-color: #021A33 !important
+} */
+
+/* #tablebody tr:nth-child(even){
+  background-color: #021A33 !important;
+}
+#tablebody tr:nth-child(odd){
+  background-color: #021A33 ;
+} */
+
+/* #tablebody tr {
+  background-color: #021A33 !important;
+} */
+
+.selected-background {
+  background-color: #3368B5 !important;
+  color: white !important;
+  /* font-weight: bold !important; */
+}
+
+
+/* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */
+
+
+
+.table-scroll::-webkit-scrollbar {
+  width: 13px; 
+}
+.table-scroll::-webkit-scrollbar-track {
+  background: #021A33; 
+}
+.table-scroll::-webkit-scrollbar-thumb {
+  background-color: #3368B5; 
+  border-radius: 10px; 
+  
+ }
+.table-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+/* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */
+
+/* /////////////////// styeling for date-picker cellender /////////////////////// */
+
+.react-datepicker {
+  font-family: "Helvetica Neue", helvetica, arial, sans-serif;
+  font-size: 0.8rem;
+  background-color: #fff;
+  color: #000;
+  /* border: 1.4px solid #3368B5 !important; */
+  border-radius: 0.3rem;
+  display: inline-block;
+  position: relative;
+  line-height: initial;
+  background: #021A33 !important;
+  /* box-shadow: #3368B5 3px 3px 1px; */
+}
+.react-datepicker__day{
+    cursor: pointer;         
+    color: white;
+}
+.react-datepicker__day:not([aria-disabled=true]):hover {
+    border-radius: 0.3rem;
+    background-color: #f0f0f0;               
+    color: black !important;
+}
+.react-datepicker__header{
+  background-color: #3368B5 !important;
+} 
+h2.react-datepicker__current-month {
+  padding: 0;
+  margin: 0;         
+  color: white;
+}
+.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name {
+  color: white !important;
+  display: inline-block;
+  width: 1.7rem;
+  line-height: 1.7rem;       
+  text-align: center;
+  margin: 0.166rem;
+}
+
+/* /////////////////// styeling for date-picker cellender /////////////////////// */
+
+/* .css-166bipr-Input{
+  color: #FFFFFF !important;
+  text-align: left !important;
+}
+
+.css-166bipr-Input{
+  color: #FFFFFF !important;
+  text-align: left !important;
+} */
+
+.css-1dimb5e-singleValue {
+  color: white !important;
+  text-align: left;
+}

@@ -12,7 +12,7 @@ const NavComponent = ({ textdata }) => {
         height: "24px",
       }}
     >
-      <div style={{ fontSize: "14px" }} className="col-12 text-center">
+      <div style={{ fontSize: "14px", fontWeight:'bold' }} className="col-12 text-center">
         {textdata}
       </div>
     </Nav>

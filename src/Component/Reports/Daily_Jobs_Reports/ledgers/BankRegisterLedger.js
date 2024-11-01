@@ -21,7 +21,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import './ledger.css';
 import { color } from "@mui/system";
 
-export default function GeneralLedger() {
+export default function BankRegisterLedger() {
 
 
     const saleSelectRef = useRef(null);
@@ -525,8 +525,7 @@ export default function GeneralLedger() {
     }, []);
 
     useEffect(() => {
-        const apiLink = "https://crystalsolutions.com.pk/emart/web";
-        axios.get(apiLink + "/getActiveAccounts.php")
+        axios.get(EmartApiurl + "/getActiveBanks.php")
             .then(response => {
                 setSupplierList(response.data);
                 console.log("supplierList data" + supplierList);
@@ -860,7 +859,7 @@ export default function GeneralLedger() {
                 // ); // Render sale report title with decreased font size, provide the time, and page number
                 // startY += 7;
                 addTitle(
-                    `General Ledger From: ${fromInputDate} To: ${toInputDate}`,
+                    `BankRegister From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -928,7 +927,7 @@ export default function GeneralLedger() {
         handlePagination();
 
         // Save the PDF file
-        doc.save("GeneralLedger.pdf");
+        doc.save("BankRegister.pdf");
 
         const pdfBlob = doc.output("blob");
         const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -969,7 +968,7 @@ export default function GeneralLedger() {
         // Add title rows
         [
             comapnyname,
-            `General Ledger From ${fromInputDate} To ${toInputDate}`,
+            `BankRegister From ${fromInputDate} To ${toInputDate}`,
         ].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
@@ -1091,7 +1090,7 @@ export default function GeneralLedger() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "GeneralLedger.xlsx");
+        saveAs(blob, "BankRegister.xlsx");
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1303,7 +1302,7 @@ export default function GeneralLedger() {
 
                     }}
                 >
-                    <NavComponent textdata="General Ledger" />
+                    <NavComponent textdata="BankRegister Ledger" />
                     <div className="row " style={{ height: '20px', marginTop: '6px', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0px', padding: '0px' }}>
 

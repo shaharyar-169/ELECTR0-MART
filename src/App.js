@@ -28,8 +28,17 @@ import Customer from "./Component/MainComponent/Header/Admin/Customer.jsx";
 import MenuAdmin from "./Component/MainComponent/Header/Admin/MenuAdmin/MenuAdmin.jsx";
 
 
+//////////////////////////// List reports //////////////////////////////
+import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList.js";
+import CategoryList from "./Component/Reports/Daily_Jobs_Reports/List/CategoryList.js";
+import ChartofAccount from "./Component/Reports/Daily_Jobs_Reports/List/ChartofAccount.js";
+import StoreList from "./Component/Reports/Daily_Jobs_Reports/List/StoreList.js";
+
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLedger.js";
+import SupplierLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger.js";
+import CustomerLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger.js";
+import BankRegisterLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger.js";
 
 function App() {
   const queryClient = new QueryClient();
@@ -64,8 +73,19 @@ function App() {
                 <Route exact path="/CategoryMaintenance" element={<Category_Maintenance />} />
                 <Route exact path="/CapacityMaintenance" element={<Capacity_Maintenance />} />
                 <Route exact path="/UserManagement" element={<UserMaintenance />} />
+
+                 {/* Rountes for List reports */}
+                 <Route exact path="/CompanyList" element={<CompanyList />} />
+                 <Route exact path="/CategoryList" element={<CategoryList />} />
+                 <Route exact path="/CharofAccount" element={<ChartofAccount />} />
+                 <Route exact path="/StoreList" element={<StoreList />} />
+
+
                 {/* Rountes for ledgers reports */}
                 <Route exact path="/GeneralLedger1" element={<GeneralLedger />} />
+                <Route exact path="/SupplierLedger" element={<SupplierLedger />} />
+                <Route exact path="/CustomerLedger" element={<CustomerLedger />} />
+                <Route exact path="/BankRegister" element={<BankRegisterLedger />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />

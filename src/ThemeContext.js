@@ -18,9 +18,9 @@ export function ThemeProvider({ children }) {
   const [secondaryColor, setSecondaryColor] = useState("white");
   const [navbarHeight, setNavbarHeight] = useState(30);
   const [pathHeight, setPathbarHeight] = useState(30);
-  const [apiLinks, setApiLinks] = useState(
-    "https://crystalsolutions.com.pk/api"
-  );
+  const [apiLinks, setApiLinks] = useState("https://crystalsolutions.com.pk/api");
+
+  const EmartApiurl='https://crystalsolutions.com.pk/emart/web'
 
   // Sidebar toggle function
   const toggleSidebar = (visible) => {
@@ -46,6 +46,7 @@ export function ThemeProvider({ children }) {
     navbarHeight,
     pathHeight,
     apiLinks,
+    EmartApiurl
   };
 
   return (

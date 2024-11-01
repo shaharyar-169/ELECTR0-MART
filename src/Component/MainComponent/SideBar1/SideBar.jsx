@@ -123,7 +123,7 @@ const SideBar1 = () => {
 
   const [expanded, setExpanded] = useState(true);
   const [menuData, setMenuData] = useState([]);
-  console.log('menu Data')
+  console.log('menu Data', menuData)
   const [openMenu, setOpenMenu] = useState({}); // To track open/closed top-level menus
   const [openSubMenu, setOpenSubMenu] = useState({}); // To track open/closed sub-menus
   const [isToggled, setIsToggled] = useState(true);
