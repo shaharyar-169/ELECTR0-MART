@@ -12,15 +12,28 @@ export function ThemeProvider({ children }) {
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const [getcolor, setcolor] = useState("#021A33");
   const [fontcolor, setfontcolor] = useState("white");
+  const [getfromdate, setFromDate] = useState("");
+  const [gettodate, setToDate] = useState("");
+  const [getLocationNumber, setLocationNumber] = useState("");
+  const [getyeardescription, setYearDescription] = useState("");
 
   // States for other theme values
+  const [getbuttonbackgroundcolor, setbuttonbackgroundcolor] =
+    useState("#186DB7");
+  // #186DB7
+  const [getbuttonfontcolor, setbuttonfontcolor] =
+    useState("rgb(230, 233, 236)");
+  const [getnavbarbackgroundcolor, setnavbarbackgrouncolor] =
+    useState("#3368b5");
+  const [getnavbarfontcolor, setnavbarfontcolor] = useState("#fff");
+
   const [primaryColor, setPrimaryColor] = useState("#1f2670");
   const [secondaryColor, setSecondaryColor] = useState("white");
   const [navbarHeight, setNavbarHeight] = useState(30);
   const [pathHeight, setPathbarHeight] = useState(30);
-  const [apiLinks, setApiLinks] = useState("https://crystalsolutions.com.pk/api");
-
-  const EmartApiurl='https://crystalsolutions.com.pk/emart/web'
+  const [apiLinks, setApiLinks] = useState(
+    "https://crystalsolutions.com.pk/api"
+  );
 
   // Sidebar toggle function
   const toggleSidebar = (visible) => {
@@ -39,14 +52,26 @@ export function ThemeProvider({ children }) {
     toggleSidebar,
     getcolor,
     fontcolor,
-    setcolor, // Expose setter for background color
-    setfontcolor, // Expose setter for font color
+    setcolor,
+    setfontcolor,
+    setFromDate,
+    setToDate,
+    setLocationNumber,
+    setYearDescription,
+    toggleChangeColor,
+    getfromdate,
+    gettodate,
+    getLocationNumber,
+    getyeardescription,
+    getbuttonfontcolor,
+    getbuttonbackgroundcolor,
+    getnavbarbackgroundcolor,
+    getnavbarfontcolor,
     primaryColor,
     secondaryColor,
     navbarHeight,
     pathHeight,
     apiLinks,
-    EmartApiurl
   };
 
   return (

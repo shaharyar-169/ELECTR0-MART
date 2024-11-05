@@ -14,12 +14,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
 import './ledger.css';
-import { color } from "@mui/system";
+
 
 export default function GeneralLedger() {
 
@@ -36,6 +35,8 @@ export default function GeneralLedger() {
     const [searchQuery, setSearchQuery] = useState('');
     const [transectionType, settransectionType] = useState('');
     const [supplierList, setSupplierList] = useState([])
+
+    console.log('accountlist data: ' + supplierList)
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [totalDebit, setTotalDebit] = useState(0);
@@ -436,14 +437,15 @@ export default function GeneralLedger() {
         document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-       const apiUrl = EmartApiurl + "/GeneralLedger.php";
+       const apiUrl = apiLinks + "/GeneralLedger.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: 'EMART',
+            code: organisation.code,
+            // FLocCod: getLocationNumber,
         }).toString();
 
         axios
@@ -525,13 +527,17 @@ export default function GeneralLedger() {
     }, []);
 
     useEffect(() => {
-        const apiLink = "https://crystalsolutions.com.pk/emart/web";
-        axios.get(apiLink + "/getActiveAccounts.php")
+
+        const apiUrl = apiLinks + "/GetActiveAccounts.php"
+        const formData = new URLSearchParams({
+            FLocCod: getLocationNumber,
+            code: organisation.code,
+        }).toString();
+        axios
+        .post(apiUrl, formData)
             .then(response => {
                 setSupplierList(response.data);
-                console.log("supplierList data" + supplierList);
-                // setSaleType(response.data[0]?.tacccod || ''); // Set default value to the tacccod of the first object in supplierList
-                console.log("sale type data" + saleType)
+             
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
@@ -1100,7 +1106,7 @@ export default function GeneralLedger() {
     const dispatch = useDispatch();
     const user = getUserData();
     const organisation = getOrganisationData();
-    const tableTopColor = "#3368B5";
+      const tableTopColor = "#3368B5";
     const tableHeadColor = "#3368b5";
     const secondaryColor = "white";
     const btnColor = "#3368B5";
@@ -1181,8 +1187,16 @@ export default function GeneralLedger() {
         getcolor,
         fontcolor,
         toggleChangeColor,
+        apiLinks,
+        getLocationNumber,
+        getyeardescription,
         EmartApiurl
     } = useTheme();
+
+    console.log('year limitation', getyeardescription )
+    console.log('Locatin number', getLocationNumber )
+
+   
 
     console.log('EmartApiurl', EmartApiurl)
 

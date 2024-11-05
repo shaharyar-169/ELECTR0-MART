@@ -136,10 +136,20 @@ export default function Header() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
   const handleLogout = () => {
-    localStorage.removeItem("user_id");
-
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
+    localStorage.removeItem("organisation");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+    // Optionally, you can also reset your alert data or any other state
+    // setAlertData({
+    //   type: "info",
+    //   message: "You have been logged out.",
+    // });
     navigate("/");
   };
+
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <div>
@@ -511,24 +521,30 @@ export default function Header() {
             <SearchIcon />
           </IconButton> */}
           <Box sx={{ flexGrow: 1 }} />
+
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <IconButton
-              size="small"
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{
-                mr: 2,
-                "&:hover": {
-                  backgroundColor: "rgba(191, 191, 191,0.5)",
-                  borderRadius: "50%",
-                },
-              }}
-              onClick={() => handleToggle("admin")}
-            >
-              <i className="bi bi-person-workspace fs-5 text-white"></i>
-            </IconButton>
-            <Admin isOpen={isadminopen} />
+            {organisation && organisation.code === "CRYSTAL" && (
+              <>
+                <IconButton
+                  size="small"
+                  edge="start"
+                  color="inherit"
+                  aria-label="open drawer"
+                  sx={{
+                    mr: 2,
+                    "&:hover": {
+                      backgroundColor: "rgba(191, 191, 191,0.5)",
+                      borderRadius: "50%",
+                    },
+                  }}
+                  onClick={() => handleToggle("admin")}
+                >
+                  <i className="bi bi-person-workspace fs-5 text-white"></i>
+                </IconButton>
+              </>
+            )}
+
+            <Admin isOpen={isadminopen} handleToggle={handleToggle} />
             {user && user.tusrtyp === "A" && (
               <>
                 <IconButton
