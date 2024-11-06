@@ -21,7 +21,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import './ledger.css';
 import { color } from "@mui/system";
 
-export default function SupplierprogressReport() {
+export default function SupplierProgressLedger() {
 
 
     const saleSelectRef = useRef(null);
@@ -67,28 +67,28 @@ export default function SupplierprogressReport() {
 
     } = useTheme();
 
-  // Assume getfromdate and gettodate are dynamic and fetched from context or state
-  const fromdatevalidate = getfromdate;  // e.g., "01-01-2023"
-  const todatevaliadete = gettodate;    // e.g., "31-12-2023"
+    // Assume getfromdate and gettodate are dynamic and fetched from context or state
+    const fromdatevalidate = getfromdate;  // e.g., "01-01-2023"
+    const todatevaliadete = gettodate;    // e.g., "31-12-2023"
 
-  // Function to convert "DD-MM-YYYY" string to Date object
-  const convertToDate = (dateString) => {
-      const [day, month, year] = dateString.split('-');  // Split string into day, month, year
-      return new Date(year, month - 1, day);  // Create Date object (Month is zero-indexed)
-  };
+    // Function to convert "DD-MM-YYYY" string to Date object
+    const convertToDate = (dateString) => {
+        const [day, month, year] = dateString.split('-');  // Split string into day, month, year
+        return new Date(year, month - 1, day);  // Create Date object (Month is zero-indexed)
+    };
 
-  // Convert dynamic date strings to Date objects
-  const GlobalfromDate = convertToDate(fromdatevalidate);  // "01-01-2023" -> Date object
-  const GlobaltoDate = convertToDate(todatevaliadete);      // "31-12-2023" -> Date object
+    // Convert dynamic date strings to Date objects
+    const GlobalfromDate = convertToDate(fromdatevalidate);  // "01-01-2023" -> Date object
+    const GlobaltoDate = convertToDate(todatevaliadete);      // "31-12-2023" -> Date object
 
-  // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
-  const formatDate1 = (date) => {
-      return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-  };
+    // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
+    const formatDate1 = (date) => {
+        return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    };
 
-  // Optionally format the Date objects back to string if needed
-  const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
-  const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
+    // Optionally format the Date objects back to string if needed
+    const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
+    const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
 
 
     const comapnyname = 'ELECTRO-MART'
@@ -118,7 +118,7 @@ export default function SupplierprogressReport() {
         setfromInputDate(e.target.value);
     };
 
-  
+
     const handlefromKeyPress = (e, inputId) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -425,21 +425,21 @@ export default function SupplierprogressReport() {
         ////////////////////////////////////////////
 
 
-        document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
+        // document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-       const apiUrl = apiLinks + "/SupplierprogressReport.php";
+        const apiUrl = apiLinks + "/SupplierProgress.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
+
+            FRepDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: organisation.name,
-            FLocCod: getLocationNumber,
+            code: organisation.code,
             FYerDsc: getyeardescription,
+            FLocCod: getLocationNumber,
 
-
+            
         }).toString();
 
         axios
@@ -470,11 +470,11 @@ export default function SupplierprogressReport() {
                                     "Closing Bal",
                                 ].includes(key)
                         )
-                        .map((key) => response.data[key]?.Detail)
+                        .map((key) => response.data[key]?.Progress)
                         .filter((detail) => detail !== undefined);
 
                     // Update the table data state
-                    setTableData(data);
+                    setTableData(response.data.Progress);
                 } else {
                     console.warn("Response data is not as expected:", response.data);
                     setTableData([]);
@@ -638,7 +638,7 @@ export default function SupplierprogressReport() {
             "Credit",
             "Balance",
         ];
-        const columnWidths = [16, 11, 9, 80,10,25, 25, 25, 25];
+        const columnWidths = [16, 11, 9, 80, 10, 25, 25, 25, 25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1074,7 +1074,7 @@ export default function SupplierprogressReport() {
         });
 
         // Set column widths
-        [10, 8, 5, 50,5,12, 12, 12, 15].forEach((width, index) => {
+        [10, 8, 5, 50, 5, 12, 12, 12, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1153,35 +1153,21 @@ export default function SupplierprogressReport() {
 
 
     const firstColWidth = {
-        width: "8%",
+        width: "20%",
     };
     const secondColWidth = {
-        width: "5.5%",
+        width: "20%",
     };
     const thirdColWidth = {
-        width: "3.7%",
+        width: "20%",
     };
-    // const forthColWidth = {
-    //     width: "8%",
-    // };
+    const forthColWidth = {
+        width: "20%",
+    };
     const fifthColWidth = {
-        width: "37.5%",
+        width: "20%",
     };
-    const sixthColWidth = {
-        width: "4%",
-    };
-    const seventhColWidth = {
-        width: "10%",
-    };
-    const eightColWidth = {
-        width: "10%",
-    };
-    const ninthColWidth = {
-        width: "10%",
-    };
-    const tenthColWidth = {
-        width: "10%",
-    };
+    
     // Adjust the content width based on sidebar state
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1197,11 +1183,11 @@ export default function SupplierprogressReport() {
     }, []);
 
 
-   
+
     const contentStyle = {
         backgroundColor: getcolor,
         // height: "100vh",
-        width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
+        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1224,7 +1210,7 @@ export default function SupplierprogressReport() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-    
+
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1325,11 +1311,11 @@ export default function SupplierprogressReport() {
                                 </div>
                                 <div style={{ marginLeft: '3px' }} >
                                     <Select
-                                          
+
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "toDatePicker")}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1410,7 +1396,7 @@ export default function SupplierprogressReport() {
                     <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
                         <div style={{ width: '100%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'space-between' }}>
                             {/* From Date */}
-                            <div className='d-flex align-items-center ' >
+                            {/* <div className='d-flex align-items-center ' >
                                 <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
                                     <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>From :</span>  <br /></label>
                                 </div>
@@ -1486,12 +1472,12 @@ export default function SupplierprogressReport() {
 
 
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* To Date */}
-                            <div className='d-flex align-items-center' style={{marginLeft:'15px'}}>
-                                <div style={{ width: '60px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>To :</span>  <br /></label>
+                            <div className='d-flex align-items-center' style={{ marginLeft: '7px' }}>
+                                <div style={{ width: '72px', display: 'flex', justifyContent: 'end', }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Date :</span>  <br /></label>
                                 </div>
                                 <div
                                     id="todatevalidation"
@@ -1502,7 +1488,7 @@ export default function SupplierprogressReport() {
                                         alignItems: 'center',
                                         height: ' 24px',
                                         justifycontent: 'center',
-                                        marginLeft: '15px',
+                                        marginLeft: '5px',
                                         background: getcolor
 
                                     }} >
@@ -1625,33 +1611,18 @@ export default function SupplierprogressReport() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                            Date
+                                            Sr#
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Trn#
+                                            Month
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Typ
-                                        </td>
-                                        {/* <td className="border-dark" style={forthColWidth}>
-                                            Item Code
-                                        </td> */}
-                                        <td className="border-dark" style={fifthColWidth}>
-                                            Description
-                                        </td>
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Qnty
-                                        </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                            Rate
-                                        </td>
-                                        <td className="border-dark" style={eightColWidth}>
                                             Debit
                                         </td>
-                                        <td className="border-dark" style={ninthColWidth}>
+                                        <td className="border-dark" style={forthColWidth}>
                                             Credit
                                         </td>
-                                        <td className="border-dark" style={tenthColWidth}>
+                                        <td className="border-dark" style={fifthColWidth}>
                                             Balance
                                         </td>
                                     </tr>
@@ -1668,7 +1639,7 @@ export default function SupplierprogressReport() {
                                 maxHeight: "45vh",
                                 width: "100%",
                                 wordBreak: "break-word",
-                              
+
 
                             }}
                         >
@@ -1689,7 +1660,7 @@ export default function SupplierprogressReport() {
                                                     backgroundColor: getcolor
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="5" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1701,7 +1672,7 @@ export default function SupplierprogressReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 5 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}
                                                             >
                                                                 &nbsp;
@@ -1714,57 +1685,38 @@ export default function SupplierprogressReport() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                {/* <td style={forthColWidth}></td> */}
+                                                <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-                                                <td style={eightColWidth}></td>
-                                                <td style={ninthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
                                         <>
                                             {tableData.map((item, i) => {
-                                              totalEnteries += 1;
+                                                totalEnteries += 1;
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
                                                         ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
                                                         onClick={() => handleRowClick(i)}
                                                         className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{backgroundColor:'#021A33'}}
+                                                        style={{ backgroundColor: '#021A33' }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
-                                                            {item.Date}
-                                                        </td>
-                                                        <td className="text-center" style={secondColWidth}>
-                                                            {item["Trn#"]}
-                                                        </td>
-                                                        <td className="text-center" style={thirdColWidth}>
-                                                            {item.Type}
-                                                        </td>
-                                                        {/* <td className="text-center" style={forthColWidth}>
-                                                            {item["Item Code"]}
-                                                        </td> */}
-                                                        <td className="text-start" style={fifthColWidth}>
-                                                            {item.Description}
-                                                        </td>
-                                                        <td className="text-center" style={sixthColWidth}>
-                                                            {item.Qnty}
-                                                        </td>
-                                                        <td className="text-end" style={seventhColWidth}>
-                                                            {item.Rate}
-                                                        </td>                                                        
-                                                        <td className="text-end" style={eightColWidth}>
-                                                            {item.Debit}
-                                                        </td>
-                                                        <td className="text-end" style={ninthColWidth}>
-                                                            {item.Credit}
-                                                        </td>
-                                                        <td className="text-end" style={tenthColWidth}>
-                                                            {item.Balance}
-                                                        </td>
+															{item["Sr#"]}
+														</td>
+														<td className="text-start" style={secondColWidth}>
+															{item.Month}
+														</td>
+														<td className="text-end" style={thirdColWidth}>
+															{item.Debit}
+														</td>
+														<td className="text-end" style={forthColWidth}>
+															{item.Credit}
+														</td>
+														<td className="text-end" style={fifthColWidth}>
+															{item.Balance}
+														</td>
+                                                      
                                                     </tr>
                                                 );
                                             })}
@@ -1777,7 +1729,7 @@ export default function SupplierprogressReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 5 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1788,13 +1740,9 @@ export default function SupplierprogressReport() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                {/* <td style={forthColWidth}></td> */}
+                                                <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-                                                <td style={eightColWidth}></td>
-                                                <td style={ninthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
+                                               
                                             </tr>
                                         </>
                                     )}
@@ -1803,18 +1751,18 @@ export default function SupplierprogressReport() {
                         </div>
                     </div>
 
-                    <div style={{  borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        {/* <div style={{ ...forthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div> */}
+                        <div style={{ ...forthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                        <span className="mobileledger_total">{totalQnty}</span>
+                        {/* <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalQnty}</span>
                         </div>
                         <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                                                
+
                         <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalDebit}</span>
                         </div>
@@ -1823,7 +1771,7 @@ export default function SupplierprogressReport() {
                         </div>
                         <div style={{ ...tenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{closingBalance}</span>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div
@@ -1854,7 +1802,7 @@ export default function SupplierprogressReport() {
                             onClick={fetchGeneralLedger}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
-                          {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
+                        {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
                     Select
                 </button>{" "} */}
 

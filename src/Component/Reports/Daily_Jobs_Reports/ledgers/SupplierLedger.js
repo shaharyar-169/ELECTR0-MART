@@ -91,7 +91,7 @@ export default function SupplierLedger() {
   const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
 
 
-    const comapnyname = 'ELECTRO-MART'
+    const comapnyname = organisation.name
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
 

@@ -129,7 +129,7 @@ export default function GeneralLedger() {
     // console.log('GlobaltoDate1', GlobaltoDate1)
 
 
-    const comapnyname = 'ELECTRO-MART'
+    const comapnyname = organisation.name
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
 

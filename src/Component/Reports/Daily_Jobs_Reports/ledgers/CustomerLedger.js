@@ -521,7 +521,7 @@ export default function CustomerLedger() {
 
     useEffect(() => {
 
-        const apiUrl = apiLinks + "/GetActiveSupplier.php"
+        const apiUrl = apiLinks + "/GetActiveCustomer.php"
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,

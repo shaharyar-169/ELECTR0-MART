@@ -92,7 +92,7 @@ export default function BankRegisterLedger() {
     const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
 
 
-    const comapnyname = 'ELECTRO-MART'
+    const comapnyname = organisation.name
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
 
@@ -469,7 +469,7 @@ export default function BankRegisterLedger() {
         document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-       const apiUrl = apiLinks + "/GeneralLedger.php";
+        const apiUrl = apiLinks + "/GeneralLedger.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
@@ -479,7 +479,7 @@ export default function BankRegisterLedger() {
             code: organisation.code,
             FYerDsc: getyeardescription,
             FLocCod: getLocationNumber,
-         
+
         }).toString();
 
         axios
@@ -515,7 +515,7 @@ export default function BankRegisterLedger() {
 
                     // Update the table data state
                     setTableData(response.data.Detail);
-                                } else {
+                } else {
                     console.warn("Response data is not as expected:", response.data);
                     setTableData([]);
                 }
@@ -1214,7 +1214,7 @@ export default function BankRegisterLedger() {
         };
     }, []);
 
-  
+
 
 
     const contentStyle = {
@@ -1243,7 +1243,7 @@ export default function BankRegisterLedger() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-    
+
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1344,7 +1344,7 @@ export default function BankRegisterLedger() {
                                 </div>
                                 <div style={{ marginLeft: '3px' }} >
                                     <Select
-                                          
+
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1508,7 +1508,7 @@ export default function BankRegisterLedger() {
                             </div>
 
                             {/* To Date */}
-                            <div className='d-flex align-items-center' style={{marginLeft:'15px'}}>
+                            <div className='d-flex align-items-center' style={{ marginLeft: '15px' }}>
                                 <div style={{ width: '60px', display: 'flex', justifyContent: 'end' }}>
                                     <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>To :</span>  <br /></label>
                                 </div>
@@ -1678,7 +1678,7 @@ export default function BankRegisterLedger() {
                                 maxHeight: "45vh",
                                 width: "100%",
                                 wordBreak: "break-word",
-                              
+
 
                             }}
                         >
@@ -1733,14 +1733,14 @@ export default function BankRegisterLedger() {
                                     ) : (
                                         <>
                                             {tableData.map((item, i) => {
-                                              totalEnteries += 1;
+                                                totalEnteries += 1;
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
                                                         ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
                                                         onClick={() => handleRowClick(i)}
                                                         className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{backgroundColor:'#021A33'}}
+                                                        style={{ backgroundColor: '#021A33' }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
                                                             {item.Date}
@@ -1798,7 +1798,7 @@ export default function BankRegisterLedger() {
                         </div>
                     </div>
 
-                    <div style={{  borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
@@ -1843,7 +1843,7 @@ export default function BankRegisterLedger() {
                             onClick={fetchGeneralLedger}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
-                          {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
+                        {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
                     Select
                 </button>{" "} */}
 
