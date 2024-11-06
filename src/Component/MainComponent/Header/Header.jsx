@@ -8,6 +8,7 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
+import axios from "axios";
 import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
@@ -33,6 +34,10 @@ import MessagePopup from "./Message/Message";
 import NotificationPopup from "./Notification/Notification";
 import BrightnessPopup from "./Brightness/Brightness";
 import Admin from "./Admin/Admin";
+import './Header.css';
+
+
+
 
 const Threelineiconheader = () => {
   return (
@@ -100,17 +105,84 @@ export default function Header() {
   const user = getUserData();
   const organisation = getOrganisationData();
 
+  const [yearList, setyearList] = useState([]);
+  console.log('years data', yearList);
+
+  const [branchlist, setbranchlist] = useState([
+
+    {
+      "branch_id": 1,
+      "branch_name": "electro-mart branch lahore",
+    }
+
+  ])
+
+
+  ///////////////////////////// YEARS POST API ////////////////////////
+
+
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveUserYear.php"
+    const formData = new URLSearchParams({
+      FUsrId: 'emart',
+      code: 'EMART',
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then(response => {
+        setyearList(response.data);
+        console.log('yaser data', response.data);
+
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
+
+  // useEffect(() => {
+  //   const apiUrl = apiLinks + "/GetActiveUserYear.php"
+  //   const formData = new URLSearchParams({
+  //     FUsrId: 'emart',
+  //     code: 'EMART',
+  //   }).toString();
+  //   axios
+  //     .post(apiUrl, formData)
+  //     .then(response => {
+  //       setyearList(response.data);
+  //       console.log('yaser data', response.data);
+
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching data:', error);
+  //     });
+  // }, []);
+
+
+
   useEffect(() => {
     if (!isLoggedIn()) {
     }
   }, [navigate]);
 
   const { primaryColor, secondaryColor } = useTheme();
-  const { apiLinks } = useTheme();
+  const {
+    apiLinks,
+    setYearDescription,
+    getyeardescription,
+    setFromDate,
+    setToDate,
+    getfromdate,
+    gettodate,
 
-  const imagelink = `https://crystalsolutions.com.pk/images/${
-    organisation && organisation.code
-  }`;
+  } = useTheme();
+
+  console.log('getyeardescription data', getyeardescription)
+  console.log('gettodate data', getfromdate)
+  console.log('getfromdate data', gettodate)
+
+  const imagelink = `https://crystalsolutions.com.pk/images/${organisation && organisation.code
+    }`;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const isMenuOpen = Boolean(anchorEl);
@@ -521,6 +593,52 @@ export default function Header() {
             <SearchIcon />
           </IconButton> */}
           <Box sx={{ flexGrow: 1 }} />
+          <div className="yearslimitation" >
+
+            <select
+              className="yearselectstyling"
+              value={getyeardescription}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                const selectedData = yearList.find((data) => data.id === selectedId);
+
+                setYearDescription(selectedId); // Update year description
+
+                if (selectedData) {
+                  setFromDate(selectedData.tstrdat); // Set fromDate from selected option
+                  setToDate(selectedData.tenddat);   // Set toDate from selected option
+                }
+              }}
+            >
+              <option value="" disabled>Select Year</option>
+              {yearList.map((data) => (
+                <option className="yearselectstyling" key={data.id} value={data.id}>
+                  {data.tyerdsc}
+                </option>
+              ))}
+            </select>
+
+
+
+          </div>
+
+          {/* //////////////////////// BRANCH DROPDOWN ///////////////////////// */}
+
+          <div className="branlist" >
+            <select className=" branlist">
+              {branchlist.map((data) => {
+                return <option
+                  className=" branlist"
+                  key={data.branch_id}
+                  value={data.id}>
+                  {data.branch_name}
+                </option>
+              })}
+            </select>
+
+          </div>
+
+
 
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             {organisation && organisation.code === "CRYSTAL" && (
@@ -577,7 +695,7 @@ export default function Header() {
                 },
               }}
               onClick={() => handleToggle("brightness")}
-              // onClick={toggleChangeColor}
+            // onClick={toggleChangeColor}
             >
               <i className="bi bi-brightness-high fs-5 text-white"></i>
             </IconButton>

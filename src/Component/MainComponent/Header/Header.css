@@ -51,3 +51,22 @@
 .bg-hover-primary:hover {
   background-color: #e2e8f0;
 }
+
+
+/* //////////////// CSS FOR YEARS LIMITATIONS ////////////////// */
+
+.yearslimitation{
+  margin-right: 5px !important;
+  font-size: 12px  !important;
+  color: white !important;
+  background-color: #021A33 !important;
+}
+
+.yearslimitation{
+  background-color: #021A33 !important;
+}
+
+.branlist{
+  margin-right: 5px !important;
+  font-size: 12px  !important;
+}

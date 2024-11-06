@@ -52,13 +52,85 @@ export default function GeneralLedger() {
     const [toInputDate, settoInputDate] = useState('');
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
 
-    const GlobalfromDate = new Date(2024, 0, 1);
-    const GlobalfromDate1 = `${String(GlobalfromDate.getDate()).padStart(2, '0')}-${String(GlobalfromDate.getMonth() + 1).padStart(2, '0')}-${GlobalfromDate.getFullYear()}`;
+    const {
+        isSidebarVisible,
+        toggleSidebar,
+        getcolor,
+        fontcolor,
+        toggleChangeColor,
+        apiLinks,
+        getLocationNumber,
+        getyeardescription,
+        getfromdate,
+        gettodate
 
-    const GlobaltoDate = new Date(2024, 11, 31);
-    const GlobaltoDate1 = `${String(GlobaltoDate.getDate()).padStart(2, '0')}-${String(GlobaltoDate.getMonth() + 1).padStart(2, '0')}-${GlobaltoDate.getFullYear()}`;
+    } = useTheme();
+
+    console.log('year limitation', getyeardescription)
+    // console.log('Locatin number', getLocationNumber )
+    console.log('from date', getfromdate)
+    console.log('to date', gettodate)
+
+    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
+
+    // const fromdatevalidate= getfromdate;
+    // const todatevaliadete=gettodate;
+
+
+
+    // const GlobalfromDate = new Date(2024, 0, 1);
+    // const GlobalfromDate1 = `${String(GlobalfromDate.getDate()).padStart(2, '0')}-${String(GlobalfromDate.getMonth() + 1).padStart(2, '0')}-${GlobalfromDate.getFullYear()}`;
+
+    // const GlobaltoDate = new Date(2024, 11, 31);
+    // const GlobaltoDate1 = `${String(GlobaltoDate.getDate()).padStart(2, '0')}-${String(GlobaltoDate.getMonth() + 1).padStart(2, '0')}-${GlobaltoDate.getFullYear()}`;
+
+
+
+
+    // Assume getfromdate and gettodate are dynamic and fetched from context or state
+    const fromdatevalidate = getfromdate;  // e.g., "01-01-2023"
+    const todatevaliadete = gettodate;    // e.g., "31-12-2023"
+
+    // Function to convert "DD-MM-YYYY" string to Date object
+    const convertToDate = (dateString) => {
+        const [day, month, year] = dateString.split('-');  // Split string into day, month, year
+        return new Date(year, month - 1, day);  // Create Date object (Month is zero-indexed)
+    };
+
+    // Convert dynamic date strings to Date objects
+    const GlobalfromDate = convertToDate(fromdatevalidate);  // "01-01-2023" -> Date object
+    const GlobaltoDate = convertToDate(todatevaliadete);      // "31-12-2023" -> Date object
+
+    // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
+    const formatDate1 = (date) => {
+        return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    };
+
+    // Optionally format the Date objects back to string if needed
+    const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
+    const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
+
+    console.log('Global From Date:', GlobalfromDate);    // Date object for 01-01-2023
+    console.log('Global To Date:', GlobaltoDate);        // Date object for 31-12-2023
+    console.log('Formatted From Date:', GlobalfromDate1); // '01-01-2023'
+    console.log('Formatted To Date:', GlobaltoDate1);     // '31-12-2023'
+
+
+
+    // const GlobalfromDate = getfromdate
+    // const GlobalfromDate1 = getfromdate;
+
+    // const GlobaltoDate = gettodate
+    // const GlobaltoDate1 = gettodate;
+
+
+    console.log('GlobalfromDate', fromdatevalidate)
+    console.log('GlobalfromDate1', todatevaliadete)
+
+    // console.log('GlobaltoDate', GlobaltoDate)
+    // console.log('GlobaltoDate1', GlobaltoDate1)
+
 
     const comapnyname = 'ELECTRO-MART'
 
@@ -437,7 +509,7 @@ export default function GeneralLedger() {
         document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-       const apiUrl = apiLinks + "/GeneralLedger.php";
+        const apiUrl = apiLinks + "/GeneralLedger.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
@@ -534,10 +606,10 @@ export default function GeneralLedger() {
             code: organisation.code,
         }).toString();
         axios
-        .post(apiUrl, formData)
+            .post(apiUrl, formData)
             .then(response => {
                 setSupplierList(response.data);
-             
+
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
@@ -1106,7 +1178,7 @@ export default function GeneralLedger() {
     const dispatch = useDispatch();
     const user = getUserData();
     const organisation = getOrganisationData();
-      const tableTopColor = "#3368B5";
+    const tableTopColor = "#3368B5";
     const tableHeadColor = "#3368b5";
     const secondaryColor = "white";
     const btnColor = "#3368B5";
@@ -1181,24 +1253,10 @@ export default function GeneralLedger() {
     }, []);
 
 
-    const {
-        isSidebarVisible,
-        toggleSidebar,
-        getcolor,
-        fontcolor,
-        toggleChangeColor,
-        apiLinks,
-        getLocationNumber,
-        getyeardescription,
-        EmartApiurl
-    } = useTheme();
 
-    console.log('year limitation', getyeardescription )
-    console.log('Locatin number', getLocationNumber )
 
-   
 
-    console.log('EmartApiurl', EmartApiurl)
+
 
     const contentStyle = {
         backgroundColor: getcolor,
@@ -1226,7 +1284,7 @@ export default function GeneralLedger() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-    
+
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1327,7 +1385,7 @@ export default function GeneralLedger() {
                                 </div>
                                 <div style={{ marginLeft: '3px' }} >
                                     <Select
-                                          
+
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1491,7 +1549,7 @@ export default function GeneralLedger() {
                             </div>
 
                             {/* To Date */}
-                            <div className='d-flex align-items-center' style={{marginLeft:'15px'}}>
+                            <div className='d-flex align-items-center' style={{ marginLeft: '15px' }}>
                                 <div style={{ width: '60px', display: 'flex', justifyContent: 'end' }}>
                                     <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>To :</span>  <br /></label>
                                 </div>
@@ -1661,7 +1719,7 @@ export default function GeneralLedger() {
                                 maxHeight: "45vh",
                                 width: "100%",
                                 wordBreak: "break-word",
-                              
+
 
                             }}
                         >
@@ -1716,14 +1774,14 @@ export default function GeneralLedger() {
                                     ) : (
                                         <>
                                             {tableData.map((item, i) => {
-                                              totalEnteries += 1;
+                                                totalEnteries += 1;
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
                                                         ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
                                                         onClick={() => handleRowClick(i)}
                                                         className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{backgroundColor:'#021A33'}}
+                                                        style={{ backgroundColor: '#021A33' }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
                                                             {item.Date}
@@ -1781,7 +1839,7 @@ export default function GeneralLedger() {
                         </div>
                     </div>
 
-                    <div style={{  borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
@@ -1826,7 +1884,7 @@ export default function GeneralLedger() {
                             onClick={fetchGeneralLedger}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
-                          {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
+                        {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
                     Select
                 </button>{" "} */}
 
