@@ -21,7 +21,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import './ledger.css';
 import { color } from "@mui/system";
 
-export default function BankRegisterLedger() {
+export default function SupplierprogressReport() {
 
 
     const saleSelectRef = useRef(null);
@@ -67,29 +67,28 @@ export default function BankRegisterLedger() {
 
     } = useTheme();
 
+  // Assume getfromdate and gettodate are dynamic and fetched from context or state
+  const fromdatevalidate = getfromdate;  // e.g., "01-01-2023"
+  const todatevaliadete = gettodate;    // e.g., "31-12-2023"
 
-    // Assume getfromdate and gettodate are dynamic and fetched from context or state
-    const fromdatevalidate = getfromdate;  // e.g., "01-01-2023"
-    const todatevaliadete = gettodate;    // e.g., "31-12-2023"
+  // Function to convert "DD-MM-YYYY" string to Date object
+  const convertToDate = (dateString) => {
+      const [day, month, year] = dateString.split('-');  // Split string into day, month, year
+      return new Date(year, month - 1, day);  // Create Date object (Month is zero-indexed)
+  };
 
-    // Function to convert "DD-MM-YYYY" string to Date object
-    const convertToDate = (dateString) => {
-        const [day, month, year] = dateString.split('-');  // Split string into day, month, year
-        return new Date(year, month - 1, day);  // Create Date object (Month is zero-indexed)
-    };
+  // Convert dynamic date strings to Date objects
+  const GlobalfromDate = convertToDate(fromdatevalidate);  // "01-01-2023" -> Date object
+  const GlobaltoDate = convertToDate(todatevaliadete);      // "31-12-2023" -> Date object
 
-    // Convert dynamic date strings to Date objects
-    const GlobalfromDate = convertToDate(fromdatevalidate);  // "01-01-2023" -> Date object
-    const GlobaltoDate = convertToDate(todatevaliadete);      // "31-12-2023" -> Date object
+  // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
+  const formatDate1 = (date) => {
+      return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+  };
 
-    // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
-    const formatDate1 = (date) => {
-        return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-    };
-
-    // Optionally format the Date objects back to string if needed
-    const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
-    const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
+  // Optionally format the Date objects back to string if needed
+  const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
+  const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
 
 
     const comapnyname = 'ELECTRO-MART'
@@ -119,47 +118,7 @@ export default function BankRegisterLedger() {
         setfromInputDate(e.target.value);
     };
 
-    // const handlefromKeyPress = (e) => {
-    //     const input = e.target;
-    //     let inputValue = input.value.replace(/\D/g, ''); // Remove non-numeric characters
-
-    //     if (inputValue.length > 8) {
-    //         inputValue = inputValue.substring(0, 8); // Limit to 8 digits
-    //     }
-
-    //     // Automatically add dashes after 2nd and 4th digits for the format dd-mm-yyyy
-    //     if (inputValue.length > 2 && inputValue.length <= 4) {
-    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2)}`;
-    //     } else if (inputValue.length > 4) {
-    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2, 4)}-${inputValue.slice(4)}`;
-    //     }
-
-    //     input.value = inputValue; // Set formatted value
-
-    //     // Perform validation only when the full date is entered
-    //     if (inputValue.length === 10) {
-    //         const [day, month, year] = inputValue.split('-').map(Number);
-    //         const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-    //         if (!datePattern.test(inputValue)) {
-    //             alert("Please enter a valid date format: dd-mm-yyyy.");
-    //             input.style.border = "2px solid red";
-    //             return;
-    //         }
-
-    //         const daysInMonth = new Date(year, month, 0).getDate();
-    //         if (day > daysInMonth || day === 0) {
-    //             alert(`Please enter a valid day for month ${month}.`);
-    //             input.style.border = "2px solid red";
-    //             return;
-    //         }
-
-    //         input.style.border = "1px solid black"; // Reset border on valid input
-
-    //         // You can now handle the date logic as needed (e.g., submit form, compare dates, etc.)
-    //     }
-    // };
-
+  
     const handlefromKeyPress = (e, inputId) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -469,17 +428,18 @@ export default function BankRegisterLedger() {
         document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-       const apiUrl = apiLinks + "/GeneralLedger.php";
+       const apiUrl = apiLinks + "/SupplierprogressReport.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: organisation.code,
-            FYerDsc: getyeardescription,
+            code: organisation.name,
             FLocCod: getLocationNumber,
-         
+            FYerDsc: getyeardescription,
+
+
         }).toString();
 
         axios
@@ -514,8 +474,8 @@ export default function BankRegisterLedger() {
                         .filter((detail) => detail !== undefined);
 
                     // Update the table data state
-                    setTableData(response.data.Detail);
-                                } else {
+                    setTableData(data);
+                } else {
                     console.warn("Response data is not as expected:", response.data);
                     setTableData([]);
                 }
@@ -562,7 +522,7 @@ export default function BankRegisterLedger() {
 
     useEffect(() => {
 
-        const apiUrl = apiLinks + "/GetActiveBanks.php"
+        const apiUrl = apiLinks + "/GetActiveSupplier.php"
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,
@@ -638,7 +598,7 @@ export default function BankRegisterLedger() {
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
@@ -646,6 +606,8 @@ export default function BankRegisterLedger() {
             item["Trn#"],
             item.Type,
             item.Description,
+            item.Qnty,
+            item.Rate,
             item.Debit,
             item.Credit,
             item.Balance,
@@ -657,6 +619,8 @@ export default function BankRegisterLedger() {
             "",
             "",
             "Total",
+            String(totalQnty),
+            "",
             String(totalDebit),
             String(totalCredit),
             String(closingBalance),
@@ -668,11 +632,13 @@ export default function BankRegisterLedger() {
             "Trn#",
             "Type",
             "Description",
+            "Qnty",
+            "Rate",
             "Debit",
             "Credit",
             "Balance",
         ];
-        const columnWidths = [18, 12, 10, 80, 20, 20, 25];
+        const columnWidths = [16, 11, 9, 80,10,25, 25, 25, 25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -900,7 +866,7 @@ export default function BankRegisterLedger() {
                 // ); // Render sale report title with decreased font size, provide the time, and page number
                 // startY += 7;
                 addTitle(
-                    `BankRegister From: ${fromInputDate} To: ${toInputDate}`,
+                    `Supplier Ledger From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -968,7 +934,7 @@ export default function BankRegisterLedger() {
         handlePagination();
 
         // Save the PDF file
-        doc.save("BankRegister.pdf");
+        doc.save("SupplierLedger.pdf");
 
         const pdfBlob = doc.output("blob");
         const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -994,10 +960,12 @@ export default function BankRegisterLedger() {
         };
 
         const columnAlignments = [
+            "center",
+            "center",
+            "center",
             "left",
-            "left",
-            "left",
-            "left",
+            "center",
+            "right",
             "right",
             "right",
             "right",
@@ -1009,7 +977,7 @@ export default function BankRegisterLedger() {
         // Add title rows
         [
             comapnyname,
-            `BankRegister From ${fromInputDate} To ${toInputDate}`,
+            `Supplier Ledger From ${fromInputDate} To ${toInputDate}`,
         ].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
@@ -1063,6 +1031,8 @@ export default function BankRegisterLedger() {
             "Trn#",
             "Type",
             "Description",
+            "Qnty",
+            "Rate",
             "Debit",
             "Credit",
             "Balance",
@@ -1079,6 +1049,8 @@ export default function BankRegisterLedger() {
                 item["Trn#"],
                 item.Type,
                 item.Description,
+                item.Qnty,
+                item.Rate,
                 item.Debit,
                 item.Credit,
                 item.Balance,
@@ -1091,6 +1063,8 @@ export default function BankRegisterLedger() {
             "",
             "",
             "Total",
+            totalQnty,
+            "",
             totalDebit,
             totalCredit,
             closingBalance,
@@ -1100,7 +1074,7 @@ export default function BankRegisterLedger() {
         });
 
         // Set column widths
-        [10, 8, 5, 50, 12, 12, 15].forEach((width, index) => {
+        [10, 8, 5, 50,5,12, 12, 12, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1131,7 +1105,7 @@ export default function BankRegisterLedger() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "BankRegister.xlsx");
+        saveAs(blob, "SupplierLedger.xlsx");
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1179,27 +1153,35 @@ export default function BankRegisterLedger() {
 
 
     const firstColWidth = {
-        width: "10%",
+        width: "8%",
     };
     const secondColWidth = {
-        width: "7%",
+        width: "5.5%",
     };
     const thirdColWidth = {
-        width: "4%",
+        width: "3.7%",
     };
-    const forthColWidth = {
-        width: "32.5%",
-    };
+    // const forthColWidth = {
+    //     width: "8%",
+    // };
     const fifthColWidth = {
-        width: "15%",
+        width: "37.5%",
     };
     const sixthColWidth = {
-        width: "15%",
+        width: "4%",
     };
     const seventhColWidth = {
-        width: "15%",
+        width: "10%",
     };
-
+    const eightColWidth = {
+        width: "10%",
+    };
+    const ninthColWidth = {
+        width: "10%",
+    };
+    const tenthColWidth = {
+        width: "10%",
+    };
     // Adjust the content width based on sidebar state
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1214,13 +1196,12 @@ export default function BankRegisterLedger() {
         };
     }, []);
 
-  
 
-
+   
     const contentStyle = {
         backgroundColor: getcolor,
         // height: "100vh",
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+        width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1334,7 +1315,7 @@ export default function BankRegisterLedger() {
 
                     }}
                 >
-                    <NavComponent textdata="BankRegister Ledger" />
+                    <NavComponent textdata="Supplier Progress Ledger" />
                     <div className="row " style={{ height: '20px', marginTop: '6px', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0px', padding: '0px' }}>
 
@@ -1652,16 +1633,25 @@ export default function BankRegisterLedger() {
                                         <td className="border-dark" style={thirdColWidth}>
                                             Typ
                                         </td>
-                                        <td className="border-dark" style={forthColWidth}>
+                                        {/* <td className="border-dark" style={forthColWidth}>
+                                            Item Code
+                                        </td> */}
+                                        <td className="border-dark" style={fifthColWidth}>
                                             Description
                                         </td>
-                                        <td className="border-dark" style={fifthColWidth}>
-                                            Debit
-                                        </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Credit
+                                            Qnty
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
+                                            Rate
+                                        </td>
+                                        <td className="border-dark" style={eightColWidth}>
+                                            Debit
+                                        </td>
+                                        <td className="border-dark" style={ninthColWidth}>
+                                            Credit
+                                        </td>
+                                        <td className="border-dark" style={tenthColWidth}>
                                             Balance
                                         </td>
                                     </tr>
@@ -1699,7 +1689,7 @@ export default function BankRegisterLedger() {
                                                     backgroundColor: getcolor
                                                 }}
                                             >
-                                                <td colSpan="7" className="text-center">
+                                                <td colSpan="9" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1711,7 +1701,7 @@ export default function BankRegisterLedger() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}
                                                             >
                                                                 &nbsp;
@@ -1724,10 +1714,13 @@ export default function BankRegisterLedger() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
+                                                {/* <td style={forthColWidth}></td> */}
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -1751,16 +1744,25 @@ export default function BankRegisterLedger() {
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
+                                                        {/* <td className="text-center" style={forthColWidth}>
+                                                            {item["Item Code"]}
+                                                        </td> */}
+                                                        <td className="text-start" style={fifthColWidth}>
                                                             {item.Description}
                                                         </td>
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item.Debit}
-                                                        </td>
-                                                        <td className="text-end" style={sixthColWidth}>
-                                                            {item.Credit}
+                                                        <td className="text-center" style={sixthColWidth}>
+                                                            {item.Qnty}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
+                                                            {item.Rate}
+                                                        </td>                                                        
+                                                        <td className="text-end" style={eightColWidth}>
+                                                            {item.Debit}
+                                                        </td>
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item.Credit}
+                                                        </td>
+                                                        <td className="text-end" style={tenthColWidth}>
                                                             {item.Balance}
                                                         </td>
                                                     </tr>
@@ -1775,7 +1777,7 @@ export default function BankRegisterLedger() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1786,10 +1788,13 @@ export default function BankRegisterLedger() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
+                                                {/* <td style={forthColWidth}></td> */}
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -1803,14 +1808,20 @@ export default function BankRegisterLedger() {
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...forthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        {/* <div style={{ ...forthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div> */}
+                        <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <span className="mobileledger_total">{totalQnty}</span>
+                        </div>
+                        <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                                                
+                        <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalDebit}</span>
                         </div>
-                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <div style={{ ...ninthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalCredit}</span>
                         </div>
-                        <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <div style={{ ...tenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{closingBalance}</span>
                         </div>
                     </div>

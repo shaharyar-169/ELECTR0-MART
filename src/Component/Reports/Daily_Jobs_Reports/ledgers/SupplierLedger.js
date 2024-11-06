@@ -53,11 +53,43 @@ export default function SupplierLedger() {
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
 
-    const GlobalfromDate = new Date(2024, 0, 1);
-    const GlobalfromDate1 = `${String(GlobalfromDate.getDate()).padStart(2, '0')}-${String(GlobalfromDate.getMonth() + 1).padStart(2, '0')}-${GlobalfromDate.getFullYear()}`;
+    const {
+        isSidebarVisible,
+        toggleSidebar,
+        getcolor,
+        fontcolor,
+        toggleChangeColor,
+        apiLinks,
+        getLocationNumber,
+        getyeardescription,
+        getfromdate,
+        gettodate
 
-    const GlobaltoDate = new Date(2024, 11, 31);
-    const GlobaltoDate1 = `${String(GlobaltoDate.getDate()).padStart(2, '0')}-${String(GlobaltoDate.getMonth() + 1).padStart(2, '0')}-${GlobaltoDate.getFullYear()}`;
+    } = useTheme();
+
+  // Assume getfromdate and gettodate are dynamic and fetched from context or state
+  const fromdatevalidate = getfromdate;  // e.g., "01-01-2023"
+  const todatevaliadete = gettodate;    // e.g., "31-12-2023"
+
+  // Function to convert "DD-MM-YYYY" string to Date object
+  const convertToDate = (dateString) => {
+      const [day, month, year] = dateString.split('-');  // Split string into day, month, year
+      return new Date(year, month - 1, day);  // Create Date object (Month is zero-indexed)
+  };
+
+  // Convert dynamic date strings to Date objects
+  const GlobalfromDate = convertToDate(fromdatevalidate);  // "01-01-2023" -> Date object
+  const GlobaltoDate = convertToDate(todatevaliadete);      // "31-12-2023" -> Date object
+
+  // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
+  const formatDate1 = (date) => {
+      return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+  };
+
+  // Optionally format the Date objects back to string if needed
+  const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
+  const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
+
 
     const comapnyname = 'ELECTRO-MART'
 
@@ -396,14 +428,16 @@ export default function SupplierLedger() {
         document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-       const apiUrl = EmartApiurl + "/SupplierLedger.php";
+       const apiUrl = apiLinks + "/SupplierLedger.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: 'EMART',
+            code: organisation.code,
+            FYerDsc: getyeardescription,
+            FLocCod: getLocationNumber,
         }).toString();
 
         axios
@@ -438,7 +472,7 @@ export default function SupplierLedger() {
                         .filter((detail) => detail !== undefined);
 
                     // Update the table data state
-                    setTableData(data);
+                    setTableData(response.data.Detail);
                 } else {
                     console.warn("Response data is not as expected:", response.data);
                     setTableData([]);
@@ -485,13 +519,17 @@ export default function SupplierLedger() {
     }, []);
 
     useEffect(() => {
-       
-        axios.get(EmartApiurl + "/getActiveSupplier.php")
+
+        const apiUrl = apiLinks + "/GetActiveSupplier.php"
+        const formData = new URLSearchParams({
+            FLocCod: getLocationNumber,
+            code: organisation.code,
+        }).toString();
+        axios
+            .post(apiUrl, formData)
             .then(response => {
                 setSupplierList(response.data);
-                console.log("supplierList data" + supplierList);
-                // setSaleType(response.data[0]?.tacccod || ''); // Set default value to the tacccod of the first object in supplierList
-                console.log("sale type data" + saleType)
+
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
@@ -1157,17 +1195,7 @@ export default function SupplierLedger() {
     }, []);
 
 
-    const {
-        isSidebarVisible,
-        toggleSidebar,
-        getcolor,
-        fontcolor,
-        toggleChangeColor,
-        EmartApiurl
-    } = useTheme();
-
-    console.log('EmartApiurl', EmartApiurl)
-
+   
     const contentStyle = {
         backgroundColor: getcolor,
         // height: "100vh",

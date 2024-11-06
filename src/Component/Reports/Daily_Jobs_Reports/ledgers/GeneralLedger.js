@@ -111,10 +111,7 @@ export default function GeneralLedger() {
     const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
     const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
 
-    console.log('Global From Date:', GlobalfromDate);    // Date object for 01-01-2023
-    console.log('Global To Date:', GlobaltoDate);        // Date object for 31-12-2023
-    console.log('Formatted From Date:', GlobalfromDate1); // '01-01-2023'
-    console.log('Formatted To Date:', GlobaltoDate1);     // '31-12-2023'
+   
 
 
 
@@ -517,7 +514,9 @@ export default function GeneralLedger() {
             FTrnTyp: transectionType,
             FAccCod: saleType,
             code: organisation.code,
-            // FLocCod: getLocationNumber,
+            FYerDsc: getyeardescription,
+            FLocCod: getLocationNumber,
+            
         }).toString();
 
         axios
@@ -526,7 +525,7 @@ export default function GeneralLedger() {
                 setIsLoading(false);
 
                 // Update total amount and quantity
-                setTotalQnty(response.data["Total Qnty  "]);
+                // setTotalQnty(response.data["Total Qnty  "]);
                 setTotalDebit(response.data["Total Debit "]);
                 setTotalCredit(response.data["Total Credit"]);
                 setClosingBalance(response.data["Closing Bal "]);
@@ -542,17 +541,17 @@ export default function GeneralLedger() {
                         .filter(
                             (key) =>
                                 ![
-                                    "Total Qnty",
-                                    "Total Debit",
+                                    // "Total Qnty",
+                                    "Total Debit ",
                                     "Total Credit",
-                                    "Closing Bal",
+                                    "Closing Bal ",
                                 ].includes(key)
                         )
                         .map((key) => response.data[key]?.Detail)
                         .filter((detail) => detail !== undefined);
 
                     // Update the table data state
-                    setTableData(data);
+                    setTableData(response.data.Detail);
                 } else {
                     console.warn("Response data is not as expected:", response.data);
                     setTableData([]);
@@ -1185,6 +1184,7 @@ export default function GeneralLedger() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
+    console.log( 'tableData',tableData)
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);

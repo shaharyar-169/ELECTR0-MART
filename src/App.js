@@ -39,6 +39,7 @@ import GeneralLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/Genera
 import SupplierLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger.js";
 import CustomerLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger.js";
 import BankRegisterLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger.js";
+import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
 
 function App() {
   const queryClient = new QueryClient();
@@ -86,6 +87,7 @@ function App() {
                 <Route exact path="/SupplierLedger" element={<SupplierLedger />} />
                 <Route exact path="/CustomerLedger" element={<CustomerLedger />} />
                 <Route exact path="/BankRegister" element={<BankRegisterLedger />} />
+                <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
