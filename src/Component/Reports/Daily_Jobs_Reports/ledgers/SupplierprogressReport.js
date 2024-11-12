@@ -1368,19 +1368,12 @@ export default function SupplierProgressLedger() {
 
                                     }}>
 
-                                    <option value="">All</option>
-                                    <option value="CRV">Cash Receive Vorcher</option>
-                                    <option value="CPV">Cash Payment Vorcher</option>
-                                    <option value="BRV">Bank Receive Vorcher</option>
-                                    <option value="BPV">Bank Payment Vorcher</option>
-                                    <option value="JRV">Journal Vorcher</option>
-                                    <option value="INV">Item Sale</option>
-                                    <option value="SRN">Sale Return</option>
-                                    <option value="BIL">Purchase</option>
-                                    <option value="PRN">Purchase Return</option>
-                                    <option value="ISS">Issue</option>
-                                    <option value="REC">Received</option>
-                                    <option value="SLY">Salary</option>
+                                    <option value="">Select</option>
+                                    <option value="2024">2024</option>
+									<option value="2023">2023</option>
+									<option value="2022">2022</option>
+									<option value="2021">2021</option>
+									<option value="2020">2020</option>
 
                                 </select>
 

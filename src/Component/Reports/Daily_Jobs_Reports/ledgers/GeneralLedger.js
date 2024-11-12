@@ -16,12 +16,18 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import 'react-calendar/dist/Calendar.css';
 import { useSelector, useDispatch } from "react-redux";
+import { ToastContainer, toast } from 'react-toastify'
+import "react-toastify/dist/ReactToastify.css";
 import { fetchGetUser } from "../../../Redux/action";
 import './ledger.css';
 
 
 export default function GeneralLedger() {
 
+    const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
+
+
+    const comapnyname = 'EMART';
 
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
@@ -111,7 +117,7 @@ export default function GeneralLedger() {
     const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
     const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
 
-   
+
 
 
 
@@ -129,7 +135,7 @@ export default function GeneralLedger() {
     // console.log('GlobaltoDate1', GlobaltoDate1)
 
 
-    const comapnyname = organisation.name
+
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
 
@@ -156,84 +162,47 @@ export default function GeneralLedger() {
         setfromInputDate(e.target.value);
     };
 
-    // const handlefromKeyPress = (e) => {
-    //     const input = e.target;
-    //     let inputValue = input.value.replace(/\D/g, ''); // Remove non-numeric characters
-
-    //     if (inputValue.length > 8) {
-    //         inputValue = inputValue.substring(0, 8); // Limit to 8 digits
-    //     }
-
-    //     // Automatically add dashes after 2nd and 4th digits for the format dd-mm-yyyy
-    //     if (inputValue.length > 2 && inputValue.length <= 4) {
-    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2)}`;
-    //     } else if (inputValue.length > 4) {
-    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2, 4)}-${inputValue.slice(4)}`;
-    //     }
-
-    //     input.value = inputValue; // Set formatted value
-
-    //     // Perform validation only when the full date is entered
-    //     if (inputValue.length === 10) {
-    //         const [day, month, year] = inputValue.split('-').map(Number);
-    //         const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-    //         if (!datePattern.test(inputValue)) {
-    //             alert("Please enter a valid date format: dd-mm-yyyy.");
-    //             input.style.border = "2px solid red";
-    //             return;
-    //         }
-
-    //         const daysInMonth = new Date(year, month, 0).getDate();
-    //         if (day > daysInMonth || day === 0) {
-    //             alert(`Please enter a valid day for month ${month}.`);
-    //             input.style.border = "2px solid red";
-    //             return;
-    //         }
-
-    //         input.style.border = "1px solid black"; // Reset border on valid input
-
-    //         // You can now handle the date logic as needed (e.g., submit form, compare dates, etc.)
-    //     }
-    // };
-
     const handlefromKeyPress = (e, inputId) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
             e.preventDefault();
-            const fromDateElement = document.getElementById('fromdatevalidation');
-            const formattedInput = fromInputDate.replace(/^(\d{2})(\d{2})(\d{4})$/, '$1-$2-$3');
+            const fromDateElement = document.getElementById("fromdatevalidation");
+            const formattedInput = fromInputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
             const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
             if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split('-').map(Number);
+                const [day, month, year] = formattedInput.split("-").map(Number);
 
                 if (month > 12 || month === 0) {
-                    alert('Please enter a valid month (MM) between 01 and 12');
+                    toast.error("Please enter a valid month (MM) between 01 and 12");
                     return;
                 }
 
                 const daysInMonth = new Date(year, month, 0).getDate();
                 if (day > daysInMonth || day === 0) {
-                    alert(`Please enter a valid day (DD) for month ${month}`);
+                    toast.error(`Please enter a valid day (DD) for month ${month}`);
                     return;
                 }
 
-                const currentDate = new Date(); // Get the current date
-                const enteredDate = new Date(year, month - 1, day); // Month in JavaScript Date starts from 0 (0 - January, 1 - February, ...)
-                // Ensure GlobalfromDate is a Date object
+                const currentDate = new Date();
+                const enteredDate = new Date(year, month - 1, day);
 
-
-                // Check if the entered date is less than GlobaltoDate
                 if (GlobalfromDate && enteredDate < GlobalfromDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
                 if (GlobalfromDate && enteredDate > GlobaltoDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
 
-                fromDateElement.style.border = `1px solid ${fontcolor}`; // Clear the red border
+                fromDateElement.style.border = `1px solid ${fontcolor}`;
                 setfromInputDate(formattedInput);
 
                 const nextInput = document.getElementById(inputId);
@@ -241,71 +210,80 @@ export default function GeneralLedger() {
                     nextInput.focus();
                     nextInput.select();
                 } else {
-                    document.getElementById('submitButton').click(); // Trigger form submission
+                    document.getElementById("submitButton").click();
                 }
             } else {
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+                toast.error("Date must be in the format dd-mm-yyyy");
             }
         }
     };
 
     const handleToKeyPress = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
             e.preventDefault();
-            const toDateElement = document.getElementById('todatevalidation');
-            const formattedInput = toInputDate.replace(/^(\d{2})(\d{2})(\d{4})$/, '$1-$2-$3');
+            const toDateElement = document.getElementById("todatevalidation");
+            const formattedInput = toInputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
             const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
             if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split('-').map(Number);
+                const [day, month, year] = formattedInput.split("-").map(Number);
 
                 if (month > 12 || month === 0) {
-                    alert('Please enter a valid month (MM) between 01 and 12');
+                    toast.error("Please enter a valid month (MM) between 01 and 12");
                     return;
                 }
 
                 const daysInMonth = new Date(year, month, 0).getDate();
                 if (day > daysInMonth || day === 0) {
-                    alert(`Please enter a valid day (DD) for month ${month}`);
+                    toast.error(`Please enter a valid day (DD) for month ${month}`);
                     return;
                 }
 
-                const currentDate = new Date(); // Get the current date
-                const enteredDate = new Date(year, month - 1, day); // Month in JavaScript Date starts from 0 (0 - January, 1 - February, ...)
+                const currentDate = new Date();
+                const enteredDate = new Date(year, month - 1, day);
 
                 if (GlobaltoDate && enteredDate > GlobaltoDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
 
                 if (GlobaltoDate && enteredDate < GlobalfromDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
 
-
                 if (fromInputDate) {
-                    const fromDate = new Date(fromInputDate.split('-').reverse().join('-'));
+                    const fromDate = new Date(
+                        fromInputDate.split("-").reverse().join("-")
+                    );
                     if (enteredDate <= fromDate) {
-                        showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                        toast.error("To date must be after from date");
                         return;
                     }
                 }
 
-                toDateElement.style.border = `1px solid ${fontcolor}`; // Add red border to the input
+                toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
                 if (input1Ref.current) {
                     e.preventDefault();
-                    console.log('Selected value:', input1Ref); // Log the select value
-                    input1Ref.current.focus(); // Move focus to React Select
+                    input1Ref.current.focus();
                 }
-
             } else {
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                toast.error("Date must be in the format dd-mm-yyyy");
             }
         }
     };
+
+
+
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : '');
@@ -338,6 +316,8 @@ export default function GeneralLedger() {
             }
         }
     };
+
+
     const showAlertMessage = (elementId, message, fromDate, toDate, fromDateElement, errortype) => {
         document.getElementById(elementId).innerHTML = `
 		  <div class="custom-message">
@@ -352,6 +332,7 @@ export default function GeneralLedger() {
 		  </div>
 		`;
 
+
         // Focus the button after it is added to the DOM
         setTimeout(() => {
             const closeButton = document.getElementById('close-btn');
@@ -359,6 +340,7 @@ export default function GeneralLedger() {
                 closeButton.click();
             }
         }, 3000);
+
 
         fromDateElement.style.border = "2px solid red"; // Add red border to the input
     };
@@ -437,67 +419,73 @@ export default function GeneralLedger() {
 
         // Handle errors using a separate switch based on errorType
         switch (errorType) {
+            //     case 'saleType':
+            //         document.getElementById('someElementId').innerHTML = `
+            //   <div class="custom-message">
+            //   <svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
+            // 			<path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
+            // 		</svg>
+            //     <p>Please Select a Account Code</p>
+            //     <button class='alert_button'  id="close-btn" onclick="closeAlert('saleType')"  cursor: pointer;">
+
+            // 		<i class="bi bi-x  cross_icon_styling"></i>
+            //     </button>
+            // </div>
+            //   `;
+            //         setTimeout(() => {
+            //             const closeButton = document.getElementById('close-btn');
+            //             if (closeButton) {
+            //                 closeButton.click();
+
+            //             }
+            //         }, 3000);
+
+            //         hasError = true;
+            //         return customStyles1(hasError);
+
             case 'saleType':
-                document.getElementById('someElementId').innerHTML = `
-		  <div class="custom-message">
-		  <svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-					<path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-				</svg>
-            <p>Please Select a Account Code</p>
-            <button class='alert_button'  id="close-btn" onclick="closeAlert('saleType')"  cursor: pointer;">
-               
-				<i class="bi bi-x  cross_icon_styling"></i>
-            </button>
-        </div>
-		  `;
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.click();
-
-                    }
-                }, 3000);
-
-                hasError = true;
-                return customStyles1(hasError);
-
-
-            case 'fromDate':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
-
+                toast.error("Please select a Account Code");
                 return;
-            case 'toDate':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
 
+            case "fromDate":
+                toast.error("From date is required");
                 return;
-            case 'fromDateInvalid':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+            case "toDate":
+                toast.error("To date is required");
+                return;
+            case "fromDateInvalid":
+                toast.error("From date must be in the format dd-mm-yyyy");
+                return;
+            case "toDateInvalid":
+                toast.error("To date must be in the format dd-mm-yyyy");
+                return;
+            case "fromDateBeforeGlobal":
+                toast.error(
+                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "fromDateAfterGlobal":
+                toast.error(
+                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "toDateAfterGlobal":
+                toast.error(
+                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "toDateBeforeGlobal":
+                toast.error(
+                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "toDateBeforeFromDate":
+                toast.error("To date must be after from date");
+                return;
 
-                return;
-            case 'toDateInvalid':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
 
-                return;
-            case 'fromDateBeforeGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
-
-                return;
-            case 'fromDateAfterGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
-                return;
-            case 'toDateAfterGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
-
-                return;
-            case 'toDateBeforeGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
-
-                return;
-            case 'toDateBeforeFromDate':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
-
-                return;
             default:
+
                 break;
         }
         ////////////////////////////////////////////
@@ -516,7 +504,7 @@ export default function GeneralLedger() {
             code: organisation.code,
             FYerDsc: getyeardescription,
             FLocCod: getLocationNumber,
-            
+
         }).toString();
 
         axios
@@ -1172,6 +1160,39 @@ export default function GeneralLedger() {
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
+    const parseDate = (dateString) => {
+        const [day, month, year] = dateString.split("-").map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    const handleRadioChange = (days) => {
+        const toDate = parseDate(toInputDate);
+        const fromDate = new Date(toDate);
+        fromDate.setUTCDate(fromDate.getUTCDate() - days);
+
+        setSelectedfromDate(fromDate);
+        setfromInputDate(formatDate(fromDate));
+        setSelectedRadio(days === 0 ? "custom" : `${days}days`);
+    };
+
+    useEffect(() => {
+        if (selectedRadio === "custom") {
+            const currentDate = new Date();
+            const firstDateOfCurrentMonth = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                1
+            );
+            setSelectedfromDate(firstDateOfCurrentMonth);
+            setfromInputDate(formatDate(firstDateOfCurrentMonth));
+            setSelectedToDate(currentDate);
+            settoInputDate(formatDate(currentDate));
+        } else {
+            const days = parseInt(selectedRadio.replace("days", ""));
+            handleRadioChange(days);
+        }
+    }, [selectedRadio]);
+
     ///////////////////////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
@@ -1184,7 +1205,7 @@ export default function GeneralLedger() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
-    console.log( 'tableData',tableData)
+    console.log('tableData', tableData)
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1362,7 +1383,8 @@ export default function GeneralLedger() {
 
     return (
         <>
-            <div id="someElementId"></div>
+            {/* <div id="someElementId"></div> */}
+            <ToastContainer />
             <div style={contentStyle}>
                 <div
                     style={{
@@ -1376,6 +1398,139 @@ export default function GeneralLedger() {
                     }}
                 >
                     <NavComponent textdata="General Ledger" />
+
+                    {/* //////////////////////////////  ROW FOR RADIO BUTTONS //////////////////////////  */}
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <div className="d-flex align-items-center justify-content-center">
+                                <div className="mx-5">
+
+                                    {/* <label htmlFor="">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Check :
+										</span>{" "}
+									</label>
+									<input
+										onChange={() => setCheck(!check)}
+										type="checkbox"
+										name=""
+										id=""
+										checked={check}
+										style={{
+											alignItems: "center",
+											marginLeft: "10px",
+										}}
+										onFocus={(e) =>
+											(e.currentTarget.style.border = "2px solid red")
+										}
+										onBlur={(e) =>
+											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+										}
+									/> */}
+                                </div>
+                                <div
+                                    className="d-flex align-items-center"
+                                    style={{ marginRight: "15px" }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "evenly",
+                                        }}
+                                    >
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="custom"
+                                                checked={selectedRadio === "custom"}
+                                                onChange={() => handleRadioChange(0)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="custom">Custom</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="30"
+                                                checked={selectedRadio === "30days"}
+                                                onChange={() => handleRadioChange(30)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="30">30 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="60"
+                                                checked={selectedRadio === "60days"}
+                                                onChange={() => handleRadioChange(60)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="60">60 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="90"
+                                                checked={selectedRadio === "90days"}
+                                                onChange={() => handleRadioChange(90)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="90">90 Days</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* ------ */}
+
+                        </div>
+                    </div>
+
+
+                    {/* ///////////////////////////////////////////////////////////////////////////////////////// */}
+
+
                     <div className="row " style={{ height: '20px', marginTop: '6px', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0px', padding: '0px' }}>
 
@@ -1440,7 +1595,14 @@ export default function GeneralLedger() {
                                         marginRight: '1px',
                                         color: fontcolor
 
-                                    }}>
+                                    }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "5px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                >
 
                                     <option value="">All</option>
                                     <option value="CRV">Cash Receive Vorcher</option>
@@ -1485,10 +1647,16 @@ export default function GeneralLedger() {
                                         justifycontent: 'center',
                                         marginLeft: '3px',
                                         background: getcolor
+                                    }}
 
-
-                                    }}>
-                                    <input
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                >
+                                    {/* <input
                                         style={{
                                             height: '20px',
                                             width: '90px',
@@ -1542,6 +1710,63 @@ export default function GeneralLedger() {
                                                 </span>
                                             </div>
                                         }
+                                    /> */}
+
+                                    <input
+                                        style={{
+                                            height: "20px",
+                                            width: "90px",
+                                            paddingLeft: "5px",
+                                            outline: "none",
+                                            border: "none",
+                                            fontSize: "12px",
+                                            backgroundColor: getcolor,
+                                            color: fontcolor,
+                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                            pointerEvents:
+                                                selectedRadio === "custom" ? "auto" : "none",
+                                        }}
+                                        id="frominputid"
+                                        value={fromInputDate}
+                                        ref={fromRef}
+                                        onChange={handlefromInputChange}
+                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                                        autoComplete="off"
+                                        placeholder="dd-mm-yyyy"
+                                        aria-label="Date Input"
+                                        disabled={selectedRadio !== "custom"}
+                                    />
+                                    <DatePicker
+                                        selected={selectedfromDate}
+                                        onChange={handlefromDateChange}
+                                        dateFormat="dd-MM-yyyy"
+                                        popperPlacement="bottom"
+                                        showPopperArrow={false}
+                                        open={fromCalendarOpen}
+                                        dropdownMode="select"
+                                        customInput={
+                                            <div>
+                                                <BsCalendar
+                                                    onClick={
+                                                        selectedRadio === "custom"
+                                                            ? toggleFromCalendar
+                                                            : undefined
+                                                    }
+                                                    style={{
+                                                        cursor:
+                                                            selectedRadio === "custom"
+                                                                ? "pointer"
+                                                                : "default",
+                                                        marginLeft: "18px",
+                                                        fontSize: "12px",
+                                                        color: fontcolor,
+                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                    }}
+                                                    disabled={selectedRadio !== "custom"}
+                                                />
+                                            </div>
+                                        }
+                                        disabled={selectedRadio !== "custom"}
                                     />
 
 
@@ -1565,8 +1790,16 @@ export default function GeneralLedger() {
                                         marginLeft: '15px',
                                         background: getcolor
 
-                                    }} >
-                                    <input
+                                    }}
+
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                >
+                                    {/* <input
                                         ref={toRef}
                                         style={{
                                             height: '20px',
@@ -1617,7 +1850,64 @@ export default function GeneralLedger() {
                                                 </span>
                                             </div>
                                         }
-                                    />
+                                    /> */}
+
+<input
+										ref={toRef}
+										style={{
+											height: "20px",
+											width: "90px",
+											paddingLeft: "5px",
+											outline: "none",
+											border: "none",
+											fontSize: "12px",
+											backgroundColor: getcolor,
+											color: fontcolor,
+											opacity: selectedRadio === "custom" ? 1 : 0.5,
+											pointerEvents:
+												selectedRadio === "custom" ? "auto" : "none",
+										}}
+										value={toInputDate}
+										onChange={handleToInputChange}
+										onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+										id="toDatePicker"
+										autoComplete="off"
+										placeholder="dd-mm-yyyy"
+										aria-label="To Date Input"
+										disabled={selectedRadio !== "custom"}
+									/>
+									<DatePicker
+										selected={selectedToDate}
+										onChange={handleToDateChange}
+										dateFormat="dd-MM-yyyy"
+										popperPlacement="bottom"
+										showPopperArrow={false}
+										open={toCalendarOpen}
+										dropdownMode="select"
+										customInput={
+											<div>
+												<BsCalendar
+													onClick={
+														selectedRadio === "custom"
+															? toggleToCalendar
+															: undefined
+													}
+													style={{
+														cursor:
+															selectedRadio === "custom"
+																? "pointer"
+																: "default",
+														marginLeft: "18px",
+														fontSize: "12px",
+														color: fontcolor,
+														opacity: selectedRadio === "custom" ? 1 : 0.5,
+													}}
+													disabled={selectedRadio !== "custom"}
+												/>
+											</div>
+										}
+										disabled={selectedRadio !== "custom"}
+									/>
                                 </div>
                             </div>
 
@@ -1644,6 +1934,8 @@ export default function GeneralLedger() {
                                         paddingLeft: '10px'
                                     }}
                                     onChange={(e) => setSearchQuery(e.target.value)}
+                                    onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                                    onBlur={(e) => (e.currentTarget.style.border = `1px solid ${fontcolor}`)}
                                 />
                             </div>
 
@@ -1716,7 +2008,7 @@ export default function GeneralLedger() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "45vh",
+                                maxHeight: "40vh",
                                 width: "100%",
                                 wordBreak: "break-word",
 
@@ -1873,24 +2165,26 @@ export default function GeneralLedger() {
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
                         <SingleButton
-                            text="EXCEL"
+                            text="Excel"
                             onClick={handleDownloadCSV}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
                         <SingleButton
                             id="searchsubmit"
-                            text="SELECT"
+                            text="Select"
                             ref={input3Ref}
                             onClick={fetchGeneralLedger}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
-                        {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
-                    Select
-                </button>{" "} */}
+
 
                     </div>
                 </div>
-            </div>
+            </div >
         </>
     );
 }

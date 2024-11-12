@@ -12,8 +12,10 @@ export function ThemeProvider({ children }) {
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const [getcolor, setcolor] = useState("#021A33");
   const [fontcolor, setfontcolor] = useState("white");
+
   const [getfromdate, setFromDate] = useState("");
   const [gettodate, setToDate] = useState("");
+  
   const [getLocationNumber, setLocationNumber] = useState("");
   const [getyeardescription, setYearDescription] = useState("");
 

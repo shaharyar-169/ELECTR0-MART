@@ -20,11 +20,8 @@ import './list.css';
 export default function StoreList() {
 
     const [sortData, setSortData] = useState("ASC");
-
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
-
-
 
     const [saleType, setSaleType] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -44,16 +41,15 @@ export default function StoreList() {
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
 
-    const formatDate = (date) => {
+        const formatDate = (date) => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
+    
     };
 
-
-
-    const handleKeyPress = (e, nextInputRef) => {
+      const handleKeyPress = (e, nextInputRef) => {
         if (e.key === 'Enter') {
             e.preventDefault(); // Prevent form submission
             if (nextInputRef.current) {
@@ -650,8 +646,6 @@ export default function StoreList() {
     //     dispatch(fetchGetUser(organisation && organisation.code));
     // }, [dispatch, organisation.code]);
 
-
-
     const handleSearch = (e) => {
         setSelectedSearch(e.target.value);
     };
@@ -714,7 +708,6 @@ export default function StoreList() {
         };
     }, []);
 
-
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -768,7 +761,7 @@ export default function StoreList() {
     }, [tableData, isFilterApplied]);
 
     let totalEnteries = 0;
-    const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
+    const [selectedRowId, setSelectedRowId]=useState(null); // Track the selected row's tctgcod
 
     // state initialize for table row highlight
     const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
@@ -826,8 +819,6 @@ export default function StoreList() {
     }, [selectedIndex]); // Add selectedIndex as a dependency
     //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
 
-
-
     return (
         <>
             <div id="someElementId"></div>
@@ -844,8 +835,6 @@ export default function StoreList() {
                     }}
                 >
                     <NavComponent textdata="Store List" />
-
-
                     <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
                         <div style={{ width: '100%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'end' }}>
                             {/* Search Item  */}
