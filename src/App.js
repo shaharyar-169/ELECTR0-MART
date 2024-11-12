@@ -35,6 +35,8 @@ import ChartofAccount from "./Component/Reports/Daily_Jobs_Reports/List/ChartofA
 import StoreList from "./Component/Reports/Daily_Jobs_Reports/List/StoreList.js";
 
 //////////////////////////// ledger reports //////////////////////////////
+import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
+
 import GeneralLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLedger.js";
 import SupplierLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger.js";
 import CustomerLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger.js";
@@ -83,7 +85,7 @@ function App() {
 
 
                 {/* Rountes for ledgers reports */}
-                <Route exact path="/GeneralLedger1" element={<GeneralLedger />} />
+                <Route exact path="/GeneralLedger1" element={<GeneralLedger1 />} />
                 <Route exact path="/SupplierLedger" element={<SupplierLedger />} />
                 <Route exact path="/CustomerLedger" element={<CustomerLedger />} />
                 <Route exact path="/BankRegister" element={<BankRegisterLedger />} />
