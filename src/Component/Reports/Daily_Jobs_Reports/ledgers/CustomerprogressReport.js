@@ -22,7 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { color } from "@mui/system";
 
-export default function SupplierProgressLedger() {
+export default function CustomerProgressLedger() {
 
 
     const saleSelectRef = useRef(null);
@@ -313,7 +313,7 @@ export default function SupplierProgressLedger() {
         // document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/SupplierProgress.php";
+        const apiUrl = apiLinks + "/CustomerProgress.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FRepDat: toInputDate,
@@ -388,7 +388,7 @@ export default function SupplierProgressLedger() {
 
     useEffect(() => {
 
-        const apiUrl = apiLinks + "/GetActiveSupplier.php"
+        const apiUrl = apiLinks + "/GetActiveCustomer.php"
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,
@@ -1101,7 +1101,7 @@ export default function SupplierProgressLedger() {
 
     return (
         <>
-            {/* <div id="someElementId"></div> */}
+         
             <ToastContainer />
             <div style={contentStyle}>
                 <div
@@ -1115,7 +1115,7 @@ export default function SupplierProgressLedger() {
 
                     }}
                 >
-                    <NavComponent textdata="Supplier Progress Ledger" />
+                    <NavComponent textdata="Customer Progress Ledger" />
                     <div className="row " style={{ height: '20px', marginTop: '6px', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0px', padding: '0px' }}>
 

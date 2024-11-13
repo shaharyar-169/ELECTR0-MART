@@ -39,6 +39,7 @@ import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/Gener
 import SupplierLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger1.js";
 import CustomerLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger1.js";
 import BankRegisterLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger1.js";
+import CustomerProgressLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerprogressReport.js";
 
 import BankRegisterLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger.js";
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
@@ -90,6 +91,7 @@ function App() {
                 <Route exact path="/CustomerLedger" element={<CustomerLedger1 />} />
                 <Route exact path="/BankRegister" element={<BankRegisterLedger1 />} />
                 <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
+                <Route exact path="/CustomerProgress" element={<CustomerProgressLedger />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
