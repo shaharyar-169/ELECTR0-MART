@@ -1725,6 +1725,7 @@ export default function GeneralLedger1() {
                                     <tr
                                         style={{
                                             backgroundColor: tableHeadColor,
+                                            color: "white",
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
