@@ -54,6 +54,7 @@ export default function BankRegisterLedger1() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+  
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -66,6 +67,10 @@ export default function BankRegisterLedger1() {
         getfromdate,
         gettodate,
     } = useTheme();
+
+    useEffect(() => {
+        document.documentElement.style.setProperty("--background-color", getcolor);
+      }, [getcolor]);
 
     const comapnyname = organisation.description;
 
@@ -1717,6 +1722,7 @@ const handleDownloadCSV = async () => {
                                     <tr
                                         style={{
                                             backgroundColor: tableHeadColor,
+                                            color:'white'
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>

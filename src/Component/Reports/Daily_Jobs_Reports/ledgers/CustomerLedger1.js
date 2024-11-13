@@ -55,6 +55,8 @@ export default function CustomerLedger1() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+  
+
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -68,6 +70,11 @@ export default function CustomerLedger1() {
         gettodate,
     } = useTheme();
 
+
+    useEffect(() => {
+        document.documentElement.style.setProperty("--background-color", getcolor);
+      }, [getcolor]);
+      
     const comapnyname = organisation.description;
 
     const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
@@ -1743,6 +1750,7 @@ export default function CustomerLedger1() {
                                     <tr
                                         style={{
                                             backgroundColor: tableHeadColor,
+                                            color: "white",
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>

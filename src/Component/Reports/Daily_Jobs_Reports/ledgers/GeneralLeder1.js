@@ -59,6 +59,7 @@ export default function GeneralLedger1() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+ 
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -71,6 +72,11 @@ export default function GeneralLedger1() {
         getfromdate,
         gettodate,
     } = useTheme();
+
+    useEffect(() => {
+        document.documentElement.style.setProperty("--background-color", getcolor);
+      }, [getcolor]);
+
 
     const comapnyname = organisation.description;
 

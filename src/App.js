@@ -40,7 +40,6 @@ import SupplierLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/Supp
 import CustomerLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger1.js";
 import BankRegisterLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger1.js";
 
-import CustomerLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger.js";
 import BankRegisterLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger.js";
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
 
