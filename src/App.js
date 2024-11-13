@@ -36,9 +36,10 @@ import StoreList from "./Component/Reports/Daily_Jobs_Reports/List/StoreList.js"
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
+import SupplierLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger1.js";
+import CustomerLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger1.js";
+import BankRegisterLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger1.js";
 
-import GeneralLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLedger.js";
-import SupplierLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger.js";
 import CustomerLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger.js";
 import BankRegisterLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger.js";
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
@@ -86,9 +87,9 @@ function App() {
 
                 {/* Rountes for ledgers reports */}
                 <Route exact path="/GeneralLedger1" element={<GeneralLedger1 />} />
-                <Route exact path="/SupplierLedger" element={<SupplierLedger />} />
-                <Route exact path="/CustomerLedger" element={<CustomerLedger />} />
-                <Route exact path="/BankRegister" element={<BankRegisterLedger />} />
+                <Route exact path="/SupplierLedger" element={<SupplierLedger1 />} />
+                <Route exact path="/CustomerLedger" element={<CustomerLedger1 />} />
+                <Route exact path="/BankRegister" element={<BankRegisterLedger1 />} />
                 <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
 
 

@@ -1,28 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
 import { getUserData, getOrganisationData } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
-import { components } from 'react-select';
-import { BsCalendar } from 'react-icons/bs';
+import { components } from "react-select";
+import { BsCalendar } from "react-icons/bs";
 import DatePicker from "react-datepicker";
-import 'react-datepicker/dist/react-datepicker.css';
+import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
-import './ledger.css';
-import { color } from "@mui/system";
+import { useHotkeys } from "react-hotkeys-hook";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function SupplierLedger() {
-
+export default function SupplierLedger1() {
+    
+    const navigate = useNavigate();
+    const user = getUserData();
+    const organisation = getOrganisationData();
 
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
@@ -32,26 +35,25 @@ export default function SupplierLedger() {
     const toRef = useRef(null);
     const fromRef = useRef(null);
 
-    const [saleType, setSaleType] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [transectionType, settransectionType] = useState('');
-    const [supplierList, setSupplierList] = useState([])
+    const [saleType, setSaleType] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [transectionType, settransectionType] = useState("");
+    const [supplierList, setSupplierList] = useState([]);
 
     const [totalQnty, setTotalQnty] = useState(0);
+    const [totalOpening, setTotalOpening] = useState(0);
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
-    const [fromInputDate, setfromInputDate] = useState('');
+    const [fromInputDate, setfromInputDate] = useState("");
     const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
     // state for To DatePicker
     const [selectedToDate, setSelectedToDate] = useState(null);
-    const [toInputDate, settoInputDate] = useState('');
+    const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
-
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
 
     const {
         isSidebarVisible,
@@ -63,99 +65,100 @@ export default function SupplierLedger() {
         getLocationNumber,
         getyeardescription,
         getfromdate,
-        gettodate
-
+        gettodate,
     } = useTheme();
 
-  // Assume getfromdate and gettodate are dynamic and fetched from context or state
-  const fromdatevalidate = getfromdate;  // e.g., "01-01-2023"
-  const todatevaliadete = gettodate;    // e.g., "31-12-2023"
+    const comapnyname = organisation.description;
 
-  // Function to convert "DD-MM-YYYY" string to Date object
-  const convertToDate = (dateString) => {
-      const [day, month, year] = dateString.split('-');  // Split string into day, month, year
-      return new Date(year, month - 1, day);  // Create Date object (Month is zero-indexed)
-  };
+    const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
-  // Convert dynamic date strings to Date objects
-  const GlobalfromDate = convertToDate(fromdatevalidate);  // "01-01-2023" -> Date object
-  const GlobaltoDate = convertToDate(todatevaliadete);      // "31-12-2023" -> Date object
+    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
-  // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
-  const formatDate1 = (date) => {
-      return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-  };
+    const fromdatevalidate = getfromdate;
+    const todatevaliadete = gettodate;
 
-  // Optionally format the Date objects back to string if needed
-  const GlobalfromDate1 = formatDate1(GlobalfromDate);  // '01-01-2023'
-  const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
+    const convertToDate = (dateString) => {
+        const [day, month, year] = dateString.split("-");
+        return new Date(year, month - 1, day);
+    };
 
+    const GlobalfromDate = convertToDate(fromdatevalidate);
+    const GlobaltoDate = convertToDate(todatevaliadete);
 
-    const comapnyname = organisation.name
+    const formatDate1 = (date) => {
+        return `${String(date.getDate()).padStart(2, "0")}-${String(
+            date.getMonth() + 1
+        ).padStart(2, "0")}-${date.getFullYear()}`;
+    };
 
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
+    const GlobalfromDate1 = formatDate1(GlobalfromDate);
+    const GlobaltoDate1 = formatDate1(GlobaltoDate);
 
+    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
     // Toggle the ToDATE && FromDATE CalendarOpen state on each click
     const toggleFromCalendar = () => {
-        setfromCalendarOpen(prevOpen => !prevOpen);
+        setfromCalendarOpen((prevOpen) => !prevOpen);
     };
     const toggleToCalendar = () => {
-        settoCalendarOpen(prevOpen => !prevOpen);
+        settoCalendarOpen((prevOpen) => !prevOpen);
     };
     const formatDate = (date) => {
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
     };
     const handlefromDateChange = (date) => {
         setSelectedfromDate(date);
-        setfromInputDate(date ? formatDate(date) : '');
+        setfromInputDate(date ? formatDate(date) : "");
         setfromCalendarOpen(false);
     };
     const handlefromInputChange = (e) => {
         setfromInputDate(e.target.value);
     };
 
-  
     const handlefromKeyPress = (e, inputId) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
             e.preventDefault();
-            const fromDateElement = document.getElementById('fromdatevalidation');
-            const formattedInput = fromInputDate.replace(/^(\d{2})(\d{2})(\d{4})$/, '$1-$2-$3');
+            const fromDateElement = document.getElementById("fromdatevalidation");
+            const formattedInput = fromInputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
             const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
             if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split('-').map(Number);
+                const [day, month, year] = formattedInput.split("-").map(Number);
 
                 if (month > 12 || month === 0) {
-                    alert('Please enter a valid month (MM) between 01 and 12');
+                    toast.error("Please enter a valid month (MM) between 01 and 12");
                     return;
                 }
 
                 const daysInMonth = new Date(year, month, 0).getDate();
                 if (day > daysInMonth || day === 0) {
-                    alert(`Please enter a valid day (DD) for month ${month}`);
+                    toast.error(`Please enter a valid day (DD) for month ${month}`);
                     return;
                 }
 
-                const currentDate = new Date(); // Get the current date
-                const enteredDate = new Date(year, month - 1, day); // Month in JavaScript Date starts from 0 (0 - January, 1 - February, ...)
-                // Ensure GlobalfromDate is a Date object
+                const currentDate = new Date();
+                const enteredDate = new Date(year, month - 1, day);
 
-
-                // Check if the entered date is less than GlobaltoDate
                 if (GlobalfromDate && enteredDate < GlobalfromDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
                 if (GlobalfromDate && enteredDate > GlobaltoDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
 
-                fromDateElement.style.border = `1px solid ${fontcolor}`; // Clear the red border
+                fromDateElement.style.border = `1px solid ${fontcolor}`;
                 setfromInputDate(formattedInput);
 
                 const nextInput = document.getElementById(inputId);
@@ -163,272 +166,233 @@ export default function SupplierLedger() {
                     nextInput.focus();
                     nextInput.select();
                 } else {
-                    document.getElementById('submitButton').click(); // Trigger form submission
+                    document.getElementById("submitButton").click();
                 }
             } else {
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+                toast.error("Date must be in the format dd-mm-yyyy");
             }
         }
     };
 
     const handleToKeyPress = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
             e.preventDefault();
-            const toDateElement = document.getElementById('todatevalidation');
-            const formattedInput = toInputDate.replace(/^(\d{2})(\d{2})(\d{4})$/, '$1-$2-$3');
+            const toDateElement = document.getElementById("todatevalidation");
+            const formattedInput = toInputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
             const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
             if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split('-').map(Number);
+                const [day, month, year] = formattedInput.split("-").map(Number);
 
                 if (month > 12 || month === 0) {
-                    alert('Please enter a valid month (MM) between 01 and 12');
+                    toast.error("Please enter a valid month (MM) between 01 and 12");
                     return;
                 }
 
                 const daysInMonth = new Date(year, month, 0).getDate();
                 if (day > daysInMonth || day === 0) {
-                    alert(`Please enter a valid day (DD) for month ${month}`);
+                    toast.error(`Please enter a valid day (DD) for month ${month}`);
                     return;
                 }
 
-                const currentDate = new Date(); // Get the current date
-                const enteredDate = new Date(year, month - 1, day); // Month in JavaScript Date starts from 0 (0 - January, 1 - February, ...)
+                const currentDate = new Date();
+                const enteredDate = new Date(year, month - 1, day);
 
                 if (GlobaltoDate && enteredDate > GlobaltoDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
 
                 if (GlobaltoDate && enteredDate < GlobalfromDate) {
-                    showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
                     return;
                 }
 
-
                 if (fromInputDate) {
-                    const fromDate = new Date(fromInputDate.split('-').reverse().join('-'));
+                    const fromDate = new Date(
+                        fromInputDate.split("-").reverse().join("-")
+                    );
                     if (enteredDate <= fromDate) {
-                        showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                        toast.error("To date must be after from date");
                         return;
                     }
                 }
 
-                toDateElement.style.border = `1px solid ${fontcolor}`; // Add red border to the input
+                toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
                 if (input1Ref.current) {
                     e.preventDefault();
-                    console.log('Selected value:', input1Ref); // Log the select value
-                    input1Ref.current.focus(); // Move focus to React Select
+                    input1Ref.current.focus();
                 }
-
             } else {
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
+                toast.error("Date must be in the format dd-mm-yyyy");
             }
         }
     };
+
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
-        settoInputDate(date ? formatDate(date) : '');
+        settoInputDate(date ? formatDate(date) : "");
         settoCalendarOpen(false);
     };
     const handleToInputChange = (e) => {
         settoInputDate(e.target.value);
     };
     const handleSaleKeypress = (event, inputId) => {
-        if (event.key === 'Enter') {
+        if (event.key === "Enter") {
             const selectedOption = saleSelectRef.current.state.selectValue;
             if (selectedOption && selectedOption.value) {
-                setSaleType(selectedOption.value); // Set the selected value only if an option is selected
+                setSaleType(selectedOption.value);
             }
             const nextInput = document.getElementById(inputId);
             if (nextInput) {
-                nextInput.focus(); // Move focus to the next input
+                nextInput.focus();
                 nextInput.select();
             } else {
-                document.getElementById('submitButton').click(); // Trigger form submission
+                document.getElementById("submitButton").click();
             }
         }
     };
-    // Function to handle keypress and move focus
     const handleKeyPress = (e, nextInputRef) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent form submission
+        if (e.key === "Enter") {
+            e.preventDefault();
             if (nextInputRef.current) {
-                nextInputRef.current.focus(); // Move focus to next input
+                nextInputRef.current.focus();
             }
         }
     };
-    const showAlertMessage = (elementId, message, fromDate, toDate, fromDateElement, errortype) => {
-        document.getElementById(elementId).innerHTML = `
-		  <div class="custom-message">
-			<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-			  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-			</svg>
-			${message} <span style="font-size: 12px; font-weight: bold;">${fromDate}</span> 
-			To <span style="font-size: 12px; font-weight: bold;">${toDate}</span>
-			<button class='alert_button' id="close-btn" onclick="closeAlert('${errortype}')" style="cursor: pointer;">
-			  <i class="bi bi-x cross_icon_styling"></i>
-			</button>
-		  </div>
-		`;
 
-        // Focus the button after it is added to the DOM
-        setTimeout(() => {
-            const closeButton = document.getElementById('close-btn');
-            if (closeButton) {
-                closeButton.click();
-            }
-        }, 3000);
-
-        fromDateElement.style.border = "2px solid red"; // Add red border to the input
-    };
-    function closeAlert(errorType) {
-
-        const alertElement = document.getElementById('someElementId');
-        alertElement.innerHTML = ''; // Clears the alert content
-        if (errorType === 'saleType') {
-            saleSelectRef.current.focus();
-        }
-        if (errorType === 'formvalidation') {
-            fromRef.current.select();
-        }
-        if (errorType === 'todatevalidation') {
-            toRef.current.select();
-        }
-    }
-    // Bind to window
-    window.closeAlert = closeAlert;
-
-    function fetchGeneralLedger() {
-
-        const fromDateElement = document.getElementById('fromdatevalidation');
-        const toDateElement = document.getElementById('todatevalidation');
+    function fetchReceivableReport() {
+        const fromDateElement = document.getElementById("fromdatevalidation");
+        const toDateElement = document.getElementById("todatevalidation");
 
         const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
         let hasError = false;
-        let errorType = '';
+        let errorType = "";
 
-        // Handle saleType, fromInputDate, and toInputDate errors first
         switch (true) {
             case !saleType:
                 errorType = 'saleType';
                 break;
             case !fromInputDate:
-                errorType = 'fromDate';
+                errorType = "fromDate";
                 break;
             case !toInputDate:
-                errorType = 'toDate';
+                errorType = "toDate";
                 break;
             default:
                 hasError = false;
                 break;
         }
 
-        // Handle date format validation separately
         if (!dateRegex.test(fromInputDate)) {
-            errorType = 'fromDateInvalid';
+            errorType = "fromDateInvalid";
         } else if (!dateRegex.test(toInputDate)) {
-            errorType = 'toDateInvalid';
+            errorType = "toDateInvalid";
         } else {
-            // Format and compare dates if both pass the regex validation
-            const formattedFromInput = fromInputDate.replace(/^(\d{2})(\d{2})(\d{4})$/, '$1-$2-$3');
-            const [fromDay, fromMonth, fromYear] = formattedFromInput.split('-').map(Number);
+            const formattedFromInput = fromInputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
+            const [fromDay, fromMonth, fromYear] = formattedFromInput
+                .split("-")
+                .map(Number);
             const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
 
-            const formattedToInput = toInputDate.replace(/^(\d{2})(\d{2})(\d{4})$/, '$1-$2-$3');
-            const [toDay, toMonth, toYear] = formattedToInput.split('-').map(Number);
+            const formattedToInput = toInputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
+            const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
             const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-            // Now handle date range validation
             if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-                errorType = 'fromDateBeforeGlobal';
+                errorType = "fromDateBeforeGlobal";
             } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-                errorType = 'fromDateAfterGlobal';
+                errorType = "fromDateAfterGlobal";
             } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = 'toDateAfterGlobal';
+                errorType = "toDateAfterGlobal";
             } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = 'toDateBeforeGlobal';
+                errorType = "toDateBeforeGlobal";
             } else if (enteredToDate < enteredFromDate) {
-                errorType = 'toDateBeforeFromDate';
+                errorType = "toDateBeforeFromDate";
             }
         }
 
-
-        // Handle errors using a separate switch based on errorType
         switch (errorType) {
+
             case 'saleType':
-                document.getElementById('someElementId').innerHTML = `
-		  <div class="custom-message">
-		  <svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-					<path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-				</svg>
-            <p>Please Select a Account Code</p>
-            <button class='alert_button'  id="close-btn" onclick="closeAlert('saleType')"  cursor: pointer;">
-               
-				<i class="bi bi-x  cross_icon_styling"></i>
-            </button>
-        </div>
-		  `;
-                setTimeout(() => {
-                    const closeButton = document.getElementById('close-btn');
-                    if (closeButton) {
-                        closeButton.click();
-
-                    }
-                }, 3000);
-
-                hasError = true;
-                return customStyles1(hasError);
-
-
-            case 'fromDate':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
-
+                toast.error("Please select a Account Code");
                 return;
-            case 'toDate':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
 
+            case "fromDate":
+                toast.error("From date is required");
                 return;
-            case 'fromDateInvalid':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
+            case "toDate":
+                toast.error("To date is required");
+                return;
+            case "fromDateInvalid":
+                toast.error("From date must be in the format dd-mm-yyyy");
+                return;
+            case "toDateInvalid":
+                toast.error("To date must be in the format dd-mm-yyyy");
+                return;
+            case "fromDateBeforeGlobal":
+                toast.error(
+                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "fromDateAfterGlobal":
+                toast.error(
+                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "toDateAfterGlobal":
+                toast.error(
+                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "toDateBeforeGlobal":
+                toast.error(
+                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                );
+                return;
+            case "toDateBeforeFromDate":
+                toast.error("To date must be after from date");
+                return;
 
-                return;
-            case 'toDateInvalid':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
 
-                return;
-            case 'fromDateBeforeGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
-
-                return;
-            case 'fromDateAfterGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, fromDateElement, 'formvalidation');
-                return;
-            case 'toDateAfterGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
-
-                return;
-            case 'toDateBeforeGlobal':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
-
-                return;
-            case 'toDateBeforeFromDate':
-                showAlertMessage('someElementId', 'Date must be from', GlobalfromDate1, GlobaltoDate1, toDateElement, 'todatevalidation');
-
-                return;
             default:
                 break;
         }
-        ////////////////////////////////////////////
 
+        const data = {
+            FIntDat: fromInputDate,
+            FFnlDat: toInputDate,
+            FTrnTyp: transectionType,
+            FAccCod: saleType,
+            code: "EMART",
+            FLocCod: "001",
+            FYerDsc: "2024-2024",
+        };
+        console.log(data);
+        document.getElementById(
+            "fromdatevalidation"
+        ).style.border = `1px solid ${fontcolor}`;
+        document.getElementById(
+            "todatevalidation"
+        ).style.border = `1px solid ${fontcolor}`;
 
-        document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
-        document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
-
-       const apiUrl = apiLinks + "/SupplierLedger.php";
+        const apiUrl = apiLinks + "/SupplierLedger.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
@@ -438,43 +402,26 @@ export default function SupplierLedger() {
             code: organisation.code,
             FYerDsc: getyeardescription,
             FLocCod: getLocationNumber,
+
         }).toString();
 
         axios
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
-
                 // Update total amount and quantity
                 setTotalQnty(response.data["Total Qnty  "]);
                 setTotalDebit(response.data["Total Debit "]);
                 setTotalCredit(response.data["Total Credit"]);
                 setClosingBalance(response.data["Closing Bal "]);
 
-                // Check if response.data is an object and has keys
-                if (
-                    response.data &&
-                    typeof response.data === "object" &&
-                    Object.keys(response.data).length > 0
-                ) {
-                    // Extract detail objects from the response
-                    const data = Object.keys(response.data)
-                        .filter(
-                            (key) =>
-                                ![
-                                    "Total Qnty",
-                                    "Total Debit",
-                                    "Total Credit",
-                                    "Closing Bal",
-                                ].includes(key)
-                        )
-                        .map((key) => response.data[key]?.Detail)
-                        .filter((detail) => detail !== undefined);
-
-                    // Update the table data state
+                if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
                 } else {
-                    console.warn("Response data is not as expected:", response.data);
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
                     setTableData([]);
                 }
             })
@@ -485,26 +432,17 @@ export default function SupplierLedger() {
     }
 
     useEffect(() => {
-        const hasComponentMountedPreviously = sessionStorage.getItem('componentMounted');
-        // If it hasn't mounted before or on refresh, select the 'from date' input
+        const hasComponentMountedPreviously =
+            sessionStorage.getItem("componentMounted");
         if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
             if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
-                    saleSelectRef.current.focus(); // Focus on the input field
-                    // saleSelectRef.current.select(); // Select the text within the input field
+                    saleSelectRef.current.focus();
+                    // saleSelectRef.current.select();
                 }, 0);
             }
-            sessionStorage.setItem('componentMounted', 'true'); // Set the flag indicating mount
-            // const storedData = localStorage.getItem('globaldata');
-
-            // if (storedData) {
-            //     // Parse the JSON string back to an object
-            //     const parsedData = JSON.parse(storedData);
-            //     setApiData(parsedData);
-            // }
+            sessionStorage.setItem("componentMounted", "true");
         }
-
-
     }, []);
 
     useEffect(() => {
@@ -512,47 +450,48 @@ export default function SupplierLedger() {
         setSelectedToDate(currentDate);
         settoInputDate(formatDate(currentDate));
 
-        const firstDateOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const firstDateOfCurrentMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            1
+        );
         setSelectedfromDate(firstDateOfCurrentMonth);
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
-
     }, []);
 
     useEffect(() => {
-
-        const apiUrl = apiLinks + "/GetActiveSupplier.php"
+        const apiUrl = apiLinks + "/GetActiveSupplier.php";
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,
         }).toString();
         axios
             .post(apiUrl, formData)
-            .then(response => {
+            .then((response) => {
                 setSupplierList(response.data);
-
             })
-            .catch(error => {
-                console.error('Error fetching data:', error);
+            .catch((error) => {
+                console.error("Error fetching data:", error);
             });
     }, []);
 
-    // Transforming fetched data into options array
-    const options = supplierList.map(item => ({
+    const options = supplierList.map((item) => ({
         value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`
+        label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
 
     const DropdownOption = (props) => {
         return (
             <components.Option {...props}>
-                <div style={{
-                    fontSize: '12px',
-                    paddingBottom: '5px',
-                    lineHeight: '3px',
-                    color: 'black',
-                    textAlign: 'start',
-
-                }}>
+                <div
+                    style={{
+                        fontSize: "12px",
+                        paddingBottom: "5px",
+                        lineHeight: "3px",
+                        color: "black",
+                        textAlign: "start",
+                    }}
+                >
                     {props.data.label}
                 </div>
             </components.Option>
@@ -561,30 +500,29 @@ export default function SupplierLedger() {
     const customStyles1 = (hasError) => ({
         control: (base, state) => ({
             ...base,
-            height: '24px',
-            minHeight: 'unset',
+            height: "24px",
+            minHeight: "unset",
             width: 418,
-            fontSize: '12px',
+            fontSize: "12px",
             backgroundColor: getcolor,
             color: fontcolor,
             borderRadius: 0,
-            border: hasError ? '2px solid red' : `1px solid ${fontcolor}`, // Conditionally change border color
-            transition: 'border-color 0.15s ease-in-out',
-            '&:hover': {
-                borderColor: state.isFocused ? base.borderColor : 'black',
+            border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+            transition: "border-color 0.15s ease-in-out",
+            "&:hover": {
+                borderColor: state.isFocused ? base.borderColor : "black",
             },
-            padding: '0 8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-
+            padding: "0 8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
         }),
-        dropdownIndicator: base => ({
+        dropdownIndicator: (base) => ({
             ...base,
             padding: 0,
-            fontSize: '18px',
-            display: 'flex',
-            textAlign: 'center !important',
+            fontSize: "18px",
+            display: "flex",
+            textAlign: "center !important",
         }),
     });
 
@@ -592,6 +530,7 @@ export default function SupplierLedger() {
         const selectedTransactionType = event.target.value;
         settransectionType(selectedTransactionType);
     };
+
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
@@ -636,7 +575,7 @@ export default function SupplierLedger() {
             "Credit",
             "Balance",
         ];
-        const columnWidths = [16, 11, 9, 80,10,25, 25, 25, 25];
+        const columnWidths = [16, 11, 9, 80, 10, 25, 25, 25, 25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1072,7 +1011,7 @@ export default function SupplierLedger() {
         });
 
         // Set column widths
-        [10, 8, 5, 50,5,12, 12, 12, 15].forEach((width, index) => {
+        [10, 8, 5, 50, 5, 12, 12, 12, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1105,13 +1044,10 @@ export default function SupplierLedger() {
         });
         saveAs(blob, "SupplierLedger.xlsx");
     };
-    ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
-    ///////////////////////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
-    const user = getUserData();
-    const organisation = getOrganisationData();
+
     const tableTopColor = "#3368B5";
     const tableHeadColor = "#3368b5";
     const secondaryColor = "white";
@@ -1123,13 +1059,6 @@ export default function SupplierLedger() {
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
 
-    // useEffect(() => {
-    //     setTableData(data);
-    //     dispatch(fetchGetUser(organisation && organisation.code));
-    // }, [dispatch, organisation.code]);
-
-
-
     const handleSearch = (e) => {
         setSelectedSearch(e.target.value);
     };
@@ -1138,17 +1067,14 @@ export default function SupplierLedger() {
 
     const getFilteredTableData = () => {
         let filteredData = tableData;
-
         if (selectedSearch.trim() !== "") {
             const query = selectedSearch.trim().toLowerCase();
             filteredData = filteredData.filter(
                 (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
             );
         }
-
         return filteredData;
     };
-
 
     const firstColWidth = {
         width: "8%",
@@ -1159,9 +1085,6 @@ export default function SupplierLedger() {
     const thirdColWidth = {
         width: "3.7%",
     };
-    // const forthColWidth = {
-    //     width: "8%",
-    // };
     const fifthColWidth = {
         width: "37.5%",
     };
@@ -1180,28 +1103,29 @@ export default function SupplierLedger() {
     const tenthColWidth = {
         width: "10%",
     };
-    // Adjust the content width based on sidebar state
+
+    useHotkeys("s", fetchReceivableReport);
+    useHotkeys("alt+p", exportPDFHandler);
+    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("esc", () => navigate("/MainPage"));
+
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     useEffect(() => {
         const handleResize = () => {
             setWindowWidth(window.innerWidth);
         };
-
         window.addEventListener("resize", handleResize);
         return () => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
 
-
-   
     const contentStyle = {
         backgroundColor: getcolor,
-        // height: "100vh",
         width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
-        top: "40%",
+        top: "35%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1222,30 +1146,25 @@ export default function SupplierLedger() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-    
-    //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
         if (isFilterApplied || tableData.length > 0) {
-            setSelectedIndex(0); // Set the selected index to the first row
+            setSelectedIndex(0);
             rowRefs.current[0]?.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
             });
         } else {
-            setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
+            setSelectedIndex(-1);
         }
     }, [tableData, isFilterApplied]);
 
     let totalEnteries = 0;
-    const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
-
-    // state initialize for table row highlight
-    const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
-    const rowRefs = useRef([]); // Array of refs for rows
+    const [selectedRowId, setSelectedRowId] = useState(null);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const rowRefs = useRef([]);
     const handleRowClick = (index) => {
         setSelectedIndex(index);
-        // setSelectedRowId(getFilteredTableData[index].tcmpdsc); // Save the selected row's tctgcod
     };
     useEffect(() => {
         if (selectedRowId !== null) {
@@ -1256,7 +1175,7 @@ export default function SupplierLedger() {
         }
     }, [tableData, selectedRowId]);
     const handleKeyDown = (e) => {
-        if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
+        if (selectedIndex === -1 || e.target.id === "searchInput") return;
         if (e.key === "ArrowUp") {
             e.preventDefault();
             setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
@@ -1279,28 +1198,55 @@ export default function SupplierLedger() {
     };
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
-
-        // Cleanup event listener on component unmount
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [selectedIndex]); // Add selectedIndex as a dependency
+    }, [selectedIndex]);
     useEffect(() => {
-        // Scroll the selected row into view
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
                 behavior: "smooth",
                 block: "nearest",
             });
         }
-    }, [selectedIndex]); // Add selectedIndex as a dependency
-    //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
+    }, [selectedIndex]);
 
+    const parseDate = (dateString) => {
+        const [day, month, year] = dateString.split("-").map(Number);
+        return new Date(year, month - 1, day);
+    };
 
+    const handleRadioChange = (days) => {
+        const toDate = parseDate(toInputDate);
+        const fromDate = new Date(toDate);
+        fromDate.setUTCDate(fromDate.getUTCDate() - days);
+
+        setSelectedfromDate(fromDate);
+        setfromInputDate(formatDate(fromDate));
+        setSelectedRadio(days === 0 ? "custom" : `${days}days`);
+    };
+
+    useEffect(() => {
+        if (selectedRadio === "custom") {
+            const currentDate = new Date();
+            const firstDateOfCurrentMonth = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                1
+            );
+            setSelectedfromDate(firstDateOfCurrentMonth);
+            setfromInputDate(formatDate(firstDateOfCurrentMonth));
+            setSelectedToDate(currentDate);
+            settoInputDate(formatDate(currentDate));
+        } else {
+            const days = parseInt(selectedRadio.replace("days", ""));
+            handleRadioChange(days);
+        }
+    }, [selectedRadio]);
 
     return (
         <>
-            <div id="someElementId"></div>
+            <ToastContainer />
             <div style={contentStyle}>
                 <div
                     style={{
@@ -1309,13 +1255,133 @@ export default function SupplierLedger() {
                         width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
-
-
                     }}
                 >
                     <NavComponent textdata="Supplier Ledger" />
-                    <div className="row " style={{ height: '20px', marginTop: '6px', marginBottom: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0px', padding: '0px' }}>
+                    <div className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
+
+                        <div style={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            margin: "0px",
+                            padding: "0px",
+                            justifyContent: "space-between",
+                        }}>
+
+                            <div className="d-flex align-items-center justify-content-center">
+                                <div className="mx-5">
+                                </div>
+
+                                <div
+                                    className="d-flex align-items-center"
+                                    style={{ marginRight: "15px" }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "evenly",
+                                        }}
+                                    >
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="custom"
+                                                checked={selectedRadio === "custom"}
+                                                onChange={() => handleRadioChange(0)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="custom">Custom</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="30"
+                                                checked={selectedRadio === "30days"}
+                                                onChange={() => handleRadioChange(30)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="30">30 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="60"
+                                                checked={selectedRadio === "60days"}
+                                                onChange={() => handleRadioChange(60)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="60">60 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="90"
+                                                checked={selectedRadio === "90days"}
+                                                onChange={() => handleRadioChange(90)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="90">90 Days</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+
+
+                            {/* ------ */}
+
 
                             <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
                                 <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
@@ -1323,7 +1389,7 @@ export default function SupplierLedger() {
                                 </div>
                                 <div style={{ marginLeft: '3px' }} >
                                     <Select
-                                          
+
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1348,38 +1414,50 @@ export default function SupplierLedger() {
 
                             </div>
 
-                            <div className="d-flex align-items-center" style={{ marginRight: '20px' }} >
-                                <div style={{ width: '60px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Type :</span>  <br /></label>
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Type:
+                                        </span>
+                                    </label>
                                 </div>
+
+
+
                                 <select
                                     ref={input1Ref}
                                     onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    // ref={typeSelectRef}
-                                    // onKeyDown={(e) => handleTypeKeypress(e, 'submitButton')}
-                                    // id="selectedtype"
                                     id="submitButton"
                                     name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
                                     value={transectionType}
                                     onChange={handleTransactionTypeChange}
-                                    // onChange={(e) => {
-                                    //   settransectionType(e.target.value);
-                                    //   handleTransactionTypeChange(e.target.value);
-                                    // }}
                                     style={{
-                                        width: '200px',
-                                        height: '24px',
-                                        marginLeft: '15px',
-                                        textAlign: 'center',
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "15px",
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        fontSize: '12px',
-                                        textAlign: 'left',
-                                        marginRight: '1px',
-                                        color: fontcolor
-
-                                    }}>
-
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                    }}
+                                >
                                     <option value="">All</option>
                                     <option value="CRV">Cash Receive Vorcher</option>
                                     <option value="CPV">Cash Payment Vorcher</option>
@@ -1393,65 +1471,82 @@ export default function SupplierLedger() {
                                     <option value="ISS">Issue</option>
                                     <option value="REC">Received</option>
                                     <option value="SLY">Salary</option>
-
                                 </select>
-
-
-
                             </div>
-
-
-
                         </div>
                     </div>
 
-                    <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'space-between' }}>
-                            {/* From Date */}
-                            <div className='d-flex align-items-center ' >
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>From :</span>  <br /></label>
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <div className="d-flex align-items-center">
+                                <div
+                                    style={{
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            From:
+                                        </span>
+                                    </label>
                                 </div>
                                 <div
                                     id="fromdatevalidation"
                                     style={{
-                                        width: '135px',
+                                        width: "135px",
                                         border: `1px solid ${fontcolor}`,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        height: ' 24px',
-                                        justifycontent: 'center',
-                                        marginLeft: '3px',
-                                        background: getcolor
-
-
-                                    }}>
+                                        display: "flex",
+                                        alignItems: "center",
+                                        height: "24px",
+                                        justifyContent: "center",
+                                        marginLeft: "3px",
+                                        background: getcolor,
+                                    }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                >
                                     <input
                                         style={{
-                                            height: '20px',
-                                            width: '90px',
-                                            paddingLeft: '5px',
-                                            outline: 'none',
-                                            alignItems: 'center',
-                                            // marginTop: '5.5px',
-                                            border: 'none',
-                                            fontSize: '12px',
+                                            height: "20px",
+                                            width: "90px",
+                                            paddingLeft: "5px",
+                                            outline: "none",
+                                            border: "none",
+                                            fontSize: "12px",
                                             backgroundColor: getcolor,
-                                            color: fontcolor
-
-
+                                            color: fontcolor,
+                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                            pointerEvents:
+                                                selectedRadio === "custom" ? "auto" : "none",
                                         }}
                                         id="frominputid"
                                         value={fromInputDate}
                                         ref={fromRef}
                                         onChange={handlefromInputChange}
-                                        // onKeyPress={handlefromKeyPress}
-                                        onKeyDown={(e) => handlefromKeyPress(e, 'toDatePicker')}
-                                        // onKeyUp={(e) => handlefromKeyPress(e, 'toDatePicker')}
+                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="Date Input"
-                                        aria-describedby="datepicker"
+                                        disabled={selectedRadio !== "custom"}
                                     />
                                     <DatePicker
                                         selected={selectedfromDate}
@@ -1459,138 +1554,164 @@ export default function SupplierLedger() {
                                         dateFormat="dd-MM-yyyy"
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
-                                        // showMonthDropdown
-                                        // showYearDropdown
                                         open={fromCalendarOpen}
                                         dropdownMode="select"
                                         customInput={
-                                            <div  >
-                                                <span >
-                                                    <BsCalendar
-                                                        onClick={toggleFromCalendar}
-                                                        style={{
-                                                            cursor: 'pointer',
-                                                            alignItems: 'center',
-                                                            marginLeft: '18px',
-                                                            // marginTop: '5px',
-                                                            fontSize: '12px',
-                                                            color: fontcolor,
-
-                                                        }} />
-                                                </span>
+                                            <div>
+                                                <BsCalendar
+                                                    onClick={
+                                                        selectedRadio === "custom"
+                                                            ? toggleFromCalendar
+                                                            : undefined
+                                                    }
+                                                    style={{
+                                                        cursor:
+                                                            selectedRadio === "custom"
+                                                                ? "pointer"
+                                                                : "default",
+                                                        marginLeft: "18px",
+                                                        fontSize: "12px",
+                                                        color: fontcolor,
+                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                    }}
+                                                    disabled={selectedRadio !== "custom"}
+                                                />
                                             </div>
                                         }
+                                        disabled={selectedRadio !== "custom"}
                                     />
-
-
                                 </div>
                             </div>
-
-                            {/* To Date */}
-                            <div className='d-flex align-items-center' style={{marginLeft:'15px'}}>
-                                <div style={{ width: '60px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>To :</span>  <br /></label>
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginLeft: "15px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="toDatePicker">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            To:
+                                        </span>
+                                    </label>
                                 </div>
                                 <div
                                     id="todatevalidation"
                                     style={{
-                                        width: '135px',
+                                        width: "135px",
                                         border: `1px solid ${fontcolor}`,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        height: ' 24px',
-                                        justifycontent: 'center',
-                                        marginLeft: '15px',
-                                        background: getcolor
-
-                                    }} >
+                                        display: "flex",
+                                        alignItems: "center",
+                                        height: "24px",
+                                        justifyContent: "center",
+                                        marginLeft: "15px",
+                                        background: getcolor,
+                                    }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                >
                                     <input
                                         ref={toRef}
                                         style={{
-                                            height: '20px',
-                                            width: '90px',
-                                            paddingLeft: '5px',
-                                            outline: 'none',
-                                            alignItems: 'center',
-                                            // marginTop: '5.5px',
-                                            border: 'none',
-                                            fontSize: '12px',
+                                            height: "20px",
+                                            width: "90px",
+                                            paddingLeft: "5px",
+                                            outline: "none",
+                                            border: "none",
+                                            fontSize: "12px",
                                             backgroundColor: getcolor,
-                                            color: fontcolor
-
-                                        }} value={toInputDate}
+                                            color: fontcolor,
+                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                            pointerEvents:
+                                                selectedRadio === "custom" ? "auto" : "none",
+                                        }}
+                                        value={toInputDate}
                                         onChange={handleToInputChange}
-                                        // onKeyPress={handleToKeyPress}
-                                        onKeyDown={(e) => handleToKeyPress(e, 'submitButton')}
-                                        // onKeyDown={(e) => handleKeyPressBoth(e, 'submitButton')}
+                                        onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="To Date Input"
-                                        aria-describedby="todatepicker"
+                                        disabled={selectedRadio !== "custom"}
                                     />
                                     <DatePicker
-
                                         selected={selectedToDate}
                                         onChange={handleToDateChange}
                                         dateFormat="dd-MM-yyyy"
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
-                                        // showMonthDropdown
-                                        // showYearDropdown
                                         open={toCalendarOpen}
                                         dropdownMode="select"
                                         customInput={
                                             <div>
-                                                <span>
-                                                    <BsCalendar
-                                                        onClick={toggleToCalendar}
-                                                        style={{
-                                                            cursor: 'pointer',
-                                                            alignItems: 'center',
-                                                            marginLeft: '18px',
-                                                            // marginTop: '5px',
-                                                            fontSize: '12px'
-                                                        }} />
-                                                </span>
+                                                <BsCalendar
+                                                    onClick={
+                                                        selectedRadio === "custom"
+                                                            ? toggleToCalendar
+                                                            : undefined
+                                                    }
+                                                    style={{
+                                                        cursor:
+                                                            selectedRadio === "custom"
+                                                                ? "pointer"
+                                                                : "default",
+                                                        marginLeft: "18px",
+                                                        fontSize: "12px",
+                                                        color: fontcolor,
+                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                    }}
+                                                    disabled={selectedRadio !== "custom"}
+                                                />
                                             </div>
                                         }
+                                        disabled={selectedRadio !== "custom"}
                                     />
                                 </div>
                             </div>
-
-                            {/* Search Item  */}
-                            <div id="lastDiv" style={{ marginRight: '1px' }}>
-                                <label for="searchInput" style={{ marginRight: '15px' }}><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Search :</span> </label>
+                            <div id="lastDiv" style={{ marginRight: "1px" }}>
+                                <label for="searchInput" style={{ marginRight: "15px" }}>
+                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        Search :
+                                    </span>{" "}
+                                </label>
                                 <input
                                     ref={input2Ref}
                                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    // onKeyDown={(e) => handlesearchKeypress(e, 'searchsubmit')}
                                     type="text"
                                     id="searchsubmit"
                                     placeholder="Item description"
                                     value={searchQuery}
                                     style={{
-                                        marginRight: '20px',
-                                        width: '200px',
-                                        height: '24px',
-                                        fontSize: '12px',
+                                        marginRight: "20px",
+                                        width: "200px",
+                                        height: "24px",
+                                        fontSize: "12px",
                                         color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        outline: 'none',
-                                        paddingLeft: '10px'
+                                        outline: "none",
+                                        paddingLeft: "10px",
                                     }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-
                         </div>
                     </div>
-
-
                     <div>
-
                         <div
                             style={{
                                 overflowY: "auto",
@@ -1653,21 +1774,19 @@ export default function SupplierLedger() {
                                             Balance
                                         </td>
                                     </tr>
+
                                 </thead>
                             </table>
                         </div>
-
                         <div
                             className="table-scroll"
                             style={{
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "45vh",
+                                maxHeight: "40vh",
                                 width: "100%",
                                 wordBreak: "break-word",
-                              
-
                             }}
                         >
                             <table
@@ -1679,12 +1798,12 @@ export default function SupplierLedger() {
                                     position: "relative",
                                 }}
                             >
-                                <tbody id="tablebody" >
+                                <tbody id="tablebody">
                                     {isLoading ? (
                                         <>
                                             <tr
                                                 style={{
-                                                    backgroundColor: getcolor
+                                                    backgroundColor: getcolor,
                                                 }}
                                             >
                                                 <td colSpan="9" className="text-center">
@@ -1693,15 +1812,15 @@ export default function SupplierLedger() {
                                             </tr>
                                             {Array.from({ length: Math.max(0, 30 - 5) }).map(
                                                 (_, rowIndex) => (
-                                                    <tr key={`blank-${rowIndex}`}
+                                                    <tr
+                                                        key={`blank-${rowIndex}`}
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
                                                         }}
                                                     >
                                                         {Array.from({ length: 9 }).map((_, colIndex) => (
-                                                            <td key={`blank-${rowIndex}-${colIndex}`}
-                                                            >
+                                                            <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
                                                         ))}
@@ -1724,14 +1843,19 @@ export default function SupplierLedger() {
                                     ) : (
                                         <>
                                             {tableData.map((item, i) => {
-                                              totalEnteries += 1;
+                                                totalEnteries += 1;
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
-                                                        ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
+                                                        ref={(el) => (rowRefs.current[i] = el)}
                                                         onClick={() => handleRowClick(i)}
-                                                        className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{backgroundColor:'#021A33'}}
+                                                        className={
+                                                            selectedIndex === i ? "selected-background" : ""
+                                                        }
+                                                        style={{
+                                                            backgroundColor: getcolor,
+                                                            color: fontcolor,
+                                                        }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
                                                             {item.Date}
@@ -1742,9 +1866,7 @@ export default function SupplierLedger() {
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        {/* <td className="text-center" style={forthColWidth}>
-                                                            {item["Item Code"]}
-                                                        </td> */}
+
                                                         <td className="text-start" style={fifthColWidth}>
                                                             {item.Description}
                                                         </td>
@@ -1753,7 +1875,7 @@ export default function SupplierLedger() {
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
                                                             {item.Rate}
-                                                        </td>                                                        
+                                                        </td>
                                                         <td className="text-end" style={eightColWidth}>
                                                             {item.Debit}
                                                         </td>
@@ -1769,7 +1891,8 @@ export default function SupplierLedger() {
                                             {Array.from({
                                                 length: Math.max(0, 27 - tableData.length),
                                             }).map((_, rowIndex) => (
-                                                <tr key={`blank-${rowIndex}`}
+                                                <tr
+                                                    key={`blank-${rowIndex}`}
                                                     style={{
                                                         backgroundColor: getcolor,
                                                         color: fontcolor,
@@ -1801,18 +1924,18 @@ export default function SupplierLedger() {
                         </div>
                     </div>
 
-                    <div style={{  borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        {/* <div style={{ ...forthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div> */}
                         <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                        <span className="mobileledger_total">{totalQnty}</span>
+                            <span className="mobileledger_total">{totalQnty}</span>
                         </div>
                         <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                                                
+
                         <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalDebit}</span>
                         </div>
@@ -1834,35 +1957,43 @@ export default function SupplierLedger() {
                             to="/MainPage"
                             text="Return"
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
                         <SingleButton
-                            text="EXCEL"
+                            text="Excel"
                             onClick={handleDownloadCSV}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
                         <SingleButton
                             id="searchsubmit"
-                            text="SELECT"
+                            text="Select"
                             ref={input3Ref}
-                            onClick={fetchGeneralLedger}
+                            onClick={fetchReceivableReport}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
-                          {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
-                    Select
-                </button>{" "} */}
-
                     </div>
                 </div>
             </div>
         </>
     );
 }
-
-
-
-

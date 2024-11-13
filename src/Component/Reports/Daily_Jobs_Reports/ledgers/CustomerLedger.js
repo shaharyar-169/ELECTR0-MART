@@ -447,7 +447,7 @@ export default function CustomerLedger() {
                 setIsLoading(false);
 
                 // Update total amount and quantity
-                setTotalQnty(response.data["Total Qnty  "]);
+                setTotalQnty(response.data["Total Qnty "]);
                 setTotalDebit(response.data["Total Debit "]);
                 setTotalCredit(response.data["Total Credit"]);
                 setClosingBalance(response.data["Closing Bal "]);

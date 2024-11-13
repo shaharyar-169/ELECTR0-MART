@@ -92,7 +92,7 @@ export default function BankRegisterLedger() {
     const GlobaltoDate1 = formatDate1(GlobaltoDate);      // '31-12-2023'
 
 
-    const comapnyname = organisation.name
+    const comapnyname = 'EMART'
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
 
@@ -469,7 +469,7 @@ export default function BankRegisterLedger() {
         document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/GeneralLedger.php";
+        const apiUrl = apiLinks + "/BankRegister.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
