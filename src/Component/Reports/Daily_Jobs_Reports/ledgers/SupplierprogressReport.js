@@ -721,7 +721,8 @@ export default function SupplierProgressLedger() {
                 // ); // Render sale report title with decreased font size, provide the time, and page number
                 // startY += 7;
                 addTitle(
-                    `Supplier Progress Report From: ${toInputDate}`,
+                    // `Supplier Progress Report From: ${toInputDate}`,
+                    `General Ledger From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,

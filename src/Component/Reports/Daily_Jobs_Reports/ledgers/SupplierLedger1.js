@@ -70,6 +70,7 @@ export default function SupplierLedger1() {
         getfromdate,
         gettodate,
     } = useTheme();
+    
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);

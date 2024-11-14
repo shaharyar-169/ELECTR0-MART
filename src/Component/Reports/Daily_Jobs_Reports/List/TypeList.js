@@ -16,7 +16,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function StoreList() {
+export default function TypeList() {
 
     const navigate = useNavigate();
     const user = getUserData();
@@ -72,13 +72,12 @@ export default function StoreList() {
     function fetchReceivableReport() {
      
       
-        const apiUrl = apiLinks + "/StoreList.php";
+        const apiUrl = apiLinks + "/TypeList.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            FStrSts: transectionType,
+            FTypSts: transectionType,
             code: organisation.code,
-            FLocCod:'001'
-        
+           
 
         }).toString();
 
@@ -121,8 +120,6 @@ export default function StoreList() {
         item.Code,
         item.Description,
         item.Status,
-        item.Abb,
-        item['Stk'],
         item['Ins ID'],
         item['Ins Date'],
         item['Upd ID'],
@@ -138,8 +135,6 @@ export default function StoreList() {
         "",
         "",
         "",
-        "",
-        "",
 ]);
 
     // Define table column headers and individual column widths
@@ -147,15 +142,13 @@ export default function StoreList() {
         "Code",
         "Description",
         "Status",
-        "Abb",
-        "STK",
         'Ins ID',
         'Ins Date',
         'Upd ID',
         'Upd Date',
 
     ];
-    const columnWidths = [10, 70, 10,15,10, 20, 20, 20, 20,];
+    const columnWidths = [10, 70, 10, 20, 20, 20, 20,];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -383,7 +376,7 @@ export default function StoreList() {
             // ); // Render sale report title with decreased font size, provide the time, and page number
             // startY += 7;
             addTitle(
-                `Store List`,
+                `Type List`,
                 "",
                 "",
                 pageNumber,
@@ -454,7 +447,7 @@ export default function StoreList() {
     handlePagination();
 
     // Save the PDF file
-    doc.save("StoreList.pdf");
+    doc.save("TypeList.pdf");
 
     const pdfBlob = doc.output("blob");
     const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -496,7 +489,7 @@ const handleDownloadCSV = async () => {
     // Add title rows
     [
         comapnyname,
-        `Store List`,
+        `Type List`,
     ].forEach((title, index) => {
         worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
         worksheet.mergeCells(
@@ -550,8 +543,6 @@ const handleDownloadCSV = async () => {
   "Code",
   "Description",
   "Status",
-  "Abb",
-  "StK",
   'Ins ID',
   'Ins Date',
   'Upd ID',
@@ -569,8 +560,6 @@ const handleDownloadCSV = async () => {
             item.Code,
             item.Description,
             item.Status,
-            item.Abb,
-            item.StK,
             item['Ins ID'],
             item['Ins Date'],
             item['Upd ID'],
@@ -587,8 +576,6 @@ const handleDownloadCSV = async () => {
         "",
         "",
         "",
-        "",
-        "",
       
     ]);
     totalRow.eachCell((cell) => {
@@ -596,7 +583,7 @@ const handleDownloadCSV = async () => {
     });
 
     // Set column widths
-    [10, 40,10,12,5,15, 15, 15, 15].forEach((width, index) => {
+    [10, 40,10,15, 15, 15, 15].forEach((width, index) => {
         worksheet.getColumn(index + 1).width = width;
     });
 
@@ -627,7 +614,7 @@ const handleDownloadCSV = async () => {
     const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, "StoreList.xlsx");
+    saveAs(blob, "TypeList.xlsx");
 };
 ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -685,29 +672,22 @@ const handleDownloadCSV = async () => {
         width: "6.5%",
     };
     const secondColWidth = {
-        width: "29%",
+        width: "32%",
     };
     const thirdColWidth = {
         width: "8%",
     };
     const forthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const fifthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const sixthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const seventhColWidth = {
-        width: "10%",
-    };
-
-    const eightColwidth = {
-        width: "10%",
-    };
-    const ninthColwidth = {
-        width: "5%",
+        width: "13%",
     };
 
     useHotkeys("s", fetchReceivableReport);
@@ -832,7 +812,7 @@ const handleDownloadCSV = async () => {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Store List" />
+                    <NavComponent textdata="Type List" />
 
 
                    <div
@@ -996,22 +976,6 @@ const handleDownloadCSV = async () => {
                                         </td>
                                         <td
                                             className="border-dark"
-                                            style={eightColwidth}
-                                            onClick={() => handleSorting("Abb")}
-                                        >
-                                            Abb{" "}
-                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
-                                        </td>
-                                        <td
-                                            className="border-dark"
-                                            style={ninthColwidth}
-                                            onClick={() => handleSorting("Stk")}
-                                        >
-                                            Stk{" "}
-                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
-                                        </td>
-                                        <td
-                                            className="border-dark"
                                             style={forthColWidth}
                                             onClick={() => handleSorting("Ins ID")}
                                         >
@@ -1076,7 +1040,7 @@ const handleDownloadCSV = async () => {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="7" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1089,7 +1053,7 @@ const handleDownloadCSV = async () => {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1101,13 +1065,10 @@ const handleDownloadCSV = async () => {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={eightColwidth}></td>
-                                                <td style={ninthColwidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                               
                                             </tr>
                                         </>
                                     ) : (
@@ -1136,12 +1097,6 @@ const handleDownloadCSV = async () => {
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Status}
                                                         </td>
-                                                        <td className="text-start" style={eightColwidth}>
-                                                            {item.Abb}
-                                                        </td>
-                                                        <td className="text-center" style={ninthColwidth}>
-                                                            {item.Stk}
-                                                        </td>
                                                         <td className="text-start" style={forthColWidth}>
                                                             {item['Ins ID']}
                                                         </td>
@@ -1167,7 +1122,7 @@ const handleDownloadCSV = async () => {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1175,11 +1130,9 @@ const handleDownloadCSV = async () => {
                                                 </tr>
                                             ))}
                                             <tr>
-                                            <td style={firstColWidth}></td>
+                                                <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={eightColwidth}></td>
-                                                <td style={ninthColwidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>

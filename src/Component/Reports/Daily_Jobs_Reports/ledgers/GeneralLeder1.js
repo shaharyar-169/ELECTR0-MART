@@ -419,8 +419,7 @@ export default function GeneralLedger1() {
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
-                console.log("Response:", response.data);
-                // setTotalOpening(response.data["Total Opening"]);
+                
                 setTotalDebit(response.data["Total Debit "]);
                 setTotalCredit(response.data["Total Credit"]);
                 setClosingBalance(response.data["Closing Bal "]);

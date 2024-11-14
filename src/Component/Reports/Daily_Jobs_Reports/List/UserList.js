@@ -16,7 +16,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function StoreList() {
+export default function UserList() {
 
     const navigate = useNavigate();
     const user = getUserData();
@@ -72,13 +72,12 @@ export default function StoreList() {
     function fetchReceivableReport() {
      
       
-        const apiUrl = apiLinks + "/StoreList.php";
+        const apiUrl = apiLinks + "/UserList.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            FStrSts: transectionType,
+            FUsrSts: transectionType,
             code: organisation.code,
-            FLocCod:'001'
-        
+            FLocCod:getLocationNumber
 
         }).toString();
 
@@ -118,15 +117,14 @@ export default function StoreList() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-        item.Code,
-        item.Description,
+        item.ID,
+        item.Name,
         item.Status,
-        item.Abb,
-        item['Stk'],
-        item['Ins ID'],
-        item['Ins Date'],
-        item['Upd ID'],
-        item['Upd Date'],
+        item.Type,
+        item.Mobile,
+        item.Email,
+        item['Log Date'],
+        item['Log Time'],
     ]);
 
     // Add summary row to the table
@@ -139,23 +137,21 @@ export default function StoreList() {
         "",
         "",
         "",
-        "",
 ]);
 
     // Define table column headers and individual column widths
     const headers = [
-        "Code",
-        "Description",
+        "ID",
+        "Name",
         "Status",
-        "Abb",
-        "STK",
-        'Ins ID',
-        'Ins Date',
-        'Upd ID',
-        'Upd Date',
+        "Type",
+        'Mobile',
+        'Email',
+        'Log Date',
+        'Log Time',
 
     ];
-    const columnWidths = [10, 70, 10,15,10, 20, 20, 20, 20,];
+    const columnWidths = [15, 50, 12, 12, 20, 40, 15,15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -383,7 +379,7 @@ export default function StoreList() {
             // ); // Render sale report title with decreased font size, provide the time, and page number
             // startY += 7;
             addTitle(
-                `Store List`,
+                `User List`,
                 "",
                 "",
                 pageNumber,
@@ -454,7 +450,7 @@ export default function StoreList() {
     handlePagination();
 
     // Save the PDF file
-    doc.save("StoreList.pdf");
+    doc.save("UserList.pdf");
 
     const pdfBlob = doc.output("blob");
     const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -496,7 +492,7 @@ const handleDownloadCSV = async () => {
     // Add title rows
     [
         comapnyname,
-        `Store List`,
+        `User List`,
     ].forEach((title, index) => {
         worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
         worksheet.mergeCells(
@@ -547,15 +543,14 @@ const handleDownloadCSV = async () => {
     // Add headers
     const headers = [
      
-  "Code",
-  "Description",
-  "Status",
-  "Abb",
-  "StK",
-  'Ins ID',
-  'Ins Date',
-  'Upd ID',
-  'Upd Date',
+        "ID",
+        "Name",
+        "Status",
+        "Type",
+        'Mobile',
+        'Email',
+        'Log Date',
+        'Log Time',
 
     ];
     const headerRow = worksheet.addRow(headers);
@@ -566,21 +561,20 @@ const handleDownloadCSV = async () => {
     // Add data rows
     tableData.forEach((item) => {
         worksheet.addRow([
-            item.Code,
-            item.Description,
+            item.ID,
+            item.Name,
             item.Status,
-            item.Abb,
-            item.StK,
-            item['Ins ID'],
-            item['Ins Date'],
-            item['Upd ID'],
-            item['Upd Date'],
+            item.Type,
+            item.Mobile,
+            item.Email,
+            item['Log Date'],
+            item['Log Time'],
+    
         ]);
     });
 
     // Add total row and bold it
     const totalRow = worksheet.addRow([
-        "",
         "",
         "",
         "",
@@ -596,7 +590,7 @@ const handleDownloadCSV = async () => {
     });
 
     // Set column widths
-    [10, 40,10,12,5,15, 15, 15, 15].forEach((width, index) => {
+    [10, 30,10,10, 15, 20, 10,10].forEach((width, index) => {
         worksheet.getColumn(index + 1).width = width;
     });
 
@@ -627,7 +621,7 @@ const handleDownloadCSV = async () => {
     const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, "StoreList.xlsx");
+    saveAs(blob, "UserList.xlsx");
 };
 ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -682,33 +676,30 @@ const handleDownloadCSV = async () => {
 
 
     const firstColWidth = {
-        width: "6.5%",
+        width: "10%",
     };
     const secondColWidth = {
-        width: "29%",
+        width: "20%",
     };
     const thirdColWidth = {
         width: "8%",
     };
     const forthColWidth = {
-        width: "10%",
+        width: "7%",
     };
     const fifthColWidth = {
-        width: "10%",
+        width: "11%",
     };
     const sixthColWidth = {
-        width: "10%",
+        width: "23%",
     };
     const seventhColWidth = {
         width: "10%",
     };
-
-    const eightColwidth = {
-        width: "10%",
+    const eightColWidth = {
+        width: "9.5%",
     };
-    const ninthColwidth = {
-        width: "5%",
-    };
+    
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -832,7 +823,7 @@ const handleDownloadCSV = async () => {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Store List" />
+                    <NavComponent textdata="User List" />
 
 
                    <div
@@ -896,8 +887,8 @@ const handleDownloadCSV = async () => {
                                     }}
                                 >
                                     <option value="">All</option>
-                                    <option value="A">Active</option>
-                                    <option value="N">Non-Active</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Non-Active">Non-Active</option>
                                    
                                 </select>
                             </div>
@@ -973,17 +964,17 @@ const handleDownloadCSV = async () => {
                                         <td
                                             className="border-dark"
                                             style={firstColWidth}
-                                            onClick={() => handleSorting("Code")}
+                                            onClick={() => handleSorting("ID")}
                                         >
-                                            Code{" "}
+                                            ID{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={secondColWidth}
-                                            onClick={() => handleSorting("Description")}
+                                            onClick={() => handleSorting("Name")}
                                         >
-                                            Description{" "}
+                                            Name{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
@@ -996,50 +987,43 @@ const handleDownloadCSV = async () => {
                                         </td>
                                         <td
                                             className="border-dark"
-                                            style={eightColwidth}
-                                            onClick={() => handleSorting("Abb")}
-                                        >
-                                            Abb{" "}
-                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
-                                        </td>
-                                        <td
-                                            className="border-dark"
-                                            style={ninthColwidth}
-                                            onClick={() => handleSorting("Stk")}
-                                        >
-                                            Stk{" "}
-                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
-                                        </td>
-                                        <td
-                                            className="border-dark"
                                             style={forthColWidth}
-                                            onClick={() => handleSorting("Ins ID")}
+                                            onClick={() => handleSorting("Type")}
                                         >
-                                            Ins ID{" "}
+                                            Type{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={fifthColWidth}
-                                            onClick={() => handleSorting("Ins Date")}
+                                            onClick={() => handleSorting("Mobile")}
                                         >
-                                            Ins Date{" "}
+                                            Mobile{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={sixthColWidth}
-                                            onClick={() => handleSorting("Upd ID")}
+                                            onClick={() => handleSorting("Email")}
                                         >
-                                            Upd ID{" "}
+                                            Email{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={seventhColWidth}
-                                            onClick={() => handleSorting("Upd Date")}
+                                            onClick={() => handleSorting("Log Date")}
                                         >
-                                            Upd Date{" "}
+                                            Log Date{" "}
+                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                                        </td>
+
+                                        <td
+                                            className="border-dark"
+                                            style={seventhColWidth}
+                                            onClick={() => handleSorting("Log Time")}
+                                        >
+                                            Log Time{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
 
@@ -1076,7 +1060,7 @@ const handleDownloadCSV = async () => {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="8" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1089,7 +1073,7 @@ const handleDownloadCSV = async () => {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 8 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1101,13 +1085,11 @@ const handleDownloadCSV = async () => {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={eightColwidth}></td>
-                                                <td style={ninthColwidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                               
+                                                <td style={eightColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -1128,31 +1110,28 @@ const handleDownloadCSV = async () => {
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {item.Code}
+                                                            {item.ID}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
+                                                            {item.Name}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Status}
                                                         </td>
-                                                        <td className="text-start" style={eightColwidth}>
-                                                            {item.Abb}
-                                                        </td>
-                                                        <td className="text-center" style={ninthColwidth}>
-                                                            {item.Stk}
-                                                        </td>
-                                                        <td className="text-start" style={forthColWidth}>
-                                                            {item['Ins ID']}
+                                                        <td className="text-center" style={forthColWidth}>
+                                                            {item.Type}
                                                         </td>
                                                         <td className="text-center" style={fifthColWidth}>
-                                                            {item['Ins Date']}
+                                                            {item.Mobile}
                                                         </td>
-                                                        <td className="text-end" style={sixthColWidth}>
-                                                            {item['Upd ID']}
+                                                        <td className="text-start" style={sixthColWidth}>
+                                                            {item.Email}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item['Upd Date']}
+                                                            {item['Log Date']}
+                                                        </td>
+                                                        <td className="text-left" style={seventhColWidth}>
+                                                            {item['Log Time']}
                                                         </td>
                                                     </tr>
                                                 );
@@ -1167,7 +1146,7 @@ const handleDownloadCSV = async () => {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 8 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1175,15 +1154,14 @@ const handleDownloadCSV = async () => {
                                                 </tr>
                                             ))}
                                             <tr>
-                                            <td style={firstColWidth}></td>
+                                                <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={eightColwidth}></td>
-                                                <td style={ninthColwidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -1252,6 +1230,14 @@ const handleDownloadCSV = async () => {
                         <div
                             style={{
                                 ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+                        <div
+                            style={{
+                                ...eightColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}

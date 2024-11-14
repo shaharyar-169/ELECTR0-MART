@@ -1,87 +1,117 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
 import { getUserData, getOrganisationData } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
-import { components } from 'react-select';
-import 'react-datepicker/dist/react-datepicker.css';
+import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import 'react-calendar/dist/Calendar.css';
+import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
-import './list.css';
-
+import { useHotkeys } from "react-hotkeys-hook";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function CategoryList() {
 
-    const [sortData, setSortData] = useState("ASC");
+    const navigate = useNavigate();
+    const user = getUserData();
+    const organisation = getOrganisationData();
 
+    const saleSelectRef = useRef(null);
+    const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
 
-   
+       const [sortData, setSortData] = useState("ASC");
 
-    const [saleType, setSaleType] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [transectionType, settransectionType] = useState('');
+    const [searchQuery, setSearchQuery] = useState("");
+    const [transectionType, settransectionType] = useState("");
 
-    const [totalDebit, setTotalDebit] = useState(0);
-    const [totalCredit, setTotalCredit] = useState(0);
-    const [closingBalance, setClosingBalance] = useState(0);
-
-    // state for from DatePicker
-    const [fromInputDate, setfromInputDate] = useState('');
-    // state for To DatePicker
-    const [toInputDate, settoInputDate] = useState('');
-
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
-    const comapnyname = 'ELECTRO-MART' 
-
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////  
     
-    const formatDate = (date) => {
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
-    };
-   
+    const {
+        isSidebarVisible,
+        toggleSidebar,
+        getcolor,
+        fontcolor,
+        toggleChangeColor,
+        apiLinks,
+        getLocationNumber,
+        getyeardescription,
+        getfromdate,
+        gettodate,
+    } = useTheme();
 
+    useEffect(() => {
+        document.documentElement.style.setProperty("--background-color", getcolor);
+    }, [getcolor]);
+
+    const comapnyname = organisation.description;
+
+ 
+
+    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
+
+    // Toggle the ToDATE && FromDATE CalendarOpen state on each click
    
+      
+
     const handleKeyPress = (e, nextInputRef) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent form submission
+        if (e.key === "Enter") {
+            e.preventDefault();
             if (nextInputRef.current) {
-                nextInputRef.current.focus(); // Move focus to next input
+                nextInputRef.current.focus();
             }
         }
     };
-    
 
-    async function fetchGeneralLedger() {
-
-        const apiUrl = EmartApiurl + "/CategoryList.php";
+    function fetchReceivableReport() {
+     
+      
+        const apiUrl = apiLinks + "/CategoryList.php";
         setIsLoading(true);
-        try {
-            const response = await axios.get(apiUrl);
-            setTableData(response.data);
-            console.log(response.data);
-            setIsLoading(false);
+        const formData = new URLSearchParams({
+            FCtgSts: transectionType,
+            code: organisation.code,
+           
 
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
+        }).toString();
 
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                setIsLoading(false);
+
+                if (response.data && Array.isArray(response.data)) {
+                    setTableData(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setTableData([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                setIsLoading(false);
+            });
     }
 
- 
-   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-   const exportPDFHandler = () => {
+
+
+    const handleTransactionTypeChange = (event) => {
+        const selectedTransactionType = event.target.value;
+        settransectionType(selectedTransactionType);
+    };
+
+  
+ ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+ const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "potraite" });
 
@@ -90,10 +120,10 @@ export default function CategoryList() {
         item.Code,
         item.Description,
         item.Status,
-        item['Created By'],
-        item['Create Date'],
-        item['Updated By'],
-        item['Update Date'],
+        item['Ins ID'],
+        item['Ins Date'],
+        item['Upd ID'],
+        item['Upd Date'],
     ]);
 
     // Add summary row to the table
@@ -112,10 +142,10 @@ export default function CategoryList() {
         "Code",
         "Description",
         "Status",
-        "Created By",
-        "Created Date",
-        "Update By",
-        "Update Date",
+        'Ins ID',
+        'Ins Date',
+        'Upd ID',
+        'Upd Date',
 
     ];
     const columnWidths = [10, 70, 10, 20, 20, 20, 20,];
@@ -278,7 +308,7 @@ export default function CategoryList() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 28; // Adjust this value based on your requirements
+    const rowsPerPage = 45; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -509,13 +539,14 @@ const handleDownloadCSV = async () => {
 
     // Add headers
     const headers = [
-      "Code",
-        "Description",
-        "Status",
-        "Created By",
-        "Created Date",
-        "Update By",
-        "Update Date",
+     
+  "Code",
+  "Description",
+  "Status",
+  'Ins ID',
+  'Ins Date',
+  'Upd ID',
+  'Upd Date',
 
     ];
     const headerRow = worksheet.addRow(headers);
@@ -529,10 +560,10 @@ const handleDownloadCSV = async () => {
             item.Code,
             item.Description,
             item.Status,
-            item['Created By'],
-            item['Create Date'],
-            item['Updated By'],
-            item['Update Date'],
+            item['Ins ID'],
+            item['Ins Date'],
+            item['Upd ID'],
+            item['Upd Date'],
         ]);
     });
 
@@ -588,8 +619,27 @@ const handleDownloadCSV = async () => {
 ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
 
+    const dispatch = useDispatch();
 
-    ///////////////////////////////////////////////////////////////////////////
+    const tableTopColor = "#3368B5";
+    const tableHeadColor = "#3368b5";
+    const secondaryColor = "white";
+    const btnColor = "#3368B5";
+    const textColor = "white";
+
+    const [tableData, setTableData] = useState([]);
+    console.log('comapnydata', tableData)
+    const [selectedSearch, setSelectedSearch] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const { data, loading, error } = useSelector((state) => state.getuser);
+
+    const handleSearch = (e) => {
+        setSelectedSearch(e.target.value);
+    };
+
+    let totalEntries = 0;
+
+ 
 
     const handleSorting = async (col) => {
         const parseValue = (value) => {
@@ -618,47 +668,6 @@ const handleDownloadCSV = async () => {
     };
 
 
-    const dispatch = useDispatch();
-    const user = getUserData();
-    const organisation = getOrganisationData();
-    const tableTopColor = "#3368B5";
-    const tableHeadColor = "#3368b5";
-    const secondaryColor = "white";
-    const btnColor = "#3368B5";
-    const textColor = "white";
-
-    const [tableData, setTableData] = useState([]);
-    const [selectedSearch, setSelectedSearch] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const { data, loading, error } = useSelector((state) => state.getuser);
-
-    // useEffect(() => {
-    //     setTableData(data);
-    //     dispatch(fetchGetUser(organisation && organisation.code));
-    // }, [dispatch, organisation.code]);
-
-
-
-    const handleSearch = (e) => {
-        setSelectedSearch(e.target.value);
-    };
-
-    let totalEntries = 0;
-
-    const getFilteredTableData = () => {
-        let filteredData = tableData;
-
-        if (selectedSearch.trim() !== "") {
-            const query = selectedSearch.trim().toLowerCase();
-            filteredData = filteredData.filter(
-                (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-            );
-        }
-
-        return filteredData;
-    };
-
-
     const firstColWidth = {
         width: "6.5%",
     };
@@ -681,38 +690,28 @@ const handleDownloadCSV = async () => {
         width: "13%",
     };
 
-    // Adjust the content width based on sidebar state
+    useHotkeys("s", fetchReceivableReport);
+    useHotkeys("alt+p", exportPDFHandler);
+    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("esc", () => navigate("/MainPage"));
+
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     useEffect(() => {
         const handleResize = () => {
             setWindowWidth(window.innerWidth);
         };
-
         window.addEventListener("resize", handleResize);
         return () => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
 
-
-    const {
-        isSidebarVisible,
-        toggleSidebar,
-        getcolor,
-        fontcolor,
-        toggleChangeColor,
-        EmartApiurl
-    } = useTheme();
-
-    console.log('EmartApiurl', EmartApiurl)
-
     const contentStyle = {
         backgroundColor: getcolor,
-        // height: "100vh",
         width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
         position: "relative",
-        top: "40%",
+        top: "35%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -733,30 +732,25 @@ const handleDownloadCSV = async () => {
         fontFamily: '"Poppins", sans-serif',
     };
 
-
-    //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
         if (isFilterApplied || tableData.length > 0) {
-            setSelectedIndex(0); // Set the selected index to the first row
+            setSelectedIndex(0);
             rowRefs.current[0]?.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
             });
         } else {
-            setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
+            setSelectedIndex(-1);
         }
     }, [tableData, isFilterApplied]);
 
     let totalEnteries = 0;
-    const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
-
-    // state initialize for table row highlight
-    const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
-    const rowRefs = useRef([]); // Array of refs for rows
+    const [selectedRowId, setSelectedRowId] = useState(null);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const rowRefs = useRef([]);
     const handleRowClick = (index) => {
         setSelectedIndex(index);
-        // setSelectedRowId(getFilteredTableData[index].tcmpdsc); // Save the selected row's tctgcod
     };
     useEffect(() => {
         if (selectedRowId !== null) {
@@ -767,7 +761,7 @@ const handleDownloadCSV = async () => {
         }
     }, [tableData, selectedRowId]);
     const handleKeyDown = (e) => {
-        if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
+        if (selectedIndex === -1 || e.target.id === "searchInput") return;
         if (e.key === "ArrowUp") {
             e.preventDefault();
             setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
@@ -790,28 +784,24 @@ const handleDownloadCSV = async () => {
     };
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
-
-        // Cleanup event listener on component unmount
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [selectedIndex]); // Add selectedIndex as a dependency
+    }, [selectedIndex]);
     useEffect(() => {
-        // Scroll the selected row into view
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
                 behavior: "smooth",
                 block: "nearest",
             });
         }
-    }, [selectedIndex]); // Add selectedIndex as a dependency
-    //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
+    }, [selectedIndex]);
 
-
+    
 
     return (
         <>
-            <div id="someElementId"></div>
+          
             <div style={contentStyle}>
                 <div
                     style={{
@@ -820,47 +810,114 @@ const handleDownloadCSV = async () => {
                         width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
-
-
                     }}
                 >
                     <NavComponent textdata="Category List" />
 
 
-                    <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'end' }}>
-                            {/* Search Item  */}
-                            <div id="lastDiv" style={{ marginRight: '3px' }}>
-                                <label for="searchInput" style={{ marginRight: '15px' }}><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Search :</span> </label>
+                   <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft:'10px',
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Status:
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType}
+                                    onChange={handleTransactionTypeChange}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "15px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">All</option>
+                                    <option value="A">Active</option>
+                                    <option value="N">Non-Active</option>
+                                   
+                                </select>
+                            </div>
+
+                            <div id="lastDiv" style={{ marginRight: "1px" }}>
+                                <label for="searchInput" style={{ marginRight: "15px" }}>
+                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        Search :
+                                    </span>{" "}
+                                </label>
                                 <input
                                     ref={input2Ref}
                                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    // onKeyDown={(e) => handlesearchKeypress(e, 'searchsubmit')}
                                     type="text"
                                     id="searchsubmit"
                                     placeholder="Item description"
                                     value={searchQuery}
                                     style={{
-                                        marginRight: '20px',
-                                        width: '200px',
-                                        height: '24px',
-                                        fontSize: '12px',
+                                        marginRight: "20px",
+                                        width: "200px",
+                                        height: "24px",
+                                        fontSize: "12px",
                                         color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        outline: 'none',
-                                        paddingLeft: '10px'
+                                        outline: "none",
+                                        paddingLeft: "10px",
                                     }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-
                         </div>
                     </div>
-
-
                     <div>
-
                         <div
                             style={{
                                 overflowY: "auto",
@@ -887,37 +944,10 @@ const handleDownloadCSV = async () => {
                                         backgroundColor: tableHeadColor,
                                     }}
                                 >
-                                    {/* <tr
+                                     <tr
                                         style={{
                                             backgroundColor: tableHeadColor,
-                                        }}
-                                    >
-                                        <td className="border-dark" style={firstColWidth}>
-                                            Date
-                                        </td>
-                                        <td className="border-dark" style={secondColWidth}>
-                                            Trn#
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
-                                            Typ
-                                        </td>
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Description
-                                        </td>
-                                        <td className="border-dark" style={fifthColWidth}>
-                                            Debit
-                                        </td>
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Credit
-                                        </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                            Balance
-                                        </td>
-                                    </tr> */}
-
-                                    <tr
-                                        style={{
-                                            backgroundColor: tableHeadColor,
+                                            color:'white',
                                         }}
                                     >
                                         <td
@@ -947,56 +977,50 @@ const handleDownloadCSV = async () => {
                                         <td
                                             className="border-dark"
                                             style={forthColWidth}
-                                            onClick={() => handleSorting("Created By")}
+                                            onClick={() => handleSorting("Ins ID")}
                                         >
-                                            Created By{" "}
+                                            Ins ID{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={fifthColWidth}
-                                            onClick={() => handleSorting("Create Date")}
+                                            onClick={() => handleSorting("Ins Date")}
                                         >
-                                            Create Date{" "}
+                                            Ins Date{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={sixthColWidth}
-                                            onClick={() => handleSorting("Updated By")}
+                                            onClick={() => handleSorting("Upd ID")}
                                         >
-                                            Updated By{" "}
+                                            Upd ID{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
-
-
                                         <td
                                             className="border-dark"
                                             style={seventhColWidth}
-                                            onClick={() => handleSorting("Update Date")}
+                                            onClick={() => handleSorting("Upd Date")}
                                         >
-                                            Update Date{" "}
+                                            Upd Date{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
 
                                     </tr>
 
-
                                 </thead>
                             </table>
                         </div>
-
                         <div
                             className="table-scroll"
                             style={{
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "45vh",
+                                maxHeight: "40vh",
                                 width: "100%",
                                 wordBreak: "break-word",
-
-
                             }}
                         >
                             <table
@@ -1008,12 +1032,12 @@ const handleDownloadCSV = async () => {
                                     position: "relative",
                                 }}
                             >
-                                <tbody id="tablebody" >
+                                <tbody id="tablebody">
                                     {isLoading ? (
                                         <>
                                             <tr
                                                 style={{
-                                                    backgroundColor: getcolor
+                                                    backgroundColor: getcolor,
                                                 }}
                                             >
                                                 <td colSpan="7" className="text-center">
@@ -1022,15 +1046,15 @@ const handleDownloadCSV = async () => {
                                             </tr>
                                             {Array.from({ length: Math.max(0, 30 - 5) }).map(
                                                 (_, rowIndex) => (
-                                                    <tr key={`blank-${rowIndex}`}
+                                                    <tr
+                                                        key={`blank-${rowIndex}`}
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
                                                         }}
                                                     >
                                                         {Array.from({ length: 7 }).map((_, colIndex) => (
-                                                            <td key={`blank-${rowIndex}-${colIndex}`}
-                                                            >
+                                                            <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
                                                         ))}
@@ -1054,13 +1078,17 @@ const handleDownloadCSV = async () => {
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
-                                                        ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
+                                                        ref={(el) => (rowRefs.current[i] = el)}
                                                         onClick={() => handleRowClick(i)}
-                                                        className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{ backgroundColor: '#021A33' }}
+                                                        className={
+                                                            selectedIndex === i ? "selected-background" : ""
+                                                        }
+                                                        style={{
+                                                            backgroundColor: getcolor,
+                                                            color: fontcolor,
+                                                        }}
                                                     >
-                                                       
-                                                       <td className="text-start" style={firstColWidth}>
+                                                        <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
@@ -1070,25 +1098,25 @@ const handleDownloadCSV = async () => {
                                                             {item.Status}
                                                         </td>
                                                         <td className="text-start" style={forthColWidth}>
-                                                            {item['Created By']}
+                                                            {item['Ins ID']}
                                                         </td>
                                                         <td className="text-center" style={fifthColWidth}>
-                                                            {item['Create Date']}
+                                                            {item['Ins Date']}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item['Updated By']}
+                                                            {item['Upd ID']}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item['Update Date']}
+                                                            {item['Upd Date']}
                                                         </td>
-
                                                     </tr>
                                                 );
                                             })}
                                             {Array.from({
                                                 length: Math.max(0, 27 - tableData.length),
                                             }).map((_, rowIndex) => (
-                                                <tr key={`blank-${rowIndex}`}
+                                                <tr
+                                                    key={`blank-${rowIndex}`}
                                                     style={{
                                                         backgroundColor: getcolor,
                                                         color: fontcolor,
@@ -1117,23 +1145,72 @@ const handleDownloadCSV = async () => {
                         </div>
                     </div>
 
-                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
-                        <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...forthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                            {/* <span className="mobileledger_total">{totalDebit}</span> */}
+                    <div
+                        style={{
+                            borderBottom: `1px solid ${fontcolor}`,
+                            borderTop: `1px solid ${fontcolor}`,
+                            height: "24px",
+                            display: "flex",
+                            paddingRight: "1.2%",
+                            width: '101.2%'
+                        }}
+                    >
+                        <div
+                            style={{
+                                ...firstColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
+                        <div
+                            style={{
+                                ...secondColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
+                        <div
+                            style={{
+                                ...thirdColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
                         </div>
-                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                            {/* <span className="mobileledger_total">{totalCredit}</span> */}
+                        <div
+                            style={{
+                                ...forthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
                         </div>
-                        <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                            {/* <span className="mobileledger_total">{closingBalance}</span> */}
+                        <div
+                            style={{
+                                ...fifthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+                        <div
+                            style={{
+                                ...sixthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+                        <div
+                            style={{
+                                ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
                         </div>
                     </div>
-
                     <div
                         style={{
                             margin: "5px",
@@ -1144,35 +1221,43 @@ const handleDownloadCSV = async () => {
                             to="/MainPage"
                             text="Return"
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
                         <SingleButton
-                            text="EXCEL"
+                            text="Excel"
                             onClick={handleDownloadCSV}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
                         <SingleButton
                             id="searchsubmit"
-                            text="SELECT"
+                            text="Select"
                             ref={input3Ref}
-                            onClick={fetchGeneralLedger}
+                            onClick={fetchReceivableReport}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
+                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+                            onBlur={(e) =>
+                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                            }
                         />
-                        {/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchGeneralLedger}>
-                    Select
-                </button>{" "} */}
-
                     </div>
                 </div>
             </div>
         </>
     );
 }
-
-
-
-
