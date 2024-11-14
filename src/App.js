@@ -29,9 +29,7 @@ import MenuAdmin from "./Component/MainComponent/Header/Admin/MenuAdmin/MenuAdmi
 
 
 //////////////////////////// List reports //////////////////////////////
-import CompanyList1 from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList1.js";
-
-import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList.js";
+import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList1.js";
 import CategoryList from "./Component/Reports/Daily_Jobs_Reports/List/CategoryList.js";
 import ChartofAccount from "./Component/Reports/Daily_Jobs_Reports/List/ChartofAccount.js";
 import StoreList from "./Component/Reports/Daily_Jobs_Reports/List/StoreList.js";
@@ -39,6 +37,9 @@ import CapacityList from "./Component/Reports/Daily_Jobs_Reports/List/CapacityLi
 import TypeList from "./Component/Reports/Daily_Jobs_Reports/List/TypeList.js";
 import EmployeeList from "./Component/Reports/Daily_Jobs_Reports/List/EmployeeList.js";
 import UserList from "./Component/Reports/Daily_Jobs_Reports/List/UserList.js";
+import ItemList from "./Component/Reports/Daily_Jobs_Reports/List/itemList.js";
+import ItemPriceList from "./Component/Reports/Daily_Jobs_Reports/List/ItemPriceList.js";
+import ItemPriceListA from "./Component/Reports/Daily_Jobs_Reports/List/ItemPriceListA.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -85,7 +86,7 @@ function App() {
                 <Route exact path="/UserManagement" element={<UserMaintenance />} />
 
                  {/* Rountes for List reports */}
-                 <Route exact path="/CompanyList" element={<CompanyList1 />} />
+                 <Route exact path="/CompanyList" element={<CompanyList />} />
                  <Route exact path="/CategoryList" element={<CategoryList />} />
                  <Route exact path="/CharofAccount" element={<ChartofAccount />} />
                  <Route exact path="/StoreList" element={<StoreList />} />
@@ -93,7 +94,9 @@ function App() {
                  <Route exact path="/TypeList" element={<TypeList />} />
                  <Route exact path="/EmployeeList" element={<EmployeeList />} />
                  <Route exact path="/UserList" element={<UserList />} />
-
+                 <Route exact path="/ItemList" element={<ItemList />} />
+                 <Route exact path="/PriceList" element={<ItemPriceList />} />
+                 <Route exact path="/PriceListA" element={<ItemPriceListA />} />
 
 
                 {/* Rountes for ledgers reports */}

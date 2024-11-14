@@ -102,6 +102,20 @@ export default function CategoryList() {
             });
     }
 
+    useEffect(() => {
+        const hasComponentMountedPreviously =
+            sessionStorage.getItem("componentMounted");
+        if (!hasComponentMountedPreviously || (input1Ref && input1Ref.current)) {
+            if (input1Ref && input1Ref.current) {
+                setTimeout(() => {
+                    input1Ref.current.focus();
+                    // saleSelectRef.current.select();
+                }, 0);
+            }
+            sessionStorage.setItem("componentMounted", "true");
+        }
+    }, []);
+
 
 
     const handleTransactionTypeChange = (event) => {
@@ -1103,10 +1117,10 @@ const handleDownloadCSV = async () => {
                                                         <td className="text-center" style={fifthColWidth}>
                                                             {item['Ins Date']}
                                                         </td>
-                                                        <td className="text-end" style={sixthColWidth}>
+                                                        <td className="text-start" style={sixthColWidth}>
                                                             {item['Upd ID']}
                                                         </td>
-                                                        <td className="text-end" style={seventhColWidth}>
+                                                        <td className="text-center" style={seventhColWidth}>
                                                             {item['Upd Date']}
                                                         </td>
                                                     </tr>

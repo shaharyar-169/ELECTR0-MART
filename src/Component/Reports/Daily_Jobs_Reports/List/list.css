@@ -324,3 +324,41 @@ h2.react-datepicker__current-month {
   color: white !important;
   text-align: left;
 }
+
+
+/* //////////////////////// code for items select //////////////// */
+.css-1tt9tct-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+
+.css-1tt9tct-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+
+.css-neogm9-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+.css-n71bgc-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+.css-10bhklz-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+
+.css-n71bgc-control:hover {
+  border-color: white !important;
+  border: 1px solid white !important;
+}
+
+.css-1tt9tct-control:hover {
+  border-color: white !important;
+}
+
+.css-1tt9tct-control:hover {
+  color: white !important;
+}

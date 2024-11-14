@@ -103,6 +103,20 @@ export default function StoreList() {
             });
     }
 
+    useEffect(() => {
+        const hasComponentMountedPreviously =
+            sessionStorage.getItem("componentMounted");
+        if (!hasComponentMountedPreviously || (input1Ref && input1Ref.current)) {
+            if (input1Ref && input1Ref.current) {
+                setTimeout(() => {
+                    input1Ref.current.focus();
+                    // saleSelectRef.current.select();
+                }, 0);
+            }
+            sessionStorage.setItem("componentMounted", "true");
+        }
+    }, []);
+
 
 
     const handleTransactionTypeChange = (event) => {
@@ -1235,7 +1249,7 @@ const handleDownloadCSV = async () => {
                         </div>
                         <div
                             style={{
-                                ...fifthColWidth,
+                                ...ninthColwidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
@@ -1244,6 +1258,22 @@ const handleDownloadCSV = async () => {
                         <div
                             style={{
                                 ...sixthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+                        <div
+                            style={{
+                                ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+                        <div
+                            style={{
+                                ...eightColwidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}

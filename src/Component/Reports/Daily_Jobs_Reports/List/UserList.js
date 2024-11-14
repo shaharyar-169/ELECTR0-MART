@@ -102,6 +102,19 @@ export default function UserList() {
             });
     }
 
+    useEffect(() => {
+        const hasComponentMountedPreviously =
+            sessionStorage.getItem("componentMounted");
+        if (!hasComponentMountedPreviously || (input1Ref && input1Ref.current)) {
+            if (input1Ref && input1Ref.current) {
+                setTimeout(() => {
+                    input1Ref.current.focus();
+                    // saleSelectRef.current.select();
+                }, 0);
+            }
+            sessionStorage.setItem("componentMounted", "true");
+        }
+    }, []);
 
 
     const handleTransactionTypeChange = (event) => {

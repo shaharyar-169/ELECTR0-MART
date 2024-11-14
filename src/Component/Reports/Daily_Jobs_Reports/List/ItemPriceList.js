@@ -9,14 +9,18 @@ import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButto
 import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
+import Select from "react-select";
+import { components } from "react-select";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
+import './list.css';
+import { getcompanyData } from "../../../File/Category_Maintenance/Category_Maintenance_Api";
 
-export default function EmployeeList() {
+export default function ItemPriceList() {
 
     const navigate = useNavigate();
     const user = getUserData();
@@ -26,6 +30,19 @@ export default function EmployeeList() {
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
+
+    const [Companyselectdata, setCompanyselectdata] = useState("");
+    const [GetCompany, setGetCompany] = useState([]);
+
+    const [Capacityselectdata, setCapacityselectdata] = useState("");
+    const [GetCapacity, setGetCapacity] = useState([]);
+
+    const [Categoryselectdata, setCategoryselectdata] = useState("");
+    const [GetCategory, setGetCategory] = useState([]);
+
+    const [Typeselectdata, setTypeselectdata] = useState("");
+    const [GetType, setGetType] = useState([]);
+
 
     const [sortData, setSortData] = useState("ASC");
 
@@ -72,15 +89,16 @@ export default function EmployeeList() {
     function fetchReceivableReport() {
 
 
-        const apiUrl = apiLinks + "/EmployeeList.php";
+        const apiUrl = apiLinks + "/ItemPriceList.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            FEmpSts: transectionType,
+            FItmSts: transectionType,
             // code: organisation.code,
-            code: 'NASIRTRD',
-            FLocCod: '001'
-
-
+            code:'NASIRTRD',
+            FCtgCod: Companyselectdata,
+            FCapCod: Capacityselectdata,
+            FTypCod: Typeselectdata,
+            FCmpCod: Companyselectdata
 
         }).toString();
 
@@ -106,19 +124,6 @@ export default function EmployeeList() {
     }
 
 
-    useEffect(() => {
-        const hasComponentMountedPreviously =
-            sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (input1Ref && input1Ref.current)) {
-            if (input1Ref && input1Ref.current) {
-                setTimeout(() => {
-                    input1Ref.current.focus();
-                    // saleSelectRef.current.select();
-                }, 0);
-            }
-            sessionStorage.setItem("componentMounted", "true");
-        }
-    }, []);
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -126,20 +131,193 @@ export default function EmployeeList() {
     };
 
 
+
+    //////////////////// CODE FOR COMPANY SELECT///////////////////
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetCompany.php";
+        const formData = new URLSearchParams({
+            code: organisation.code,
+
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+
+                if (response.data && Array.isArray(response.data)) {
+                    setGetCompany(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setGetCompany([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+
+            });
+    }, []);
+    const options = GetCompany.map((item) => ({
+        value: item.tcmpcod,
+        label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+    }));
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetCapacity.php";
+        const formData = new URLSearchParams({
+            code: organisation.code,
+
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+
+                if (response.data && Array.isArray(response.data)) {
+                    setGetCapacity(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setGetCapacity([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+
+            });
+    }, []);
+
+    const capacityoptions = GetCapacity.map((item) => ({
+        value: item.tcapcod,
+        label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
+    }));
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetCatg.php";
+        const formData = new URLSearchParams({
+            code: organisation.code,
+
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+
+                if (response.data && Array.isArray(response.data)) {
+                    setGetCategory(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setGetCategory([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+
+            });
+    }, []);
+
+    const categoryoptions = GetCategory.map((item) => ({
+        value: item.tctgcod,
+        label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+    }));
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetType.php";
+        const formData = new URLSearchParams({
+            code: organisation.code,
+
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+
+                if (response.data && Array.isArray(response.data)) {
+                    setGetType(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setGetType([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+
+            });
+    }, []);
+
+    const typeoptions = GetType.map((item) => ({
+        value: item.ttypcod,
+        label: `${item.ttypcod}-${item.ttypdsc.trim()}`,
+    }));
+
+    const DropdownOption = (props) => {
+        return (
+            <components.Option {...props}>
+                <div
+                    style={{
+                        fontSize: "12px",
+                        paddingBottom: "5px",
+                        lineHeight: "3px",
+                        color: "black",
+                        textAlign: "start",
+                    }}
+                >
+                    {props.data.label}
+                </div>
+            </components.Option>
+        );
+    };
+    const customStyles1 = (hasError) => ({
+        control: (base, state) => ({
+            ...base,
+            height: "24px",
+            minHeight: "unset",
+            width: 250,
+            fontSize: "12px",
+            backgroundColor: getcolor,
+            color: fontcolor,
+            borderRadius: 0,
+            border: `1px solid ${fontcolor}`,
+            transition: "border-color 0.15s ease-in-out",
+            "&:hover": {
+                borderColor: state.isFocused ? base.borderColor : "black",
+            },
+            padding: "0 8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            padding: 0,
+            fontSize: "18px",
+            display: "flex",
+            textAlign: "center !important",
+        }),
+    });
+
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "potraite" });
+        const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
             item.Code,
-            item.Employee,
-            item.Status,
-            item.Designation,
-            item['COntact #'],
-            item['Adv Code'],
-            item['Exp Code'],
+            item.Description,
+            item.Stk,
+            item.Comm,
+            item['SM Rate'],
+            item['Sale Rate'],
+            item.MRP,
+            item['Fix Rate'],
         ]);
 
         // Add summary row to the table
@@ -151,20 +329,24 @@ export default function EmployeeList() {
             "",
             "",
             "",
+            "",
+
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
             "Code",
-            "Employee",
-            "Status",
-            'Designation',
-            'Contact',
-            'Adv Code',
-            'Exp Code',
+            "Description",
+            "StK",
+            "Comm",
+            "SM Rate",
+            "Sale Rate",
+            "MRP",
+            "Fix Rate"
+
 
         ];
-        const columnWidths = [10, 40, 10, 50, 30, 20, 20,];
+        const columnWidths = [35, 80, 10,20, 20, 20, 20,20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -324,7 +506,7 @@ export default function EmployeeList() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 45; // Adjust this value based on your requirements
+        const rowsPerPage = 27; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -392,7 +574,7 @@ export default function EmployeeList() {
                 // ); // Render sale report title with decreased font size, provide the time, and page number
                 // startY += 7;
                 addTitle(
-                    `Employee List`,
+                    `Item Price List`,
                     "",
                     "",
                     pageNumber,
@@ -463,7 +645,7 @@ export default function EmployeeList() {
         handlePagination();
 
         // Save the PDF file
-        doc.save("EmployeeList.pdf");
+        doc.save("ItemPriceList.pdf");
 
         const pdfBlob = doc.output("blob");
         const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -491,11 +673,11 @@ export default function EmployeeList() {
         const columnAlignments = [
             "left",
             "left",
-            "center",
-            "right",
-            "right",
-            "right",
-            "right",
+            "left",
+            "left",
+            "left",
+            "left",
+
 
         ];
 
@@ -505,7 +687,7 @@ export default function EmployeeList() {
         // Add title rows
         [
             comapnyname,
-            `Employee List`,
+            `Item price List`,
         ].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
@@ -557,12 +739,14 @@ export default function EmployeeList() {
         const headers = [
 
             "Code",
-            "Employee",
-            "Status",
-            'Designation',
-            'Contact',
-            'Adv Code',
-            'Exp Code',
+            "Description",
+            "StK",
+            'Comm',
+            'SM Rate',
+            'Sale Rate',
+            'MRP',
+            'Fix Rate',
+         
 
         ];
         const headerRow = worksheet.addRow(headers);
@@ -574,12 +758,13 @@ export default function EmployeeList() {
         tableData.forEach((item) => {
             worksheet.addRow([
                 item.Code,
-                item.Employee,
-                item.Status,
-                item.Designation,
-                item['COntact #'],
-                item['Adv Code'],
-                item['Exp Code'],
+                item.Description,
+                item.Stk,
+                item.Comm,
+                item['SM Rate'],
+                item['Sale Rate'],
+                item.MRP,
+                item['Fix Rate'],
             ]);
         });
 
@@ -592,6 +777,8 @@ export default function EmployeeList() {
             "",
             "",
             "",
+            "",
+          
 
         ]);
         totalRow.eachCell((cell) => {
@@ -599,7 +786,7 @@ export default function EmployeeList() {
         });
 
         // Set column widths
-        [10, 30, 10, 30, 15, 15, 15].forEach((width, index) => {
+        [22, 40,10, 20, 20, 20, 20,20 ].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -630,7 +817,7 @@ export default function EmployeeList() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "EmployeeList.xlsx");
+        saveAs(blob, "ItempriceList.xlsx");
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -683,28 +870,33 @@ export default function EmployeeList() {
         setSortData(sortData === "ASC" ? "DSC" : "ASC");
     };
 
-
     const firstColWidth = {
-        width: "6.5%",
-    };
-    const secondColWidth = {
-        width: "25%",
-    };
-    const thirdColWidth = {
-        width: "8%",
-    };
-    const forthColWidth = {
-        width: "24%",
-    };
-    const fifthColWidth = {
         width: "12%",
     };
+    const secondColWidth = {
+        width: "35.5%",
+    };
+    const thirdColWidth = {
+        width: "5%",
+    };
+    const forthColWidth = {
+        width: "9%",
+    };
+    const fifthColWidth = {
+        width: "9%",
+    };
     const sixthColWidth = {
+        width: "9%",
+    };
+    const eightColWidth = {
+        width: "9%",
+    };
+
+    const ninthColWidth = {
         width: "10%",
     };
-    const seventhColWidth = {
-        width: "13%",
-    };
+
+
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -725,7 +917,7 @@ export default function EmployeeList() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+        width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
         top: "35%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -828,8 +1020,9 @@ export default function EmployeeList() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Employee List" />
+                    <NavComponent textdata="Item Price List" />
 
+                    {/* //////////////// FIRST ROW ///////////////////////// */}
 
                     <div
                         className="row"
@@ -854,52 +1047,216 @@ export default function EmployeeList() {
                                 <div
                                     style={{
                                         marginLeft: '10px',
-                                        width: "60px",
+                                        width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
                                     }}
                                 >
                                     <label htmlFor="transactionType">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Status:
+                                            Company :
                                         </span>
                                     </label>
                                 </div>
 
+                                <div style={{ marginLeft: '3px' }} >
+                                    <Select
 
+                                        className="List-select-class "
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                setCompanyselectdata(selectedOption.value);
+                                            } else {
+                                                setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!Companyselectdata)}
+                                        isClearable
+                                        placeholder="Search or select..."
+                                    />
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "15px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">All</option>
-                                    <option value="A">Active</option>
-                                    <option value="N">Non-Active</option>
-
-                                </select>
+                                </div>
                             </div>
 
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: '10px',
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Capacity :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div style={{ marginLeft: '3px' }} >
+                                    <Select
+
+                                        className="List-select-class "
+                                        ref={saleSelectRef}
+                                        options={capacityoptions}
+                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                setCapacityselectdata(selectedOption.value);
+                                            } else {
+                                                setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!Capacityselectdata)}
+                                        isClearable
+                                        placeholder="Search or select..."
+                                    />
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {/* //////////////// SECOND ROW ///////////////////////// */}
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: '10px',
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Category :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div style={{ marginLeft: '3px' }} >
+                                    <Select
+
+                                        className="List-select-class "
+                                        ref={saleSelectRef}
+                                        options={categoryoptions}
+                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                setCategoryselectdata(selectedOption.value);
+                                            } else {
+                                                setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!Categoryselectdata)}
+                                        isClearable
+                                        placeholder="Search or select..."
+                                    />
+
+                                </div>
+                            </div>
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: '10px',
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div style={{ marginLeft: '3px' }} >
+                                    <Select
+
+                                        className="List-select-class "
+                                        ref={saleSelectRef}
+                                        options={typeoptions}
+                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                setTypeselectdata(selectedOption.value);
+                                            } else {
+                                                setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!Typeselectdata)}
+                                        isClearable
+                                        placeholder="Search or select..."
+                                    />
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* //////////////// THIRD ROW ///////////////////////// */}
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "end",
+                            }}
+                        >
+
+
+                            
+
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "15px" }}>
+                                <label for="searchInput" style={{ marginRight: "3px" }}>
                                     <span style={{ fontSize: "15px", fontWeight: "bold" }}>
                                         Search :
                                     </span>{" "}
@@ -913,7 +1270,7 @@ export default function EmployeeList() {
                                     value={searchQuery}
                                     style={{
                                         marginRight: "20px",
-                                        width: "200px",
+                                        width: "250px",
                                         height: "24px",
                                         fontSize: "12px",
                                         color: fontcolor,
@@ -933,6 +1290,8 @@ export default function EmployeeList() {
                             </div>
                         </div>
                     </div>
+
+                    {/* //////////////// TABLE HEADER SECTION ///////////////////////// */}
                     <div>
                         <div
                             style={{
@@ -977,51 +1336,60 @@ export default function EmployeeList() {
                                         <td
                                             className="border-dark"
                                             style={secondColWidth}
-                                            onClick={() => handleSorting("Employee")}
+                                            onClick={() => handleSorting("Description")}
                                         >
-                                            Employee{" "}
+                                            Description{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={thirdColWidth}
-                                            onClick={() => handleSorting("Status")}
+                                            onClick={() => handleSorting("Stk")}
                                         >
-                                            Status{" "}
+                                            Stk{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={forthColWidth}
-                                            onClick={() => handleSorting("Designation")}
+                                            onClick={() => handleSorting("Comm")}
                                         >
-                                            Designation{" "}
+                                            Comm{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={fifthColWidth}
-                                            onClick={() => handleSorting("COntact #")}
+                                            onClick={() => handleSorting("SM Rate")}
                                         >
-                                            Contact{" "}
+                                            SM Rate{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
                                             style={sixthColWidth}
-                                            onClick={() => handleSorting("Adv Code")}
+                                            onClick={() => handleSorting("Sale Rate")}
                                         >
-                                            Adv Code{" "}
+                                            Sale Rate{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
                                         <td
                                             className="border-dark"
-                                            style={seventhColWidth}
-                                            onClick={() => handleSorting("Exp Code")}
+                                            style={eightColWidth}
+                                            onClick={() => handleSorting("MRP")}
                                         >
-                                            Exp Code{" "}
+                                            MRP{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
+                                        <td
+                                            className="border-dark"
+                                            style={ninthColWidth}
+                                            onClick={() => handleSorting("Fix Rate")}
+                                        >
+                                            Fix Rate{" "}
+                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                                        </td>
+
 
                                     </tr>
 
@@ -1034,7 +1402,7 @@ export default function EmployeeList() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "40vh",
+                                maxHeight: "35vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1056,7 +1424,7 @@ export default function EmployeeList() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="7" className="text-center">
+                                                <td colSpan="8" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1069,7 +1437,7 @@ export default function EmployeeList() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 8 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1084,7 +1452,9 @@ export default function EmployeeList() {
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+
                                             </tr>
                                         </>
                                     ) : (
@@ -1108,23 +1478,27 @@ export default function EmployeeList() {
                                                             {item.Code}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
-                                                            {item.Employee}
+                                                            {item.Description}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
-                                                            {item.Status}
+                                                            {item.Stk}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
-                                                            {item.Designation}
+                                                        <td className="text-end" style={forthColWidth}>
+                                                            {item.Comm}
                                                         </td>
-                                                        <td className="text-center" style={fifthColWidth}>
-                                                            {item['COntact #']}
+                                                        <td className="text-end" style={fifthColWidth}>
+                                                            {item['SM Rate']}
                                                         </td>
-                                                        <td className="text-center" style={sixthColWidth}>
-                                                            {item['Adv Code']}
+                                                        <td className="text-end" style={sixthColWidth}>
+                                                            {item['Sale Rate']}
                                                         </td>
-                                                        <td className="text-end" style={seventhColWidth}>
-                                                            {item['Exp Code']}
+                                                        <td className="text-end" style={eightColWidth}>
+                                                            {item.MRP}
                                                         </td>
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item['Fix Rate']}
+                                                        </td>
+
                                                     </tr>
                                                 );
                                             })}
@@ -1138,7 +1512,7 @@ export default function EmployeeList() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 8 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1152,7 +1526,9 @@ export default function EmployeeList() {
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+
                                             </tr>
                                         </>
                                     )}
@@ -1220,12 +1596,21 @@ export default function EmployeeList() {
                         </div>
                         <div
                             style={{
-                                ...seventhColWidth,
+                                ...eightColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
                         </div>
+                        <div
+                            style={{
+                                ...ninthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+
                     </div>
                     <div
                         style={{
