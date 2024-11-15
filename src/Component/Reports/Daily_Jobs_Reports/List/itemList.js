@@ -30,6 +30,9 @@ export default function ItemList() {
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
+    const input4Ref = useRef(null);
+    const input5Ref = useRef(null);
+    const input6Ref = useRef(null);
 
     const [Companyselectdata, setCompanyselectdata] = useState("");
     const [GetCompany, setGetCompany] = useState([]);
@@ -77,14 +80,6 @@ export default function ItemList() {
 
 
 
-    const handleKeyPress = (e, nextInputRef) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            if (nextInputRef.current) {
-                nextInputRef.current.focus();
-            }
-        }
-    };
 
     function fetchReceivableReport() {
 
@@ -122,7 +117,98 @@ export default function ItemList() {
             });
     }
 
+    useEffect(() => {
+        const hasComponentMountedPreviously =
+            sessionStorage.getItem("componentMounted");
+        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+            if (saleSelectRef && saleSelectRef.current) {
+                setTimeout(() => {
+                    saleSelectRef.current.focus();
+                    // saleSelectRef.current.select();
+                }, 0);
+            }
+            sessionStorage.setItem("componentMounted", "true");
+        }
+    }, []);
 
+
+    const handlecompanyKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCompanyselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+    const handlecategoryKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCategoryselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
+    const handlecapacityKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCapacityselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+    const handletypeKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setTypeselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
+    const handleKeyPress = (e, nextInputRef) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (nextInputRef.current) {
+                nextInputRef.current.focus();
+            }
+        }
+    };
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -737,7 +823,7 @@ export default function ItemList() {
             'Category',
             'Capacity',
             'Type',
-         
+
 
         ];
         const headerRow = worksheet.addRow(headers);
@@ -765,7 +851,7 @@ export default function ItemList() {
             "",
             "",
             "",
-          
+
 
         ]);
         totalRow.eachCell((cell) => {
@@ -773,7 +859,7 @@ export default function ItemList() {
         });
 
         // Set column widths
-        [22, 40, 20, 20, 20, 20, ].forEach((width, index) => {
+        [22, 40, 20, 20, 20, 20,].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1029,7 +1115,9 @@ export default function ItemList() {
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
+
                                     }}
+
                                 >
                                     <label htmlFor="transactionType">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
@@ -1038,13 +1126,15 @@ export default function ItemList() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: '3px' }}
+                                  
+                                >
                                     <Select
 
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1086,10 +1176,10 @@ export default function ItemList() {
                                     <Select
 
                                         className="List-select-class "
-                                        ref={saleSelectRef}
+                                        ref={input2Ref}
                                         options={capacityoptions}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
+                                        onKeyDown={(e) => handlecapacityKeypress(e, input3Ref)}
+                                        id="selectedsale2"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
                                                 setCapacityselectdata(selectedOption.value);
@@ -1148,9 +1238,9 @@ export default function ItemList() {
                                     <Select
 
                                         className="List-select-class "
-                                        ref={saleSelectRef}
+                                        ref={input1Ref}
                                         options={categoryoptions}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1192,9 +1282,9 @@ export default function ItemList() {
                                     <Select
 
                                         className="List-select-class "
-                                        ref={saleSelectRef}
+                                        ref={input3Ref}
                                         options={typeoptions}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handletypeKeypress(e, input4Ref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1254,8 +1344,8 @@ export default function ItemList() {
 
 
                                 <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    ref={input4Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
                                     id="submitButton"
                                     name="type"
                                     onFocus={(e) =>
@@ -1290,8 +1380,8 @@ export default function ItemList() {
                                     </span>{" "}
                                 </label>
                                 <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                    ref={input5Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input6Ref)}
                                     type="text"
                                     id="searchsubmit"
                                     placeholder="Item description"
@@ -1634,7 +1724,7 @@ export default function ItemList() {
                         <SingleButton
                             id="searchsubmit"
                             text="Select"
-                            ref={input3Ref}
+                            ref={input6Ref}
                             onClick={fetchReceivableReport}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}

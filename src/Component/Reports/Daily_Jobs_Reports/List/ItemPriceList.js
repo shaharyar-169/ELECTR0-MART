@@ -30,6 +30,9 @@ export default function ItemPriceList() {
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
+    const input4Ref = useRef(null);
+    const input5Ref = useRef(null);
+    const input6Ref = useRef(null);
 
     const [Companyselectdata, setCompanyselectdata] = useState("");
     const [GetCompany, setGetCompany] = useState([]);
@@ -77,15 +80,7 @@ export default function ItemPriceList() {
 
 
 
-    const handleKeyPress = (e, nextInputRef) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            if (nextInputRef.current) {
-                nextInputRef.current.focus();
-            }
-        }
-    };
-
+   
     function fetchReceivableReport() {
 
 
@@ -124,11 +119,99 @@ export default function ItemPriceList() {
     }
 
 
+    const handlecompanyKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCompanyselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
 
-    const handleTransactionTypeChange = (event) => {
-        const selectedTransactionType = event.target.value;
-        settransectionType(selectedTransactionType);
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
     };
+    const handlecategoryKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCategoryselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
+    const handlecapacityKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCapacityselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+    const handletypeKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setTypeselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
+    const handleKeyPress = (e, nextInputRef) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (nextInputRef.current) {
+                nextInputRef.current.focus();
+            }
+        }
+    };
+
+    useEffect(() => {
+        const hasComponentMountedPreviously =
+            sessionStorage.getItem("componentMounted");
+        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+            if (saleSelectRef && saleSelectRef.current) {
+                setTimeout(() => {
+                    saleSelectRef.current.focus();
+                    // saleSelectRef.current.select();
+                }, 0);
+            }
+            sessionStorage.setItem("componentMounted", "true");
+        }
+    }, []);
+
+   
 
 
 
@@ -1065,7 +1148,7 @@ export default function ItemPriceList() {
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1107,9 +1190,9 @@ export default function ItemPriceList() {
                                     <Select
 
                                         className="List-select-class "
-                                        ref={saleSelectRef}
+                                        ref={input2Ref}
                                         options={capacityoptions}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handlecapacityKeypress(e, input3Ref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1169,9 +1252,9 @@ export default function ItemPriceList() {
                                     <Select
 
                                         className="List-select-class "
-                                        ref={saleSelectRef}
+                                        ref={input1Ref}
                                         options={categoryoptions}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1213,9 +1296,9 @@ export default function ItemPriceList() {
                                     <Select
 
                                         className="List-select-class "
-                                        ref={saleSelectRef}
+                                        ref={input3Ref}
                                         options={typeoptions}
-                                        // onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handletypeKeypress(e, input4Ref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1252,8 +1335,7 @@ export default function ItemPriceList() {
                             }}
                         >
 
-
-                            
+                        
 
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "3px" }}>
@@ -1262,8 +1344,8 @@ export default function ItemPriceList() {
                                     </span>{" "}
                                 </label>
                                 <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                    ref={input4Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input6Ref)}
                                     type="text"
                                     id="searchsubmit"
                                     placeholder="Item description"
@@ -1648,7 +1730,7 @@ export default function ItemPriceList() {
                         <SingleButton
                             id="searchsubmit"
                             text="Select"
-                            ref={input3Ref}
+                            ref={input6Ref}
                             onClick={fetchReceivableReport}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
