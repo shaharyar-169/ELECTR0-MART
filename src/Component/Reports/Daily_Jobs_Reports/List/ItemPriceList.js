@@ -80,7 +80,7 @@ export default function ItemPriceList() {
 
 
 
-   
+
     function fetchReceivableReport() {
 
 
@@ -89,7 +89,7 @@ export default function ItemPriceList() {
         const formData = new URLSearchParams({
             FItmSts: transectionType,
             // code: organisation.code,
-            code:'NASIRTRD',
+            code: 'NASIRTRD',
             FCtgCod: Companyselectdata,
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
@@ -210,8 +210,6 @@ export default function ItemPriceList() {
             sessionStorage.setItem("componentMounted", "true");
         }
     }, []);
-
-   
 
 
 
@@ -429,7 +427,7 @@ export default function ItemPriceList() {
 
 
         ];
-        const columnWidths = [35, 80, 10,20, 20, 20, 20,20];
+        const columnWidths = [35, 80, 10, 20, 20, 20, 20, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -527,13 +525,26 @@ export default function ItemPriceList() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+                    if (cellIndex === 2 ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+                        doc.text(cellValue, rightAlignX, cellY, {
+                            align: "center",
+                            baseline: "middle",
+                        });
+
+                    }
+
+                    else if (cellIndex === 3 || cellIndex ===4 || cellIndex ===5 || cellIndex ===6 || cellIndex ===7) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    } else {
+
+                    }
+
+
+                    else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -829,7 +840,7 @@ export default function ItemPriceList() {
             'Sale Rate',
             'MRP',
             'Fix Rate',
-         
+
 
         ];
         const headerRow = worksheet.addRow(headers);
@@ -861,7 +872,7 @@ export default function ItemPriceList() {
             "",
             "",
             "",
-          
+
 
         ]);
         totalRow.eachCell((cell) => {
@@ -869,7 +880,7 @@ export default function ItemPriceList() {
         });
 
         // Set column widths
-        [22, 40,10, 20, 20, 20, 20,20 ].forEach((width, index) => {
+        [22, 40, 10, 20, 20, 20, 20, 20].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1335,7 +1346,7 @@ export default function ItemPriceList() {
                             }}
                         >
 
-                        
+
 
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "3px" }}>

@@ -256,6 +256,8 @@ export default function GeneralLedger1() {
     const handleToInputChange = (e) => {
         settoInputDate(e.target.value);
     };
+
+
     const handleSaleKeypress = (event, inputId) => {
         if (event.key === "Enter") {
             const selectedOption = saleSelectRef.current.state.selectValue;
@@ -271,6 +273,7 @@ export default function GeneralLedger1() {
             }
         }
     };
+
     const handleKeyPress = (e, nextInputRef) => {
         if (e.key === "Enter") {
             e.preventDefault();

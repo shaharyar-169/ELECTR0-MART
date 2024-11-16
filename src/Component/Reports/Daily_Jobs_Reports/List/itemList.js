@@ -673,9 +673,9 @@ export default function ItemList() {
                 // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
 
                 // let typeText = transectionType ? transectionType : "";
-                // let typeItem = saleType ? saleType : "";
+                let typeItem = transectionType ? transectionType : "All";
 
-                // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
                 // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
                 // Reset font weight to normal if necessary for subsequent text

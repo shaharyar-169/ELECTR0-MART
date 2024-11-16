@@ -260,13 +260,18 @@ export default function ChartofAccount() {
                 // Ensure the cell value is a string
                 const cellValue = String(cell);
 
-                if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-                    const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+
+                 if (cellIndex === 2 || cellIndex ===4 || cellIndex ===6 ) {
+                    const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                     doc.text(cellValue, rightAlignX, cellY, {
-                        align: "right",
+                        align: "center",
                         baseline: "middle",
                     });
-                } else {
+                                      
+                }
+                
+                
+                else {
                     doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                 }
 
@@ -410,10 +415,10 @@ export default function ChartofAccount() {
             // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
 
             // let typeText = transectionType ? transectionType : "";
-            // let typeItem = saleType ? saleType : "";
+            let typeItem = transectionType ? transectionType : "All";
 
-            // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-            // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
+            doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+            // doc.text(`Status: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
             // Reset font weight to normal if necessary for subsequent text
             doc.setFont("verdana", "normal");
@@ -1102,7 +1107,7 @@ const handleDownloadCSV = async () => {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-center" style={firstColWidth}>
+                                                        <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>

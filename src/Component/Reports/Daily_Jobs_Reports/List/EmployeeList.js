@@ -262,13 +262,16 @@ export default function EmployeeList() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                    if (cellIndex === 2 ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
+                            align: "center",
                             baseline: "middle",
                         });
-                    } else {
+                                          
+                    } 
+                    
+                    else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -412,9 +415,9 @@ export default function EmployeeList() {
                 // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
 
                 // let typeText = transectionType ? transectionType : "";
-                // let typeItem = saleType ? saleType : "";
+                let typeItem = transectionType ? transectionType : "All";
 
-                // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
                 // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
                 // Reset font weight to normal if necessary for subsequent text
@@ -1116,13 +1119,13 @@ export default function EmployeeList() {
                                                         <td className="text-start" style={forthColWidth}>
                                                             {item.Designation}
                                                         </td>
-                                                        <td className="text-center" style={fifthColWidth}>
+                                                        <td className="text-start" style={fifthColWidth}>
                                                             {item['COntact #']}
                                                         </td>
-                                                        <td className="text-center" style={sixthColWidth}>
+                                                        <td className="text-start" style={sixthColWidth}>
                                                             {item['Adv Code']}
                                                         </td>
-                                                        <td className="text-end" style={seventhColWidth}>
+                                                        <td className="text-start" style={seventhColWidth}>
                                                             {item['Exp Code']}
                                                         </td>
                                                     </tr>

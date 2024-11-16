@@ -526,13 +526,26 @@ export default function ItemPriceListA() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+                    if (cellIndex === 2 ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+                        doc.text(cellValue, rightAlignX, cellY, {
+                            align: "center",
+                            baseline: "middle",
+                        });
+
+                    }
+
+                    else if (cellIndex === 3 || cellIndex ===4 || cellIndex ===5 || cellIndex ===6 || cellIndex ===7 || cellIndex===8 || cellIndex===9) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    } else {
+
+                    } 
+                    
+                    
+                    else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 

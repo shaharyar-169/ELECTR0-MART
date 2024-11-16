@@ -164,7 +164,7 @@ export default function UserList() {
         'Log Time',
 
     ];
-    const columnWidths = [15, 50, 12, 12, 20, 40, 15,15];
+    const columnWidths = [15, 50, 12, 12, 20, 40, 18,15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -262,13 +262,16 @@ export default function UserList() {
                 // Ensure the cell value is a string
                 const cellValue = String(cell);
 
-                if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-                    const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                if (cellIndex === 2 || cellIndex ===3 || cellIndex ===7) {
+                    const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                     doc.text(cellValue, rightAlignX, cellY, {
-                        align: "right",
+                        align: "center",
                         baseline: "middle",
                     });
-                } else {
+                                      
+                }  
+                
+                else {
                     doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                 }
 
@@ -412,9 +415,9 @@ export default function UserList() {
             // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
 
             // let typeText = transectionType ? transectionType : "";
-            // let typeItem = saleType ? saleType : "";
+            let typeItem = transectionType ? transectionType : "All";
 
-            // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+            doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
             // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
             // Reset font weight to normal if necessary for subsequent text
@@ -1134,13 +1137,13 @@ const handleDownloadCSV = async () => {
                                                         <td className="text-center" style={forthColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-center" style={fifthColWidth}>
+                                                        <td className="text-start" style={fifthColWidth}>
                                                             {item.Mobile}
                                                         </td>
                                                         <td className="text-start" style={sixthColWidth}>
                                                             {item.Email}
                                                         </td>
-                                                        <td className="text-end" style={seventhColWidth}>
+                                                        <td className="text-start" style={seventhColWidth}>
                                                             {item['Log Date']}
                                                         </td>
                                                         <td className="text-left" style={seventhColWidth}>

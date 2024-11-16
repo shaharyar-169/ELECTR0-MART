@@ -192,7 +192,7 @@ export default function StoreList() {
             const cellWidth = columnWidths[index];
             const cellHeight = 6; // Height of the header row
             const cellX = startX + cellWidth / 2; // Center the text horizontally
-            const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+            const cellY = startY + cellHeight / 2 + 1.2; // Center the text vertically
 
             // Draw the grey background for the header
             doc.setFillColor(200, 200, 200); // Grey color
@@ -267,13 +267,19 @@ export default function StoreList() {
                 // Ensure the cell value is a string
                 const cellValue = String(cell);
 
-                if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-                    const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                
+                if (cellIndex === 2 || cellIndex ===4 || cellIndex ===6 || cellIndex ===8) {
+                    const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                     doc.text(cellValue, rightAlignX, cellY, {
-                        align: "right",
+                        align: "center",
                         baseline: "middle",
                     });
-                } else {
+                                      
+                } 
+      
+
+               
+                else {
                     doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                 }
 
@@ -416,11 +422,11 @@ export default function StoreList() {
             // let typeText = selectedOptionType ? selectedOptionType : "All";
             // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
 
-            // let typeText = transectionType ? transectionType : "";
-            // let typeItem = saleType ? saleType : "";
+            // let typeText = transectionType ? transectionType : "All";
+            let typeItem = transectionType ? transectionType : "All";
 
-            // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-            // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
+            doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+            // doc.text(`Status: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
             // Reset font weight to normal if necessary for subsequent text
             doc.setFont("verdana", "normal");
