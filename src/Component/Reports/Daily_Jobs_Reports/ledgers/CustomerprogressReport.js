@@ -982,6 +982,9 @@ export default function CustomerProgressLedger() {
     const fifthColWidth = {
         width: "20%",
     };
+    const eightColWidth = {
+        width: "20%",
+    };
 
     // Adjust the content width based on sidebar state
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
