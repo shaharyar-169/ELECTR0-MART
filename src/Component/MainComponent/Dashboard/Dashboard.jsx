@@ -49,30 +49,30 @@ export default function Dasboard() {
         <div className="row Row_styling">
           <div className="Card_styling">
             <div className="row" style={{width:'100%'}}>
-              <div className="col-md-5 text-start "style={{color:fontcolor, paddingLeft:'25px'}}>Today</div>
-            <div className="col-md-7 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
+              <div className="col-md-6 text-start "style={{color:fontcolor, paddingLeft:'25px'}}>Today</div>
+            <div className="col-md-6 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
             </div>
             <div className="row" style={{width:'100%'}}>
-              <div className="col-md-5 text-start "style={{color:fontcolor,  paddingLeft:'25px'}}>This Month</div>
-            <div className="col-md-7 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
+              <div className="col-md-6 text-start "style={{color:fontcolor,  paddingLeft:'25px'}}>This Month</div>
+            <div className="col-md-6 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
             </div>
             <div className="row" style={{width:'100%'}}>
-              <div className="col-md-5 text-start"style={{color:fontcolor,  paddingLeft:'25px'}}>This Year</div>
-            <div className="col-md-7 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
+              <div className="col-md-6 text-start"style={{color:fontcolor,  paddingLeft:'25px'}}>This Year</div>
+            <div className="col-md-6 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
             </div>
           </div>
           <div className="Card_styling">
           <div className="row" style={{width:'100%'}}>
-              <div className="col-md-5 text-start "style={{color:fontcolor, paddingLeft:'25px'}}>Stock</div>
-            <div className="col-md-7 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
+              <div className="col-md-6 text-start "style={{color:fontcolor, paddingLeft:'25px'}}>Stock</div>
+            <div className="col-md-6 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
             </div>
             <div className="row" style={{width:'100%'}}>
-              <div className="col-md-5 text-start "style={{color:fontcolor,  paddingLeft:'25px'}}>Receivable</div>
-            <div className="col-md-7 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
+              <div className="col-md-6 text-start "style={{color:fontcolor,  paddingLeft:'25px'}}>Receivable</div>
+            <div className="col-md-6 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
             </div>
             <div className="row" style={{width:'100%'}}>
-              <div className="col-md-5 text-start"style={{color:fontcolor,  paddingLeft:'25px'}}>Payable</div>
-            <div className="col-md-7 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
+              <div className="col-md-6 text-start"style={{color:fontcolor,  paddingLeft:'25px'}}>Payable</div>
+            <div className="col-md-6 text-start " style={{color:fontcolor, fontWeight:'bold'}} >999,999,99</div>
             </div>
           </div>
           <div className="Card_styling"></div>
