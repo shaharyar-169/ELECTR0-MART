@@ -818,7 +818,7 @@ export default function CustomerProgressLedger() {
 
 		// Add title rows
 		[
-			organisation.name,
+			comapnyname,
 			`Customer Progress Report Date: ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
@@ -834,9 +834,11 @@ export default function CustomerProgressLedger() {
 
 		// Add type and store row and bold it
 		const typeAndStoreRow = worksheet.addRow([
-			"",
+			
 			`Code: ${typeCode}`,
 			"",
+            "",
+            "",
 			`Year: ${typeYear}`,
 		]);
 		typeAndStoreRow.eachCell((cell) => {
@@ -1152,7 +1154,7 @@ export default function CustomerProgressLedger() {
 
                             <div className="d-flex align-items-center" style={{ marginRight: '20px' }} >
                                 <div style={{ width: '60px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Type :</span>  <br /></label>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Year :</span>  <br /></label>
                                 </div>
                                 <select
                                     ref={input1Ref}

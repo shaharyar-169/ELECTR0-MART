@@ -667,13 +667,25 @@ export default function BankRegisterLedger1() {
                 // Ensure the cell value is a string
                 const cellValue = String(cell);
 
-                if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+                if (cellIndex === 2 ) {
+                    const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+                    doc.text(cellValue, rightAlignX, cellY, {
+                        align: "center",
+                        baseline: "middle",
+                    });
+
+                }
+
+                else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
                     const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                     doc.text(cellValue, rightAlignX, cellY, {
                         align: "right",
                         baseline: "middle",
                     });
-                } else {
+
+                }
+                
+                else {
                     doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                 }
 
@@ -921,16 +933,15 @@ const handleDownloadCSV = async () => {
 
     // Add type and store row and bold it
     const typeAndStoreRow = worksheet.addRow([
-        " ",
-        "",
-        "",
+      
         `Account: ${typeItem}`,
         "",
         "",
+        " ",
+        "",
+        "",
         `Type: ${typeText}`,
-        "",
-        "",
-        "",
+        
     ]);
     typeAndStoreRow.eachCell((cell) => {
         cell.font = { bold: true };

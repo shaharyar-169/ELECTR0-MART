@@ -503,10 +503,12 @@ const handleDownloadCSV = async () => {
         "left",
         "left",
         "center",
-        "right",
-        "right",
-        "right",
-        "right",
+        "left",
+        "center",
+        "left",
+        "center",
+        "left",
+        "center",
 
     ];
 
@@ -520,31 +522,29 @@ const handleDownloadCSV = async () => {
     ].forEach((title, index) => {
         worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
         worksheet.mergeCells(
-            `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+            `A${index + 2}:${String.fromCharCode(65 + numColumns)}${index + 2}`
         );
     });
 
     worksheet.addRow([]); // Empty row for spacing
 
     // let typeText = selectedOptionType ? selectedOptionType : "All";
-    // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
+    let typeItem = transectionType ? transectionType : "All";
 
     // Add type and store row and bold it
-    // const typeAndStoreRow = worksheet.addRow([
-    //     " ",
-    //     "",
-    //     "",
-    //     `Account: ${typeItem}`,
-    //     "",
-    //     "",
-    //     `Type: ${typeText}`,
-    //     "",
-    //     "",
-    //     "",
-    // ]);
-    // typeAndStoreRow.eachCell((cell) => {
-    //     cell.font = { bold: true };
-    // });
+    const typeAndStoreRow = worksheet.addRow([
+        
+        `Status: ${typeItem}`,
+        "",
+        "",
+        // `Type: ${typeText}`,
+        "",
+        "",
+        "",
+    ]);
+    typeAndStoreRow.eachCell((cell) => {
+        cell.font = { bold: true };
+    });
 
     worksheet.addRow([]); // Empty row for spacing
 
@@ -590,7 +590,7 @@ const handleDownloadCSV = async () => {
             item.Description,
             item.Status,
             item.Abb,
-            item.StK,
+            item.Stk,
             item['Ins ID'],
             item['Ins Date'],
             item['Upd ID'],

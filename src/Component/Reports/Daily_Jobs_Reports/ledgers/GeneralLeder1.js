@@ -59,7 +59,7 @@ export default function GeneralLedger1() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
- 
+
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -75,7 +75,7 @@ export default function GeneralLedger1() {
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
-      }, [getcolor]);
+    }, [getcolor]);
 
 
     const comapnyname = organisation.description;
@@ -422,7 +422,7 @@ export default function GeneralLedger1() {
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
-                
+
                 setTotalDebit(response.data["Total Debit "]);
                 setTotalCredit(response.data["Total Credit"]);
                 setClosingBalance(response.data["Closing Bal "]);
@@ -543,8 +543,8 @@ export default function GeneralLedger1() {
         settransectionType(selectedTransactionType);
     };
 
-     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-     const exportPDFHandler = () => {
+    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+    const exportPDFHandler = () => {
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "portrait" });
 
@@ -678,13 +678,24 @@ export default function GeneralLedger1() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+                    if (cellIndex === 2 ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+                        doc.text(cellValue, rightAlignX, cellY, {
+                            align: "center",
+                            baseline: "middle",
+                        });
+
+                    }
+
+                    else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    } else {
+                    }
+
+                    else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -932,16 +943,17 @@ export default function GeneralLedger1() {
 
         // Add type and store row and bold it
         const typeAndStoreRow = worksheet.addRow([
-            " ",
-            "",
-            "",
+            // " ",
+            // "",
+            // "",
             `Account: ${typeItem}`,
             "",
             "",
+            "",
+            "",
+            "",
             `Type: ${typeText}`,
-            "",
-            "",
-            "",
+            
         ]);
         typeAndStoreRow.eachCell((cell) => {
             cell.font = { bold: true };

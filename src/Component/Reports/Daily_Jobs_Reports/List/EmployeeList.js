@@ -495,10 +495,10 @@ export default function EmployeeList() {
             "left",
             "left",
             "center",
-            "right",
-            "right",
-            "right",
-            "right",
+            "left",
+            "left",
+            "left",
+            "left",
 
         ];
 
@@ -519,24 +519,24 @@ export default function EmployeeList() {
         worksheet.addRow([]); // Empty row for spacing
 
         // let typeText = selectedOptionType ? selectedOptionType : "All";
-        // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
+        let typeItem = transectionType ? transectionType : "All";
 
         // Add type and store row and bold it
-        // const typeAndStoreRow = worksheet.addRow([
-        //     " ",
-        //     "",
-        //     "",
-        //     `Account: ${typeItem}`,
-        //     "",
-        //     "",
-        //     `Type: ${typeText}`,
-        //     "",
-        //     "",
-        //     "",
-        // ]);
-        // typeAndStoreRow.eachCell((cell) => {
-        //     cell.font = { bold: true };
-        // });
+        const typeAndStoreRow = worksheet.addRow([
+            // " ",
+            // "",
+            // "",
+            `Status: ${typeItem}`,
+            "",
+            "",
+            // `Type: ${typeText}`,
+            "",
+            "",
+            "",
+        ]);
+        typeAndStoreRow.eachCell((cell) => {
+            cell.font = { bold: true };
+        });
 
         worksheet.addRow([]); // Empty row for spacing
 

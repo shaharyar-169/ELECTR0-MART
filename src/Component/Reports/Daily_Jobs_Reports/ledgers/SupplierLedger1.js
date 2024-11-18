@@ -22,7 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function SupplierLedger1() {
-    
+
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -55,7 +55,7 @@ export default function SupplierLedger1() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
- 
+
 
 
     const {
@@ -70,11 +70,11 @@ export default function SupplierLedger1() {
         getfromdate,
         gettodate,
     } = useTheme();
-    
+
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
-      }, [getcolor]);
+    }, [getcolor]);
 
     const comapnyname = organisation.description;
 
@@ -245,7 +245,6 @@ export default function SupplierLedger1() {
             }
         }
     };
-
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : "");
@@ -438,7 +437,6 @@ export default function SupplierLedger1() {
                 setIsLoading(false);
             });
     }
-
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
@@ -452,7 +450,6 @@ export default function SupplierLedger1() {
             sessionStorage.setItem("componentMounted", "true");
         }
     }, []);
-
     useEffect(() => {
         const currentDate = new Date();
         setSelectedToDate(currentDate);
@@ -466,7 +463,6 @@ export default function SupplierLedger1() {
         setSelectedfromDate(firstDateOfCurrentMonth);
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
-
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveSupplier.php";
         const formData = new URLSearchParams({
@@ -681,13 +677,25 @@ export default function SupplierLedger1() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+                    if (cellIndex === 2 || cellIndex === 4) {
+                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+                        doc.text(cellValue, rightAlignX, cellY, {
+                            align: "center",
+                            baseline: "middle",
+                        });
+
+                    }
+
+                    else if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8 ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    } else {
+
+                    }
+
+                    else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -831,7 +839,7 @@ export default function SupplierLedger1() {
                 let typeItem = saleType ? saleType : "";
 
                 doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Type: ${typeText}`, labelsX + 200, labelsY); // Adjust x-coordinate for From Date
 
                 // Reset font weight to normal if necessary for subsequent text
                 doc.setFont("verdana", "normal");
@@ -937,16 +945,19 @@ export default function SupplierLedger1() {
 
         // Add type and store row and bold it
         const typeAndStoreRow = worksheet.addRow([
-            " ",
-            "",
-            "",
+            // " ",
+            // "",
+            // "",
             `Account: ${typeItem}`,
             "",
             "",
+            "",
+            "",
+            "",
+            "",
+            "",
             `Type: ${typeText}`,
-            "",
-            "",
-            "",
+           
         ]);
         typeAndStoreRow.eachCell((cell) => {
             cell.font = { bold: true };

@@ -1283,6 +1283,7 @@ export default function MobileLedger() {
                                     value={mobileNumber}
                                     onKeyDown={(e) => handleMobilePress(e, fromRef)}
                                     onChange={handleMobilenumberInputChange}
+                                    autoComplete="off"
                                     type="tel"
                                     id="phone"
                                     name="phone"
@@ -1662,13 +1663,13 @@ export default function MobileLedger() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-center" style={firstColWidth}>
+                                                        <td className="text-start" style={firstColWidth}>
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-center" style={secondColWidth}>
+                                                        <td className="text-start" style={secondColWidth}>
                                                             {item["Inv#"]}
                                                         </td>
-                                                        <td className="text-center" style={thirdColWidth}>
+                                                        <td className="text-start" style={thirdColWidth}>
                                                             {item.Customer}
                                                         </td>
                                                         <td className="text-end" style={forthColWidth}>

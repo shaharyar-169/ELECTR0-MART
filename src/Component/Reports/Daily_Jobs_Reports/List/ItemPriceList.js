@@ -767,11 +767,12 @@ export default function ItemPriceList() {
         const columnAlignments = [
             "left",
             "left",
-            "left",
-            "left",
-            "left",
-            "left",
-
+            "center",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
 
         ];
 
@@ -792,24 +793,24 @@ export default function ItemPriceList() {
         worksheet.addRow([]); // Empty row for spacing
 
         // let typeText = selectedOptionType ? selectedOptionType : "All";
-        // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
+        let typeItem = transectionType ? transectionType : "All";
 
         // Add type and store row and bold it
-        // const typeAndStoreRow = worksheet.addRow([
-        //     " ",
-        //     "",
-        //     "",
-        //     `Account: ${typeItem}`,
-        //     "",
-        //     "",
-        //     `Type: ${typeText}`,
-        //     "",
-        //     "",
-        //     "",
-        // ]);
-        // typeAndStoreRow.eachCell((cell) => {
-        //     cell.font = { bold: true };
-        // });
+        const typeAndStoreRow = worksheet.addRow([
+            // " ",
+            // "",
+            // "",
+            // `Account: ${typeItem}`,
+            "",
+            "",
+            // `Type: ${typeText}`,
+            "",
+            "",
+            "",
+        ]);
+        typeAndStoreRow.eachCell((cell) => {
+            cell.font = { bold: true };
+        });
 
         worksheet.addRow([]); // Empty row for spacing
 
@@ -880,7 +881,7 @@ export default function ItemPriceList() {
         });
 
         // Set column widths
-        [22, 40, 10, 20, 20, 20, 20, 20].forEach((width, index) => {
+        [22, 45, 6, 15, 15, 15, 15, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
