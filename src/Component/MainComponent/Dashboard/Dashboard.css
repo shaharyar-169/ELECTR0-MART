@@ -1,29 +1,27 @@
-.dashboard {
-  padding: 20px;
-  height: 100vh;
-  background-color: #e2f0ff;
-}
-.card {
-  border: 1px solid #ccc;
-  border-radius: 0px;
-  width: 150px;
-  margin-right: 1%;
-
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.Countair_styling{
+/* border: 1px solid white !important; */
+height: 80vh !important;
+display: flex;
+align-items: start;
+margin-left: 5px;
 }
 
-.card-header {
-  background-color: #007bff;
-  color: white;
-  padding: -10px;
-  font-size: 18px;
-  text-align: center;
-  border-bottom: 1px solid #ccc;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+.Row_styling{
+  width: 100%;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  /* column-gap: 5px !important; */
+  flex-wrap: nowrap;
 }
 
-.card-body {
-  text-align: center;
-  padding: 10px;
+.Card_styling{
+  height: 110px;
+  border-left: 8px solid #7DDDD2;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+  width: 24.5%;
+  background-color: #3368B5;
+  padding: 5px 0px ;
 }

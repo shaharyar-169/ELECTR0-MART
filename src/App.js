@@ -27,6 +27,8 @@ import AddUser1 from "./Component/Utilities/UserManagement/AddUser/AddUser.jsx";
 import Customer from "./Component/MainComponent/Header/Admin/Customer.jsx";
 import MenuAdmin from "./Component/MainComponent/Header/Admin/MenuAdmin/MenuAdmin.jsx";
 
+//////////////////////////// DASHBOARD //////////////////////////////
+import Dashboard from "./Component/MainComponent/Dashboard/Dashboard.jsx";
 
 //////////////////////////// List reports //////////////////////////////
 import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList1.js";
@@ -54,14 +56,14 @@ import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledge
 function App() {
   const queryClient = new QueryClient();
 
-  const globadata={
-    tableTopColor : "#3368B5",
-	 tableHeadColor: "#C6DAF7",
-	 headerColor : "#D9DADF",
-	 secondaryColor : "#F5F5F5",
-	 textColor : "#fff",
-	 btnColor : "#3368B5",
-	 apiLink : "https://crystalsolutions.com.pk/emart/web"
+  const globadata = {
+    tableTopColor: "#3368B5",
+    tableHeadColor: "#C6DAF7",
+    headerColor: "#D9DADF",
+    secondaryColor: "#F5F5F5",
+    textColor: "#fff",
+    btnColor: "#3368B5",
+    apiLink: "https://crystalsolutions.com.pk/emart/web"
   }
 
   return (
@@ -85,18 +87,18 @@ function App() {
                 <Route exact path="/CapacityMaintenance" element={<Capacity_Maintenance />} />
                 <Route exact path="/UserManagement" element={<UserMaintenance />} />
 
-                 {/* Rountes for List reports */}
-                 <Route exact path="/CompanyList" element={<CompanyList />} />
-                 <Route exact path="/CategoryList" element={<CategoryList />} />
-                 <Route exact path="/CharofAccount" element={<ChartofAccount />} />
-                 <Route exact path="/StoreList" element={<StoreList />} />
-                 <Route exact path="/CapacityList" element={<CapacityList />} />
-                 <Route exact path="/TypeList" element={<TypeList />} />
-                 <Route exact path="/EmployeeList" element={<EmployeeList />} />
-                 <Route exact path="/UserList" element={<UserList />} />
-                 <Route exact path="/ItemList" element={<ItemList />} />
-                 <Route exact path="/PriceList" element={<ItemPriceList />} />
-                 <Route exact path="/PriceListA" element={<ItemPriceListA />} />
+                {/* Rountes for List reports */}
+                <Route exact path="/CompanyList" element={<CompanyList />} />
+                <Route exact path="/CategoryList" element={<CategoryList />} />
+                <Route exact path="/CharofAccount" element={<ChartofAccount />} />
+                <Route exact path="/StoreList" element={<StoreList />} />
+                <Route exact path="/CapacityList" element={<CapacityList />} />
+                <Route exact path="/TypeList" element={<TypeList />} />
+                <Route exact path="/EmployeeList" element={<EmployeeList />} />
+                <Route exact path="/UserList" element={<UserList />} />
+                <Route exact path="/ItemList" element={<ItemList />} />
+                <Route exact path="/PriceList" element={<ItemPriceList />} />
+                <Route exact path="/PriceListA" element={<ItemPriceListA />} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -107,6 +109,11 @@ function App() {
                 <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
                 <Route exact path="/CustomerProgress" element={<CustomerProgressLedger />} />
                 <Route exact path="/MobileLedger" element={<MobileLedger />} />
+
+
+                {/* Rountes for Dashboard */}
+                <Route exact path="/salesdashboad" element={<Dashboard />} />
+
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
