@@ -1,14 +1,17 @@
 .Countair_styling{
 /* border: 1px solid white !important; */
-height: 80vh !important;
+height: 86vh !important;
 display: flex;
 align-items: start;
 margin-left: 5px;
+display: flex;
+flex-direction: column ;
 }
 
 .Row_styling{
   width: 100%;
   padding: 5px;
+  margin: 0px ;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -18,10 +21,55 @@ margin-left: 5px;
 
 .Card_styling{
   height: 110px;
-  border-left: 8px solid #7DDDD2;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
+  border-left: 10px solid #3368B5;
+  border-radius: 5px;
   width: 24.5%;
-  background-color: #3368B5;
+  background-color: white;
   padding: 5px 0px ;
+  text-align: left !important;
+/* box-shadow: 5px 5px 2px black !important;   */
+/* box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset; */
+}
+
+.card_heading{
+  /* border-bottom: 2px solid #009dff; */
+padding-bottom: 0px !important;
+  padding-bottom: 8px;
+  color: #009dff;
+  font-size: 20px;
+  font-weight: 600;
+ margin-left: 12px;
+}
+.second_container_card{
+  width: 49.5%;
+  height: 200px;
+  /* background-color: white; */
+  border-radius: 5px;
+  
+ }
+.dunut_chart{
+  height: 200px;
+  width: 32.5%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+   
+}
+
+.table_container{
+  height: 100%;
+  width: 49%;
+  background-color: white;
+  display: flex;
+  border-radius: 5px;
+}
+
+.table_heading{
+  padding-bottom: 8px;
+  color: blackwhite;
+  font-size: 16px;
+  font-weight: 500;
+ margin-left: 12px;
 }
