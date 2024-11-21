@@ -53,6 +53,10 @@ import MobileLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileL
 import BankRegisterLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger.js";
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
 
+//////////////////////////// ledger reports //////////////////////////////
+import DailyCashReceipts from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashReceipts.js";
+import DailyCashBookSummary from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBookSummary.js";
+
 function App() {
   const queryClient = new QueryClient();
 
@@ -75,6 +79,7 @@ function App() {
               <Route exact path="/" element={<Loginn />} />
               <Route exact path="/login" element={<Loginn />} />
               <Route element={<Layout />}>
+              
                 {/* All pages with the sidebar */}
                 <Route exact path="/MainPage" element={<HomePage1 />} />
                 <Route exact path="/AccountCodeMaintenance" element={<Account_Code_Maintenance />} />
@@ -109,6 +114,10 @@ function App() {
                 <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
                 <Route exact path="/CustomerProgress" element={<CustomerProgressLedger />} />
                 <Route exact path="/MobileLedger" element={<MobileLedger />} />
+
+                {/* Rountes for ledgers reports */}
+                <Route exact path="/DailyCashReceipts" element={<DailyCashReceipts />} />
+                <Route exact path="/DailyCashBookSummary" element={<DailyCashBookSummary />} />
 
 
                 {/* Rountes for Dashboard */}
