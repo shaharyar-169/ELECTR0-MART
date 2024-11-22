@@ -20,6 +20,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import './daily.css';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import callAddFont from "../../../../vardana-normal";
 import { color } from "@mui/system";
 
 export default function DailyCashReceipts() {
@@ -32,6 +33,11 @@ export default function DailyCashReceipts() {
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
+
+    const [CashBookSummaryData, setCashBookSummaryData] = useState([]);
+    const [CashPaymentData, setCashPaymentData] = useState([]);
+
+    console.log('CashPaymentData', CashPaymentData)
 
     const [saleType, setSaleType] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -172,7 +178,6 @@ export default function DailyCashReceipts() {
     const handleToInputChange = (e) => {
         settoInputDate(e.target.value);
     };
-
     // Function to handle keypress and move focus
     const handleKeyPress = (e, nextInputRef) => {
         if (e.key === 'Enter') {
@@ -182,7 +187,6 @@ export default function DailyCashReceipts() {
             }
         }
     };
-
     function closeAlert(errorType) {
 
         const alertElement = document.getElementById('someElementId');
@@ -269,6 +273,42 @@ export default function DailyCashReceipts() {
         // document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
         document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
 
+
+
+        const apiUrl2 = apiLinks + "/DailyCashBookSummary.php";
+        setIsLoading(true);
+        const formData2 = new URLSearchParams({
+            FTrnDat: toInputDate,
+            code: 'NASIRTRD',
+            // code: organisation.code,
+            // FYerDsc: getyeardescription,
+            FYerDsc: '2024-2024',
+            // FLocCod: getLocationNumber,
+            FLocCod: '001',
+
+        }).toString();
+
+        axios
+            .post(apiUrl2, formData2)
+            .then((response) => {
+
+                if (response.data && Array.isArray(response.data)) {
+                    setCashBookSummaryData(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setCashBookSummaryData([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                setIsLoading(false);
+            });
+
+
+
         const apiUrl = apiLinks + "/DailyCashReceipts.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
@@ -304,6 +344,40 @@ export default function DailyCashReceipts() {
                 console.error("Error:", error);
                 setIsLoading(false);
             });
+
+
+        const apiUrl3 = apiLinks + "/DailyCashPayments.php";
+        setIsLoading(true);
+        const formData3 = new URLSearchParams({
+            FTrnDat: toInputDate,
+            code: 'NASIRTRD',
+            // code: organisation.code,
+            // FYerDsc: getyeardescription,
+            FYerDsc: '2024-2024',
+            // FLocCod: getLocationNumber,
+            FLocCod: '001',
+
+        }).toString();
+
+        axios
+            .post(apiUrl3, formData3)
+            .then((response) => {
+
+                setTotalCredit(response.data["Total"]);
+                if (response.data && Array.isArray(response.data.Receipts)) {
+                    setCashPaymentData(response.data.Receipts);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setCashPaymentData([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+
     }
 
     useEffect(() => {
@@ -420,29 +494,37 @@ export default function DailyCashReceipts() {
         const doc = new jsPDF({ orientation: "portrait" });
 
         // Define table data (rows)
-        const rows = tableData.map((item) => [
-            item['Trn#'],
-            `${item['A/C']} - ${item.Description}`,
-            item.Amount,
-
-        ]);
+        const rows = CashPaymentData.map((cashPaymentItem, index) => {
+            // Retrieve corresponding data from tableData
+            const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
+        
+            return [
+                tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
+                tableItem.Amount || "", // Second column - From tableData
+                cashPaymentItem['Trn#'] ? `${cashPaymentItem['Trn#']} - ${cashPaymentItem.Description}` : "", // Third column - From CashPaymentData
+                cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
+            ];
+        });
+        
 
         // Add summary row to the table
         rows.push([
             "",
-            "Total",
             String(totalDebit),
+            "",
+            String(totalCredit),
 
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
-            "Trn#",
-            "A/C - Description",
+            "Receipts",
+            "Amount",
+            "Payments",
             "Amount",
 
         ];
-        const columnWidths = [15, 80, 20];
+        const columnWidths = [80, 17,80,17];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -458,7 +540,7 @@ export default function DailyCashReceipts() {
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
+            doc.setFont("vardana", "bold"); // Set font to bold
             doc.setFontSize(10); // Set font size for headers
 
             headers.forEach((header, index) => {
@@ -498,7 +580,7 @@ export default function DailyCashReceipts() {
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 100; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -507,17 +589,7 @@ export default function DailyCashReceipts() {
                     fontName = boldFont; // Set bold font for red-colored row
                 }
 
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+                
 
                 // Draw row borders
                 doc.setDrawColor(0); // Set color for borders
@@ -540,16 +612,8 @@ export default function DailyCashReceipts() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 2) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
-
-                    }
-
-                    else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+                   
+                    if (cellIndex === 1 || cellIndex === 3 ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -670,18 +734,9 @@ export default function DailyCashReceipts() {
                     10
                 ); // Render company title with default font size, only date, and page number
                 startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
+                
                 addTitle(
-                    `Daily Cash Receipts Report From: ${fromInputDate} To: ${toInputDate}`,
+                    `Daily Cash Book Report From: ${fromInputDate} `,
                     "",
                     "",
                     pageNumber,
@@ -694,14 +749,14 @@ export default function DailyCashReceipts() {
                 const labelsY = startY + 2; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
+                doc.setFontSize(10);
+                doc.setFont("verdana", 'bold');
 
-                // let typeText = transectionType ? transectionType : "";
-                // let typeItem = saleType ? saleType : "";
+                let typeText = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null ? CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null : "";
+                let typeItem = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null ? CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null : "";
 
-                // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Opening Bal : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Closing Bal : ${typeText}`, labelsX + 165, labelsY); // Adjust x-coordinate for From Date
 
                 // Reset font weight to normal if necessary for subsequent text
                 doc.setFont("verdana", "normal");
@@ -749,7 +804,7 @@ export default function DailyCashReceipts() {
         handlePagination();
 
         // Save the PDF file
-        doc.save("GeneralLedger.pdf");
+        doc.save("DailyCashBookReport.pdf");
 
         const pdfBlob = doc.output("blob");
         const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -771,21 +826,22 @@ export default function DailyCashReceipts() {
             alignment: { horizontal: "center" },
         };
 
-        const columnAlignments = ["center", "left", "right"];
+        const columnAlignments = ["left", "right","left", "right"];
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
-        // Add title rows
-        [
+               // Add title rows
+         [
             comapnyname,
-            `Daily Cash Receipts Report: ${toInputDate}`,
+            `Daily Cash Book From ${toInputDate}`,
         ].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
+
 
         worksheet.addRow([]); // Empty row for spacing
 
@@ -826,26 +882,47 @@ export default function DailyCashReceipts() {
 
         // Add headers
         const headers = [
-            "Trn#",
-            "A/C - Description",
-            "Amount",];
+            "Receipt",
+            "Amount",
+            "Payments",
+            "Amount",
+        ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
             cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
         });
 
+
         // Add data rows
-        tableData.forEach((item) => {
+        CashPaymentData.forEach((cashPaymentItem, index) => {
+            // Retrieve corresponding data from tableData
+            const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
+
             worksheet.addRow([
-                item['Trn#'],
-                `${item['A/C']} - ${item.Description}`,
-                item.Amount,
+                tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
+                tableItem.Amount || "", // Second column - From tableData
+                cashPaymentItem['Trn#'] ? `${cashPaymentItem['Trn#']} - ${cashPaymentItem.Description}` : "", // Third column - From CashPaymentData
+                cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
+           
             ]);
         });
 
 
+         // Add total row and bold it
+         const totalRow = worksheet.addRow([
+            "",
+            totalDebit,
+            "",
+            totalCredit,
+           
+        ]);
+        totalRow.eachCell((cell) => {
+            cell.font = { bold: true };
+        });
+
+
         // Set column widths
-        [10, 50, 15].forEach((width, index) => {
+        [48, 12, 48, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -902,7 +979,7 @@ export default function DailyCashReceipts() {
     // }, [dispatch, organisation.code]);
 
 
-    const comapnyname = organisation.name;
+    const comapnyname = organisation.description;
 
     const handleSearch = (e) => {
         setSelectedSearch(e.target.value);
@@ -925,13 +1002,16 @@ export default function DailyCashReceipts() {
 
 
     const firstColWidth = {
-        width: "10%",
+        width: "40%",
     };
     const secondColWidth = {
-        width: "74.6%",
+        width: "10%",
     };
     const thirdColWidth = {
-        width: "15%",
+        width: "40%",
+    };
+    const forthColWidth = {
+        width: "10%",
     };
 
 
@@ -955,7 +1035,7 @@ export default function DailyCashReceipts() {
     const contentStyle = {
         backgroundColor: getcolor,
         // height: "100vh",
-        width: isSidebarVisible ? "calc(45vw - 0%)" : "45vw",
+        width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -982,7 +1062,7 @@ export default function DailyCashReceipts() {
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
-        if (isFilterApplied || tableData.length > 0) {
+        if (isFilterApplied || CashPaymentData.length > 0) {
             setSelectedIndex(0); // Set the selected index to the first row
             rowRefs.current[0]?.scrollIntoView({
                 behavior: "smooth",
@@ -991,7 +1071,7 @@ export default function DailyCashReceipts() {
         } else {
             setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
         }
-    }, [tableData, isFilterApplied]);
+    }, [CashPaymentData, isFilterApplied]);
 
     let totalEnteries = 0;
     const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
@@ -1010,7 +1090,7 @@ export default function DailyCashReceipts() {
             );
             setSelectedIndex(newIndex);
         }
-    }, [tableData, selectedRowId]);
+    }, [CashPaymentData, selectedRowId]);
     const handleKeyDown = (e) => {
         if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
         if (e.key === "ArrowUp") {
@@ -1020,7 +1100,7 @@ export default function DailyCashReceipts() {
         } else if (e.key === "ArrowDown") {
             e.preventDefault();
             setSelectedIndex((prevIndex) =>
-                Math.min(prevIndex + 1, tableData.length - 1)
+                Math.min(prevIndex + 1, CashPaymentData.length - 1)
             );
             scrollToSelectedRow();
         }
@@ -1070,12 +1150,11 @@ export default function DailyCashReceipts() {
 
                     }}
                 >
-                    <NavComponent textdata="Daily Cash Receipts Report" />
+                    <NavComponent textdata="Daily Cash Book Report" />
 
 
                     <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'space-between' }}>
-
+                        <div style={{ width: '97.5%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'space-between' }}>
 
                             {/* To Date */}
                             <div className='d-flex align-items-center' style={{ marginLeft: '7px' }}>
@@ -1156,30 +1235,44 @@ export default function DailyCashReceipts() {
                                 </div>
                             </div>
 
-                            {/* Search Item  */}
-                            <div id="lastDiv" style={{ marginRight: '1px' }}>
-                                <label for="searchInput" style={{ marginRight: '15px' }}><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Search :</span> </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    // onKeyDown={(e) => handlesearchKeypress(e, 'searchsubmit')}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
+                            {/* Opening Balance  */}
+                            <div style={{ display: 'flex' }}>
+                                <div style={{ width: '110px' }}>
+                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Opening Bal :</span> </label>
+                                </div>
+                                <div
                                     style={{
-                                        marginRight: '20px',
-                                        width: '200px',
+                                        width: '100px',
                                         height: '24px',
                                         fontSize: '12px',
                                         color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        outline: 'none',
-                                        paddingLeft: '10px'
+
                                     }}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                                >
+                                    <span className="mobileledger_total">{CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null}</span>
+                                </div>
+                            </div>
+
+                            {/* Closing Balance  */}
+                            <div style={{ display: 'flex' }}>
+                                <div style={{ width: '110px' }}>
+                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Closing Bal :</span> </label>
+                                </div>
+                                <div
+                                    style={{
+                                        width: '100px',
+                                        height: '24px',
+                                        fontSize: '12px',
+                                        color: fontcolor,
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+
+                                    }}
+                                >
+                                    <span className="mobileledger_total">{CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null}</span>
+                                </div>
                             </div>
 
                         </div>
@@ -1221,12 +1314,15 @@ export default function DailyCashReceipts() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                            Trn#
+                                            Receipts
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            A/C - Description
+                                            Amount
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
+                                            Payments
+                                        </td>
+                                        <td className="border-dark" style={forthColWidth}>
                                             Amount
                                         </td>
 
@@ -1265,7 +1361,7 @@ export default function DailyCashReceipts() {
                                                     backgroundColor: getcolor
                                                 }}
                                             >
-                                                <td colSpan="3" className="text-center">
+                                                <td colSpan="4" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1277,7 +1373,7 @@ export default function DailyCashReceipts() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 3 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 4 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}
                                                             >
                                                                 &nbsp;
@@ -1290,11 +1386,13 @@ export default function DailyCashReceipts() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
+                                                <td style={forthColWidth}></td>
+
                                             </tr>
                                         </>
                                     ) : (
                                         <>
-                                            {tableData.map((item, i) => {
+                                            {/* {tableData.map((item, i) => {
                                                 totalEnteries += 1;
                                                 return (
                                                     <tr
@@ -1304,20 +1402,69 @@ export default function DailyCashReceipts() {
                                                         className={selectedIndex === i ? "selected-background" : ""}
                                                         style={{ backgroundColor: '#021A33' }}
                                                     >
-                                                        <td className="text-center" style={firstColWidth}>
-                                                            {item["Trn#"]}
+                                                        <td className="text-start" style={firstColWidth}>
+                                                            {`${item['Trn#']}-${item['A/C']} - ${item.Description}`}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {`${item['A/C']} - ${item.Description}`}
+                                                        <td className="text-end" style={secondColWidth}>
+                                                            {item.Amount} 
                                                         </td>
-                                                        <td className="text-end" style={thirdColWidth}>
+
+                                                        <td className="text-start" style={thirdColWidth}>
+                                                        {`${item['Trn#']}-${item['A/C']} - ${item.Description}`}
+
+                                                        </td>
+                                                        <td className="text-end" style={forthColWidth}>
                                                             {item.Amount}
                                                         </td>
 
 
                                                     </tr>
                                                 );
+                                            })} */}
+
+
+                                            {CashPaymentData.map((cashPaymentItem, i) => {
+                                                totalEnteries += 1;
+
+                                                // Retrieve corresponding data from tableData if it exists
+                                                const tableItem = tableData[i] || {}; // Fallback to an empty object if index doesn't exist
+
+                                                return (
+                                                    <tr
+                                                        key={`${i}-${selectedIndex}`}
+                                                        ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
+                                                        onClick={() => handleRowClick(i)}
+                                                        className={selectedIndex === i ? "selected-background" : ""}
+                                                        style={{ backgroundColor: '#021A33' }}
+                                                    >
+                                                        {/* First Column - From tableData if available */}
+                                                        <td className="text-start" style={firstColWidth}>
+                                                            {tableItem['Trn#']
+                                                                ? `${tableItem['Trn#']}- ${tableItem.Description}`
+                                                                : ""}
+                                                        </td>
+
+                                                        {/* Second Column - From CashPaymentData */}
+                                                        <td className="text-end" style={secondColWidth}>
+                                                            {tableItem.Amount || ""}
+                                                        </td>
+
+                                                        {/* Third Column - From CashPaymentData */}
+                                                        <td className="text-start" style={thirdColWidth}>
+                                                            {`${cashPaymentItem['Trn#'] || ""}-${cashPaymentItem.Description || ""}`}
+                                                        </td>
+
+                                                        {/* Fourth Column - From tableData if available */}
+                                                        <td className="text-end" style={forthColWidth}>
+                                                            {cashPaymentItem.Amount || ""}
+
+                                                        </td>
+                                                    </tr>
+                                                );
                                             })}
+
+
+
                                             {Array.from({
                                                 length: Math.max(0, 27 - tableData.length),
                                             }).map((_, rowIndex) => (
@@ -1327,7 +1474,7 @@ export default function DailyCashReceipts() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 3 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 4 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1338,6 +1485,7 @@ export default function DailyCashReceipts() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
+                                                <td style={forthColWidth}></td>
 
 
 
@@ -1349,12 +1497,18 @@ export default function DailyCashReceipts() {
                         </div>
                     </div>
 
-                    <div style={{ width: '98.5%', borderTop: `1px solid ${fontcolor}`, borderBottom: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{ width: '98.8%', borderTop: `1px solid ${fontcolor}`, borderBottom: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalDebit}</span>
+
+                        </div>
+                        <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+
+                        </div>
+                        <div style={{ ...forthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalCredit}</span>
 
                         </div>
 

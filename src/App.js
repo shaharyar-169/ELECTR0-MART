@@ -116,7 +116,7 @@ function App() {
                 <Route exact path="/MobileLedger" element={<MobileLedger />} />
 
                 {/* Rountes for ledgers reports */}
-                <Route exact path="/DailyCashReceipts" element={<DailyCashReceipts />} />
+                <Route exact path="/CashBook" element={<DailyCashReceipts />} />
                 <Route exact path="/DailyCashBookSummary" element={<DailyCashBookSummary />} />
 
 
