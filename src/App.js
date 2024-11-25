@@ -56,6 +56,9 @@ import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledge
 //////////////////////////// ledger reports //////////////////////////////
 import DailyCashReceipts from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashReceipts.js";
 import DailyCashBookSummary from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBookSummary.js";
+import JournalReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/Journal.js";
+import DailyCreditReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCreditMemo.js";
+import DocumentEditReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DocumentEditReport.js";
 
 function App() {
   const queryClient = new QueryClient();
@@ -118,6 +121,9 @@ function App() {
                 {/* Rountes for ledgers reports */}
                 <Route exact path="/CashBook" element={<DailyCashReceipts />} />
                 <Route exact path="/DailyCashBookSummary" element={<DailyCashBookSummary />} />
+                <Route exact path="/Journal" element={<JournalReport />} />
+                <Route exact path="/EditDocumentReport" element={<DocumentEditReport />} />
+                <Route exact path="/DailyCreditMemo" element={<DailyCreditReport />} />
 
 
                 {/* Rountes for Dashboard */}
