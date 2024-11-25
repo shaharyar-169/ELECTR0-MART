@@ -969,6 +969,8 @@ export default function DailyCashReceipts() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
+
+    
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
