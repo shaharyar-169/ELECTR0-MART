@@ -102,7 +102,7 @@ export default function Dasboard() {
     backgroundColor: getcolor,
     width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
     position: "relative",
-    top: "40%",
+    top: "44%",
     left: isSidebarVisible ? "50%" : "50%",
     transform: "translate(-50%, -50%)",
     transition: isSidebarVisible
