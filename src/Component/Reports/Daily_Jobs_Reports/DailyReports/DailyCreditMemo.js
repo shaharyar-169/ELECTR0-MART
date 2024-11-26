@@ -41,7 +41,7 @@ export default function DailyCreditReport() {
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("");
+    const [transectionType, settransectionType] = useState("A");
     const [supplierList, setSupplierList] = useState([]);
 
     const [totalQnty, setTotalQnty] = useState(0);
@@ -990,7 +990,6 @@ export default function DailyCreditReport() {
                                     }}
                                 >
                                     
-                                    <option value=""></option>
                                     <option value="A">All</option>
                                     <option value="O">Outstanding</option>
                                     <option value="N">Nill</option>

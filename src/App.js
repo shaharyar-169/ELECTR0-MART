@@ -59,6 +59,7 @@ import DailyCashBookSummary from "./Component/Reports/Daily_Jobs_Reports/DailyRe
 import JournalReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/Journal.js";
 import DailyCreditReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCreditMemo.js";
 import DocumentEditReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DocumentEditReport.js";
+import DailyProfitReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyProfitReport.js";
 
 function App() {
   const queryClient = new QueryClient();
@@ -124,6 +125,7 @@ function App() {
                 <Route exact path="/Journal" element={<JournalReport />} />
                 <Route exact path="/EditDocumentReport" element={<DocumentEditReport />} />
                 <Route exact path="/DailyCreditMemo" element={<DailyCreditReport />} />
+                <Route exact path="/DailyProfitReport" element={<DailyProfitReport />} />
 
 
                 {/* Rountes for Dashboard */}
