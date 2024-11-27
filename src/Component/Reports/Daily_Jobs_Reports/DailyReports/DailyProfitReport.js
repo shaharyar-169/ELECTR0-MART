@@ -400,7 +400,7 @@ export default function DailyProfitReport() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            FTrnRat: transectionType,
+            FRepTyp: transectionType,
             code: 'NASIRTRD',
             FYerDsc: '2024-2024',
             FLocCod: '001',
@@ -1555,7 +1555,7 @@ export default function DailyProfitReport() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
+                                style={{ marginRight: "25px" }}
                             >
                                 <div
                                     style={{
@@ -1575,7 +1575,7 @@ export default function DailyProfitReport() {
 
                                 <select
                                     ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                                     id="submitButton"
                                     name="type"
                                     onFocus={(e) =>
@@ -1597,18 +1597,9 @@ export default function DailyProfitReport() {
                                     }}
                                 >
                                     <option value="">All</option>
-                                    <option value="CRV">Cash Receive Vorcher</option>
-                                    <option value="CPV">Cash Payment Vorcher</option>
-                                    <option value="BRV">Bank Receive Vorcher</option>
-                                    <option value="BPV">Bank Payment Vorcher</option>
-                                    <option value="JRV">Journal Vorcher</option>
-                                    <option value="INV">Item Sale</option>
-                                    <option value="SRN">Sale Return</option>
-                                    <option value="BIL">Purchase</option>
-                                    <option value="PRN">Purchase Return</option>
-                                    <option value="ISS">Issue</option>
-                                    <option value="REC">Received</option>
-                                    <option value="SLY">Salary</option>
+                                    <option value="S">Cash </option>
+                                    <option value="R">Credit</option>
+                                    
                                 </select>
                             </div>
                         </div>
@@ -1661,17 +1652,19 @@ export default function DailyProfitReport() {
                                         <td className="border-dark" style={fifthColWidth}>
                                             Item
                                         </td>
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Qty
-                                        </td>
+
                                         <td className="border-dark" style={seventhColWidth}>
                                             Sale Rt
                                         </td>
-                                        <td className="border-dark" style={eightColWidth}>
-                                            Sale Amt
-                                        </td>
+
                                         <td className="border-dark" style={ninthColWidth}>
                                             Cost Rate
+                                        </td>
+                                        <td className="border-dark" style={sixthColWidth}>
+                                            Qty
+                                        </td>
+                                        <td className="border-dark" style={eightColWidth}>
+                                            Sale Amt
                                         </td>
                                         <td className="border-dark" style={tenthColWidth}>
                                             Margin
@@ -1741,9 +1734,9 @@ export default function DailyProfitReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eightColWidth}></td>
+                                                <td style={sixthColWidth}></td>
                                                 <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
                                                 <td style={elewnthColWidth}></td>
@@ -1782,18 +1775,21 @@ export default function DailyProfitReport() {
                                                         <td className="text-start" style={fifthColWidth}>
                                                             {item.Item}
                                                         </td>
-                                                        <td className="text-center" style={sixthColWidth}>
-                                                            {item.Qnty}
-                                                        </td>
+
                                                         <td className="text-end" style={seventhColWidth}>
                                                             {item['Sale Rt']}
+                                                        </td>
+
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item['Cost Rate']}
+                                                        </td>
+                                                        <td className="text-center" style={sixthColWidth}>
+                                                            {item.Qnty}
                                                         </td>
                                                         <td className="text-end" style={eightColWidth}>
                                                             {item['Sale Amt']}
                                                         </td>
-                                                        <td className="text-end" style={ninthColWidth}>
-                                                            {item['Cost Rate']}
-                                                        </td>
+
                                                         <td className="text-end" style={tenthColWidth}>
                                                             {item.Margin}
                                                         </td>
@@ -1827,9 +1823,9 @@ export default function DailyProfitReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eightColWidth}></td>
+                                                <td style={sixthColWidth}></td>
                                                 <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
                                                 <td style={elewnthColWidth}></td>
@@ -1890,6 +1886,24 @@ export default function DailyProfitReport() {
                                 }}
                             >
                             </div>
+
+                            <div
+                                style={{
+                                    ...seventhColWidth,
+                                    background: getcolor,
+                                    borderRight: `1px solid ${fontcolor}`,
+                                }}
+                            >
+                            </div>
+
+                            <div
+                                style={{
+                                    ...eightColWidth,
+                                    background: getcolor,
+                                    borderRight: `1px solid ${fontcolor}`,
+                                }}
+                            >
+                            </div>
                             <div
                                 style={{
                                     ...sixthColWidth,
@@ -1902,28 +1916,12 @@ export default function DailyProfitReport() {
                             </div>
                             <div
                                 style={{
-                                    ...seventhColWidth,
-                                    background: getcolor,
-                                    borderRight: `1px solid ${fontcolor}`,
-                                }}
-                            >
-                            </div>
-                            <div
-                                style={{
-                                    ...eightColWidth,
-                                    background: getcolor,
-                                    borderRight: `1px solid ${fontcolor}`,
-                                }}
-                            >
-                                <span className="mobileledger_total">{totalCredit}</span>
-                            </div>
-                            <div
-                                style={{
                                     ...ninthColWidth,
                                     background: getcolor,
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             >
+                                <span className="mobileledger_total">{totalCredit}</span>
                             </div>
                             <div
                                 style={{
@@ -1949,92 +1947,151 @@ export default function DailyProfitReport() {
 
                         </div>
 
-
-                        <div style={{ width: '60%', border: '1px solid white' }}>
-                            <div
-                                style={{
-                                    overflowY: "auto",
-                                    width: "98%",
-                                }}
-                            >
-                                <table
-                                    className="myTable"
-                                    id="table"
+                        <div style={{ display: 'flex' }}>
+                            <div style={{ width: '60%', border: '1px solid white' }}>
+                                <div
                                     style={{
-                                        fontSize: "12px",
-                                        width: "100%",
-                                        position: "relative",
-                                        paddingRight: "2%",
+                                        overflowY: "auto",
+                                        width: "98%",
                                     }}
                                 >
-                                    <thead
+                                    <table
+                                        className="myTable"
+                                        id="table"
                                         style={{
-                                            fontWeight: "bold",
-                                            height: "24px",
-                                            position: "sticky",
-                                            top: 0,
-                                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                            backgroundColor: tableHeadColor,
+                                            fontSize: "12px",
+                                            width: "100%",
+                                            position: "relative",
+                                            paddingRight: "2%",
                                         }}
                                     >
-                                        <tr
+                                        <thead
                                             style={{
+                                                fontWeight: "bold",
+                                                height: "24px",
+                                                position: "sticky",
+                                                top: 0,
+                                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                                 backgroundColor: tableHeadColor,
-                                                color: "white",
                                             }}
                                         >
-                                            <td className="border-dark" style={bottomfirstColWidth}>
-                                                Date
-                                            </td>
-                                            <td className="border-dark" style={bottomsecondColWidth}>
-                                                Trn#
-                                            </td>
-                                            <td className="border-dark" style={bottomthirdColWidth}>
-                                                Item
-                                            </td>
-                                            <td className="border-dark" style={bottomforthColWidth}>
-                                                Amount
-                                            </td>
+                                            <tr
+                                                style={{
+                                                    backgroundColor: tableHeadColor,
+                                                    color: "white",
+                                                }}
+                                            >
+                                                <td className="border-dark" style={bottomfirstColWidth}>
+                                                    Date
+                                                </td>
+                                                <td className="border-dark" style={bottomsecondColWidth}>
+                                                    Trn#
+                                                </td>
+                                                <td className="border-dark" style={bottomthirdColWidth}>
+                                                    Item
+                                                </td>
+                                                <td className="border-dark" style={bottomforthColWidth}>
+                                                    Amount
+                                                </td>
 
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
 
-                            <div
-                                className="table-scroll"
-                                style={{
-                                    backgroundColor: textColor,
-                                    borderBottom: `1px solid ${fontcolor}`,
-                                    overflowY: "auto",
-                                    maxHeight: "25vh",
-                                    width: "100%",
-                                    wordBreak: "break-word",
-                                }}
-                            >
-                                <table
-                                    className="myTable"
-                                    id="tableBody"
+                                <div
+                                    className="table-scroll"
                                     style={{
-                                        fontSize: "12px",
+                                        backgroundColor: textColor,
+                                        borderBottom: `1px solid ${fontcolor}`,
+                                        overflowY: "auto",
+                                        maxHeight: "25vh",
                                         width: "100%",
-                                        position: "relative",
+                                        wordBreak: "break-word",
                                     }}
                                 >
-                                    <tbody id="tablebody">
-                                        {isLoading ? (
-                                            <>
-                                                <tr
-                                                    style={{
-                                                        backgroundColor: getcolor,
-                                                    }}
-                                                >
-                                                    <td colSpan="4" className="text-center">
-                                                        <Spinner animation="border" variant="primary" />
-                                                    </td>
-                                                </tr>
-                                                {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                                                    (_, rowIndex) => (
+                                    <table
+                                        className="myTable"
+                                        id="tableBody"
+                                        style={{
+                                            fontSize: "12px",
+                                            width: "100%",
+                                            position: "relative",
+                                        }}
+                                    >
+                                        <tbody id="tablebody">
+                                            {isLoading ? (
+                                                <>
+                                                    <tr
+                                                        style={{
+                                                            backgroundColor: getcolor,
+                                                        }}
+                                                    >
+                                                        <td colSpan="4" className="text-center">
+                                                            <Spinner animation="border" variant="primary" />
+                                                        </td>
+                                                    </tr>
+                                                    {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                                                        (_, rowIndex) => (
+                                                            <tr
+                                                                key={`blank-${rowIndex}`}
+                                                                style={{
+                                                                    backgroundColor: getcolor,
+                                                                    color: fontcolor,
+                                                                }}
+                                                            >
+                                                                {Array.from({ length: 4 }).map((_, colIndex) => (
+                                                                    <td key={`blank-${rowIndex}-${colIndex}`}>
+                                                                        &nbsp;
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        )
+                                                    )}
+                                                    <tr>
+                                                        <td style={bottomfirstColWidth}></td>
+                                                        <td style={bottomsecondColWidth}></td>
+                                                        <td style={bottomthirdColWidth}></td>
+                                                        <td style={bottomforthColWidth}></td>
+
+                                                    </tr>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {Expenses.map((item, i) => {
+                                                        // totalEnteries += 1;
+                                                        return (
+                                                            <tr
+                                                                // key={`${i}-${selectedIndex}`}
+                                                                // ref={(el) => (rowRefs.current[i] = el)}
+                                                                // onClick={() => handleRowClick(i)}
+                                                                // className={
+                                                                //     selectedIndex === i ? "selected-background" : ""
+                                                                // }
+                                                                style={{
+                                                                    backgroundColor: getcolor,
+                                                                    color: fontcolor,
+                                                                }}
+                                                            >
+                                                                <td className="text-start" style={bottomfirstColWidth}>
+                                                                    {item.Date}
+                                                                </td>
+                                                                <td className="text-start" style={bottomsecondColWidth}>
+                                                                    {item['Trn#']}
+                                                                </td>
+                                                                <td className="text-start" style={bottomthirdColWidth}>
+                                                                    {item.Item}
+                                                                </td>
+                                                                <td className="text-end" style={bottomforthColWidth}>
+                                                                    {item.Amount}
+                                                                </td>
+
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                    {Array.from({
+                                                        length: Math.max(0, 27 - Expenses.length),
+                                                    }).map((_, rowIndex) => (
                                                         <tr
                                                             key={`blank-${rowIndex}`}
                                                             style={{
@@ -2048,81 +2105,54 @@ export default function DailyProfitReport() {
                                                                 </td>
                                                             ))}
                                                         </tr>
-                                                    )
-                                                )}
-                                                <tr>
-                                                    <td style={bottomfirstColWidth}></td>
-                                                    <td style={bottomsecondColWidth}></td>
-                                                    <td style={bottomthirdColWidth}></td>
-                                                    <td style={bottomforthColWidth}></td>
+                                                    ))}
+                                                    <tr>
+                                                        <td style={bottomfirstColWidth}></td>
+                                                        <td style={bottomsecondColWidth}></td>
+                                                        <td style={bottomthirdColWidth}></td>
+                                                        <td style={bottomforthColWidth}></td>
 
-                                                </tr>
-                                            </>
-                                        ) : (
-                                            <>
-                                                {Expenses.map((item, i) => {
-                                                    // totalEnteries += 1;
-                                                    return (
-                                                        <tr
-                                                            // key={`${i}-${selectedIndex}`}
-                                                            // ref={(el) => (rowRefs.current[i] = el)}
-                                                            // onClick={() => handleRowClick(i)}
-                                                            // className={
-                                                            //     selectedIndex === i ? "selected-background" : ""
-                                                            // }
-                                                            style={{
-                                                                backgroundColor: getcolor,
-                                                                color: fontcolor,
-                                                            }}
-                                                        >
-                                                            <td className="text-start" style={bottomfirstColWidth}>
-                                                                {item.Date}
-                                                            </td>
-                                                            <td className="text-start" style={bottomsecondColWidth}>
-                                                                {item['Trn#']}
-                                                            </td>
-                                                            <td className="text-start" style={bottomthirdColWidth}>
-                                                                {item.Item}
-                                                            </td>
-                                                            <td className="text-end" style={bottomforthColWidth}>
-                                                                {item.Amount}
-                                                            </td>
 
-                                                        </tr>
-                                                    );
-                                                })}
-                                                {Array.from({
-                                                    length: Math.max(0, 27 - Expenses.length),
-                                                }).map((_, rowIndex) => (
-                                                    <tr
-                                                        key={`blank-${rowIndex}`}
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        {Array.from({ length: 4 }).map((_, colIndex) => (
-                                                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                                                                &nbsp;
-                                                            </td>
-                                                        ))}
                                                     </tr>
-                                                ))}
-                                                <tr>
-                                                    <td style={bottomfirstColWidth}></td>
-                                                    <td style={bottomsecondColWidth}></td>
-                                                    <td style={bottomthirdColWidth}></td>
-                                                    <td style={bottomforthColWidth}></td>
+                                                </>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
 
 
-                                                </tr>
-                                            </>
-                                        )}
-                                    </tbody>
-                                </table>
                             </div>
-                        </div>
 
+                            <div style={{ width: "40%" }}>
+
+                                <div className="row" style={{ width: '100%', height: '24px', display: 'flex', margin: "0px" }}>
+                                    <div style={{ width: '57%', textAlign: 'end' }}>Total Expenses :</div>
+                                    <div style={{ width: '20%', border: `1px solid ${fontcolor} ` }}></div>
+
+                                </div>
+                                <div className="row" style={{ width: '100%', height: '24px', display: 'flex', margin: "0px" }}>
+                                    <div style={{ width: '57%', textAlign: 'end' }}>Net Profit :</div>
+                                    <div style={{ width: '20%', border: `1px solid ${fontcolor} ` }}></div>
+                                </div>
+                                <div className="row simple_line" style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div style={{ width: '80%', border: `1px solid ${fontcolor} ` }}></div>
+                                    <div >
+                                    </div>
+                               </div>
+                                <div className="row" style={{ width: '100%', height: '24px', display: 'flex', margin: "0px" }}>
+                                    <div style={{ width: '57%', textAlign: 'end' }}>Other Income :</div>
+                                    <div style={{ width: '20%', border: `1px solid ${fontcolor} ` }}></div>
+
+                                </div>
+                                <div className="row" style={{ width: '100%', height: '24px', display: 'flex', margin: "0px" }}>
+                                    <div style={{ width: '57%', textAlign: 'end' }}>Total Profit :</div>
+                                    <div style={{ width: '20%', border: `1px solid ${fontcolor} ` }}></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 

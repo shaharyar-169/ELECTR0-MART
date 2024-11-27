@@ -1589,7 +1589,7 @@ export default function DocumentEditReport() {
 
                                 <select
                                     ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                                     id="submitButton"
                                     name="type"
                                     onFocus={(e) =>
