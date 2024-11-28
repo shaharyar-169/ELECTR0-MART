@@ -46,7 +46,7 @@ export default function Dasboard() {
       // code: organisation.code,
       code: 'NASIRTRD',
       FLocCod: LocationNumner,
-      FYerDsc:'2024-2024'
+      FYerDsc: '2024-2024'
     }).toString();
 
     axios
@@ -75,7 +75,7 @@ export default function Dasboard() {
       // code: organisation.code,
       code: 'NASIRTRD',
       FLocCod: LocationNumner,
-       FYerDsc:'2024-2024'
+      FYerDsc: '2024-2024'
     }).toString();
 
     axios
@@ -131,7 +131,9 @@ export default function Dasboard() {
       <div className="Countair_styling" style={contentStyle} >
         {/* CARD ROW */}
         <div className="row Row_styling" >
-          <div className="Card_styling">
+
+
+          {/* <div className="Card_styling">
             <span className="card_heading">Sales</span>
             <div className="row" style={{ width: '100%' }}>
               <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Today</div>
@@ -145,7 +147,28 @@ export default function Dasboard() {
               <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>This Year</div>
               <div className="col-md-6 text-end " style={{ color: 'black', }} >{saleyear}</div>
             </div>
+          </div> */}
+
+          <div className="Card_styling1">
+            <div style={{background:'orange', width:'100%'}}> <span>Sales</span></div>
+         
+            <div className="row" style={{ width: '100%' }}>
+              <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Today</div>
+              <div className="col-md-6 text-end " style={{ color: 'black' }} >{saletoday}</div>
+            </div>
+            <div className="row" style={{ width: '100%' }}>
+              <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>This Month</div>
+              <div className="col-md-6 text-end " style={{ color: 'black', }} >{salemonth}</div>
+            </div>
+            <div className="row" style={{ width: '100%' }}>
+              <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>This Year</div>
+              <div className="col-md-6 text-end " style={{ color: 'black', }} >{saleyear}</div>
+            </div>
           </div>
+
+          {/* //////////////// NEW CADD DESIGN ////////////////////// */}
+
+
           <div className="Card_styling">
             <span className="card_heading">Purchase</span>
             <div className="row" style={{ width: '100%' }}>

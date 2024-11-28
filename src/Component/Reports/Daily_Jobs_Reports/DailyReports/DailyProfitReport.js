@@ -488,45 +488,69 @@ export default function DailyProfitReport() {
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "landscape" });
 
-        // Define table data (rows)
-        const rows = tableData.map((item) => [
+       
+        const profitRows = Profits.map((item) => [
             item.Date,
-            item.Time,
             item["Trn#"],
             item.Type,
             item.Code,
-            item.User,
-            item.Description,
-            item.Amount,
-            item["Old Amt"],
+            item.Item,
+            item["Sale Rt"],
+            item["Sale Amt"],
+            item.Qnty,
+            item["Cost Rate"],
+            item.Margin,
+            item.Emp,
         ]);
+    
+        const expenseRows = Expenses.map((expense) => [
+            expense.Date || "",
+            expense["Trn#"] || "",
+            "", // Empty column for "Type"
+            "", // Empty column for "Code"
+            expense.Item || "",
+            "", // Empty column for "Qnty"
+            "", // Empty column for "Sale Rt"
+            "", // Empty column for "Sale Amt"
+            "", // Empty column for "Cost Rate"
+            "", // Empty column for "Margin"
+            expense.Amount || "",        ]);
+    
+        const rows = [...profitRows, ...expenseRows];
 
         // Add summary row to the table
-        // rows.push([
-        //     "",
-        //     "",
-        //     "",
-        //     "Total",
-        //     String(totalDebit),
-        //     String(totalCredit),
-        //     String(closingBalance),
-        // ]);
+        rows.push([
+            "",
+            "",
+            "",
+            "",
+            "Total",
+            "",
+            "",
+            String(totalDebit),
+            String(totalCredit),
+            String(closingBalance),
+            String(totalExpense),
+
+        ]);
 
         // Define table column headers and individual column widths
         const headers = [
             "Date",
-            "Time",
             "Trn#",
             "Type",
             "Code",
-            "User",
-            "Description",
-            "Amont",
-            "Old Amt",
+            "Item",
+            "Sale Rt",
+            "Sale Amt",
+            "Qnty",
+            "Cost Rate",
+            "Margin",
+            "Emp",
         ];
-        const columnWidths = [17, 14, 10, 8, 14, 8, 60, 20, 20,];
+        const columnWidths = [17, 14, 8, 17, 80, 20, 20,8, 20,20 ,20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -591,17 +615,7 @@ export default function DailyProfitReport() {
                     fontName = boldFont; // Set bold font for red-colored row
                 }
 
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+               
 
                 // Draw row borders
                 doc.setDrawColor(0); // Set color for borders
@@ -624,7 +638,7 @@ export default function DailyProfitReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 3 || cellIndex === 5) {
+                    if (cellIndex === 2 || cellIndex === 7) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "center",
@@ -633,7 +647,7 @@ export default function DailyProfitReport() {
 
                     }
 
-                    else if (cellIndex === 7 || cellIndex === 8) {
+                    else if (cellIndex === 5 || cellIndex === 6 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -697,7 +711,7 @@ export default function DailyProfitReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
+        const rowsPerPage = 27; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -733,7 +747,7 @@ export default function DailyProfitReport() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 15,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -754,18 +768,9 @@ export default function DailyProfitReport() {
                     10
                 ); // Render company title with default font size, only date, and page number
                 startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
+               
                 addTitle(
-                    `Document Edit Report From: ${fromInputDate} To: ${toInputDate}`,
+                    `Daily Profit Report From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -784,7 +789,7 @@ export default function DailyProfitReport() {
                 // let typeText = transectionType ? transectionType : "";
                 let typeItem = transectionType ? transectionType : "All";
 
-                doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Type: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
                 // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
                 // Reset font weight to normal if necessary for subsequent text
@@ -833,7 +838,7 @@ export default function DailyProfitReport() {
         handlePagination();
 
         // Save the PDF file
-        doc.save("DocumentEditReport.pdf");
+        doc.save("DailyProfitReport.pdf");
 
         const pdfBlob = doc.output("blob");
         const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -842,76 +847,62 @@ export default function DailyProfitReport() {
         // setPdfFile(pdfFile);
         // setShowMailModal(true); // Show the mail modal after downloading PDF
     };
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
-
-    ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+   
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
-
-        const numColumns = 7; // Number of columns
-
+    
+        const numColumns = 11; // Number of columns
+    
         // Common styles
         const titleStyle = {
             font: { bold: true, size: 12 },
             alignment: { horizontal: "center" },
         };
-
+    
         const columnAlignments = [
             "left",
             "left",
-            "left",
             "center",
             "left",
-            "center",
             "left",
+            "right",
+            "right",
+            "center",
+            "right",
             "right",
             "right",
         ];
-
+    
         // Add an empty row at the start
         worksheet.addRow([]);
-
+    
         // Add title rows
         [
             comapnyname,
-            `Document Edit Report From ${fromInputDate} To ${toInputDate}`,
+            `Daily Profit Report From ${fromInputDate} To ${toInputDate}`,
         ].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
-
+    
         worksheet.addRow([]); // Empty row for spacing
-
-        // let typeText = transectionType ? transectionType : "All";
+    
         let typeItem = transectionType ? transectionType : "All";
-
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            `Type: ${typeItem}`,
-            "",
-            "",
-            "",
-            "",
-            "",
-            // `Type: ${typeText}`,
-
-        ]);
-        typeAndStoreRow.eachCell((cell) => {
+    
+        // Add type row
+        const typeRow = worksheet.addRow([`Type: ${typeItem}`]);
+        typeRow.eachCell((cell) => {
             cell.font = { bold: true };
         });
-
+    
         worksheet.addRow([]); // Empty row for spacing
-
+    
         const headerStyle = {
             font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
+            alignment: { horizontal: "center" },
             fill: {
                 type: "pattern",
                 pattern: "solid",
@@ -924,62 +915,85 @@ export default function DailyProfitReport() {
                 right: { style: "thin" },
             },
         };
-
+    
         // Add headers
         const headers = [
             "Date",
-            "Time",
             "Trn#",
             "Type",
             "Code",
-            "User",
-            "Description",
-            "Amont",
-            "Old Amt",
+            "Item",
+            "Sale Rt",
+            "Sale Amt",
+            "Qnty",
+            "Cost Rate",
+            "Margin",
+            "Emp",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
             cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
         });
-
+    
         // Add data rows
-        tableData.forEach((item) => {
-            worksheet.addRow([
-                item.Date,
-                item.Time,
-                item["Trn#"],
-                item.Type,
-                item.Code,
-                item.User,
-                item.Description,
-                item.Amount,
-                item["Old Amt"],
-            ]);
-        });
-
+        const profitRows = Profits.map((item) => [
+            item.Date,
+            item["Trn#"],
+            item.Type,
+            item.Code,
+            item.Item,
+            item["Sale Rt"],
+            item["Sale Amt"],
+            item.Qnty,
+            item["Cost Rate"],
+            item.Margin,
+            item.Emp,
+        ]);
+    
+        const expenseRows = Expenses.map((expense) => [
+            expense.Date || "",
+            expense["Trn#"] || "",
+            "", // Empty column for "Type"
+            "", // Empty column for "Code"
+            expense.Item || "",
+            "", // Empty column for "Sale Rt"
+            "", // Empty column for "Sale Amt"
+            "", // Empty column for "Qnty"
+            "", // Empty column for "Cost Rate"
+            "", // Empty column for "Margin"
+            expense.Amount || "", // "Emp" column used for expense amount
+        ]);
+    
+        const rows = [...profitRows, ...expenseRows];
+        rows.forEach((row) => worksheet.addRow(row));
+    
         // Add total row and bold it
-        // const totalRow = worksheet.addRow([
-        //     "",
-        //     "",
-        //     "",
-        //     "Total",
-        //     totalDebit,
-        //     totalCredit,
-        //     closingBalance,
-        // ]);
-        // totalRow.eachCell((cell) => {
-        //     cell.font = { bold: true };
-        // });
-
+        const totalRow = worksheet.addRow([
+            "",
+            "",
+            "",
+            "",
+            "Total",
+            "",
+            "",
+            totalDebit,
+            totalCredit,
+            closingBalance,
+            totalExpense,
+        ]);
+        totalRow.eachCell((cell) => {
+            cell.font = { bold: true };
+        });
+    
         // Set column widths
-        [10, 9, 8, 5, 10, 5, 40, 15, 15].forEach((width, index) => {
+        [10, 7, 5, 10, 45, 15, 15, 6, 12, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
-
-        // Apply individual alignment and borders to each column
+    
+        // Apply alignment and borders
         worksheet.eachRow((row, rowNumber) => {
             if (rowNumber > 5) {
-                // Skip title rows and the empty row
+                // Skip title rows and empty rows
                 row.eachCell((cell, colNumber) => {
                     if (rowNumber === 7) {
                         // Keep headers centered
@@ -997,14 +1011,15 @@ export default function DailyProfitReport() {
                 });
             }
         });
-
+    
         // Generate Excel file buffer and save
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "DocumentEditReport.xlsx");
+        saveAs(blob, "DailyProfitReport.xlsx");
     };
+    
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
 
