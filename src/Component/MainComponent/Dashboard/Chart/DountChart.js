@@ -72,5 +72,4 @@ const Donut = (props) => {
     </div>
   );
 };
-
 export default Donut;

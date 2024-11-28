@@ -490,7 +490,7 @@ export default function DailyProfitReport() {
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
-       
+
         const profitRows = Profits.map((item) => [
             item.Date,
             item["Trn#"],
@@ -503,8 +503,10 @@ export default function DailyProfitReport() {
             item["Cost Rate"],
             item.Margin,
             item.Emp,
+            "",
+
         ]);
-    
+
         const expenseRows = Expenses.map((expense) => [
             expense.Date || "",
             expense["Trn#"] || "",
@@ -516,8 +518,9 @@ export default function DailyProfitReport() {
             "", // Empty column for "Sale Amt"
             "", // Empty column for "Cost Rate"
             "", // Empty column for "Margin"
-            expense.Amount || "",        ]);
-    
+            "",
+            expense.Amount || "",]);
+
         const rows = [...profitRows, ...expenseRows];
 
         // Add summary row to the table
@@ -533,6 +536,7 @@ export default function DailyProfitReport() {
             String(totalCredit),
             String(closingBalance),
             String(totalExpense),
+            "",
 
         ]);
 
@@ -549,8 +553,9 @@ export default function DailyProfitReport() {
             "Cost Rate",
             "Margin",
             "Emp",
+            "Exp Amt"
         ];
-        const columnWidths = [17, 14, 8, 17, 80, 20, 20,8, 20,20 ,20];
+        const columnWidths = [17, 14, 8, 17, 80, 20, 20, 8, 20, 20, 20, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -615,7 +620,7 @@ export default function DailyProfitReport() {
                     fontName = boldFont; // Set bold font for red-colored row
                 }
 
-               
+
 
                 // Draw row borders
                 doc.setDrawColor(0); // Set color for borders
@@ -647,7 +652,7 @@ export default function DailyProfitReport() {
 
                     }
 
-                    else if (cellIndex === 5 || cellIndex === 6 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10) {
+                    else if (cellIndex === 5 || cellIndex === 6 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10 || cellIndex === 11) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -747,7 +752,7 @@ export default function DailyProfitReport() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 15,
+                    rightX - 10,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -768,7 +773,7 @@ export default function DailyProfitReport() {
                     10
                 ); // Render company title with default font size, only date, and page number
                 startY += 7; // Adjust vertical position for the company title
-               
+
                 addTitle(
                     `Daily Profit Report From: ${fromInputDate} To: ${toInputDate}`,
                     "",
@@ -847,19 +852,19 @@ export default function DailyProfitReport() {
         // setPdfFile(pdfFile);
         // setShowMailModal(true); // Show the mail modal after downloading PDF
     };
-   
+
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
-    
+
         const numColumns = 11; // Number of columns
-    
+
         // Common styles
         const titleStyle = {
             font: { bold: true, size: 12 },
             alignment: { horizontal: "center" },
         };
-    
+
         const columnAlignments = [
             "left",
             "left",
@@ -872,11 +877,12 @@ export default function DailyProfitReport() {
             "right",
             "right",
             "right",
+            "right"
         ];
-    
+
         // Add an empty row at the start
         worksheet.addRow([]);
-    
+
         // Add title rows
         [
             comapnyname,
@@ -887,19 +893,19 @@ export default function DailyProfitReport() {
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
-    
+
         worksheet.addRow([]); // Empty row for spacing
-    
+
         let typeItem = transectionType ? transectionType : "All";
-    
+
         // Add type row
         const typeRow = worksheet.addRow([`Type: ${typeItem}`]);
         typeRow.eachCell((cell) => {
             cell.font = { bold: true };
         });
-    
+
         worksheet.addRow([]); // Empty row for spacing
-    
+
         const headerStyle = {
             font: { bold: true },
             alignment: { horizontal: "center" },
@@ -915,7 +921,7 @@ export default function DailyProfitReport() {
                 right: { style: "thin" },
             },
         };
-    
+
         // Add headers
         const headers = [
             "Date",
@@ -929,12 +935,13 @@ export default function DailyProfitReport() {
             "Cost Rate",
             "Margin",
             "Emp",
+            "Exp Amt"
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
             cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
         });
-    
+
         // Add data rows
         const profitRows = Profits.map((item) => [
             item.Date,
@@ -948,8 +955,9 @@ export default function DailyProfitReport() {
             item["Cost Rate"],
             item.Margin,
             item.Emp,
+            ""
         ]);
-    
+
         const expenseRows = Expenses.map((expense) => [
             expense.Date || "",
             expense["Trn#"] || "",
@@ -961,12 +969,13 @@ export default function DailyProfitReport() {
             "", // Empty column for "Qnty"
             "", // Empty column for "Cost Rate"
             "", // Empty column for "Margin"
+            "",
             expense.Amount || "", // "Emp" column used for expense amount
         ]);
-    
+
         const rows = [...profitRows, ...expenseRows];
         rows.forEach((row) => worksheet.addRow(row));
-    
+
         // Add total row and bold it
         const totalRow = worksheet.addRow([
             "",
@@ -980,16 +989,17 @@ export default function DailyProfitReport() {
             totalCredit,
             closingBalance,
             totalExpense,
+            "",
         ]);
         totalRow.eachCell((cell) => {
             cell.font = { bold: true };
         });
-    
+
         // Set column widths
-        [10, 7, 5, 10, 45, 15, 15, 6, 12, 12, 12].forEach((width, index) => {
+        [10, 7, 5, 10, 45, 15, 15, 6, 12, 12, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
-    
+
         // Apply alignment and borders
         worksheet.eachRow((row, rowNumber) => {
             if (rowNumber > 5) {
@@ -1011,7 +1021,7 @@ export default function DailyProfitReport() {
                 });
             }
         });
-    
+
         // Generate Excel file buffer and save
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
@@ -1019,7 +1029,7 @@ export default function DailyProfitReport() {
         });
         saveAs(blob, "DailyProfitReport.xlsx");
     };
-    
+
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
 
@@ -1614,7 +1624,7 @@ export default function DailyProfitReport() {
                                     <option value="">All</option>
                                     <option value="S">Cash </option>
                                     <option value="R">Credit</option>
-                                    
+
                                 </select>
                             </div>
                         </div>
@@ -2153,7 +2163,7 @@ export default function DailyProfitReport() {
                                     <div style={{ width: '80%', border: `1px solid ${fontcolor} ` }}></div>
                                     <div >
                                     </div>
-                               </div>
+                                </div>
                                 <div className="row" style={{ width: '100%', height: '24px', display: 'flex', margin: "0px" }}>
                                     <div style={{ width: '57%', textAlign: 'end' }}>Other Income :</div>
                                     <div style={{ width: '20%', border: `1px solid ${fontcolor} ` }}></div>
