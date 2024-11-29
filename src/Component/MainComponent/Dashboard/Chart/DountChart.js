@@ -68,7 +68,7 @@ const Donut = (props) => {
 
   return (
     <div id="chart">
-      <Chart options={options} series={series} type="donut" width={220} />
+      <Chart options={options} series={series} type="donut" width={240} />
     </div>
   );
 };

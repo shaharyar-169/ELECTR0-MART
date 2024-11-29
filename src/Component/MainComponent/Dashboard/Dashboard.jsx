@@ -5,7 +5,7 @@ import axios from "axios";
 import Dounut from "./Chart/DountChart";
 import BarChart from "./Chart/Barchart";
 import { Spinner } from "react-bootstrap";
-
+import DatePicker from "react-datepicker";
 import { BsCalendar } from "react-icons/bs";
 import { getOrganisationData, getUserData } from "../../Auth";
 import { useTheme } from "../../../ThemeContext";
@@ -17,9 +17,32 @@ export default function Dasboard() {
 
   const [CompanySaleComparison, setCompanySaleComparison] = useState([])
 
+  const [DailyDashboard, setDailyDashboard] = useState([])
 
-  console.log('CompanySaleComparison', CompanySaleComparison)
 
+  const [selectedfromDate, setSelectedfromDate] = useState(null);
+  const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
+  const [fromInputDate, setfromInputDate] = useState("11-11-2024");
+
+
+  const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
+
+  const formatDate = (date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+ 
   //  SALE API DATA
   const purchasetoday = purchaseData.length > 0 ? purchaseData[0].today : null;
   const purchasemonth = purchaseData.length > 0 ? purchaseData[0].month : null;
@@ -46,6 +69,12 @@ export default function Dasboard() {
 
   } = useTheme();
 
+
+  useEffect(() => {
+    const currentDate = new Date();
+    setSelectedfromDate(currentDate);
+    setfromInputDate(formatDate(currentDate));
+ }, []);
 
   useEffect(() => {
 
@@ -105,6 +134,27 @@ export default function Dasboard() {
 
   }, [])
 
+  useEffect(() => {
+
+    const apiUrl = apiLinks + "/DashboardDaily.php";
+    const formData = new URLSearchParams({
+      FRepDat: fromInputDate,
+      code: 'NASIRTRD',
+      FLocCod: '001',
+
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        setDailyDashboard(response.data)
+      })
+
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+
+  }, [fromInputDate])
 
   function fetchReceivableReport() {
 
@@ -112,8 +162,8 @@ export default function Dasboard() {
     const apiUrl = apiLinks + "/CompanySaleComparison.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FIntDat: '02-02-2024',
-      FFnlDat: '02-11-2024',
+      FIntDat: fromInputDate,
+      FFnlDat: fromInputDate,
       FLocCod: '001',
       code: 'NASIRTRD'
 
@@ -149,7 +199,7 @@ export default function Dasboard() {
     backgroundColor: getcolor,
     width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
     position: "relative",
-    top: "44%",
+    top: "42%",
     left: isSidebarVisible ? "50%" : "50%",
     transform: "translate(-50%, -50%)",
     transition: isSidebarVisible
@@ -172,7 +222,6 @@ export default function Dasboard() {
     Margin: '0px'
   };
 
-
   const tableHeadColor = "#3368b5";
   const textColor = "white";
 
@@ -192,215 +241,281 @@ export default function Dasboard() {
   return (
     <>
 
-      <div className="Countair_styling" style={contentStyle} >
-        {/* CARD ROW */}
-        <div className="row Row_styling" >
-
-
+      <div className="row Countair_styling" style={contentStyle} >
+        {/* FIRST LEFT COLUMN */}
+        <div style={{ height: "100%", width: "22%", padding: '0px' }}>
           <div className="Card_styling">
-            <span className="card_heading">Sales</span>
-            <div className="row" style={{ width: '100%' }}>
-              <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Today</div>
-              <div className="col-md-6 text-end " style={{ color: 'black' }} >{saletoday}</div>
-            </div>
-            <div className="row" style={{ width: '100%' }}>
-              <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>This Month</div>
-              <div className="col-md-6 text-end " style={{ color: 'black', }} >{salemonth}</div>
-            </div>
-            <div className="row" style={{ width: '100%' }}>
-              <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>This Year</div>
-              <div className="col-md-6 text-end " style={{ color: 'black', }} >{saleyear}</div>
-            </div>
-          </div>
-
-
-
-          {/* //////////////// NEW CADD DESIGN ////////////////////// */}
-
-
-          <div className="Card_styling">
-            <span className="card_heading">Purchase</span>
-            <div className="row" style={{ width: '100%' }}>
-              <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Stock</div>
-              <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchasetoday}</div>
-            </div>
-            <div className="row" style={{ width: '100%' }}>
-              <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Receivable</div>
-              <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchasemonth}</div>
-            </div>
-            <div className="row" style={{ width: '100%' }}>
-              <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>Payable</div>
-              <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchaseyear}</div>
-            </div>
-          </div>
-
-          {/* <div className="Card_styling"></div> */}
-          <div className="Card_styling1">
             <div className="Card_Heading_div">
-              <span className="Span_Heading">01-01-2024 <BsCalendar className="Callender_styling" /></span>
+              <span className="Span_Heading">
+               {fromInputDate}
+
+                <DatePicker
+                  selected={selectedfromDate}
+                  onChange={handlefromDateChange}
+                  dateFormat="dd-MM-yyyy"
+                  popperPlacement="bottom"
+                  showPopperArrow={false}
+                  open={fromCalendarOpen}
+                  dropdownMode="select"
+                  customInput={
+                    <div>
+                      <BsCalendar
+                        onClick={toggleFromCalendar}
+                        style={{
+                          cursor:'pointer',                           
+                          marginLeft: "18px",
+                          fontSize: "14px",
+                          color: 'red',
+                          marginBottom:'5px'
+                        }}
+                      />
+                    </div>
+                  }
+                />
+              </span>
             </div>
 
-            <div className="Card_body_Styling">
-              <div className="row" style={{ width: '100%', margin: '0px' }}>
-                <div className="col-md-5 text-start " style={{ color: 'black', paddingLeft: '4px' }}>Sale</div>
-                <div className="col-md-2 text-center " style={{ color: 'black' }} >6</div>
-                <div className="col-md-5 text-end " style={{ color: 'black' }} >262,000</div>
+            {Object.entries(DailyDashboard).map(([key, value], index) => (
+              <div key={index} className="row" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>
+                  {key}
+                </div>
+                <div className="col-md-6 text-end" style={{ color: 'black' }}>
+                  {value}
+                </div>
+              </div>
+            ))}
 
-              </div>
-              <div className="row" style={{ width: '100%', margin: '0px' }}>
-                <div className="col-md-5 text-start " style={{ color: 'black', paddingLeft: '4px' }}>Purchase</div>
-                <div className="col-md-2 text-center " style={{ color: 'black', }} >10</div>
-                <div className="col-md-5 text-end " style={{ color: 'black', }} >792,097</div>
-              </div>
-
-              <div className="row" style={{ width: '100%', margin: '0px' }}>
-                <div className="col-md-5 text-start " style={{ color: 'black', paddingLeft: '4px' }}>Collection</div>
-                <div className="col-md-2 text-center " style={{ color: 'black', }} ></div>
-                <div className="col-md-5 text-end " style={{ color: 'black', }} >0</div>
-              </div>
-              <div className="row" style={{ width: '100%', margin: '0px' }}>
-                <div className="col-md-5 text-start " style={{ color: 'black', paddingLeft: '4px' }}>Payments</div>
-                <div className="col-md-2 text-center " style={{ color: 'black', }} ></div>
-                <div className="col-md-5 text-end " style={{ color: 'black', }} >730</div>
-              </div>
-              <div className="row" style={{ width: '100%', margin: '0px' }}>
-                <div className="col-md-5 text-start " style={{ color: 'black', paddingLeft: '4px' }}>Expense</div>
-                <div className="col-md-2 text-center " style={{ color: 'black', }} ></div>
-                <div className="col-md-5 text-end " style={{ color: 'black', }} >730</div>
-              </div>
-
-              <div className="row" style={{ width: '100%', margin: '0px' }}>
-                <div className="col-md-5 text-start " style={{ color: 'black', paddingLeft: '4px' }}>Margin</div>
-                <div className="col-md-2 text-center " style={{ color: 'black', }} ></div>
-                <div className="col-md-5 text-end " style={{ color: 'black', }} >32,843</div>
-              </div>
-
-            </div>
           </div>
-          <div className="Card_styling"></div>
+
+
+
 
         </div>
-        {/* GRAPH/CHART ROW */}
-        <div className="row Row_styling" style={{ marginTop: '10px' }}>
-          <div className="second_container_card">
-            <div className="row innercontainer" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div className="dunut_chart">
-                <Dounut title='Category-wise Premiun' />
+        {/* SECOND RIGHT COLUMN */}
+        <div style={{ height: '100%', width: '78%', padding: '0px' }}>
+          {/* FIRST ROW */}
+          <div className="row Row_styling" >
+            <div className="Card_styling_new">
+              <span className="card_heading">Purchase</span>
+              <div className="row" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Stock</div>
+                <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchasetoday}</div>
               </div>
-              <div className="dunut_chart">
-                <Dounut title='Dept-wise Premiun' />
+              <div className="row" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Receivable</div>
+                <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchasemonth}</div>
               </div>
-              <div className="dunut_chart">
-                <Dounut title='Category-wise Claim' />
+              <div className="row" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>Payable</div>
+                <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchaseyear}</div>
               </div>
             </div>
 
-          </div>
-          <div className="second_container_card" style={{ display: 'flex', justifyContent: 'space-between', background: 'white' }}>
-            <BarChart />
-          </div>
-        </div>
-        {/* Table ROW */}
-        <div className="row Row_styling">
-          <div className="second_container_card" style={{ display: 'flex', justifyContent: 'space-between', padding: '0px' }}>
-            <div className="table_container" style={{ display: 'flex', flexDirection: 'column', border: '1px solid white' }}>
-              <div
-                style={{
-                  // overflowY: "auto",
-                  width: "95.8%",
 
-                }}
-              >
-                <table
-                  className="myTable"
-                  id="table"
+            <div className="Card_styling_new">
+              <span className="card_heading">Sales</span>
+              <div className="row" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Today</div>
+                <div className="col-md-6 text-end " style={{ color: 'black' }} >{saletoday}</div>
+              </div>
+              <div className="row" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>This Month</div>
+                <div className="col-md-6 text-end " style={{ color: 'black', }} >{salemonth}</div>
+              </div>
+              <div className="row" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>This Year</div>
+                <div className="col-md-6 text-end " style={{ color: 'black', }} >{saleyear}</div>
+              </div>
+            </div>
+
+            <div className="Card_styling_new"> </div>
+          </div>
+
+          {/* SECOND GRAPH/CHART ROW */}
+          <div className="row Row_styling" style={{ marginTop: '10px' }}>
+
+            <div className="second_container_card1">
+              <div className="row " style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="dunut_chart">
+                  <Dounut title='Category-wise Claim' />
+                </div>
+              </div>
+
+            </div>
+
+            <div className="second_container_card2" style={{ display: 'flex', justifyContent: 'space-between', background: 'white' }}>
+              <BarChart />
+            </div>
+          </div>
+
+          {/* THIRD TABLE ROW */}
+          <div className="row Row_styling">
+
+            <div className="second_container_card" style={{ display: 'flex', justifyContent: 'space-around', padding: '0px' }}>
+
+
+              {/* FIRST TABLE  */}
+              <div className="table_container" style={{ display: 'flex', flexDirection: 'column', border: '1px solid white' }}>
+
+                <div
                   style={{
-                    fontSize: "12px",
-                    width: "100%",
-                    position: "relative",
-                    paddingRight: "2%",
+                    // overflowY: "auto",
+                    width: "95.8%",
+
                   }}
                 >
-                  <thead
+                  <table
+                    className="myTable"
+                    id="table"
                     style={{
-                      fontWeight: "bold",
-                      height: "24px",
-                      position: "sticky",
-                      top: 0,
-                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                      backgroundColor: tableHeadColor,
+                      fontSize: "12px",
+                      width: "100%",
+                      position: "relative",
+                      paddingRight: "2%",
                     }}
                   >
-                    <tr
+                    <thead
                       style={{
+                        fontWeight: "bold",
+                        height: "24px",
+                        position: "sticky",
+                        top: 0,
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                         backgroundColor: tableHeadColor,
-                        color: 'white',
                       }}
                     >
-                      <td
-                        className="border-dark"
-                        style={firstColWidth}
+                      <tr
+                        style={{
+                          backgroundColor: tableHeadColor,
+                          color: 'white',
+                        }}
                       >
-                        Company
-                      </td>
-                      <td
-                        className="border-dark"
-                        style={secondColWidth}
-                      >
-                        Qnty
-                      </td>
-                      <td
-                        className="border-dark"
-                        style={thirdColWidth}
-                      >
-                        Amount
-                      </td>
-                      <td
-                        className="border-dark"
-                        style={forthColWidth}
-                      >
-                        Margin
-                      </td>
+                        <td
+                          className="border-dark"
+                          style={firstColWidth}
+                        >
+                          Company
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={secondColWidth}
+                        >
+                          Qnty
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={thirdColWidth}
+                        >
+                          Amount
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={forthColWidth}
+                        >
+                          Margin
+                        </td>
 
-                    </tr>
+                      </tr>
 
-                  </thead>
-                </table>
-              </div>
-              <div
-                className="table-scroll"
-                style={{
-                  backgroundColor: textColor,
-                  borderBottom: `1px solid ${fontcolor}`,
-                  overflowY: "auto",
-                  maxHeight: "100%",
-                  width: "100%",
-                  wordBreak: "break-word",
-                }}
-              >
-                <table
-                  className="myTable"
-                  id="tableBody"
+                    </thead>
+                  </table>
+                </div>
+                <div
+                  className="table-scroll"
                   style={{
-                    fontSize: "12px",
+                    backgroundColor: textColor,
+                    borderBottom: `1px solid ${fontcolor}`,
+                    overflowY: "auto",
+                    maxHeight: "100%",
                     width: "100%",
-                    position: "relative",
+                    wordBreak: "break-word",
                   }}
                 >
-                  <tbody id="tablebody">
-                    {isLoading ? (
-                      <>
-                        <tr
-                          style={{
-                            backgroundColor: getcolor,
-                          }}
-                        >
-                          <td colSpan="4" className="text-center">
-                            <Spinner animation="border" variant="primary" />
-                          </td>
-                        </tr>
-                        {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                          (_, rowIndex) => (
+                  <table
+                    className="myTable"
+                    id="tableBody"
+                    style={{
+                      fontSize: "12px",
+                      width: "100%",
+                      position: "relative",
+                    }}
+                  >
+                    <tbody id="tablebody">
+                      {isLoading ? (
+                        <>
+                          <tr
+                            style={{
+                              backgroundColor: getcolor,
+                            }}
+                          >
+                            <td colSpan="4" className="text-center">
+                              <Spinner animation="border" variant="primary" />
+                            </td>
+                          </tr>
+                          {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                            (_, rowIndex) => (
+                              <tr
+                                key={`blank-${rowIndex}`}
+                                style={{
+                                  backgroundColor: getcolor,
+                                  color: fontcolor,
+                                }}
+                              >
+                                {Array.from({ length: 4 }).map((_, colIndex) => (
+                                  <td key={`blank-${rowIndex}-${colIndex}`}>
+                                    &nbsp;
+                                  </td>
+                                ))}
+                              </tr>
+                            )
+                          )}
+                          <tr>
+                            <td style={firstColWidth}></td>
+                            <td style={secondColWidth}></td>
+                            <td style={thirdColWidth}></td>
+                            <td style={forthColWidth}></td>
+
+
+                          </tr>
+                        </>
+                      ) : (
+                        <>
+                          {CompanySaleComparison.map((item, i) => {
+                            // totalEnteries += 1;
+                            return (
+                              <tr
+                                // key={`${i}-${selectedIndex}`}
+                                // ref={(el) => (rowRefs.current[i] = el)}
+                                // onClick={() => handleRowClick(i)}
+                                // className={
+                                //   selectedIndex === i ? "selected-background" : ""
+                                // }
+                                style={{
+                                  backgroundColor: getcolor,
+                                  color: fontcolor,
+                                }}
+                              >
+                                <td className="text-start" style={firstColWidth}>
+                                  {item.Company}
+                                </td>
+                                <td className="text-center" style={secondColWidth}>
+                                  {item.Qnty}
+                                </td>
+                                <td className="text-end" style={thirdColWidth}>
+                                  {item.Amount}
+                                </td>
+                                <td className="text-end" style={forthColWidth}>
+                                  {item.Margin}
+                                </td>
+
+
+                              </tr>
+                            );
+                          })}
+                          {Array.from({
+                            length: Math.max(0, 27 - CompanySaleComparison.length),
+                          }).map((_, rowIndex) => (
                             <tr
                               key={`blank-${rowIndex}`}
                               style={{
@@ -414,93 +529,404 @@ export default function Dasboard() {
                                 </td>
                               ))}
                             </tr>
-                          )
-                        )}
-                        <tr>
-                          <td style={firstColWidth}></td>
-                          <td style={secondColWidth}></td>
-                          <td style={thirdColWidth}></td>
-                          <td style={forthColWidth}></td>
+                          ))}
+                          <tr>
+                            <td style={firstColWidth}></td>
+                            <td style={secondColWidth}></td>
+                            <td style={thirdColWidth}></td>
+                            <td style={forthColWidth}></td>
+
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {/* SECOND TABLE  */}
+              <div className="table_container" style={{ display: 'flex', flexDirection: 'column', border: '1px solid white' }}>
+
+                <div
+                  style={{
+                    // overflowY: "auto",
+                    width: "95.8%",
+
+                  }}
+                >
+                  <table
+                    className="myTable"
+                    id="table"
+                    style={{
+                      fontSize: "12px",
+                      width: "100%",
+                      position: "relative",
+                      paddingRight: "2%",
+                    }}
+                  >
+                    <thead
+                      style={{
+                        fontWeight: "bold",
+                        height: "24px",
+                        position: "sticky",
+                        top: 0,
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                        backgroundColor: tableHeadColor,
+                      }}
+                    >
+                      <tr
+                        style={{
+                          backgroundColor: tableHeadColor,
+                          color: 'white',
+                        }}
+                      >
+                        <td
+                          className="border-dark"
+                          style={firstColWidth}
+                        >
+                          Company
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={secondColWidth}
+                        >
+                          Qnty
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={thirdColWidth}
+                        >
+                          Amount
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={forthColWidth}
+                        >
+                          Margin
+                        </td>
+
+                      </tr>
+
+                    </thead>
+                  </table>
+                </div>
+                <div
+                  className="table-scroll"
+                  style={{
+                    backgroundColor: textColor,
+                    borderBottom: `1px solid ${fontcolor}`,
+                    overflowY: "auto",
+                    maxHeight: "100%",
+                    width: "100%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  <table
+                    className="myTable"
+                    id="tableBody"
+                    style={{
+                      fontSize: "12px",
+                      width: "100%",
+                      position: "relative",
+                    }}
+                  >
+                    <tbody id="tablebody">
+                      {isLoading ? (
+                        <>
+                          <tr
+                            style={{
+                              backgroundColor: getcolor,
+                            }}
+                          >
+                            <td colSpan="4" className="text-center">
+                              <Spinner animation="border" variant="primary" />
+                            </td>
+                          </tr>
+                          {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                            (_, rowIndex) => (
+                              <tr
+                                key={`blank-${rowIndex}`}
+                                style={{
+                                  backgroundColor: getcolor,
+                                  color: fontcolor,
+                                }}
+                              >
+                                {Array.from({ length: 4 }).map((_, colIndex) => (
+                                  <td key={`blank-${rowIndex}-${colIndex}`}>
+                                    &nbsp;
+                                  </td>
+                                ))}
+                              </tr>
+                            )
+                          )}
+                          <tr>
+                            <td style={firstColWidth}></td>
+                            <td style={secondColWidth}></td>
+                            <td style={thirdColWidth}></td>
+                            <td style={forthColWidth}></td>
 
 
-                        </tr>
-                      </>
-                    ) : (
-                      <>
-                        {CompanySaleComparison.map((item, i) => {
-                          // totalEnteries += 1;
-                          return (
+                          </tr>
+                        </>
+                      ) : (
+                        <>
+                          {CompanySaleComparison.map((item, i) => {
+                            // totalEnteries += 1;
+                            return (
+                              <tr
+                                // key={`${i}-${selectedIndex}`}
+                                // ref={(el) => (rowRefs.current[i] = el)}
+                                // onClick={() => handleRowClick(i)}
+                                // className={
+                                //   selectedIndex === i ? "selected-background" : ""
+                                // }
+                                style={{
+                                  backgroundColor: getcolor,
+                                  color: fontcolor,
+                                }}
+                              >
+                                <td className="text-start" style={firstColWidth}>
+                                  {item.Company}
+                                </td>
+                                <td className="text-center" style={secondColWidth}>
+                                  {item.Qnty}
+                                </td>
+                                <td className="text-end" style={thirdColWidth}>
+                                  {item.Amount}
+                                </td>
+                                <td className="text-end" style={forthColWidth}>
+                                  {item.Margin}
+                                </td>
+
+
+                              </tr>
+                            );
+                          })}
+                          {Array.from({
+                            length: Math.max(0, 27 - CompanySaleComparison.length),
+                          }).map((_, rowIndex) => (
                             <tr
-                              // key={`${i}-${selectedIndex}`}
-                              // ref={(el) => (rowRefs.current[i] = el)}
-                              // onClick={() => handleRowClick(i)}
-                              // className={
-                              //   selectedIndex === i ? "selected-background" : ""
-                              // }
+                              key={`blank-${rowIndex}`}
                               style={{
                                 backgroundColor: getcolor,
                                 color: fontcolor,
                               }}
                             >
-                              <td className="text-start" style={firstColWidth}>
-                                {item.Company}
-                              </td>
-                              <td className="text-center" style={secondColWidth}>
-                                {item.Qnty}
-                              </td>
-                              <td className="text-end" style={thirdColWidth}>
-                                {item.Amount}
-                              </td>
-                              <td className="text-end" style={forthColWidth}>
-                                {item.Margin}
-                              </td>
-
-
+                              {Array.from({ length: 4 }).map((_, colIndex) => (
+                                <td key={`blank-${rowIndex}-${colIndex}`}>
+                                  &nbsp;
+                                </td>
+                              ))}
                             </tr>
-                          );
-                        })}
-                        {Array.from({
-                          length: Math.max(0, 27 - CompanySaleComparison.length),
-                        }).map((_, rowIndex) => (
+                          ))}
+                          <tr>
+                            <td style={firstColWidth}></td>
+                            <td style={secondColWidth}></td>
+                            <td style={thirdColWidth}></td>
+                            <td style={forthColWidth}></td>
+
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {/* THIRD TABLE  */}
+              <div className="table_container" style={{ display: 'flex', flexDirection: 'column', border: '1px solid white' }}>
+
+                <div
+                  style={{
+                    // overflowY: "auto",
+                    width: "95.8%",
+
+                  }}
+                >
+                  <table
+                    className="myTable"
+                    id="table"
+                    style={{
+                      fontSize: "12px",
+                      width: "100%",
+                      position: "relative",
+                      paddingRight: "2%",
+                    }}
+                  >
+                    <thead
+                      style={{
+                        fontWeight: "bold",
+                        height: "24px",
+                        position: "sticky",
+                        top: 0,
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                        backgroundColor: tableHeadColor,
+                      }}
+                    >
+                      <tr
+                        style={{
+                          backgroundColor: tableHeadColor,
+                          color: 'white',
+                        }}
+                      >
+                        <td
+                          className="border-dark"
+                          style={firstColWidth}
+                        >
+                          Company
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={secondColWidth}
+                        >
+                          Qnty
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={thirdColWidth}
+                        >
+                          Amount
+                        </td>
+                        <td
+                          className="border-dark"
+                          style={forthColWidth}
+                        >
+                          Margin
+                        </td>
+
+                      </tr>
+
+                    </thead>
+                  </table>
+                </div>
+                <div
+                  className="table-scroll"
+                  style={{
+                    backgroundColor: textColor,
+                    borderBottom: `1px solid ${fontcolor}`,
+                    overflowY: "auto",
+                    maxHeight: "100%",
+                    width: "100%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  <table
+                    className="myTable"
+                    id="tableBody"
+                    style={{
+                      fontSize: "12px",
+                      width: "100%",
+                      position: "relative",
+                    }}
+                  >
+                    <tbody id="tablebody">
+                      {isLoading ? (
+                        <>
                           <tr
-                            key={`blank-${rowIndex}`}
                             style={{
                               backgroundColor: getcolor,
-                              color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 4 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
+                            <td colSpan="4" className="text-center">
+                              <Spinner animation="border" variant="primary" />
+                            </td>
                           </tr>
-                        ))}
-                        <tr>
-                          <td style={firstColWidth}></td>
-                          <td style={secondColWidth}></td>
-                          <td style={thirdColWidth}></td>
-                          <td style={forthColWidth}></td>
+                          {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                            (_, rowIndex) => (
+                              <tr
+                                key={`blank-${rowIndex}`}
+                                style={{
+                                  backgroundColor: getcolor,
+                                  color: fontcolor,
+                                }}
+                              >
+                                {Array.from({ length: 4 }).map((_, colIndex) => (
+                                  <td key={`blank-${rowIndex}-${colIndex}`}>
+                                    &nbsp;
+                                  </td>
+                                ))}
+                              </tr>
+                            )
+                          )}
+                          <tr>
+                            <td style={firstColWidth}></td>
+                            <td style={secondColWidth}></td>
+                            <td style={thirdColWidth}></td>
+                            <td style={forthColWidth}></td>
 
-                        </tr>
-                      </>
-                    )}
-                  </tbody>
-                </table>
+
+                          </tr>
+                        </>
+                      ) : (
+                        <>
+                          {CompanySaleComparison.map((item, i) => {
+                            // totalEnteries += 1;
+                            return (
+                              <tr
+                                // key={`${i}-${selectedIndex}`}
+                                // ref={(el) => (rowRefs.current[i] = el)}
+                                // onClick={() => handleRowClick(i)}
+                                // className={
+                                //   selectedIndex === i ? "selected-background" : ""
+                                // }
+                                style={{
+                                  backgroundColor: getcolor,
+                                  color: fontcolor,
+                                }}
+                              >
+                                <td className="text-start" style={firstColWidth}>
+                                  {item.Company}
+                                </td>
+                                <td className="text-center" style={secondColWidth}>
+                                  {item.Qnty}
+                                </td>
+                                <td className="text-end" style={thirdColWidth}>
+                                  {item.Amount}
+                                </td>
+                                <td className="text-end" style={forthColWidth}>
+                                  {item.Margin}
+                                </td>
+
+
+                              </tr>
+                            );
+                          })}
+                          {Array.from({
+                            length: Math.max(0, 27 - CompanySaleComparison.length),
+                          }).map((_, rowIndex) => (
+                            <tr
+                              key={`blank-${rowIndex}`}
+                              style={{
+                                backgroundColor: getcolor,
+                                color: fontcolor,
+                              }}
+                            >
+                              {Array.from({ length: 4 }).map((_, colIndex) => (
+                                <td key={`blank-${rowIndex}-${colIndex}`}>
+                                  &nbsp;
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                          <tr>
+                            <td style={firstColWidth}></td>
+                            <td style={secondColWidth}></td>
+                            <td style={thirdColWidth}></td>
+                            <td style={forthColWidth}></td>
+
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-
-
-
-            </div>
-            <div className="table_container">
-              <span className="table_heading">Top 5 Branches</span>
 
             </div>
 
           </div>
-          <div className="second_container_card">second container</div>
+
         </div>
       </div>
+
     </>
   );
 }
