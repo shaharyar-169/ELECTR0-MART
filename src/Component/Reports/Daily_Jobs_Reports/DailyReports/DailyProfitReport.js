@@ -31,6 +31,7 @@ export default function DailyProfitReport() {
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
+    
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
@@ -45,6 +46,7 @@ export default function DailyProfitReport() {
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
+    const [Retrate, setRetrate] = useState("");
     const [supplierList, setSupplierList] = useState([]);
 
     const [totalQnty, setTotalQnty] = useState(0);
@@ -401,6 +403,7 @@ export default function DailyProfitReport() {
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
+            FRepRat: Retrate,
             code: 'NASIRTRD',
             FYerDsc: '2024-2024',
             FLocCod: '001',
@@ -437,7 +440,9 @@ export default function DailyProfitReport() {
                         );
                         setExpenses([]); // Fallback to an empty array
                     }
-                } else {
+                } 
+                
+                else {
                     console.warn("Response data is null or undefined:", response.data);
                     setProfits([]);
                     setExpenses([]);
@@ -483,6 +488,11 @@ export default function DailyProfitReport() {
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
         settransectionType(selectedTransactionType);
+    };
+
+    const handleReprateChange = (event) => {
+        const selectedTransactionType = event.target.value;
+        setRetrate(selectedTransactionType);
     };
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
@@ -1371,6 +1381,58 @@ export default function DailyProfitReport() {
 
                                 </div>
 
+                            </div>
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "25px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "90px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Rep Rate:
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={Retrate}
+                                    onChange={handleReprateChange}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "15px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">All</option>
+                                    <option value="P">Purchase Rate </option>
+                                    <option value="S">Sale Man Rate</option>
+                                    <option value="A">Actual Rate</option>
+
+
+                                </select>
                             </div>
 
                         </div>

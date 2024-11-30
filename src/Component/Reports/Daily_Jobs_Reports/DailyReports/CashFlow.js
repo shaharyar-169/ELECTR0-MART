@@ -1437,6 +1437,8 @@ export default function CashFlowReport() {
 
 
                     </div>
+
+
                     <div>
                         <div
                             style={{
@@ -1565,22 +1567,32 @@ export default function CashFlowReport() {
                                                                 color: fontcolor,
                                                             }}
                                                         >
-                                                            {/* First column - Conditional logic for Receipt heading and empty second row */}
+                                                            {/* First column - tacccod or empty */}
+                                                            <td
+                                                                className="text-start"
+                                                                style={{
+                                                                    ...firstColWidth,
+                                                                    textAlign: "center", // Center align
+                                                                    fontWeight: "normal", // Normal weight for first column
+                                                                    backgroundColor: "transparent", // No background for first column
+                                                                }}
+                                                            >
+                                                                {i === 0 ? "-" : i === 1 ? "" : item.tacccod}
+                                                            </td>
+
+                                                            {/* Second column - Custom description or Receipt heading */}
                                                             <td
                                                                 className={`text-start ${i === 1 ? "heading-cell" : ""}`}
                                                                 style={{
-                                                                    ...firstColWidth,
-                                                                    textAlign: i === 1 ? "center" : "center", // Center align for heading
+                                                                    ...secondColWidth,
+                                                                    // textAlign: i === 1 ? "center" : "center", // Center align for heading
+                                                                   textAlign:"center !important",
                                                                     fontWeight: i === 1 ? "bold" : "normal", // Bold for heading
                                                                     backgroundColor: i === 1 ? "#3368B5" : "transparent", // Background color for heading
+                                                                    color: i === 1 ? `${fontcolor}` : `${fontcolor}`, // Text color for heading
                                                                 }}
                                                             >
-                                                                {i === 0 ? "-" : i === 1 ? "Receipt" : item.tacccod}
-                                                            </td>
-
-                                                            {/* Second column - Custom description for first cell */}
-                                                            <td className="text-start" style={secondColWidth}>
-                                                                {i === 0 ? "Opening Balance" : i === 1 ? "" : item.Description}
+                                                                {i === 0 ? "Opening Balance" : i === 1 ? "Receipt" : item.Description}
                                                             </td>
 
                                                             {/* Third column - Receipt values */}
@@ -1601,12 +1613,23 @@ export default function CashFlowReport() {
                                                     );
                                                 })}
 
-                                               
+
+
                                                 {/* Payment Heading */}
                                                 {tableData.length > 0 && (
                                                     <tr>
                                                         {/* First column - Payment heading */}
                                                         <td
+                                                            style={{
+                                                                ...firstColWidth,
+                                                                backgroundColor: "#021A33", // Same background color as the heading
+                                                            }}
+                                                        >
+                                                        </td>
+
+                                                        {/* Other columns - Empty cells */}
+                                                        <td
+
                                                             style={{
                                                                 textAlign: "left",
                                                                 fontWeight: "bold",
@@ -1616,30 +1639,22 @@ export default function CashFlowReport() {
                                                         >
                                                             Payment
                                                         </td>
-
-                                                        {/* Other columns - Empty cells */}
-                                                        <td
-                                                            style={{
-                                                                ...secondColWidth,
-                                                                backgroundColor: "#021A33", // Same background color as the heading
-                                                            }}
-                                                        ></td>
                                                         <td
                                                             style={{
                                                                 ...thirdColWidth,
-                                                                backgroundColor: "#021A33",
+                                                                backgroundColor: `${getcolor}`,
                                                             }}
                                                         ></td>
                                                         <td
                                                             style={{
                                                                 ...forthColWidth,
-                                                                backgroundColor: "#021A33",
+                                                                backgroundColor: `${getcolor}`,
                                                             }}
                                                         ></td>
                                                         <td
                                                             style={{
                                                                 ...fifthColWidth,
-                                                                backgroundColor: "#021A33",
+                                                                backgroundColor: `${getcolor}`,
                                                             }}
                                                         ></td>
                                                     </tr>
@@ -1746,7 +1761,7 @@ export default function CashFlowReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                        <span className="mobileledger_total">{totalDebit}</span>
+                            <span className="mobileledger_total">{totalDebit}</span>
 
                         </div>
                         <div
@@ -1756,7 +1771,7 @@ export default function CashFlowReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                         <span className="mobileledger_total">{totalCredit}</span>
+                            <span className="mobileledger_total">{totalCredit}</span>
 
                         </div>
                         <div
@@ -1766,7 +1781,7 @@ export default function CashFlowReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                       <span className="mobileledger_total">{closingBalance}</span>
+                            <span className="mobileledger_total">{closingBalance}</span>
 
                         </div>
 
