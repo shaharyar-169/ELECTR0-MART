@@ -88,7 +88,7 @@ const BarChart = () => {
 
   return (
     <div id="chart">
-      <ReactApexChart options={options} series={series} type="bar" height={200} width={500} />
+      <ReactApexChart options={options} series={series} type="bar" height={200} width={480} />
    
    
     </div>

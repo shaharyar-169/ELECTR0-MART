@@ -27,7 +27,7 @@ export default function Dasboard() {
 
   const [selectedfromDate, setSelectedfromDate] = useState(null);
   const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
-  const [fromInputDate, setfromInputDate] = useState("11-11-2024");
+  const [fromInputDate, setfromInputDate] = useState("");
 
 
   const handlefromDateChange = (date) => {
@@ -261,6 +261,12 @@ export default function Dasboard() {
     width: "18%",
   };
 
+  const getDayName = (dateString) => {
+    const dateParts = dateString.split("-").map(Number); // Split date string into parts (day, month, year)
+    const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // Create Date object
+    return date.toLocaleDateString("en-US", { weekday: "long" }); // Get day name
+  };
+
   return (
     <>
 
@@ -270,7 +276,7 @@ export default function Dasboard() {
           <div className="Card_styling">
             <div className="Card_Heading_div">
               <span className="Span_Heading">
-                {fromInputDate}
+                {fromInputDate} ({getDayName(fromInputDate)})
 
                 <DatePicker
                   selected={selectedfromDate}
@@ -341,7 +347,7 @@ export default function Dasboard() {
               </div>
               <div className="col-md-6 inner_section_first_column1">
                 <div className="row leable_row_styling" >
-                  <div className="col-md-6 lable_left_section" style={{ background: '#2196F3', }}>
+                  <div className="col-md-6 lable_left_section" style={{ background: '#2196F3', padding:'0px' }}>
                     C&B
                   </div>
                   <div className="col-md-6 lable_right_section">
@@ -349,15 +355,15 @@ export default function Dasboard() {
                   </div>
                 </div>
                 <div className="row leable_row_styling" >
-                  <div className="col-md-6 lable_left_section" style={{ background: '#4AB052', }}>
-                    Receivble
+                  <div className="col-md-6 lable_left_section" style={{ background: '#4AB052', padding:'0px' }}>
+                    Receivable
                   </div>
                   <div className="col-md-6 lable_right_section">
                     {DailyDashboard.Receivable}
                   </div>
                 </div>
                 <div className="row leable_row_styling" >
-                  <div className="col-md-6 lable_left_section" style={{ background: '#FE5353', }}>
+                  <div className="col-md-6 lable_left_section" style={{ background: '#FE5353',  padding:'0px'}}>
                     Payable
                   </div>
                   <div className="col-md-6 lable_right_section">
@@ -366,7 +372,7 @@ export default function Dasboard() {
                   </div>
                 </div>
                 <div className="row leable_row_styling" >
-                  <div className="col-md-6 lable_left_section" style={{ background: '#673BB7', }}>
+                  <div className="col-md-6 lable_left_section" style={{ background: '#673BB7',  padding:'0px'}}>
                     Stock
                   </div>
                   <div className="col-md-6 lable_right_section">
