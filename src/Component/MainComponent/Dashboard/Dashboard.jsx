@@ -9,6 +9,8 @@ import DatePicker from "react-datepicker";
 import { BsCalendar } from "react-icons/bs";
 import { getOrganisationData, getUserData } from "../../Auth";
 import { useTheme } from "../../../ThemeContext";
+import Donut1 from "./Chart/SmallChart";
+import { Dashboard } from "@mui/icons-material";
 export default function Dasboard() {
 
   const [saleData, setsaleData] = useState([])
@@ -18,6 +20,9 @@ export default function Dasboard() {
   const [CompanySaleComparison, setCompanySaleComparison] = useState([])
 
   const [DailyDashboard, setDailyDashboard] = useState([])
+  const [DailyDashboardSale, setDailyDashboardSale] = useState([])
+
+  console.log('DailyDashboardSale', DailyDashboardSale)
 
 
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -42,7 +47,7 @@ export default function Dasboard() {
     return `${day}-${month}-${year}`;
   };
 
- 
+
   //  SALE API DATA
   const purchasetoday = purchaseData.length > 0 ? purchaseData[0].today : null;
   const purchasemonth = purchaseData.length > 0 ? purchaseData[0].month : null;
@@ -60,11 +65,8 @@ export default function Dasboard() {
 
   const {
     isSidebarVisible,
-    toggleSidebar,
     getcolor,
     fontcolor,
-    toggleChangeColor,
-    getLocationNumber,
     apiLinks,
 
   } = useTheme();
@@ -74,7 +76,7 @@ export default function Dasboard() {
     const currentDate = new Date();
     setSelectedfromDate(currentDate);
     setfromInputDate(formatDate(currentDate));
- }, []);
+  }, []);
 
   useEffect(() => {
 
@@ -194,6 +196,27 @@ export default function Dasboard() {
     fetchReceivableReport();
   }, [])
 
+  useEffect(() => {
+
+    const apiUrl = apiLinks + "/DashboardDailySale.php";
+    const formData = new URLSearchParams({
+      FRepDat: fromInputDate,
+      code: 'NASIRTRD',
+      FLocCod: '001',
+
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        setDailyDashboardSale(response.data)
+      })
+
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+
+  }, [fromInputDate])
 
   const contentStyle = {
     backgroundColor: getcolor,
@@ -243,11 +266,11 @@ export default function Dasboard() {
 
       <div className="row Countair_styling" style={contentStyle} >
         {/* FIRST LEFT COLUMN */}
-        <div style={{ height: "100%", width: "22%", padding: '0px' }}>
+        <div style={{ height: "100%", width: "30%", padding: '0px' }}>
           <div className="Card_styling">
             <div className="Card_Heading_div">
               <span className="Span_Heading">
-               {fromInputDate}
+                {fromInputDate}
 
                 <DatePicker
                   selected={selectedfromDate}
@@ -262,11 +285,11 @@ export default function Dasboard() {
                       <BsCalendar
                         onClick={toggleFromCalendar}
                         style={{
-                          cursor:'pointer',                           
+                          cursor: 'pointer',
                           marginLeft: "18px",
                           fontSize: "14px",
                           color: 'red',
-                          marginBottom:'5px'
+                          marginBottom: '5px'
                         }}
                       />
                     </div>
@@ -274,8 +297,270 @@ export default function Dasboard() {
                 />
               </span>
             </div>
+            {/* FIRST LEFT COLUMN TABLE SECTION */}
+            <div className="row Column_first_Table_section" >
+              <table className="first_column_table " >
+                <tbody>
+                  <tr>
+                    <td class="col1"> Sale</td>
+                    <td class="col2">{DailyDashboard.SaleQnty}</td>
+                    <td class="col3">{DailyDashboard.SaleAmount}</td>
+                  </tr>
+                  <tr>
+                    <td class="col1">Purchase</td>
+                    <td class="col2">{DailyDashboard.PurQnty}</td>
+                    <td class="col3">{DailyDashboard.PurAmount}</td>
+                  </tr>
+                  <tr>
+                    <td class="col1">Collection</td>
+                    <td class="col2"></td>
+                    <td class="col3">{DailyDashboard.Collection}</td>
+                  </tr>
+                  <tr>
+                    <td class="col1">Payment</td>
+                    <td class="col2"></td>
+                    <td class="col3">{DailyDashboard.Payment}</td>
+                  </tr>
+                  <tr>
+                    <td class="col1">Expense</td>
+                    <td class="col2"></td>
+                    <td class="col3">{DailyDashboard.Expense}</td>
+                  </tr>
+                  <tr>
+                    <td class="col1">Margin</td>
+                    <td class="col2"></td>
+                    <td class="col3" style={{ fontWeight: 'bold' }}>{DailyDashboard.Margin}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {/* FIRST LEFT COLUMN DOUNT CHART SECTION */}
+            <div className="second_section_first_column">
+              <div className="col-md-6 inner_section_first_column"  >
+                <Donut1 />
+              </div>
+              <div className="col-md-6 inner_section_first_column1">
+                <div className="row leable_row_styling" >
+                  <div className="col-md-6 lable_left_section" style={{ background: '#2196F3', }}>
+                    C&B
+                  </div>
+                  <div className="col-md-6 lable_right_section">
+                    {DailyDashboard.CashBankBal}
+                  </div>
+                </div>
+                <div className="row leable_row_styling" >
+                  <div className="col-md-6 lable_left_section" style={{ background: '#4AB052', }}>
+                    Receivble
+                  </div>
+                  <div className="col-md-6 lable_right_section">
+                    {DailyDashboard.Receivable}
+                  </div>
+                </div>
+                <div className="row leable_row_styling" >
+                  <div className="col-md-6 lable_left_section" style={{ background: '#FE5353', }}>
+                    Payable
+                  </div>
+                  <div className="col-md-6 lable_right_section">
+                    {DailyDashboard.Payable}
 
-            {Object.entries(DailyDashboard).map(([key, value], index) => (
+                  </div>
+                </div>
+                <div className="row leable_row_styling" >
+                  <div className="col-md-6 lable_left_section" style={{ background: '#673BB7', }}>
+                    Stock
+                  </div>
+                  <div className="col-md-6 lable_right_section">
+                    {0}
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+            {/* FIRST LEFT COLUMN DAIMOND SECTION */}
+            <div className="Diamond_section">
+              <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', columnGap: '8px', flexDirection: 'row' }}>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0',
+                  fontSize: '12px',
+                  height: '37px',
+                  width: '37px',
+                  boxShadow: '5px 5px 10px grey',
+                  background: '#2196F3',
+                  color: 'white',
+                  transform: 'rotate(45deg)',
+                  // position: 'relative',
+                  top: '35px',
+                  borderRadius: '10px',
+
+                }}>
+                  <div style={{
+                    transform: 'rotate(-45deg)',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-One']}<br />{DailyDashboard['Date-One']}</div>
+                  </div>
+                </div>
+                <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                  {DailyDashboard['Qnty-One']}
+                </div>
+                <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                  {DailyDashboard['Sale-One']}
+                </div>
+
+              </div>
+
+              <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'end', columnGap: '8px', flexDirection: 'row' }}>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0',
+                  fontSize: '12px',
+                  height: '37px',
+                  width: '37px',
+                  boxShadow: '5px 5px 10px grey',
+                  background: '#2196F3',
+                  color: 'white',
+                  transform: 'rotate(45deg)',
+                  // position: 'relative',
+                  top: '35px',
+                  borderRadius: '10px',
+
+                }}>
+                  <div style={{
+                    transform: 'rotate(-45deg)',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Two']}<br />{DailyDashboard['Date-Two']}</div>
+                  </div>
+                </div>
+                <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                  {DailyDashboard['Qnty-Two']}
+                </div>
+                <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                  {DailyDashboard['Sale-Two']}
+                </div>
+
+              </div>
+
+              <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', columnGap: '8px', flexDirection: 'row' }}>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0',
+                  fontSize: '12px',
+                  height: '37px',
+                  width: '37px',
+                  boxShadow: '5px 5px 10px grey',
+                  background: '#2196F3',
+                  color: 'white',
+                  transform: 'rotate(45deg)',
+                  // position: 'relative',
+                  top: '35px',
+                  borderRadius: '10px',
+
+                }}>
+                  <div style={{
+                    transform: 'rotate(-45deg)',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Three']}<br />{DailyDashboard['Date-Three']}</div>
+                  </div>
+                </div>
+                <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey' }}>
+                  {DailyDashboard['Qnty-Three']}
+                </div>
+                <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                  {DailyDashboard['Sale-Three']}
+                </div>
+
+              </div>
+
+              <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'end', columnGap: '8px', flexDirection: 'row' }}>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0',
+                  fontSize: '12px',
+                  height: '37px',
+                  width: '37px',
+                  boxShadow: '5px 5px 10px grey',
+                  background: '#2196F3',
+                  color: 'white',
+                  transform: 'rotate(45deg)',
+                  // position: 'relative',
+                  top: '35px',
+                  borderRadius: '10px',
+
+                }}>
+                  <div style={{
+                    transform: 'rotate(-45deg)',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Four']}<br />{DailyDashboard['Date-Four']}</div>
+                  </div>
+                </div>
+                <div className="Diamond_sale" style={{ padding: "0px", width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                  {DailyDashboard['Qnty-Four']}
+                </div>
+                <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                  {DailyDashboard['Sale-Four']}
+                </div>
+
+              </div>
+
+            </div>
+            {/* FIRST LEFT COLUMN LAST TABLE SECTION */}
+
+            <div className="row last_table_section">
+              <table className="first_column_table " >
+                {/* <tbody>
+                 {DailyDashboardSale.map((item, index)=>{
+                  return(
+                    <tr key={index}>
+                    <td className="second_col1">{item.Category}</td>
+                    <td className="second_col2">{item.Qnty}</td>
+                    <td className="second_col3">{item.Amount}</td>
+                    </tr>
+                  )
+                 })}
+                 
+                </tbody> */}
+                <tbody>
+                  {DailyDashboardSale.length > 0 ? (
+                    DailyDashboardSale.map((item, index) => (
+                      <tr key={index}>
+                        <td className="second_col1">{item.Category}</td>
+                        <td className="second_col2">{item.Qnty}</td>
+                        <td className="second_col3">{item.Amount}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    Array(5).fill(null).map((_, index) => (
+                      <tr key={index}>
+                        <td className="second_col1"></td>
+                        <td className="second_col2"></td>
+                        <td className="second_col3"></td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+
+
+            {/* {Object.entries(DailyDashboard).map(([key, value], index) => (
               <div key={index} className="row" style={{ width: '100%' }}>
                 <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>
                   {key}
@@ -284,16 +569,13 @@ export default function Dasboard() {
                   {value}
                 </div>
               </div>
-            ))}
+            ))} */}
 
           </div>
 
-
-
-
         </div>
         {/* SECOND RIGHT COLUMN */}
-        <div style={{ height: '100%', width: '78%', padding: '0px' }}>
+        <div style={{ height: '100%', width: '70%', padding: '0px' }}>
           {/* FIRST ROW */}
           <div className="row Row_styling" >
             <div className="Card_styling_new">
