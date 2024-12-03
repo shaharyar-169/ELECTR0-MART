@@ -580,16 +580,16 @@ export default function Dasboard() {
           <div className="row Row_styling" >
             <div className="Card_styling_new">
               <span className="card_heading">Purchase</span>
-              <div className="row" style={{ width: '100%' }}>
-                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Stock</div>
+              <div className="row card_row_data" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '5px' }}>Stock</div>
                 <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchasetoday}</div>
               </div>
-              <div className="row" style={{ width: '100%' }}>
-                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Receivable</div>
+              <div className="row card_row_data" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '5px' }}>Receivable</div>
                 <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchasemonth}</div>
               </div>
-              <div className="row" style={{ width: '100%' }}>
-                <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>Payable</div>
+              <div className="row card_row_data" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '5px' }}>Payable</div>
                 <div className="col-md-6 text-end " style={{ color: 'black', }} >{purchaseyear}</div>
               </div>
             </div>
@@ -597,16 +597,16 @@ export default function Dasboard() {
 
             <div className="Card_styling_new">
               <span className="card_heading">Sales</span>
-              <div className="row" style={{ width: '100%' }}>
-                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>Today</div>
+              <div className="row card_row_data" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '5px' }}>Today</div>
                 <div className="col-md-6 text-end " style={{ color: 'black' }} >{saletoday}</div>
               </div>
-              <div className="row" style={{ width: '100%' }}>
-                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '25px' }}>This Month</div>
+              <div className="row card_row_data" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start " style={{ color: 'grey', paddingLeft: '5px' }}>This Month</div>
                 <div className="col-md-6 text-end " style={{ color: 'black', }} >{salemonth}</div>
               </div>
-              <div className="row" style={{ width: '100%' }}>
-                <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '25px' }}>This Year</div>
+              <div className="row card_row_data" style={{ width: '100%' }}>
+                <div className="col-md-6 text-start" style={{ color: 'grey', paddingLeft: '5px' }}>This Year</div>
                 <div className="col-md-6 text-end " style={{ color: 'black', }} >{saleyear}</div>
               </div>
             </div>
@@ -683,7 +683,7 @@ export default function Dasboard() {
                           className="border-dark"
                           style={secondColWidth}
                         >
-                          Qnty
+                          Qty
                         </td>
                         <td
                           className="border-dark"
@@ -871,7 +871,7 @@ export default function Dasboard() {
                           className="border-dark"
                           style={secondColWidth}
                         >
-                          Qnty
+                          Qty
                         </td>
                         <td
                           className="border-dark"
@@ -1059,7 +1059,7 @@ export default function Dasboard() {
                           className="border-dark"
                           style={secondColWidth}
                         >
-                          Qnty
+                          Qty
                         </td>
                         <td
                           className="border-dark"

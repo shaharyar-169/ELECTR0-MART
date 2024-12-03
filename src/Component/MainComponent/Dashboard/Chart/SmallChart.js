@@ -52,7 +52,7 @@ const Donut1 = (props) => {
 
   return (
     <div id="chart">
-      <Chart options={options} series={series} type="donut" width={180} />
+      <Chart options={options} series={series} type="donut" width={150} />
     </div>
   );
 };
