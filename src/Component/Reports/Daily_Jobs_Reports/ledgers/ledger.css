@@ -324,3 +324,18 @@ h2.react-datepicker__current-month {
   color: #FFFFFF!important;
   text-align: left!important;
 } 
+
+/* ////////////// SELECT SEARCH COLOR WHITE ID ///////////////////   */
+
+.css-1cfo1cf{
+  color: white !important;
+}
+
+.css-166bipr-Input{
+  color: white !important;
+}
+
+.css-bpe1w1-control{
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
