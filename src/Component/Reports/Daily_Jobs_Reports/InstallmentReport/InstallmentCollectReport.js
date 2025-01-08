@@ -22,7 +22,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function InstallmentSaleReport() {
+export default function InstallmentCollectReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -387,16 +387,11 @@ export default function InstallmentSaleReport() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/InstallmentSaleReport.php";
+        const apiUrl = apiLinks + "/InstallmentCollectionReport.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            // FTrnTyp: transectionType,
-            // FAccCod: saleType,
-            // code: organisation.code,
-            // FYerDsc: getyeardescription,
-            // FLocCod: getLocationNumber,
             FLocCod: '001',
             code: 'HAJVERY',
 
@@ -408,9 +403,9 @@ export default function InstallmentSaleReport() {
             .then((response) => {
                 setIsLoading(false);
 
-                setTotalDebit(response.data["Total Amount"]);
-                setTotalCredit(response.data["Total Advance"]);
-                setClosingBalance(response.data["Percentage"]);
+                // setTotalDebit(response.data["Total Amount"]);
+                // setTotalCredit(response.data["Total Advance"]);
+                // setClosingBalance(response.data["Percentage"]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -536,43 +531,30 @@ export default function InstallmentSaleReport() {
         // Define table data (rows)
         const rows = tableData.map((item) => [
             item.Date,
-            item.INV,
+            item['Rec#'],
+            item.Type,
+            item.Code,
             item.Customer,
-            item.Mobile,
-            item['Sale Amt'],
-            item.Advance,
-            item.age,
-            item['Ins Nos'],
+            item.Col,
             item['Ins Amt'],
-
+            item.Collection,
         ]);
 
         // Add summary row to the table
-        rows.push([
-            "",
-            "",
-            "",
-            "",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
-            "",
-            "",
-        ]);
+     
 
         // Define table column headers and individual column widths
         const headers = [
             "Date",
-            "INV",
+            "Rec#",
+            "Type",
+            "Code",
             "Customer",
-            "Mobile",
-            "Sale Amt",
-            "Advance",
-            "age",
-            "Ins",
+            "Col",
             "Ins Amt",
+            "Collection",
         ];
-        const columnWidths = [18, 12, 50, 20, 20, 20, 10, 10, 20];
+        const columnWidths = [18, 12, 12, 18, 60, 10, 20, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -628,7 +610,7 @@ export default function InstallmentSaleReport() {
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 100; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -670,8 +652,16 @@ export default function InstallmentSaleReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
+                    if (cellIndex === 2 ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+                        doc.text(cellValue, rightAlignX, cellY, {
+                            align: "center",
+                            baseline: "middle",
+                        });
 
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
+                    }
+
+                    else if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7 ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -803,7 +793,7 @@ export default function InstallmentSaleReport() {
                 // ); // Render sale report title with decreased font size, provide the time, and page number
                 // startY += 7;
                 addTitle(
-                    `Installment Sale Report From: ${fromInputDate} To: ${toInputDate}`,
+                    `Installment Collection Report From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -871,7 +861,7 @@ export default function InstallmentSaleReport() {
         handlePagination();
 
         // Save the PDF file
-        doc.save("Installmentsalereport.pdf");
+        doc.save("Installmentcollectionreport.pdf");
 
         const pdfBlob = doc.output("blob");
         const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -888,7 +878,7 @@ export default function InstallmentSaleReport() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 7; // Number of columns
+        const numColumns = 8; // Number of columns
 
         // Common styles
         const titleStyle = {
@@ -899,13 +889,13 @@ export default function InstallmentSaleReport() {
         const columnAlignments = [
             "left",
             "left",
+            "center",
             "left",
             "left",
             "right",
             "right",
             "right",
-            "right",
-            "right",
+           
         ];
 
         // Add an empty row at the start
@@ -914,7 +904,7 @@ export default function InstallmentSaleReport() {
         // Add title rows
         [
             comapnyname,
-            `Installment Sale Report From ${fromInputDate} To ${toInputDate}`,
+            `Installment Collection Report From ${fromInputDate} To ${toInputDate}`,
         ].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
@@ -965,15 +955,14 @@ export default function InstallmentSaleReport() {
 
         // Add headers
         const headers = [
-            "Date",
-            "INV",
+           "Date",
+            "Rec#",
+            "Type",
+            "Code",
             "Customer",
-            "Mobile",
-            "Sale Amt",
-            "Advance",
-            "age",
-            "Ins",
+            "Col",
             "Ins Amt",
+            "Collection",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
@@ -984,35 +973,33 @@ export default function InstallmentSaleReport() {
         tableData.forEach((item) => {
             worksheet.addRow([
                 item.Date,
-                item.INV,
+                item['Rec#'],
+                item.Type,
+                item.Code,
                 item.Customer,
-                item.Mobile,
-                item['Sale Amt'],
-                item.Advance,
-                item.age,
-                item['Ins Nos'],
+                item.Col,
                 item['Ins Amt'],
+                item.Collection,
             ]);
         });
 
         // Add total row and bold it
-        const totalRow = worksheet.addRow([
-            "",
-            "",
-            "",
-            "",
-            totalDebit,
-            totalCredit,
-            closingBalance,
-            "",
-            "",
-        ]);
-        totalRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
+        // const totalRow = worksheet.addRow([
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        // ]);
+        // totalRow.eachCell((cell) => {
+        //     cell.font = { bold: true };
+        // });
 
         // Set column widths
-        [10, 7, 30, 12, 12, 12,6,6 ,10].forEach((width, index) => {
+        [10,8,7,10,30,7,12,12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1043,7 +1030,7 @@ export default function InstallmentSaleReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "installmentSalereport.xlsx");
+        saveAs(blob, "installmentcollectionreport.xlsx");
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1086,26 +1073,24 @@ export default function InstallmentSaleReport() {
         width: "6%",
     };
     const thirdColWidth = {
-        width: "31.8%",
-    };
+        width: "5%",
+        };
     const forthColWidth = {
         width: "10%",
     };
     const fifthColWidth = {
-        width: "10%",
-    };
+        width: "31.7%",
+   };
     const sixthColWidth = {
-        width: "10%",
+        width: "7%",
     };
     const seventhColWidth = {
-        width: "6%",
+        width: "15%",
     };
     const eighthColWidth = {
-        width: "6%",
+        width: "15%",
     };
-    const ninthColWidth = {
-        width: "10%",
-    };
+   
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1260,7 +1245,7 @@ export default function InstallmentSaleReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Installment Sale Report" />
+                    <NavComponent textdata="Installment Collectoin Report" />
                     <div className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
 
@@ -1640,29 +1625,27 @@ export default function InstallmentSaleReport() {
                                             Date
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            INV
+                                        Rec#
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Customer
+                                            Type
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
-                                            Mobile
+                                            Code
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                            Sale Amt
+                                            Customer
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Advance
+                                            Col
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            age
-                                        </td>
-                                        <td className="border-dark" style={eighthColWidth}>
-                                            Ins
-                                        </td>
-                                        <td className="border-dark" style={ninthColWidth}>
                                             Ins Amt
                                         </td>
+                                        <td className="border-dark" style={eighthColWidth}>
+                                            Collection
+                                        </td>
+                                      
                                     </tr>
                                 </thead>
                             </table>
@@ -1695,7 +1678,7 @@ export default function InstallmentSaleReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="8" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1708,7 +1691,7 @@ export default function InstallmentSaleReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 8 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1725,7 +1708,6 @@ export default function InstallmentSaleReport() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
-                                                <td style={ninthColWidth}></td>
 
                                             </tr>
                                         </>
@@ -1750,29 +1732,27 @@ export default function InstallmentSaleReport() {
                                                             {item.Date}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
-                                                            {item.INV}
+                                                            {item['Rec#']}
                                                         </td>
-                                                        <td className="text-start" style={thirdColWidth}>
-                                                            {item.Customer}
+                                                        <td className="text-center" style={thirdColWidth}>
+                                                            {item.Type}
                                                         </td>
                                                         <td className="text-start" style={forthColWidth}>
-                                                            {item.Mobile}
+                                                            {item.Code}
                                                         </td>
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item['Sale Amt']}
+                                                        <td className="text-start" style={fifthColWidth}>
+                                                            {item.Customer}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Advance}
+                                                            {item.Col}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.age}
+                                                        {item['Ins Amt']}
                                                         </td>
                                                         <td className="text-end" style={eighthColWidth}>
-                                                            {item['Ins Nos']}
+                                                            {item.Collection}
                                                         </td>
-                                                        <td className="text-end" style={ninthColWidth}>
-                                                            {item['Ins Amt']}
-                                                        </td>
+                                                       
                                                     </tr>
                                                 );
                                             })}
@@ -1786,7 +1766,7 @@ export default function InstallmentSaleReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 8 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1802,7 +1782,6 @@ export default function InstallmentSaleReport() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
-                                                <td style={ninthColWidth}></td>
 
                                             </tr>
                                         </>
@@ -1860,7 +1839,6 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalDebit}</span>
                         </div>
                         <div
                             style={{
@@ -1869,7 +1847,6 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalCredit}</span>
                         </div>
                         <div
                             style={{
@@ -1878,7 +1855,6 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{closingBalance}</span>
                         </div>
                         <div
                             style={{
@@ -1888,14 +1864,7 @@ export default function InstallmentSaleReport() {
                             }}
                         >
                         </div>
-                        <div
-                            style={{
-                                ...ninthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                        </div>
+                       
                     </div>
                     <div
                         style={{

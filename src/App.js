@@ -64,7 +64,7 @@ import CashFlowReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
 import InstallmentSaleReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentSaleReport.js";
-
+import InstallmentCollectReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectReport.js"; 
 function App() {
   const queryClient = new QueryClient();
 
@@ -132,8 +132,9 @@ function App() {
                 <Route exact path="/CashFlow" element={<CashFlowReport />} />
 
                   {/* Rountes for Installments reports */}
-                  <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />
-                  <Route exact path="/DailyInstallationReport" element={<InstallmentSaleReport />} />
+                  <Route exact path="/InstallmentLedger" element={<InstallmentBalanceReport />} />
+                  <Route exact path="/InstallmentSaleReport" element={<InstallmentSaleReport />} />
+                  <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
 
 
                 {/* Rountes for Dashboard */}
