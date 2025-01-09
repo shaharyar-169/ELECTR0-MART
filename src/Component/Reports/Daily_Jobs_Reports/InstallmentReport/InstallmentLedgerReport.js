@@ -23,7 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import callAddFont from "../../../../vardana-normal";
 import { color } from "@mui/system";
 
-export default function InstallmentBalanceReport() {
+export default function InstallmentLedgerReport() {
 
 
     const saleSelectRef = useRef(null);
@@ -43,7 +43,6 @@ export default function InstallmentBalanceReport() {
     const [searchQuery, setSearchQuery] = useState('');
     const [transectionType, settransectionType] = useState('');
     const [supplierList, setSupplierList] = useState([])
-    console.log('code data is hhae', supplierList);
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [totalDebit, setTotalDebit] = useState(0);
@@ -206,101 +205,52 @@ export default function InstallmentBalanceReport() {
     // Bind to window
     window.closeAlert = closeAlert;
 
+
+
     function fetchGeneralLedger() {
 
-        const fromDateElement = document.getElementById('fromdatevalidation');
-        const toDateElement = document.getElementById('todatevalidation');
-
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-
-        let hasError = false;
-        let errorType = '';
-
-        // Handle saleType, fromInputDate, and toInputDate errors first
-        switch (true) {
-            case !saleType:
-                errorType = 'saleType';
-                break;
-
-            case !toInputDate:
-                errorType = 'toDate';
-                break;
-            default:
-                hasError = false;
-                break;
-        }
-
-        // Handle date format validation separately
-        if (!dateRegex.test(fromInputDate)) {
-            errorType = 'fromDateInvalid';
-        }
-
-        if (!dateRegex.test(toInputDate)) {
-            errorType = 'toDateInvalid';
-        } else {
-            const formattedToInput = toInputDate.replace(/^(\d{2})(\d{2})(\d{4})$/, '$1-$2-$3');
-            const [toDay, toMonth, toYear] = formattedToInput.split('-').map(Number);
-            const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-
-
-            if (enteredToDate < GlobalfromDate || enteredToDate > GlobaltoDate) {
-                errorType = 'toDateAfterGlobal';
-            }
-        }
-
-
-        // Handle errors using a separate switch based on errorType
-        switch (errorType) {
-
-            case 'saleType':
-                toast.error("Please select a Account Code");
-                return;
-            case 'toDate':
-                toast.error(
-                    `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-
-            case 'toDateAfterGlobal':
-                toast.error(
-                    `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-
-
-            default:
-                break;
-        }
-        ////////////////////////////////////////////
-
-
-        // document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
-        document.getElementById('todatevalidation').style.border = `1px solid ${fontcolor}`;
-
-        const apiUrl2 = apiLinks + "/InstallmentBalanceReport.php";
+        const apiUrl = apiLinks + "/InstallmentLedger.php";
         setIsLoading(true);
-        const formData2 = new URLSearchParams({
-            FRepDat: toInputDate,
+
+        const formData = new URLSearchParams({
             code: 'HAJVERY',
             FLocCod: '001',
-            FColCod: '001'
+            FInsCod: '14-01-2723'
 
         }).toString();
 
         axios
-            .post(apiUrl2, formData2)
+            .post(apiUrl, formData)
             .then((response) => {
+                setIsLoading(false);
 
-                if (response.data && Array.isArray(response.data.Detail)) {
-                    setTableData(response.data.Detail);
-                    setIsLoading(false);
-                } else {
-                    console.warn(
-                        "Response data structure is not as expected:",
-                        response.data
-                    );
+                // Store Profit and Expense data into separate states
+                if (response.data) {
+                    if (Array.isArray(response.data.Detail)) {
+                        setTableData(response.data.Detail); // Store Profit array in profits state
+                    } else {
+                        console.warn(
+                            "Response data 'Profit' is not an array:",
+                            response.data.Detail
+                        );
+                        setTableData([]); // Fallback to an empty array
+                    }
+
+                    if (Array.isArray(response.data.Header)) {
+                        setheaderData(response.data.Header); // Store Expense array in expenses state
+                    } else {
+                        console.warn(
+                            "Response data 'Expense' is not an array:",
+                            response.data.Header
+                        );
+                        setheaderData([]); // Fallback to an empty array
+                    }
+                }
+
+                else {
+                    console.warn("Response data is null or undefined:", response.data);
                     setTableData([]);
+                    setheaderData([]);
                 }
             })
             .catch((error) => {
@@ -308,17 +258,17 @@ export default function InstallmentBalanceReport() {
                 setIsLoading(false);
             });
 
-
     }
+
 
     useEffect(() => {
         const hasComponentMountedPreviously = sessionStorage.getItem('componentMounted');
         // If it hasn't mounted before or on refresh, select the 'from date' input
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
-            if (saleSelectRef && saleSelectRef.current) {
+        if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+            if (toRef && toRef.current) {
                 setTimeout(() => {
-                    saleSelectRef.current.focus(); // Focus on the input field
-                    // saleSelectRef.current.select(); // Select the text within the input field
+                    toRef.current.focus(); // Focus on the input field
+                    toRef.current.select(); // Select the text within the input field
                 }, 0);
             }
             sessionStorage.setItem('componentMounted', 'true'); // Set the flag indicating mount
@@ -347,10 +297,10 @@ export default function InstallmentBalanceReport() {
 
     useEffect(() => {
 
-        const apiUrl = apiLinks + "/GetCollector.php"
+        const apiUrl = apiLinks + "/GetActiveSupplier.php"
         const formData = new URLSearchParams({
-            // FLocCod: getLocationNumber,
-            code: 'HAJVERY',
+            FLocCod: getLocationNumber,
+            code: organisation.code,
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -365,8 +315,8 @@ export default function InstallmentBalanceReport() {
 
     // Transforming fetched data into options array
     const options = supplierList.map(item => ({
-        value: item.tcolcod,
-        label: `${item.tcolcod}-${item.tcolnam.trim()}`
+        value: item.tacccod,
+        label: `${item.tacccod}-${item.taccdsc.trim()}`
     }));
 
     const DropdownOption = (props) => {
@@ -714,13 +664,13 @@ export default function InstallmentBalanceReport() {
                 doc.setFontSize(14);
                 doc.setFont("verdana", "bold");
 
-                let typeText = saleType ? saleType : "";
-                let typeItem = saleType ? saleType : "";
+                // let typeText = selectedOptionType ? selectedOptionType : "All";
+                // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
 
                 // let typeText = transectionType ? transectionType : "";
                 //    let typeItem = transectionType ? transectionType : "All";
 
-                   doc.text(`Account Code: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                //    doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
                 // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
                 // Reset font weight to normal if necessary for subsequent text
@@ -823,10 +773,10 @@ export default function InstallmentBalanceReport() {
             );
         });
 
-           worksheet.addRow([]); // Empty row for spacing
+        //    worksheet.addRow([]); // Empty row for spacing
 
-        let typeText = saleType ? saleType : "";
-        // let typeItem = transectionType ? transectionType : "All";
+        // let typeText = selectedOptionType ? selectedOptionType : "All";
+        let typeItem = transectionType ? transectionType : "All";
 
         // Add type and store row and bold it
         const typeAndStoreRow = worksheet.addRow([
@@ -834,7 +784,9 @@ export default function InstallmentBalanceReport() {
             // "",
             // "",
             //    `Status: ${typeItem}`,
-            `Account Code: ${typeText}`,
+            "",
+            "",
+            // `Type: ${typeText}`,
             "",
             "",
             "",
@@ -967,18 +919,16 @@ export default function InstallmentBalanceReport() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
+    const [headerData, setheaderData] = useState([]);
 
-    console.log('HAJVARY DATE', tableData);
+
+    console.log('HAJVARY TbaleDate', tableData);
+    console.log('HAJVARY HeaderData', headerData);
 
 
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
-
-    // useEffect(() => {
-    //     setTableData(data);
-    //     dispatch(fetchGetUser(organisation && organisation.code));
-    // }, [dispatch, organisation.code]);
 
 
     const comapnyname = organisation.description;
@@ -1003,55 +953,28 @@ export default function InstallmentBalanceReport() {
     };
 
 
-    const handleSaleKeypress = (event, inputId) => {
-        if (event.key === "Enter") {
-            const selectedOption = saleSelectRef.current.state.selectValue;
-            if (selectedOption && selectedOption.value) {
-                setSaleType(selectedOption.value);
-            }
-            const nextInput = document.getElementById(inputId);
-            if (nextInput) {
-                nextInput.focus();
-                nextInput.select();
-            } else {
-                document.getElementById("submitButton").click();
-            }
-        }
-    };
-
     const firstColWidth = {
-        width: "8%",
+        width: "10%",
     };
     const secondColWidth = {
-        width: "21.8%",
+        width: "10%",
     };
     const thirdColWidth = {
         width: "8%",
     };
     const forthColWidth = {
-        width: "8%",
+        width: "40.8%",
     };
     const fifthColWidth = {
-        width: "8%",
+        width: "10%",
     };
     const sixthColWidth = {
-        width: "8%",
+        width: "10%",
     };
     const seventhColWidth = {
-        width: "5%",
+        width: "10%",
     };
-    const eighthColWidth = {
-        width: "8%",
-    };
-    const ninthColWidth = {
-        width: "8%",
-    };
-    const tenthColWidth = {
-        width: "8%",
-    };
-    const elewenthColWidth = {
-        width: "8%",
-    };
+
 
 
     // Adjust the content width based on sidebar state
@@ -1072,7 +995,6 @@ export default function InstallmentBalanceReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        // height: "100vh",
         width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
         top: "40%",
@@ -1096,6 +1018,21 @@ export default function InstallmentBalanceReport() {
         fontFamily: '"Poppins", sans-serif',
     };
 
+    const handleSaleKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setSaleType(selectedOption.value);
+            }
+            const nextInput = document.getElementById(inputId);
+            if (nextInput) {
+                nextInput.focus();
+                nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
 
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1188,203 +1125,144 @@ export default function InstallmentBalanceReport() {
 
                     }}
                 >
-                    <NavComponent textdata="Installment Balance Report" />
+                    <NavComponent textdata="Installment Ledger Report" />
 
+                    {/* TOP HEADER SECTIO SECTION */}
+                    <div className="row " style={{ height: '300px', marginTop: '5px', marginBottom: "2px" }}>
+                        {/* FIRST SECTION OF HEADER */}
+                        <div className="row" style={{ height: "100%", width: '100%', margin: '0px', padding: '0px' }}>
+                            {/* LEFT PART OF THE HEADER FIRST SECTION  */}
+                            <div className="col-md-8" style={{ height: '20px', padding: '0px' }}>
+                                <div className="row" style={{ height: '100%', width: '100%', margin: '0px' }}>
+                                    <div className="col-md-4" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ width: '60px', height: '100%', color: fontcolor, display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Code :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '163px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
 
-                    <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
-                        <div style={{ width: '97.5%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'space-between' }}>
+                                        </input>
+                                    </div>
+                                    <div className="col-md-8" style={{ height: '100%', padding: '0px', display: 'flex' }}>
+                                        <div style={{ width: '40px', fontSize: '12px', fontWeight: 'bold', height: '100%', display: 'flex', justifyContent: 'end', alignItems: 'center', color: fontcolor }}>A/C :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '410px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
 
+                                        </input>
 
-                            {/* SELECT TH CODE  */}
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Code :</span>  <br /></label>
+                                    </div>
                                 </div>
-                                <div style={{ marginLeft: '3px' }} >
-                                    <Select
+                                <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '2px' }}>
+                                    <div className="col-md-7" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Father Name :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '293px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
 
-                                        className="List-select-class "
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, 'toDatePicker')}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                setSaleType(selectedOption.value);
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="Search or select..."
-                                    />
+                                        </input>
+                                    </div>
+                                    <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ width: '150px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Net Amt :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                            236,000
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row" style={{ height: '40px', width: '100%', margin: '0px', marginTop: '1px' }}>
+                                    <div className="col-md-7" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Address :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '293px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                        </input>
+                                    </div>
+                                    <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ width: '150px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Rent :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                            236,000
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '1px' }}>
+                                    <div className="col-md-7" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Phone No :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '293px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                        </input>
+                                    </div>
+                                    <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ width: '150px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Advance :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                            236,000
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '1px' }}>
+                                    <div className="col-md-7" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Sales Man :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '293px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                        </input>
+                                    </div>
+                                    <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ width: '150px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Qist Amt :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                            236,000
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '1px' }}>
+                                    <div className="col-md-12" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Varify By :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '120px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                        </input>
+                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Delivereb By :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '120px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                        </input>
+
+                                        <div style={{ height: '100%', width: '100px', marginLeft: '2px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Profession :</div>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                        </input>
+
+                                    </div>
+                                    {/* <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ width: '150px', height: '100%',display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Qist Amt :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems:'center' }}>
+                                            236,000
+                                        </div>
+                                    </div> */}
+                                </div>
+                                <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '1px' }}>
+                                    <div className="col-md-12" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Remarks :</div>
+                                        <div style={{ paddingLeft: '3px', display: 'flex', alignItems: 'center', justifyContent: 'start', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '580px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+                                            INSTALLMENT SALE
+                                        </div>
+                                    </div>
 
                                 </div>
 
 
                             </div>
 
-
-                            {/* To Date */}
-                            <div className='d-flex align-items-center' style={{ marginLeft: '7px' }}>
-                                <div style={{ width: '72px', display: 'flex', justifyContent: 'end', }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Date :</span>  <br /></label>
-                                </div>
-                                <div
-                                    id="todatevalidation"
-                                    style={{
-                                        width: '135px',
-                                        border: `1px solid ${fontcolor}`,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        height: ' 24px',
-                                        justifycontent: 'center',
-                                        marginLeft: '5px',
-                                        background: getcolor
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        ref={toRef}
-                                        style={{
-                                            height: '20px',
-                                            width: '90px',
-                                            paddingLeft: '5px',
-                                            outline: 'none',
-                                            alignItems: 'center',
-                                            // marginTop: '5.5px',
-                                            border: 'none',
-                                            fontSize: '12px',
-                                            backgroundColor: getcolor,
-                                            color: fontcolor
-
-                                        }} value={toInputDate}
-                                        onChange={handleToInputChange}
-                                        // onKeyPress={handleToKeyPress}
-                                        onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
-                                        // onKeyDown={(e) => handleKeyPressBoth(e, 'submitButton')}
-                                        id="toDatePicker"
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="To Date Input"
-                                        aria-describedby="todatepicker"
-                                    />
-                                    <DatePicker
-
-                                        selected={selectedToDate}
-                                        onChange={handleToDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        // showMonthDropdown
-                                        // showYearDropdown
-                                        open={toCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <span>
-                                                    <BsCalendar
-                                                        onClick={toggleToCalendar}
-                                                        style={{
-                                                            cursor: 'pointer',
-                                                            alignItems: 'center',
-                                                            marginLeft: '18px',
-                                                            // marginTop: '5px',
-                                                            fontSize: '12px'
-                                                        }} />
-                                                </span>
-                                            </div>
-                                        }
-                                    />
-                                </div>
+                            {/* RIGHT PART OF THE HEADER FIRST SECTION  */}
+                            <div className="col-md-4" style={{ backgroundColor: 'grey', height: '20px' }}>
+                                hello dear
                             </div>
 
-
+                            {/* DRAW LINER AFTER FIRST SECTION OF HEADER */}
 
                         </div>
+
+                        <div className="row" style={{ height: "1px", border: '1px solid grey', width: '100%', margin: '0px', padding: '0px' }}>
+                       
+                        </div>
+
+
+
+
                     </div>
-
-
+                    {/* TABLE HEADER BODY DATA SECTION */}
+                    
                     <div>
 
-                        <div
-                            style={{
-                                overflowY: "auto",
-                                width: "98.8%",
-                            }}
-                        >
-                            <table
-                                className="myTable"
-                                id="table"
-                                style={{
-                                    fontSize: "12px",
-                                    width: "100%",
-                                    position: "relative",
-                                    paddingRight: "2%",
-                                }}
-                            >
-                                <thead
-                                    style={{
-                                        fontWeight: "bold",
-                                        height: "24px",
-                                        position: "sticky",
-                                        top: 0,
-                                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                        backgroundColor: tableHeadColor,
-                                    }}
-                                >
-                                    <tr
-                                        style={{
-                                            backgroundColor: tableHeadColor,
-                                            color: 'white'
-                                        }}
-                                    >
-                                        <td className="border-dark" style={firstColWidth}>
-                                            Code
-                                        </td>
-                                        <td className="border-dark" style={secondColWidth}>
-                                            Customer
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
-                                            Sale Date
-                                        </td>
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Sale
-                                        </td>
-                                        <td className="border-dark" style={fifthColWidth}>
-                                            Advance
-                                        </td>
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Collection
-                                        </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                            Ins #
-                                        </td>
-                                        <td className="border-dark" style={eighthColWidth}>
-                                            Ins Amt
-                                        </td>
-                                        <td className="border-dark" style={ninthColWidth}>
-                                            Last Date
-                                        </td>
-                                        <td className="border-dark" style={tenthColWidth}>
-                                            Balance
-                                        </td>
-                                        <td className="border-dark" style={elewenthColWidth}>
-                                            Collector
-                                        </td>
-
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
+                       
 
                         <div
                             className="table-scroll"
@@ -1392,7 +1270,7 @@ export default function InstallmentBalanceReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "55vh",
+                                maxHeight: "20vh",
                                 width: "100%",
                                 wordBreak: "break-word",
 
@@ -1416,7 +1294,7 @@ export default function InstallmentBalanceReport() {
                                                     backgroundColor: getcolor
                                                 }}
                                             >
-                                                <td colSpan="11" className="text-center">
+                                                <td colSpan="7" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1428,7 +1306,7 @@ export default function InstallmentBalanceReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 11 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}
                                                             >
                                                                 &nbsp;
@@ -1445,10 +1323,7 @@ export default function InstallmentBalanceReport() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
+
 
                                             </tr>
                                         </>
@@ -1470,37 +1345,25 @@ export default function InstallmentBalanceReport() {
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {item.tinscod}
+                                                            {item.Date}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
-                                                            {item.Customer}
+                                                            {item['Trn#']}
                                                         </td>
-                                                        <td className="text-start" style={thirdColWidth}>
-                                                            {item['Sale Date']}
+                                                        <td className="text-center" style={thirdColWidth}>
+                                                            {item.Type}
+                                                        </td>
+                                                        <td className="text-start" style={fifthColWidth}>
+                                                            {item.Description}
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
                                                             {item.Sale}
-                                                        </td>
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item.Advance}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
                                                             {item.Collection}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item['Ins #']}
-                                                        </td>
-                                                        <td className="text-end" style={eighthColWidth}>
-                                                            {item['Ins Amt']}
-                                                        </td>
-                                                        <td className="text-end" style={ninthColWidth}>
-                                                            {item['Last Date']}
-                                                        </td>
-                                                        <td className="text-end" style={tenthColWidth}>
                                                             {item.Balance}
-                                                        </td>
-                                                        <td className="text-end" style={elewenthColWidth}>
-                                                            {item.Collector}
                                                         </td>
 
                                                     </tr>
@@ -1518,7 +1381,7 @@ export default function InstallmentBalanceReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 11 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1533,10 +1396,6 @@ export default function InstallmentBalanceReport() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
 
                                             </tr>
                                         </>
@@ -1545,7 +1404,7 @@ export default function InstallmentBalanceReport() {
                             </table>
                         </div>
                     </div>
-
+                    {/* TOTAL ROW SECTION */}
                     <div style={{ width: '100%', borderTop: `1px solid ${fontcolor}`, borderBottom: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
@@ -1555,13 +1414,9 @@ export default function InstallmentBalanceReport() {
                         <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...eighthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...ninthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...tenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...elewenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
 
                     </div>
-
+                    {/* LAST BUTTONS SECTION SELECT, PDF, EXCEL AND RETURN */}
                     <div
                         style={{
                             margin: "5px",

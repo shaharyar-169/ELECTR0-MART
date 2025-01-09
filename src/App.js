@@ -64,7 +64,9 @@ import CashFlowReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
 import InstallmentSaleReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentSaleReport.js";
-import InstallmentCollectReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectReport.js"; 
+import InstallmentCollectReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectReport.js";
+import InstallmentLedgerReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentLedgerReport.js";
+
 function App() {
   const queryClient = new QueryClient();
 
@@ -87,7 +89,7 @@ function App() {
               <Route exact path="/" element={<Loginn />} />
               <Route exact path="/login" element={<Loginn />} />
               <Route element={<Layout />}>
-              
+
                 {/* All pages with the sidebar */}
                 <Route exact path="/MainPage" element={<HomePage1 />} />
                 <Route exact path="/AccountCodeMaintenance" element={<Account_Code_Maintenance />} />
@@ -131,10 +133,11 @@ function App() {
                 <Route exact path="/DailyProfitReport" element={<DailyProfitReport />} />
                 <Route exact path="/CashFlow" element={<CashFlowReport />} />
 
-                  {/* Rountes for Installments reports */}
-                  <Route exact path="/InstallmentLedger" element={<InstallmentBalanceReport />} />
-                  <Route exact path="/InstallmentSaleReport" element={<InstallmentSaleReport />} />
-                  <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
+                {/* Rountes for Installments reports */}
+                <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} />
+                <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />
+                <Route exact path="/InstallmentSaleReport" element={<InstallmentSaleReport />} />
+                <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
 
 
                 {/* Rountes for Dashboard */}
