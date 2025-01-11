@@ -29,6 +29,7 @@ export default function InstallmentCollectReport() {
 
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
+    const input1Reftype= useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
 
@@ -37,14 +38,19 @@ export default function InstallmentCollectReport() {
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("");
+    const [transectionType, settransectionType] = useState("A");
+    const [transectionType2, settransectionType2] = useState("M");
+
     const [supplierList, setSupplierList] = useState([]);
+    console.log('getactivecollectordata', supplierList)
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [totalOpening, setTotalOpening] = useState(0);
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
+    const [totalDif, settotalDif] = useState(0);
+
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -180,69 +186,69 @@ export default function InstallmentCollectReport() {
         }
     };
 
-    const handleToKeyPress = (e, nextref) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const toDateElement = document.getElementById("todatevalidation");
-            const formattedInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split("-").map(Number);
-
-                if (month > 12 || month === 0) {
-                    toast.error("Please enter a valid month (MM) between 01 and 12");
-                    return;
-                }
-
-                const daysInMonth = new Date(year, month, 0).getDate();
-                if (day > daysInMonth || day === 0) {
-                    toast.error(`Please enter a valid day (DD) for month ${month}`);
-                    return;
-                }
-
-                const currentDate = new Date();
-                const enteredDate = new Date(year, month - 1, day);
-
-                if (GlobaltoDate && enteredDate > GlobaltoDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (GlobaltoDate && enteredDate < GlobalfromDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (fromInputDate) {
-                    const fromDate = new Date(
-                        fromInputDate.split("-").reverse().join("-")
-                    );
-                    if (enteredDate <= fromDate) {
-                        toast.error("To date must be after from date");
-                        return;
-                    }
-                }
-
-                toDateElement.style.border = `1px solid ${fontcolor}`;
-                settoInputDate(formattedInput);
-
-                if (nextref.current) {
-                    e.preventDefault();
-                    input3Ref.current.focus();
-                }
-            } else {
-                toast.error("Date must be in the format dd-mm-yyyy");
-            }
-        }
-    };
+   const handleToKeyPress = (e) => {
+           if (e.key === "Enter") {
+               e.preventDefault();
+               const toDateElement = document.getElementById("todatevalidation");
+               const formattedInput = toInputDate.replace(
+                   /^(\d{2})(\d{2})(\d{4})$/,
+                   "$1-$2-$3"
+               );
+               const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+   
+               if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+                   const [day, month, year] = formattedInput.split("-").map(Number);
+   
+                   if (month > 12 || month === 0) {
+                       toast.error("Please enter a valid month (MM) between 01 and 12");
+                       return;
+                   }
+   
+                   const daysInMonth = new Date(year, month, 0).getDate();
+                   if (day > daysInMonth || day === 0) {
+                       toast.error(`Please enter a valid day (DD) for month ${month}`);
+                       return;
+                   }
+   
+                   const currentDate = new Date();
+                   const enteredDate = new Date(year, month - 1, day);
+   
+                   if (GlobaltoDate && enteredDate > GlobaltoDate) {
+                       toast.error(
+                           `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                       );
+                       return;
+                   }
+   
+                   if (GlobaltoDate && enteredDate < GlobalfromDate) {
+                       toast.error(
+                           `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                       );
+                       return;
+                   }
+   
+                   if (fromInputDate) {
+                       const fromDate = new Date(
+                           fromInputDate.split("-").reverse().join("-")
+                       );
+                       if (enteredDate <= fromDate) {
+                           toast.error("To date must be after from date");
+                           return;
+                       }
+                   }
+   
+                   toDateElement.style.border = `1px solid ${fontcolor}`;
+                   settoInputDate(formattedInput);
+   
+                   if (input1Reftype.current) {
+                       e.preventDefault();
+                       input1Reftype.current.focus();
+                   }
+               } else {
+                   toast.error("Date must be in the format dd-mm-yyyy");
+               }
+           }
+       };
 
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
@@ -392,6 +398,9 @@ export default function InstallmentCollectReport() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
+            FColCod: saleType,
+            FRepTyp: transectionType,
+            FCstTyp: transectionType2,
             FLocCod: '001',
             code: 'HAJVERY',
 
@@ -403,9 +412,11 @@ export default function InstallmentCollectReport() {
             .then((response) => {
                 setIsLoading(false);
 
-                // setTotalDebit(response.data["Total Amount"]);
-                // setTotalCredit(response.data["Total Advance"]);
-                // setClosingBalance(response.data["Percentage"]);
+                setTotalDebit(response.data["Total Cnt"]);
+                setTotalCredit(response.data["Total Ins"]);
+                setClosingBalance(response.data["Total Col"]);
+                settotalDif(response.data["Total Dif"]);
+
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -426,11 +437,11 @@ export default function InstallmentCollectReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-            if (fromRef && fromRef.current) {
+        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+            if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
-                    fromRef.current.focus();
-                    fromRef.current.select();
+                    saleSelectRef.current.focus();
+                    // saleSelectRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -452,10 +463,10 @@ export default function InstallmentCollectReport() {
     }, []);
 
     useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveAccounts.php";
+        const apiUrl = apiLinks + "/GetActiveCollector.php";
         const formData = new URLSearchParams({
-            FLocCod: getLocationNumber,
-            code: organisation.code,
+            // FLocCod: getLocationNumber,
+            code: 'HAJVERY',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -468,8 +479,8 @@ export default function InstallmentCollectReport() {
     }, []);
 
     const options = supplierList.map((item) => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`,
+        value: item.tcolcod,
+        label: `${item.tcolcod}-${item.tcolnam.trim()}`,
     }));
 
     const DropdownOption = (props) => {
@@ -522,39 +533,63 @@ export default function InstallmentCollectReport() {
         const selectedTransactionType = event.target.value;
         settransectionType(selectedTransactionType);
     };
+    const handleTransactionTypeChange2 = (event) => {
+        const selectedTransactionType2 = event.target.value;
+        settransectionType2(selectedTransactionType2);
+    };
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "landscap" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
             item.Date,
-            item['Rec#'],
+            item['Trn#'],
             item.Type,
             item.Code,
+            item['Manual #'],
             item.Customer,
-            item.Col,
+            item.Collector,
             item['Ins Amt'],
             item.Collection,
+            item.Diff,
+
         ]);
 
         // Add summary row to the table
-     
+
+         // Add summary row to the table
+         rows.push([
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            String(totalDebit),
+            String(totalCredit),
+            String(closingBalance),
+            String(totalDif),
+
+        ]);
+
 
         // Define table column headers and individual column widths
         const headers = [
             "Date",
-            "Rec#",
+            "Trn#",
             "Type",
             "Code",
+            "Manual#",
             "Customer",
-            "Col",
+            "Collector",
             "Ins Amt",
             "Collection",
+            "Diff"
         ];
-        const columnWidths = [18, 12, 12, 18, 60, 10, 20, 20];
+        const columnWidths = [18, 12, 12, 18, 18, 60, 20, 20, 20,20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -652,7 +687,7 @@ export default function InstallmentCollectReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 2 ) {
+                    if (cellIndex === 2) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "center",
@@ -661,7 +696,7 @@ export default function InstallmentCollectReport() {
 
                     }
 
-                    else if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7 ) {
+                    else if (cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -809,11 +844,14 @@ export default function InstallmentCollectReport() {
                 doc.setFontSize(14);
                 doc.setFont("verdana", "bold");
 
-                // let typeText = transectionType ? transectionType : "";
-                // let typeItem = saleType ? saleType : "";
+                let typeText = transectionType ? transectionType : "";
+                let typeText1 = transectionType2 ? transectionType2 : "";
+                let typeItem = saleType ? saleType : "";
+                
+                doc.text(`Collector Code: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Type1: ${typeText}`, labelsX + 165, labelsY); // Adjust x-coordinate for From Date
+                doc.text(`Type2: ${typeText1}`, labelsX + 195, labelsY); // Adjust x-coordinate for From Date
 
-                // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
                 // Reset font weight to normal if necessary for subsequent text
                 doc.setFont("verdana", "normal");
@@ -878,7 +916,7 @@ export default function InstallmentCollectReport() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 8; // Number of columns
+        const numColumns = 10; // Number of columns
 
         // Common styles
         const titleStyle = {
@@ -892,10 +930,12 @@ export default function InstallmentCollectReport() {
             "center",
             "left",
             "left",
+            "left",
             "right",
             "right",
             "right",
-           
+            "right",
+
         ];
 
         // Add an empty row at the start
@@ -913,22 +953,23 @@ export default function InstallmentCollectReport() {
         });
 
         worksheet.addRow([]); // Empty row for spacing
-
-        // let typeText = transectionType ? transectionType : "All";
-        // let typeItem = saleType ? saleType : "All";
+        let typeText = transectionType ? transectionType : "";
+        let typeText1 = transectionType2 ? transectionType2 : "";
+        let typeItem = saleType ? saleType : "";
 
         // Add type and store row and bold it
         const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            // `Account: ${typeItem}`,
-            // "",
-            // "",
-            // "",
-            // "",
-            // "",
-            // `Type: ${typeText}`,
+           
+            `Collector Code: ${typeItem}`,
+            "",
+            "",
+            "",
+            " ",
+            "",
+            "",
+            `Type1: ${typeText}`,
+            "",
+            `Type2: ${typeText1}`,
 
         ]);
         typeAndStoreRow.eachCell((cell) => {
@@ -955,14 +996,16 @@ export default function InstallmentCollectReport() {
 
         // Add headers
         const headers = [
-           "Date",
-            "Rec#",
+          "Date",
+            "Trn#",
             "Type",
             "Code",
+            "Manual#",
             "Customer",
-            "Col",
+            "Collector",
             "Ins Amt",
             "Collection",
+            "Diff"
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
@@ -973,33 +1016,37 @@ export default function InstallmentCollectReport() {
         tableData.forEach((item) => {
             worksheet.addRow([
                 item.Date,
-                item['Rec#'],
+                item['Trn#'],
                 item.Type,
                 item.Code,
+                item['Manual #'],
                 item.Customer,
-                item.Col,
+                item.Collector,
                 item['Ins Amt'],
                 item.Collection,
+                item.Diff,
             ]);
         });
 
         // Add total row and bold it
-        // const totalRow = worksheet.addRow([
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        // ]);
-        // totalRow.eachCell((cell) => {
-        //     cell.font = { bold: true };
-        // });
+        const totalRow = worksheet.addRow([
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+           totalDebit,
+           totalCredit,
+           closingBalance,
+           totalDif
+        ]);
+        totalRow.eachCell((cell) => {
+            cell.font = { bold: true };
+        });
 
         // Set column widths
-        [10,8,7,10,30,7,12,12].forEach((width, index) => {
+        [10, 8, 7, 10, 10,30, 12, 12, 12,12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1074,23 +1121,29 @@ export default function InstallmentCollectReport() {
     };
     const thirdColWidth = {
         width: "5%",
-        };
+    };
     const forthColWidth = {
-        width: "10%",
+        width: "9%",
     };
     const fifthColWidth = {
-        width: "31.7%",
-   };
+        width: "8%",
+    };
     const sixthColWidth = {
-        width: "7%",
+        width: "29.7%",
     };
     const seventhColWidth = {
-        width: "15%",
+        width: "8%",
     };
     const eighthColWidth = {
-        width: "15%",
+        width: "8%",
     };
-   
+    const ninhthColWidth = {
+        width: "8%",
+    };
+    const tenthColWidth = {
+        width: "8%",
+    };
+
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1247,7 +1300,7 @@ export default function InstallmentCollectReport() {
                 >
                     <NavComponent textdata="Installment Collectoin Report" />
                     <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", }}>
 
                         <div style={{
                             width: "100%",
@@ -1346,10 +1399,170 @@ export default function InstallmentCollectReport() {
 
                             </div>
 
+                            {/* CODE FOR SELECT */}
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Reftype}
+                                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
+                                    id="firsttype"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType2}
+                                    onChange={handleTransactionTypeChange2}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="M">Monthly</option>
+                                    <option value="D">Daily</option>
+                                    <option value="A">All</option>
+
+                                </select>
+                            </div>
+
                         </div>
 
 
+
                     </div>
+
+                    {/* CODE FOR CODE SELECT */}
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+
+
+                            {/* ------ */}
+
+
+                            <div className="d-flex align-items-center  " style={{ marginLeft: '2px' }}>
+                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Account :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '3px' }} >
+                                    <Select
+
+                                        className="List-select-class "
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                setSaleType(selectedOption.value);
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="Search or select..."
+                                    />
+
+                                </div>
+
+
+                            </div>
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType}
+                                    onChange={handleTransactionTypeChange}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">All</option>
+                                    <option value="L">Less Ins</option>
+                                    <option value="F">Full Ins</option>
+                                    <option value="E">Extra Ins</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    {/* ///////////////////////// */}
 
 
 
@@ -1377,7 +1590,7 @@ export default function InstallmentCollectReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{ fontSize: "15px", fontWeight: "bold", marginLeft: '2px' }}>
                                             From :
                                         </span>
                                     </label>
@@ -1512,7 +1725,7 @@ export default function InstallmentCollectReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
+                                        onKeyDown={(e) => handleToKeyPress(e,'firsttype')}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1625,7 +1838,7 @@ export default function InstallmentCollectReport() {
                                             Date
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                        Rec#
+                                            Trn#
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
                                             Type
@@ -1634,18 +1847,24 @@ export default function InstallmentCollectReport() {
                                             Code
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                            Customer
+                                            Manual #
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Col
+                                            Customer
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
+                                            Collector
+                                        </td>
+                                        <td className="border-dark" style={eighthColWidth}>
                                             Ins Amt
                                         </td>
                                         <td className="border-dark" style={eighthColWidth}>
                                             Collection
                                         </td>
-                                      
+                                        <td className="border-dark" style={eighthColWidth}>
+                                            Diff
+                                        </td>
+
                                     </tr>
                                 </thead>
                             </table>
@@ -1678,7 +1897,7 @@ export default function InstallmentCollectReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="8" className="text-center">
+                                                <td colSpan="10" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1691,7 +1910,7 @@ export default function InstallmentCollectReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 8 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1708,6 +1927,8 @@ export default function InstallmentCollectReport() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
+                                                <td style={ninhthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
 
                                             </tr>
                                         </>
@@ -1732,7 +1953,7 @@ export default function InstallmentCollectReport() {
                                                             {item.Date}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
-                                                            {item['Rec#']}
+                                                            {item['Trn#']}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
@@ -1741,18 +1962,24 @@ export default function InstallmentCollectReport() {
                                                             {item.Code}
                                                         </td>
                                                         <td className="text-start" style={fifthColWidth}>
+                                                            {item['Manual #']}
+                                                        </td>
+                                                        <td className="text-start" style={sixthColWidth}>
                                                             {item.Customer}
                                                         </td>
-                                                        <td className="text-end" style={sixthColWidth}>
-                                                            {item.Col}
-                                                        </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                        {item['Ins Amt']}
+                                                            {item.Collector}
                                                         </td>
                                                         <td className="text-end" style={eighthColWidth}>
+                                                            {item['Ins Amt']}
+                                                        </td>
+                                                        <td className="text-end" style={ninhthColWidth}>
                                                             {item.Collection}
                                                         </td>
-                                                       
+                                                        <td className="text-end" style={tenthColWidth}>
+                                                            {item.Diff}
+                                                        </td>
+
                                                     </tr>
                                                 );
                                             })}
@@ -1766,7 +1993,7 @@ export default function InstallmentCollectReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 8 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1782,6 +2009,9 @@ export default function InstallmentCollectReport() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
+                                                <td style={ninhthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+
 
                                             </tr>
                                         </>
@@ -1855,6 +2085,8 @@ export default function InstallmentCollectReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total">{totalDebit}</span>
+
                         </div>
                         <div
                             style={{
@@ -1863,8 +2095,30 @@ export default function InstallmentCollectReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total">{totalCredit}</span>
+
                         </div>
-                       
+                        <div
+                            style={{
+                                ...ninhthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{closingBalance}</span>
+
+                        </div>
+                        <div
+                            style={{
+                                ...tenthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalDif}</span>
+
+                        </div>
+
                     </div>
                     <div
                         style={{

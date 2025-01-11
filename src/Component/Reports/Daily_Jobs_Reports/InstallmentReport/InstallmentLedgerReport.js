@@ -1018,21 +1018,7 @@ export default function InstallmentLedgerReport() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-    const handleSaleKeypress = (event, inputId) => {
-        if (event.key === "Enter") {
-            const selectedOption = saleSelectRef.current.state.selectValue;
-            if (selectedOption && selectedOption.value) {
-                setSaleType(selectedOption.value);
-            }
-            const nextInput = document.getElementById(inputId);
-            if (nextInput) {
-                nextInput.focus();
-                nextInput.select();
-            } else {
-                document.getElementById("submitButton").click();
-            }
-        }
-    };
+   
 
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1243,7 +1229,7 @@ export default function InstallmentLedgerReport() {
 
                             {/* RIGHT PART OF THE HEADER FIRST SECTION  */}
                             <div className="col-md-4" style={{ backgroundColor: 'grey', height: '20px' }}>
-                                hello dear
+                                {/* hello dear */}
                             </div>
 
                             {/* DRAW LINER AFTER FIRST SECTION OF HEADER */}
