@@ -21,7 +21,7 @@ import './installment.css';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import callAddFont from "../../../../vardana-normal";
-import { color } from "@mui/system";
+import { color, height } from "@mui/system";
 
 export default function InstallmentLedgerReport() {
 
@@ -236,7 +236,7 @@ export default function InstallmentLedgerReport() {
                         setTableData([]); // Fallback to an empty array
                     }
 
-                    if (Array.isArray(response.data.Header)) {
+                    if (response.data.Header) {
                         setheaderData(response.data.Header); // Store Expense array in expenses state
                     } else {
                         console.warn(
@@ -1018,7 +1018,7 @@ export default function InstallmentLedgerReport() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-   
+
 
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
     const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1114,7 +1114,7 @@ export default function InstallmentLedgerReport() {
                     <NavComponent textdata="Installment Ledger Report" />
 
                     {/* TOP HEADER SECTIO SECTION */}
-                    <div className="row " style={{ height: '300px', marginTop: '5px', marginBottom: "2px" }}>
+                    <div className="row " style={{ display: 'flex', flexWrap: 'wrap', height: '330px', marginTop: '5px', marginBottom: "2px", marginRight: '2px' }}>
                         {/* FIRST SECTION OF HEADER */}
                         <div className="row" style={{ height: "100%", width: '100%', margin: '0px', padding: '0px' }}>
                             {/* LEFT PART OF THE HEADER FIRST SECTION  */}
@@ -1128,7 +1128,7 @@ export default function InstallmentLedgerReport() {
                                     </div>
                                     <div className="col-md-8" style={{ height: '100%', padding: '0px', display: 'flex' }}>
                                         <div style={{ width: '40px', fontSize: '12px', fontWeight: 'bold', height: '100%', display: 'flex', justifyContent: 'end', alignItems: 'center', color: fontcolor }}>A/C :</div>
-                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '410px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '412px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
 
                                         </input>
 
@@ -1137,7 +1137,7 @@ export default function InstallmentLedgerReport() {
                                 <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '2px' }}>
                                     <div className="col-md-7" style={{ height: '100%', display: 'flex', padding: '0px' }}>
                                         <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Father Name :</div>
-                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '293px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '290px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
 
                                         </input>
                                     </div>
@@ -1151,15 +1151,26 @@ export default function InstallmentLedgerReport() {
                                 <div className="row" style={{ height: '40px', width: '100%', margin: '0px', marginTop: '1px' }}>
                                     <div className="col-md-7" style={{ height: '100%', display: 'flex', padding: '0px' }}>
                                         <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Address :</div>
-                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '293px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
-
-                                        </input>
+                                        <div style={{ fontSize:'12px',lineHeight:'13px',paddingTop:'2px',textAlign:'start',paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '293px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+                                            GHULISTAN COLONY QARACHI AMAR SANDHU LAHORE
+                                        </div>
                                     </div>
-                                    <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
-                                        <div style={{ width: '150px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Rent :</div>
-                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                    <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px', margin:'0px' }}>
+                                       <div style={{height:'100%', padding:'0px', display:'flex',flexWrap:'wrap', margin:'0px' }}>
+                                      
+                                       <div style={{ width: '148px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Rent :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '20px', backgroundColor: getcolor, width: '129px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                             236,000
                                         </div>
+
+
+                                        <div style={{ width: '148px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Total :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '20px', backgroundColor: getcolor, width: '129px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                            236,000
+                                        </div>
+                                       </div>
+                                       
+                                       
                                     </div>
                                 </div>
                                 <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '1px' }}>
@@ -1193,7 +1204,7 @@ export default function InstallmentLedgerReport() {
                                 <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '1px' }}>
                                     <div className="col-md-12" style={{ height: '100%', display: 'flex', padding: '0px' }}>
                                         <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Varify By :</div>
-                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '120px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '120px', marginLeft: '4px', border: '2px solid grey', borderRadius: '0px' }}>
 
                                         </input>
                                         <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Delivereb By :</div>
@@ -1202,7 +1213,7 @@ export default function InstallmentLedgerReport() {
                                         </input>
 
                                         <div style={{ height: '100%', width: '100px', marginLeft: '2px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Profession :</div>
-                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+                                        <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '129px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
 
                                         </input>
 
@@ -1228,27 +1239,304 @@ export default function InstallmentLedgerReport() {
                             </div>
 
                             {/* RIGHT PART OF THE HEADER FIRST SECTION  */}
-                            <div className="col-md-4" style={{ backgroundColor: 'grey', height: '20px' }}>
+                            <div className="col-md-4" style={{ flexWrap: 'wrap', height: '20px', padding: "0px", display: "flex", gap: '0px' }}>
                                 {/* hello dear */}
+                                <div className="col-md-7" style={{ height: '100%' }}>
+                                    <div className="col-md-12" style={{ display: 'flex', height: '100%' }}>
+                                        <div style={{ height: '100%', width: '100px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Months :</div>
+                                        <div style={{ paddingRight: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '90px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'end' }}>
+                                            12.00
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-12" style={{ display: 'flex', height: '100%', marginTop: "1px" }}>
+                                        <div style={{ height: '100%', width: '100px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Inv Date :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '90px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+                                            30/07/2024
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-12" style={{ display: 'flex', height: '100%', marginTop: "1px" }}>
+                                        <div style={{ height: '100%', width: '100px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>From Date :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '90px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+                                            10/09/2024
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-12" style={{ display: 'flex', height: '100%', marginTop: "1px" }}>
+                                        <div style={{ height: '100%', width: '100px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Engine.# :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '90px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-12" style={{ display: 'flex', height: '100%', marginTop: "1px" }}>
+                                        <div style={{ height: '100%', width: '100px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Chasis.# :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '90px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-12" style={{ display: 'flex', height: '100%', marginTop: "1px" }}>
+                                        <div style={{ height: '100%', width: '100px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Eng.# : :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '90px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+                                {/* <div className="col-md-5" style={{ height: '120px', border:'2px solid grey' }}></div> */}
+
+                                <div
+                                    className="col-md-5"
+                                    style={{
+                                        height: '120px',
+                                        border: '2px solid grey',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            background: 'linear-gradient(40deg, transparent 49%, grey 49%, grey 40%, transparent 51%)',
+                                            pointerEvents: 'none', // So it doesn't interfere with clicks
+                                        }}
+                                    ></div>
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            background: 'linear-gradient(-40deg, transparent 49%, grey 49%, grey 40%, transparent 51%)',
+                                            pointerEvents: 'none', // So it doesn't interfere with clicks
+                                        }}
+                                    ></div>
+                                </div>
+
+
+
+
+                                <div className="col-md-12" style={{ height: '100%', display: 'flex', marginTop: "6px" }}>
+
+                                    <div className="col-md-6" style={{ height: "100%", display: 'flex' }}>
+                                        <div style={{ height: '100%', width: '100px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Actual Mths :</div>
+                                        <div style={{ paddingRight: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '65px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'end' }}>
+                                            5.00
+                                        </div>
+
+                                    </div>
+                                    <div className="col-md-6" style={{ height: "100%", display: 'flex' }}>
+                                        <div style={{ height: '100%', width: '50px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Grade :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '120px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div className="col-md-12" style={{ height: '100%', display: 'flex', marginTop: "1px" }}>
+
+                                    <div className="col-md-6" style={{ height: "100%", display: 'flex' }}>
+                                        <div style={{ height: '100%', width: '65px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Collector :</div>
+                                        <div style={{ paddingleft: '2px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '100px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+                                            REHAN  ASLAM
+                                        </div>
+
+                                    </div>
+                                    <div className="col-md-6" style={{ height: "100%", display: 'flex' }}>
+                                        <div style={{ height: '100%', width: '50px', color: fontcolor, fontSize: '12px', fontWeight: 'bold', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>Type :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '120px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
+                                            MONTHLY
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
                             </div>
 
+                            {/* CENTER SECTION  */}
+                            <div className="row downrow" style={{ width: '100%', height: '20px', margin: '0px', padding: '0px' }}>
+
+                                <div className="col-md-12" style={{ height: '1px', border: '1px solid grey' }}></div>
+                                <div className="col-md-12" style={{ height: '100%', marginTop: '2px', marginBottom: '2px', display: 'flex', padding: '0px' }}>
+                                    <div style={{ height: '100%', width: '98px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Off Address :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '350px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                    <div style={{ height: '100%', width: '50px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Mobile :</div>
+
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '132px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                </div>
+                                <div className="col-md-12" style={{ height: '1px', border: '1px solid grey' }}></div>
+                                <div className="col-md-12" style={{ height: '100%', marginTop: '2px', marginBottom: '1px', display: 'flex', padding: '0px' }}>
+                                    <div style={{ height: '100%', width: '98px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Guaranter :</div>
+                                    <input value='FAROOQ BHAI S/O' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                    <div style={{ height: '100%', width: '110px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Witness Name :</div>
+                                    <input value='S/O' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                </div>
+                                <div className="col-md-12" style={{ height: '100%', marginTop: '1px', marginBottom: '1px', display: 'flex', padding: '0px' }}>
+                                    <div style={{ height: '100%', width: '98px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Address :</div>
+                                    <input value='H #E-169,ST #4, GHULISTAN COLONY KARACHI' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                    <div style={{ height: '100%', width: '110px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Address :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                </div>
+                                <div className="col-md-12" style={{ height: '100%', marginTop: '1px', marginBottom: '1px', display: 'flex', padding: '0px' }}>
+                                    <div style={{ height: '100%', width: '98px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}></div>
+                                    <input value='AMAR SADHU LAHORE' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                    <div style={{ height: '100%', width: '110px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}></div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                </div>
+                                <div className="col-md-12" style={{ height: '100%', marginTop: '1px', marginBottom: '1px', display: 'flex', padding: '0px' }}>
+                                    <div style={{ height: '100%', width: '98px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Mobile :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '146px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                    <div style={{ height: '100%', width: '75px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Profession :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '146px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+
+                                    <div style={{ height: '100%', width: '110px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Mobile :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '146px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                    <div style={{ height: '100%', width: '75px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Profession :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '146px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                </div>
+                                <div className="col-md-12" style={{ height: '100%', marginTop: '1px', marginBottom: '1px', display: 'flex', padding: '0px' }}>
+                                    <div style={{ height: '100%', width: '98px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Official :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                    <div style={{ height: '100%', width: '110px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Official :</div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                </div>
+                                <div className="col-md-12" style={{ height: '100%', marginTop: '1px', marginBottom: '1px', display: 'flex', padding: '0px' }}>
+                                    <div style={{ height: '100%', width: '98px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}></div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+
+                                    <div style={{ height: '100%', width: '110px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}></div>
+                                    <input value='' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '370px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px' }}>
+
+                                    </input>
+                                </div>
+
+                            </div>
                             {/* DRAW LINER AFTER FIRST SECTION OF HEADER */}
 
                         </div>
 
-                        <div className="row" style={{ height: "1px", border: '1px solid grey', width: '100%', margin: '0px', padding: '0px' }}>
-                       
-                        </div>
+
 
 
 
 
                     </div>
-                    {/* TABLE HEADER BODY DATA SECTION */}
-                    
-                    <div>
 
-                       
+
+                    {/* TABLE HEADER BODY DATA SECTION */}
+
+                    <div>
+                        <div
+                            style={{
+                                overflowY: "auto",
+                                width: "98.8%",
+                            }}
+                        >
+                            <table
+                                className="myTable"
+                                id="table"
+                                style={{
+                                    fontSize: "12px",
+                                    width: "100%",
+                                    position: "relative",
+                                    paddingRight: "2%",
+                                }}
+                            >
+                                <thead
+                                    style={{
+                                        fontWeight: "bold",
+                                        height: "24px",
+                                        position: "sticky",
+                                        top: 0,
+                                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                        backgroundColor: tableHeadColor,
+                                    }}
+                                >
+                                    <tr
+                                        style={{
+                                            backgroundColor: tableHeadColor,
+                                            color: "white",
+                                        }}
+                                    >
+                                        <td className="border-dark" style={firstColWidth}>
+                                            Date
+                                        </td>
+                                        <td className="border-dark" style={secondColWidth}>
+                                            Trn#
+                                        </td>
+                                        <td className="border-dark" style={thirdColWidth}>
+                                            Type
+                                        </td>
+                                        <td className="border-dark" style={forthColWidth}>
+                                            Description
+                                        </td>
+                                        <td className="border-dark" style={fifthColWidth}>
+                                            Sale
+                                        </td>
+                                        <td className="border-dark" style={sixthColWidth}>
+                                            Collection
+                                        </td>
+                                        <td className="border-dark" style={seventhColWidth}>
+                                            Balance
+                                        </td>
+
+
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
 
                         <div
                             className="table-scroll"
@@ -1256,7 +1544,7 @@ export default function InstallmentLedgerReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "20vh",
+                                maxHeight: "18vh",
                                 width: "100%",
                                 wordBreak: "break-word",
 
