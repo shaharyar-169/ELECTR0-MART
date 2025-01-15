@@ -2,13 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-// import { useTheme } from "../../../ThemeContext";
 import { useTheme } from "../../../../ThemeContext";
-// import { getUserData, getOrganisationData } from "../../Auth";
 import { getUserData, getOrganisationData } from "../../../Auth";
-// import NavComponent from "../../MainComponent/Navform/navbarform";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
-// import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
@@ -636,7 +632,7 @@ export default function GeneralLedger1() {
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 100; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 1000000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 

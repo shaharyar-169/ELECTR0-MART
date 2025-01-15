@@ -923,7 +923,6 @@ export default function InstallmentSaleReport() {
         });
 
         worksheet.addRow([]); // Empty row for spacing
-
         // let typeText = transectionType ? transectionType : "All";
         // let typeItem = saleType ? saleType : "All";
 

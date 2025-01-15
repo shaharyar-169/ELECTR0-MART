@@ -245,6 +245,8 @@ export default function SupplierLedger1() {
             }
         }
     };
+
+    
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : "");

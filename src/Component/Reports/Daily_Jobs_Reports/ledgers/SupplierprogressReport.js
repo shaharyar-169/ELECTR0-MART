@@ -704,7 +704,7 @@ export default function SupplierProgressLedger() {
                 startY += 7; // Adjust vertical position for the company title
                
                 addTitle(
-                    "",
+                   
                     `Mobile Ledger From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",

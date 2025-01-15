@@ -119,47 +119,7 @@ export default function BankRegisterLedger() {
         setfromInputDate(e.target.value);
     };
 
-    // const handlefromKeyPress = (e) => {
-    //     const input = e.target;
-    //     let inputValue = input.value.replace(/\D/g, ''); // Remove non-numeric characters
-
-    //     if (inputValue.length > 8) {
-    //         inputValue = inputValue.substring(0, 8); // Limit to 8 digits
-    //     }
-
-    //     // Automatically add dashes after 2nd and 4th digits for the format dd-mm-yyyy
-    //     if (inputValue.length > 2 && inputValue.length <= 4) {
-    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2)}`;
-    //     } else if (inputValue.length > 4) {
-    //         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2, 4)}-${inputValue.slice(4)}`;
-    //     }
-
-    //     input.value = inputValue; // Set formatted value
-
-    //     // Perform validation only when the full date is entered
-    //     if (inputValue.length === 10) {
-    //         const [day, month, year] = inputValue.split('-').map(Number);
-    //         const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-    //         if (!datePattern.test(inputValue)) {
-    //             alert("Please enter a valid date format: dd-mm-yyyy.");
-    //             input.style.border = "2px solid red";
-    //             return;
-    //         }
-
-    //         const daysInMonth = new Date(year, month, 0).getDate();
-    //         if (day > daysInMonth || day === 0) {
-    //             alert(`Please enter a valid day for month ${month}.`);
-    //             input.style.border = "2px solid red";
-    //             return;
-    //         }
-
-    //         input.style.border = "1px solid black"; // Reset border on valid input
-
-    //         // You can now handle the date logic as needed (e.g., submit form, compare dates, etc.)
-    //     }
-    // };
-
+    
     const handlefromKeyPress = (e, inputId) => {
         if (e.key === 'Enter') {
             e.preventDefault();

@@ -964,7 +964,7 @@ export default function InstallmentCollectReport() {
             "",
             "",
             "",
-            " ",
+            "",
             "",
             "",
             `Type1: ${typeText}`,

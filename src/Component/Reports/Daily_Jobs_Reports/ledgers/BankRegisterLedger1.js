@@ -933,7 +933,6 @@ const handleDownloadCSV = async () => {
 
     // Add type and store row and bold it
     const typeAndStoreRow = worksheet.addRow([
-      
         `Account: ${typeItem}`,
         "",
         "",
