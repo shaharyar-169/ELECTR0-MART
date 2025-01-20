@@ -994,6 +994,8 @@ export default function InstallmentLedgerReport() {
 
 
     const contentStyle = {
+        overflowY:"auto",
+        height:'80vh',
         backgroundColor: getcolor,
         width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
@@ -1007,7 +1009,7 @@ export default function InstallmentLedgerReport() {
         justifyContent: "center",
         alignItems: "start",
         overflowX: "hidden",
-        overflowY: "hidden",
+        // overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
         maxWidth: "1000px",
@@ -1099,7 +1101,7 @@ export default function InstallmentLedgerReport() {
         <>
             {/* <div id="someElementId"></div> */}
             <ToastContainer />
-            <div style={contentStyle} >
+            <div className="main_container_scroll" style={contentStyle} >
                 <div
                     style={{
                         backgroundColor: getcolor,
@@ -1158,14 +1160,14 @@ export default function InstallmentLedgerReport() {
                                     <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px', margin:'0px' }}>
                                        <div style={{height:'100%', padding:'0px', display:'flex',flexWrap:'wrap', margin:'0px' }}>
                                       
-                                       <div style={{ width: '148px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Rent :</div>
-                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '20px', backgroundColor: getcolor, width: '129px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                       <div style={{ width: '148px', paddingRight:'2px',height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Rent :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '20px', backgroundColor: getcolor, width: '127px', marginLeft: '1px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                             236,000
                                         </div>
 
 
-                                        <div style={{ width: '148px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Total :</div>
-                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '20px', backgroundColor: getcolor, width: '129px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                        <div style={{ width: '148px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', paddingRight:'2px',fontWeight: 'bold' }}>Total :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '20px', backgroundColor: getcolor, width: '127px', marginLeft: '1px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                             236,000
                                         </div>
                                        </div>
@@ -1203,7 +1205,8 @@ export default function InstallmentLedgerReport() {
                                 </div>
                                 <div className="row" style={{ height: '100%', width: '100%', margin: '0px', marginTop: '1px' }}>
                                     <div className="col-md-12" style={{ height: '100%', display: 'flex', padding: '0px' }}>
-                                        <div style={{ height: '100%', width: '100px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Varify By :</div>
+                                       
+                                        <div style={{ height: '100%', width: '104px', display: 'flex', justifyContent: "end", alignItems: 'center', fontSize: '12px', fontWeight: 'bold', color: fontcolor }}>Varify By :</div>
                                         <input value='14-01-708' disabled style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '120px', marginLeft: '4px', border: '2px solid grey', borderRadius: '0px' }}>
 
                                         </input>

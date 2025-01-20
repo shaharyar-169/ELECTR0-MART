@@ -250,7 +250,7 @@ background: transparent !important;
 
 
 
-.table-scroll::-webkit-scrollbar {
+/* .table-scroll::-webkit-scrollbar {
   width: 13px; 
 }
 .table-scroll::-webkit-scrollbar-track {
@@ -262,6 +262,23 @@ background: transparent !important;
   
  }
 .table-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+} */
+
+
+
+.main_container_scroll::-webkit-scrollbar {
+  width: 13px; 
+}
+.main_container_scroll::-webkit-scrollbar-track {
+  background: #021A33; 
+}
+.main_container_scroll::-webkit-scrollbar-thumb {
+  background-color: #3368B5 !important; 
+  border-radius: 10px; 
+  
+ }
+.main_container_scroll::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
 
@@ -334,3 +351,11 @@ h2.react-datepicker__current-month {
 .downrow{
   margin-top: 10px !important;
 }
+
+
+#main_container_scroll{
+  overflow-y: scroll !important;
+
+}
+
+

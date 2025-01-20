@@ -1495,7 +1495,11 @@ export default function ItemList() {
                                                         <td className="text-start" style={fifthColWidth}>
                                                             {item.Capacity}
                                                         </td>
-                                                        <td className="text-start" style={sixthColWidth}>
+                                                        <td
+                                                            className="text-start"
+                                                            style={secondColWidth}
+                                                            title={item.Type}
+                                                        >
                                                             {item.Type.length > 14 ? `${item.Type.substring(0, 14)}...` : item.Type}
                                                         </td>
                                                     </tr>

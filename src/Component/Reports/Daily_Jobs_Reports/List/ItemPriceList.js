@@ -1482,13 +1482,18 @@ export default function ItemPriceList() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        
-                                                        <td className="text-start" style={sixthColWidth}>
+
+                                                        <td className="text-start" style={sixthColWidth}  title={item.Code} >
+
                                                             {item.Code.length > 10 ? `${item.Code.substring(0, 10)}...` : item.Code}
                                                         </td>
+                                                  
+
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item.Description}
+
                                                         </td>
+                                                       
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Stk}
                                                         </td>
