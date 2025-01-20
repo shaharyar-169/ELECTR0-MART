@@ -21,7 +21,6 @@ import './list.css';
 import { getcompanyData } from "../../../File/Category_Maintenance/Category_Maintenance_Api";
 
 export default function ItemPriceList() {
-
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -46,12 +45,10 @@ export default function ItemPriceList() {
     const [Typeselectdata, setTypeselectdata] = useState("");
     const [GetType, setGetType] = useState([]);
 
-
     const [sortData, setSortData] = useState("ASC");
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
-
 
     const {
         isSidebarVisible,
@@ -72,29 +69,21 @@ export default function ItemPriceList() {
 
     const comapnyname = organisation.description;
 
-
-
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
     // Toggle the ToDATE && FromDATE CalendarOpen state on each click
 
-
-
-
     function fetchReceivableReport() {
-
-
         const apiUrl = apiLinks + "/ItemPriceList.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FItmSts: transectionType,
-            // code: organisation.code,
-            code: 'NASIRTRD',
+            code: organisation.code,
+            // code: 'NASIRTRD',
             FCtgCod: Companyselectdata,
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
-            FCmpCod: Companyselectdata
-
+            FCmpCod: Companyselectdata,
         }).toString();
 
         axios
@@ -117,7 +106,6 @@ export default function ItemPriceList() {
                 setIsLoading(false);
             });
     }
-
 
     const handlecompanyKeypress = (event, inputId) => {
         if (event.key === "Enter") {
@@ -200,7 +188,10 @@ export default function ItemPriceList() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+        if (
+            !hasComponentMountedPreviously ||
+            (saleSelectRef && saleSelectRef.current)
+        ) {
             if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
                     saleSelectRef.current.focus();
@@ -211,20 +202,16 @@ export default function ItemPriceList() {
         }
     }, []);
 
-
-
     //////////////////// CODE FOR COMPANY SELECT///////////////////
 
     useEffect(() => {
         const apiUrl = apiLinks + "/GetCompany.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetCompany(response.data);
                 } else {
@@ -237,7 +224,6 @@ export default function ItemPriceList() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
     const options = GetCompany.map((item) => ({
@@ -249,12 +235,10 @@ export default function ItemPriceList() {
         const apiUrl = apiLinks + "/GetCapacity.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetCapacity(response.data);
                 } else {
@@ -267,7 +251,6 @@ export default function ItemPriceList() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
 
@@ -280,12 +263,10 @@ export default function ItemPriceList() {
         const apiUrl = apiLinks + "/GetCatg.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetCategory(response.data);
                 } else {
@@ -298,7 +279,6 @@ export default function ItemPriceList() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
 
@@ -311,12 +291,10 @@ export default function ItemPriceList() {
         const apiUrl = apiLinks + "/GetType.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetType(response.data);
                 } else {
@@ -329,7 +307,6 @@ export default function ItemPriceList() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
 
@@ -378,9 +355,20 @@ export default function ItemPriceList() {
         dropdownIndicator: (base) => ({
             ...base,
             padding: 0,
+            marginTop: "-5px",
             fontSize: "18px",
             display: "flex",
             textAlign: "center !important",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            textAlign: "left",
+            color: fontcolor,
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            marginTop: "-5px",
         }),
     });
 
@@ -395,24 +383,14 @@ export default function ItemPriceList() {
             item.Description,
             item.Stk,
             item.Comm,
-            item['SM Rate'],
-            item['Sale Rate'],
+            item["SM Rate"],
+            item["Sale Rate"],
             item.MRP,
-            item['Fix Rate'],
+            item["Fix Rate"],
         ]);
 
         // Add summary row to the table
-        rows.push([
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-
-        ]);
+        rows.push(["", "", "", "", "", "", "", ""]);
 
         // Define table column headers and individual column widths
         const headers = [
@@ -423,9 +401,7 @@ export default function ItemPriceList() {
             "SM Rate",
             "Sale Rate",
             "MRP",
-            "Fix Rate"
-
-
+            "Fix Rate",
         ];
         const columnWidths = [35, 80, 10, 20, 20, 20, 20, 20];
 
@@ -525,26 +501,25 @@ export default function ItemPriceList() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 2 ) {
+                    if (cellIndex === 2) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "center",
                             baseline: "middle",
                         });
-
-                    }
-
-                    else if (cellIndex === 3 || cellIndex ===4 || cellIndex ===5 || cellIndex ===6 || cellIndex ===7) {
+                    } else if (
+                        cellIndex === 3 ||
+                        cellIndex === 4 ||
+                        cellIndex === 5 ||
+                        cellIndex === 6 ||
+                        cellIndex === 7
+                    ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-
-                    }
-
-
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -647,15 +622,7 @@ export default function ItemPriceList() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
+                addTitle(comapnyname, "", "", pageNumber, startY, 20, 10); // Render company title with default font size, only date, and page number
                 startY += 7; // Adjust vertical position for the company title
                 // addTitle(
                 // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
@@ -667,14 +634,7 @@ export default function ItemPriceList() {
                 // 	10
                 // ); // Render sale report title with decreased font size, provide the time, and page number
                 // startY += 7;
-                addTitle(
-                    `Item Price List`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Item Price List`, "", "", pageNumber, startY, 14); // Render sale report title with decreased font size, provide the time, and page number
                 startY += 13;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -750,7 +710,6 @@ export default function ItemPriceList() {
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
-
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -773,17 +732,13 @@ export default function ItemPriceList() {
             "right",
             "right",
             "right",
-
         ];
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
         // Add title rows
-        [
-            comapnyname,
-            `Item price List`,
-        ].forEach((title, index) => {
+        [comapnyname, `Item price List`].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
@@ -832,17 +787,14 @@ export default function ItemPriceList() {
 
         // Add headers
         const headers = [
-
             "Code",
             "Description",
             "StK",
-            'Comm',
-            'SM Rate',
-            'Sale Rate',
-            'MRP',
-            'Fix Rate',
-
-
+            "Comm",
+            "SM Rate",
+            "Sale Rate",
+            "MRP",
+            "Fix Rate",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
@@ -856,26 +808,15 @@ export default function ItemPriceList() {
                 item.Description,
                 item.Stk,
                 item.Comm,
-                item['SM Rate'],
-                item['Sale Rate'],
+                item["SM Rate"],
+                item["Sale Rate"],
                 item.MRP,
-                item['Fix Rate'],
+                item["Fix Rate"],
             ]);
         });
 
         // Add total row and bold it
-        const totalRow = worksheet.addRow([
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-
-
-        ]);
+        const totalRow = worksheet.addRow(["", "", "", "", "", "", "", ""]);
         totalRow.eachCell((cell) => {
             cell.font = { bold: true };
         });
@@ -916,7 +857,6 @@ export default function ItemPriceList() {
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
-
     const dispatch = useDispatch();
 
     const tableTopColor = "#3368B5";
@@ -926,7 +866,7 @@ export default function ItemPriceList() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
-    console.log('comapnydata', tableData)
+    console.log("comapnydata", tableData);
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -936,8 +876,6 @@ export default function ItemPriceList() {
     };
 
     let totalEntries = 0;
-
-
 
     const handleSorting = async (col) => {
         const parseValue = (value) => {
@@ -991,8 +929,6 @@ export default function ItemPriceList() {
         width: "10%",
     };
 
-
-
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
     useHotkeys("alt+e", handleDownloadCSV);
@@ -1014,7 +950,7 @@ export default function ItemPriceList() {
         backgroundColor: getcolor,
         width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
-        top: "35%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1100,11 +1036,8 @@ export default function ItemPriceList() {
         }
     }, [selectedIndex]);
 
-
-
     return (
         <>
-
             <div style={contentStyle}>
                 <div
                     style={{
@@ -1133,15 +1066,13 @@ export default function ItemPriceList() {
                                 justifyContent: "space-between",
                             }}
                         >
-
-
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "21px" }}
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1154,9 +1085,8 @@ export default function ItemPriceList() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1175,7 +1105,6 @@ export default function ItemPriceList() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
 
@@ -1185,7 +1114,7 @@ export default function ItemPriceList() {
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1198,9 +1127,8 @@ export default function ItemPriceList() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={input2Ref}
                                         options={capacityoptions}
@@ -1219,7 +1147,6 @@ export default function ItemPriceList() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
                         </div>
@@ -1239,15 +1166,13 @@ export default function ItemPriceList() {
                                 justifyContent: "space-between",
                             }}
                         >
-
-
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "21px" }}
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1260,9 +1185,8 @@ export default function ItemPriceList() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={input1Ref}
                                         options={categoryoptions}
@@ -1281,7 +1205,6 @@ export default function ItemPriceList() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
 
@@ -1291,7 +1214,7 @@ export default function ItemPriceList() {
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1304,9 +1227,8 @@ export default function ItemPriceList() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={input3Ref}
                                         options={typeoptions}
@@ -1325,7 +1247,6 @@ export default function ItemPriceList() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
                         </div>
@@ -1346,9 +1267,6 @@ export default function ItemPriceList() {
                                 justifyContent: "end",
                             }}
                         >
-
-
-
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "3px" }}>
                                     <span style={{ fontSize: "15px", fontWeight: "bold" }}>
@@ -1416,7 +1334,7 @@ export default function ItemPriceList() {
                                     <tr
                                         style={{
                                             backgroundColor: tableHeadColor,
-                                            color: 'white',
+                                            color: "white",
                                         }}
                                     >
                                         <td
@@ -1483,10 +1401,7 @@ export default function ItemPriceList() {
                                             Fix Rate{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
-
-
                                     </tr>
-
                                 </thead>
                             </table>
                         </div>
@@ -1496,7 +1411,7 @@ export default function ItemPriceList() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "35vh",
+                                maxHeight: "53vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1548,7 +1463,6 @@ export default function ItemPriceList() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
-
                                             </tr>
                                         </>
                                     ) : (
@@ -1568,8 +1482,9 @@ export default function ItemPriceList() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-start" style={firstColWidth}>
-                                                            {item.Code}
+                                                        
+                                                        <td className="text-start" style={sixthColWidth}>
+                                                            {item.Code.length > 10 ? `${item.Code.substring(0, 10)}...` : item.Code}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item.Description}
@@ -1581,18 +1496,17 @@ export default function ItemPriceList() {
                                                             {item.Comm}
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item['SM Rate']}
+                                                            {item["SM Rate"]}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item['Sale Rate']}
+                                                            {item["Sale Rate"]}
                                                         </td>
                                                         <td className="text-end" style={eightColWidth}>
                                                             {item.MRP}
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item['Fix Rate']}
+                                                            {item["Fix Rate"]}
                                                         </td>
-
                                                     </tr>
                                                 );
                                             })}
@@ -1622,7 +1536,6 @@ export default function ItemPriceList() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
-
                                             </tr>
                                         </>
                                     )}
@@ -1631,7 +1544,6 @@ export default function ItemPriceList() {
                         </div>
                     </div>
 
-
                     <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
@@ -1639,7 +1551,7 @@ export default function ItemPriceList() {
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
+                            width: "101.2%",
                         }}
                     >
                         <div
@@ -1662,49 +1574,42 @@ export default function ItemPriceList() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...forthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...fifthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...sixthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...eightColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...ninthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
-
+                        ></div>
                     </div>
                     <div
                         style={{
@@ -1715,7 +1620,6 @@ export default function ItemPriceList() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1724,7 +1628,6 @@ export default function ItemPriceList() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1733,7 +1636,6 @@ export default function ItemPriceList() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1744,7 +1646,6 @@ export default function ItemPriceList() {
                             text="Select"
                             ref={input6Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

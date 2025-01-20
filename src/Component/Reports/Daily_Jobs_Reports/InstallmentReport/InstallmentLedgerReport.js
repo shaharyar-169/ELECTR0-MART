@@ -1099,7 +1099,7 @@ export default function InstallmentLedgerReport() {
         <>
             {/* <div id="someElementId"></div> */}
             <ToastContainer />
-            <div style={contentStyle}>
+            <div style={contentStyle} >
                 <div
                     style={{
                         backgroundColor: getcolor,
@@ -1473,10 +1473,7 @@ export default function InstallmentLedgerReport() {
 
 
                     </div>
-
-
                     {/* TABLE HEADER BODY DATA SECTION */}
-
                     <div>
                         <div
                             style={{
