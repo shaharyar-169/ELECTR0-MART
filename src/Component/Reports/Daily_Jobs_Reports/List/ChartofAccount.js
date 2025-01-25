@@ -70,6 +70,7 @@ export default function ChartofAccount() {
         // FAccSts: transectionType,
         code: 'NASIRTRD',
         FLocCod: '001',
+        FSchTxt: searchQuery
       }).toString();
   
       axios
@@ -818,6 +819,7 @@ export default function ChartofAccount() {
                     id="searchsubmit"
                     placeholder="Item description"
                     value={searchQuery}
+                    autoComplete="off"
                     style={{
                       marginRight: "20px",
                       width: "200px",
@@ -835,9 +837,9 @@ export default function ChartofAccount() {
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
+                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())}                />
+
+                    </div>
               </div>
             </div>
             <div>
@@ -1020,7 +1022,7 @@ export default function ChartofAccount() {
               </div>
             </div>
   
-            <div
+            {/* <div
               style={{
                 borderBottom: `1px solid ${fontcolor}`,
                 borderTop: `1px solid ${fontcolor}`,
@@ -1054,7 +1056,8 @@ export default function ChartofAccount() {
                         
              
              
-            </div>
+            </div> */}
+            
             <div
               style={{
                 margin: "5px",

@@ -84,6 +84,7 @@ export default function ItemPriceList() {
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
             FCmpCod: Companyselectdata,
+            FSchTxt:searchQuery
         }).toString();
 
         axios
@@ -904,10 +905,10 @@ export default function ItemPriceList() {
     };
 
     const firstColWidth = {
-        width: "12%",
+        width: "15%",
     };
     const secondColWidth = {
-        width: "35.5%",
+        width: "32.5%",
     };
     const thirdColWidth = {
         width: "5%",
@@ -1280,6 +1281,7 @@ export default function ItemPriceList() {
                                     id="searchsubmit"
                                     placeholder="Item description"
                                     value={searchQuery}
+                                    autoComplete="off"
                                     style={{
                                         marginRight: "20px",
                                         width: "250px",
@@ -1297,9 +1299,9 @@ export default function ItemPriceList() {
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
+                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())}                />
+
+                                    </div>
                         </div>
                     </div>
 
@@ -1483,17 +1485,19 @@ export default function ItemPriceList() {
                                                         }}
                                                     >
 
-                                                        <td className="text-start" style={sixthColWidth}  title={item.Code} >
-
-                                                            {item.Code.length > 10 ? `${item.Code.substring(0, 10)}...` : item.Code}
+                                                        <td className="text-start" style={sixthColWidth}  >
+                                                            {item.Code}
+                                                       </td>
+                                                      <td
+                                                            className="text-start"
+                                                            style={secondColWidth}
+                                                            title={item.Description || ""}
+                                                        >
+                                                            {item.Description && item.Description.length > 35
+                                                                ? `${item.Description.substring(0, 35)}...`
+                                                                : item.Description || ""}
                                                         </td>
-                                                  
 
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
-
-                                                        </td>
-                                                       
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Stk}
                                                         </td>
@@ -1549,7 +1553,7 @@ export default function ItemPriceList() {
                         </div>
                     </div>
 
-                    <div
+                    {/* <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
                             borderTop: `1px solid ${fontcolor}`,
@@ -1615,7 +1619,9 @@ export default function ItemPriceList() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
-                    </div>
+                    </div> */}
+
+                    
                     <div
                         style={{
                             margin: "5px",

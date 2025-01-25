@@ -83,6 +83,7 @@ export default function ItemList() {
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
             FCmpCod: Companyselectdata,
+            FSchTxt: searchQuery
         }).toString();
 
         axios
@@ -882,7 +883,7 @@ export default function ItemList() {
         width: "16.7%",
     };
     const secondColWidth = {
-        width: "37%",
+        width: "35%",
     };
     const thirdColWidth = {
         width: "10%",
@@ -894,7 +895,7 @@ export default function ItemList() {
         width: "9%",
     };
     const sixthColWidth = {
-        width: "14%",
+        width: "16%",
     };
 
     useHotkeys("s", fetchReceivableReport);
@@ -1296,6 +1297,7 @@ export default function ItemList() {
                                     id="searchsubmit"
                                     placeholder="Item description"
                                     value={searchQuery}
+                                    autoComplete="off"
                                     style={{
                                         marginRight: "20px",
                                         width: "250px",
@@ -1313,8 +1315,8 @@ export default function ItemList() {
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
+
                             </div>
                         </div>
                     </div>
@@ -1483,8 +1485,14 @@ export default function ItemList() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
+                                                        <td
+                                                            className="text-start"
+                                                            style={secondColWidth}
+                                                            title={item.Description || ""}
+                                                        >
+                                                            {item.Description && item.Description.length > 35
+                                                                ? `${item.Description.substring(0, 35)}...`
+                                                                : item.Description || ""}
                                                         </td>
                                                         <td className="text-start" style={thirdColWidth}>
                                                             {item.Company}
@@ -1495,12 +1503,8 @@ export default function ItemList() {
                                                         <td className="text-start" style={fifthColWidth}>
                                                             {item.Capacity}
                                                         </td>
-                                                        <td
-                                                            className="text-start"
-                                                            style={secondColWidth}
-                                                            title={item.Type}
-                                                        >
-                                                            {item.Type.length > 14 ? `${item.Type.substring(0, 14)}...` : item.Type}
+                                                        <td className="text-start" style={sixthColWidth}                                                        >
+                                                            {item.Type}
                                                         </td>
                                                     </tr>
                                                 );
@@ -1537,7 +1541,7 @@ export default function ItemList() {
                         </div>
                     </div>
 
-                    <div
+                    {/* <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
                             borderTop: `1px solid ${fontcolor}`,
@@ -1589,7 +1593,7 @@ export default function ItemList() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
-                    </div>
+                    </div> */}
                     <div
                         style={{
                             margin: "5px",

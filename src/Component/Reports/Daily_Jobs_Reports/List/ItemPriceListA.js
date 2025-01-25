@@ -21,7 +21,6 @@ import './list.css';
 import { getcompanyData } from "../../../File/Category_Maintenance/Category_Maintenance_Api";
 
 export default function ItemPriceListA() {
-
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -46,12 +45,10 @@ export default function ItemPriceListA() {
     const [Typeselectdata, setTypeselectdata] = useState("");
     const [GetType, setGetType] = useState([]);
 
-
     const [sortData, setSortData] = useState("ASC");
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
-
 
     const {
         isSidebarVisible,
@@ -72,28 +69,21 @@ export default function ItemPriceListA() {
 
     const comapnyname = organisation.description;
 
-
-
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
     // Toggle the ToDATE && FromDATE CalendarOpen state on each click
 
-
-
-   
     function fetchReceivableReport() {
-
-
         const apiUrl = apiLinks + "/ItemPriceListA.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            // code: organisation.code,
-            code:'NASIRTRD',
+            code: organisation.code,
+            // code:'NASIRTRD',
             FCtgCod: Companyselectdata,
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
-            FCmpCod: Companyselectdata
-
+            FCmpCod: Companyselectdata,
+            FSchTxt: searchQuery
         }).toString();
 
         axios
@@ -198,7 +188,10 @@ export default function ItemPriceListA() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+        if (
+            !hasComponentMountedPreviously ||
+            (saleSelectRef && saleSelectRef.current)
+        ) {
             if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
                     saleSelectRef.current.focus();
@@ -209,20 +202,16 @@ export default function ItemPriceListA() {
         }
     }, []);
 
-
-
     //////////////////// CODE FOR COMPANY SELECT///////////////////
 
     useEffect(() => {
         const apiUrl = apiLinks + "/GetCompany.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetCompany(response.data);
                 } else {
@@ -235,7 +224,6 @@ export default function ItemPriceListA() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
     const options = GetCompany.map((item) => ({
@@ -247,12 +235,10 @@ export default function ItemPriceListA() {
         const apiUrl = apiLinks + "/GetCapacity.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetCapacity(response.data);
                 } else {
@@ -265,7 +251,6 @@ export default function ItemPriceListA() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
 
@@ -278,12 +263,10 @@ export default function ItemPriceListA() {
         const apiUrl = apiLinks + "/GetCatg.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetCategory(response.data);
                 } else {
@@ -296,7 +279,6 @@ export default function ItemPriceListA() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
 
@@ -309,12 +291,10 @@ export default function ItemPriceListA() {
         const apiUrl = apiLinks + "/GetType.php";
         const formData = new URLSearchParams({
             code: organisation.code,
-
         }).toString();
         axios
             .post(apiUrl, formData)
             .then((response) => {
-
                 if (response.data && Array.isArray(response.data)) {
                     setGetType(response.data);
                 } else {
@@ -327,7 +307,6 @@ export default function ItemPriceListA() {
             })
             .catch((error) => {
                 console.error("Error:", error);
-
             });
     }, []);
 
@@ -376,9 +355,20 @@ export default function ItemPriceListA() {
         dropdownIndicator: (base) => ({
             ...base,
             padding: 0,
+            marginTop: "-5px",
             fontSize: "18px",
             display: "flex",
             textAlign: "center !important",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            textAlign: "left",
+            color: fontcolor,
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            marginTop: "-5px",
         }),
     });
 
@@ -393,27 +383,16 @@ export default function ItemPriceListA() {
             item.Description,
             item.Stk,
             item.Comm,
-            item['Act Rate'],
-            item['Pur Rate'],
-            item['SM Rate'],
-            item['Sale Rate'],
+            item["Act Rate"],
+            item["Pur Rate"],
+            item["SM Rate"],
+            item["Sale Rate"],
             item.MRP,
-            item['Fix Rate'],
+            item["Fix Rate"],
         ]);
 
         // Add summary row to the table
-        rows.push([
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-        ]);
+        rows.push(["", "", "", "", "", "", "", "", "", ""]);
 
         // Define table column headers and individual column widths
         const headers = [
@@ -426,9 +405,9 @@ export default function ItemPriceListA() {
             "SM Rate",
             "Sale Rate",
             "MRP",
-            "Fix Rate"
+            "Fix Rate",
         ];
-        const columnWidths = [35, 80, 10,20,20,20, 20, 20, 20,20];
+        const columnWidths = [35, 80, 10, 20, 20, 20, 20, 20, 20, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -526,26 +505,27 @@ export default function ItemPriceListA() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 2 ) {
+                    if (cellIndex === 2) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "center",
                             baseline: "middle",
                         });
-
-                    }
-
-                    else if (cellIndex === 3 || cellIndex ===4 || cellIndex ===5 || cellIndex ===6 || cellIndex ===7 || cellIndex===8 || cellIndex===9) {
+                    } else if (
+                        cellIndex === 3 ||
+                        cellIndex === 4 ||
+                        cellIndex === 5 ||
+                        cellIndex === 6 ||
+                        cellIndex === 7 ||
+                        cellIndex === 8 ||
+                        cellIndex === 9
+                    ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-
-                    } 
-                    
-                    
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -648,15 +628,7 @@ export default function ItemPriceListA() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
+                addTitle(comapnyname, "", "", pageNumber, startY, 20, 10); // Render company title with default font size, only date, and page number
                 startY += 7; // Adjust vertical position for the company title
                 // addTitle(
                 // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
@@ -668,14 +640,7 @@ export default function ItemPriceListA() {
                 // 	10
                 // ); // Render sale report title with decreased font size, provide the time, and page number
                 // startY += 7;
-                addTitle(
-                    `Item Price List A`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Item Price List A`, "", "", pageNumber, startY, 14); // Render sale report title with decreased font size, provide the time, and page number
                 startY += 13;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -751,7 +716,6 @@ export default function ItemPriceListA() {
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
-
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -776,18 +740,13 @@ export default function ItemPriceListA() {
             "right",
             "right",
             "right",
-
-
         ];
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
         // Add title rows
-        [
-            comapnyname,
-            `Item price List A`,
-        ].forEach((title, index) => {
+        [comapnyname, `Item price List A`].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
@@ -836,19 +795,16 @@ export default function ItemPriceListA() {
 
         // Add headers
         const headers = [
-
             "Code",
             "Description",
             "StK",
-            'Comm',
-            'Act Rate',
-            'Pur Rate',
-            'SM Rate',
-            'Sale Rate',
-            'MRP',
-            'Fix Rate',
-         
-
+            "Comm",
+            "Act Rate",
+            "Pur Rate",
+            "SM Rate",
+            "Sale Rate",
+            "MRP",
+            "Fix Rate",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
@@ -862,36 +818,23 @@ export default function ItemPriceListA() {
                 item.Description,
                 item.Stk,
                 item.Comm,
-                item['Act Rate'],
-                item['Pur Rate'],
-                item['SM Rate'],
-                item['Sale Rate'],
+                item["Act Rate"],
+                item["Pur Rate"],
+                item["SM Rate"],
+                item["Sale Rate"],
                 item.MRP,
-                item['Fix Rate'],
+                item["Fix Rate"],
             ]);
         });
 
         // Add total row and bold it
-        const totalRow = worksheet.addRow([
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-          
-
-        ]);
+        const totalRow = worksheet.addRow(["", "", "", "", "", "", "", "", "", ""]);
         totalRow.eachCell((cell) => {
             cell.font = { bold: true };
         });
 
         // Set column widths
-        [22, 40,6,12, 12,12,12, 12, 12,12 ].forEach((width, index) => {
+        [22, 40, 6, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -926,7 +869,6 @@ export default function ItemPriceListA() {
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
-
     const dispatch = useDispatch();
 
     const tableTopColor = "#3368B5";
@@ -936,7 +878,7 @@ export default function ItemPriceListA() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
-    console.log('comapnydata', tableData)
+    console.log("comapnydata", tableData);
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -946,8 +888,6 @@ export default function ItemPriceListA() {
     };
 
     let totalEntries = 0;
-
-
 
     const handleSorting = async (col) => {
         const parseValue = (value) => {
@@ -976,36 +916,35 @@ export default function ItemPriceListA() {
     };
 
     const firstColWidth = {
-        width: "9.3%",
+        width: "12.3%",
     };
     const secondColWidth = {
-        width: "20.5%",
+        width: "24.5%",
     };
     const thirdColWidth = {
-        width: "5%",
+        width: "4%",
     };
     const forthColWidth = {
         width: "7%",
     };
     const fifthColWidth = {
-        width: "9.5%",
+        width: "8.5%",
     };
     const sixthColWidth = {
-        width: "9.5%",
+        width: "8.5%",
     };
     const eightColWidth = {
-        width: "9.5%",
+        width: "8.5%",
     };
     const ninthColWidth = {
-        width: "9.5%",
+        width: "8.5%",
     };
     const tenthColWidth = {
-        width: "9.5%",
+        width: "8.5%",
     };
     const elewenthColWidth = {
-        width: "9.5%",
+        width: "8.5%",
     };
-
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1028,7 +967,7 @@ export default function ItemPriceListA() {
         backgroundColor: getcolor,
         width: isSidebarVisible ? "calc(85vw - 0%)" : "85vw",
         position: "relative",
-        top: "35%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1041,7 +980,7 @@ export default function ItemPriceListA() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "1000px",
+        maxWidth: "1100px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1114,11 +1053,8 @@ export default function ItemPriceListA() {
         }
     }, [selectedIndex]);
 
-
-
     return (
         <>
-
             <div style={contentStyle}>
                 <div
                     style={{
@@ -1147,15 +1083,13 @@ export default function ItemPriceListA() {
                                 justifyContent: "space-between",
                             }}
                         >
-
-
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "21px" }}
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1168,9 +1102,8 @@ export default function ItemPriceListA() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1189,7 +1122,6 @@ export default function ItemPriceListA() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
 
@@ -1199,7 +1131,7 @@ export default function ItemPriceListA() {
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1212,9 +1144,8 @@ export default function ItemPriceListA() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={input2Ref}
                                         options={capacityoptions}
@@ -1233,7 +1164,6 @@ export default function ItemPriceListA() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
                         </div>
@@ -1253,15 +1183,13 @@ export default function ItemPriceListA() {
                                 justifyContent: "space-between",
                             }}
                         >
-
-
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "21px" }}
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1274,9 +1202,8 @@ export default function ItemPriceListA() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={input1Ref}
                                         options={categoryoptions}
@@ -1295,7 +1222,6 @@ export default function ItemPriceListA() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
 
@@ -1305,7 +1231,7 @@ export default function ItemPriceListA() {
                             >
                                 <div
                                     style={{
-                                        marginLeft: '10px',
+                                        marginLeft: "10px",
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
@@ -1318,9 +1244,8 @@ export default function ItemPriceListA() {
                                     </label>
                                 </div>
 
-                                <div style={{ marginLeft: '3px' }} >
+                                <div style={{ marginLeft: "3px" }}>
                                     <Select
-
                                         className="List-select-class "
                                         ref={input3Ref}
                                         options={typeoptions}
@@ -1339,7 +1264,6 @@ export default function ItemPriceListA() {
                                         isClearable
                                         placeholder="Search or select..."
                                     />
-
                                 </div>
                             </div>
                         </div>
@@ -1360,8 +1284,6 @@ export default function ItemPriceListA() {
                                 justifyContent: "end",
                             }}
                         >
-                          
-
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "3px" }}>
                                     <span style={{ fontSize: "15px", fontWeight: "bold" }}>
@@ -1375,6 +1297,7 @@ export default function ItemPriceListA() {
                                     id="searchsubmit"
                                     placeholder="Item description"
                                     value={searchQuery}
+                                    autoComplete="off"
                                     style={{
                                         marginRight: "20px",
                                         width: "250px",
@@ -1392,8 +1315,8 @@ export default function ItemPriceListA() {
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())}                />
+
                             </div>
                         </div>
                     </div>
@@ -1429,7 +1352,7 @@ export default function ItemPriceListA() {
                                     <tr
                                         style={{
                                             backgroundColor: tableHeadColor,
-                                            color: 'white',
+                                            color: "white",
                                         }}
                                     >
                                         <td
@@ -1512,10 +1435,7 @@ export default function ItemPriceListA() {
                                             Fix Rate{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
-
-
                                     </tr>
-
                                 </thead>
                             </table>
                         </div>
@@ -1525,7 +1445,7 @@ export default function ItemPriceListA() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "35vh",
+                                maxHeight: "53vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1579,7 +1499,6 @@ export default function ItemPriceListA() {
                                                 <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
                                                 <td style={elewenthColWidth}></td>
-
                                             </tr>
                                         </>
                                     ) : (
@@ -1602,8 +1521,14 @@ export default function ItemPriceListA() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
+                                                        <td
+                                                            className="text-start"
+                                                            style={secondColWidth}
+                                                            title={item.Description || ""}
+                                                        >
+                                                            {item.Description && item.Description.length > 30
+                                                                ? `${item.Description.substring(0, 30)}...`
+                                                                : item.Description || ""}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Stk}
@@ -1612,24 +1537,23 @@ export default function ItemPriceListA() {
                                                             {item.Comm}
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item['Act Rate']}
+                                                            {item["Act Rate"]}
                                                         </td>
                                                         <td className="text-end" style={elewenthColWidth}>
-                                                            {item['Pur Rate']}
+                                                            {item["Pur Rate"]}
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item['SM Rate']}
+                                                            {item["SM Rate"]}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item['Sale Rate']}
+                                                            {item["Sale Rate"]}
                                                         </td>
                                                         <td className="text-end" style={eightColWidth}>
                                                             {item.MRP}
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item['Fix Rate']}
+                                                            {item["Fix Rate"]}
                                                         </td>
-
                                                     </tr>
                                                 );
                                             })}
@@ -1661,7 +1585,6 @@ export default function ItemPriceListA() {
                                                 <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
                                                 <td style={elewenthColWidth}></td>
-
                                             </tr>
                                         </>
                                     )}
@@ -1670,15 +1593,14 @@ export default function ItemPriceListA() {
                         </div>
                     </div>
 
-
-                    <div
+                    {/* <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
+                            width: "101.2%",
                         }}
                     >
                         <div
@@ -1701,66 +1623,58 @@ export default function ItemPriceListA() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...forthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...tenthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...elewenthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...fifthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...sixthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...eightColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...ninthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
+                    </div> */}
 
-                    </div>
                     <div
                         style={{
                             margin: "5px",
@@ -1770,7 +1684,6 @@ export default function ItemPriceListA() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1779,7 +1692,6 @@ export default function ItemPriceListA() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1788,7 +1700,6 @@ export default function ItemPriceListA() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1799,7 +1710,6 @@ export default function ItemPriceListA() {
                             text="Select"
                             ref={input6Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

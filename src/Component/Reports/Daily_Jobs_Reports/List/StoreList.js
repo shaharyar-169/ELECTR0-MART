@@ -70,6 +70,7 @@ export default function StoreList() {
         FStrSts: transectionType,
         code: organisation.code,
         FLocCod: getLocationNumber,
+        FSchTxt: searchQuery
       }).toString();
   
       axios
@@ -832,6 +833,7 @@ export default function StoreList() {
                     id="searchsubmit"
                     placeholder="Item description"
                     value={searchQuery}
+                    autoComplete="off"
                     style={{
                       marginRight: "20px",
                       width: "200px",
@@ -849,8 +851,8 @@ export default function StoreList() {
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())}                />
+
                 </div>
               </div>
             </div>
@@ -1058,7 +1060,7 @@ export default function StoreList() {
               </div>
             </div>
   
-            <div
+            {/* <div
               style={{
                 borderBottom: `1px solid ${fontcolor}`,
                 borderTop: `1px solid ${fontcolor}`,
@@ -1105,7 +1107,8 @@ export default function StoreList() {
               ></div>
               
             
-            </div>
+            </div> */}
+            
             <div
               style={{
                 margin: "5px",

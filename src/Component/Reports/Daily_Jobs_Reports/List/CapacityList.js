@@ -69,6 +69,7 @@ export default function CapacityList() {
       const formData = new URLSearchParams({
         FCapSts: transectionType,
         code: organisation.code,
+        FSchTxt: searchQuery
       }).toString();
   
       axios
@@ -817,6 +818,7 @@ export default function CapacityList() {
                     id="searchsubmit"
                     placeholder="Item description"
                     value={searchQuery}
+                    autoComplete="off"
                     style={{
                       marginRight: "20px",
                       width: "200px",
@@ -834,8 +836,8 @@ export default function CapacityList() {
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())}                />
+
                 </div>
               </div>
             </div>

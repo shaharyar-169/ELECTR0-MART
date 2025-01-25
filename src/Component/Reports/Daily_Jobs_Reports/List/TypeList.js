@@ -69,6 +69,7 @@ export default function TypeList() {
       const formData = new URLSearchParams({
         FTypSts: transectionType,
         code: organisation.code,
+        FSchTxt: searchQuery
       }).toString();
   
       axios
@@ -817,6 +818,7 @@ export default function TypeList() {
                     id="searchsubmit"
                     placeholder="Item description"
                     value={searchQuery}
+                    autoComplete="off"
                     style={{
                       marginRight: "20px",
                       width: "200px",
@@ -834,8 +836,8 @@ export default function TypeList() {
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())}                />
+
                 </div>
               </div>
             </div>
@@ -1018,7 +1020,7 @@ export default function TypeList() {
               </div>
             </div>
   
-            <div
+            {/* <div
               style={{
                 borderBottom: `1px solid ${fontcolor}`,
                 borderTop: `1px solid ${fontcolor}`,
@@ -1051,7 +1053,8 @@ export default function TypeList() {
               ></div>
             
             
-            </div>
+            </div> */}
+            
             <div
               style={{
                 margin: "5px",
