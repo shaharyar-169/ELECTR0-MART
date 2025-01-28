@@ -29,6 +29,10 @@ export function ThemeProvider({ children }) {
     useState("#3368b5");
   const [getnavbarfontcolor, setnavbarfontcolor] = useState("#fff");
 
+  const [getdatafontsize, setdatafontsize] = useState("12px");
+  const [getfontstyle, setfontstyle] = useState("Verdana");
+
+
   const [primaryColor, setPrimaryColor] = useState("#1f2670");
   const [secondaryColor, setSecondaryColor] = useState("white");
   const [navbarHeight, setNavbarHeight] = useState(30);
@@ -72,6 +76,8 @@ export function ThemeProvider({ children }) {
     primaryColor,
     secondaryColor,
     navbarHeight,
+    getdatafontsize,
+    getfontstyle,
     pathHeight,
     apiLinks,
   };

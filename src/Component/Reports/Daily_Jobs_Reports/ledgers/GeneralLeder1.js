@@ -556,15 +556,15 @@ export default function GeneralLedger1() {
         ]);
 
         // Add summary row to the table
-        rows.push([
-            "",
-            "",
-            "",
-            "Total",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
-        ]);
+        // rows.push([
+        //     "",
+        //     "",
+        //     "",
+        //     "Total",
+        //     String(totalDebit),
+        //     String(totalCredit),
+        //     String(closingBalance),
+        // ]);
 
         // Define table column headers and individual column widths
         const headers = [

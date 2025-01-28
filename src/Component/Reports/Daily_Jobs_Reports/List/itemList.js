@@ -34,20 +34,32 @@ export default function ItemList() {
     const input6Ref = useRef(null);
 
     const [Companyselectdata, setCompanyselectdata] = useState("");
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+
+
     const [GetCompany, setGetCompany] = useState([]);
 
     const [Capacityselectdata, setCapacityselectdata] = useState("");
+    const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
+
+
     const [GetCapacity, setGetCapacity] = useState([]);
 
     const [Categoryselectdata, setCategoryselectdata] = useState("");
+    const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
+
+
     const [GetCategory, setGetCategory] = useState([]);
 
     const [Typeselectdata, setTypeselectdata] = useState("");
+    const [typeselectdatavalue, settypeselectdatavalue] = useState("");
+
+
     const [GetType, setGetType] = useState([]);
 
     const [sortData, setSortData] = useState("ASC");
 
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState('');
     const [transectionType, settransectionType] = useState("");
 
     const {
@@ -61,7 +73,12 @@ export default function ItemList() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getdatafontsize,
+        getfontstyle,
     } = useTheme();
+
+
+
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
@@ -129,6 +146,7 @@ export default function ItemList() {
             const selectedOption = saleSelectRef.current.state.selectValue;
             if (selectedOption && selectedOption.value) {
                 setCompanyselectdata(selectedOption.value);
+
             }
             // const nextInput = document.getElementById(inputId);
             const nextInput = inputId.current;
@@ -201,6 +219,7 @@ export default function ItemList() {
             }
         }
     };
+
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -377,8 +396,22 @@ export default function ItemList() {
         }),
     });
 
+
+    const globalFontSettings = {
+        name: 'vardana',
+        bold: 'bold',
+        normal: 'normal',
+        size: getdatafontsize // Font size
+    };
+
+
+
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
+
+        const globalfontsize = 12;
+        console.log('gobal font data', globalfontsize)
+
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
@@ -393,7 +426,7 @@ export default function ItemList() {
         ]);
 
         // Add summary row to the table
-        rows.push(["", "", "", "", "", ""]);
+        // rows.push(["", "", "", "", "", ""]);
 
         // Define table column headers and individual column widths
         const headers = [
@@ -404,7 +437,7 @@ export default function ItemList() {
             "Capacity",
             "Type",
         ];
-        const columnWidths = [35, 80, 20, 27, 30, 25];
+        const columnWidths = [35, 95, 25, 32, 22, 45];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -414,14 +447,14 @@ export default function ItemList() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont("verdana");
+        doc.setFont(getfontstyle);
         doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
+            doc.setFont(getfontstyle, "bold"); // Set font to bold
+            doc.setFontSize(12); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -444,15 +477,15 @@ export default function ItemList() {
             });
 
             // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
+            doc.setFont(getfontstyle);
+            doc.setFontSize(12);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
+            const fontSize = 10; // Adjust this value to decrease font size
+            const boldFont = 400; // Bold font
+            const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
             doc.setFontSize(fontSize);
@@ -502,7 +535,7 @@ export default function ItemList() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+                    if (cellIndex === 7) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -568,6 +601,8 @@ export default function ItemList() {
 
         // Function to handle pagination
         const handlePagination = () => {
+
+
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -575,9 +610,8 @@ export default function ItemList() {
                 time,
                 pageNumber,
                 startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
+                titleFontSize = 18,
+                pageNumberFontSize = 10
             ) => {
                 doc.setFontSize(titleFontSize); // Set the font size for the title
                 doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -587,14 +621,14 @@ export default function ItemList() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
+                // if (date) {
+                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                //     if (time) {
+                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                //     } else {
+                //         doc.text(date, rightX - 10, startY, { align: "right" });
+                //     }
+                // }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
@@ -611,41 +645,79 @@ export default function ItemList() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(comapnyname, "", "", pageNumber, startY, 20, 10); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(`Item List`, "", "", pageNumber, startY, 14); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
+
+                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                startY += 5; // Adjust vertical position for the company title
+
+                addTitle(`Item List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                startY += 5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 2; // Position the labels below the titles and above the table
+                const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
+                doc.setFontSize(12);
+                doc.setFont(getfontstyle, "300");
 
-                // let typeText = selectedOptionType ? selectedOptionType : "All";
-                // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
 
-                // let typeText = transectionType ? transectionType : "";
-                let typeItem = transectionType ? transectionType : "All";
+                let typeText = capacityselectdatavalue.label ? capacityselectdatavalue.label : "ALL";
+                let typeItem = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+                let category = categoryselectdatavalue.label ? categoryselectdatavalue.label : "ALL";
+                let typename = typeselectdatavalue.label ? typeselectdatavalue.label : "ALL";
+                let status = transectionType ? transectionType : "All";
+                let search = searchQuery ? searchQuery : "";
 
-                doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
 
-                startY += 0; // Adjust vertical position for the labels
+                // doc.text(`COMPANY : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                // doc.text(`CAPACITY : ${typeText}`, labelsX + 180, labelsY); // Adjust x-coordinate for From Date
+                // doc.text(`CATEGORY : ${category}`, labelsX, labelsY + 4.3); // Adjust x-coordinate for From Date
+
+                // doc.text(`TYPE : ${typename}`, labelsX + 180, labelsY + 4.3); // Adjust x-coordinate for From Date
+                // doc.text(`STATUS : ${status}`, labelsX, labelsY + 8.5); // Adjust x-coordinate for From Date
+                // doc.text(`SEARCH : ${search}`, labelsX + 180, labelsY + 8.5); // Adjust x-coordinate for From Date
+
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`CAPACITY :`, labelsX + 180, labelsY); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${typeText}`, labelsX + 205, labelsY); // Draw the value next to the label
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${typename}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${status}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+
+
+
+                // // Reset font weight to normal if necessary for subsequent text
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFontSize(10);
+
+                startY += 10; // Adjust vertical position for the labels
 
                 addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
                 const startIndex = currentPageIndex * rowsPerPage;
@@ -687,30 +759,21 @@ export default function ItemList() {
         // Call function to handle pagination
         handlePagination();
 
-        // Save the PDF file
-        doc.save("ItemList.pdf");
+        // Save the PDF files
+        doc.save(`ItemList_${date}.pdf`);
 
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
+
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+
+
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 7; // Number of columns
-
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
+        const numColumns = 6; // Number of columns
 
         const columnAlignments = ["left", "left", "left", "left", "left", "left"];
 
@@ -718,40 +781,116 @@ export default function ItemList() {
         worksheet.addRow([]);
 
         // Add title rows
+
         [comapnyname, `Item List`].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+            // Define custom styles for each title
+            let customStyle;
+            let rowHeight = 20;  // Default row height
+            if (index === 0) {
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
+            } else {
+                // Style for "Item List"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
+            }
+
+            // Add row with the title
+            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+
+            // Adjust the row height for the company name or other titles
+            worksheet.getRow(index + 2).height = rowHeight;
+
+            // Merge the cells for the title
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
 
-        worksheet.addRow([]); // Empty row for spacing
 
-        // let typeText = selectedOptionType ? selectedOptionType : "All";
-        let typeItem = transectionType ? transectionType : "All";
+
+        // Add an empty row after the title section
+        worksheet.addRow([]);  // This is where you add the empty row
+
+        let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+        let typecapacity = capacityselectdatavalue.label ? capacityselectdatavalue.label : "ALL";
+        let typecategory = categoryselectdatavalue.label ? categoryselectdatavalue.label : "ALL";
+        let typetype = typeselectdatavalue.label ? typeselectdatavalue.label : "ALL ";
+        let typestatus = transectionType ? transectionType : "All";
+        let typesearch = searchQuery ? searchQuery : "";
 
         // Add type and store row and bold it
+        // const typeAndStoreRow = worksheet.addRow([
+        //     `COMPANY: ${typecompany}`,
+        //     "",
+        //     "",
+        //     `CAPACITY: ${typecapacity}`,
+        // ]);
+
+        // const typeAndStoreRow2 = worksheet.addRow([
+        //     `CATEGORY: ${typecategory}`,
+        //     "",
+        //     "",
+        //     `TYPE: ${typetype}`,
+        // ]);
+
+        // const typeAndStoreRow3 = worksheet.addRow([
+        //     `STATUS: ${typestatus}`,
+        //     "",
+        //     "",
+        //     `SEARCH: ${typesearch}`,
+        // ]);
+
+
+
         const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            `Status: ${typeItem}`,
-            "",
-            "",
-            // `Type: ${typeText}`,
-            "",
-            "",
-            "",
+            "COMPANY:", typecompany, "", "CAPACITY:", typecapacity,
         ]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
 
-        worksheet.addRow([]); // Empty row for spacing
+        const typeAndStoreRow2 = worksheet.addRow([
+            "CATEGORY:", typecategory, "", "TYPE:", typetype,
+        ]);
+        const typeAndStoreRow3 = worksheet.addRow([
+            "STATUS:", typestatus, "", "SEARCH:", typesearch,
+        ]);
 
+        const applyStatusRowStyle = (row, boldColumns = []) => {
+            row.eachCell((cell, colIndex) => {
+                // Check if the current cell is in the boldColumns array
+                const isBold = boldColumns.includes(colIndex);
+
+                cell.font = {
+                    family: getfontstyle, // Your desired font family
+                    size: getdatafontsize, // Your desired font size
+                    bold: isBold, // Bold only for specific columns
+                };
+
+                cell.alignment = {
+                    horizontal: "left", // Align text to the left
+                    vertical: "middle", // Vertically align to the middle
+                };
+
+                cell.border = null; // Remove borders
+            });
+        };
+
+        // Bold specific columns (labels)
+        applyStatusRowStyle(typeAndStoreRow, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+        applyStatusRowStyle(typeAndStoreRow2, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+        applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+
+
+
+        // Header style for center alignment
         const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
+            font: { bold: true, family: getfontstyle, size: getdatafontsize },
+            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
             fill: {
                 type: "pattern",
                 pattern: "solid",
@@ -766,22 +905,18 @@ export default function ItemList() {
         };
 
         // Add headers
-        const headers = [
-            "Code",
-            "Description",
-            "Company",
-            "Category",
-            "Capacity",
-            "Type",
-        ];
+        const headers = ["Code", "Description", "Company", "Category", "Capacity", "Type"];
         const headerRow = worksheet.addRow(headers);
+
+        // Apply styles and center alignment to the header row
         headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+            cell.style = { ...headerStyle };
         });
+
 
         // Add data rows
         tableData.forEach((item) => {
-            worksheet.addRow([
+            const row = worksheet.addRow([
                 item.Code,
                 item.Description,
                 item.Company,
@@ -789,48 +924,58 @@ export default function ItemList() {
                 item.Capacity,
                 item.Type,
             ]);
+
+            // Apply custom styles to each cell in the row
+            row.eachCell((cell, colIndex) => {
+                cell.font = {
+                    family: getfontstyle, // Set your desired font family
+                    size: getdatafontsize, // Set the font size
+                    bold: false, // Make the font bold
+                };
+
+                cell.border = {
+                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                };
+
+                // Align cell content based on columnAlignments array
+                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                cell.alignment = {
+                    horizontal: alignment,
+                    vertical: "middle", // Vertically align to the middle
+                };
+            });
         });
 
-        // Add total row and bold it
-        const totalRow = worksheet.addRow(["", "", "", "", "", ""]);
-        totalRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
+
+
 
         // Set column widths
-        [22, 40, 20, 20, 20, 20].forEach((width, index) => {
+        [22, 50, 15, 20, 14, 25].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
-            }
-        });
+        const getCurrentDate = () => {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, "0");
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const yyyy = today.getFullYear();
+            return dd + "/" + mm + "/" + yyyy;
+        };
+
+        const currentdate = getCurrentDate();
 
         // Generate Excel file buffer and save
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "ItemList.xlsx");
+        saveAs(blob, `ItemList ${currentdate}.xlsx`);
     };
+
+
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
@@ -1063,7 +1208,13 @@ export default function ItemList() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
                                                 setCompanyselectdata(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                });
+
                                             } else {
                                                 setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1105,8 +1256,12 @@ export default function ItemList() {
                                         id="selectedsale2"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
                                                 setCapacityselectdata(selectedOption.value);
-                                            } else {
+                                                setcapacityselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                  });                                            } else {
                                                 setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
                                         }}
@@ -1163,7 +1318,13 @@ export default function ItemList() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
                                                 setCategoryselectdata(selectedOption.value);
+                                                setcategoryselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                  });
+
                                             } else {
                                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1205,7 +1366,12 @@ export default function ItemList() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
                                                 setTypeselectdata(selectedOption.value);
+                                                settypeselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                  });
                                             } else {
                                                 setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1485,15 +1651,19 @@ export default function ItemList() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
+
                                                         <td
                                                             className="text-start"
                                                             style={secondColWidth}
                                                             title={item.Description || ""}
                                                         >
-                                                            {item.Description && item.Description.length > 35
-                                                                ? `${item.Description.substring(0, 35)}...`
-                                                                : item.Description || ""}
+                                                            {item.Description && item.Description.trim().length > 35
+                                                                ? `${item.Description.trim().slice(0, 35)}...`
+                                                                : item.Description.trim() || ""}
+
                                                         </td>
+
+
                                                         <td className="text-start" style={thirdColWidth}>
                                                             {item.Company}
                                                         </td>
