@@ -384,7 +384,7 @@ export default function ItemPriceList() {
     });
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-    
+
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
     const exportPDFHandler = () => {
@@ -656,7 +656,7 @@ export default function ItemPriceList() {
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
 
-               
+
 
 
 
@@ -682,35 +682,36 @@ export default function ItemPriceList() {
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`COMPANY :`, labelsX , labelsY); // Draw bold label
+                doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`CAPACITY :`, labelsX + 160, labelsY); // Draw bold label
+                doc.text(`TYPE :`, labelsX + 180, labelsY); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${typeText}`, labelsX + 185, labelsY); // Draw the value next to the label
+                doc.text(`${typename}`, labelsX + 195, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                 doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 160, labelsY + 4.3); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${typename}`, labelsX + 185, labelsY + 4.3); // Draw the value next to the label
-
-                // doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                // doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
-                // doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                // doc.text(`${status}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+                //   doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                //   doc.text(`TYPE :`, labelsX + 170, labelsY + 4.3); // Draw bold label
+                //   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                //   doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`SEARCH :`, labelsX + 160, labelsY + 8.5); // Draw bold label
+                doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
+                doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
+                }
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -794,31 +795,31 @@ export default function ItemPriceList() {
             let customStyle;
             let rowHeight = 20;  // Default row height
             if (index === 0) {
-              // Style for company name
-              customStyle = {
-                font: { family: getfontstyle, size: 18, bold: true },
-                alignment: { horizontal: "center" },
-              };
-              rowHeight = 30; // Increase row height for company name to avoid overlap
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
             } else {
-              // Style for "Item List"
-              customStyle = {
-                font: { family: getfontstyle, size: getdatafontsize, bold: false },
-                alignment: { horizontal: "center" },
-              };
+                // Style for "Item List"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
             }
-          
+
             // Add row with the title
             worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-          
+
             // Adjust the row height for the company name or other titles
             worksheet.getRow(index + 2).height = rowHeight;
-          
+
             // Merge the cells for the title
             worksheet.mergeCells(
-              `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
-          });
+        });
 
 
 
@@ -857,15 +858,18 @@ export default function ItemPriceList() {
 
 
         const typeAndStoreRow = worksheet.addRow([
-            "COMPANY:", typecompany, "", "CAPACITY:", typecapacity,
+            "COMPANY:", typecompany, "", "TYPE:", typetype,
         ]);
 
         const typeAndStoreRow2 = worksheet.addRow([
-            "CATEGORY:", typecategory, "", "TYPE:", typetype,
-        ]);
-        const typeAndStoreRow3 = worksheet.addRow([
-            "", "", "", "SEARCH:", typesearch,
-        ]);
+            "CATEGORY:", typecategory, "" 
+                ]);
+        // Add third row with conditional rendering for "SEARCH:"
+        const typeAndStoreRow3 = worksheet.addRow(
+            searchQuery
+                ? ["CAPACITY:", typecapacity, "", "SEARCH:", typesearch]
+                : ["CAPACITY:", typecapacity, ""]
+        );
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
@@ -1236,7 +1240,7 @@ export default function ItemPriceList() {
                                                 setCompanyselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart,  // Set only the 'NGS' part of the label
-                                                  });
+                                                });
                                             } else {
                                                 setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1245,7 +1249,7 @@ export default function ItemPriceList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Companyselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1283,7 +1287,7 @@ export default function ItemPriceList() {
                                                 setcapacityselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart,  // Set only the 'NGS' part of the label
-                                                  });
+                                                });
                                             } else {
                                                 setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1292,7 +1296,7 @@ export default function ItemPriceList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Capacityselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1346,7 +1350,7 @@ export default function ItemPriceList() {
                                                 setcategoryselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart,  // Set only the 'NGS' part of the label
-                                                  });
+                                                });
                                             } else {
                                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1355,7 +1359,7 @@ export default function ItemPriceList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Categoryselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1393,7 +1397,7 @@ export default function ItemPriceList() {
                                                 settypeselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart,  // Set only the 'NGS' part of the label
-                                                  });
+                                                });
                                             } else {
                                                 setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1402,7 +1406,7 @@ export default function ItemPriceList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Typeselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>

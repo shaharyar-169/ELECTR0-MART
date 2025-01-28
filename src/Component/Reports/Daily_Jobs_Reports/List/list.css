@@ -359,3 +359,14 @@ h2.react-datepicker__current-month {
 .css-1tt9tct-control:hover {
   color: white !important;
 }
+
+
+/* style for all select for ALL */
+
+.css-1jqq78o-placeholder {
+  color: white !important;
+  margin-left: -10px !important;
+  padding-left: 5px !important;
+  display: flex !important;
+  justify-content: start !important;;
+}

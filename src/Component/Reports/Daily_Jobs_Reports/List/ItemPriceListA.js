@@ -685,30 +685,31 @@ export default function ItemPriceListA() {
                   doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
   
                   doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                  doc.text(`CAPACITY :`, labelsX + 170, labelsY); // Draw bold label
+                  doc.text(`TYPE :`, labelsX + 180, labelsY); // Draw bold label
                   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                  doc.text(`${typeText}`, labelsX + 195, labelsY); // Draw the value next to the label
+                  doc.text(`${typename}`, labelsX + 195, labelsY); // Draw the value next to the label
   
                   doc.setFont(getfontstyle, 'bold'); // Set font to bold
                   doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
                   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                   doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
   
-                  doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                  doc.text(`TYPE :`, labelsX + 170, labelsY + 4.3); // Draw bold label
-                  doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                  doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
-  
-                  // doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                  // doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
-                  // doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                  // doc.text(`${status}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+                //   doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                //   doc.text(`TYPE :`, labelsX + 170, labelsY + 4.3); // Draw bold label
+                //   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                //   doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
   
                   doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                  doc.text(`SEARCH :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+                  doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
                   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                  doc.text(`${search}`, labelsX + 195, labelsY + 8.5); // Draw the value next to the label
+                  doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
   
+                if(searchQuery){
+                  doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                  doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+                  doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                  doc.text(`${search}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
+  }
   
   
                   // // Reset font weight to normal if necessary for subsequent text
@@ -833,15 +834,18 @@ export default function ItemPriceListA() {
    
           
            const typeAndStoreRow = worksheet.addRow([
-               "COMPANY:", typecompany,"", "",  "", "CAPACITY:", typecapacity,
-           ]);
-   
-           const typeAndStoreRow2 = worksheet.addRow([
-               "CATEGORY:", typecategory,"", "",  "", "TYPE:", typetype,
-           ]);
-           const typeAndStoreRow3 = worksheet.addRow([
-               "", "", "","",  "", "SEARCH:", typesearch,
-           ]);
+            "COMPANY :", typecompany, "","","", "TYPE :", typetype,
+        ]);
+
+        const typeAndStoreRow2 = worksheet.addRow([
+            "CATEGORY :", typecategory, "" 
+                ]);
+        // Add third row with conditional rendering for "SEARCH:"
+        const typeAndStoreRow3 = worksheet.addRow(
+            searchQuery
+                ? ["CAPACITY :", typecapacity, "","","", "SEARCH :", typesearch]
+                : ["CAPACITY :", typecapacity, ""]
+        );
    
            const applyStatusRowStyle = (row, boldColumns = []) => {
                row.eachCell((cell, colIndex) => {
@@ -1230,7 +1234,7 @@ export default function ItemPriceListA() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Companyselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1277,7 +1281,7 @@ export default function ItemPriceListA() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Capacityselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1340,7 +1344,7 @@ export default function ItemPriceListA() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Categoryselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1387,7 +1391,7 @@ export default function ItemPriceListA() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Typeselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>

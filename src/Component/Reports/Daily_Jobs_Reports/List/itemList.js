@@ -665,20 +665,13 @@ export default function ItemList() {
                 let category = categoryselectdatavalue.label ? categoryselectdatavalue.label : "ALL";
                 let typename = typeselectdatavalue.label ? typeselectdatavalue.label : "ALL";
                 let status = transectionType ? transectionType : "All";
+
                 let search = searchQuery ? searchQuery : "";
 
 
                 // Set font style, size, and family
                 doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
                 doc.setFontSize(10); // Font size
-
-                // doc.text(`COMPANY : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`CAPACITY : ${typeText}`, labelsX + 180, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`CATEGORY : ${category}`, labelsX, labelsY + 4.3); // Adjust x-coordinate for From Date
-
-                // doc.text(`TYPE : ${typename}`, labelsX + 180, labelsY + 4.3); // Adjust x-coordinate for From Date
-                // doc.text(`STATUS : ${status}`, labelsX, labelsY + 8.5); // Adjust x-coordinate for From Date
-                // doc.text(`SEARCH : ${search}`, labelsX + 180, labelsY + 8.5); // Adjust x-coordinate for From Date
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
@@ -687,9 +680,9 @@ export default function ItemList() {
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`CAPACITY :`, labelsX + 180, labelsY); // Draw bold label
+                doc.text(`TYPE :`, labelsX + 180, labelsY); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${typeText}`, labelsX + 205, labelsY); // Draw the value next to the label
+                doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -697,20 +690,21 @@ export default function ItemList() {
                 doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                doc.text(`STATUS :`, labelsX + 180, labelsY + 4.3); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${typename}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+                doc.text(`${status}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+                doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+                }
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -818,6 +812,7 @@ export default function ItemList() {
         // Add an empty row after the title section
         worksheet.addRow([]);  // This is where you add the empty row
 
+      
         let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
         let typecapacity = capacityselectdatavalue.label ? capacityselectdatavalue.label : "ALL";
         let typecategory = categoryselectdatavalue.label ? categoryselectdatavalue.label : "ALL";
@@ -825,40 +820,25 @@ export default function ItemList() {
         let typestatus = transectionType ? transectionType : "All";
         let typesearch = searchQuery ? searchQuery : "";
 
-        // Add type and store row and bold it
-        // const typeAndStoreRow = worksheet.addRow([
-        //     `COMPANY: ${typecompany}`,
-        //     "",
-        //     "",
-        //     `CAPACITY: ${typecapacity}`,
-        // ]);
-
-        // const typeAndStoreRow2 = worksheet.addRow([
-        //     `CATEGORY: ${typecategory}`,
-        //     "",
-        //     "",
-        //     `TYPE: ${typetype}`,
-        // ]);
-
-        // const typeAndStoreRow3 = worksheet.addRow([
-        //     `STATUS: ${typestatus}`,
-        //     "",
-        //     "",
-        //     `SEARCH: ${typesearch}`,
-        // ]);
-
-
-
+        // Add first row
         const typeAndStoreRow = worksheet.addRow([
-            "COMPANY:", typecompany, "", "CAPACITY:", typecapacity,
+            "COMPANY :", typecompany, "", "TYPE :", typetype
         ]);
 
+        // Add second row
         const typeAndStoreRow2 = worksheet.addRow([
-            "CATEGORY:", typecategory, "", "TYPE:", typetype,
+            "CATEGORY :", typecategory, "", "STATUS :", typestatus,
         ]);
-        const typeAndStoreRow3 = worksheet.addRow([
-            "STATUS:", typestatus, "", "SEARCH:", typesearch,
-        ]);
+
+        // Add third row with conditional rendering for "SEARCH:"
+        const typeAndStoreRow3 = worksheet.addRow(
+            searchQuery
+                ? ["CAPACITY :", typecapacity, "", "SEARCH :", typesearch]
+                : ["CAPACITY :", typecapacity, ""]
+        );
+
+
+
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
@@ -1223,7 +1203,7 @@ export default function ItemList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Companyselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1261,7 +1241,8 @@ export default function ItemList() {
                                                 setcapacityselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart,  // Set only the 'NGS' part of the label
-                                                  });                                            } else {
+                                                });
+                                            } else {
                                                 setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
                                         }}
@@ -1269,7 +1250,7 @@ export default function ItemList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Capacityselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1323,7 +1304,7 @@ export default function ItemList() {
                                                 setcategoryselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart,  // Set only the 'NGS' part of the label
-                                                  });
+                                                });
 
                                             } else {
                                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
@@ -1333,7 +1314,7 @@ export default function ItemList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Categoryselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1371,7 +1352,7 @@ export default function ItemList() {
                                                 settypeselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart,  // Set only the 'NGS' part of the label
-                                                  });
+                                                });
                                             } else {
                                                 setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                             }
@@ -1380,7 +1361,7 @@ export default function ItemList() {
                                         // styles={customStyles1}
                                         styles={customStyles1(!Typeselectdata)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -1442,9 +1423,10 @@ export default function ItemList() {
                                         border: `1px solid ${fontcolor}`,
                                         fontSize: "12px",
                                         color: fontcolor,
+                                        paddingLeft: "7px"
                                     }}
                                 >
-                                    <option value="">All</option>
+                                    <option value="">ALL</option>
                                     <option value="Active">Active</option>
                                     <option value="Non-Active">Non-Active</option>
                                 </select>
