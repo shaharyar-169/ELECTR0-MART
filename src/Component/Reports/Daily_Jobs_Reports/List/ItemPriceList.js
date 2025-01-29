@@ -855,20 +855,18 @@ export default function ItemPriceList() {
         //     `SEARCH: ${typesearch}`,
         // ]);
 
-
-
         const typeAndStoreRow = worksheet.addRow([
-            "COMPANY:", typecompany, "", "TYPE:", typetype,
+            "COMPANY :", typecompany, "", "TYPE :", typetype,
         ]);
 
         const typeAndStoreRow2 = worksheet.addRow([
-            "CATEGORY:", typecategory, "" 
+            "CATEGORY :", typecategory, "" 
                 ]);
         // Add third row with conditional rendering for "SEARCH:"
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
-                ? ["CAPACITY:", typecapacity, "", "SEARCH:", typesearch]
-                : ["CAPACITY:", typecapacity, ""]
+                ? ["CAPACITY :", typecapacity, "", "SEARCH :", typesearch]
+                : ["CAPACITY :", typecapacity, ""]
         );
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
@@ -1243,6 +1241,7 @@ export default function ItemPriceList() {
                                                 });
                                             } else {
                                                 setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('');
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1290,6 +1289,8 @@ export default function ItemPriceList() {
                                                 });
                                             } else {
                                                 setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcapacityselectdatavalue('');
+
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1353,6 +1354,8 @@ export default function ItemPriceList() {
                                                 });
                                             } else {
                                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcategoryselectdatavalue('');
+
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1400,6 +1403,8 @@ export default function ItemPriceList() {
                                                 });
                                             } else {
                                                 setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                settypeselectdatavalue('');
+
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}

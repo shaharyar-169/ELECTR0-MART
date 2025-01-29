@@ -1228,6 +1228,7 @@ export default function ItemPriceListA() {
                                                   });
                                             } else {
                                                 setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('');
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1275,6 +1276,8 @@ export default function ItemPriceListA() {
                                                   });
                                             } else {
                                                 setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcapacityselectdatavalue('');
+
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1338,6 +1341,8 @@ export default function ItemPriceListA() {
                                                   });
                                             } else {
                                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcategoryselectdatavalue('');
+
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1385,6 +1390,8 @@ export default function ItemPriceListA() {
                                                   });
                                             } else {
                                                 setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                settypeselectdatavalue('');
+
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}

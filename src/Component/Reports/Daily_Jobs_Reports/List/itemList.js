@@ -34,8 +34,10 @@ export default function ItemList() {
     const input6Ref = useRef(null);
 
     const [Companyselectdata, setCompanyselectdata] = useState("");
-    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
+    console.log('Companyselectdata', Companyselectdata)
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    console.log('Companyselectdatavalue', Companyselectdatavalue.label)
 
     const [GetCompany, setGetCompany] = useState([]);
 
@@ -812,7 +814,7 @@ export default function ItemList() {
         // Add an empty row after the title section
         worksheet.addRow([]);  // This is where you add the empty row
 
-      
+
         let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
         let typecapacity = capacityselectdatavalue.label ? capacityselectdatavalue.label : "ALL";
         let typecategory = categoryselectdatavalue.label ? categoryselectdatavalue.label : "ALL";
@@ -1197,6 +1199,7 @@ export default function ItemList() {
 
                                             } else {
                                                 setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue("")
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1244,6 +1247,7 @@ export default function ItemList() {
                                                 });
                                             } else {
                                                 setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcapacityselectdatavalue("")
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1308,6 +1312,7 @@ export default function ItemList() {
 
                                             } else {
                                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcategoryselectdatavalue("")
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1355,6 +1360,7 @@ export default function ItemList() {
                                                 });
                                             } else {
                                                 setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                settypeselectdatavalue("")
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
