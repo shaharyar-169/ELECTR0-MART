@@ -33,7 +33,6 @@ export default function ItemPriceList() {
     const input5Ref = useRef(null);
     const input6Ref = useRef(null);
 
-
     const [Companyselectdata, setCompanyselectdata] = useState("");
     const [GetCompany, setGetCompany] = useState([]);
 
@@ -50,8 +49,6 @@ export default function ItemPriceList() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
-
-
 
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
     const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
@@ -70,7 +67,7 @@ export default function ItemPriceList() {
         getfromdate,
         gettodate,
         getfontstyle,
-        getdatafontsize
+        getdatafontsize,
     } = useTheme();
 
     useEffect(() => {
@@ -94,7 +91,7 @@ export default function ItemPriceList() {
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
             FCmpCod: Companyselectdata,
-            FSchTxt: searchQuery
+            FSchTxt: searchQuery,
         }).toString();
 
         axios
@@ -388,9 +385,8 @@ export default function ItemPriceList() {
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
     const exportPDFHandler = () => {
-
         const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
+        console.log("gobal font data", globalfontsize);
 
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
@@ -519,7 +515,6 @@ export default function ItemPriceList() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-
                     if (cellIndex === 2) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
@@ -598,8 +593,6 @@ export default function ItemPriceList() {
 
         // Function to handle pagination
         const handlePagination = () => {
-
-
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -642,7 +635,6 @@ export default function ItemPriceList() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
@@ -656,17 +648,20 @@ export default function ItemPriceList() {
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
 
-
-
-
-
-                let typeText = capacityselectdatavalue.label ? capacityselectdatavalue.label : "ALL";
-                let typeItem = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-                let category = categoryselectdatavalue.label ? categoryselectdatavalue.label : "ALL";
-                let typename = typeselectdatavalue.label ? typeselectdatavalue.label : "ALL";
+                let typeText = capacityselectdatavalue.label
+                    ? capacityselectdatavalue.label
+                    : "ALL";
+                let typeItem = Companyselectdatavalue.label
+                    ? Companyselectdatavalue.label
+                    : "ALL";
+                let category = categoryselectdatavalue.label
+                    ? categoryselectdatavalue.label
+                    : "ALL";
+                let typename = typeselectdatavalue.label
+                    ? typeselectdatavalue.label
+                    : "ALL";
                 // let status = transectionType ? transectionType : "All";
                 let search = searchQuery ? searchQuery : "";
-
 
                 // Set font style, size, and family
                 doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
@@ -680,42 +675,35 @@ export default function ItemPriceList() {
                 // doc.text(`STATUS : ${status}`, labelsX, labelsY + 8.5); // Adjust x-coordinate for From Date
                 // doc.text(`SEARCH : ${search}`, labelsX + 180, labelsY + 8.5); // Adjust x-coordinate for From Date
 
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 180, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${typename}`, labelsX + 195, labelsY); // Draw the value next to the label
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-                //   doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                //   doc.text(`TYPE :`, labelsX + 170, labelsY + 4.3); // Draw bold label
-                //   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                //   doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
                 if (searchQuery) {
-                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                    doc.setFont(getfontstyle, "bold"); // Set font to bold
                     doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                    doc.setFont(getfontstyle, "normal"); // Reset font to normal
                     doc.text(`${search}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
                 }
 
-
                 // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.setFontSize(10);
 
                 startY += 10; // Adjust vertical position for the labels
@@ -740,9 +728,9 @@ export default function ItemPriceList() {
         const getCurrentDate = () => {
             const today = new Date();
             const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return `${dd}-${mm}-${yyyy}`;
         };
 
         // Function to get current time in the format HH:MM:SS
@@ -761,12 +749,8 @@ export default function ItemPriceList() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`ItemPriceList_${date}.pdf`);
-
-
+        doc.save(`ItemPriceList As On ${date}.pdf`);
     };
-
-
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
@@ -793,7 +777,7 @@ export default function ItemPriceList() {
         [comapnyname, `Item Price List`].forEach((title, index) => {
             // Define custom styles for each title
             let customStyle;
-            let rowHeight = 20;  // Default row height
+            let rowHeight = 20; // Default row height
             if (index === 0) {
                 // Style for company name
                 customStyle = {
@@ -821,15 +805,21 @@ export default function ItemPriceList() {
             );
         });
 
-
-
         // Add an empty row after the title section
-        worksheet.addRow([]);  // This is where you add the empty row
+        worksheet.addRow([]); // This is where you add the empty row
 
-        let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-        let typecapacity = capacityselectdatavalue.label ? capacityselectdatavalue.label : "ALL";
-        let typecategory = categoryselectdatavalue.label ? categoryselectdatavalue.label : "ALL";
-        let typetype = typeselectdatavalue.label ? typeselectdatavalue.label : "ALL ";
+        let typecompany = Companyselectdatavalue.label
+            ? Companyselectdatavalue.label
+            : "ALL";
+        let typecapacity = capacityselectdatavalue.label
+            ? capacityselectdatavalue.label
+            : "ALL";
+        let typecategory = categoryselectdatavalue.label
+            ? categoryselectdatavalue.label
+            : "ALL";
+        let typetype = typeselectdatavalue.label
+            ? typeselectdatavalue.label
+            : "ALL ";
         //    let typestatus = transectionType ? transectionType : "All";
         let typesearch = searchQuery ? searchQuery : "";
 
@@ -856,12 +846,13 @@ export default function ItemPriceList() {
         // ]);
 
         const typeAndStoreRow = worksheet.addRow([
-            "COMPANY :", typecompany, "", "TYPE :", typetype,
+            "COMPANY :",
+            typecompany,
+            
         ]);
 
-        const typeAndStoreRow2 = worksheet.addRow([
-            "CATEGORY :", typecategory, "" 
-                ]);
+        const typeAndStoreRow2 = worksheet.addRow(["CATEGORY :", typecategory, "",  "TYPE :",
+            typetype,]);
         // Add third row with conditional rendering for "SEARCH:"
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
@@ -894,8 +885,6 @@ export default function ItemPriceList() {
         applyStatusRowStyle(typeAndStoreRow2, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
         applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
 
-
-
         // Header style for center alignment
         const headerStyle = {
             font: { bold: true, family: getfontstyle, size: getdatafontsize },
@@ -914,14 +903,16 @@ export default function ItemPriceList() {
         };
 
         // Add headers
-        const headers = ["Code",
+        const headers = [
+            "Code",
             "Description",
             "StK",
             "Comm",
             "SM Rate",
             "Sale Rate",
             "MRP",
-            "Fix Rate",];
+            "Fix Rate",
+        ];
         const headerRow = worksheet.addRow(headers);
 
         // Apply styles and center alignment to the header row
@@ -968,20 +959,17 @@ export default function ItemPriceList() {
             });
         });
 
-
         // Set column widths
         [22, 45, 6, 15, 15, 15, 15, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
-
-
         const getCurrentDate = () => {
             const today = new Date();
             const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return `${dd}-${mm}-${yyyy}`;
         };
 
         const currentdate = getCurrentDate();
@@ -991,7 +979,7 @@ export default function ItemPriceList() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `ItemPriceList ${currentdate}.xlsx`);
+        saveAs(blob, `ItemPriceList As On ${currentdate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1232,16 +1220,16 @@ export default function ItemPriceList() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split('-')[1];
+                                                const labelPart = selectedOption.label.split("-")[1];
 
                                                 setCompanyselectdata(selectedOption.value);
                                                 setCompanyselectdatavalue({
                                                     value: selectedOption.value,
-                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                    label: labelPart, // Set only the 'NGS' part of the label
                                                 });
                                             } else {
                                                 setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue('');
+                                                setCompanyselectdatavalue("");
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1253,54 +1241,7 @@ export default function ItemPriceList() {
                                 </div>
                             </div>
 
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Capacity :
-                                        </span>
-                                    </label>
-                                </div>
 
-                                <div style={{ marginLeft: "3px" }}>
-                                    <Select
-                                        className="List-select-class "
-                                        ref={input2Ref}
-                                        options={capacityoptions}
-                                        onKeyDown={(e) => handlecapacityKeypress(e, input3Ref)}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split('-')[1];
-                                                setCapacityselectdata(selectedOption.value);
-                                                setcapacityselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart,  // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setcapacityselectdatavalue('');
-
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!Capacityselectdata)}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-                                </div>
-                            </div>
                         </div>
                     </div>
                     {/* //////////////// SECOND ROW ///////////////////////// */}
@@ -1346,16 +1287,15 @@ export default function ItemPriceList() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split('-')[1];
+                                                const labelPart = selectedOption.label.split("-")[1];
                                                 setCategoryselectdata(selectedOption.value);
                                                 setcategoryselectdatavalue({
                                                     value: selectedOption.value,
-                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                    label: labelPart, // Set only the 'NGS' part of the label
                                                 });
                                             } else {
                                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setcategoryselectdatavalue('');
-
+                                                setcategoryselectdatavalue("");
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1395,16 +1335,15 @@ export default function ItemPriceList() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split('-')[1];
+                                                const labelPart = selectedOption.label.split("-")[1];
                                                 setTypeselectdata(selectedOption.value);
                                                 settypeselectdatavalue({
                                                     value: selectedOption.value,
-                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                    label: labelPart, // Set only the 'NGS' part of the label
                                                 });
                                             } else {
                                                 setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                settypeselectdatavalue('');
-
+                                                settypeselectdatavalue("");
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1430,9 +1369,58 @@ export default function ItemPriceList() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "end",
+                                justifyContent: "space-between",
                             }}
                         >
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: "10px",
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Capacity :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div style={{ marginLeft: "3px" }}>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={input2Ref}
+                                        options={capacityoptions}
+                                        onKeyDown={(e) => handlecapacityKeypress(e, input3Ref)}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setCapacityselectdata(selectedOption.value);
+                                                setcapacityselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcapacityselectdatavalue("");
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!Capacityselectdata)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+                                </div>
+                            </div>
+
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "3px" }}>
                                     <span style={{ fontSize: "15px", fontWeight: "bold" }}>
@@ -1464,8 +1452,10 @@ export default function ItemPriceList() {
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
-
+                                    onChange={(e) =>
+                                        setSearchQuery((e.target.value || "").toUpperCase())
+                                    }
+                                />
                             </div>
                         </div>
                     </div>
@@ -1649,8 +1639,7 @@ export default function ItemPriceList() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-
-                                                        <td className="text-start" style={sixthColWidth}  >
+                                                        <td className="text-start" style={sixthColWidth}>
                                                             {item.Code}
                                                         </td>
 
@@ -1659,10 +1648,10 @@ export default function ItemPriceList() {
                                                             style={secondColWidth}
                                                             title={item.Description || ""}
                                                         >
-                                                            {item.Description && item.Description.trim().length > 35
+                                                            {item.Description &&
+                                                                item.Description.trim().length > 35
                                                                 ? `${item.Description.trim().slice(0, 35)}...`
                                                                 : item.Description.trim() || ""}
-
                                                         </td>
 
                                                         <td className="text-center" style={thirdColWidth}>
@@ -1721,73 +1710,72 @@ export default function ItemPriceList() {
                     </div>
 
                     {/* <div
-                        style={{
-                            borderBottom: `1px solid ${fontcolor}`,
-                            borderTop: `1px solid ${fontcolor}`,
-                            height: "24px",
-                            display: "flex",
-                            paddingRight: "1.2%",
-                            width: "101.2%",
-                        }}
-                    >
-                        <div
-                            style={{
-                                ...firstColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...secondColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...thirdColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...forthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...fifthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...sixthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...eightColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...ninthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                    </div> */}
-
+                          style={{
+                              borderBottom: `1px solid ${fontcolor}`,
+                              borderTop: `1px solid ${fontcolor}`,
+                              height: "24px",
+                              display: "flex",
+                              paddingRight: "1.2%",
+                              width: "101.2%",
+                          }}
+                      >
+                          <div
+                              style={{
+                                  ...firstColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                          <div
+                              style={{
+                                  ...secondColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                          <div
+                              style={{
+                                  ...thirdColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                          <div
+                              style={{
+                                  ...forthColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                          <div
+                              style={{
+                                  ...fifthColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                          <div
+                              style={{
+                                  ...sixthColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                          <div
+                              style={{
+                                  ...eightColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                          <div
+                              style={{
+                                  ...ninthColWidth,
+                                  background: getcolor,
+                                  borderRight: `1px solid ${fontcolor}`,
+                              }}
+                          ></div>
+                      </div> */}
 
                     <div
                         style={{

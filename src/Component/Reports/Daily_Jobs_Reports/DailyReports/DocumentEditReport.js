@@ -2,13 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-// import { useTheme } from "../../../ThemeContext";
 import { useTheme } from "../../../../ThemeContext";
-// import { getUserData, getOrganisationData } from "../../Auth";
 import { getUserData, getOrganisationData } from "../../../Auth";
-// import NavComponent from "../../MainComponent/Navform/navbarform";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
-// import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
@@ -20,7 +16,6 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-// import { fetchGetUser } from "../../Redux/action";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
@@ -35,6 +30,7 @@ export default function DocumentEditReport() {
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
+    const input4Ref = useRef(null);
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
@@ -59,7 +55,6 @@ export default function DocumentEditReport() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -71,12 +66,14 @@ export default function DocumentEditReport() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getfontstyle,
+        getdatafontsize
+
     } = useTheme();
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
-
 
     const comapnyname = organisation.description;
 
@@ -257,7 +254,6 @@ export default function DocumentEditReport() {
         settoInputDate(e.target.value);
     };
 
-
     const handleSaleKeypress = (event, inputId) => {
         if (event.key === "Enter") {
             const selectedOption = saleSelectRef.current.state.selectValue;
@@ -293,7 +289,6 @@ export default function DocumentEditReport() {
         let errorType = "";
 
         switch (true) {
-            
             case !fromInputDate:
                 errorType = "fromDate";
                 break;
@@ -340,8 +335,6 @@ export default function DocumentEditReport() {
         }
 
         switch (errorType) {
-
-           
             case "fromDate":
                 toast.error("From date is required");
                 return;
@@ -378,7 +371,6 @@ export default function DocumentEditReport() {
                 toast.error("To date must be after from date");
                 return;
 
-
             default:
                 break;
         }
@@ -397,9 +389,9 @@ export default function DocumentEditReport() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             code: organisation.code,
-            FYerDsc: '2024-2024',
+            FYerDsc: getyeardescription,
             FLocCod: getLocationNumber,
-
+            FSchTxt: searchQuery
         }).toString();
 
         axios
@@ -529,8 +521,12 @@ export default function DocumentEditReport() {
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
+
+        const globalfontsize = 12;
+        console.log('gobal font data', globalfontsize)
+
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
@@ -546,15 +542,7 @@ export default function DocumentEditReport() {
         ]);
 
         // Add summary row to the table
-        // rows.push([
-        //     "",
-        //     "",
-        //     "",
-        //     "Total",
-        //     String(totalDebit),
-        //     String(totalCredit),
-        //     String(closingBalance),
-        // ]);
+
 
         // Define table column headers and individual column widths
         const headers = [
@@ -565,10 +553,10 @@ export default function DocumentEditReport() {
             "Code",
             "User",
             "Description",
-            "Amont",
+            "Amount",
             "Old Amt",
         ];
-        const columnWidths = [17, 14, 10,8,14,8,60, 20, 20,];
+        const columnWidths = [20, 17, 15, 15, 14, 12, 60, 20, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -578,14 +566,14 @@ export default function DocumentEditReport() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont("verdana");
+        doc.setFont(getfontstyle);
         doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
+            doc.setFont(getfontstyle, "bold"); // Set font to bold
+            doc.setFontSize(12); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -608,15 +596,15 @@ export default function DocumentEditReport() {
             });
 
             // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
+            doc.setFont(getfontstyle);
+            doc.setFontSize(12);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
+            const fontSize = 10; // Adjust this value to decrease font size
+            const boldFont = 400; // Bold font
+            const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
             doc.setFontSize(fontSize);
@@ -672,20 +660,17 @@ export default function DocumentEditReport() {
                             align: "center",
                             baseline: "middle",
                         });
-
-                    }
-
-                    else if (cellIndex === 7 || cellIndex === 8 ) {
+                    } else if (cellIndex === 7 || cellIndex === 8) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    }
-
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
+
+
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
@@ -739,10 +724,12 @@ export default function DocumentEditReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
+        const rowsPerPage = 27; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
+
+
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -750,9 +737,8 @@ export default function DocumentEditReport() {
                 time,
                 pageNumber,
                 startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
+                titleFontSize = 18,
+                pageNumberFontSize = 10
             ) => {
                 doc.setFontSize(titleFontSize); // Set the font size for the title
                 doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -762,20 +748,20 @@ export default function DocumentEditReport() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
+                // if (date) {
+                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                //     if (time) {
+                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                //     } else {
+                //         doc.text(date, rightX - 10, startY, { align: "right" });
+                //     }
+                // }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 40,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -786,55 +772,81 @@ export default function DocumentEditReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(
-                    `Document Edit Report From: ${fromInputDate} To: ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
+
+                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                startY += 5; // Adjust vertical position for the company title
+
+                addTitle(`Document Edit Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 2; // Position the labels below the titles and above the table
+                const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
+                doc.setFontSize(12);
+                doc.setFont(getfontstyle, "300");
 
-                // let typeText = transectionType ? transectionType : "";
-                let typeItem = transectionType ? transectionType : "All";
 
-                doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
 
-                startY += 0; // Adjust vertical position for the labels
+                let status = transectionType === "A"
+                    ? "ALL"
+                    : transectionType === "CRV"
+                        ? "Cash Receive Voucher"
+                        : transectionType === "CPV"
+                            ? "Cash Payment Voucher"
+                            : transectionType === "BRV"
+                                ? "Bank Receive Voucher"
+                                : transectionType === "BPV"
+                                    ? "Bank Payment Voucher"
+                                    : transectionType === "JVR"
+                                        ? "Journal Voucher"
+                                        : transectionType === "INV"
+                                            ? "Item Sale"
+                                            : transectionType === "SRN"
+                                                ? "Sale Return"
+                                                : transectionType === "BIL"
+                                                    ? "Purchase"
+                                                    : transectionType === "PRN"
+                                                        ? "Purchase Return"
+                                                        : transectionType === "ISS"
+                                                            ? "Issue"
+                                                            : transectionType === "REC"
+                                                                ? "Received"
+                                                                : transectionType === "SLY"
+                                                                    ? "Salary"
+                                                                    : "ALL";
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+
+
+                let search = searchQuery ? searchQuery : "";
+
+
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
+
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`TYPE :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 150, labelsY + 8.5); // Draw bold label
+                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 170, labelsY + 8.5); // Draw the value next to the label
+                }
+
+
+                // // Reset font weight to normal if necessary for subsequent text
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFontSize(10);
+
+                startY += 10; // Adjust vertical position for the labels
+
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -874,31 +886,19 @@ export default function DocumentEditReport() {
         // Call function to handle pagination
         handlePagination();
 
-        // Save the PDF file
-        doc.save("DocumentEditReport.pdf");
+        // Save the PDF files
+        doc.save(`DocomenEdittReport Form ${fromInputDate} To ${toInputDate}.pdf`);
 
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
+
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 7; // Number of columns
-
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
+        const numColumns = 6; // Number of columns
 
         const columnAlignments = [
             "left",
@@ -910,50 +910,158 @@ export default function DocumentEditReport() {
             "left",
             "right",
             "right",
+
         ];
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
         // Add title rows
-        [
-            comapnyname,
-            `Document Edit Report From ${fromInputDate} To ${toInputDate}`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+
+        // [comapnyname, `Document Edit Report From`].forEach((title, index) => {
+        //     // Define custom styles for each title
+        //     let customStyle;
+        //     let rowHeight = 20;  // Default row height
+        //     if (index === 0) {
+        //         // Style for company name
+        //         customStyle = {
+        //             font: { family: getfontstyle, size: 18, bold: true },
+        //             alignment: { horizontal: "center" },
+        //         };
+        //         rowHeight = 30; // Increase row height for company name to avoid overlap
+        //     } else {
+        //         // Style for "Item List"
+        //         customStyle = {
+        //             font: { family: getfontstyle, size: getdatafontsize, bold: false },
+        //             alignment: { horizontal: "center" },
+        //         };
+        //     }
+
+        //     // Add row with the title
+        //     worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+
+        //     // Adjust the row height for the company name or other titles
+        //     worksheet.getRow(index + 2).height = rowHeight;
+
+        //     // Merge the cells for the title
+        //     worksheet.mergeCells(
+        //         `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+        //     );
+        // });
+
+
+        [comapnyname, `Document Edit Report From ${fromInputDate} To ${toInputDate} `].forEach((title, index) => {
+            // Define custom styles for each title
+            let customStyle;
+            let rowHeight = 20; // Default row height
+            if (index === 0) {
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
+            } else {
+                // Style for "Document Edit Report From"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
+            }
+        
+            // Add row with empty columns before the title
+            let row = worksheet.addRow(["", "", title]);
+        
+            // Apply styles only to the title cell (third column)
+            row.getCell(3).style = customStyle;
+        
+            // Adjust row height
+            worksheet.getRow(row.number).height = rowHeight;
+        
+            // Merge the cells for the title, shifting 2 columns forward
             worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+                `C${row.number}:${String.fromCharCode(66 + numColumns)}${row.number}`
             );
         });
+        
 
-        worksheet.addRow([]); // Empty row for spacing
 
-        // let typeText = transectionType ? transectionType : "All";
-        let typeItem = transectionType ? transectionType : "All";
 
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            `Type: ${typeItem}`,
-            "",
-            "",
-            "",
-            "",
-            "",
-            // `Type: ${typeText}`,
-            
-        ]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
+        // Add an empty row after the title section
+        worksheet.addRow([]);  // This is where you add the empty row
 
-        worksheet.addRow([]); // Empty row for spacing
 
+        let typestatus = "";
+
+        if (transectionType === "A") {
+            typestatus = "ALL";
+        } else if (transectionType === "CRV") {
+            typestatus = "Cash Receive Voucher";
+        } else if (transectionType === "CPV") {
+            typestatus = "Cash Payment Voucher";
+        } else if (transectionType === "BRV") {
+            typestatus = "Bank Receive Voucher";
+        } else if (transectionType === "BPV") {
+            typestatus = "Bank Payment Voucher";
+        } else if (transectionType === "JVR") {
+            typestatus = "Journal Voucher";
+        } else if (transectionType === "INV") {
+            typestatus = "Item Sale";
+        } else if (transectionType === "SRN") {
+            typestatus = "Sale Return";
+        } else if (transectionType === "BIL") {
+            typestatus = "Purchase";
+        } else if (transectionType === "PRN") {
+            typestatus = "Purchase Return";
+        } else if (transectionType === "ISS") {
+            typestatus = "Issue";
+        } else if (transectionType === "REC") {
+            typestatus = "Received";
+        } else if (transectionType === "SLY") {
+            typestatus = "Salary";
+        } else {
+            typestatus = "ALL"; // Default value
+        }
+
+
+        let typesearch = searchQuery ? searchQuery : "";
+
+        const typeAndStoreRow3 = worksheet.addRow(
+            searchQuery
+                ? ["TYPE :", typestatus, "", "", "", "","", "SEARCH :", typesearch]
+                : ["TYPE :", typestatus, ""]
+        );
+
+        const applyStatusRowStyle = (row, boldColumns = []) => {
+            row.eachCell((cell, colIndex) => {
+                // Check if the current cell is in the boldColumns array
+                const isBold = boldColumns.includes(colIndex);
+
+                cell.font = {
+                    family: getfontstyle, // Your desired font family
+                    size: getdatafontsize, // Your desired font size
+                    bold: isBold, // Bold only for specific columns
+                };
+
+                cell.alignment = {
+                    horizontal: "left", // Align text to the left
+                    vertical: "middle", // Vertically align to the middle
+                };
+
+                cell.border = null; // Remove borders
+            });
+        };
+
+        // Bold specific columns (labels)
+
+        applyStatusRowStyle(typeAndStoreRow3, [1, 8]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+
+
+
+        // Header style for center alignment
         const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
+            font: { bold: true, family: getfontstyle, size: getdatafontsize },
+            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
             fill: {
                 type: "pattern",
                 pattern: "solid",
@@ -969,7 +1077,8 @@ export default function DocumentEditReport() {
 
         // Add headers
         const headers = [
-          "Date",
+
+            "Date",
             "Time",
             "Trn#",
             "Type",
@@ -980,13 +1089,17 @@ export default function DocumentEditReport() {
             "Old Amt",
         ];
         const headerRow = worksheet.addRow(headers);
+
+        // Apply styles and center alignment to the header row
         headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+            cell.style = { ...headerStyle };
         });
 
         // Add data rows
+
+        // Add data rows
         tableData.forEach((item) => {
-            worksheet.addRow([
+            const row = worksheet.addRow([
                 item.Date,
                 item.Time,
                 item["Trn#"],
@@ -997,58 +1110,58 @@ export default function DocumentEditReport() {
                 item.Amount,
                 item["Old Amt"],
             ]);
+
+            // Apply custom styles to each cell in the row
+            row.eachCell((cell, colIndex) => {
+                cell.font = {
+                    family: getfontstyle, // Set your desired font family
+                    size: getdatafontsize, // Set the font size
+                    bold: false, // Make the font bold
+                };
+
+                cell.border = {
+                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                };
+
+                // Align cell content based on columnAlignments array
+                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                cell.alignment = {
+                    horizontal: alignment,
+                    vertical: "middle", // Vertically align to the middle
+                };
+            });
         });
 
-        // Add total row and bold it
-        // const totalRow = worksheet.addRow([
-        //     "",
-        //     "",
-        //     "",
-        //     "Total",
-        //     totalDebit,
-        //     totalCredit,
-        //     closingBalance,
-        // ]);
-        // totalRow.eachCell((cell) => {
-        //     cell.font = { bold: true };
-        // });
-
         // Set column widths
-        [10, 9, 8,5,10,5, 40, 15, 15].forEach((width, index) => {
+
+
+        [13, 12, 11, 8, 10, 7, 40, 15, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
-            }
-        });
+
+
+        const getCurrentDate = () => {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, "0");
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const yyyy = today.getFullYear();
+            return dd + "/" + mm + "/" + yyyy;
+        };
+
+        const currentdate = getCurrentDate();
 
         // Generate Excel file buffer and save
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "DocumentEditReport.xlsx");
+        saveAs(blob, `DocmentEditReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
 
     const dispatch = useDispatch();
 
@@ -1096,10 +1209,10 @@ export default function DocumentEditReport() {
         width: "8%",
     };
     const sixthColWidth = {
-        width: "4%",
+        width: "5%",
     };
     const seventhColWidth = {
-        width: "37.7%",
+        width: "36.7%",
     };
     const eightColWidth = {
         width: "11%",
@@ -1127,9 +1240,9 @@ export default function DocumentEditReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+        width: isSidebarVisible ? "calc(80VW - 0%)" : "80VW",
         position: "relative",
-        top: "35%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1261,22 +1374,23 @@ export default function DocumentEditReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Document Edit Report" />
-                    <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
-
-                        <div style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "0px",
-                            padding: "0px",
-                            justifyContent: "space-between",
-                        }}>
-
+                    <NavComponent textdata="Edit Document Report" />
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
                             <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
+                                <div className="mx-5"></div>
 
                                 <div
                                     className="d-flex align-items-center"
@@ -1357,17 +1471,75 @@ export default function DocumentEditReport() {
                                             <label htmlFor="90">90 Days</label>
                                         </div>
                                     </div>
-
                                 </div>
 
+
+                                <div
+                                    className="d-flex align-items-center"
+                                    style={{ marginLeft: "266px" }}
+                                >
+                                    <div
+                                        style={{
+                                            width: "60px",
+                                            display: "flex",
+                                            justifyContent: "end",
+                                        }}
+                                    >
+                                        <label htmlFor="transactionType">
+                                            <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                                Type :
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <select
+                                        ref={input1Ref}
+                                        onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                        id="submitButton"
+                                        name="type"
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.border = "4px solid red")
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                        }
+                                        value={transectionType}
+                                        onChange={handleTransactionTypeChange}
+                                        style={{
+                                            width: "200px",
+                                            height: "24px",
+                                            marginLeft: "5px",
+                                            backgroundColor: getcolor,
+                                            border: `1px solid ${fontcolor}`,
+                                            fontSize: "12px",
+                                            color: fontcolor,
+                                        }}
+                                    >
+                                        <option value="">All</option>
+                                        <option value="CRV">Cash Receive Vorcher</option>
+                                        <option value="CPV">Cash Payment Vorcher</option>
+                                        <option value="BRV">Bank Receive Vorcher</option>
+                                        <option value="BPV">Bank Payment Vorcher</option>
+                                        <option value="JVR">Journal Vorcher</option>
+                                        <option value="INV">Item Sale</option>
+                                        <option value="SRN">Sale Return</option>
+                                        <option value="BIL">Purchase</option>
+                                        <option value="PRN">Purchase Return</option>
+                                        <option value="ISS">Issue</option>
+                                        <option value="REC">Received</option>
+                                        <option value="SLY">Salary</option>
+                                    </select>
+                                </div>
                             </div>
+
+
 
                         </div>
 
 
+
                     </div>
 
-                    
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1392,7 +1564,7 @@ export default function DocumentEditReport() {
                                 >
                                     <label htmlFor="fromDatePicker">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            From:
+                                            From :
                                         </span>
                                     </label>
                                 </div>
@@ -1405,7 +1577,7 @@ export default function DocumentEditReport() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "3px",
+                                        marginLeft: "5px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1486,7 +1658,7 @@ export default function DocumentEditReport() {
                                 >
                                     <label htmlFor="toDatePicker">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            To:
+                                            To :
                                         </span>
                                     </label>
                                 </div>
@@ -1499,7 +1671,7 @@ export default function DocumentEditReport() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "15px",
+                                        marginLeft: "5px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1567,64 +1739,43 @@ export default function DocumentEditReport() {
                                     />
                                 </div>
                             </div>
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
+
+                            <div id="lastDiv" style={{ marginRight: "10px" }}>
+                                <label for="searchInput" style={{ marginRight: "5px" }}>
+                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        Search :
+                                    </span>{" "}
+                                </label>
+                                <input
+                                    ref={input3Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
+                                    type="text"
+                                    id="searchsubmit"
+                                    placeholder="Item description"
+                                    value={searchQuery}
+                                    autoComplete="off"
                                     style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
+                                        marginRight: "20px",
+                                        width: "200px",
+                                        height: "24px",
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        outline: "none",
+                                        paddingLeft: "10px",
                                     }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Type:
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    id="submitButton"
-                                    name="type"
                                     onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
+                                        (e.currentTarget.style.border = "2px solid red")
                                     }
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "15px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">All</option>
-                                    <option value="CRV">Cash Receive Vorcher</option>
-                                    <option value="CPV">Cash Payment Vorcher</option>
-                                    <option value="BRV">Bank Receive Vorcher</option>
-                                    <option value="BPV">Bank Payment Vorcher</option>
-                                    <option value="JRV">Journal Vorcher</option>
-                                    <option value="INV">Item Sale</option>
-                                    <option value="SRN">Sale Return</option>
-                                    <option value="BIL">Purchase</option>
-                                    <option value="PRN">Purchase Return</option>
-                                    <option value="ISS">Issue</option>
-                                    <option value="REC">Received</option>
-                                    <option value="SLY">Salary</option>
-                                </select>
+                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
+
                             </div>
+
+
                         </div>
                     </div>
                     <div>
@@ -1697,7 +1848,7 @@ export default function DocumentEditReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "40vh",
+                                maxHeight: "55vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1776,7 +1927,7 @@ export default function DocumentEditReport() {
                                                             {item.Time}
                                                         </td>
                                                         <td className="text-start" style={thirdColWidth}>
-                                                            {item['Trn#']}
+                                                            {item["Trn#"]}
                                                         </td>
                                                         <td className="text-center" style={forthColWidth}>
                                                             {item.Type}
@@ -1794,7 +1945,7 @@ export default function DocumentEditReport() {
                                                             {item.Amount}
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item['Old Amt']}
+                                                            {item["Old Amt"]}
                                                         </td>
                                                     </tr>
                                                 );
@@ -1826,7 +1977,6 @@ export default function DocumentEditReport() {
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
-
                                             </tr>
                                         </>
                                     )}
@@ -1835,7 +1985,6 @@ export default function DocumentEditReport() {
                         </div>
                     </div>
 
-
                     <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
@@ -1843,7 +1992,7 @@ export default function DocumentEditReport() {
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
+                            width: "101.2%",
                         }}
                     >
                         <div
@@ -1866,56 +2015,49 @@ export default function DocumentEditReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...forthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...fifthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...sixthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...seventhColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...eightColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...ninthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                     </div>
                     <div
                         style={{
@@ -1953,7 +2095,7 @@ export default function DocumentEditReport() {
                         <SingleButton
                             id="searchsubmit"
                             text="Select"
-                            ref={input3Ref}
+                            ref={input4Ref}
                             onClick={fetchReceivableReport}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
@@ -1967,3 +2109,4 @@ export default function DocumentEditReport() {
         </>
     );
 }
+

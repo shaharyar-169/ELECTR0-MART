@@ -59,7 +59,6 @@ export default function JournalReport() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -71,12 +70,13 @@ export default function JournalReport() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getfontstyle,
+        getdatafontsize
     } = useTheme();
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
-
 
     const comapnyname = organisation.description;
 
@@ -257,8 +257,6 @@ export default function JournalReport() {
         settoInputDate(e.target.value);
     };
 
- 
-
     function fetchReceivableReport() {
         const fromDateElement = document.getElementById("fromdatevalidation");
         const toDateElement = document.getElementById("todatevalidation");
@@ -269,7 +267,6 @@ export default function JournalReport() {
         let errorType = "";
 
         switch (true) {
-           
             case !fromInputDate:
                 errorType = "fromDate";
                 break;
@@ -316,8 +313,7 @@ export default function JournalReport() {
         }
 
         switch (errorType) {
-
-                        case "fromDate":
+            case "fromDate":
                 toast.error("From date is required");
                 return;
             case "toDate":
@@ -353,12 +349,10 @@ export default function JournalReport() {
                 toast.error("To date must be after from date");
                 return;
 
-
             default:
                 break;
         }
 
-     
         document.getElementById(
             "fromdatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
@@ -371,10 +365,10 @@ export default function JournalReport() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            code: 'EMART',
+            code: 'NASIRTRD',
             FYerDsc: '2024-2024',
             FLocCod: '001',
-
+            FSchTxt: searchQuery
         }).toString();
 
         axios
@@ -382,12 +376,12 @@ export default function JournalReport() {
             .then((response) => {
                 setIsLoading(false);
 
-                // setTotalDebit(response.data["Total Debit "]);
-                // setTotalCredit(response.data["Total Credit"]);
-                // setClosingBalance(response.data["Closing Bal "]);
+                setTotalDebit(response.data["Total Debit "]);
+                setTotalCredit(response.data["Total Credit"]);
+                // setClosingBalance(response.data["Total Balance"]);
 
-                if (response.data && Array.isArray(response.data)) {
-                    setTableData(response.data);
+                if (response.data && Array.isArray(response.data.Detail)) {
+                    setTableData(response.data.Detail);
                 } else {
                     console.warn(
                         "Response data structure is not as expected:",
@@ -430,12 +424,14 @@ export default function JournalReport() {
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
 
-  
-
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
+
+        const globalfontsize = 12;
+        console.log('gobal font data', globalfontsize)
+
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
@@ -447,26 +443,20 @@ export default function JournalReport() {
         ]);
 
         // Add summary row to the table
-        // rows.push([
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-           
-        // ]);
+        rows.push([
+            "",
+            "",
+
+            "Total",
+
+            String(totalDebit),
+            String(totalCredit),
+
+        ]);
 
         // Define table column headers and individual column widths
-        const headers = [
-          
-            "Jvr#",
-            "Date",
-            "Description",
-            "Debit",
-            "Credit",
-        
-        ];
-        const columnWidths = [12, 17, 80, 20, 20];
+        const headers = ["Jvr#", "Date", "Description", "Debit", "Credit"];
+        const columnWidths = [18, 22, 85, 20, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -476,14 +466,14 @@ export default function JournalReport() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont("verdana");
+        doc.setFont(getfontstyle);
         doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
+            doc.setFont(getfontstyle, "bold"); // Set font to bold
+            doc.setFontSize(12); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -506,15 +496,15 @@ export default function JournalReport() {
             });
 
             // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
+            doc.setFont(getfontstyle);
+            doc.setFontSize(12);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
+            const fontSize = 10; // Adjust this value to decrease font size
+            const boldFont = 400; // Bold font
+            const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
             doc.setFontSize(fontSize);
@@ -522,7 +512,7 @@ export default function JournalReport() {
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 100000000; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -564,19 +554,19 @@ export default function JournalReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                  
 
-                     if (cellIndex === 3 || cellIndex === 4 ) {
+
+                    if (cellIndex === 3 || cellIndex === 4) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    }
-
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
+
+
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
@@ -630,10 +620,12 @@ export default function JournalReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
+        const rowsPerPage = 27; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
+
+
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -641,9 +633,8 @@ export default function JournalReport() {
                 time,
                 pageNumber,
                 startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
+                titleFontSize = 18,
+                pageNumberFontSize = 10
             ) => {
                 doc.setFontSize(titleFontSize); // Set the font size for the title
                 doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -653,20 +644,20 @@ export default function JournalReport() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
+                // if (date) {
+                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                //     if (time) {
+                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                //     } else {
+                //         doc.text(date, rightX - 10, startY, { align: "right" });
+                //     }
+                // }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 20,
+                    rightX - 55,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -677,55 +668,44 @@ export default function JournalReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(
-                    `Journal Report From: ${fromInputDate} To: ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
 
-                // const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                // const labelsY = startY + 2; // Position the labels below the titles and above the table
+                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                startY += 5; // Adjust vertical position for the company title
+
+                addTitle(`Journal Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                startY += -5;
+
+                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+                const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
+                doc.setFontSize(12);
+                doc.setFont(getfontstyle, "300");
 
-                // let typeText = transectionType ? transectionType : "";
-                // let typeItem = saleType ? saleType : "";
+                let search = searchQuery ? searchQuery : "";
 
-                // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
 
-                startY += 0; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 100, labelsY + 8.5); // Draw bold label
+                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 120, labelsY + 8.5); // Draw the value next to the label
+                }
+
+
+                // // Reset font weight to normal if necessary for subsequent text
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFontSize(10);
+
+                startY += 10; // Adjust vertical position for the labels
+
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -765,82 +745,104 @@ export default function JournalReport() {
         // Call function to handle pagination
         handlePagination();
 
-        // Save the PDF file
-        doc.save("JournalReport.pdf");
+        // Save the PDF files
+        doc.save(`JournalReport From ${fromInputDate} To ${toInputDate}.pdf`);
 
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
+
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 5; // Number of columns
+        const numColumns = 6; // Number of columns
 
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
-
-        const columnAlignments = [
-            "left",
-            "left",
-            "left",
-            "right",
-            "right",
-        ];
+        const columnAlignments = ["left", "left", "left", "right", "right"];
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
         // Add title rows
-        [
-            comapnyname,
-            `Journal Report From ${fromInputDate} To ${toInputDate}`,
+
+        [comapnyname, `Journal Report From ${fromInputDate} To ${toInputDate}`
         ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+            // Define custom styles for each title
+            let customStyle;
+            let rowHeight = 20;  // Default row height
+            if (index === 0) {
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
+            } else {
+                // Style for "Item List"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
+            }
+
+            // Add row with the title
+            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+
+            // Adjust the row height for the company name or other titles
+            worksheet.getRow(index + 2).height = rowHeight;
+
+            // Merge the cells for the title
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
 
-        worksheet.addRow([]); // Empty row for spacing
 
-        // let typeText = transectionType ? transectionType : "All";
-        // let typeItem = saleType ? saleType : "All";
 
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            // `Account: ${typeItem}`,
-            // "",
-            // "",
-            // "",
-            // "",
-            // "",
-            // `Type: ${typeText}`,
-            
-        ]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
+        // Add an empty row after the title section
+        worksheet.addRow([]);  // This is where you add the empty row
 
-        worksheet.addRow([]); // Empty row for spacing
 
+
+        let typesearch = searchQuery ? searchQuery : "";
+
+        const typeAndStoreRow3 = worksheet.addRow(
+            searchQuery
+                ? ["", "", "", "SEARCH :", typesearch]
+                : [""]
+        );
+
+        const applyStatusRowStyle = (row, boldColumns = []) => {
+            row.eachCell((cell, colIndex) => {
+                // Check if the current cell is in the boldColumns array
+                const isBold = boldColumns.includes(colIndex);
+
+                cell.font = {
+                    family: getfontstyle, // Your desired font family
+                    size: getdatafontsize, // Your desired font size
+                    bold: isBold, // Bold only for specific columns
+                };
+
+                cell.alignment = {
+                    horizontal: "left", // Align text to the left
+                    vertical: "middle", // Vertically align to the middle
+                };
+
+                cell.border = null; // Remove borders
+            });
+        };
+
+        // Bold specific columns (labels)
+
+        applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+
+
+
+        // Header style for center alignment
         const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
+            font: { bold: true, family: getfontstyle, size: getdatafontsize },
+            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
             fill: {
                 type: "pattern",
                 pattern: "solid",
@@ -855,77 +857,104 @@ export default function JournalReport() {
         };
 
         // Add headers
-        const headers = [
-            "Jvr#",
-            "Date",
-            "Description",
-            "Debit",
-            "Credit",
-        ];
+        const headers = ["Jvr#", "Date", "Description", "Debit", "Credit"];
         const headerRow = worksheet.addRow(headers);
+
+        // Apply styles and center alignment to the header row
         headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+            cell.style = { ...headerStyle };
         });
 
         // Add data rows
+
+        // Add data rows
         tableData.forEach((item) => {
-            worksheet.addRow([
+            const row = worksheet.addRow([
                 item["Jvr#"],
                 item.Date,
                 item.Description,
                 item.Debit,
                 item.Credit,
             ]);
+
+            // Apply custom styles to each cell in the row
+            row.eachCell((cell, colIndex) => {
+                cell.font = {
+                    family: getfontstyle, // Set your desired font family
+                    size: getdatafontsize, // Set the font size
+                    bold: false, // Make the font bold
+                };
+
+                cell.border = {
+                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                };
+
+                // Align cell content based on columnAlignments array
+                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                cell.alignment = {
+                    horizontal: alignment,
+                    vertical: "middle", // Vertically align to the middle
+                };
+            });
         });
 
-        // Add total row and bold it
-        // const totalRow = worksheet.addRow([
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",           
-        // ]);
-        // totalRow.eachCell((cell) => {
-        //     cell.font = { bold: true };
-        // });
+
+        const totalRow = worksheet.addRow([
+            "",
+            "",
+            "Total",
+            totalDebit,
+            totalCredit,
+        ]);
+
+        // total row added
+
+        totalRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true };
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            };
+
+            // Align only the "Total" text to the right
+            if (colNumber === 4 || colNumber === 5) {
+                cell.alignment = { horizontal: "right" };
+            }
+        });
+
 
         // Set column widths
-        [7, 10, 50, 15, 15].forEach((width, index) => {
+
+
+        [9, 12, 50, 15, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
-            }
-        });
+
+
+        const getCurrentDate = () => {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, "0");
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const yyyy = today.getFullYear();
+            return dd + "/" + mm + "/" + yyyy;
+        };
+
+        const currentdate = getCurrentDate();
 
         // Generate Excel file buffer and save
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "JournalReport.xlsx");
+        saveAs(blob, `JournalReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
 
     const dispatch = useDispatch();
 
@@ -937,7 +966,7 @@ export default function JournalReport() {
 
     const [tableData, setTableData] = useState([]);
 
-    console.log('jpurnal tableData', tableData);
+    console.log("jpurnal tableData", tableData);
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -960,13 +989,13 @@ export default function JournalReport() {
     };
 
     const firstColWidth = {
-        width: "6%",
+        width: "9%",
     };
     const secondColWidth = {
-        width: "10%",
+        width: "12%",
     };
     const thirdColWidth = {
-        width: "58.5%",
+        width: "53.5%",
     };
     const forthColWidth = {
         width: "12%",
@@ -974,7 +1003,6 @@ export default function JournalReport() {
     const fifthColWidth = {
         width: "12%",
     };
-  
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -997,7 +1025,7 @@ export default function JournalReport() {
         backgroundColor: getcolor,
         width: isSidebarVisible ? "calc(60vw - 0%)" : "60vw",
         position: "relative",
-        top: "35%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1010,7 +1038,7 @@ export default function JournalReport() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "1000px",
+        maxWidth: "800px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1116,6 +1144,15 @@ export default function JournalReport() {
         }
     }, [selectedRadio]);
 
+    const handleKeyPress = (e, nextInputRef) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (nextInputRef.current) {
+                nextInputRef.current.focus();
+            }
+        }
+    };
+
     return (
         <>
             <ToastContainer />
@@ -1130,10 +1167,15 @@ export default function JournalReport() {
                     }}
                 >
                     <NavComponent textdata="Journal Report" />
-                   
+
                     <div
                         className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", display:'flex' }}
+                        style={{
+                            height: "47px",
+                            marginTop: "8px",
+                            marginBottom: "8px",
+                            display: "flex",
+                        }}
                     >
                         <div
                             style={{
@@ -1143,6 +1185,100 @@ export default function JournalReport() {
                                 margin: "0px",
                                 padding: "0px",
                                 // justifyContent: "space-between",
+                            }}
+                        >
+                            <div className="d-flex align-items-center justify-content-center">
+                                <div className="d-flex align-items-center">
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "evenly",
+                                            marginLeft: '100px',
+                                            marginBottom: "4px"
+                                        }}
+                                    >
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="custom"
+                                                checked={selectedRadio === "custom"}
+                                                onChange={() => handleRadioChange(0)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="custom">Custom</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="30"
+                                                checked={selectedRadio === "30days"}
+                                                onChange={() => handleRadioChange(30)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="30">30 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="60"
+                                                checked={selectedRadio === "60days"}
+                                                onChange={() => handleRadioChange(60)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="60">60 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="90"
+                                                checked={selectedRadio === "90days"}
+                                                onChange={() => handleRadioChange(90)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="90">90 Days</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
                             }}
                         >
                             <div className="d-flex align-items-center">
@@ -1155,7 +1291,7 @@ export default function JournalReport() {
                                 >
                                     <label htmlFor="fromDatePicker">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            From:
+                                            From :
                                         </span>
                                     </label>
                                 </div>
@@ -1168,7 +1304,7 @@ export default function JournalReport() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "3px",
+                                        marginLeft: "5px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1249,7 +1385,7 @@ export default function JournalReport() {
                                 >
                                     <label htmlFor="toDatePicker">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            To:
+                                            To :
                                         </span>
                                     </label>
                                 </div>
@@ -1262,7 +1398,7 @@ export default function JournalReport() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "15px",
+                                        marginLeft: "5px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1289,7 +1425,7 @@ export default function JournalReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
+                                        onKeyDown={(e) => handleToKeyPress(e, input2Ref)}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1331,95 +1467,48 @@ export default function JournalReport() {
                                 </div>
                             </div>
 
-                            <div className="d-flex align-items-center justify-content-center">
-                                 <div
-                                    className="d-flex align-items-center"
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom">Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30">30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60">60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90">90 Days</label>
-                                        </div>
-                                    </div>
-
-                                </div>
+                            <div id="lastDiv" style={{ marginRight: "5px" }}>
+                                <label for="searchInput" style={{ marginRight: "5px" }}>
+                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        Search :
+                                    </span>{" "}
+                                </label>
+                                <input
+                                    ref={input2Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                    type="text"
+                                    id="searchsubmit"
+                                    placeholder="Item description"
+                                    value={searchQuery}
+                                    autoComplete="off"
+                                    style={{
+                                        marginRight: "20px",
+                                        width: "200px",
+                                        height: "24px",
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        outline: "none",
+                                        paddingLeft: "10px",
+                                    }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
 
                             </div>
-
                         </div>
 
-                      
-                        
                     </div>
+
+
+
+
+
                     <div>
                         <div
                             style={{
@@ -1454,21 +1543,20 @@ export default function JournalReport() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                        Jvr#
+                                            Jvr#
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
                                             Date
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                        Description
+                                            Description
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
-                                        Debit
+                                            Debit
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                        Credit
+                                            Credit
                                         </td>
-                                       
                                     </tr>
                                 </thead>
                             </table>
@@ -1479,7 +1567,7 @@ export default function JournalReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "40vh",
+                                maxHeight: "55vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1528,7 +1616,6 @@ export default function JournalReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                            
                                             </tr>
                                         </>
                                     ) : (
@@ -1549,7 +1636,7 @@ export default function JournalReport() {
                                                         }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
-                                                            {item['Jvr#']}
+                                                            {item["Jvr#"]}
                                                         </td>
                                                         <td className="text-center" style={secondColWidth}>
                                                             {item.Date}
@@ -1563,7 +1650,6 @@ export default function JournalReport() {
                                                         <td className="text-end" style={fifthColWidth}>
                                                             {item.Credit}
                                                         </td>
-                                                        
                                                     </tr>
                                                 );
                                             })}
@@ -1590,7 +1676,6 @@ export default function JournalReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                          
                                             </tr>
                                         </>
                                     )}
@@ -1599,7 +1684,6 @@ export default function JournalReport() {
                         </div>
                     </div>
 
-
                     <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
@@ -1607,7 +1691,7 @@ export default function JournalReport() {
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
+                            width: "101.2%",
                         }}
                     >
                         <div
@@ -1630,8 +1714,7 @@ export default function JournalReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...forthColWidth,
@@ -1639,6 +1722,7 @@ export default function JournalReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total">{totalDebit}</span>
                         </div>
                         <div
                             style={{
@@ -1647,9 +1731,9 @@ export default function JournalReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total">{totalCredit}</span>
+
                         </div>
-                       
-                      
                     </div>
                     <div
                         style={{
