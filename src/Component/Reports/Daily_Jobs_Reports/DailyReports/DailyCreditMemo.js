@@ -733,6 +733,8 @@ export default function DailyCreditReport() {
             totalCredit,
             closingBalance,
         ]);
+
+        // total row added
         
         totalRow.eachCell((cell) => {
             cell.font = { bold: true };
