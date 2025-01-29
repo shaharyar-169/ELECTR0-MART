@@ -395,11 +395,12 @@ export default function EmployeeList() {
         doc.setFont(getfontstyle, 'normal'); // Reset font to normal
         doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
+      if(searchQuery){
         doc.setFont(getfontstyle, 'bold'); // Set font to bold
         doc.text(`SEARCH :`, labelsX + 140, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, 'normal'); // Reset font to normal
         doc.text(`${search}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
-
+}
 
 
         // // Reset font weight to normal if necessary for subsequent text
@@ -525,9 +526,11 @@ export default function EmployeeList() {
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow3 = worksheet.addRow([
-      "STATUS:", typestatus, "", "", "SEARCH:", typesearch,
-    ]);
+    const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery
+          ? ["STATUS :", typestatus, "","", "SEARCH :", typesearch]
+          : ["STATUS :", typestatus, ""]
+  );
 
     const applyStatusRowStyle = (row, boldColumns = []) => {
       row.eachCell((cell, colIndex) => {
@@ -551,7 +554,7 @@ export default function EmployeeList() {
 
     // Bold specific columns (labels)
 
-    applyStatusRowStyle(typeAndStoreRow3, [1, 5]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+    applyStatusRowStyle(typeAndStoreRow3, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
 
 
 

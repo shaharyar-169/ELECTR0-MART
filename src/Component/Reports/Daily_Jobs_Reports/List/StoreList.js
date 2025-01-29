@@ -391,11 +391,12 @@ export default function StoreList() {
         doc.setFont(getfontstyle, 'normal'); // Reset font to normal
         doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
+     if(searchQuery){ 
         doc.setFont(getfontstyle, 'bold'); // Set font to bold
         doc.text(`SEARCH :`, labelsX + 90, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, 'normal'); // Reset font to normal
         doc.text(`${search}`, labelsX + 110, labelsY + 8.5); // Draw the value next to the label
-
+}
 
 
         // // Reset font weight to normal if necessary for subsequent text
@@ -520,9 +521,12 @@ export default function StoreList() {
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow3 = worksheet.addRow([
-      "STATUS:", typestatus,   "SEARCH:", typesearch,
-    ]);
+   
+    const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery
+          ? ["STATUS :", typestatus, "", "SEARCH :", typesearch]
+          : ["STATUS :", typestatus, ""]
+  );
 
     const applyStatusRowStyle = (row, boldColumns = []) => {
       row.eachCell((cell, colIndex) => {
@@ -546,7 +550,7 @@ export default function StoreList() {
 
     // Bold specific columns (labels)
 
-    applyStatusRowStyle(typeAndStoreRow3, [1, 3]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+    applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
 
 
 

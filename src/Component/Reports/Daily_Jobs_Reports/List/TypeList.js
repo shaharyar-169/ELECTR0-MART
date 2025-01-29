@@ -386,11 +386,12 @@ export default function TypeList() {
                   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                   doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
           
+              if(searchQuery){
                   doc.setFont(getfontstyle, 'bold'); // Set font to bold
                   doc.text(`SEARCH :`, labelsX + 70, labelsY + 8.5); // Draw bold label
                   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                   doc.text(`${search}`, labelsX + 90, labelsY + 8.5); // Draw the value next to the label
-          
+          }
           
           
                   // // Reset font weight to normal if necessary for subsequent text
@@ -512,9 +513,11 @@ export default function TypeList() {
           
               let typesearch = searchQuery ? searchQuery : "";
           
-              const typeAndStoreRow3 = worksheet.addRow([
-                "STATUS:", typestatus, "SEARCH:", typesearch,
-              ]);
+              const typeAndStoreRow3 = worksheet.addRow(
+                searchQuery
+                    ? ["STATUS :", typestatus,  "SEARCH :", typesearch]
+                    : ["STATUS :", typestatus, ""]
+            );
           
               const applyStatusRowStyle = (row, boldColumns = []) => {
                 row.eachCell((cell, colIndex) => {
