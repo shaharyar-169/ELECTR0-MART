@@ -43,7 +43,7 @@ export default function EmployeeList() {
     getfromdate,
     gettodate,
     getfontstyle,
-    getdatafontsize
+    getdatafontsize,
   } = useTheme();
 
   useEffect(() => {
@@ -70,10 +70,10 @@ export default function EmployeeList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FEmpSts: transectionType,
-      // code: organisation.code,
-      code: "NASIRTRD",
-      FLocCod: '001',
-      FSchTxt: searchQuery
+      code: organisation.code,
+      // code: "NASIRTRD",
+      FLocCod: getLocationNumber,
+      FSchTxt: searchQuery,
     }).toString();
 
     axios
@@ -118,9 +118,8 @@ export default function EmployeeList() {
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
-
     const globalfontsize = 12;
-    console.log('gobal font data', globalfontsize)
+    console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
@@ -247,18 +246,21 @@ export default function EmployeeList() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-
           if (cellIndex === 2) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
+          } else if (cellIndex === 4) {
+            const rightAlignX = startX + columnWidths[cellIndex] + 10; // Adjust for right alignment
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
           } else {
             doc.text(cellValue, cellX, cellY, { baseline: "middle" });
           }
-
-
 
           // Draw column borders (excluding the last column)
           if (cellIndex < row.length - 1) {
@@ -316,8 +318,6 @@ export default function EmployeeList() {
 
     // Function to handle pagination
     const handlePagination = () => {
-
-
       // Define the addTitle function
       const addTitle = (
         title,
@@ -360,7 +360,6 @@ export default function EmployeeList() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
 
@@ -374,37 +373,32 @@ export default function EmployeeList() {
         doc.setFontSize(12);
         doc.setFont(getfontstyle, "300");
 
-
-       
-
-        let status = transectionType === "N"
-          ? "NON-ACTIVE"
-          : transectionType === "A"
+        let status =
+          transectionType === "N"
+            ? "NON-ACTIVE"
+            : transectionType === "A"
             ? "ACTIVE"
             : "ALL";
         let search = searchQuery ? searchQuery : "";
-
 
         // Set font style, size, and family
         doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
         doc.setFontSize(10); // Font size
 
-      
-        doc.setFont(getfontstyle, 'bold'); // Set font to bold
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
-      if(searchQuery){
-        doc.setFont(getfontstyle, 'bold'); // Set font to bold
-        doc.text(`SEARCH :`, labelsX + 140, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-        doc.text(`${search}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
-}
-
+        if (searchQuery) {
+          doc.setFont(getfontstyle, "bold"); // Set font to bold
+          doc.text(`SEARCH :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+          doc.text(`${search}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
+        }
 
         // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, 'bold'); // Set font to bold
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
         startY += 10; // Adjust vertical position for the labels
@@ -429,9 +423,9 @@ export default function EmployeeList() {
     const getCurrentDate = () => {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
       const yyyy = today.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
+      return `${dd}-${mm}-${yyyy}`;
     };
 
     // Function to get current time in the format HH:MM:SS
@@ -450,9 +444,7 @@ export default function EmployeeList() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeList${date}.pdf`);
-
-
+    doc.save(`EmployeeList As On ${date}.pdf`);
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
@@ -461,14 +453,14 @@ export default function EmployeeList() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Number of columns
+    const numColumns = 6;
 
     const columnAlignments = [
       "left",
       "left",
       "center",
       "left",
-      "left",
+      "right",
       "left",
       "left",
     ];
@@ -480,7 +472,7 @@ export default function EmployeeList() {
     [comapnyname, `Employee List`].forEach((title, index) => {
       // Define custom styles for each title
       let customStyle;
-      let rowHeight = 20;  // Default row height
+      let rowHeight = 20; // Default row height
       if (index === 0) {
         // Style for company name
         customStyle = {
@@ -495,24 +487,21 @@ export default function EmployeeList() {
           alignment: { horizontal: "center" },
         };
       }
-    
+
       // Add row with the title
       worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-    
+
       // Adjust the row height for the company name or other titles
       worksheet.getRow(index + 2).height = rowHeight;
-    
+
       // Merge the cells for the title
       worksheet.mergeCells(
         `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
       );
     });
 
-
-
     // Add an empty row after the title section
-    worksheet.addRow([]);  // This is where you add the empty row
-
+    worksheet.addRow([]); // This is where you add the empty row
 
     let typestatus = "";
 
@@ -528,9 +517,9 @@ export default function EmployeeList() {
 
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
-          ? ["STATUS :", typestatus, "","", "SEARCH :", typesearch]
-          : ["STATUS :", typestatus, ""]
-  );
+        ? ["STATUS :", typestatus, "", "", "SEARCH :", typesearch]
+        : ["STATUS :", typestatus, ""]
+    );
 
     const applyStatusRowStyle = (row, boldColumns = []) => {
       row.eachCell((cell, colIndex) => {
@@ -555,8 +544,6 @@ export default function EmployeeList() {
     // Bold specific columns (labels)
 
     applyStatusRowStyle(typeAndStoreRow3, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-
 
     // Header style for center alignment
     const headerStyle = {
@@ -630,21 +617,18 @@ export default function EmployeeList() {
       });
     });
 
-
     // Set column widths
 
     [10, 30, 10, 30, 15, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
-
-
     const getCurrentDate = () => {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
       const yyyy = today.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
+      return `${dd}-${mm}-${yyyy}`;
     };
 
     const currentdate = getCurrentDate();
@@ -654,7 +638,7 @@ export default function EmployeeList() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeList ${currentdate}.xlsx`);
+    saveAs(blob, `EmployeeList As On ${currentdate}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -874,7 +858,7 @@ export default function EmployeeList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                       Status :
                     </span>
                   </label>
@@ -899,7 +883,7 @@ export default function EmployeeList() {
                     marginLeft: "5px",
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
-                    fontSize: "12px",
+                    fontSize: getdatafontsize, fontFamily: getfontstyle,
                     color: fontcolor,
                   }}
                 >
@@ -911,7 +895,7 @@ export default function EmployeeList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                  <span style={{fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                     Search :
                   </span>{" "}
                 </label>
@@ -927,7 +911,7 @@ export default function EmployeeList() {
                     marginRight: "20px",
                     width: "200px",
                     height: "24px",
-                    fontSize: "12px",
+                    fontSize: getdatafontsize, fontFamily: getfontstyle,
                     color: fontcolor,
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
@@ -940,8 +924,10 @@ export default function EmployeeList() {
                   onBlur={(e) =>
                     (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                   }
-                  onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
-
+                  onChange={(e) =>
+                    setSearchQuery((e.target.value || "").toUpperCase())
+                  }
+                />
               </div>
             </div>
           </div>
@@ -956,7 +942,7 @@ export default function EmployeeList() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: "12px",
+                  fontSize: getdatafontsize, fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                   paddingRight: "2%",
@@ -964,6 +950,7 @@ export default function EmployeeList() {
               >
                 <thead
                   style={{
+                    fontSize: getdatafontsize, fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -1053,7 +1040,7 @@ export default function EmployeeList() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: "12px",
+                  fontSize: getdatafontsize, fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                 }}
@@ -1126,7 +1113,7 @@ export default function EmployeeList() {
                             <td className="text-start" style={forthColWidth}>
                               {item.Designation}
                             </td>
-                            <td className="text-start" style={fifthColWidth}>
+                            <td className="text-end" style={fifthColWidth}>
                               {item["COntact #"]}
                             </td>
                             <td className="text-start" style={sixthColWidth}>

@@ -82,7 +82,7 @@ background: transparent !important;
   display: flex;
   justify-content: center !important;
   align-items: center !important;
-  font-size: 12px !important;
+  /* font-size: 12px !important; */
   width: 100% !important;
   font-weight: bold !important;
   color: rgb(65, 64, 64);
@@ -93,7 +93,7 @@ background: transparent !important;
   display: flex;
   justify-content: end !important;
   align-items: center !important;
-  font-size: 12px !important;
+  /* font-size: 12px !important; */
   width: 100% !important;
   font-weight: bold !important;
   color: rgb(65, 64, 64);
@@ -108,7 +108,7 @@ background: transparent !important;
   justify-content: end;
   align-items: center;
   /* font-weight: bold; */
-  font-size: 12px !important;
+  /* font-size: 12px !important; */
   padding-right: 2px !important;
 }
 
@@ -208,17 +208,17 @@ background: transparent !important;
   display: flex !important;
   flex-wrap: nowrap !important;
  }
- .css-184twxf-control:hover {
+ /* .css-184twxf-control:hover {
   border-color: white !important;
-}
+} */
 
-.css-592obd-control:hover {
+/* .css-592obd-control:hover {
     border-color: red !important;
-}
+} */
 
- .css-1dimb5e-singleValue{
+ /* .css-1dimb5e-singleValue{
   color: white !important;
- }
+ } */
 
 
 
@@ -310,20 +310,12 @@ h2.react-datepicker__current-month {
 
 /* /////////////////// styeling for date-picker cellender /////////////////////// */
 
-/* .css-166bipr-Input{
-  color: #FFFFFF !important;
-  text-align: left !important;
-}
 
-.css-166bipr-Input{
-  color: #FFFFFF !important;
-  text-align: left !important;
-} */
 
-.css-1dimb5e-singleValue {
+/* .css-1dimb5e-singleValue {
   color: white !important;
   text-align: left;
-}
+} */
 
 
 /* //////////////////////// code for items select //////////////// */
@@ -349,7 +341,7 @@ h2.react-datepicker__current-month {
   display: flex !important;
   flex-wrap: nowrap !important;
 }
-.css-n71bgc-control:hover {
+/* .css-n71bgc-control:hover {
   border-color: white !important;
   border: 1px solid white !important;
 }
@@ -358,15 +350,7 @@ h2.react-datepicker__current-month {
 }
 .css-1tt9tct-control:hover {
   color: white !important;
-}
+} */
 
 
 /* style for all select for ALL */
-
-.css-1jqq78o-placeholder {
-  color: white !important;
-  margin-left: -10px !important;
-  padding-left: 5px !important;
-  display: flex !important;
-  justify-content: start !important;;
-}

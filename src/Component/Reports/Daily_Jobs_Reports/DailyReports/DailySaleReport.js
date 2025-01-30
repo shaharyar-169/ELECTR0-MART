@@ -16,13 +16,12 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-// import { fetchGetUser } from "../../Redux/action";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function GeneralLedger1() {
+export default function DailySaleReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -34,17 +33,37 @@ export default function GeneralLedger1() {
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
+    const companyRef = useRef(null);
+    const categoryRef = useRef(null);
+    const capacityRef = useRef(null);
+    const storeRef = useRef(null);
+    const typeRef = useRef(null);
+    const searchRef = useRef(null);
+    const selectButtonRef = useRef(null);
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
-    const [supplierList, setSupplierList] = useState([]);
+
+    const [storeType, setStoreType] = useState("");
+
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+
+    const [companyType, setCompanyType] = useState("");
+    const [categoryType, setCategoryType] = useState("");
+    const [capacityType, setCapacityType] = useState("");
+
+    const [storeList, setStoreList] = useState([]);
+    const [companyList, setCompanyList] = useState([]);
+    const [categoryList, setCategoryList] = useState([]);
+    const [capacityList, setCapacityList] = useState([]);
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [totalOpening, setTotalOpening] = useState(0);
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
+    const [totalAmount, setTotalAmount] = useState(0);
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -55,6 +74,7 @@ export default function GeneralLedger1() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+    const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
     const {
         isSidebarVisible,
@@ -67,16 +87,15 @@ export default function GeneralLedger1() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getfontstyle,
+        getdatafontsize
     } = useTheme();
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
 
-
     const comapnyname = organisation.description;
-
-    const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -124,126 +143,6 @@ export default function GeneralLedger1() {
         setfromInputDate(e.target.value);
     };
 
-    const handlefromKeyPress = (e, inputId) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const fromDateElement = document.getElementById("fromdatevalidation");
-            const formattedInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split("-").map(Number);
-
-                if (month > 12 || month === 0) {
-                    toast.error("Please enter a valid month (MM) between 01 and 12");
-                    return;
-                }
-
-                const daysInMonth = new Date(year, month, 0).getDate();
-                if (day > daysInMonth || day === 0) {
-                    toast.error(`Please enter a valid day (DD) for month ${month}`);
-                    return;
-                }
-
-                const currentDate = new Date();
-                const enteredDate = new Date(year, month - 1, day);
-
-                if (GlobalfromDate && enteredDate < GlobalfromDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-                if (GlobalfromDate && enteredDate > GlobaltoDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                fromDateElement.style.border = `1px solid ${fontcolor}`;
-                setfromInputDate(formattedInput);
-
-                const nextInput = document.getElementById(inputId);
-                if (nextInput) {
-                    nextInput.focus();
-                    nextInput.select();
-                } else {
-                    document.getElementById("submitButton").click();
-                }
-            } else {
-                toast.error("Date must be in the format dd-mm-yyyy");
-            }
-        }
-    };
-
-    const handleToKeyPress = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const toDateElement = document.getElementById("todatevalidation");
-            const formattedInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split("-").map(Number);
-
-                if (month > 12 || month === 0) {
-                    toast.error("Please enter a valid month (MM) between 01 and 12");
-                    return;
-                }
-
-                const daysInMonth = new Date(year, month, 0).getDate();
-                if (day > daysInMonth || day === 0) {
-                    toast.error(`Please enter a valid day (DD) for month ${month}`);
-                    return;
-                }
-
-                const currentDate = new Date();
-                const enteredDate = new Date(year, month - 1, day);
-
-                if (GlobaltoDate && enteredDate > GlobaltoDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (GlobaltoDate && enteredDate < GlobalfromDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (fromInputDate) {
-                    const fromDate = new Date(
-                        fromInputDate.split("-").reverse().join("-")
-                    );
-                    if (enteredDate <= fromDate) {
-                        toast.error("To date must be after from date");
-                        return;
-                    }
-                }
-
-                toDateElement.style.border = `1px solid ${fontcolor}`;
-                settoInputDate(formattedInput);
-
-                if (input1Ref.current) {
-                    e.preventDefault();
-                    input1Ref.current.focus();
-                }
-            } else {
-                toast.error("Date must be in the format dd-mm-yyyy");
-            }
-        }
-    };
-
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : "");
@@ -253,33 +152,7 @@ export default function GeneralLedger1() {
         settoInputDate(e.target.value);
     };
 
-
-    const handleSaleKeypress = (event, inputId) => {
-        if (event.key === "Enter") {
-            const selectedOption = saleSelectRef.current.state.selectValue;
-            if (selectedOption && selectedOption.value) {
-                setSaleType(selectedOption.value);
-            }
-            const nextInput = document.getElementById(inputId);
-            if (nextInput) {
-                nextInput.focus();
-                nextInput.select();
-            } else {
-                document.getElementById("submitButton").click();
-            }
-        }
-    };
-
-    const handleKeyPress = (e, nextInputRef) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            if (nextInputRef.current) {
-                nextInputRef.current.focus();
-            }
-        }
-    };
-
-    function fetchReceivableReport() {
+    function fetchDailySaleReport() {
         const fromDateElement = document.getElementById("fromdatevalidation");
         const toDateElement = document.getElementById("todatevalidation");
 
@@ -289,9 +162,6 @@ export default function GeneralLedger1() {
         let errorType = "";
 
         switch (true) {
-            case !saleType:
-                errorType = 'saleType';
-                break;
             case !fromInputDate:
                 errorType = "fromDate";
                 break;
@@ -338,11 +208,6 @@ export default function GeneralLedger1() {
         }
 
         switch (errorType) {
-
-            case 'saleType':
-                toast.error("Please select a Account Code");
-                return;
-
             case "fromDate":
                 toast.error("From date is required");
                 return;
@@ -378,22 +243,10 @@ export default function GeneralLedger1() {
             case "toDateBeforeFromDate":
                 toast.error("To date must be after from date");
                 return;
-
-
             default:
                 break;
         }
 
-        const data = {
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
-            FTrnTyp: transectionType,
-            FAccCod: saleType,
-            code: "EMART",
-            FLocCod: "001",
-            FYerDsc: "2024-2024",
-        };
-        console.log(data);
         document.getElementById(
             "fromdatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
@@ -401,27 +254,27 @@ export default function GeneralLedger1() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/GeneralLedger.php";
+        const apiMainUrl = apiLinks + "/DailySaleReport.php";
         setIsLoading(true);
-        const formData = new URLSearchParams({
+        const formMainData = new URLSearchParams({
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
-            FAccCod: saleType,
-            code: organisation.code,
-            FYerDsc: getyeardescription,
-            FLocCod: getLocationNumber,
-
+            FStrCod: storeType,
+            FSchTxt: searchQuery,
         }).toString();
 
         axios
-            .post(apiUrl, formData)
+            .post(apiMainUrl, formMainData)
             .then((response) => {
                 setIsLoading(false);
+                // console.log("Response:", response.data);
 
-                setTotalDebit(response.data["Total Debit "]);
-                setTotalCredit(response.data["Total Credit"]);
-                setClosingBalance(response.data["Closing Bal "]);
+                setTotalQnty(response.data["Total Qnty"]);
+                setTotalAmount(response.data["Total Amount"]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -442,11 +295,11 @@ export default function GeneralLedger1() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
-            if (saleSelectRef && saleSelectRef.current) {
+        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+            if (fromRef && fromRef.current) {
                 setTimeout(() => {
-                    saleSelectRef.current.focus();
-                    // saleSelectRef.current.select();
+                    fromRef.current.focus();
+                    fromRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -468,24 +321,26 @@ export default function GeneralLedger1() {
     }, []);
 
     useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveAccounts.php";
-        const formData = new URLSearchParams({
-            FLocCod: getLocationNumber,
+        //----------------- store dropdown
+        const apiStoreUrl = apiLinks + "/GetStore.php";
+        const formStoreData = new URLSearchParams({
             code: organisation.code,
         }).toString();
         axios
-            .post(apiUrl, formData)
+            .post(apiStoreUrl, formStoreData)
             .then((response) => {
-                setSupplierList(response.data);
+                setStoreList(response.data);
+                // console.log("STORE"+response.data);
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
             });
     }, []);
 
-    const options = supplierList.map((item) => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`,
+    // Store List array
+    const optionStore = storeList.map((item) => ({
+        value: item.tstrcod,
+        label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
     }));
 
     const DropdownOption = (props) => {
@@ -505,32 +360,45 @@ export default function GeneralLedger1() {
             </components.Option>
         );
     };
-    const customStyles1 = (hasError) => ({
+
+    // ------------ store style customization
+    const customStylesStore = () => ({
         control: (base, state) => ({
             ...base,
             height: "24px",
             minHeight: "unset",
-            width: 418,
+            width: "275px",
             fontSize: "12px",
             backgroundColor: getcolor,
             color: fontcolor,
             borderRadius: 0,
-            border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+            // border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
             transition: "border-color 0.15s ease-in-out",
             "&:hover": {
                 borderColor: state.isFocused ? base.borderColor : "black",
             },
             padding: "0 8px",
             display: "flex",
-            alignItems: "center",
+            // alignItems: "center",
             justifyContent: "space-between",
         }),
         dropdownIndicator: (base) => ({
             ...base,
             padding: 0,
+            marginTop: "-5px",
             fontSize: "18px",
             display: "flex",
             textAlign: "center !important",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            textAlign: "left",
+            color: fontcolor,
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            marginTop: "-5px",
         }),
     });
 
@@ -539,20 +407,24 @@ export default function GeneralLedger1() {
         settransectionType(selectedTransactionType);
     };
 
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
+        const globalfontsize = 12;
+        console.log("gobal font data", globalfontsize);
+
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
             item.Date,
-            item["Trn#"],
+            item["Trn #"],
             item.Type,
             item.Description,
-            item.Debit,
-            item.Credit,
-            item.Balance,
+            item.Customer,
+            item.Mobile,
+            item.Rate,
+            item.Qnty,
+            item["Sale Amount"],
         ]);
 
         // Add summary row to the table
@@ -561,22 +433,26 @@ export default function GeneralLedger1() {
             "",
             "",
             "Total",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
-        ]);
+            "",
+            "",
+            "",
+            String(totalQnty),
+            String(totalAmount),]);
 
         // Define table column headers and individual column widths
+
         const headers = [
             "Date",
             "Trn#",
             "Type",
             "Description",
-            "Debit",
-            "Credit",
-            "Balance",
+            "Customer",
+            "Mobile",
+            "Rate",
+            "Qnty",
+            "Amount",
         ];
-        const columnWidths = [18, 12, 10, 80, 20, 20, 25];
+        const columnWidths = [22, 13, 10, 90, 50, 22, 20, 12, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -586,14 +462,14 @@ export default function GeneralLedger1() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont("verdana");
+        doc.setFont(getfontstyle);
         doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
+            doc.setFont(getfontstyle, "bold"); // Set font to bold
+            doc.setFontSize(12); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -616,15 +492,15 @@ export default function GeneralLedger1() {
             });
 
             // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
+            doc.setFont(getfontstyle);
+            doc.setFontSize(12);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
+            const fontSize = 10; // Adjust this value to decrease font size
+            const boldFont = 400; // Bold font
+            const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
             doc.setFontSize(fontSize);
@@ -632,7 +508,7 @@ export default function GeneralLedger1() {
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 1000000000; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -674,24 +550,19 @@ export default function GeneralLedger1() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 2 ) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
-
-                    }
-
-                    else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                    if (
+                        cellIndex === 1 ||
+                        cellIndex === 5 ||
+                        cellIndex === 6 ||
+                        cellIndex === 7 ||
+                        cellIndex === 8
+                    ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] - 2;
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    }
-
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -747,7 +618,7 @@ export default function GeneralLedger1() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
+        const rowsPerPage = 27; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -758,9 +629,8 @@ export default function GeneralLedger1() {
                 time,
                 pageNumber,
                 startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
+                titleFontSize = 18,
+                pageNumberFontSize = 10
             ) => {
                 doc.setFontSize(titleFontSize); // Set the font size for the title
                 doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -770,20 +640,20 @@ export default function GeneralLedger1() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
+                // if (date) {
+                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                //     if (time) {
+                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                //     } else {
+                //         doc.text(date, rightX - 10, startY, { align: "right" });
+                //     }
+                // }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 5,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -794,55 +664,86 @@ export default function GeneralLedger1() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(
-                    `General Ledger From: ${fromInputDate} To: ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
+                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                startY += 5; // Adjust vertical position for the company title
+
+                addTitle(`Daily Sale Report From: ${fromInputDate} To: ${toInputDate}`
+                    , "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                startY += 5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 2; // Position the labels below the titles and above the table
+                const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
+                doc.setFontSize(12);
+                doc.setFont(getfontstyle, "300");
 
-                let typeText = transectionType ? transectionType : "";
-                let typeItem = saleType ? saleType : "";
+                let status = transectionType === "A"
+                    ? "ALL"
+                    : transectionType === "CRV"
+                        ? "SALE"
+                        : transectionType === "CPV"
+                            ? "SALE RETURN"
+                            : "ALL";
 
-                doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
 
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
 
-                startY += 0; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+                let typeItem = Companyselectdatavalue.label
+                    ? Companyselectdatavalue.label
+                    : "ALL";
+
+
+                // let status = transectionType ? transectionType : "All";
+                let search = searchQuery ? searchQuery : "";
+
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
+
+                // doc.text(`COMPANY : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                // doc.text(`CAPACITY : ${typeText}`, labelsX + 180, labelsY); // Adjust x-coordinate for From Date
+                // doc.text(`CATEGORY : ${category}`, labelsX, labelsY + 4.3); // Adjust x-coordinate for From Date
+
+                // doc.text(`TYPE : ${typename}`, labelsX + 180, labelsY + 4.3); // Adjust x-coordinate for From Date
+                // doc.text(`STATUS : ${status}`, labelsX, labelsY + 8.5); // Adjust x-coordinate for From Date
+                // doc.text(`SEARCH : ${search}`, labelsX + 180, labelsY + 8.5); // Adjust x-coordinate for From Date
+
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.text(`STORE :`, labelsX, labelsY); // Draw bold label
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+
+
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.text(`TYPE :`, labelsX, labelsY + 4.3); // Draw bold label
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                doc.text(`${status}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+
+                //    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                //    doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                //    doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
+
+                //    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                //    doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+                //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                //    doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 200, labelsY + 4.3); // Draw the value next to the label
+                }
+
+                // // Reset font weight to normal if necessary for subsequent text
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.setFontSize(10);
+
+                startY += 6; // Adjust vertical position for the labels
+
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 35);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -862,9 +763,9 @@ export default function GeneralLedger1() {
         const getCurrentDate = () => {
             const today = new Date();
             const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return `${dd}-${mm}-${yyyy}`;
         };
 
         // Function to get current time in the format HH:MM:SS
@@ -882,84 +783,46 @@ export default function GeneralLedger1() {
         // Call function to handle pagination
         handlePagination();
 
-        // Save the PDF file
-        doc.save("GeneralLedger.pdf");
-
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
+        // Save the PDF files
+        doc.save(`DailySaleReport From ${fromInputDate} To ${toInputDate}.pdf`);
     };
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
-
-    ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+    useEffect(() => {
+        document.documentElement.style.setProperty("--background-color", getcolor);
+    }, [getcolor]);
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
-
-        const numColumns = 7; // Number of columns
-
-        // Common styles
+        const numColumns = 9;
         const titleStyle = {
             font: { bold: true, size: 12 },
             alignment: { horizontal: "center" },
         };
-
         const columnAlignments = [
             "left",
+            "right",
+            "center",
             "left",
             "left",
-            "left",
+            "right",
             "right",
             "right",
             "right",
         ];
-
-        // Add an empty row at the start
         worksheet.addRow([]);
-
-        // Add title rows
         [
             comapnyname,
-            `General Ledger From ${fromInputDate} To ${toInputDate}`,
+            `Daily Sale Report From ${fromInputDate} To ${toInputDate}`,
         ].forEach((title, index) => {
             worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
-
-        worksheet.addRow([]); // Empty row for spacing
-
-        let typeText = transectionType ? transectionType : "All";
-        let typeItem = saleType ? saleType : "All";
-
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            `Account: ${typeItem}`,
-            "",
-            "",
-            "",
-            "",
-            "",
-            `Type: ${typeText}`,
-            
-        ]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-
-        worksheet.addRow([]); // Empty row for spacing
-
+        worksheet.addRow([]);
         const headerStyle = {
             font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
+            alignment: { horizontal: "center" },
             fill: {
                 type: "pattern",
                 pattern: "solid",
@@ -972,64 +835,57 @@ export default function GeneralLedger1() {
                 right: { style: "thin" },
             },
         };
-
-        // Add headers
         const headers = [
             "Date",
             "Trn#",
             "Type",
             "Description",
-            "Debit",
-            "Credit",
-            "Balance",
+            "Customer",
+            "Mobile",
+            "Rate",
+            "Qnty",
+            "Amount",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => {
             cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
         });
-
-        // Add data rows
         tableData.forEach((item) => {
             worksheet.addRow([
                 item.Date,
-                item["Trn#"],
+                item["Trn #"],
                 item.Type,
                 item.Description,
-                item.Debit,
-                item.Credit,
-                item.Balance,
+                item.Customer,
+                item.Mobile,
+                item.Rate,
+                item.Qnty,
+                item["Sale Amount"],
             ]);
         });
-
-        // Add total row and bold it
         const totalRow = worksheet.addRow([
             "",
             "",
             "",
             "Total",
-            totalDebit,
-            totalCredit,
-            closingBalance,
+            "",
+            "",
+            "",
+            String(totalQnty),
+            String(totalAmount),
         ]);
         totalRow.eachCell((cell) => {
             cell.font = { bold: true };
         });
-
-        // Set column widths
-        [10, 8, 5, 50, 12, 12, 15].forEach((width, index) => {
+        [11, 8, 5, 45, 45, 13, 11, 5, 11].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
-
-        // Apply individual alignment and borders to each column
         worksheet.eachRow((row, rowNumber) => {
             if (rowNumber > 5) {
-                // Skip title rows and the empty row
                 row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
+                    if (rowNumber === 5) {
                         cell.alignment = { horizontal: "center" };
                     } else {
-                        // Apply individual alignment to body cells
                         cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
                     }
                     cell.border = {
@@ -1041,16 +897,12 @@ export default function GeneralLedger1() {
                 });
             }
         });
-
-        // Generate Excel file buffer and save
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "GeneralLedger.xlsx");
+        saveAs(blob, "DailySaleReport.xlsx");
     };
-    ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
 
     const dispatch = useDispatch();
 
@@ -1083,28 +935,34 @@ export default function GeneralLedger1() {
     };
 
     const firstColWidth = {
-        width: "10%",
+        width: "7.75%",
     };
     const secondColWidth = {
-        width: "7%",
+        width: "5.25%",
     };
     const thirdColWidth = {
         width: "4%",
     };
     const forthColWidth = {
-        width: "32.5%",
+        width: "30%",
     };
     const fifthColWidth = {
-        width: "15%",
+        width: "25%",
     };
     const sixthColWidth = {
-        width: "15%",
+        width: "10%",
     };
     const seventhColWidth = {
-        width: "15%",
+        width: "6%",
+    };
+    const eighthColWidth = {
+        width: "4%",
+    };
+    const ninthColWidth = {
+        width: "8%",
     };
 
-    useHotkeys("s", fetchReceivableReport);
+    useHotkeys("s", fetchDailySaleReport);
     useHotkeys("alt+p", exportPDFHandler);
     useHotkeys("alt+e", handleDownloadCSV);
     useHotkeys("esc", () => navigate("/MainPage"));
@@ -1123,9 +981,9 @@ export default function GeneralLedger1() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+        width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
         position: "relative",
-        top: "35%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1138,7 +996,7 @@ export default function GeneralLedger1() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "1000px",
+        maxWidth: "1100px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1166,6 +1024,7 @@ export default function GeneralLedger1() {
     const handleRowClick = (index) => {
         setSelectedIndex(index);
     };
+
     useEffect(() => {
         if (selectedRowId !== null) {
             const newIndex = tableData.findIndex(
@@ -1174,6 +1033,7 @@ export default function GeneralLedger1() {
             setSelectedIndex(newIndex);
         }
     }, [tableData, selectedRowId]);
+
     const handleKeyDown = (e) => {
         if (selectedIndex === -1 || e.target.id === "searchInput") return;
         if (e.key === "ArrowUp") {
@@ -1188,6 +1048,7 @@ export default function GeneralLedger1() {
             scrollToSelectedRow();
         }
     };
+
     const scrollToSelectedRow = () => {
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
@@ -1196,12 +1057,14 @@ export default function GeneralLedger1() {
             });
         }
     };
+
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
     }, [selectedIndex]);
+
     useEffect(() => {
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
@@ -1210,6 +1073,8 @@ export default function GeneralLedger1() {
             });
         }
     }, [selectedIndex]);
+
+    // Radio Functionality
 
     const parseDate = (dateString) => {
         const [day, month, year] = dateString.split("-").map(Number);
@@ -1244,6 +1109,122 @@ export default function GeneralLedger1() {
         }
     }, [selectedRadio]);
 
+    const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
+
+    const focusNextElement = (currentRef, nextRef) => {
+        if (currentRef.current && nextRef.current) {
+            currentRef.current.focus();
+            nextRef.current.focus();
+        }
+    };
+
+    const handleFromDateEnter = (e) => {
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+
+        const inputDate = e.target.value;
+        const formattedDate = inputDate.replace(
+            /^(\d{2})(\d{2})(\d{4})$/,
+            "$1-$2-$3"
+        );
+
+        // Basic format validation (dd-mm-yyyy)
+        if (
+            !/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+        ) {
+            toast.error("Date must be in the format dd-mm-yyyy");
+            return;
+        }
+
+        const [day, month, year] = formattedDate.split("-").map(Number);
+        const enteredDate = new Date(year, month - 1, day);
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        // Validate month, day, and date range
+        if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+            toast.error("Invalid date. Please check the day and month.");
+            return;
+        }
+        if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+            toast.error(
+                `Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+            );
+            return;
+        }
+
+        // Update input value and state
+        e.target.value = formattedDate;
+        setfromInputDate(formattedDate); // Update the state with formatted date
+
+        // Move focus to the next element
+        focusNextElement(fromRef, toRef);
+    };
+
+    const handleToDateEnter = (e) => {
+        if (e.key === "Enter") {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+
+            const inputDate = e.target.value;
+            const formattedDate = inputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
+
+            // Basic format validation (dd-mm-yyyy)
+            if (
+                !/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+            ) {
+                toast.error("Date must be in the format dd-mm-yyyy");
+                return;
+            }
+
+            const [day, month, year] = formattedDate.split("-").map(Number);
+            const enteredDate = new Date(year, month - 1, day);
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            // Validate month, day, and date range
+            if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+                toast.error("Invalid date. Please check the day and month.");
+                return;
+            }
+            if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+                toast.error(
+                    `Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+                );
+                return;
+            }
+
+            // Update input value and state
+            e.target.value = formattedDate;
+            settoInputDate(formattedDate); // Update the state with formatted date
+
+            // Move focus to the next element
+            focusNextElement(toRef, storeRef);
+        }
+    };
+
+    const handleStoreEnter = (e) => {
+        if (e.key === "Enter" && !menuStoreIsOpen) {
+            e.preventDefault();
+            focusNextElement(storeRef, typeRef);
+        }
+    };
+
+    const handleTypeEnter = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            focusNextElement(typeRef, searchRef);
+        }
+    };
+
+    const handleSearchEnter = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            focusNextElement(searchRef, selectButtonRef);
+        }
+    };
+
     return (
         <>
             <ToastContainer />
@@ -1257,112 +1238,9 @@ export default function GeneralLedger1() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="General Ledger" />
-                    <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
+                    <NavComponent textdata="Daily Sale Report" />
 
-                        <div style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "0px",
-                            padding: "0px",
-                            justifyContent: "space-between",
-                        }}>
-
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom">Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30">30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60">60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90">90 Days</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
+                    {/* ------------1st row */}
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1377,131 +1255,21 @@ export default function GeneralLedger1() {
                                 justifyContent: "space-between",
                             }}
                         >
-
-
-
-                            {/* ------ */}
-
-
-                            <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Account :</span>  <br /></label>
-                                </div>
-                                <div style={{ marginLeft: '3px' }} >
-                                    <Select
-
-                                        className="List-select-class "
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                setSaleType(selectedOption.value);
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="Search or select..."
-                                    />
-
-                                </div>
-
-
-                            </div>
-
-
+                            {/* From Date */}
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
+                            // style={{ marginLeft: "20px" }}
                             >
                                 <div
                                     style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Type:
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "15px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">All</option>
-                                    <option value="CRV">Cash Receive Vorcher</option>
-                                    <option value="CPV">Cash Payment Vorcher</option>
-                                    <option value="BRV">Bank Receive Vorcher</option>
-                                    <option value="BPV">Bank Payment Vorcher</option>
-                                    <option value="JRV">Journal Vorcher</option>
-                                    <option value="INV">Item Sale</option>
-                                    <option value="SRN">Sale Return</option>
-                                    <option value="BIL">Purchase</option>
-                                    <option value="PRN">Purchase Return</option>
-                                    <option value="ISS">Issue</option>
-                                    <option value="REC">Received</option>
-                                    <option value="SLY">Salary</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center">
-                                <div
-                                    style={{
-                                        width: "80px",
+                                        width: "100px",
                                         display: "flex",
                                         justifyContent: "end",
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            From:
+                                            From:&nbsp;&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1514,7 +1282,6 @@ export default function GeneralLedger1() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "3px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1542,7 +1309,7 @@ export default function GeneralLedger1() {
                                         value={fromInputDate}
                                         ref={fromRef}
                                         onChange={handlefromInputChange}
-                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                                        onKeyDown={handleFromDateEnter}
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="Date Input"
@@ -1582,10 +1349,9 @@ export default function GeneralLedger1() {
                                     />
                                 </div>
                             </div>
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginLeft: "15px" }}
-                            >
+
+                            {/* To Date */}
+                            <div className="d-flex align-items-center">
                                 <div
                                     style={{
                                         width: "60px",
@@ -1595,7 +1361,7 @@ export default function GeneralLedger1() {
                                 >
                                     <label htmlFor="toDatePicker">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            To:
+                                            To:&nbsp;&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1608,7 +1374,6 @@ export default function GeneralLedger1() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "15px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1635,7 +1400,7 @@ export default function GeneralLedger1() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                                        onKeyDown={handleToDateEnter}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1676,42 +1441,276 @@ export default function GeneralLedger1() {
                                     />
                                 </div>
                             </div>
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "15px" }}>
-                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                        Search :
-                                    </span>{" "}
-                                </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
+
+                            {/* radio checks */}
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "15px" }}
+                            >
+                                <div
                                     style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
+                                        display: "flex",
+                                        justifyContent: "evenly",
                                     }}
+                                >
+                                    <div className="d-flex align-items-baseline mx-1">
+                                        <input
+                                            type="radio"
+                                            name="dateRange"
+                                            id="custom"
+                                            checked={selectedRadio === "custom"}
+                                            onChange={() => handleRadioChange(0)}
+                                            onFocus={(e) =>
+                                                (e.currentTarget.style.border = "2px solid red")
+                                            }
+                                            onBlur={(e) =>
+                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                            }
+                                        />
+                                        &nbsp;
+                                        <label htmlFor="custom" style={{ fontSize: "14px" }}>
+                                            Custom
+                                        </label>
+                                    </div>
+                                    <div className="d-flex align-items-baseline mx-1">
+                                        <input
+                                            type="radio"
+                                            name="dateRange"
+                                            id="30"
+                                            checked={selectedRadio === "30days"}
+                                            onChange={() => handleRadioChange(30)}
+                                            onFocus={(e) =>
+                                                (e.currentTarget.style.border = "2px solid red")
+                                            }
+                                            onBlur={(e) =>
+                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                            }
+                                        />
+                                        &nbsp;
+                                        <label htmlFor="30" style={{ fontSize: "14px" }}>
+                                            30 Days
+                                        </label>
+                                    </div>
+                                    <div className="d-flex align-items-baseline mx-1">
+                                        <input
+                                            type="radio"
+                                            name="dateRange"
+                                            id="60"
+                                            checked={selectedRadio === "60days"}
+                                            onChange={() => handleRadioChange(60)}
+                                            onFocus={(e) =>
+                                                (e.currentTarget.style.border = "2px solid red")
+                                            }
+                                            onBlur={(e) =>
+                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                            }
+                                        />
+                                        &nbsp;
+                                        <label htmlFor="60" style={{ fontSize: "14px" }}>
+                                            60 Days
+                                        </label>
+                                    </div>
+                                    <div className="d-flex align-items-baseline mx-1">
+                                        <input
+                                            type="radio"
+                                            name="dateRange"
+                                            id="90"
+                                            checked={selectedRadio === "90days"}
+                                            onChange={() => handleRadioChange(90)}
+                                            onFocus={(e) =>
+                                                (e.currentTarget.style.border = "2px solid red")
+                                            }
+                                            onBlur={(e) =>
+                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                            }
+                                        />
+                                        &nbsp;
+                                        <label htmlFor="90" style={{ fontSize: "14px" }}>
+                                            90 Days
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {/* --------2nd row */}
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            {/* Store Select */}
+                            <div
+                                className="d-flex align-items-center"
+                            // style={{ marginRight: "20px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "100px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Store:&nbsp;&nbsp;
+                                        </span>{" "}
+                                        <br />
+                                    </label>
+                                </div>
+                                <div>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={storeRef}
+                                        options={optionStore}
+                                        onKeyDown={handleStoreEnter}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
+                                                setStoreType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('')
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStylesStore}
+                                        styles={customStylesStore()}
+                                        isClearable
+                                        placeholder="ALL"
+                                        menuIsOpen={menuStoreIsOpen}
+                                        onMenuOpen={() => setMenuStoreIsOpen(true)}
+                                        onMenuClose={() => setMenuStoreIsOpen(false)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div></div>
+                        </div>
+                    </div>
+
+                    {/* ------------3rd row */}
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            {/* Type */}
+                            <div
+                                className="d-flex align-items-center"
+                            // style={{ marginLeft: "20px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "100px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Type:&nbsp;&nbsp;
+                                        </span>
+                                    </label>
+                                </div>
+                                <select
+                                    ref={typeRef}
+                                    onKeyDown={handleTypeEnter}
+                                    id="submitButton"
+                                    name="type"
                                     onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
+                                        (e.currentTarget.style.border = "4px solid red")
                                     }
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                                    value={transectionType}
+                                    onChange={handleTransactionTypeChange}
+                                    style={{
+                                        width: "275px",
+                                        height: "24px",
+                                        // marginLeft: "15px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">All</option>
+                                    <option value="INV">Sale</option>
+                                    <option value="SRN">Sale Return</option>
+                                </select>
+                            </div>
+
+                            {/* Search */}
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "20px" }}
+                            >
+                                <div>
+                                    <label for="searchInput">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Search:&nbsp;&nbsp;
+                                        </span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <input
+                                        ref={searchRef}
+                                        onKeyDown={handleSearchEnter}
+                                        type="text"
+                                        id="searchsubmit"
+                                        placeholder="Item description"
+                                        value={searchQuery}
+                                        autoComplete="off"
+                                        style={{
+                                            width: "275px",
+                                            height: "24px",
+                                            fontSize: "12px",
+                                            color: fontcolor,
+                                            backgroundColor: getcolor,
+                                            border: `1px solid ${fontcolor}`,
+                                            outline: "none",
+                                            paddingLeft: "10px",
+                                        }}
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.border = "2px solid red")
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                        }
+                                        onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())}                />
+
+                                </div>
                             </div>
                         </div>
                     </div>
+
                     <div>
+                        {/* Table Head */}
                         <div
                             style={{
                                 overflowY: "auto",
@@ -1751,31 +1750,38 @@ export default function GeneralLedger1() {
                                             Trn#
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Typ
+                                            Type
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
                                             Description
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                            Debit
+                                            Customer
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Credit
+                                            Mobile
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            Balance
+                                            Rate
+                                        </td>
+                                        <td className="border-dark" style={eighthColWidth}>
+                                            Qnty
+                                        </td>
+                                        <td className="border-dark" style={ninthColWidth}>
+                                            Amount
                                         </td>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
+                        {/* Table Body */}
                         <div
                             className="table-scroll"
                             style={{
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "40vh",
+                                maxHeight: "50vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1797,7 +1803,7 @@ export default function GeneralLedger1() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="7" className="text-center">
+                                                <td colSpan="9" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1810,7 +1816,7 @@ export default function GeneralLedger1() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1826,6 +1832,8 @@ export default function GeneralLedger1() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eighthColWidth}></td>
+                                                <td style={ninthColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -1842,29 +1850,52 @@ export default function GeneralLedger1() {
                                                         }
                                                         style={{
                                                             backgroundColor: getcolor,
-                                                            color: fontcolor,
+                                                            color:
+                                                                item["Sale Amount"]?.[0] === "-"
+                                                                    ? "red"
+                                                                    : fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-center" style={firstColWidth}>
+                                                        <td className="text-start" style={firstColWidth}>
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-center" style={secondColWidth}>
-                                                            {item["Trn#"]}
+                                                        <td className="text-end" style={secondColWidth}>
+                                                            {item["Trn #"]}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
-                                                            {item.Description}
+                                                        <td
+                                                            className="text-start"
+                                                            style={secondColWidth}
+                                                            title={item.Description || ""}
+                                                        >
+                                                            {item.Description && item.Description.trim().length > 35
+                                                                ? `${item.Description.trim().slice(0, 35)}...`
+                                                                : item.Description.trim() || ""}
+
                                                         </td>
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item.Debit}
+                                                        <td
+                                                            className="text-start"
+                                                            style={secondColWidth}
+                                                            title={item.Customer || ""}
+                                                        >
+                                                            {item.Customer && item.Customer.trim().length > 35
+                                                                ? `${item.Customer.trim().slice(0, 35)}...`
+                                                                : item.Customer.trim() || ""}
+
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Credit}
+                                                            {item.Mobile}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Balance}
+                                                            {item.Rate}
+                                                        </td>
+                                                        <td className="text-center" style={eighthColWidth}>
+                                                            {item.Qnty}
+                                                        </td>
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item["Sale Amount"]}
                                                         </td>
                                                     </tr>
                                                 );
@@ -1879,7 +1910,7 @@ export default function GeneralLedger1() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1894,6 +1925,8 @@ export default function GeneralLedger1() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eighthColWidth}></td>
+                                                <td style={ninthColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -1901,8 +1934,7 @@ export default function GeneralLedger1() {
                             </table>
                         </div>
                     </div>
-
-
+                    {/* Table Footer */}
                     <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
@@ -1910,7 +1942,6 @@ export default function GeneralLedger1() {
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
                         }}
                     >
                         <div
@@ -1933,44 +1964,55 @@ export default function GeneralLedger1() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...forthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...fifthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                            <span className="mobileledger_total">{totalDebit}</span>
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...sixthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                            <span className="mobileledger_total">{totalCredit}</span>
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...seventhColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
+                        ></div>
+                        <div
+                            style={{
+                                ...eighthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
                         >
-                            <span className="mobileledger_total">{closingBalance}</span>
+                            <span className="mobileledger_total">{totalQnty}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...ninthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalAmount}</span>
                         </div>
                     </div>
+                    {/* Action Buttons */}
                     <div
                         style={{
                             margin: "5px",
@@ -2007,8 +2049,8 @@ export default function GeneralLedger1() {
                         <SingleButton
                             id="searchsubmit"
                             text="Select"
-                            ref={input3Ref}
-                            onClick={fetchReceivableReport}
+                            ref={selectButtonRef}
+                            onClick={fetchDailySaleReport}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>

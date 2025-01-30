@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData , getYearDescription, getLocationnumber} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -20,7 +20,8 @@ export default function StoreList() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
-
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -43,7 +44,7 @@ export default function StoreList() {
     getfromdate,
     gettodate,
     getfontstyle,
-    getdatafontsize
+    getdatafontsize,
   } = useTheme();
 
   useEffect(() => {
@@ -65,14 +66,16 @@ export default function StoreList() {
     }
   };
 
+
+  
   function fetchReceivableReport() {
     const apiUrl = apiLinks + "/StoreList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FStrSts: transectionType,
       code: organisation.code,
-      FLocCod: getLocationNumber,
-      FSchTxt: searchQuery
+      FLocCod: locationnumber || getLocationNumber,
+      FSchTxt: searchQuery,
     }).toString();
 
     axios
@@ -117,9 +120,8 @@ export default function StoreList() {
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
-
     const globalfontsize = 12;
-    console.log('gobal font data', globalfontsize)
+    console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
@@ -137,14 +139,7 @@ export default function StoreList() {
     // rows.push(["", "", "", "", "", ""]);
 
     // Define table column headers and individual column widths
-    const headers = [
-      "Code",
-      "Description",
-      "Status",
-      "Abb",
-      "STK",
-
-    ];
+    const headers = ["Code", "Description", "Status", "Abb", "STK"];
     const columnWidths = [13, 80, 15, 20, 20];
 
     // Calculate total table width
@@ -243,7 +238,6 @@ export default function StoreList() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-
           if (cellIndex === 2 || cellIndex === 4) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
@@ -253,8 +247,6 @@ export default function StoreList() {
           } else {
             doc.text(cellValue, cellX, cellY, { baseline: "middle" });
           }
-
-
 
           // Draw column borders (excluding the last column)
           if (cellIndex < row.length - 1) {
@@ -312,8 +304,6 @@ export default function StoreList() {
 
     // Function to handle pagination
     const handlePagination = () => {
-
-
       // Define the addTitle function
       const addTitle = (
         title,
@@ -356,7 +346,6 @@ export default function StoreList() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
 
@@ -370,37 +359,30 @@ export default function StoreList() {
         doc.setFontSize(12);
         doc.setFont(getfontstyle, "300");
 
-
-
-
-        let status = transectionType === "N"
-          ? "NON-ACTIVE"
-          : transectionType === "A"
+        let status =
+          transectionType === "N"
+            ? "NON-ACTIVE"
+            : transectionType === "A"
             ? "ACTIVE"
             : "ALL";
         let search = searchQuery ? searchQuery : "";
-
 
         // Set font style, size, and family
         doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
         doc.setFontSize(10); // Font size
 
-
-        doc.setFont(getfontstyle, 'bold'); // Set font to bold
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
-     if(searchQuery){ 
-        doc.setFont(getfontstyle, 'bold'); // Set font to bold
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.text(`SEARCH :`, labelsX + 90, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${search}`, labelsX + 110, labelsY + 8.5); // Draw the value next to the label
-}
-
 
         // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, 'bold'); // Set font to bold
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
         startY += 10; // Adjust vertical position for the labels
@@ -425,9 +407,9 @@ export default function StoreList() {
     const getCurrentDate = () => {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
       const yyyy = today.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
+      return `${dd}-${mm}-${yyyy}`;
     };
 
     // Function to get current time in the format HH:MM:SS
@@ -446,9 +428,7 @@ export default function StoreList() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`StoreList${date}.pdf`);
-
-
+    doc.save(`StoreList As On ${date}.pdf`);
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
@@ -459,13 +439,7 @@ export default function StoreList() {
 
     const numColumns = 6; // Number of columns
 
-    const columnAlignments = [
-      "left",
-      "left",
-      "center",
-      "left",
-      "center",
-    ];
+    const columnAlignments = ["left", "left", "center", "left", "center"];
 
     // Add an empty row at the start
     worksheet.addRow([]);
@@ -475,7 +449,7 @@ export default function StoreList() {
     [comapnyname, `Store List`].forEach((title, index) => {
       // Define custom styles for each title
       let customStyle;
-      let rowHeight = 20;  // Default row height
+      let rowHeight = 20; // Default row height
       if (index === 0) {
         // Style for company name
         customStyle = {
@@ -490,24 +464,21 @@ export default function StoreList() {
           alignment: { horizontal: "center" },
         };
       }
-    
+
       // Add row with the title
       worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-    
+
       // Adjust the row height for the company name or other titles
       worksheet.getRow(index + 2).height = rowHeight;
-    
+
       // Merge the cells for the title
       worksheet.mergeCells(
         `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
       );
     });
 
-
-
     // Add an empty row after the title section
-    worksheet.addRow([]);  // This is where you add the empty row
-
+    worksheet.addRow([]); // This is where you add the empty row
 
     let typestatus = "";
 
@@ -521,12 +492,12 @@ export default function StoreList() {
 
     let typesearch = searchQuery ? searchQuery : "";
 
-   
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-          ? ["STATUS :", typestatus, "", "SEARCH :", typesearch]
-          : ["STATUS :", typestatus, ""]
-  );
+    const typeAndStoreRow3 = worksheet.addRow([
+      "STATUS:",
+      typestatus,
+      "SEARCH:",
+      typesearch,
+    ]);
 
     const applyStatusRowStyle = (row, boldColumns = []) => {
       row.eachCell((cell, colIndex) => {
@@ -550,9 +521,7 @@ export default function StoreList() {
 
     // Bold specific columns (labels)
 
-    applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-
+    applyStatusRowStyle(typeAndStoreRow3, [1, 3]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
 
     // Header style for center alignment
     const headerStyle = {
@@ -572,13 +541,7 @@ export default function StoreList() {
     };
 
     // Add headers
-    const headers = [
-      "Code",
-      "Description",
-      "Status",
-      "Abb",
-      "StK",
-    ];
+    const headers = ["Code", "Description", "Status", "Abb", "StK"];
     const headerRow = worksheet.addRow(headers);
 
     // Apply styles and center alignment to the header row
@@ -622,15 +585,11 @@ export default function StoreList() {
       });
     });
 
-
     // Set column widths
-
 
     [10, 40, 10, 12, 10].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
-
 
     const getCurrentDate = () => {
       const today = new Date();
@@ -647,7 +606,7 @@ export default function StoreList() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `StoreList ${currentdate}.xlsx`);
+    saveAs(blob, `StoreList As On${currentdate}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -712,7 +671,6 @@ export default function StoreList() {
   const fifthColWidth = {
     width: "10%",
   };
-
 
   useHotkeys("s", fetchReceivableReport);
   useHotkeys("alt+p", exportPDFHandler);
@@ -862,7 +820,7 @@ export default function StoreList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                    <span style={{ fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
                       Status :
                     </span>
                   </label>
@@ -887,7 +845,8 @@ export default function StoreList() {
                     marginLeft: "5px",
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
-                    fontSize: "12px",
+                    fontSize: getdatafontsize,
+                    fontFamily:getfontstyle,
                     color: fontcolor,
                   }}
                 >
@@ -899,7 +858,7 @@ export default function StoreList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                  <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                     Search :
                   </span>{" "}
                 </label>
@@ -915,7 +874,8 @@ export default function StoreList() {
                     marginRight: "20px",
                     width: "200px",
                     height: "24px",
-                    fontSize: "12px",
+                    fontSize: getdatafontsize,
+                    fontFamily:getfontstyle,
                     color: fontcolor,
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
@@ -928,8 +888,10 @@ export default function StoreList() {
                   onBlur={(e) =>
                     (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                   }
-                  onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
-
+                  onChange={(e) =>
+                    setSearchQuery((e.target.value || "").toUpperCase())
+                  }
+                />
               </div>
             </div>
           </div>
@@ -944,7 +906,8 @@ export default function StoreList() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: "12px",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                   paddingRight: "2%",
@@ -952,6 +915,8 @@ export default function StoreList() {
               >
                 <thead
                   style={{
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -1006,7 +971,6 @@ export default function StoreList() {
                       Stk{" "}
                       <i className="fa-solid fa-caret-down caretIconStyle"></i>
                     </td>
-
                   </tr>
                 </thead>
               </table>
@@ -1026,7 +990,8 @@ export default function StoreList() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: "12px",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                 }}
@@ -1066,7 +1031,6 @@ export default function StoreList() {
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
-
                       </tr>
                     </>
                   ) : (
@@ -1101,7 +1065,6 @@ export default function StoreList() {
                             <td className="text-center" style={fifthColWidth}>
                               {item.Stk}
                             </td>
-
                           </tr>
                         );
                       })}
@@ -1128,7 +1091,6 @@ export default function StoreList() {
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
-
                       </tr>
                     </>
                   )}
@@ -1195,7 +1157,6 @@ export default function StoreList() {
             <SingleButton
               to="/MainPage"
               text="Return"
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1204,7 +1165,6 @@ export default function StoreList() {
             <SingleButton
               text="PDF"
               onClick={exportPDFHandler}
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1213,7 +1173,6 @@ export default function StoreList() {
             <SingleButton
               text="Excel"
               onClick={handleDownloadCSV}
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1224,7 +1183,6 @@ export default function StoreList() {
               text="Select"
               ref={input3Ref}
               onClick={fetchReceivableReport}
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

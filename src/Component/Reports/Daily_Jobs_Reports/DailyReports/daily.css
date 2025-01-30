@@ -330,3 +330,21 @@ h2.react-datepicker__current-month {
 .simple_line{
   margin: 5px 0px !important;
 }
+
+
+ /* HAMZA REPORT CSS */
+ .css-1falora-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+ }
+
+
+ .css-nwf8mi-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+ }
+
+ .css-1falora-control:hover {
+  border-color: white !important;
+ }
+ 

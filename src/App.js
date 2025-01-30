@@ -60,6 +60,11 @@ import DailyCreditReport from "./Component/Reports/Daily_Jobs_Reports/DailyRepor
 import DocumentEditReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DocumentEditReport.js";
 import DailyProfitReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyProfitReport.js";
 import CashFlowReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/CashFlow.js";
+import DailyStatusReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailystatusReport.js";
+import DailyCollectionReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCollectionReport.js";
+import DailyPaymentReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPaymentReport.js";
+import DailyCashBankBalance from "./Component/Reports/Daily_Jobs_Reports/DailyReports/CashBankBalanceReport.js";
+import DailySaleReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySaleReport.js";
 
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
@@ -132,7 +137,14 @@ function App() {
                 <Route exact path="/DailyCreditMemo" element={<DailyCreditReport />} />
                 <Route exact path="/DailyProfitReport" element={<DailyProfitReport />} />
                 <Route exact path="/CashFlow" element={<CashFlowReport />} />
+                <Route exact path="/DailyStatusReport" element={<DailyStatusReport />} />
+                <Route exact path="/DailyCollectionReport" element={<DailyCollectionReport />} />
+                <Route exact path="/DailyPaymentReport" element={<DailyPaymentReport />} />
+                <Route exact path="/Cash&BankBalance" element={<DailyCashBankBalance />} />
+                <Route exact path="/SaleReport" element={<DailySaleReport />} />
 
+              
+              
                 {/* Rountes for Installments reports */}
                 <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} />
                 <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />

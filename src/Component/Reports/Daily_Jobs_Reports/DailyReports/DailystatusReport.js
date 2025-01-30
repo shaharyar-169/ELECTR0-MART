@@ -21,29 +21,40 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function JournalReport() {
+export default function DailyStatusReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
 
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
-    const input2Ref = useRef(null);
-    const input3Ref = useRef(null);
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
+    const companyRef = useRef(null);
+    const categoryRef = useRef(null);
+    const capacityRef = useRef(null);
+    const storeRef = useRef(null);
+    const typeRef = useRef(null);
+    const searchRef = useRef(null);
+    const selectButtonRef = useRef(null);
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
-    const [supplierList, setSupplierList] = useState([]);
 
-    const [totalQnty, setTotalQnty] = useState(0);
+    const [storeList, setStoreList] = useState([]);
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    const [storeType, setStoreType] = useState("");
+
     const [totalOpening, setTotalOpening] = useState(0);
-    const [totalDebit, setTotalDebit] = useState(0);
-    const [totalCredit, setTotalCredit] = useState(0);
-    const [closingBalance, setClosingBalance] = useState(0);
+    const [totalPurchase, setTotalPurchase] = useState(0);
+    const [totalPurRet, setTotalPurRet] = useState(0);
+    const [totalReceive, setTotalReceive] = useState(0);
+    const [totalIssue, setTotalIssue] = useState(0);
+    const [totalSale, setTotalSale] = useState(0);
+    const [totalSaleRet, setTotalSaleRet] = useState(0);
+    const [totalBalance, setTotalBalance] = useState(0);
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -53,6 +64,8 @@ export default function JournalReport() {
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+    const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
     const {
         isSidebarVisible,
@@ -75,10 +88,7 @@ export default function JournalReport() {
 
     const comapnyname = organisation.description;
 
-    const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
-
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
-
     const fromdatevalidate = getfromdate;
     const todatevaliadete = gettodate;
 
@@ -95,16 +105,12 @@ export default function JournalReport() {
             date.getMonth() + 1
         ).padStart(2, "0")}-${date.getFullYear()}`;
     };
-
-    const GlobalfromDate1 = formatDate1(GlobalfromDate);
     const GlobaltoDate1 = formatDate1(GlobaltoDate);
+    const GlobalfromDate1 = formatDate1(GlobalfromDate);
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
-    // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-    const toggleFromCalendar = () => {
-        setfromCalendarOpen((prevOpen) => !prevOpen);
-    };
+    // Toggle the ToDATE CalendarOpen state on each click
     const toggleToCalendar = () => {
         settoCalendarOpen((prevOpen) => !prevOpen);
     };
@@ -113,134 +119,6 @@ export default function JournalReport() {
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
-    };
-    const handlefromDateChange = (date) => {
-        setSelectedfromDate(date);
-        setfromInputDate(date ? formatDate(date) : "");
-        setfromCalendarOpen(false);
-    };
-    const handlefromInputChange = (e) => {
-        setfromInputDate(e.target.value);
-    };
-
-    const handlefromKeyPress = (e, inputId) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const fromDateElement = document.getElementById("fromdatevalidation");
-            const formattedInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split("-").map(Number);
-
-                if (month > 12 || month === 0) {
-                    toast.error("Please enter a valid month (MM) between 01 and 12");
-                    return;
-                }
-
-                const daysInMonth = new Date(year, month, 0).getDate();
-                if (day > daysInMonth || day === 0) {
-                    toast.error(`Please enter a valid day (DD) for month ${month}`);
-                    return;
-                }
-
-                const currentDate = new Date();
-                const enteredDate = new Date(year, month - 1, day);
-
-                if (GlobalfromDate && enteredDate < GlobalfromDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-                if (GlobalfromDate && enteredDate > GlobaltoDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                fromDateElement.style.border = `1px solid ${fontcolor}`;
-                setfromInputDate(formattedInput);
-
-                const nextInput = document.getElementById(inputId);
-                if (nextInput) {
-                    nextInput.focus();
-                    nextInput.select();
-                } else {
-                    document.getElementById("submitButton").click();
-                }
-            } else {
-                toast.error("Date must be in the format dd-mm-yyyy");
-            }
-        }
-    };
-
-    const handleToKeyPress = (e, inputref) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const toDateElement = document.getElementById("todatevalidation");
-            const formattedInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split("-").map(Number);
-
-                if (month > 12 || month === 0) {
-                    toast.error("Please enter a valid month (MM) between 01 and 12");
-                    return;
-                }
-
-                const daysInMonth = new Date(year, month, 0).getDate();
-                if (day > daysInMonth || day === 0) {
-                    toast.error(`Please enter a valid day (DD) for month ${month}`);
-                    return;
-                }
-
-                const currentDate = new Date();
-                const enteredDate = new Date(year, month - 1, day);
-
-                if (GlobaltoDate && enteredDate > GlobaltoDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (GlobaltoDate && enteredDate < GlobalfromDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (fromInputDate) {
-                    const fromDate = new Date(
-                        fromInputDate.split("-").reverse().join("-")
-                    );
-                    if (enteredDate <= fromDate) {
-                        toast.error("To date must be after from date");
-                        return;
-                    }
-                }
-
-                toDateElement.style.border = `1px solid ${fontcolor}`;
-                settoInputDate(formattedInput);
-
-                if (inputref.current) {
-                    e.preventDefault();
-                    inputref.current.focus();
-                }
-            } else {
-                toast.error("Date must be in the format dd-mm-yyyy");
-            }
-        }
     };
 
     const handleToDateChange = (date) => {
@@ -252,41 +130,22 @@ export default function JournalReport() {
         settoInputDate(e.target.value);
     };
 
-    function fetchReceivableReport() {
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
-
+    function fetchDailyStatusReport() {
         const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-        let hasError = false;
         let errorType = "";
 
         switch (true) {
-            case !fromInputDate:
-                errorType = "fromDate";
-                break;
             case !toInputDate:
                 errorType = "toDate";
                 break;
             default:
-                hasError = false;
                 break;
         }
 
-        if (!dateRegex.test(fromInputDate)) {
-            errorType = "fromDateInvalid";
-        } else if (!dateRegex.test(toInputDate)) {
+        if (!dateRegex.test(toInputDate)) {
             errorType = "toDateInvalid";
         } else {
-            const formattedFromInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [fromDay, fromMonth, fromYear] = formattedFromInput
-                .split("-")
-                .map(Number);
-            const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
             const formattedToInput = toInputDate.replace(
                 /^(\d{2})(\d{2})(\d{4})$/,
                 "$1-$2-$3"
@@ -294,93 +153,76 @@ export default function JournalReport() {
             const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
             const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-            if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-                errorType = "fromDateBeforeGlobal";
-            } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-                errorType = "fromDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+            if (GlobaltoDate && enteredToDate > GlobaltoDate) {
                 errorType = "toDateAfterGlobal";
             } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
                 errorType = "toDateBeforeGlobal";
-            } else if (enteredToDate < enteredFromDate) {
-                errorType = "toDateBeforeFromDate";
             }
         }
 
         switch (errorType) {
-            case "fromDate":
-                toast.error("From date is required");
-                return;
             case "toDate":
-                toast.error("To date is required");
+                toast.error("Rep Date is required");
                 return;
-            case "fromDateInvalid":
-                toast.error("From date must be in the format dd-mm-yyyy");
-                return;
+
             case "toDateInvalid":
-                toast.error("To date must be in the format dd-mm-yyyy");
+                toast.error("Rep Date must be in the format dd-mm-yyyy");
                 return;
-            case "fromDateBeforeGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "fromDateAfterGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
+
             case "toDateAfterGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
+                toast.error(`Rep Date must be before ${GlobaltoDate1}`);
                 return;
             case "toDateBeforeGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeFromDate":
-                toast.error("To date must be after from date");
+                toast.error(`Rep Date must be after ${GlobalfromDate1}`);
                 return;
 
             default:
                 break;
         }
 
-        document.getElementById(
-            "fromdatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-        document.getElementById(
-            "todatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
+        const fromDateElement = document.getElementById("fromdatevalidation");
+        const toDateElement = document.getElementById("todatevalidation");
 
-        const apiUrl = apiLinks + "/Journal.php";
+        if (fromDateElement) {
+            fromDateElement.style.border = `1px solid ${fontcolor}`;
+        }
+        if (toDateElement) {
+            toDateElement.style.border = `1px solid ${fontcolor}`;
+        }
+
+        const apiMainUrl = apiLinks + "/DailyStatusReport.php";
         setIsLoading(true);
-        const formData = new URLSearchParams({
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
+        const formMainData = new URLSearchParams({
             code: 'NASIRTRD',
-            FYerDsc: '2024-2024',
             FLocCod: '001',
-            FSchTxt: searchQuery
+            FYerDsc: '2024-2024',
+            // FIntDat: fromInputDate,
+            FRepDat: toInputDate,
+            FStrCod: storeType,
+            // FSchTxt: "",
         }).toString();
 
         axios
-            .post(apiUrl, formData)
+            .post(apiMainUrl, formMainData)
             .then((response) => {
                 setIsLoading(false);
+                // console.log("Response:", response.data);
 
-                setTotalDebit(response.data["Total Debit "]);
-                setTotalCredit(response.data["Total Credit"]);
-                // setClosingBalance(response.data["Total Balance"]);
+                setTotalOpening(response.data["Opening"]);
+                setTotalPurchase(response.data["Purchase"]);
+                setTotalPurRet(response.data["Pur Ret"]);
+                setTotalReceive(response.data["Receive"]);
+                setTotalIssue(response.data["Issue"]);
+                setTotalSale(response.data["Sale"]);
+                setTotalSaleRet(response.data["Sale Ret"]);
+                setTotalBalance(response.data["Balance"]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
                 } else {
                     console.warn(
                         "Response data structure is not as expected:",
-                        response.data
+                        response.data.Detail
                     );
                     setTableData([]);
                 }
@@ -394,11 +236,11 @@ export default function JournalReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-            if (fromRef && fromRef.current) {
+        if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+            if (toRef && toRef.current) {
                 setTimeout(() => {
-                    fromRef.current.focus();
-                    fromRef.current.select();
+                    toRef.current.focus();
+                    toRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -419,7 +261,88 @@ export default function JournalReport() {
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
 
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+    useEffect(() => {
+        //----------------- store dropdown
+        const apiStoreUrl = apiLinks + "/GetStore.php";
+        const formStoreData = new URLSearchParams({
+            code: organisation.code,
+        }).toString();
+        axios
+            .post(apiStoreUrl, formStoreData)
+            .then((response) => {
+                setStoreList(response.data);
+                // console.log("STORE"+response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    }, []);
+
+    // Store List array
+    const optionStore = storeList.map((item) => ({
+        value: item.tstrcod,
+        label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
+    }));
+
+    const DropdownOption = (props) => {
+        return (
+            <components.Option {...props}>
+                <div
+                    style={{
+                        fontSize: "12px",
+                        paddingBottom: "5px",
+                        lineHeight: "3px",
+                        color: "black",
+                        textAlign: "start",
+                    }}
+                >
+                    {props.data.label}
+                </div>
+            </components.Option>
+        );
+    };
+
+    // ------------ store style customization
+    const customStylesStore = () => ({
+        control: (base, state) => ({
+            ...base,
+            height: "24px",
+            minHeight: "unset",
+            width: "275px",
+            fontSize: "12px",
+            backgroundColor: getcolor,
+            color: fontcolor,
+            borderRadius: 0,
+            // border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+            transition: "border-color 0.15s ease-in-out",
+            "&:hover": {
+                borderColor: state.isFocused ? base.borderColor : "black",
+            },
+            padding: "0 8px",
+            display: "flex",
+            // alignItems: "center",
+            justifyContent: "space-between",
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            padding: 0,
+            marginTop: "-5px",
+            fontSize: "18px",
+            display: "flex",
+            textAlign: "center !important",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            textAlign: "left",
+            color: fontcolor,
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            marginTop: "-5px",
+        }),
+    });
+
     const exportPDFHandler = () => {
 
         const globalfontsize = 12;
@@ -430,28 +353,46 @@ export default function JournalReport() {
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item["Jvr#"],
-            item.Date,
+            item.code,
             item.Description,
-            item.Debit,
-            item.Credit,
+            item["Opening"],
+            item["Purchase"],
+            item["Pur Ret"],
+            item["Receive"],
+            item["Issue"],
+            item["Sale"],
+            item["Sale Ret"],
+            item["Balance"],
         ]);
 
         // Add summary row to the table
         rows.push([
             "",
-            "",
-
             "Total",
-
-            String(totalDebit),
-            String(totalCredit),
-
+            String(totalOpening),
+            String(totalPurchase),
+            String(totalPurRet),
+            String(totalReceive),
+            String(totalIssue),
+            String(totalSale),
+            String(totalSaleRet),
+            String(totalBalance),
         ]);
 
         // Define table column headers and individual column widths
-        const headers = ["Jvr#", "Date", "Description", "Debit", "Credit"];
-        const columnWidths = [18, 22, 85, 20, 20];
+        const headers = [
+            "Code",
+            "Description",
+            "Open",
+            "Pur",
+            "Pur Ret",
+            "Rec",
+            "Iss",
+            "Sal",
+            "Sal Ret",
+            "Bal",
+        ];
+        const columnWidths = [30, 90, 15, 15, 15, 15, 15, 15, 15, 15];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -550,9 +491,17 @@ export default function JournalReport() {
                     const cellValue = String(cell);
 
 
-
-                    if (cellIndex === 3 || cellIndex === 4) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                    if (
+                        cellIndex === 2 ||
+                        cellIndex === 3 ||
+                        cellIndex === 4 ||
+                        cellIndex === 5 ||
+                        cellIndex === 6 ||
+                        cellIndex === 7 ||
+                        cellIndex === 8 ||
+                        cellIndex === 9
+                    ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] - 2;
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
@@ -652,7 +601,7 @@ export default function JournalReport() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 55,
+                    rightX - 20,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -667,7 +616,7 @@ export default function JournalReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Journal Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Daily Status Report Rep Date: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -677,6 +626,11 @@ export default function JournalReport() {
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
 
+
+
+                let typeText = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+
+
                 let search = searchQuery ? searchQuery : "";
 
 
@@ -685,12 +639,18 @@ export default function JournalReport() {
                 doc.setFontSize(10); // Font size
 
 
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`STORE :`, labelsX, labelsY + 8); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${typeText}`, labelsX + 15, labelsY + 8); // Draw the value next to the label
 
+
+                
                 if (searchQuery) {
                     doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 100, labelsY + 8.5); // Draw bold label
+                    doc.text(`SEARCH :`, labelsX + 170, labelsY + 8.5); // Draw bold label
                     doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 120, labelsY + 8.5); // Draw the value next to the label
+                    doc.text(`${search}`, labelsX + 190, labelsY + 8.5); // Draw the value next to the label
                 }
 
 
@@ -741,215 +701,247 @@ export default function JournalReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`JournalReport From ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`DailyStatusReport AS on ${toInputDate}.pdf`);
 
 
     };
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
-    ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-    const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
+  const handleDownloadCSV = async () => {
+         const workbook = new ExcelJS.Workbook();
+         const worksheet = workbook.addWorksheet("Sheet1");
+ 
+         const numColumns = 6; // Number of columns
+ 
+         const columnAlignments = [
+            "left",
+            "left",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+ 
+         ];
+ 
+         // Add an empty row at the start
+         worksheet.addRow([]);
+ 
+         // Add title rows
+ 
+         [comapnyname, `Daily Status Report Rep Date ${toInputDate}`].forEach((title, index) => {
+             // Define custom styles for each title
+             let customStyle;
+             let rowHeight = 20;  // Default row height
+             if (index === 0) {
+                 // Style for company name
+                 customStyle = {
+                     font: { family: getfontstyle, size: 18, bold: true },
+                     alignment: { horizontal: "center" },
+                 };
+                 rowHeight = 30; // Increase row height for company name to avoid overlap
+             } else {
+                 // Style for "Item List"
+                 customStyle = {
+                     font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                     alignment: { horizontal: "center" },
+                 };
+             }
+ 
+             // Add row with the title
+             worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+ 
+             // Adjust the row height for the company name or other titles
+             worksheet.getRow(index + 2).height = rowHeight;
+ 
+             // Merge the cells for the title
+             worksheet.mergeCells(
+                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+             );
+         });
+ 
+ 
+ 
+         // Add an empty row after the title section
+         worksheet.addRow([]);  // This is where you add the empty row
+ 
+ 
+      
+ 
+         let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
 
-        const numColumns = 6; // Number of columns
-
-        const columnAlignments = ["left", "left", "left", "right", "right"];
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-        // Add title rows
-
-        [comapnyname, `Journal Report From ${fromInputDate} To ${toInputDate}`
-        ].forEach((title, index) => {
-            // Define custom styles for each title
-            let customStyle;
-            let rowHeight = 20;  // Default row height
-            if (index === 0) {
-                // Style for company name
-                customStyle = {
-                    font: { family: getfontstyle, size: 18, bold: true },
-                    alignment: { horizontal: "center" },
-                };
-                rowHeight = 30; // Increase row height for company name to avoid overlap
-            } else {
-                // Style for "Item List"
-                customStyle = {
-                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
-                    alignment: { horizontal: "center" },
-                };
-            }
-
-            // Add row with the title
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-            // Adjust the row height for the company name or other titles
-            worksheet.getRow(index + 2).height = rowHeight;
-
-            // Merge the cells for the title
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
-        });
-
-
-
-        // Add an empty row after the title section
-        worksheet.addRow([]);  // This is where you add the empty row
-
-
-
-        let typesearch = searchQuery ? searchQuery : "";
-
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["", "", "", "SEARCH :", typesearch]
-                : [""]
-        );
-
-        const applyStatusRowStyle = (row, boldColumns = []) => {
-            row.eachCell((cell, colIndex) => {
-                // Check if the current cell is in the boldColumns array
-                const isBold = boldColumns.includes(colIndex);
-
-                cell.font = {
-                    family: getfontstyle, // Your desired font family
-                    size: getdatafontsize, // Your desired font size
-                    bold: isBold, // Bold only for specific columns
-                };
-
-                cell.alignment = {
-                    horizontal: "left", // Align text to the left
-                    vertical: "middle", // Vertically align to the middle
-                };
-
-                cell.border = null; // Remove borders
-            });
-        };
-
-        // Bold specific columns (labels)
-
-        applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-
-
-        // Header style for center alignment
-        const headerStyle = {
-            font: { bold: true, family: getfontstyle, size: getdatafontsize },
-            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
-        };
-
-        // Add headers
-        const headers = ["Jvr#", "Date", "Description", "Debit", "Credit"];
-        const headerRow = worksheet.addRow(headers);
-
-        // Apply styles and center alignment to the header row
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle };
-        });
-
-        // Add data rows
-
-        // Add data rows
-        tableData.forEach((item) => {
-            const row = worksheet.addRow([
-                item["Jvr#"],
-                item.Date,
+         let typesearch = searchQuery ? searchQuery : "";
+ 
+         const typeAndStoreRow3 = worksheet.addRow(
+             searchQuery
+                 ? ["STORE :", typecompany, "", "", "","",'', "SEARCH :", typesearch]
+                 : ["STORE :", typecompany, ""]
+         );
+ 
+         const applyStatusRowStyle = (row, boldColumns = []) => {
+             row.eachCell((cell, colIndex) => {
+                 // Check if the current cell is in the boldColumns array
+                 const isBold = boldColumns.includes(colIndex);
+ 
+                 cell.font = {
+                     family: getfontstyle, // Your desired font family
+                     size: getdatafontsize, // Your desired font size
+                     bold: isBold, // Bold only for specific columns
+                 };
+ 
+                 cell.alignment = {
+                     horizontal: "left", // Align text to the left
+                     vertical: "middle", // Vertically align to the middle
+                 };
+ 
+                 cell.border = null; // Remove borders
+             });
+         };
+ 
+         // Bold specific columns (labels)
+ 
+         applyStatusRowStyle(typeAndStoreRow3, [1, 8]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+ 
+ 
+ 
+         // Header style for center alignment
+         const headerStyle = {
+             font: { bold: true, family: getfontstyle, size: getdatafontsize },
+             alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
+             fill: {
+                 type: "pattern",
+                 pattern: "solid",
+                 fgColor: { argb: "FFC6D9F7" },
+             },
+             border: {
+                 top: { style: "thin" },
+                 left: { style: "thin" },
+                 bottom: { style: "thin" },
+                 right: { style: "thin" },
+             },
+         };
+ 
+         // Add headers
+         const headers = [
+           "Code",
+            "Description",
+            "Open",
+            "Pur",
+            "Pur Ret",
+            "Rec",
+            "Iss",
+            "Sal",
+            "Sal Ret",
+            "Bal",
+         ];
+         const headerRow = worksheet.addRow(headers);
+ 
+         // Apply styles and center alignment to the header row
+         headerRow.eachCell((cell) => {
+             cell.style = { ...headerStyle };
+         });
+ 
+         // Add data rows
+ 
+         // Add data rows
+         tableData.forEach((item) => {
+             const row = worksheet.addRow([
+                item.code,
                 item.Description,
-                item.Debit,
-                item.Credit,
-            ]);
-
-            // Apply custom styles to each cell in the row
-            row.eachCell((cell, colIndex) => {
-                cell.font = {
-                    family: getfontstyle, // Set your desired font family
-                    size: getdatafontsize, // Set the font size
-                    bold: false, // Make the font bold
-                };
-
-                cell.border = {
-                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-                };
-
-                // Align cell content based on columnAlignments array
-                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-                cell.alignment = {
-                    horizontal: alignment,
-                    vertical: "middle", // Vertically align to the middle
-                };
-            });
-        });
-
-
-        const totalRow = worksheet.addRow([
-            "",
-            "",
+                item["Opening"],
+                item["Purchase"],
+                item["Pur Ret"],
+                item["Receive"],
+                item["Issue"],
+                item["Sale"],
+                item["Sale Ret"],
+                item["Balance"],
+             ]);
+ 
+             // Apply custom styles to each cell in the row
+             row.eachCell((cell, colIndex) => {
+                 cell.font = {
+                     family: getfontstyle, // Set your desired font family
+                     size: getdatafontsize, // Set the font size
+                     bold: false, // Make the font bold
+                 };
+ 
+                 cell.border = {
+                     top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                     left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                     bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                     right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                 };
+ 
+                 // Align cell content based on columnAlignments array
+                 const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                 cell.alignment = {
+                     horizontal: alignment,
+                     vertical: "middle", // Vertically align to the middle
+                 };
+             });
+         });
+ 
+ 
+         const totalRow = worksheet.addRow([
+             "",
             "Total",
-            totalDebit,
-            totalCredit,
-        ]);
+            String(totalOpening),
+            String(totalPurchase),
+            String(totalPurRet),
+            String(totalReceive),
+            String(totalIssue),
+            String(totalSale),
+            String(totalSaleRet),
+            String(totalBalance),
+         ]);
+ 
+         // total row added
+         
+         totalRow.eachCell((cell , colNumber) => {
+             cell.font = { bold: true };
+             cell.border = {
+                 top: { style: "thin" },
+                 left: { style: "thin" },
+                 bottom: { style: "thin" },
+                 right: { style: "thin" },
+             };
 
-        // total row added
-
-        totalRow.eachCell((cell, colNumber) => {
-            cell.font = { bold: true };
-            cell.border = {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            };
-
-            // Align only the "Total" text to the right
-            if (colNumber === 4 || colNumber === 5) {
+              // Align only the "Total" text to the right
+            if (colNumber === 2 || colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9 ) {
                 cell.alignment = { horizontal: "right" };
             }
-        });
-
-
-        // Set column widths
-
-
-        [9, 12, 50, 15, 15].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
-        };
-
-        const currentdate = getCurrentDate();
-
-        // Generate Excel file buffer and save
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, `JournalReport From ${fromInputDate} To ${toInputDate}.xlsx`);
-    };
-    ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+         });
+         
+ 
+         // Set column widths
+ 
+ 
+         [25, 50, 10, 10, 10, 10, 10, 10, 10, 10].forEach((width, index) => {
+             worksheet.getColumn(index + 1).width = width;
+         });
+ 
+ 
+ 
+         const getCurrentDate = () => {
+             const today = new Date();
+             const dd = String(today.getDate()).padStart(2, "0");
+             const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+             const yyyy = today.getFullYear();
+             return dd + "/" + mm + "/" + yyyy;
+         };
+ 
+         const currentdate = getCurrentDate();
+ 
+         // Generate Excel file buffer and save
+         const buffer = await workbook.xlsx.writeBuffer();
+         const blob = new Blob([buffer], {
+             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+         });
+         saveAs(blob, `DailyStatusReport As on ${toInputDate}.xlsx`);
+     };
 
     const dispatch = useDispatch();
 
@@ -960,8 +952,6 @@ export default function JournalReport() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
-
-    console.log("jpurnal tableData", tableData);
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -984,22 +974,37 @@ export default function JournalReport() {
     };
 
     const firstColWidth = {
-        width: "9%",
+        width: "15%",
     };
     const secondColWidth = {
-        width: "12%",
+        width: "30%",
     };
     const thirdColWidth = {
-        width: "53.5%",
+        width: "7%",
     };
     const forthColWidth = {
-        width: "12%",
+        width: "7%",
     };
     const fifthColWidth = {
-        width: "12%",
+        width: "7%",
+    };
+    const sixthColWidth = {
+        width: "7%",
+    };
+    const seventhColWidth = {
+        width: "7%",
+    };
+    const eighthColWidth = {
+        width: "7%",
+    };
+    const ninthColWidth = {
+        width: "7%",
+    };
+    const tenthColWidth = {
+        width: "7%",
     };
 
-    useHotkeys("s", fetchReceivableReport);
+    useHotkeys("s", fetchDailyStatusReport);
     useHotkeys("alt+p", exportPDFHandler);
     useHotkeys("alt+e", handleDownloadCSV);
     useHotkeys("esc", () => navigate("/MainPage"));
@@ -1018,10 +1023,10 @@ export default function JournalReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(60vw - 0%)" : "60vw",
-        position: "relative",
-        top: "40%",
-        left: isSidebarVisible ? "50%" : "50%",
+        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+        position: "absolute",
+        top: "53%",
+        left: isSidebarVisible ? "60%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
             ? "left 3s ease-in-out, width 2s ease-in-out"
@@ -1033,7 +1038,7 @@ export default function JournalReport() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "800px",
+        maxWidth: "1100px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1061,6 +1066,7 @@ export default function JournalReport() {
     const handleRowClick = (index) => {
         setSelectedIndex(index);
     };
+
     useEffect(() => {
         if (selectedRowId !== null) {
             const newIndex = tableData.findIndex(
@@ -1069,6 +1075,7 @@ export default function JournalReport() {
             setSelectedIndex(newIndex);
         }
     }, [tableData, selectedRowId]);
+
     const handleKeyDown = (e) => {
         if (selectedIndex === -1 || e.target.id === "searchInput") return;
         if (e.key === "ArrowUp") {
@@ -1083,6 +1090,7 @@ export default function JournalReport() {
             scrollToSelectedRow();
         }
     };
+
     const scrollToSelectedRow = () => {
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
@@ -1091,12 +1099,14 @@ export default function JournalReport() {
             });
         }
     };
+
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
     }, [selectedIndex]);
+
     useEffect(() => {
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
@@ -1106,45 +1116,68 @@ export default function JournalReport() {
         }
     }, [selectedIndex]);
 
-    const parseDate = (dateString) => {
-        const [day, month, year] = dateString.split("-").map(Number);
-        return new Date(year, month - 1, day);
-    };
+    const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
 
-    const handleRadioChange = (days) => {
-        const toDate = parseDate(toInputDate);
-        const fromDate = new Date(toDate);
-        fromDate.setUTCDate(fromDate.getUTCDate() - days);
-
-        setSelectedfromDate(fromDate);
-        setfromInputDate(formatDate(fromDate));
-        setSelectedRadio(days === 0 ? "custom" : `${days}days`);
-    };
-
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(formatDate(firstDateOfCurrentMonth));
-            setSelectedToDate(currentDate);
-            settoInputDate(formatDate(currentDate));
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
-            handleRadioChange(days);
+    const focusNextElement = (currentRef, nextRef) => {
+        if (currentRef.current && nextRef.current) {
+            currentRef.current.focus();
+            nextRef.current.focus();
         }
-    }, [selectedRadio]);
+    };
 
-    const handleKeyPress = (e, nextInputRef) => {
+    const handleToDateEnter = (e) => {
+        if (e.key === "Enter") {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+
+            const inputDate = e.target.value;
+            const formattedDate = inputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
+
+            // Basic format validation (dd-mm-yyyy)
+            if (
+                !/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+            ) {
+                toast.error("Date must be in the format dd-mm-yyyy");
+                return;
+            }
+
+            const [day, month, year] = formattedDate.split("-").map(Number);
+            const enteredDate = new Date(year, month - 1, day);
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            // Validate month, day, and date range
+            if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+                toast.error("Invalid date. Please check the day and month.");
+                return;
+            }
+            if (enteredDate > GlobaltoDate) {
+                toast.error(`Date must be before ${GlobaltoDate1}`);
+                return;
+            }
+
+            // Update input value and state
+            e.target.value = formattedDate;
+            settoInputDate(formattedDate); // Update the state with formatted date
+
+            // Move focus to the next element
+            focusNextElement(toRef, storeRef);
+        }
+    };
+
+    const handleStoreEnter = (e) => {
+        if (e.key === "Enter" && !menuStoreIsOpen) {
+            e.preventDefault();
+            focusNextElement(storeRef, searchRef);
+        }
+    };
+
+    const handleSearchEnter = (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
-            if (nextInputRef.current) {
-                nextInputRef.current.focus();
-            }
+            focusNextElement(searchRef, selectButtonRef);
         }
     };
 
@@ -1161,111 +1194,13 @@ export default function JournalReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Journal Report" />
+                    <NavComponent textdata="Daily Status Report" />
 
+                    {/* ------------1st row */}
                     <div
                         className="row"
-                        style={{
-                            height: "47px",
-                            marginTop: "8px",
-                            marginBottom: "8px",
-                            display: "flex",
-                        }}
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
                     >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                // justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="d-flex align-items-center">
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                            marginLeft: '100px',
-                                            marginBottom: "4px"
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom">Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30">30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60">60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90">90 Days</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
                         <div
                             style={{
                                 width: "100%",
@@ -1276,111 +1211,18 @@ export default function JournalReport() {
                                 justifyContent: "space-between",
                             }}
                         >
+                            {/* To Date */}
                             <div className="d-flex align-items-center">
                                 <div
                                     style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            From :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="fromdatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "5px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        id="frominputid"
-                                        value={fromInputDate}
-                                        ref={fromRef}
-                                        onChange={handlefromInputChange}
-                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedfromDate}
-                                        onChange={handlefromDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={fromCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleFromCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginLeft: "15px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
+                                        width: "100px",
                                         display: "flex",
                                         justifyContent: "end",
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            To :
+                                            Rep Date :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1393,7 +1235,6 @@ export default function JournalReport() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "5px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1420,7 +1261,7 @@ export default function JournalReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, input2Ref)}
+                                        onKeyDown={handleToDateEnter}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1462,49 +1303,104 @@ export default function JournalReport() {
                                 </div>
                             </div>
 
-                            <div id="lastDiv" style={{ marginRight: "5px" }}>
-                                <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                        Search :
-                                    </span>{" "}
-                                </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
-                                    autoComplete="off"
+                            {/* Store Select */}
+                            <div
+                                className="d-flex align-items-center"
+                            // style={{ marginRight: "20px" }}
+                            >
+                                <div
                                     style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
                                     }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Store :&nbsp;
+                                        </span>{" "}
+                                        <br />
+                                    </label>
+                                </div>
+                                <div>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={storeRef}
+                                        options={optionStore}
+                                        onKeyDown={handleStoreEnter}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
+                                                setStoreType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('')
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStylesStore}
+                                        styles={customStylesStore()}
+                                        isClearable
+                                        placeholder="ALL"
+                                        menuIsOpen={menuStoreIsOpen}
+                                        onMenuOpen={() => setMenuStoreIsOpen(true)}
+                                        onMenuClose={() => setMenuStoreIsOpen(false)}
+                                    />
+                                </div>
+                            </div>
 
+                            {/* Search */}
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "25px" }}
+                            >
+                                <div>
+                                    <label for="searchInput">
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                            Search :
+                                        </span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <input
+                                        ref={searchRef}
+                                        onKeyDown={handleSearchEnter}
+                                        type="text"
+                                        id="searchsubmit"
+                                        placeholder="Item description"
+                                        value={searchQuery}
+                                        autoComplete="off"
+                                        style={{
+                                            width: "200px",
+                                            height: "24px",
+                                            fontSize: "12px",
+                                            marginLeft: '5px',
+                                            color: fontcolor,
+                                            backgroundColor: getcolor,
+                                            border: `1px solid ${fontcolor}`,
+                                            outline: "none",
+                                            paddingLeft: "10px",
+                                        }}
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.border = "2px solid red")
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                        }
+                                        onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
+
+                                </div>
                             </div>
                         </div>
-
                     </div>
 
-
-
-
-
                     <div>
+                        {/* Table Head */}
                         <div
                             style={{
                                 overflowY: "auto",
@@ -1518,7 +1414,6 @@ export default function JournalReport() {
                                     fontSize: "12px",
                                     width: "100%",
                                     position: "relative",
-                                    paddingRight: "2%",
                                 }}
                             >
                                 <thead
@@ -1538,31 +1433,47 @@ export default function JournalReport() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                            Jvr#
+                                            Code
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Date
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
                                             Description
                                         </td>
+                                        <td className="border-dark" style={thirdColWidth}>
+                                            Open
+                                        </td>
                                         <td className="border-dark" style={forthColWidth}>
-                                            Debit
+                                            Pur
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                            Credit
+                                            Pur Ret
+                                        </td>
+                                        <td className="border-dark" style={sixthColWidth}>
+                                            Rec
+                                        </td>
+                                        <td className="border-dark" style={seventhColWidth}>
+                                            Iss
+                                        </td>
+                                        <td className="border-dark" style={eighthColWidth}>
+                                            Sal
+                                        </td>
+                                        <td className="border-dark" style={ninthColWidth}>
+                                            Sal Ret
+                                        </td>
+                                        <td className="border-dark" style={tenthColWidth}>
+                                            Bal
                                         </td>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
+                        {/* Table Body */}
                         <div
                             className="table-scroll"
                             style={{
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "55vh",
+                                maxHeight: "60vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1584,7 +1495,7 @@ export default function JournalReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="5" className="text-center">
+                                                <td colSpan="10" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1597,7 +1508,7 @@ export default function JournalReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 5 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1611,6 +1522,11 @@ export default function JournalReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
+                                                <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+                                                <td style={eighthColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -1630,20 +1546,35 @@ export default function JournalReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-center" style={firstColWidth}>
-                                                            {item["Jvr#"]}
+                                                        <td className="text-start" style={firstColWidth}>
+                                                            {item.code}
                                                         </td>
-                                                        <td className="text-center" style={secondColWidth}>
-                                                            {item.Date}
-                                                        </td>
-                                                        <td className="text-start" style={thirdColWidth}>
+                                                        <td className="text-start" style={secondColWidth}>
                                                             {item.Description}
                                                         </td>
+                                                        <td className="text-end" style={thirdColWidth}>
+                                                            {item["Opening"]}
+                                                        </td>
                                                         <td className="text-end" style={forthColWidth}>
-                                                            {item.Debit}
+                                                            {item["Purchase"]}
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item.Credit}
+                                                            {item["Pur Ret"]}
+                                                        </td>
+                                                        <td className="text-end" style={sixthColWidth}>
+                                                            {item["Receive"]}
+                                                        </td>
+                                                        <td className="text-end" style={seventhColWidth}>
+                                                            {item["Issue"]}
+                                                        </td>
+                                                        <td className="text-end" style={eighthColWidth}>
+                                                            {item["Sale"]}
+                                                        </td>
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item["Sale Ret"]}
+                                                        </td>
+                                                        <td className="text-end" style={tenthColWidth}>
+                                                            {item["Balance"]}
                                                         </td>
                                                     </tr>
                                                 );
@@ -1658,7 +1589,7 @@ export default function JournalReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 5 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1671,6 +1602,11 @@ export default function JournalReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
+                                                <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+                                                <td style={eighthColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -1678,21 +1614,21 @@ export default function JournalReport() {
                             </table>
                         </div>
                     </div>
-
+                    {/* Table Footer */}
                     <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "1.2%",
-                            width: "101.2%",
+                            paddingRight: "10px"
                         }}
                     >
                         <div
                             style={{
                                 ...firstColWidth,
                                 background: getcolor,
+                                marginLeft: "2px",
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
@@ -1709,7 +1645,9 @@ export default function JournalReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+                            <span className="mobileledger_total">{totalOpening}</span>
+                        </div>
                         <div
                             style={{
                                 ...forthColWidth,
@@ -1717,7 +1655,7 @@ export default function JournalReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalDebit}</span>
+                            <span className="mobileledger_total">{totalPurchase}</span>
                         </div>
                         <div
                             style={{
@@ -1726,10 +1664,55 @@ export default function JournalReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalCredit}</span>
-
+                            <span className="mobileledger_total">{totalPurRet}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...sixthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalReceive}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalIssue}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...eighthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalSale}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...ninthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalSaleRet}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...tenthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalBalance}</span>
                         </div>
                     </div>
+                    {/* Action Buttons */}
                     <div
                         style={{
                             margin: "5px",
@@ -1766,8 +1749,8 @@ export default function JournalReport() {
                         <SingleButton
                             id="searchsubmit"
                             text="Select"
-                            ref={input3Ref}
-                            onClick={fetchReceivableReport}
+                            ref={selectButtonRef}
+                            onClick={fetchDailyStatusReport}
                             style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
