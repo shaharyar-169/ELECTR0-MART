@@ -1289,7 +1289,7 @@ export default function DailyPaymentReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="custom">Custom</label>
+                                            <label htmlFor="custom" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>Custom</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1306,7 +1306,7 @@ export default function DailyPaymentReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="30">30 Days</label>
+                                            <label htmlFor="30" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>30 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1323,7 +1323,7 @@ export default function DailyPaymentReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="60">60 Days</label>
+                                            <label htmlFor="60" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>60 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1340,7 +1340,7 @@ export default function DailyPaymentReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="90">90 Days</label>
+                                            <label htmlFor="90" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>90 Days</label>
                                         </div>
                                     </div>
                                 </div>
@@ -1358,8 +1358,8 @@ export default function DailyPaymentReport() {
                                     }}
                                 >
                                     <label htmlFor="transactionType">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Type:
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            Type :
                                         </span>
                                     </label>
                                 </div>
@@ -1379,11 +1379,10 @@ export default function DailyPaymentReport() {
                                     style={{
                                         width: "200px",
                                         height: "24px",
-                                        marginLeft: "15px",
+                                        marginLeft: "5px",
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
                                     }}
                                 >
                                     <option value="">All</option>
@@ -1416,8 +1415,8 @@ export default function DailyPaymentReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            From:
+                                        <span style={{fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            From :
                                         </span>
                                     </label>
                                 </div>
@@ -1430,7 +1429,7 @@ export default function DailyPaymentReport() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "3px",
+                                        marginLeft: "5px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1447,8 +1446,7 @@ export default function DailyPaymentReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                            backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1486,8 +1484,7 @@ export default function DailyPaymentReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                        color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1510,8 +1507,8 @@ export default function DailyPaymentReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            To:
+                                        <span style={{fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            To :
                                         </span>
                                     </label>
                                 </div>
@@ -1524,7 +1521,7 @@ export default function DailyPaymentReport() {
                                         alignItems: "center",
                                         height: "24px",
                                         justifyContent: "center",
-                                        marginLeft: "15px",
+                                        marginLeft: "5px",
                                         background: getcolor,
                                     }}
                                     onFocus={(e) =>
@@ -1542,8 +1539,7 @@ export default function DailyPaymentReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                            backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1580,8 +1576,7 @@ export default function DailyPaymentReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                        color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1593,8 +1588,8 @@ export default function DailyPaymentReport() {
                                 </div>
                             </div>
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "15px" }}>
-                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                <label for="searchInput" style={{ marginRight: "5px" }}>
+                                    <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
                                         Search :
                                     </span>{" "}
                                 </label>
@@ -1610,8 +1605,7 @@ export default function DailyPaymentReport() {
                                         marginRight: "20px",
                                         width: "200px",
                                         height: "24px",
-                                        fontSize: "12px",
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1639,13 +1633,13 @@ export default function DailyPaymentReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
                                     position: "relative",
                                 }}
                             >
                                 <thead
                                     style={{
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1697,8 +1691,7 @@ export default function DailyPaymentReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
                                     position: "relative",
                                 }}
                             >

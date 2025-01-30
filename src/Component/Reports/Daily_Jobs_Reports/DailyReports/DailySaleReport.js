@@ -20,6 +20,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import './dailydemo.css';
 
 export default function DailySaleReport() {
     const navigate = useNavigate();
@@ -46,6 +47,7 @@ export default function DailySaleReport() {
     const [transectionType, settransectionType] = useState("");
 
     const [storeType, setStoreType] = useState("");
+  
 
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
@@ -348,8 +350,7 @@ export default function DailySaleReport() {
             <components.Option {...props}>
                 <div
                     style={{
-                        fontSize: "12px",
-                        paddingBottom: "5px",
+                        fontSize: getdatafontsize,fontFamily:getfontstyle,                        paddingBottom: "5px",
                         lineHeight: "3px",
                         color: "black",
                         textAlign: "start",
@@ -368,8 +369,7 @@ export default function DailySaleReport() {
             height: "24px",
             minHeight: "unset",
             width: "275px",
-            fontSize: "12px",
-            backgroundColor: getcolor,
+            fontSize: getdatafontsize,fontFamily:getfontstyle,            backgroundColor: getcolor,
             color: fontcolor,
             borderRadius: 0,
             // border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
@@ -680,9 +680,9 @@ export default function DailySaleReport() {
 
                 let status = transectionType === "A"
                     ? "ALL"
-                    : transectionType === "CRV"
+                    : transectionType === "INV"
                         ? "SALE"
-                        : transectionType === "CPV"
+                        : transectionType === "SRN"
                             ? "SALE RETURN"
                             : "ALL";
 
@@ -790,16 +790,13 @@ export default function DailySaleReport() {
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
-    const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-        const numColumns = 9;
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
-        const columnAlignments = [
-            "left",
+  const handleDownloadCSV = async () => {
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet("Sheet1");
+  
+          const numColumns = 6; // Number of columns
+  
+          const columnAlignments = ["left",
             "right",
             "center",
             "left",
@@ -807,36 +804,126 @@ export default function DailySaleReport() {
             "right",
             "right",
             "right",
-            "right",
-        ];
-        worksheet.addRow([]);
-        [
-            comapnyname,
-            `Daily Sale Report From ${fromInputDate} To ${toInputDate}`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
-        });
-        worksheet.addRow([]);
-        const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" },
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
-        };
-        const headers = [
-            "Date",
+            "right",];
+  
+          // Add an empty row at the start
+          worksheet.addRow([]);
+  
+          // Add title rows
+  
+          [comapnyname, `Daily Sale Report From ${fromInputDate} To ${toInputDate}`
+          ].forEach((title, index) => {
+              // Define custom styles for each title
+              let customStyle;
+              let rowHeight = 20;  // Default row height
+              if (index === 0) {
+                  // Style for company name
+                  customStyle = {
+                      font: { family: getfontstyle, size: 18, bold: true },
+                      alignment: { horizontal: "center" },
+                  };
+                  rowHeight = 30; // Increase row height for company name to avoid overlap
+              } else {
+                  // Style for "Item List"
+                  customStyle = {
+                      font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                      alignment: { horizontal: "center" },
+                  };
+              }
+  
+              // Add row with the title
+              worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+  
+              // Adjust the row height for the company name or other titles
+              worksheet.getRow(index + 2).height = rowHeight;
+  
+              // Merge the cells for the title
+              worksheet.mergeCells(
+                  `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+              );
+          });
+  
+  
+  
+          // Add an empty row after the title section
+          worksheet.addRow([]);  // This is where you add the empty row
+  
+  
+          let typecategory = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";
+
+
+          let typestatus = "";
+
+          if (transectionType === "INV") {
+            typestatus = "SALE";
+          } else if (transectionType === "SRN") {
+            typestatus = "SALE RETURN";
+          } else {
+            typestatus = "ALL"; // Default value if transectionType is neither 'N' nor 'A'
+          }
+          let typesearch = searchQuery ? searchQuery : "";
+
+          const typeAndStoreRow2 = worksheet.addRow([
+            "STORE :", typecategory,
+           
+          ]);
+
+          const typeAndStoreRow3 = worksheet.addRow(
+            searchQuery
+              ? ["TYPE :", typestatus, "","", "", "SEARCH :", typesearch]
+              : ["TYPE :", typestatus, ""]
+          );
+  
+        
+  
+          const applyStatusRowStyle = (row, boldColumns = []) => {
+              row.eachCell((cell, colIndex) => {
+                  // Check if the current cell is in the boldColumns array
+                  const isBold = boldColumns.includes(colIndex);
+  
+                  cell.font = {
+                      family: getfontstyle, // Your desired font family
+                      size: getdatafontsize, // Your desired font size
+                      bold: isBold, // Bold only for specific columns
+                  };
+  
+                  cell.alignment = {
+                      horizontal: "left", // Align text to the left
+                      vertical: "middle", // Vertically align to the middle
+                  };
+  
+                  cell.border = null; // Remove borders
+              });
+          };
+  
+          // Bold specific columns (labels)
+  
+          applyStatusRowStyle(typeAndStoreRow2, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+          applyStatusRowStyle(typeAndStoreRow3, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+
+  
+  
+          // Header style for center alignment
+          const headerStyle = {
+              font: { bold: true, family: getfontstyle, size: getdatafontsize },
+              alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
+              fill: {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb: "FFC6D9F7" },
+              },
+              border: {
+                  top: { style: "thin" },
+                  left: { style: "thin" },
+                  bottom: { style: "thin" },
+                  right: { style: "thin" },
+              },
+          };
+  
+          // Add headers
+          const headers = ["Date",
             "Trn#",
             "Type",
             "Description",
@@ -844,14 +931,19 @@ export default function DailySaleReport() {
             "Mobile",
             "Rate",
             "Qnty",
-            "Amount",
-        ];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
-        });
-        tableData.forEach((item) => {
-            worksheet.addRow([
+            "Amount",];
+          const headerRow = worksheet.addRow(headers);
+  
+          // Apply styles and center alignment to the header row
+          headerRow.eachCell((cell) => {
+              cell.style = { ...headerStyle };
+          });
+  
+          // Add data rows
+  
+          // Add data rows
+          tableData.forEach((item) => {
+              const row = worksheet.addRow([
                 item.Date,
                 item["Trn #"],
                 item.Type,
@@ -861,9 +953,34 @@ export default function DailySaleReport() {
                 item.Rate,
                 item.Qnty,
                 item["Sale Amount"],
-            ]);
-        });
-        const totalRow = worksheet.addRow([
+              ]);
+  
+              // Apply custom styles to each cell in the row
+              row.eachCell((cell, colIndex) => {
+                  cell.font = {
+                      family: getfontstyle, // Set your desired font family
+                      size: getdatafontsize, // Set the font size
+                      bold: false, // Make the font bold
+                  };
+  
+                  cell.border = {
+                      top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                      left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                      bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                      right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                  };
+  
+                  // Align cell content based on columnAlignments array
+                  const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                  cell.alignment = {
+                      horizontal: alignment,
+                      vertical: "middle", // Vertically align to the middle
+                  };
+              });
+          });
+  
+  
+          const totalRow = worksheet.addRow([
             "",
             "",
             "",
@@ -873,36 +990,52 @@ export default function DailySaleReport() {
             "",
             String(totalQnty),
             String(totalAmount),
-        ]);
-        totalRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-        [11, 8, 5, 45, 45, 13, 11, 5, 11].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 5) {
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
-            }
-        });
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, "DailySaleReport.xlsx");
-    };
+          ]);
+  
+          // total row added
+  
+          totalRow.eachCell((cell, colNumber) => {
+              cell.font = { bold: true };
+              cell.border = {
+                  top: { style: "thin" },
+                  left: { style: "thin" },
+                  bottom: { style: "thin" },
+                  right: { style: "thin" },
+              };
+  
+              // Align only the "Total" text to the right
+              if (colNumber === 8 || colNumber === 9) {
+                  cell.alignment = { horizontal: "right" };
+              }
+          });
+  
+  
+          // Set column widths
+  
+  
+          [14, 12, 7, 50, 45, 13, 11, 5, 11].forEach((width, index) => {
+              worksheet.getColumn(index + 1).width = width;
+          });
+  
+  
+  
+          const getCurrentDate = () => {
+              const today = new Date();
+              const dd = String(today.getDate()).padStart(2, "0");
+              const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+              const yyyy = today.getFullYear();
+              return dd + "/" + mm + "/" + yyyy;
+          };
+  
+          const currentdate = getCurrentDate();
+  
+          // Generate Excel file buffer and save
+          const buffer = await workbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          saveAs(blob, `Daily Sale Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+      };
 
     const dispatch = useDispatch();
 
@@ -1268,8 +1401,8 @@ export default function DailySaleReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            From:&nbsp;&nbsp;
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            From :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1298,8 +1431,7 @@ export default function DailySaleReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                            backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1337,8 +1469,7 @@ export default function DailySaleReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                        color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1360,8 +1491,8 @@ export default function DailySaleReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            To:&nbsp;&nbsp;
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            To :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1391,8 +1522,7 @@ export default function DailySaleReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                            backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1429,8 +1559,7 @@ export default function DailySaleReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                        color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1468,7 +1597,7 @@ export default function DailySaleReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="custom" style={{ fontSize: "14px" }}>
+                                        <label htmlFor="custom" style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, }}>
                                             Custom
                                         </label>
                                     </div>
@@ -1487,7 +1616,7 @@ export default function DailySaleReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="30" style={{ fontSize: "14px" }}>
+                                        <label htmlFor="30" style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, }}>
                                             30 Days
                                         </label>
                                     </div>
@@ -1506,7 +1635,7 @@ export default function DailySaleReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="60" style={{ fontSize: "14px" }}>
+                                        <label htmlFor="60" style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, }}>
                                             60 Days
                                         </label>
                                     </div>
@@ -1525,7 +1654,7 @@ export default function DailySaleReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="90" style={{ fontSize: "14px" }}>
+                                        <label htmlFor="90" style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, }}>
                                             90 Days
                                         </label>
                                     </div>
@@ -1561,8 +1690,8 @@ export default function DailySaleReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Store:&nbsp;&nbsp;
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            Store :&nbsp;
                                         </span>{" "}
                                         <br />
                                     </label>
@@ -1631,8 +1760,8 @@ export default function DailySaleReport() {
                                     }}
                                 >
                                     <label htmlFor="transactionType">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Type:&nbsp;&nbsp;
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            Type :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1655,8 +1784,7 @@ export default function DailySaleReport() {
                                         // marginLeft: "15px",
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
                                     }}
                                 >
                                     <option value="">All</option>
@@ -1672,8 +1800,8 @@ export default function DailySaleReport() {
                             >
                                 <div>
                                     <label for="searchInput">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Search:&nbsp;&nbsp;
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                            Search :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1689,8 +1817,7 @@ export default function DailySaleReport() {
                                         style={{
                                             width: "275px",
                                             height: "24px",
-                                            fontSize: "12px",
-                                            color: fontcolor,
+                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                            color: fontcolor,
                                             backgroundColor: getcolor,
                                             border: `1px solid ${fontcolor}`,
                                             outline: "none",
@@ -1721,14 +1848,14 @@ export default function DailySaleReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
                             >
                                 <thead
                                     style={{
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1790,8 +1917,7 @@ export default function DailySaleReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
                                     position: "relative",
                                 }}
                             >

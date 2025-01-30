@@ -1013,7 +1013,7 @@ export default function DailyCreditReport() {
                                     }}
                                 >
                                     <label htmlFor="transactionType">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
                                             Type :
                                         </span>
                                     </label>
@@ -1038,8 +1038,7 @@ export default function DailyCreditReport() {
                                         marginLeft: "5px",
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
                                     }}
                                 >
                                     <option value="A">All</option>
@@ -1051,7 +1050,7 @@ export default function DailyCreditReport() {
 
                             <div id="lastDiv" style={{ marginRight: "5px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                    <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
                                         Search :
                                     </span>{" "}
                                 </label>
@@ -1067,8 +1066,7 @@ export default function DailyCreditReport() {
                                         marginRight: "20px",
                                         width: "200px",
                                         height: "24px",
-                                        fontSize: "12px",
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1096,14 +1094,14 @@ export default function DailyCreditReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
                             >
                                 <thead
                                     style={{
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1161,8 +1159,7 @@ export default function DailyCreditReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
                                     position: "relative",
                                 }}
                             >

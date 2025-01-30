@@ -804,7 +804,7 @@ export default function CategoryList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span style={{ display:'flex',alignItems:'center',justifyContent:'center',fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                       Status :
                     </span>
                   </label>
@@ -844,7 +844,8 @@ export default function CategoryList() {
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span style={{
                     fontSize: getdatafontsize,
-                    fontFamily: getfontstyle, fontWeight: "bold"
+                    fontFamily: getfontstyle, fontWeight: "bold",
+                    display:'flex',alignItems:'center',justifyContent:'center',
                   }}>
                     Search :
                   </span>{" "}

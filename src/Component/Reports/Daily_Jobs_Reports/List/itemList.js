@@ -1176,8 +1176,9 @@ export default function ItemList() {
                       justifyContent: "end",
                     }}
                   >
+                   
                     <label htmlFor="transactionType">
-                      <span style={{ fontSize: getdatafontsize, fontFamily:getfontstyle, fontWeight: "bold" }}>
+                      <span style={{ display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize, fontFamily:getfontstyle, fontWeight: "bold" }}>
                         Company :
                       </span>
                     </label>

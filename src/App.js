@@ -65,6 +65,7 @@ import DailyCollectionReport from "./Component/Reports/Daily_Jobs_Reports/DailyR
 import DailyPaymentReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPaymentReport.js";
 import DailyCashBankBalance from "./Component/Reports/Daily_Jobs_Reports/DailyReports/CashBankBalanceReport.js";
 import DailySaleReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySaleReport.js";
+import DailyPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPurchaseReport.js";
 
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
@@ -142,6 +143,7 @@ function App() {
                 <Route exact path="/DailyPaymentReport" element={<DailyPaymentReport />} />
                 <Route exact path="/Cash&BankBalance" element={<DailyCashBankBalance />} />
                 <Route exact path="/SaleReport" element={<DailySaleReport />} />
+                <Route exact path="/PurchaseReport" element={<DailyPurchaseReport />} />
 
               
               

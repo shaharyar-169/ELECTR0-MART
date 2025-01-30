@@ -1,0 +1,49 @@
+.css-1jqq78o-placeholder {
+    color: var(--font-color) !important;
+    margin-left: -10px !important;
+    padding-left: 5px !important;
+    display: flex !important;
+    justify-content: start !important;
+}
+
+.css-1crk2i0-singleValue {
+    color: var(--font-color) !important;
+}
+
+.css-166bipr-Input {
+    color: var(--font-color) !important;
+    text-align: left !important;
+}
+
+.css-qbdosj-Input {
+    color: var(--font-color) !important;
+    text-align: left !important;
+}
+
+/* Font size decrease select */
+.css-1g8werf-control,
+.css-5svr4e-control {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+.css-1g8werf-control:hover {
+    border-color: var(--font-color) !important;
+}
+
+
+
+.css-1ttuojf-control {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+.css-vovtv1-control {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+
+.css-1ttuojf-control:hover {
+    border-color: var(--font-color) !important;
+}

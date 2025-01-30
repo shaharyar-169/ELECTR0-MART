@@ -20,6 +20,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import './dailydemo.css';
 
 export default function DailyStatusReport() {
     const navigate = useNavigate();
@@ -289,8 +290,7 @@ export default function DailyStatusReport() {
             <components.Option {...props}>
                 <div
                     style={{
-                        fontSize: "12px",
-                        paddingBottom: "5px",
+                        fontSize: getdatafontsize,fontFamily:getfontstyle,                         paddingBottom: "5px",
                         lineHeight: "3px",
                         color: "black",
                         textAlign: "start",
@@ -309,7 +309,7 @@ export default function DailyStatusReport() {
             height: "24px",
             minHeight: "unset",
             width: "275px",
-            fontSize: "12px",
+            fontSize: getdatafontsize,fontFamily:getfontstyle, 
             backgroundColor: getcolor,
             color: fontcolor,
             borderRadius: 0,
@@ -1221,7 +1221,7 @@ export default function DailyStatusReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
                                             Rep Date :&nbsp;
                                         </span>
                                     </label>
@@ -1252,8 +1252,7 @@ export default function DailyStatusReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1290,8 +1289,7 @@ export default function DailyStatusReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1316,7 +1314,7 @@ export default function DailyStatusReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
                                             Store :&nbsp;
                                         </span>{" "}
                                         <br />
@@ -1361,7 +1359,7 @@ export default function DailyStatusReport() {
                             >
                                 <div>
                                     <label for="searchInput">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
                                             Search :
                                         </span>
                                     </label>
@@ -1378,8 +1376,7 @@ export default function DailyStatusReport() {
                                         style={{
                                             width: "200px",
                                             height: "24px",
-                                            fontSize: "12px",
-                                            marginLeft: '5px',
+                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                             marginLeft: '5px',
                                             color: fontcolor,
                                             backgroundColor: getcolor,
                                             border: `1px solid ${fontcolor}`,
@@ -1411,13 +1408,13 @@ export default function DailyStatusReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                     width: "100%",
                                     position: "relative",
                                 }}
                             >
                                 <thead
                                     style={{
+                                        fontSize: getdatafontsize,fontFamily:getfontstyle, 
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1482,8 +1479,7 @@ export default function DailyStatusReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                     width: "100%",
                                     position: "relative",
                                 }}
                             >

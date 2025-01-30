@@ -802,7 +802,7 @@ export default function TypeList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
                       Status :
                     </span>
                   </label>
@@ -839,7 +839,7 @@ export default function TypeList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
                     Search :
                   </span>{" "}
                 </label>

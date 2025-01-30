@@ -18,6 +18,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 import './list.css';
+import './demo.css';
 import { getcompanyData } from "../../../File/Category_Maintenance/Category_Maintenance_Api";
 
 export default function ItemPriceListA() {
