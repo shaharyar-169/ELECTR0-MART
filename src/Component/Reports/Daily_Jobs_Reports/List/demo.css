@@ -30,3 +30,19 @@
 .css-1g8werf-control:hover {
     border-color: var(--font-color) !important;
 }
+
+
+.css-1c6sv9v-control {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+.css-1pbmvgo-control {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+
+.css-1c6sv9v-control:hover {
+    border-color: var(--font-color) !important;;
+}

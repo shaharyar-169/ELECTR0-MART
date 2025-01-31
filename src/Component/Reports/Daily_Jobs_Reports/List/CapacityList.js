@@ -73,6 +73,8 @@ export default function CapacityList() {
     const formData = new URLSearchParams({
       FCapSts: transectionType,
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
     }).toString();
 

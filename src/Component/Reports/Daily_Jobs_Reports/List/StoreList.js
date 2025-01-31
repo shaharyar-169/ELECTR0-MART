@@ -75,6 +75,7 @@ export default function StoreList() {
       FStrSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
     }).toString();
 

@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -21,6 +21,9 @@ export default function EmployeeList() {
   const user = getUserData();
   const organisation = getOrganisationData();
 
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
+
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -30,6 +33,7 @@ export default function EmployeeList() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
+ 
 
   const {
     isSidebarVisible,
@@ -45,6 +49,8 @@ export default function EmployeeList() {
     getfontstyle,
     getdatafontsize,
   } = useTheme();
+
+ 
 
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
@@ -71,8 +77,8 @@ export default function EmployeeList() {
     const formData = new URLSearchParams({
       FEmpSts: transectionType,
       code: organisation.code,
-      // code: "NASIRTRD",
-      FLocCod: getLocationNumber,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
     }).toString();
 

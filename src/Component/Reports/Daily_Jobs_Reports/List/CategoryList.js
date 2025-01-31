@@ -72,6 +72,8 @@ export default function CategoryList() {
     const formData = new URLSearchParams({
       FCtgSts: transectionType,
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
     }).toString();
 

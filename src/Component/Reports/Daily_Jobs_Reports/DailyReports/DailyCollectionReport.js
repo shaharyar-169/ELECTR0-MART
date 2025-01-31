@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription  } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -69,6 +69,9 @@ export default function DailyCollectionReport() {
         getfontstyle,
         getdatafontsize
     } = useTheme();
+
+    const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber()
 
     const comapnyname = organisation.description;
 
@@ -378,8 +381,8 @@ export default function DailyCollectionReport() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             code: organisation.code,
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
@@ -788,30 +791,30 @@ export default function DailyCollectionReport() {
     };
 
     const handleDownloadCSV = async () => {
-           const workbook = new ExcelJS.Workbook();
-           const worksheet = workbook.addWorksheet("Sheet1");
-   
-           const numColumns = 6; // Number of columns
-   
-           const columnAlignments = [
-               "left",
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Sheet1");
+
+        const numColumns = 6; // Number of columns
+
+        const columnAlignments = [
+            "left",
             "right",
             "center",
             "left",
             "left",
             "right",
-   
-           ];
-   
-           // Add an empty row at the start
-           worksheet.addRow([]);
-   
-           // Add title rows
-   
-         
-   
-       
-           
+
+        ];
+
+        // Add an empty row at the start
+        worksheet.addRow([]);
+
+        // Add title rows
+
+
+
+
+
         [comapnyname, `Daily Collection Report From ${fromInputDate} To ${toInputDate}`].forEach((title, index) => {
             // Define custom styles for each title
             let customStyle;
@@ -842,99 +845,99 @@ export default function DailyCollectionReport() {
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
-   
-   
-   
-           // Add an empty row after the title section
-           worksheet.addRow([]);  // This is where you add the empty row
-   
-   
-           let typestatus = "";
-   
-           if (transectionType === "A") {
-               typestatus = "ALL";
-           } else if (transectionType === "C") {
-               typestatus = "CASH";
-           } else if (transectionType === "B") {
-               typestatus = "BANK";
-           } 
-            else {
-               typestatus = "ALL"; // Default value
-           }
-   
-   
-           let typesearch = searchQuery ? searchQuery : "";
-   
-           const typeAndStoreRow3 = worksheet.addRow(
-               searchQuery
-                   ? ["TYPE :", typestatus, "", "",  "SEARCH :", typesearch]
-                   : ["TYPE :", typestatus, ""]
-           );
-   
-           const applyStatusRowStyle = (row, boldColumns = []) => {
-               row.eachCell((cell, colIndex) => {
-                   // Check if the current cell is in the boldColumns array
-                   const isBold = boldColumns.includes(colIndex);
-   
-                   cell.font = {
-                       family: getfontstyle, // Your desired font family
-                       size: getdatafontsize, // Your desired font size
-                       bold: isBold, // Bold only for specific columns
-                   };
-   
-                   cell.alignment = {
-                       horizontal: "left", // Align text to the left
-                       vertical: "middle", // Vertically align to the middle
-                   };
-   
-                   cell.border = null; // Remove borders
-               });
-           };
-   
-           // Bold specific columns (labels)
-   
-           applyStatusRowStyle(typeAndStoreRow3, [1,5]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-   
-   
-   
-           // Header style for center alignment
-           const headerStyle = {
-               font: { bold: true, family: getfontstyle, size: getdatafontsize },
-               alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-               fill: {
-                   type: "pattern",
-                   pattern: "solid",
-                   fgColor: { argb: "FFC6D9F7" },
-               },
-               border: {
-                   top: { style: "thin" },
-                   left: { style: "thin" },
-                   bottom: { style: "thin" },
-                   right: { style: "thin" },
-               },
-           };
-   
-           // Add headers
-           const headers = [
+
+
+
+        // Add an empty row after the title section
+        worksheet.addRow([]);  // This is where you add the empty row
+
+
+        let typestatus = "";
+
+        if (transectionType === "A") {
+            typestatus = "ALL";
+        } else if (transectionType === "C") {
+            typestatus = "CASH";
+        } else if (transectionType === "B") {
+            typestatus = "BANK";
+        }
+        else {
+            typestatus = "ALL"; // Default value
+        }
+
+
+        let typesearch = searchQuery ? searchQuery : "";
+
+        const typeAndStoreRow3 = worksheet.addRow(
+            searchQuery
+                ? ["TYPE :", typestatus, "", "", "SEARCH :", typesearch]
+                : ["TYPE :", typestatus, ""]
+        );
+
+        const applyStatusRowStyle = (row, boldColumns = []) => {
+            row.eachCell((cell, colIndex) => {
+                // Check if the current cell is in the boldColumns array
+                const isBold = boldColumns.includes(colIndex);
+
+                cell.font = {
+                    family: getfontstyle, // Your desired font family
+                    size: getdatafontsize, // Your desired font size
+                    bold: isBold, // Bold only for specific columns
+                };
+
+                cell.alignment = {
+                    horizontal: "left", // Align text to the left
+                    vertical: "middle", // Vertically align to the middle
+                };
+
+                cell.border = null; // Remove borders
+            });
+        };
+
+        // Bold specific columns (labels)
+
+        applyStatusRowStyle(typeAndStoreRow3, [1, 5]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+
+
+
+        // Header style for center alignment
+        const headerStyle = {
+            font: { bold: true, family: getfontstyle, size: getdatafontsize },
+            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
+            fill: {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFC6D9F7" },
+            },
+            border: {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            },
+        };
+
+        // Add headers
+        const headers = [
             "Date",
             "Trn#",
             "Type",
             "A/C Description",
             "Description",
             "Amount",
-           ];
-           const headerRow = worksheet.addRow(headers);
-   
-           // Apply styles and center alignment to the header row
-           headerRow.eachCell((cell) => {
-               cell.style = { ...headerStyle };
-           });
-   
-           // Add data rows
-   
-           // Add data rows
-           tableData.forEach((item) => {
-               const row = worksheet.addRow([
+        ];
+        const headerRow = worksheet.addRow(headers);
+
+        // Apply styles and center alignment to the header row
+        headerRow.eachCell((cell) => {
+            cell.style = { ...headerStyle };
+        });
+
+        // Add data rows
+
+        // Add data rows
+        tableData.forEach((item) => {
+            const row = worksheet.addRow([
                 item.Date,
                 item["Trn#"],
                 item.Type,
@@ -942,36 +945,36 @@ export default function DailyCollectionReport() {
                 item.Description,
                 item.Amount,
 
-               ]);
+            ]);
 
-   
-               // Apply custom styles to each cell in the row
-               row.eachCell((cell, colIndex) => {
-                   cell.font = {
-                       family: getfontstyle, // Set your desired font family
-                       size: getdatafontsize, // Set the font size
-                       bold: false, // Make the font bold
-                   };
-   
-                   cell.border = {
-                       top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-                       left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-                       bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-                       right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-                   };
-   
-                   // Align cell content based on columnAlignments array
-                   const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-                   cell.alignment = {
-                       horizontal: alignment,
-                       vertical: "middle", // Vertically align to the middle
-                   };
-               });
-           });
-   
-           // Set column widths
 
-           const totalRow = worksheet.addRow([
+            // Apply custom styles to each cell in the row
+            row.eachCell((cell, colIndex) => {
+                cell.font = {
+                    family: getfontstyle, // Set your desired font family
+                    size: getdatafontsize, // Set the font size
+                    bold: false, // Make the font bold
+                };
+
+                cell.border = {
+                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                };
+
+                // Align cell content based on columnAlignments array
+                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                cell.alignment = {
+                    horizontal: alignment,
+                    vertical: "middle", // Vertically align to the middle
+                };
+            });
+        });
+
+        // Set column widths
+
+        const totalRow = worksheet.addRow([
             "",
             "",
             "",
@@ -997,30 +1000,30 @@ export default function DailyCollectionReport() {
                 cell.alignment = { horizontal: "right" };
             }
         });
-            
-   
-           [12, 10, 8, 40, 45, 12].forEach((width, index) => {
-               worksheet.getColumn(index + 1).width = width;
-           });
 
- 
-           const getCurrentDate = () => {
-               const today = new Date();
-               const dd = String(today.getDate()).padStart(2, "0");
-               const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-               const yyyy = today.getFullYear();
-               return dd + "/" + mm + "/" + yyyy;
-           };
-   
-           const currentdate = getCurrentDate();
-   
-           // Generate Excel file buffer and save
-           const buffer = await workbook.xlsx.writeBuffer();
-           const blob = new Blob([buffer], {
-               type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-           });
-           saveAs(blob, `DailyCollectionReport From ${fromInputDate} To ${toInputDate}.xlsx`);
-       };
+
+        [12, 10, 8, 40, 45, 12].forEach((width, index) => {
+            worksheet.getColumn(index + 1).width = width;
+        });
+
+
+        const getCurrentDate = () => {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, "0");
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const yyyy = today.getFullYear();
+            return dd + "/" + mm + "/" + yyyy;
+        };
+
+        const currentdate = getCurrentDate();
+
+        // Generate Excel file buffer and save
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        saveAs(blob, `DailyCollectionReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+    };
 
     const dispatch = useDispatch();
 
@@ -1291,7 +1294,7 @@ export default function DailyCollectionReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="custom" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>Custom</label>
+                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>Custom</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1308,7 +1311,7 @@ export default function DailyCollectionReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="30" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>30 Days</label>
+                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>30 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1325,7 +1328,7 @@ export default function DailyCollectionReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="60" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>60 Days</label>
+                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>60 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1342,7 +1345,7 @@ export default function DailyCollectionReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="90" style={{fontSize: getdatafontsize,fontFamily:getfontstyle,}}>90 Days</label>
+                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>90 Days</label>
                                         </div>
                                     </div>
                                 </div>
@@ -1360,7 +1363,7 @@ export default function DailyCollectionReport() {
                                     }}
                                 >
                                     <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             Type :
                                         </span>
                                     </label>
@@ -1384,7 +1387,7 @@ export default function DailyCollectionReport() {
                                         marginLeft: "5px",
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                     }}
                                 >
                                     <option value="">All</option>
@@ -1417,7 +1420,7 @@ export default function DailyCollectionReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             From :
                                         </span>
                                     </label>
@@ -1448,7 +1451,7 @@ export default function DailyCollectionReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1486,7 +1489,7 @@ export default function DailyCollectionReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1509,7 +1512,7 @@ export default function DailyCollectionReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             To :
                                         </span>
                                     </label>
@@ -1541,7 +1544,7 @@ export default function DailyCollectionReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1578,7 +1581,7 @@ export default function DailyCollectionReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1591,7 +1594,7 @@ export default function DailyCollectionReport() {
                             </div>
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                         Search :
                                     </span>{" "}
                                 </label>
@@ -1607,7 +1610,7 @@ export default function DailyCollectionReport() {
                                         marginRight: "20px",
                                         width: "200px",
                                         height: "24px",
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1635,13 +1638,13 @@ export default function DailyCollectionReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                 }}
                             >
                                 <thead
                                     style={{
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1693,7 +1696,7 @@ export default function DailyCollectionReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                 }}
                             >

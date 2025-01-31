@@ -56,6 +56,9 @@ export default function ItemPriceList() {
     const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
     const [typeselectdatavalue, settypeselectdatavalue] = useState("");
 
+    const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
+
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -86,7 +89,8 @@ export default function ItemPriceList() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             code: organisation.code,
-            // code:'NASIRTRD',
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
             FCtgCod: Companyselectdata,
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
@@ -346,7 +350,7 @@ export default function ItemPriceList() {
             height: "24px",
             minHeight: "unset",
             width: 250,
-            fontSize: getdatafontsize,fontFamily:getfontstyle,
+            fontSize: getdatafontsize, fontFamily: getfontstyle,
             backgroundColor: getcolor,
             color: fontcolor,
             borderRadius: 0,

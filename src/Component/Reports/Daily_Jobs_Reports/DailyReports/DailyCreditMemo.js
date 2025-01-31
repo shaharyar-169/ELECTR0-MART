@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -54,6 +54,7 @@ export default function DailyCreditReport() {
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+   
 
     const {
         isSidebarVisible,
@@ -69,6 +70,9 @@ export default function DailyCreditReport() {
         getfontstyle,
         getdatafontsize
     } = useTheme();
+
+    const yeardescription = getYearDescription();
+    const locationnumber = getLocationnumber();
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
@@ -122,9 +126,9 @@ export default function DailyCreditReport() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             FRepTyp: transectionType,
-            code: 'NASIRTRD',
-            FYerDsc: '2024-2024',
-            FLocCod: '001',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
             FSchTxt: searchQuery
         }).toString();
 
@@ -230,7 +234,7 @@ export default function DailyCreditReport() {
             "Received",
             "Balance",
         ];
-        const columnWidths = [14, 22 ,22, 70, 25, 25, 20, 20];
+        const columnWidths = [14, 22, 22, 70, 25, 25, 20, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -332,12 +336,12 @@ export default function DailyCreditReport() {
                     if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
-                          align: "right",
-                          baseline: "middle",
+                            align: "right",
+                            baseline: "middle",
                         });
-                      } else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-                      }
+                    }
 
 
 
@@ -480,12 +484,12 @@ export default function DailyCreditReport() {
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                 doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-             if(searchQuery){
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`SEARCH :`, labelsX + 150, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 170, labelsY + 8.5); // Draw the value next to the label
-}
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 150, labelsY + 8.5); // Draw bold label
+                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 170, labelsY + 8.5); // Draw the value next to the label
+                }
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -735,7 +739,7 @@ export default function DailyCreditReport() {
         ]);
 
         // total row added
-        
+
         totalRow.eachCell((cell) => {
             cell.font = { bold: true };
             cell.border = {
@@ -745,7 +749,7 @@ export default function DailyCreditReport() {
                 right: { style: "thin" },
             };
         });
-        
+
 
         // Set column widths
 
@@ -1013,7 +1017,7 @@ export default function DailyCreditReport() {
                                     }}
                                 >
                                     <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             Type :
                                         </span>
                                     </label>
@@ -1038,7 +1042,7 @@ export default function DailyCreditReport() {
                                         marginLeft: "5px",
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                     }}
                                 >
                                     <option value="A">All</option>
@@ -1050,7 +1054,7 @@ export default function DailyCreditReport() {
 
                             <div id="lastDiv" style={{ marginRight: "5px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                         Search :
                                     </span>{" "}
                                 </label>
@@ -1066,7 +1070,7 @@ export default function DailyCreditReport() {
                                         marginRight: "20px",
                                         width: "200px",
                                         height: "24px",
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                        color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1094,14 +1098,14 @@ export default function DailyCreditReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
                             >
                                 <thead
                                     style={{
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1159,7 +1163,7 @@ export default function DailyCreditReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                 }}
                             >

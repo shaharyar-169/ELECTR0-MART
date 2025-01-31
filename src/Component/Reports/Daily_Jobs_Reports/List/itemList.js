@@ -27,6 +27,8 @@ export default function ItemList() {
     const organisation = getOrganisationData();
     const yeardescription = getYearDescription();
     const locationnumber = getLocationnumber();
+
+   
   
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
@@ -101,6 +103,8 @@ export default function ItemList() {
         FCtgCod: Companyselectdata,
         FCapCod: Capacityselectdata,
         FTypCod: Typeselectdata,
+        FLocCod: locationnumber || getLocationNumber,
+        FYerDsc: yeardescription || getYearDescription,
         FCmpCod: Companyselectdata,
         FSchTxt: searchQuery,
       }).toString();
@@ -339,69 +343,129 @@ export default function ItemList() {
       label: `${item.ttypcod}-${item.ttypdsc.trim()}`,
     }));
   
-    const DropdownOption = (props) => {
-      return (
-        <components.Option {...props}>
-          <div
-            style={{
-             fontSize: getdatafontsize, fontFamily:getfontstyle,
-              paddingBottom: "5px",
-              lineHeight: "3px",
-              color: "black",
-              textAlign: "start",
-            }}
-          >
-            {props.data.label}
-          </div>
-        </components.Option>
-      );
-    };
-    const customStyles1 = (hasError) => ({
-      control: (base, state) => ({
-        ...base,
-        height: "24px",
-        minHeight: "unset",
-        width: 250,
-        fontSize: getdatafontsize,fontFamily:getfontstyle,
-        backgroundColor: getcolor,
-        color: fontcolor,
-        borderRadius: 0,
-        border: `1px solid ${fontcolor}`,
-        transition: "border-color 0.15s ease-in-out",
-        "&:hover": {
-          borderColor: state.isFocused ? base.borderColor : "black",
-        },
-        padding: "0 8px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }),
-      dropdownIndicator: (base) => ({
-        ...base,
-        padding: 0,
-        marginTop: "-5px",
-        fontSize: "18px",
-        display: "flex",
-        textAlign: "center !important",
-      }),
-      singleValue: (base) => ({
-        ...base,
-        marginTop: "-5px",
-        textAlign: "left",
-        color: fontcolor,
-      }),
-      clearIndicator: (base) => ({
-        ...base,
-        marginTop: "-5px",
-      }),
-    });
+    // const DropdownOption = (props) => {
+    //   return (
+    //     <components.Option {...props}>
+    //       <div
+    //         style={{
+    //          fontSize: getdatafontsize, fontFamily:getfontstyle,
+    //           paddingBottom: "5px",
+    //           lineHeight: "3px",
+    //           color: "black",
+    //           textAlign: "start",
+    //         }}
+    //       >
+    //         {props.data.label}
+    //       </div>
+    //     </components.Option>
+    //   );
+    // };
+    // const customStyles1 = (hasError) => ({
+    //   control: (base, state) => ({
+    //     ...base,
+    //     height: "24px",
+    //     minHeight: "unset",
+    //     width: 250,
+    //     fontSize: getdatafontsize,fontFamily:getfontstyle,
+    //     backgroundColor: getcolor,
+    //     color: fontcolor,
+    //     borderRadius: 0,
+    //     border: `1px solid ${fontcolor}`,
+    //     transition: "border-color 0.15s ease-in-out",
+    //     "&:hover": {
+    //       borderColor: state.isFocused ? base.borderColor : "black",
+    //     },
+    //     padding: "0 8px",
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "space-between",
+    //   }),
+    //   dropdownIndicator: (base) => ({
+    //     ...base,
+    //     padding: 0,
+    //     marginTop: "-5px",
+    //     fontSize: "18px",
+    //     display: "flex",
+    //     textAlign: "center !important",
+    //   }),
+    //   singleValue: (base) => ({
+    //     ...base,
+    //     marginTop: "-5px",
+    //     textAlign: "left",
+    //     color: fontcolor,
+    //   }),
+    //   clearIndicator: (base) => ({
+    //     ...base,
+    //     marginTop: "-5px",
+    //   }),
+    // });
   
-    const globalFontSettings = {
-      name: "vardana",
-      bold: "bold",
-      normal: "normal",
-      size: getdatafontsize, // Font size
-    };
+   
+    const DropdownOption = (props) => {
+        return (
+          <components.Option {...props}>
+            <div
+              style={{
+                fontSize: getdatafontsize,
+                fontFamily: getfontstyle,
+                paddingBottom: "5px",
+                lineHeight: "3px",
+                color: "black",
+                textAlign: "start",
+              }}
+            >
+              {props.data.label}
+            </div>
+          </components.Option>
+        );
+      };
+      
+      const customStyles1 = (hasError) => ({
+        control: (base, state) => ({
+          ...base,
+          height: "24px",
+          minHeight: "unset",
+          width: 250,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          backgroundColor: getcolor,
+          color: fontcolor,
+          caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+          borderRadius: 0,
+          border: `1px solid ${fontcolor}`, // Fixed Template Literal
+          transition: "border-color 0.15s ease-in-out",
+          "&:hover": {
+            borderColor: state.isFocused ? base.borderColor : "black",
+          },
+          padding: "0 8px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }),
+        dropdownIndicator: (base) => ({
+          ...base,
+          padding: 0,
+          marginTop: "-5px",
+          fontSize: "18px",
+          display: "flex",
+          textAlign: "center",
+        }),
+        singleValue: (base) => ({
+          ...base,
+          marginTop: "-5px",
+          textAlign: "left",
+          color: fontcolor,
+        }),
+        input: (base) => ({
+          ...base,
+          color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+          caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+        }),
+        clearIndicator: (base) => ({
+          ...base,
+          marginTop: "-5px",
+        }),
+      });
   
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
@@ -1226,8 +1290,8 @@ export default function ItemList() {
                     }}
                   >
                     <label htmlFor="transactionType">
-                      <span style={{fontSize: getdatafontsize, fontFamily:getfontstyle, fontWeight: "bold" }}>
-                        Capacity :
+                      <span style={{ fontSize: getdatafontsize, fontFamily:getfontstyle, fontWeight: "bold" }}>
+                        Type :
                       </span>
                     </label>
                   </div>
@@ -1235,31 +1299,33 @@ export default function ItemList() {
                   <div style={{ marginLeft: "3px" }}>
                     <Select
                       className="List-select-class "
-                      ref={input2Ref}
-                      options={capacityoptions}
-                      onKeyDown={(e) => handlecapacityKeypress(e, input3Ref)}
-                      id="selectedsale2"
+                      ref={input3Ref}
+                      options={typeoptions}
+                      onKeyDown={(e) => handletypeKeypress(e, input4Ref)}
+                      id="selectedsale"
                       onChange={(selectedOption) => {
                         if (selectedOption && selectedOption.value) {
                           const labelPart = selectedOption.label.split("-")[1];
-                          setCapacityselectdata(selectedOption.value);
-                          setcapacityselectdatavalue({
+                          setTypeselectdata(selectedOption.value);
+                          settypeselectdatavalue({
                             value: selectedOption.value,
                             label: labelPart, // Set only the 'NGS' part of the label
                           });
                         } else {
-                          setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                          setcapacityselectdatavalue("");
+                          setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                          settypeselectdatavalue("");
                         }
                       }}
                       components={{ Option: DropdownOption }}
                       // styles={customStyles1}
-                      styles={customStyles1(!Capacityselectdata)}
+                      styles={customStyles1(!Typeselectdata)}
                       isClearable
                       placeholder="ALL"
                     />
                   </div>
                 </div>
+                
+               
               </div>
             </div>
             {/* //////////////// SECOND ROW ///////////////////////// */}
@@ -1325,71 +1391,8 @@ export default function ItemList() {
                   </div>
                 </div>
   
-                <div
-                  className="d-flex align-items-center"
-                  style={{ marginRight: "21px" }}
-                >
-                  <div
-                    style={{
-                      marginLeft: "10px",
-                      width: "80px",
-                      display: "flex",
-                      justifyContent: "end",
-                    }}
-                  >
-                    <label htmlFor="transactionType">
-                      <span style={{ fontSize: getdatafontsize, fontFamily:getfontstyle, fontWeight: "bold" }}>
-                        Type :
-                      </span>
-                    </label>
-                  </div>
-  
-                  <div style={{ marginLeft: "3px" }}>
-                    <Select
-                      className="List-select-class "
-                      ref={input3Ref}
-                      options={typeoptions}
-                      onKeyDown={(e) => handletypeKeypress(e, input4Ref)}
-                      id="selectedsale"
-                      onChange={(selectedOption) => {
-                        if (selectedOption && selectedOption.value) {
-                          const labelPart = selectedOption.label.split("-")[1];
-                          setTypeselectdata(selectedOption.value);
-                          settypeselectdatavalue({
-                            value: selectedOption.value,
-                            label: labelPart, // Set only the 'NGS' part of the label
-                          });
-                        } else {
-                          setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                          settypeselectdatavalue("");
-                        }
-                      }}
-                      components={{ Option: DropdownOption }}
-                      // styles={customStyles1}
-                      styles={customStyles1(!Typeselectdata)}
-                      isClearable
-                      placeholder="ALL"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-  
-            {/* //////////////// THIRD ROW ///////////////////////// */}
-            <div
-              className="row"
-              style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  margin: "0px",
-                  padding: "0px",
-                  justifyContent: "space-between",
-                }}
-              >
+                
+
                 <div
                   className="d-flex align-items-center"
                   style={{ marginRight: "21px" }}
@@ -1438,6 +1441,74 @@ export default function ItemList() {
                     <option value="Non-Active">Non-Active</option>
                   </select>
                 </div>
+              </div>
+            </div>
+  
+            {/* //////////////// THIRD ROW ///////////////////////// */}
+            <div
+              className="row"
+              style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  margin: "0px",
+                  padding: "0px",
+                  justifyContent: "space-between",
+                }}
+              >
+
+<div
+                  className="d-flex align-items-center"
+                  style={{ marginRight: "21px" }}
+                >
+                  <div
+                    style={{
+                      marginLeft: "10px",
+                      width: "80px",
+                      display: "flex",
+                      justifyContent: "end",
+                    }}
+                  >
+                    <label htmlFor="transactionType">
+                      <span style={{fontSize: getdatafontsize, fontFamily:getfontstyle, fontWeight: "bold" }}>
+                        Capacity :
+                      </span>
+                    </label>
+                  </div>
+  
+                  <div style={{ marginLeft: "3px" }}>
+                    <Select
+                      className="List-select-class "
+                      ref={input2Ref}
+                      options={capacityoptions}
+                      onKeyDown={(e) => handlecapacityKeypress(e, input3Ref)}
+                      id="selectedsale2"
+                      onChange={(selectedOption) => {
+                        if (selectedOption && selectedOption.value) {
+                          const labelPart = selectedOption.label.split("-")[1];
+                          setCapacityselectdata(selectedOption.value);
+                          setcapacityselectdatavalue({
+                            value: selectedOption.value,
+                            label: labelPart, // Set only the 'NGS' part of the label
+                          });
+                        } else {
+                          setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                          setcapacityselectdatavalue("");
+                        }
+                      }}
+                      components={{ Option: DropdownOption }}
+                      // styles={customStyles1}
+                      styles={customStyles1(!Capacityselectdata)}
+                      isClearable
+                      placeholder="ALL"
+                    />
+                  </div>
+                </div>
+
+               
   
                 <div id="lastDiv" style={{ marginRight: "1px" }}>
                   <label for="searchInput" style={{ marginRight: "3px" }}>

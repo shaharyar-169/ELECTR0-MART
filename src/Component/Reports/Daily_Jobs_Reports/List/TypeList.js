@@ -21,6 +21,9 @@ export default function TypeList() {
   const user = getUserData();
   const organisation = getOrganisationData();
 
+   const yeardescription = getYearDescription();
+    const locationnumber = getLocationnumber();
+
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -70,6 +73,8 @@ export default function TypeList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FTypSts: transectionType,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       code: organisation.code,
       FSchTxt: searchQuery,
     }).toString();

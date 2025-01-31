@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -53,6 +53,9 @@ export default function JournalReport() {
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+    const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
 
     const {
         isSidebarVisible,
@@ -360,9 +363,9 @@ export default function JournalReport() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            code: 'NASIRTRD',
-            FYerDsc: '2024-2024',
-            FLocCod: '001',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
             FSchTxt: searchQuery
         }).toString();
 
@@ -698,9 +701,9 @@ export default function JournalReport() {
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 10; // Adjust vertical position for the labels
+                startY += 6; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 25);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -800,14 +803,7 @@ export default function JournalReport() {
 
 
 
-        let typesearch = searchQuery ? searchQuery : "";
-
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["", "", "", "SEARCH :", typesearch]
-                : [""]
-        );
-
+       
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
                 // Check if the current cell is in the boldColumns array
@@ -830,7 +826,6 @@ export default function JournalReport() {
 
         // Bold specific columns (labels)
 
-        applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
 
 
 
@@ -1273,7 +1268,7 @@ export default function JournalReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                justifyContent: "start",
                             }}
                         >
                             <div className="d-flex align-items-center">
@@ -1369,7 +1364,7 @@ export default function JournalReport() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "15px" }}
+                                style={{ marginLeft: "100px" }}
                             >
                                 <div
                                     style={{
@@ -1420,7 +1415,7 @@ export default function JournalReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, input2Ref)}
+                                        onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1462,7 +1457,7 @@ export default function JournalReport() {
                                 </div>
                             </div>
 
-                            <div id="lastDiv" style={{ marginRight: "5px" }}>
+                            {/* <div id="lastDiv" style={{ marginRight: "5px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
                                     <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
                                         Search :
@@ -1495,7 +1490,7 @@ export default function JournalReport() {
                                     }
                                     onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
 
-                            </div>
+                            </div> */}
                         </div>
 
                     </div>

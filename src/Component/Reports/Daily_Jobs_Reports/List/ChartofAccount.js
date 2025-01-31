@@ -70,10 +70,9 @@ export default function ChartofAccount() {
     const apiUrl = apiLinks + "/ChartOfAccountList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      // FAccSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FSchTxt: searchQuery,
+      FYerDsc: yeardescription || getYearDescription,      FSchTxt: searchQuery,
     }).toString();
 
     axios

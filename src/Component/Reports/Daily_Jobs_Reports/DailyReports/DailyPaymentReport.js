@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getYearDescription, getLocationnumber } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -69,6 +69,9 @@ export default function DailyPaymentReport() {
         getfontstyle,
         getdatafontsize
     } = useTheme();
+
+    const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber()
 
     const comapnyname = organisation.description;
 
@@ -377,9 +380,9 @@ export default function DailyPaymentReport() {
         const apiUrl = apiLinks + "/DailyPaymentReport.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FRepTyp: transectionType,

@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData , getLocationnumber, getYearDescription} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -65,6 +65,9 @@ export default function DailyStatusReport() {
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+    const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber()
 
     const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
@@ -194,10 +197,9 @@ export default function DailyStatusReport() {
         const apiMainUrl = apiLinks + "/DailyStatusReport.php";
         setIsLoading(true);
         const formMainData = new URLSearchParams({
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
-            // FIntDat: fromInputDate,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
             FRepDat: toInputDate,
             FStrCod: storeType,
             // FSchTxt: "",
@@ -285,63 +287,71 @@ export default function DailyStatusReport() {
         label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
     }));
 
-    const DropdownOption = (props) => {
-        return (
-            <components.Option {...props}>
-                <div
-                    style={{
-                        fontSize: getdatafontsize,fontFamily:getfontstyle,                         paddingBottom: "5px",
+      const DropdownOption = (props) => {
+                return (
+                  <components.Option {...props}>
+                    <div
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        paddingBottom: "5px",
                         lineHeight: "3px",
                         color: "black",
                         textAlign: "start",
-                    }}
-                >
-                    {props.data.label}
-                </div>
-            </components.Option>
-        );
-    };
-
-    // ------------ store style customization
-    const customStylesStore = () => ({
-        control: (base, state) => ({
-            ...base,
-            height: "24px",
-            minHeight: "unset",
-            width: "275px",
-            fontSize: getdatafontsize,fontFamily:getfontstyle, 
-            backgroundColor: getcolor,
-            color: fontcolor,
-            borderRadius: 0,
-            // border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-            transition: "border-color 0.15s ease-in-out",
-            "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
-            },
-            padding: "0 8px",
-            display: "flex",
-            // alignItems: "center",
-            justifyContent: "space-between",
-        }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            marginTop: "-5px",
-            fontSize: "18px",
-            display: "flex",
-            textAlign: "center !important",
-        }),
-        singleValue: (base) => ({
-            ...base,
-            marginTop: "-5px",
-            textAlign: "left",
-            color: fontcolor,
-        }),
-        clearIndicator: (base) => ({
-            ...base,
-            marginTop: "-5px",
-        }),
-    });
+                      }}
+                    >
+                      {props.data.label}
+                    </div>
+                  </components.Option>
+                );
+              };
+              
+              const customStyles1 = (hasError) => ({
+                control: (base, state) => ({
+                  ...base,
+                  height: "24px",
+                  minHeight: "unset",
+                  width: 250,
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                  caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+                  borderRadius: 0,
+                  border: `1px solid ${fontcolor}`, // Fixed Template Literal
+                  transition: "border-color 0.15s ease-in-out",
+                  "&:hover": {
+                    borderColor: state.isFocused ? base.borderColor : "black",
+                  },
+                  padding: "0 8px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }),
+                dropdownIndicator: (base) => ({
+                  ...base,
+                  padding: 0,
+                  marginTop: "-5px",
+                  fontSize: "18px",
+                  display: "flex",
+                  textAlign: "center",
+                }),
+                singleValue: (base) => ({
+                  ...base,
+                  marginTop: "-5px",
+                  textAlign: "left",
+                  color: fontcolor,
+                }),
+                input: (base) => ({
+                  ...base,
+                  color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+                  caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+                }),
+                clearIndicator: (base) => ({
+                  ...base,
+                  marginTop: "-5px",
+                }),
+              });
 
     const exportPDFHandler = () => {
 
@@ -1170,7 +1180,7 @@ export default function DailyStatusReport() {
     const handleStoreEnter = (e) => {
         if (e.key === "Enter" && !menuStoreIsOpen) {
             e.preventDefault();
-            focusNextElement(storeRef, searchRef);
+            focusNextElement(storeRef, selectButtonRef);
         }
     };
 
@@ -1304,7 +1314,7 @@ export default function DailyStatusReport() {
                             {/* Store Select */}
                             <div
                                 className="d-flex align-items-center"
-                            // style={{ marginRight: "20px" }}
+                            style={{ marginRight: "30px" }}
                             >
                                 <div
                                     style={{
@@ -1342,7 +1352,7 @@ export default function DailyStatusReport() {
                                         }}
                                         components={{ Option: DropdownOption }}
                                         // styles={customStylesStore}
-                                        styles={customStylesStore()}
+                                        styles={customStyles1()}
                                         isClearable
                                         placeholder="ALL"
                                         menuIsOpen={menuStoreIsOpen}
@@ -1353,7 +1363,7 @@ export default function DailyStatusReport() {
                             </div>
 
                             {/* Search */}
-                            <div
+                            {/* <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "25px" }}
                             >
@@ -1392,7 +1402,7 @@ export default function DailyStatusReport() {
                                         onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
 
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 

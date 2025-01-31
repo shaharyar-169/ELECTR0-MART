@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -53,6 +53,9 @@ export default function DailyCashBankBalance() {
   const [selectedToDate, setSelectedToDate] = useState(null);
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
 
   const {
     isSidebarVisible,
@@ -229,9 +232,9 @@ export default function DailyCashBankBalance() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input2Ref.current) {
+        if (input3Ref.current) {
           e.preventDefault();
-          input2Ref.current.focus();
+          input3Ref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -378,9 +381,9 @@ export default function DailyCashBankBalance() {
     const apiUrl = apiLinks + "/DailyCashBankBalance.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      code: 'NASIRTRD',
-      FLocCod: '001',
-      FYerDsc: '2024-2024',
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FSchTxt: searchQuery,
@@ -428,16 +431,14 @@ export default function DailyCashBankBalance() {
 
   useEffect(() => {
     const currentDate = new Date();
+
+    setSelectedfromDate(currentDate);
+    setfromInputDate(formatDate(currentDate));
+
     setSelectedToDate(currentDate);
     settoInputDate(formatDate(currentDate));
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
+
   }, []);
 
   useEffect(() => {
@@ -781,30 +782,18 @@ export default function DailyCashBankBalance() {
         doc.setFontSize(12);
         doc.setFont(getfontstyle, "300");
 
-        let search = searchQuery ? searchQuery : "";
-
 
         // Set font style, size, and family
         doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
         doc.setFontSize(10); // Font size
 
-
-
-        if (searchQuery) {
-          doc.setFont(getfontstyle, 'bold'); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 150, labelsY + 8.5); // Draw bold label
-          doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-          doc.text(`${search}`, labelsX + 170, labelsY + 8.5); // Draw the value next to the label
-        }
-
-
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, 'bold'); // Set font to bold
         doc.setFontSize(10);
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += 6; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 25);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -907,14 +896,6 @@ export default function DailyCashBankBalance() {
 
 
 
-    let typesearch = searchQuery ? searchQuery : "";
-
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["", "", "", "SEARCH :", typesearch]
-        : [""]
-    );
-
     const applyStatusRowStyle = (row, boldColumns = []) => {
       row.eachCell((cell, colIndex) => {
         // Check if the current cell is in the boldColumns array
@@ -937,7 +918,6 @@ export default function DailyCashBankBalance() {
 
     // Bold specific columns (labels)
 
-    applyStatusRowStyle(typeAndStoreRow3, [1, 4]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
 
 
 
@@ -1045,7 +1025,7 @@ export default function DailyCashBankBalance() {
     // Set column widths
 
 
-    [10, 45, 12, 15, 15, 15].forEach((width, index) => {
+    [14, 45, 12, 15, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1250,8 +1230,8 @@ export default function DailyCashBankBalance() {
         currentDate.getMonth(),
         1
       );
-      setSelectedfromDate(firstDateOfCurrentMonth);
-      setfromInputDate(formatDate(firstDateOfCurrentMonth));
+      setSelectedfromDate(currentDate);
+      setfromInputDate(formatDate(currentDate));
       setSelectedToDate(currentDate);
       settoInputDate(formatDate(currentDate));
     } else {
@@ -1395,51 +1375,7 @@ export default function DailyCashBankBalance() {
                 </div>
               </div>
               {/* ------ */}
-              {/* <div
-                                  className="d-flex align-items-center"
-                                  style={{ marginRight: "21px" }}
-                              >
-                                  <div
-                                      style={{
-                                          width: "60px",
-                                          display: "flex",
-                                          justifyContent: "end",
-                                      }}
-                                  >
-                                      <label htmlFor="transactionType">
-                                          <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                              Type:
-                                          </span>
-                                      </label>
-                                  </div>
-                                  <select
-                                      ref={input1Ref}
-                                      onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                      id="submitButton"
-                                      name="type"
-                                      onFocus={(e) =>
-                                          (e.currentTarget.style.border = "4px solid red")
-                                      }
-                                      onBlur={(e) =>
-                                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                      }
-                                      value={transectionType}
-                                      onChange={handleTransactionTypeChange}
-                                      style={{
-                                          width: "200px",
-                                          height: "24px",
-                                          marginLeft: "15px",
-                                          backgroundColor: getcolor,
-                                          border: `1px solid ${fontcolor}`,
-                                          fontSize: "12px",
-                                          color: fontcolor,
-                                      }}
-                                  >
-                                      <option value="">All</option>
-                                      <option value="Receivable">Receivable</option>
-                                      <option value="Payable">Payable</option>
-                                  </select>
-                              </div> */}
+
               <div></div>
             </div>
           </div>
@@ -1454,7 +1390,7 @@ export default function DailyCashBankBalance() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
               <div className="d-flex align-items-center">
@@ -1548,7 +1484,7 @@ export default function DailyCashBankBalance() {
               </div>
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "15px" }}
+                style={{ marginLeft: "100px" }}
               >
                 <div
                   style={{
@@ -1598,7 +1534,7 @@ export default function DailyCashBankBalance() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, "input2Ref")}
+                    onKeyDown={(e) => handleToKeyPress(e, "searchsubmit")}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -1638,39 +1574,7 @@ export default function DailyCashBankBalance() {
                   />
                 </div>
               </div>
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                    Search :
-                  </span>{" "}
-                </label>
-                <input
-                  ref={input2Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                  type="text"
-                  id="searchsubmit"
-                  placeholder="Item description"
-                  value={searchQuery}
-                  autoComplete="off"
-                  style={{
-                    marginRight: "20px",
-                    width: "200px",
-                    height: "24px",
-                    fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    outline: "none",
-                    paddingLeft: "10px",
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
 
-              </div>
             </div>
           </div>
           <div>

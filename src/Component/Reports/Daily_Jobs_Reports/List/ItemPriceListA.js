@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import {getUserData, getOrganisationData, getLocationnumber, getYearDescription  } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -55,6 +55,9 @@ export default function ItemPriceListA() {
     const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
     const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
     const [typeselectdatavalue, settypeselectdatavalue] = useState("");
+
+    const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
   
     const {
       isSidebarVisible,
@@ -86,7 +89,8 @@ export default function ItemPriceListA() {
       setIsLoading(true);
       const formData = new URLSearchParams({
         code: organisation.code,
-        // code:'NASIRTRD',
+        FLocCod: locationnumber || getLocationNumber,
+        FYerDsc: yeardescription || getYearDescription,
         FCtgCod: Companyselectdata,
         FCapCod: Capacityselectdata,
         FTypCod: Typeselectdata,

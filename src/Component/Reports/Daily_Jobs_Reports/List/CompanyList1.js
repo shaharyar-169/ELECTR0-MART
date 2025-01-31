@@ -73,6 +73,8 @@ export default function CompanyList() {
     const formData = new URLSearchParams({
       FCmpSts: transectionType,
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
     }).toString();
 

@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -32,6 +32,8 @@ export default function DocumentEditReport() {
     const input3Ref = useRef(null);
     const input4Ref = useRef(null);
 
+    const storeRef = useRef(null);
+
     const toRef = useRef(null);
     const fromRef = useRef(null);
 
@@ -39,6 +41,10 @@ export default function DocumentEditReport() {
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
+
+    const [storeList, setStoreList] = useState([]);
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("")
+    const [storeType, setStoreType] = useState("");
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [totalOpening, setTotalOpening] = useState(0);
@@ -71,6 +77,9 @@ export default function DocumentEditReport() {
 
     } = useTheme();
 
+    const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
+
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
@@ -78,7 +87,7 @@ export default function DocumentEditReport() {
     const comapnyname = organisation.description;
 
     const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
-
+ const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
     const fromdatevalidate = getfromdate;
@@ -389,8 +398,8 @@ export default function DocumentEditReport() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             code: organisation.code,
-            FYerDsc: getyeardescription,
-            FLocCod: getLocationNumber,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
             FSchTxt: searchQuery
         }).toString();
 
@@ -448,76 +457,114 @@ export default function DocumentEditReport() {
     }, []);
 
     useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveAccounts.php";
-        const formData = new URLSearchParams({
-            FLocCod: getLocationNumber,
+        //----------------- store dropdown
+        const apiStoreUrl = apiLinks + "/GetStore.php";
+        const formStoreData = new URLSearchParams({
             code: organisation.code,
         }).toString();
         axios
-            .post(apiUrl, formData)
+            .post(apiStoreUrl, formStoreData)
             .then((response) => {
-                setSupplierList(response.data);
+                setStoreList(response.data);
+                // console.log("STORE"+response.data);
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
             });
     }, []);
 
-    const options = supplierList.map((item) => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`,
+    // Store List array
+    const optionStore = storeList.map((item) => ({
+        value: item.tstrcod,
+        label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
     }));
 
-    const DropdownOption = (props) => {
-        return (
-            <components.Option {...props}>
-                <div
-                    style={{
-                        fontSize: "12px",
-                        paddingBottom: "5px",
-                        lineHeight: "3px",
-                        color: "black",
-                        textAlign: "start",
-                    }}
-                >
-                    {props.data.label}
-                </div>
-            </components.Option>
-        );
+   
+
+    const focusNextElement = (currentRef, nextRef) => {
+        if (currentRef.current && nextRef.current) {
+            currentRef.current.focus();
+            nextRef.current.focus();
+        }
     };
-    const customStyles1 = (hasError) => ({
-        control: (base, state) => ({
-            ...base,
-            height: "24px",
-            minHeight: "unset",
-            width: 418,
-            fontSize: "12px",
-            backgroundColor: getcolor,
-            color: fontcolor,
-            borderRadius: 0,
-            border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-            transition: "border-color 0.15s ease-in-out",
-            "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
-            },
-            padding: "0 8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-        }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            fontSize: "18px",
-            display: "flex",
-            textAlign: "center !important",
-        }),
-    });
+
+    const handleStoreEnter = (e) => {
+        if (e.key === "Enter" && !menuStoreIsOpen) {
+            e.preventDefault();
+            focusNextElement(storeRef, input3Ref);
+        }
+    };
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
         settransectionType(selectedTransactionType);
     };
+
+     const DropdownOption = (props) => {
+            return (
+              <components.Option {...props}>
+                <div
+                  style={{
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
+                    paddingBottom: "5px",
+                    lineHeight: "3px",
+                    color: "black",
+                    textAlign: "start",
+                  }}
+                >
+                  {props.data.label}
+                </div>
+              </components.Option>
+            );
+          };
+          
+          const customStyles1 = (hasError) => ({
+            control: (base, state) => ({
+              ...base,
+              height: "24px",
+              minHeight: "unset",
+              width: 250,
+              fontSize: getdatafontsize,
+              fontFamily: getfontstyle,
+              backgroundColor: getcolor,
+              color: fontcolor,
+              caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+              borderRadius: 0,
+              border: `1px solid ${fontcolor}`, // Fixed Template Literal
+              transition: "border-color 0.15s ease-in-out",
+              "&:hover": {
+                borderColor: state.isFocused ? base.borderColor : "black",
+              },
+              padding: "0 8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }),
+            dropdownIndicator: (base) => ({
+              ...base,
+              padding: 0,
+              marginTop: "-5px",
+              fontSize: "18px",
+              display: "flex",
+              textAlign: "center",
+            }),
+            singleValue: (base) => ({
+              ...base,
+              marginTop: "-5px",
+              textAlign: "left",
+              color: fontcolor,
+            }),
+            input: (base) => ({
+              ...base,
+              color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+              caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+            }),
+            clearIndicator: (base) => ({
+              ...base,
+              marginTop: "-5px",
+            }),
+          });
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
@@ -968,22 +1015,22 @@ export default function DocumentEditReport() {
                     alignment: { horizontal: "center" },
                 };
             }
-        
+
             // Add row with empty columns before the title
             let row = worksheet.addRow(["", "", title]);
-        
+
             // Apply styles only to the title cell (third column)
             row.getCell(3).style = customStyle;
-        
+
             // Adjust row height
             worksheet.getRow(row.number).height = rowHeight;
-        
+
             // Merge the cells for the title, shifting 2 columns forward
             worksheet.mergeCells(
                 `C${row.number}:${String.fromCharCode(66 + numColumns)}${row.number}`
             );
         });
-        
+
 
 
 
@@ -1028,7 +1075,7 @@ export default function DocumentEditReport() {
 
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
-                ? ["TYPE :", typestatus, "", "", "", "","", "SEARCH :", typesearch]
+                ? ["TYPE :", typestatus, "", "", "", "", "", "SEARCH :", typesearch]
                 : ["TYPE :", typestatus, ""]
         );
 
@@ -1374,7 +1421,7 @@ export default function DocumentEditReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Edit Document Report" />
+                    <NavComponent textdata="Document Edit Report" />
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1417,7 +1464,7 @@ export default function DocumentEditReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="custom" style={{fontSize: getdatafontsize,fontFamily:getfontstyle, }}>Custom</label>
+                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>Custom</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1434,7 +1481,7 @@ export default function DocumentEditReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="30" style={{fontSize: getdatafontsize,fontFamily:getfontstyle, }}>30 Days</label>
+                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>30 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1451,7 +1498,7 @@ export default function DocumentEditReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="60" style={{fontSize: getdatafontsize,fontFamily:getfontstyle, }}>60 Days</label>
+                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>60 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1468,11 +1515,13 @@ export default function DocumentEditReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="90" style={{fontSize: getdatafontsize,fontFamily:getfontstyle, }}>90 Days</label>
+                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>90 Days</label>
                                         </div>
                                     </div>
                                 </div>
 
+
+                               
 
                                 <div
                                     className="d-flex align-items-center"
@@ -1486,7 +1535,7 @@ export default function DocumentEditReport() {
                                         }}
                                     >
                                         <label htmlFor="transactionType">
-                                            <span style={{fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
+                                            <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                                 Type :
                                             </span>
                                         </label>
@@ -1511,7 +1560,7 @@ export default function DocumentEditReport() {
                                             marginLeft: "5px",
                                             backgroundColor: getcolor,
                                             border: `1px solid ${fontcolor}`,
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle,
                                             color: fontcolor,
                                         }}
                                     >
@@ -1530,6 +1579,7 @@ export default function DocumentEditReport() {
                                         <option value="SLY">Salary</option>
                                     </select>
                                 </div>
+                         
                             </div>
 
 
@@ -1563,7 +1613,7 @@ export default function DocumentEditReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             From :
                                         </span>
                                     </label>
@@ -1594,7 +1644,7 @@ export default function DocumentEditReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                             backgroundColor: getcolor,
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1632,7 +1682,7 @@ export default function DocumentEditReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                         color: fontcolor,
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1655,7 +1705,7 @@ export default function DocumentEditReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             To :
                                         </span>
                                     </label>
@@ -1687,7 +1737,7 @@ export default function DocumentEditReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                             backgroundColor: getcolor,
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1724,7 +1774,7 @@ export default function DocumentEditReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                                         color: fontcolor,
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1736,9 +1786,12 @@ export default function DocumentEditReport() {
                                 </div>
                             </div>
 
+
+                          
+
                             <div id="lastDiv" style={{ marginRight: "10px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
+                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                         Search :
                                     </span>{" "}
                                 </label>
@@ -1754,7 +1807,7 @@ export default function DocumentEditReport() {
                                         marginRight: "20px",
                                         width: "200px",
                                         height: "24px",
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle,                                         color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1773,6 +1826,78 @@ export default function DocumentEditReport() {
 
                         </div>
                     </div>
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" ,marginLeft:'12px'}}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                          
+                          <div
+                                className="d-flex align-items-center"
+                            // style={{ marginRight: "20px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                            Store :&nbsp;
+                                        </span>{" "}
+                                        <br />
+                                    </label>
+                                </div>
+                                <div>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={storeRef}
+                                        options={optionStore}
+                                        onKeyDown={handleStoreEnter}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
+                                                setStoreType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('')
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStylesStore}
+                                        styles={customStyles1()}
+                                        isClearable
+                                        placeholder="ALL"
+                                        menuIsOpen={menuStoreIsOpen}
+                                        onMenuOpen={() => setMenuStoreIsOpen(true)}
+                                        onMenuClose={() => setMenuStoreIsOpen(false)}
+                                    />
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
+
                     <div>
                         <div
                             style={{
@@ -1784,14 +1909,14 @@ export default function DocumentEditReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                     width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
                             >
                                 <thead
                                     style={{
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1843,7 +1968,7 @@ export default function DocumentEditReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "55vh",
+                                maxHeight: "50vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1852,7 +1977,7 @@ export default function DocumentEditReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                     width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                 }}
                             >
