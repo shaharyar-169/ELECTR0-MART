@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -60,6 +60,9 @@ export default function DailyCashReceipts() {
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
 
+const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber()
+
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -70,8 +73,9 @@ export default function DailyCashReceipts() {
         getLocationNumber,
         getyeardescription,
         getfromdate,
-        gettodate
-
+        gettodate,
+        getfontstyle,
+        getdatafontsize,
     } = useTheme();
 
     console.log('select year: ' + getyeardescription)
@@ -279,12 +283,9 @@ export default function DailyCashReceipts() {
         setIsLoading(true);
         const formData2 = new URLSearchParams({
             FTrnDat: toInputDate,
-            code: 'NASIRTRD',
-            // code: organisation.code,
-            // FYerDsc: getyeardescription,
-            FYerDsc: '2024-2024',
-            // FLocCod: getLocationNumber,
-            FLocCod: '001',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription
 
         }).toString();
 
@@ -350,12 +351,9 @@ export default function DailyCashReceipts() {
         setIsLoading(true);
         const formData3 = new URLSearchParams({
             FTrnDat: toInputDate,
-            code: 'NASIRTRD',
-            // code: organisation.code,
-            // FYerDsc: getyeardescription,
-            FYerDsc: '2024-2024',
-            // FLocCod: getLocationNumber,
-            FLocCod: '001',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription
 
         }).toString();
 
@@ -490,14 +488,18 @@ export default function DailyCashReceipts() {
     };
 
     const exportPDFHandler = () => {
+
+        const globalfontsize = 12;
+        console.log('gobal font data', globalfontsize)
+
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = CashPaymentData.map((cashPaymentItem, index) => {
             // Retrieve corresponding data from tableData
             const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
-        
+
             return [
                 tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
                 tableItem.Amount || "", // Second column - From tableData
@@ -505,7 +507,6 @@ export default function DailyCashReceipts() {
                 cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
             ];
         });
-        
 
         // Add summary row to the table
         rows.push([
@@ -515,7 +516,6 @@ export default function DailyCashReceipts() {
             String(totalCredit),
 
         ]);
-
         // Define table column headers and individual column widths
         const headers = [
             "Receipts",
@@ -524,7 +524,7 @@ export default function DailyCashReceipts() {
             "Amount",
 
         ];
-        const columnWidths = [80, 17,80,17];
+        const columnWidths = [90, 20, 90, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -534,14 +534,14 @@ export default function DailyCashReceipts() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont("verdana");
+        doc.setFont(getfontstyle);
         doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("vardana", "bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
+            doc.setFont(getfontstyle, "bold"); // Set font to bold
+            doc.setFontSize(12); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -564,15 +564,15 @@ export default function DailyCashReceipts() {
             });
 
             // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
+            doc.setFont(getfontstyle);
+            doc.setFontSize(12);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
+            const fontSize = 10; // Adjust this value to decrease font size
+            const boldFont = 400; // Bold font
+            const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
             doc.setFontSize(fontSize);
@@ -580,7 +580,7 @@ export default function DailyCashReceipts() {
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -589,7 +589,17 @@ export default function DailyCashReceipts() {
                     fontName = boldFont; // Set bold font for red-colored row
                 }
 
-                
+                // Set background color for odd-numbered rows
+                // if (isOddRow) {
+                // 	doc.setFillColor(240); // Light background color
+                // 	doc.rect(
+                // 		startX,
+                // 		startY + (i - startIndex + 2) * rowHeight,
+                // 		tableWidth,
+                // 		rowHeight,
+                // 		"F"
+                // 	);
+                // }
 
                 // Draw row borders
                 doc.setDrawColor(0); // Set color for borders
@@ -612,8 +622,9 @@ export default function DailyCashReceipts() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                   
-                    if (cellIndex === 1 || cellIndex === 3 ) {
+
+
+                    if (cellIndex === 1 || cellIndex === 3) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -624,6 +635,8 @@ export default function DailyCashReceipts() {
                     else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
+
+
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
@@ -677,10 +690,12 @@ export default function DailyCashReceipts() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
+        const rowsPerPage = 27; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
+
+
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -688,9 +703,8 @@ export default function DailyCashReceipts() {
                 time,
                 pageNumber,
                 startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
+                titleFontSize = 18,
+                pageNumberFontSize = 10
             ) => {
                 doc.setFontSize(titleFontSize); // Set the font size for the title
                 doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -700,20 +714,20 @@ export default function DailyCashReceipts() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
+                // if (date) {
+                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                //     if (time) {
+                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                //     } else {
+                //         doc.text(date, rightX - 10, startY, { align: "right" });
+                //     }
+                // }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 30,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -724,46 +738,81 @@ export default function DailyCashReceipts() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                
-                addTitle(
-                    `Daily Cash Book Report From: ${fromInputDate} `,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
+
+                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                startY += 5; // Adjust vertical position for the company title
+
+                addTitle(`Daily Cash Book Report From: ${fromInputDate} `, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 2; // Position the labels below the titles and above the table
+                const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
+                doc.setFontSize(12);
+                doc.setFont(getfontstyle, "300");
+
+
+
+
+
+
+                let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null
+
+                let search = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null;
+
+
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
+
+
+
+
+
+                const fixedWidth = 20; // Set a fixed width for both rectangles
+                const fixedHeight = 5; // Keep height constant
+                const rightPadding = 3; // Padding from the right side
+                
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`OPENING BAL :`, labelsX + 62, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                
+                // Draw the value inside the border
+                const textWidthStatus = doc.getTextWidth(status); // Get the width of the status text
+                const statusX = labelsX + 92 + fixedWidth - textWidthStatus - rightPadding; // Right-align with padding
+                const statusY = labelsY + 8.5;
+                
+                doc.text(`${status}`, statusX, statusY); // Draw the text
+                
+                // Draw a rectangle with fixed width and height
+                doc.rect(labelsX + 90, statusY - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
+                
+                // Positioning for CLOSING BALANCE
+                const closingLabelX = labelsX + 172; // Space after OPENING BAL
+                doc.setFont(getfontstyle, 'bold');
+                doc.text(`CLOSING BAL :`, closingLabelX, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal');
+                
+                // Draw the value inside the border
+                const textWidthSearch = doc.getTextWidth(search); // Get the width of the search text
+                const statusX1 = closingLabelX + 30 + fixedWidth - textWidthSearch - rightPadding; // Right-align with padding
+                const statusY1 = labelsY + 8.5;
+                
+                doc.text(`${search}`, statusX1, statusY1); // Draw the text
+                
+                // Draw a rectangle with fixed width and height
+                doc.rect(closingLabelX + 28, statusY1 - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
+                
+
+
+                // // Reset font weight to normal if necessary for subsequent text
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
-                doc.setFont("verdana", 'bold');
 
-                let typeText = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null ? CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null : "";
-                let typeItem = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null ? CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null : "";
+                startY += 10; // Adjust vertical position for the labels
 
-                doc.text(`Opening Bal : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                doc.text(`Closing Bal : ${typeText}`, labelsX + 165, labelsY); // Adjust x-coordinate for From Date
-
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
-
-                startY += 0; // Adjust vertical position for the labels
-
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -782,10 +831,10 @@ export default function DailyCashReceipts() {
 
         const getCurrentDate = () => {
             const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            const dd = String(today.getDate()).padStart(2, "0"); // Get day and pad with 0 if needed
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-based, so +1
+            const yyyy = today.getFullYear(); // Get full year
+            return `${dd}-${mm}-${yyyy}`; // Format as dd-mm-yyyy
         };
 
         // Function to get current time in the format HH:MM:SS
@@ -803,157 +852,221 @@ export default function DailyCashReceipts() {
         // Call function to handle pagination
         handlePagination();
 
-        // Save the PDF file
-        doc.save("DailyCashBookReport.pdf");
+        // Save the PDF files
+        doc.save(`DailyCashBookReport As on ${date}.pdf`);
 
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
+
     };
 
-    const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-
-        const numColumns = 5; // Number of columns
-
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
-
-        const columnAlignments = ["left", "right","left", "right"];
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-               // Add title rows
-         [
-            comapnyname,
-            `Daily Cash Book From ${toInputDate}`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
-        });
-
-
-        worksheet.addRow([]); // Empty row for spacing
-
-        // let typeYear = transectionType ? transectionType : "All";
-        // let typeCode = saleType ? saleType : "All";
-
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // "",
-            // `Code: ${typeCode}`,
-            // "",
-            // "",
-            // "",
-            // `Year: ${typeYear}`,
-        ]);
-
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-
-        worksheet.addRow([]); // Empty row for spacing
-
-        const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
-        };
-
-        // Add headers
-        const headers = [
-            "Receipt",
+     const handleDownloadCSV = async () => {
+                  const workbook = new ExcelJS.Workbook();
+                  const worksheet = workbook.addWorksheet("Sheet1");
+          
+                  const numColumns = 6; // Number of columns
+          
+                  const columnAlignments = ["left", "right", "left", "right"];
+          
+                  // Add an empty row at the start
+                  worksheet.addRow([]);
+          
+                  // Add title rows
+                  
+               [comapnyname,  `Daily Cash Book From ${toInputDate}`,].forEach((title, index) => {
+                   // Define custom styles for each title
+                   let customStyle;
+                   let rowHeight = 20;  // Default row height
+                   if (index === 0) {
+                       // Style for company name
+                       customStyle = {
+                           font: { family: getfontstyle, size: 18, bold: true },
+                           alignment: { horizontal: "center" },
+                       };
+                       rowHeight = 30; // Increase row height for company name to avoid overlap
+                   } else {
+                       // Style for "Item List"
+                       customStyle = {
+                           font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                           alignment: { horizontal: "center" },
+                       };
+                   }
+       
+                   // Add row with the title
+                   worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+       
+                   // Adjust the row height for the company name or other titles
+                   worksheet.getRow(index + 2).height = rowHeight;
+       
+                   // Merge the cells for the title
+                   worksheet.mergeCells(
+                       `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+                   );
+               });
+          
+          
+          
+                  // Add an empty row after the title section
+                  worksheet.addRow([]);  // This is where you add the empty row
+          
+          
+                let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null
+                let search = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null;
+          
+                  const typeAndStoreRow3 = worksheet.addRow(
+                       ["ONPENING BAL :", status,  "CLOSING BAL :", search]
+                  );
+          
+                  const applyStatusRowStyle = (row, boldColumns = []) => {
+                      row.eachCell((cell, colIndex) => {
+                          // Check if the current cell is in the boldColumns array
+                          const isBold = boldColumns.includes(colIndex);
+          
+                          cell.font = {
+                              family: getfontstyle, // Your desired font family
+                              size: getdatafontsize, // Your desired font size
+                              bold: isBold, // Bold only for specific columns
+                          };
+          
+                          cell.alignment = {
+                              horizontal: "right", // Align text to the left
+                              vertical: "middle", // Vertically align to the middle
+                          };
+          
+                          cell.border = null; // Remove borders
+                      });
+                  };
+          
+                  // Bold specific columns (labels)
+          
+                  applyStatusRowStyle(typeAndStoreRow3, [1,3]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+          
+          
+          
+                  // Header style for center alignment
+                  const headerStyle = {
+                      font: { bold: true, family: getfontstyle, size: getdatafontsize },
+                      alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
+                      fill: {
+                          type: "pattern",
+                          pattern: "solid",
+                          fgColor: { argb: "FFC6D9F7" },
+                      },
+                      border: {
+                          top: { style: "thin" },
+                          left: { style: "thin" },
+                          bottom: { style: "thin" },
+                          right: { style: "thin" },
+                      },
+                  };
+          
+                  // Add headers
+                  const headers = [
+                  "Receipt",
             "Amount",
             "Payments",
             "Amount",
-        ];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
-        });
-
-
-        // Add data rows
-        CashPaymentData.forEach((cashPaymentItem, index) => {
-            // Retrieve corresponding data from tableData
-            const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
-
-            worksheet.addRow([
-                tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
-                tableItem.Amount || "", // Second column - From tableData
-                cashPaymentItem['Trn#'] ? `${cashPaymentItem['Trn#']} - ${cashPaymentItem.Description}` : "", // Third column - From CashPaymentData
-                cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
-           
-            ]);
-        });
-
-
-         // Add total row and bold it
-         const totalRow = worksheet.addRow([
-            "",
-            totalDebit,
-            "",
-            totalCredit,
-           
-        ]);
-        totalRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-
-
-        // Set column widths
-        [48, 12, 48, 12].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
+                  ];
+                  const headerRow = worksheet.addRow(headers);
+          
+                  // Apply styles and center alignment to the header row
+                  headerRow.eachCell((cell) => {
+                      cell.style = { ...headerStyle };
+                  });
+          
+                  // Add data rows
+          
+                  // Add data rows
+                  CashPaymentData.forEach((cashPaymentItem, index) => {
+                    // Retrieve corresponding data from tableData
+                    const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
+                
+                    // Add a new row and store the reference
+                    const row = worksheet.addRow([
+                        tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
+                        tableItem.Amount || "", // Second column - From tableData
+                        cashPaymentItem['Trn#'] ? `${cashPaymentItem['Trn#']} - ${cashPaymentItem.Description}` : "", // Third column - From CashPaymentData
+                        cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
+                    ]);
+                
+                    // Apply custom styles to each cell in the row
+                    row.eachCell((cell, colIndex) => {
+                        cell.font = {
+                            family: getfontstyle, // Set your desired font family
+                            size: getdatafontsize, // Set the font size
+                            bold: false, // Make the font bold
+                        };
+                
+                        cell.border = {
+                            top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                            left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                            bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                            right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                        };
+                
+                        // Align cell content based on columnAlignments array
+                        const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                        cell.alignment = {
+                            horizontal: alignment,
+                            vertical: "middle", // Vertically align to the middle
+                        };
+                    });
                 });
-            }
-        });
+                
+          
+                  // Set column widths
+       
+                  const totalRow = worksheet.addRow([
+                    "",
+                    totalDebit,
+                    "",
+                    totalCredit,
+               ]);
+       
+               // total row added
+       
+               totalRow.eachCell((cell, colNumber) => {
+                   cell.font = { bold: true };
+                   cell.border = {
+                       top: { style: "thin" },
+                       left: { style: "thin" },
+                       bottom: { style: "thin" },
+                       right: { style: "thin" },
+                   };
+       
+                   // Align only the "Total" text to the right
+                   if (colNumber === 5) {
+                       cell.alignment = { horizontal: "right" };
+                   }
+               });
+                   
+          
+               [48, 12, 48, 12].forEach((width, index) => {
+                      worksheet.getColumn(index + 1).width = width;
+                  });
+       
+        
+                  const getCurrentDate = () => {
+                      const today = new Date();
+                      const dd = String(today.getDate()).padStart(2, "0");
+                      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+                      const yyyy = today.getFullYear();
+                      return dd + "-" + mm + "-" + yyyy;
+                  };
+          
+                  const currentdate = getCurrentDate();
+          
+                  // Generate Excel file buffer and save
+                  const buffer = await workbook.xlsx.writeBuffer();
+                  const blob = new Blob([buffer], {
+                      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                  });
+                  saveAs(blob, `DailyCashBookReport As on ${currentdate}.xlsx`);
+              };
 
-        // Generate Excel file buffer and save
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, "DailyCashReceiptsReport.xlsx");
+
+    const getDayName = (dateString) => {
+        const dateParts = dateString.split("-").map(Number); // Split date string into parts (day, month, year)
+        const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // Create Date object
+        return date.toLocaleDateString("en-US", { weekday: "long" }); // Get day name
     };
 
 
@@ -970,7 +1083,7 @@ export default function DailyCashReceipts() {
 
     const [tableData, setTableData] = useState([]);
 
-    
+
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1156,17 +1269,17 @@ export default function DailyCashReceipts() {
 
 
                     <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
-                        <div style={{ width: '97.5%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'space-between' }}>
+                        <div style={{ width: '97.5%', display: 'flex', alignItems: 'center', margin: '0px', padding: '0px', justifyContent: 'start' }}>
 
                             {/* To Date */}
                             <div className='d-flex align-items-center' style={{ marginLeft: '7px' }}>
                                 <div style={{ width: '72px', display: 'flex', justifyContent: 'end', }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Date :</span>  <br /></label>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Date :</span>  <br /></label>
                                 </div>
                                 <div
                                     id="todatevalidation"
                                     style={{
-                                        width: '135px',
+                                        width: '100px',
                                         border: `1px solid ${fontcolor}`,
                                         display: 'flex',
                                         alignItems: 'center',
@@ -1186,14 +1299,13 @@ export default function DailyCashReceipts() {
                                         ref={toRef}
                                         style={{
                                             height: '20px',
-                                            width: '90px',
+                                            width: '80px',
                                             paddingLeft: '5px',
                                             outline: 'none',
                                             alignItems: 'center',
                                             // marginTop: '5.5px',
                                             border: 'none',
-                                            fontSize: '12px',
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor
 
                                         }} value={toInputDate}
@@ -1208,7 +1320,7 @@ export default function DailyCashReceipts() {
                                         aria-describedby="todatepicker"
                                     />
                                     <DatePicker
-
+                                        style={{ marginRight: "20px" }}
                                         selected={selectedToDate}
                                         onChange={handleToDateChange}
                                         dateFormat="dd-MM-yyyy"
@@ -1226,9 +1338,9 @@ export default function DailyCashReceipts() {
                                                         style={{
                                                             cursor: 'pointer',
                                                             alignItems: 'center',
-                                                            marginLeft: '18px',
+                                                            // marginLeft: '18px',
                                                             // marginTop: '5px',
-                                                            fontSize: '12px'
+                                                            fontSize: getdatafontsize, fontFamily: getfontstyle,
                                                         }} />
                                                 </span>
                                             </div>
@@ -1237,17 +1349,33 @@ export default function DailyCashReceipts() {
                                 </div>
                             </div>
 
+                            {/* box for selected date name  */}
+
+                            <div
+                                style={{
+                                    marginLeft: '5px',
+                                    width: '90px',
+                                    height: '24px',
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    color: fontcolor,
+                                    backgroundColor: getcolor,
+                                    border: `1px solid ${fontcolor}`,
+
+                                }}
+                            >
+                                <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} className="mobileledger_total">{getDayName(toInputDate)}</span>
+                            </div>
+
                             {/* Opening Balance  */}
-                            <div style={{ display: 'flex' }}>
+                            <div style={{ display: 'flex', marginLeft: '25px' }}>
                                 <div style={{ width: '110px' }}>
-                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Opening Bal :</span> </label>
+                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Opening Bal :</span> </label>
                                 </div>
                                 <div
                                     style={{
                                         width: '100px',
                                         height: '24px',
-                                        fontSize: '12px',
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
 
@@ -1258,16 +1386,15 @@ export default function DailyCashReceipts() {
                             </div>
 
                             {/* Closing Balance  */}
-                            <div style={{ display: 'flex' }}>
+                            <div style={{ display: 'flex', marginLeft: '280px' }}>
                                 <div style={{ width: '110px' }}>
-                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Closing Bal :</span> </label>
+                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Closing Bal :</span> </label>
                                 </div>
                                 <div
                                     style={{
                                         width: '100px',
                                         height: '24px',
-                                        fontSize: '12px',
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
 
@@ -1293,8 +1420,7 @@ export default function DailyCashReceipts() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
@@ -1350,8 +1476,7 @@ export default function DailyCashReceipts() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                 }}
                             >
