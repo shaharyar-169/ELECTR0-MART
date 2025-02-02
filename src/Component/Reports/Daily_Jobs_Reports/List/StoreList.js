@@ -716,6 +716,7 @@ export default function StoreList() {
   };
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
+  
   useEffect(() => {
     if (isFilterApplied || tableData.length > 0) {
       setSelectedIndex(0);

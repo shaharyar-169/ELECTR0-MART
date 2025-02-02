@@ -516,6 +516,10 @@ const yeardescription = getYearDescription();
             String(totalCredit),
 
         ]);
+
+
+
+
         // Define table column headers and individual column widths
         const headers = [
             "Receipts",

@@ -414,9 +414,12 @@ export default function DailyProfitReport() {
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
             FRepRat: Retrate,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
+          
+
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
+
             FSchTxt: searchQuery
         }).toString();
 
@@ -562,11 +565,11 @@ export default function DailyProfitReport() {
             String(totalDebit),
             String(totalCredit),
             String(closingBalance),
-            String(totalExpense),
+            // String(totalExpense),
+            "",
             "",
 
         ]);
-
 
 
         // Define table column headers and individual column widths
@@ -585,7 +588,7 @@ export default function DailyProfitReport() {
             "Emp",
             "Exp Amt"
         ];
-        const columnWidths = [19, 16, 10, 20, 90, 18, 20, 10, 18, 17, 17, 18];
+        const columnWidths = [19, 15, 10, 20, 90, 16, 18, 13, 22, 17, 17, 18];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1223,6 +1226,8 @@ export default function DailyProfitReport() {
         fontFamily: '"Poppins", sans-serif',
     };
 
+
+
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
         if (isFilterApplied || Profits.length > 0) {
@@ -1287,6 +1292,10 @@ export default function DailyProfitReport() {
             });
         }
     }, [selectedIndex]);
+
+
+  
+
 
     const parseDate = (dateString) => {
         const [day, month, year] = dateString.split("-").map(Number);
@@ -2265,6 +2274,7 @@ export default function DailyProfitReport() {
                                                                 // onClick={() => handleRowClick(i)}
                                                                 // className={
                                                                 //     selectedIndex === i ? "selected-background" : ""
+                                                               
                                                                 // }
                                                                 style={{
                                                                     backgroundColor: getcolor,
