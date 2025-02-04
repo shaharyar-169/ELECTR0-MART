@@ -21,7 +21,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import './ledgerselect.css';
+
 
 export default function GeneralLedger() {
     const navigate = useNavigate();
@@ -40,6 +40,9 @@ export default function GeneralLedger() {
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
+
+    const [tableData, setTableData] = useState([]);
+    console.log('general ledger tableData', tableData)
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [totalOpening, setTotalOpening] = useState(0);
@@ -386,7 +389,6 @@ export default function GeneralLedger() {
                 break;
         }
 
-
         // console.log(data);
         document.getElementById(
             "fromdatevalidation"
@@ -405,6 +407,7 @@ export default function GeneralLedger() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
+          
         }).toString();
 
         axios
@@ -421,7 +424,7 @@ export default function GeneralLedger() {
                 } else {
                     console.warn(
                         "Response data structure is not as expected:",
-                        response.data
+                        response.data.Detail
                     );
                     setTableData([]);
                 }
@@ -485,62 +488,70 @@ export default function GeneralLedger() {
     }));
 
 
-    const DropdownOption = (props) => {
-        return (
-            <components.Option {...props}>
-                <div
-                    style={{
-                        fontSize: getdatafontsize, fontFamily: getfontstyle,
-                        paddingBottom: "5px",
-                        lineHeight: "3px",
-                        color: "black",
-                        textAlign: "start",
-                    }}
-                >
-                    {props.data.label}
-                </div>
-            </components.Option>
-        );
+   const DropdownOption = (props) => {
+      return (
+        <components.Option {...props}>
+          <div
+            style={{
+              fontSize: getdatafontsize,
+              fontFamily: getfontstyle,
+              paddingBottom: "5px",
+              lineHeight: "3px",
+              color: "black",
+              textAlign: "start",
+            }}
+          >
+            {props.data.label}
+          </div>
+        </components.Option>
+      );
     };
+  
     const customStyles1 = (hasError) => ({
-        control: (base, state) => ({
-            ...base,
-            height: "24px",
-            minHeight: "unset",
-            width: 350,
-            fontSize: getdatafontsize, fontFamily: getfontstyle,
-            backgroundColor: getcolor,
-            color: fontcolor,
-            borderRadius: 0,
-            // border: `1px solid ${fontcolor}`,
-            border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-            transition: "border-color 0.15s ease-in-out",
-            "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
-            },
-            padding: "0 8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-        }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            marginTop: "-5px",
-            fontSize: "18px",
-            display: "flex",
-            textAlign: "center !important",
-        }),
-        singleValue: (base) => ({
-            ...base,
-            marginTop: "-5px",
-            textAlign: "left",
-            color: fontcolor,
-        }),
-        clearIndicator: (base) => ({
-            ...base,
-            marginTop: "-5px",
-        }),
+      control: (base, state) => ({
+        ...base,
+        height: "24px",
+        minHeight: "unset",
+        width: 250,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+        backgroundColor: getcolor,
+        color: fontcolor,
+        caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+        borderRadius: 0,
+        border: `1px solid ${fontcolor}`, // Fixed Template Literal
+        transition: "border-color 0.15s ease-in-out",
+        "&:hover": {
+          borderColor: state.isFocused ? base.borderColor : "black",
+        },
+        padding: "0 8px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }),
+      dropdownIndicator: (base) => ({
+        ...base,
+        padding: 0,
+        marginTop: "-5px",
+        fontSize: "18px",
+        display: "flex",
+        textAlign: "center",
+      }),
+      singleValue: (base) => ({
+        ...base,
+        marginTop: "-5px",
+        textAlign: "left",
+        color: fontcolor,
+      }),
+      input: (base) => ({
+        ...base,
+        color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+        caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+      }),
+      clearIndicator: (base) => ({
+        ...base,
+        marginTop: "-5px",
+      }),
     });
 
     const handleTransactionTypeChange = (event) => {
@@ -854,7 +865,7 @@ export default function GeneralLedger() {
 
 
 
-                let search = searchQuery ? searchQuery : "";
+                let search = saleType ? saleType : "ALL";
 
 
                 // Set font style, size, and family
@@ -863,16 +874,16 @@ export default function GeneralLedger() {
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.text(`CODE :`, labelsX, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+                doc.text(`${search}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-                if (searchQuery) {
+             
                     doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 150, labelsY + 8.5); // Draw bold label
+                    doc.text(`TYPE :`, labelsX + 170, labelsY + 8.5); // Draw bold label
                     doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 170, labelsY + 8.5); // Draw the value next to the label
-                }
+                    doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
+              
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -1029,13 +1040,14 @@ export default function GeneralLedger() {
         }
 
 
-        let typesearch = searchQuery ? searchQuery : "";
+        let typesearch = saleType ? saleType : "ALL";
 
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["TYPE :", typestatus, "", "", "", "SEARCH :", typesearch]
-                : ["TYPE :", typestatus, ""]
-        );
+        const typeAndStoreRow3 = worksheet.addRow([
+            "ACCOUNT:", typesearch, "", "", "", "TYPE :", typestatus
+        ]);
+        
+      
+        
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
@@ -1201,7 +1213,8 @@ export default function GeneralLedger() {
     const btnColor = "#3368B5";
     const textColor = "white";
 
-    const [tableData, setTableData] = useState([]);
+  
+
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1264,7 +1277,7 @@ export default function GeneralLedger() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+        width: isSidebarVisible ? "calc(55vw - 0%)" : "55vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
