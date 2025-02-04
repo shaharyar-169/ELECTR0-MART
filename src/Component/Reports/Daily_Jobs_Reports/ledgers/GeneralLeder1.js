@@ -50,6 +50,9 @@ export default function GeneralLedger() {
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
 
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    console.log('Companyselectdatavalue', Companyselectdatavalue.label)
+
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
     const [fromInputDate, setfromInputDate] = useState("");
@@ -407,7 +410,8 @@ export default function GeneralLedger() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
-          
+
+
         }).toString();
 
         axios
@@ -488,70 +492,70 @@ export default function GeneralLedger() {
     }));
 
 
-   const DropdownOption = (props) => {
-      return (
-        <components.Option {...props}>
-          <div
-            style={{
-              fontSize: getdatafontsize,
-              fontFamily: getfontstyle,
-              paddingBottom: "5px",
-              lineHeight: "3px",
-              color: "black",
-              textAlign: "start",
-            }}
-          >
-            {props.data.label}
-          </div>
-        </components.Option>
-      );
+    const DropdownOption = (props) => {
+        return (
+            <components.Option {...props}>
+                <div
+                    style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        paddingBottom: "5px",
+                        lineHeight: "3px",
+                        color: "black",
+                        textAlign: "start",
+                    }}
+                >
+                    {props.data.label}
+                </div>
+            </components.Option>
+        );
     };
-  
+
     const customStyles1 = (hasError) => ({
-      control: (base, state) => ({
-        ...base,
-        height: "24px",
-        minHeight: "unset",
-        width: 250,
-        fontSize: getdatafontsize,
-        fontFamily: getfontstyle,
-        backgroundColor: getcolor,
-        color: fontcolor,
-        caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
-        borderRadius: 0,
-        border: `1px solid ${fontcolor}`, // Fixed Template Literal
-        transition: "border-color 0.15s ease-in-out",
-        "&:hover": {
-          borderColor: state.isFocused ? base.borderColor : "black",
-        },
-        padding: "0 8px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }),
-      dropdownIndicator: (base) => ({
-        ...base,
-        padding: 0,
-        marginTop: "-5px",
-        fontSize: "18px",
-        display: "flex",
-        textAlign: "center",
-      }),
-      singleValue: (base) => ({
-        ...base,
-        marginTop: "-5px",
-        textAlign: "left",
-        color: fontcolor,
-      }),
-      input: (base) => ({
-        ...base,
-        color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
-        caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
-      }),
-      clearIndicator: (base) => ({
-        ...base,
-        marginTop: "-5px",
-      }),
+        control: (base, state) => ({
+            ...base,
+            height: "24px",
+            minHeight: "unset",
+            width: 250,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            backgroundColor: getcolor,
+            color: fontcolor,
+            caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+            borderRadius: 0,
+            border: `1px solid ${fontcolor}`, // Fixed Template Literal
+            transition: "border-color 0.15s ease-in-out",
+            "&:hover": {
+                borderColor: state.isFocused ? base.borderColor : "black",
+            },
+            padding: "0 8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            padding: 0,
+            marginTop: "-5px",
+            fontSize: "18px",
+            display: "flex",
+            textAlign: "center",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            textAlign: "left",
+            color: fontcolor,
+        }),
+        input: (base) => ({
+            ...base,
+            color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+            caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            marginTop: "-5px",
+        }),
     });
 
     const handleTransactionTypeChange = (event) => {
@@ -863,10 +867,9 @@ export default function GeneralLedger() {
                                                                     ? "Salary"
                                                                     : "ALL";
 
-
-
-                let search = saleType ? saleType : "ALL";
-
+                let search = Companyselectdatavalue.label
+                    ? Companyselectdatavalue.label
+                    : "ALL";
 
                 // Set font style, size, and family
                 doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
@@ -878,12 +881,12 @@ export default function GeneralLedger() {
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                 doc.text(`${search}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-             
-                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`TYPE :`, labelsX + 170, labelsY + 8.5); // Draw bold label
-                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
-              
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`TYPE :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
+
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -1040,14 +1043,14 @@ export default function GeneralLedger() {
         }
 
 
-        let typesearch = saleType ? saleType : "ALL";
+        let typesearch = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
 
         const typeAndStoreRow3 = worksheet.addRow([
             "ACCOUNT:", typesearch, "", "", "", "TYPE :", typestatus
         ]);
-        
-      
-        
+
+
+
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
@@ -1213,7 +1216,7 @@ export default function GeneralLedger() {
     const btnColor = "#3368B5";
     const textColor = "white";
 
-  
+
 
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -1277,7 +1280,7 @@ export default function GeneralLedger() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(55vw - 0%)" : "55vw",
+        width: isSidebarVisible ? "calc(70vw - 0%)" : "70vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1556,9 +1559,18 @@ export default function GeneralLedger() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
+                                                const labelParts = selectedOption.label.split("-"); // Split by "-"
+                                                const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+
                                                 setSaleType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: description, // Keep only the description
+
+                                                });
                                             } else {
                                                 setSaleType("");
+                                                setCompanyselectdatavalue('')
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
