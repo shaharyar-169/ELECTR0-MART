@@ -21,7 +21,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function BankRegisterLedger1() {
+export default function ItemLedgerReport() {
+
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -41,11 +42,19 @@ export default function BankRegisterLedger1() {
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
 
-    const [totalQnty, setTotalQnty] = useState(0);
-    const [totalOpening, setTotalOpening] = useState(0);
+    const [totalpurchase, settotalpurchase] = useState(0);
+    const [totalpurchaseReturn, settotalpurchaseReturn] = useState(0);
+    const [totalReceive, settotalReceive] = useState(0);
+    const [totalissue, settotalissue] = useState(0);
+    const [totalsale, settotalsale] = useState(0);
+    const [totalsaleReturn, settotalsaleReturn] = useState(0);
+    const [totalclosingbalance, settotalclosingbalance] = useState(0);
+
+    const [totalQnty, settotalQnty] = useState(0);
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
+
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -55,6 +64,7 @@ export default function BankRegisterLedger1() {
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
 
     const yeardescription = getYearDescription();
     const locationnumber = getLocationnumber();
@@ -73,6 +83,7 @@ export default function BankRegisterLedger1() {
         getfontstyle,
         getdatafontsize
     } = useTheme();
+
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
@@ -127,6 +138,7 @@ export default function BankRegisterLedger1() {
     const handlefromInputChange = (e) => {
         setfromInputDate(e.target.value);
     };
+
     const handlefromKeyPress = (e, inputId) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -182,6 +194,7 @@ export default function BankRegisterLedger1() {
             }
         }
     };
+
     const handleToKeyPress = (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -245,6 +258,8 @@ export default function BankRegisterLedger1() {
             }
         }
     };
+
+
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : "");
@@ -288,7 +303,7 @@ export default function BankRegisterLedger1() {
 
         switch (true) {
             case !saleType:
-                errorType = "saleType";
+                errorType = 'saleType';
                 break;
             case !fromInputDate:
                 errorType = "fromDate";
@@ -336,7 +351,8 @@ export default function BankRegisterLedger1() {
         }
 
         switch (errorType) {
-            case "saleType":
+
+            case 'saleType':
                 toast.error("Please select a Account Code");
                 return;
 
@@ -376,12 +392,12 @@ export default function BankRegisterLedger1() {
                 toast.error("To date must be after from date");
                 return;
 
+
             default:
                 break;
         }
 
 
-        // console.log(data);
         document.getElementById(
             "fromdatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
@@ -389,7 +405,7 @@ export default function BankRegisterLedger1() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/BankRegister.php";
+        const apiUrl = apiLinks + "/ItemLedger.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
@@ -399,7 +415,7 @@ export default function BankRegisterLedger1() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
-
+          
 
         }).toString();
 
@@ -407,11 +423,15 @@ export default function BankRegisterLedger1() {
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
-                console.log("Response:", response.data);
-                // setTotalOpening(response.data["Total Opening"]);
-                setTotalDebit(response.data["Total Debit "]);
-                setTotalCredit(response.data["Total Credit"]);
-                setClosingBalance(response.data["Closing Bal "]);
+                // Update total amount and quantity
+                settotalpurchase(response.data["Total Purchase "]);
+                settotalpurchaseReturn(response.data["Total Pur Return "]);
+                settotalReceive(response.data["Total Receive "]);
+                settotalissue(response.data["Total Issue "]);
+                settotalsale(response.data["Total Sale "]);
+                settotalsaleReturn(response.data["Total Sale Return"]);
+                settotalclosingbalance(response.data["Closing Balance"]);
+
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -428,14 +448,10 @@ export default function BankRegisterLedger1() {
                 setIsLoading(false);
             });
     }
-
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (
-            !hasComponentMountedPreviously ||
-            (saleSelectRef && saleSelectRef.current)
-        ) {
+        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
             if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
                     saleSelectRef.current.focus();
@@ -445,7 +461,6 @@ export default function BankRegisterLedger1() {
             sessionStorage.setItem("componentMounted", "true");
         }
     }, []);
-
     useEffect(() => {
         const currentDate = new Date();
         setSelectedToDate(currentDate);
@@ -459,9 +474,8 @@ export default function BankRegisterLedger1() {
         setSelectedfromDate(firstDateOfCurrentMonth);
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
-
     useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveBanks.php";
+        const apiUrl = apiLinks + "/GetItem.php";
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,
@@ -477,8 +491,8 @@ export default function BankRegisterLedger1() {
     }, []);
 
     const options = supplierList.map((item) => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`,
+        value: item.titmcod,
+        label: `${item.titmcod}-${item.titmdsc.trim()}`,
     }));
 
     const DropdownOption = (props) => {
@@ -552,6 +566,7 @@ export default function BankRegisterLedger1() {
         settransectionType(selectedTransactionType);
     };
 
+
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
 
@@ -566,10 +581,15 @@ export default function BankRegisterLedger1() {
             item.Date,
             item["Trn#"],
             item.Type,
+            item.Str,
             item.Description,
-            item.Debit,
-            item.Credit,
-            item.Balance,
+            item.Purchase,
+            item['Pur-Ret'],
+            item.Receive,
+            item.Issue,
+            item.Sale,
+            item['Sale-Ret'],
+            item.Bal,
         ]);
 
         // Add summary row to the table
@@ -578,10 +598,15 @@ export default function BankRegisterLedger1() {
             "",
             "",
             "",
+            "",
             "Total",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
+            String(totalpurchase),
+            String(totalpurchaseReturn),
+            String(totalReceive),
+            String(totalissue),
+            String(totalsale),
+            String(totalsaleReturn),
+            String(totalclosingbalance),
         ]);
 
         // Define table column headers and individual column widths
@@ -589,12 +614,17 @@ export default function BankRegisterLedger1() {
             "Date",
             "Trn#",
             "Type",
+            "Str",
             "Description",
-            "Debit",
-            "Credit",
-            "Balance",
+            "Purchase",
+            "Pur-Ret",
+            "Receive",
+            "Issue",
+            "Sale",
+            "Sale-Ret",
+            "Bal",
         ];
-        const columnWidths = [22, 15, 15, 90, 25, 25, 25];
+        const columnWidths = [20, 14, 12, 12, 70, 18, 18, 18, 18, 18, 18, 18];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -692,20 +722,25 @@ export default function BankRegisterLedger1() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-
                     if (cellIndex === 2) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "center",
                             baseline: "middle",
                         });
-                    } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+
+                    }
+
+                    else if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10 || cellIndex === 11) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    } else {
+
+                    }
+
+                    else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -800,7 +835,7 @@ export default function BankRegisterLedger1() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 30,
+                    rightX - 10,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -815,7 +850,7 @@ export default function BankRegisterLedger1() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Bank Register Ledger Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Item Ledger Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -872,9 +907,9 @@ export default function BankRegisterLedger1() {
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+                doc.text(`TYPE :`, labelsX + 200, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
+                doc.text(`${status}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
 
 
 
@@ -925,11 +960,12 @@ export default function BankRegisterLedger1() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`BAnkRegisterLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`ItemLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
 
 
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
@@ -941,13 +977,16 @@ export default function BankRegisterLedger1() {
         const columnAlignments = [
             "left",
             "left",
+            "center",
             "left",
             "left",
             "right",
             "right",
             "right",
-
-
+            "right",
+            "right",
+            "right",
+            "right",
         ];
 
         // Add an empty row at the start
@@ -957,7 +996,7 @@ export default function BankRegisterLedger1() {
 
 
 
-        [comapnyname, `Bank Register Ledger Report From ${fromInputDate} To ${toInputDate} `].forEach((title, index) => {
+        [comapnyname, `Item Ledger Report From ${fromInputDate} To ${toInputDate} `].forEach((title, index) => {
             // Define custom styles for each title
             let customStyle;
             let rowHeight = 20; // Default row height
@@ -1034,7 +1073,7 @@ export default function BankRegisterLedger1() {
         let typesearch = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
 
         const typeAndStoreRow3 = worksheet.addRow([
-            "ACCOUNT:", typesearch, "", "", "", "TYPE :", typestatus
+            "ACCOUNT:", typesearch, "", "", "", "", "", "", "", "TYPE :", typestatus
         ]);
 
 
@@ -1062,7 +1101,7 @@ export default function BankRegisterLedger1() {
 
         // Bold specific columns (labels)
 
-        applyStatusRowStyle(typeAndStoreRow3, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+        applyStatusRowStyle(typeAndStoreRow3, [1, 10]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
 
 
 
@@ -1088,10 +1127,15 @@ export default function BankRegisterLedger1() {
             "Date",
             "Trn#",
             "Type",
+            "Str",
             "Description",
-            "Debit",
-            "Credit",
-            "Balance",
+            "Purchase",
+            "Pur-Ret",
+            "Receive",
+            "Issue",
+            "Sale",
+            "Sale-Ret",
+            "Bal",
         ];
         const headerRow = worksheet.addRow(headers);
 
@@ -1108,10 +1152,15 @@ export default function BankRegisterLedger1() {
                 item.Date,
                 item["Trn#"],
                 item.Type,
+                item.Str,
                 item.Description,
-                item.Debit,
-                item.Credit,
-                item.Balance,
+                item.Purchase,
+                item['Pur-Ret'],
+                item.Receive,
+                item.Issue,
+                item.Sale,
+                item['Sale-Ret'],
+                item.Bal,
             ]);
 
             // Apply custom styles to each cell in the row
@@ -1141,14 +1190,18 @@ export default function BankRegisterLedger1() {
 
 
         const totalRow = worksheet.addRow([
-
+           "",
             "",
             "",
             "",
             "Total",
-            totalDebit,
-            totalCredit,
-            closingBalance,
+            String(totalpurchase),
+            String(totalpurchaseReturn),
+            String(totalReceive),
+            String(totalissue),
+            String(totalsale),
+            String(totalsaleReturn),
+            String(totalclosingbalance),
         ]);
 
         // total row added
@@ -1163,7 +1216,7 @@ export default function BankRegisterLedger1() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 5 || colNumber === 6 || colNumber === 7) {
+            if (colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9 || colNumber === 10 || colNumber === 11 || colNumber === 12 ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
@@ -1171,7 +1224,7 @@ export default function BankRegisterLedger1() {
         // Set column widths
 
 
-        [13, 12, 8, 50, 15, 15, 15].forEach((width, index) => {
+        [12, 8, 7,7, 40, 11, 11, 11, 11, 11, 11,11].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1192,9 +1245,8 @@ export default function BankRegisterLedger1() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `BankRegisterLedgerReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `ItemLedgerReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
-    ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
 
@@ -1227,26 +1279,45 @@ export default function BankRegisterLedger1() {
     };
 
     const firstColWidth = {
-        width: "10%",
+        width: "8%",
     };
     const secondColWidth = {
-        width: "7%",
+        width: "5.5%",
     };
     const thirdColWidth = {
-        width: "4%",
-    };
-    const forthColWidth = {
-        width: "32.5%",
+        width: "3.7%",
     };
     const fifthColWidth = {
-        width: "15%",
+        width: "5%",
     };
     const sixthColWidth = {
-        width: "15%",
+        width: "24%",
     };
     const seventhColWidth = {
-        width: "15%",
+        width: "7.5%",
     };
+    const eightColWidth = {
+        width: "7.5%",
+    };
+    const ninthColWidth = {
+        width: "7.5%",
+    };
+    const tenthColWidth = {
+        width: "7.5%",
+    };
+
+    const elewenthColWidth = {
+        width: "7.5%",
+    };
+    const tewlthColWidth = {
+        width: "7.5%",
+    };
+
+    const thirteenColWidth = {
+        width: "7.5%",
+    };
+
+
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1267,7 +1338,7 @@ export default function BankRegisterLedger1() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1282,7 +1353,7 @@ export default function BankRegisterLedger1() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "900px",
+        maxWidth: "1000px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1401,23 +1472,22 @@ export default function BankRegisterLedger1() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Bank Register Ledger" />
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
+                    <NavComponent textdata="Item Ledger Report" />
+                    <div className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
+
+                        <div style={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            margin: "0px",
+                            padding: "0px",
+                            justifyContent: "space-between",
+                        }}>
+
                             <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5"></div>
+                                <div className="mx-5">
+                                </div>
 
                                 <div
                                     className="d-flex align-items-center"
@@ -1498,9 +1568,14 @@ export default function BankRegisterLedger1() {
                                             <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>90 Days</label>
                                         </div>
                                     </div>
+
                                 </div>
+
                             </div>
+
                         </div>
+
+
                     </div>
 
                     <div
@@ -1517,28 +1592,19 @@ export default function BankRegisterLedger1() {
                                 justifyContent: "space-between",
                             }}
                         >
+
+
+
                             {/* ------ */}
 
-                            <div
-                                className="d-flex align-items-center  "
-                                style={{ marginRight: "1px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Account :
-                                        </span>{" "}
-                                        <br />
-                                    </label>
+
+                            <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
+                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Account :</span>  <br /></label>
                                 </div>
-                                <div style={{ marginLeft: "5px" }}>
+                                <div style={{ marginLeft: '5px' }} >
                                     <Select
+
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1546,16 +1612,12 @@ export default function BankRegisterLedger1() {
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
-
-                                                const labelParts = selectedOption.label.split("-"); // Split by "-"
-                                                const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
-
+                                                const labelPart = selectedOption.label.split("-")[1];
                                                 setSaleType(selectedOption.value);
                                                 setCompanyselectdatavalue({
                                                     value: selectedOption.value,
-                                                    label: description, // Keep only the description
-
-                                                });
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                  });
                                             } else {
                                                 setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                                 setCompanyselectdatavalue('')
@@ -1567,8 +1629,12 @@ export default function BankRegisterLedger1() {
                                         isClearable
                                         placeholder="ALL"
                                     />
+
                                 </div>
+
+
                             </div>
+
 
                             <div
                                 className="d-flex align-items-center"
@@ -1587,6 +1653,8 @@ export default function BankRegisterLedger1() {
                                         </span>
                                     </label>
                                 </div>
+
+
 
                                 <select
                                     ref={input1Ref}
@@ -1607,7 +1675,7 @@ export default function BankRegisterLedger1() {
                                         marginLeft: "5px",
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                        fontSize: "12px",
                                         color: fontcolor,
                                     }}
                                 >
@@ -1628,6 +1696,7 @@ export default function BankRegisterLedger1() {
                             </div>
                         </div>
                     </div>
+
 
                     <div
                         className="row"
@@ -1683,7 +1752,9 @@ export default function BankRegisterLedger1() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1721,7 +1792,9 @@ export default function BankRegisterLedger1() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                                        fontSize: getdatafontsize,
+                                                        fontFamily: getfontstyle,
+                                                        color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1776,7 +1849,9 @@ export default function BankRegisterLedger1() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1813,7 +1888,9 @@ export default function BankRegisterLedger1() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                                        fontSize: getdatafontsize,
+                                                        fontFamily: getfontstyle,
+                                                        color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1842,7 +1919,8 @@ export default function BankRegisterLedger1() {
                                         marginRight: "20px",
                                         width: "200px",
                                         height: "24px",
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1872,7 +1950,8 @@ export default function BankRegisterLedger1() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
@@ -1903,19 +1982,38 @@ export default function BankRegisterLedger1() {
                                         <td className="border-dark" style={thirdColWidth}>
                                             Typ
                                         </td>
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Description
-                                        </td>
+                                        {/* <td className="border-dark" style={forthColWidth}>
+                                            Item Code
+                                        </td> */}
                                         <td className="border-dark" style={fifthColWidth}>
-                                            Debit
+                                            Str
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Credit
+                                            Description
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            Balance
+                                            Purchase
+                                        </td>
+                                        <td className="border-dark" style={eightColWidth}>
+                                            Pur Ret
+                                        </td>
+                                        <td className="border-dark" style={ninthColWidth}>
+                                            Receive
+                                        </td>
+                                        <td className="border-dark" style={tenthColWidth}>
+                                            Issue
+                                        </td>
+                                        <td className="border-dark" style={elewenthColWidth}>
+                                            Sale
+                                        </td>
+                                        <td className="border-dark" style={tewlthColWidth}>
+                                            Sale Ret
+                                        </td>
+                                        <td className="border-dark" style={thirteenColWidth}>
+                                            Bal
                                         </td>
                                     </tr>
+
                                 </thead>
                             </table>
                         </div>
@@ -1934,7 +2032,8 @@ export default function BankRegisterLedger1() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    width: "100%",
                                     position: "relative",
                                 }}
                             >
@@ -1946,7 +2045,7 @@ export default function BankRegisterLedger1() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="7" className="text-center">
+                                                <td colSpan="12" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1959,7 +2058,7 @@ export default function BankRegisterLedger1() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 12 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1971,10 +2070,16 @@ export default function BankRegisterLedger1() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
+                                                {/* <td style={forthColWidth}></td> */}
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+                                                <td style={tewlthColWidth}></td>
+                                                <td style={thirteenColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -1994,27 +2099,44 @@ export default function BankRegisterLedger1() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-center" style={firstColWidth}>
+                                                        <td className="text-start" style={firstColWidth}>
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-center" style={secondColWidth}>
+                                                        <td className="text-start" style={secondColWidth}>
                                                             {item["Trn#"]}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
+
+                                                        <td className="text-start" style={fifthColWidth}>
+                                                            {item.Str}
+                                                        </td>
+                                                        <td className="text-start" style={sixthColWidth}>
                                                             {item.Description}
                                                         </td>
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item.Debit}
-                                                        </td>
-                                                        <td className="text-end" style={sixthColWidth}>
-                                                            {item.Credit}
-                                                        </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Balance}
+                                                            {item.Purchase}
                                                         </td>
+                                                        <td className="text-end" style={eightColWidth}>
+                                                            {item['Pur-Ret']}
+                                                        </td>
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item.Receive}
+                                                        </td>
+                                                        <td className="text-end" style={tenthColWidth}>
+                                                            {item.Issue}
+                                                        </td>
+                                                        <td className="text-end" style={elewenthColWidth}>
+                                                            {item.Sale}
+                                                        </td>
+                                                        <td className="text-end" style={tewlthColWidth}>
+                                                            {item['Sale-Ret']}
+                                                        </td>
+                                                        <td className="text-end" style={thirteenColWidth}>
+                                                            {item.Bal}
+                                                        </td>
+
                                                     </tr>
                                                 );
                                             })}
@@ -2028,7 +2150,7 @@ export default function BankRegisterLedger1() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 12 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2039,10 +2161,16 @@ export default function BankRegisterLedger1() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
+                                                {/* <td style={forthColWidth}></td> */}
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+                                                <td style={tewlthColWidth}></td>
+                                                <td style={thirteenColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -2051,72 +2179,46 @@ export default function BankRegisterLedger1() {
                         </div>
                     </div>
 
-                    <div
-                        style={{
-                            borderBottom: `1px solid ${fontcolor}`,
-                            borderTop: `1px solid ${fontcolor}`,
-                            height: "24px",
-                            display: "flex",
-                            paddingRight: "1.2%",
-                            width: "101.2%",
-                        }}
-                    >
-                        <div
-                            style={{
-                                ...firstColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...secondColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...thirdColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...forthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...fifthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total">{totalDebit}</span>
+
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+
+                        <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+
+                        <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalpurchase}</span>
+
                         </div>
-                        <div
-                            style={{
-                                ...sixthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total">{totalCredit}</span>
+
+                        <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalpurchaseReturn}</span>
                         </div>
-                        <div
-                            style={{
-                                ...seventhColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total">{closingBalance}</span>
+                        <div style={{ ...ninthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalReceive}</span>
                         </div>
+                        <div style={{ ...tenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalissue}</span>
+                        </div>
+
+                        <div style={{ ...elewenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalsale}</span>
+
+                        </div>
+                        <div style={{ ...tewlthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalsaleReturn}</span>
+
+                        </div>
+                        <div style={{ ...thirteenColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalclosingbalance}</span>
+
+                        </div>
+
+
                     </div>
+
                     <div
                         style={{
                             margin: "5px",

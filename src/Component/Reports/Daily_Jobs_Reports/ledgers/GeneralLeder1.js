@@ -877,9 +877,9 @@ export default function GeneralLedger() {
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`CODE :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.text(`ACCOUNT :`, labelsX, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+                doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
@@ -1870,6 +1870,7 @@ export default function GeneralLedger() {
                                     }
                                     onChange={(e) =>
                                         setSearchQuery((e.target.value || "").toUpperCase())
+                                    
                                     } />
                             </div>
                         </div>

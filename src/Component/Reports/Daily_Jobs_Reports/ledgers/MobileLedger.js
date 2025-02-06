@@ -2,13 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-// import { useTheme } from "../../../ThemeContext";
 import { useTheme } from "../../../../ThemeContext";
-// import { getUserData, getOrganisationData } from "../../Auth";
-import { getUserData, getOrganisationData } from "../../../Auth";
-// import NavComponent from "../../MainComponent/Navform/navbarform";
+import { getUserData, getOrganisationData, getYearDescription, getLocationnumber } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
-// import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
@@ -36,7 +32,7 @@ export default function MobileLedger() {
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
 
-    const [mobileNumber, setmobileNumber] = useState('')
+    const [mobileNumber, setmobileNumber] = useState("");
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
@@ -61,6 +57,8 @@ export default function MobileLedger() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+    const yeardescription = getYearDescription();
+    const locationnumber = getLocationnumber();
 
     const {
         isSidebarVisible,
@@ -73,12 +71,13 @@ export default function MobileLedger() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getfontstyle,
+        getdatafontsize
     } = useTheme();
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
-
 
     const comapnyname = organisation.description;
 
@@ -259,7 +258,6 @@ export default function MobileLedger() {
         settoInputDate(e.target.value);
     };
 
-
     const handleSaleKeypress = (event, inputId) => {
         if (event.key === "Enter") {
             const selectedOption = saleSelectRef.current.state.selectValue;
@@ -288,6 +286,8 @@ export default function MobileLedger() {
     function fetchReceivableReport() {
         const fromDateElement = document.getElementById("fromdatevalidation");
         const toDateElement = document.getElementById("todatevalidation");
+        const mobilenumber = document.getElementById("phone");
+
 
         const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
@@ -296,7 +296,10 @@ export default function MobileLedger() {
 
         switch (true) {
             case !mobileNumber:
-                errorType = 'saleType';
+                errorType = "saleType";
+                break;
+            case mobileNumber.length !== 11 || !mobileNumber.startsWith("03"):
+                errorType = "invalidMobileNumber";
                 break;
             case !fromInputDate:
                 errorType = "fromDate";
@@ -330,7 +333,6 @@ export default function MobileLedger() {
             const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
             const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-
             if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
                 errorType = "fromDateBeforeGlobal";
             } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
@@ -346,9 +348,15 @@ export default function MobileLedger() {
 
         switch (errorType) {
 
-            case 'saleType':
+
+            case "saleType":
                 toast.error("Please Enter a Mobile Number");
                 return;
+
+                case "invalidMobileNumber":
+                    toast.error("Invalid Mobile Number");
+                    mobilenumber.style.border = "2px solid red";
+                    return;
 
             case "fromDate":
                 toast.error("From date is required");
@@ -386,11 +394,9 @@ export default function MobileLedger() {
                 toast.error("To date must be after from date");
                 return;
 
-
             default:
                 break;
         }
-
 
         document.getElementById(
             "fromdatevalidation"
@@ -405,9 +411,15 @@ export default function MobileLedger() {
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FMobNum: mobileNumber,
-            code: organisation.code,
+
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription,
+
+            code: 'NASIRTRD',
             FYerDsc: '2024-2024',
             FLocCod: '001',
+
 
         }).toString();
 
@@ -415,7 +427,7 @@ export default function MobileLedger() {
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
-                setTotalDebit(response.data['Total Amount ']);
+                setTotalDebit(response.data["Total Amount "]);
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
                 } else {
@@ -460,124 +472,132 @@ export default function MobileLedger() {
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
 
-
-
-    const exportPDFHandler = () => {
-        // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
-
-        // Define table data (rows)
-        const rows = tableData.map((item) => [
+     const exportPDFHandler = () => {
+   
+           const globalfontsize = 12;
+           console.log('gobal font data', globalfontsize)
+   
+           // Create a new jsPDF instance with landscape orientation
+           const doc = new jsPDF({ orientation: "landscape" });
+   
+           // Define table data (rows)
+           const rows = tableData.map((item) => [
             item.Date,
             item["Inv#"],
             item.Customer,
             item.Amount,
-        ]);
+           ]);
+   
+           // Add summary row to the table
+   
+           rows.push([
+               
+"", "", "Total", String(totalDebit)
+           ]);
+   
+           // Define table column headers and individual column widths
+           const headers = ["Date", "Trn#", "Customer", "Amount"];
+        const columnWidths = [25, 20, 80, 30];
 
-        // Add summary row to the table
-        rows.push(["", "", "Total", String(totalDebit)]);
-
-        // Define table column headers and individual column widths
-        const headers = ["Date", "Trn#", "Customer", "Amount"];
-        const columnWidths = [20, 15, 80, 30];
-
-        // Calculate total table width
-        const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-
-        // Define page height and padding
-        const pageHeight = doc.internal.pageSize.height;
-        const paddingTop = 15;
-
-        // Set font properties for the table
-        doc.setFont("verdana");
-        doc.setFontSize(10);
-
-        // Function to add table headers
-        const addTableHeaders = (startX, startY) => {
-            // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
-
-            headers.forEach((header, index) => {
-                const cellWidth = columnWidths[index];
-                const cellHeight = 6; // Height of the header row
-                const cellX = startX + cellWidth / 2; // Center the text horizontally
-                const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-                // Draw the grey background for the header
-                doc.setFillColor(200, 200, 200); // Grey color
-                doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-                // Draw the outer border
-                doc.setLineWidth(0.2); // Set the width of the outer border
-                doc.rect(startX, startY, cellWidth, cellHeight);
-
-                // Set text alignment to center
-                doc.setTextColor(0); // Set text color to black
-                doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-                startX += columnWidths[index]; // Move to the next column
-            });
-
-            // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
-        };
-
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-            doc.setFontSize(fontSize);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 100; // Check if tctgcod is greater than 100
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
-
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
-                }
-
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
-
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
-
-                row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
-
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
-
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
-
-                    if (cellIndex === 1 || cellIndex === 3) {
+   
+           // Calculate total table width
+           const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+   
+           // Define page height and padding
+           const pageHeight = doc.internal.pageSize.height;
+           const paddingTop = 15;
+   
+           // Set font properties for the table
+           doc.setFont(getfontstyle);
+           doc.setFontSize(10);
+   
+           // Function to add table headers
+           const addTableHeaders = (startX, startY) => {
+               // Set font style and size for headers
+               doc.setFont(getfontstyle, "bold"); // Set font to bold
+               doc.setFontSize(12); // Set font size for headers
+   
+               headers.forEach((header, index) => {
+                   const cellWidth = columnWidths[index];
+                   const cellHeight = 6; // Height of the header row
+                   const cellX = startX + cellWidth / 2; // Center the text horizontally
+                   const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+   
+                   // Draw the grey background for the header
+                   doc.setFillColor(200, 200, 200); // Grey color
+                   doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+   
+                   // Draw the outer border
+                   doc.setLineWidth(0.2); // Set the width of the outer border
+                   doc.rect(startX, startY, cellWidth, cellHeight);
+   
+                   // Set text alignment to center
+                   doc.setTextColor(0); // Set text color to black
+                   doc.text(header, cellX, cellY, { align: "center" }); // Center the text
+                   startX += columnWidths[index]; // Move to the next column
+               });
+   
+               // Reset font style and size after adding headers
+               doc.setFont(getfontstyle);
+               doc.setFontSize(12);
+           };
+   
+           const addTableRows = (startX, startY, startIndex, endIndex) => {
+               const rowHeight = 5; // Adjust this value to decrease row height
+               const fontSize = 10; // Adjust this value to decrease font size
+               const boldFont = 400; // Bold font
+               const normalFont = getfontstyle; // Default font
+               const tableWidth = getTotalTableWidth(); // Calculate total table width
+   
+               doc.setFontSize(fontSize);
+   
+               for (let i = startIndex; i < endIndex; i++) {
+                   const row = rows[i];
+                   const isOddRow = i % 2 !== 0; // Check if the row index is odd
+                   const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
+                   let textColor = [0, 0, 0]; // Default text color
+                   let fontName = normalFont; // Default font
+   
+                   if (isRedRow) {
+                       textColor = [255, 0, 0]; // Red color
+                       fontName = boldFont; // Set bold font for red-colored row
+                   }
+   
+                   // Set background color for odd-numbered rows
+                   // if (isOddRow) {
+                   // 	doc.setFillColor(240); // Light background color
+                   // 	doc.rect(
+                   // 		startX,
+                   // 		startY + (i - startIndex + 2) * rowHeight,
+                   // 		tableWidth,
+                   // 		rowHeight,
+                   // 		"F"
+                   // 	);
+                   // }
+   
+                   // Draw row borders
+                   doc.setDrawColor(0); // Set color for borders
+                   doc.rect(
+                       startX,
+                       startY + (i - startIndex + 2) * rowHeight,
+                       tableWidth,
+                       rowHeight
+                   );
+   
+                   row.forEach((cell, cellIndex) => {
+                       const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
+                       const cellX = startX + 2;
+   
+                       // Set text color
+                       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+                       // Set font
+                       doc.setFont(fontName, "normal");
+   
+                       // Ensure the cell value is a string
+                       const cellValue = String(cell);
+   
+   
+                       if (cellIndex === 1 || cellIndex === 3) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -586,314 +606,464 @@ export default function MobileLedger() {
                     } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
+   
+   
+   
+                       // Draw column borders (excluding the last column)
+                       if (cellIndex < row.length - 1) {
+                           doc.rect(
+                               startX,
+                               startY + (i - startIndex + 2) * rowHeight,
+                               columnWidths[cellIndex],
+                               rowHeight
+                           );
+                           startX += columnWidths[cellIndex];
+                       }
+                   });
+   
+                   // Draw border for the last column
+                   doc.rect(
+                       startX,
+                       startY + (i - startIndex + 2) * rowHeight,
+                       columnWidths[row.length - 1],
+                       rowHeight
+                   );
+                   startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+               }
+   
+               // Draw line at the bottom of the page with padding
+               const lineWidth = tableWidth; // Match line width with table width
+               const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
+               const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+               doc.setLineWidth(0.3);
+               doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
+               const headingFontSize = 12; // Adjust as needed
+   
+               // Add heading "Crystal Solution" aligned left bottom of the line
+               const headingX = lineX + 2; // Padding from left
+               const headingY = lineY + 5; // Padding from bottom
+               doc.setFontSize(headingFontSize); // Set the font size for the heading
+               doc.setTextColor(0); // Reset text color to default
+               doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+           };
+   
+           // Function to calculate total table width
+           const getTotalTableWidth = () => {
+               let totalWidth = 0;
+               columnWidths.forEach((width) => (totalWidth += width));
+               return totalWidth;
+           };
+   
+           // Function to add a new page and reset startY
+           const addNewPage = (startY) => {
+               doc.addPage();
+               return paddingTop; // Set startY for each new page
+           };
+   
+           // Define the number of rows per page
+           const rowsPerPage = 27; // Adjust this value based on your requirements
+   
+           // Function to handle pagination
+           const handlePagination = () => {
+   
+   
+               // Define the addTitle function
+               const addTitle = (
+                   title,
+                   date,
+                   time,
+                   pageNumber,
+                   startY,
+                   titleFontSize = 18,
+                   pageNumberFontSize = 10
+               ) => {
+                   doc.setFontSize(titleFontSize); // Set the font size for the title
+                   doc.text(title, doc.internal.pageSize.width / 2, startY, {
+                       align: "center",
+                   });
+   
+                   // Calculate the x-coordinate for the right corner
+                   const rightX = doc.internal.pageSize.width - 10;
+   
+                   // if (date) {
+                   //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                   //     if (time) {
+                   //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                   //     } else {
+                   //         doc.text(date, rightX - 10, startY, { align: "right" });
+                   //     }
+                   // }
+   
+                   // Add page numbering
+                   doc.setFontSize(pageNumberFontSize);
+                   doc.text(
+                       `Page ${pageNumber}`,
+                       rightX - 60,
+                       doc.internal.pageSize.height - 10,
+                       { align: "right" }
+                   );
+               };
+   
+               let currentPageIndex = 0;
+               let startY = paddingTop; // Initialize startY
+               let pageNumber = 1; // Initialize page number
+   
+               while (currentPageIndex * rowsPerPage < rows.length) {
+   
+                   addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                   startY += 5; // Adjust vertical position for the company title
+   
+                   addTitle(`Mobile Ledger Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                   startY += -5;
+   
+                   const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+                   const labelsY = startY + 4; // Position the labels below the titles and above the table
+   
+                   // Set font size and weight for the labels
+                   doc.setFontSize(12);
+                   doc.setFont(getfontstyle, "300");
+   
+   
+   
+   
+                   let status = transectionType === "A"
+                       ? "ALL"
+                       : transectionType === "CRV"
+                           ? "Cash Receive Voucher"
+                           : transectionType === "CPV"
+                               ? "Cash Payment Voucher"
+                               : transectionType === "BRV"
+                                   ? "Bank Receive Voucher"
+                                   : transectionType === "BPV"
+                                       ? "Bank Payment Voucher"
+                                       : transectionType === "JRV"
+                                           ? "Journal Voucher"
+                                           : transectionType === "INV"
+                                               ? "Item Sale"
+                                               : transectionType === "SRN"
+                                                   ? "Sale Return"
+                                                   : transectionType === "BIL"
+                                                       ? "Purchase"
+                                                       : transectionType === "PRN"
+                                                           ? "Purchase Return"
+                                                           : transectionType === "ISS"
+                                                               ? "Issue"
+                                                               : transectionType === "REC"
+                                                                   ? "Received"
+                                                                   : transectionType === "SLY"
+                                                                       ? "Salary"
+                                                                       : "ALL";
+   
+                   let search = mobileNumber
+                       ? mobileNumber
+                       : "ALL";
+   
+                   // Set font style, size, and family
+                   doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                   doc.setFontSize(10); // Font size
+   
+   
+                   doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                   doc.text(`MOBILE :`, labelsX, labelsY + 8.5); // Draw bold label
+                   doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                   doc.text(`${search}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
+   
+   
+                //    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                //    doc.text(`TYPE :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+                //    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                //    doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
+   
+   
+   
+                   // // Reset font weight to normal if necessary for subsequent text
+                   doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                   doc.setFontSize(10);
+   
+                   startY += 10; // Adjust vertical position for the labels
+   
+                   addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+                   const startIndex = currentPageIndex * rowsPerPage;
+                   const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+                   startY = addTableRows(
+                       (doc.internal.pageSize.width - totalWidth) / 2,
+                       startY,
+                       startIndex,
+                       endIndex
+                   );
+                   if (endIndex < rows.length) {
+                       startY = addNewPage(startY); // Add new page and update startY
+                       pageNumber++; // Increment page number
+                   }
+                   currentPageIndex++;
+               }
+           };
+   
+           const getCurrentDate = () => {
+               const today = new Date();
+               const dd = String(today.getDate()).padStart(2, "0");
+               const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+               const yyyy = today.getFullYear();
+               return dd + "/" + mm + "/" + yyyy;
+           };
+   
+           // Function to get current time in the format HH:MM:SS
+           const getCurrentTime = () => {
+               const today = new Date();
+               const hh = String(today.getHours()).padStart(2, "0");
+               const mm = String(today.getMinutes()).padStart(2, "0");
+               const ss = String(today.getSeconds()).padStart(2, "0");
+               return hh + ":" + mm + ":" + ss;
+           };
+   
+           const date = getCurrentDate(); // Get current date
+           const time = getCurrentTime(); // Get current time
+   
+           // Call function to handle pagination
+           handlePagination();
+   
+           // Save the PDF files
+           doc.save(`MobileLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+   
+   
+       };
 
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
-
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+  const handleDownloadCSV = async () => {
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet("Sheet1");
+  
+          const numColumns = 6; // Number of columns
+  
+          const columnAlignments = [
+              "left", "right", "left", "right"
+  
+  
+          ];
+  
+          // Add an empty row at the start
+          worksheet.addRow([]);
+  
+          // Add title rows
+  
+  
+  
+         [comapnyname, `Mobile Ledger Report From ${fromInputDate} To ${toInputDate} `].forEach((title, index) => {
+            // Define custom styles for each title
+            let customStyle;
+            let rowHeight = 20;  // Default row height
+            if (index === 0) {
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
+            } else {
+                // Style for "Item List"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
             }
 
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+            // Add row with the title
+            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
 
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+            // Adjust the row height for the company name or other titles
+            worksheet.getRow(index + 2).height = rowHeight;
 
-        // Function to calculate total table width
-        const getTotalTableWidth = () => {
-            let totalWidth = 0;
-            columnWidths.forEach((width) => (totalWidth += width));
-            return totalWidth;
-        };
-
-        // Function to add a new page and reset startY
-        const addNewPage = (startY) => {
-            doc.addPage();
-            return paddingTop; // Set startY for each new page
-        };
-
-        // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
-
-        // Function to handle pagination
-        const handlePagination = () => {
-            // Define the addTitle function
-            const addTitle = (
-                title,
-                date,
-                time,
-                pageNumber,
-                startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
-            ) => {
-                doc.setFontSize(titleFontSize); // Set the font size for the title
-                doc.text(title, doc.internal.pageSize.width / 2, startY, {
-                    align: "center",
-                });
-
-                // Calculate the x-coordinate for the right corner
-                const rightX = doc.internal.pageSize.width - 10;
-
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
-
-                // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
-                    `Page ${pageNumber}`,
-                    rightX - 10,
-                    doc.internal.pageSize.height - 10,
-                    { align: "right" }
-                );
-            };
-
-            let currentPageIndex = 0;
-            let startY = paddingTop; // Initialize startY
-            let pageNumber = 1; // Initialize page number
-
-            while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(
-                    `Mobile Ledger From: ${fromInputDate} To: ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
-
-                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 2; // Position the labels below the titles and above the table
-
-                // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
-
-                // let typeText = selectedOptionType ? selectedOptionType : "All";
-                let typeMobile = mobileNumber ? mobileNumber : "All";
-
-                doc.text(`Mobile: ${typeMobile}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
-
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
-
-                startY += 0; // Adjust vertical position for the labels
-
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
-                const startIndex = currentPageIndex * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-                startY = addTableRows(
-                    (doc.internal.pageSize.width - totalWidth) / 2,
-                    startY,
-                    startIndex,
-                    endIndex
-                );
-                if (endIndex < rows.length) {
-                    startY = addNewPage(startY); // Add new page and update startY
-                    pageNumber++; // Increment page number
-                }
-                currentPageIndex++;
-            }
-        };
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
-        };
-
-        // Function to get current time in the format HH:MM:SS
-        const getCurrentTime = () => {
-            const today = new Date();
-            const hh = String(today.getHours()).padStart(2, "0");
-            const mm = String(today.getMinutes()).padStart(2, "0");
-            const ss = String(today.getSeconds()).padStart(2, "0");
-            return hh + ":" + mm + ":" + ss;
-        };
-
-        const date = getCurrentDate(); // Get current date
-        const time = getCurrentTime(); // Get current time
-
-        // Call function to handle pagination
-        handlePagination();
-
-        // Save the PDF file
-        doc.save("MobileLedger.pdf");
-
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
-    };
-
-    const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-
-        const numColumns = 4; // Number of columns
-
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
-
-        const columnAlignments = ["left", "right", "left", "right"];
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-        // Add title rows
-        [
-            comapnyname,
-            `Mobile Ledger From ${fromInputDate} To ${toInputDate}`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+            // Merge the cells for the title
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
-        });
-
-        worksheet.addRow([]); // Empty row for spacing
-
-        // let typeText = selectedOptionType ? selectedOptionType : "All";
-        let typeMobile = mobileNumber ? mobileNumber : "All";
-
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([`Mobile: ${typeMobile}`]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-
-        worksheet.addRow([]); // Empty row for spacing
-
-        const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
-        };
-
-        // Add headers
-        const headers = ["Date", "Inv#", "Customer", "Amount"];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
-        });
-
-        // Add data rows
-        tableData.forEach((item) => {
-            worksheet.addRow([item.Date, item["Inv#"], item.Customer, item.Amount]);
-        });
-
-        // Add total row and bold it
-        const totalRow = worksheet.addRow(["", "", "Total", totalDebit]);
-        totalRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-
-        // Set column widths
-        [10, 8, 50, 15].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
-            }
-        });
-
-        // Generate Excel file buffer and save
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, "MobileLedger.xlsx");
-    };
+        }); 
+  
+  
+          // Add an empty row after the title section
+          worksheet.addRow([]);  // This is where you add the empty row
+  
+  
+          let typestatus = "";
+  
+          if (transectionType === "A") {
+              typestatus = "ALL";
+          } else if (transectionType === "CRV") {
+              typestatus = "Cash Receive Voucher";
+          } else if (transectionType === "CPV") {
+              typestatus = "Cash Payment Voucher";
+          } else if (transectionType === "BRV") {
+              typestatus = "Bank Receive Voucher";
+          } else if (transectionType === "BPV") {
+              typestatus = "Bank Payment Voucher";
+          } else if (transectionType === "JRV") {
+              typestatus = "Journal Voucher";
+          } else if (transectionType === "INV") {
+              typestatus = "Item Sale";
+          } else if (transectionType === "SRN") {
+              typestatus = "Sale Return";
+          } else if (transectionType === "BIL") {
+              typestatus = "Purchase";
+          } else if (transectionType === "PRN") {
+              typestatus = "Purchase Return";
+          } else if (transectionType === "ISS") {
+              typestatus = "Issue";
+          } else if (transectionType === "REC") {
+              typestatus = "Received";
+          } else if (transectionType === "SLY") {
+              typestatus = "Salary";
+          } else {
+              typestatus = "ALL"; // Default value
+          }
+  
+  
+          let typesearch = mobileNumber ? mobileNumber : "ALL";
+  
+          const typeAndStoreRow3 = worksheet.addRow([
+              "MOBILE:", typesearch 
+          ]);
+  
+  
+  
+  
+          const applyStatusRowStyle = (row, boldColumns = []) => {
+              row.eachCell((cell, colIndex) => {
+                  // Check if the current cell is in the boldColumns array
+                  const isBold = boldColumns.includes(colIndex);
+  
+                  cell.font = {
+                      family: getfontstyle, // Your desired font family
+                      size: getdatafontsize, // Your desired font size
+                      bold: isBold, // Bold only for specific columns
+                  };
+  
+                  cell.alignment = {
+                      horizontal: "left", // Align text to the left
+                      vertical: "middle", // Vertically align to the middle
+                  };
+  
+                  cell.border = null; // Remove borders
+              });
+          };
+  
+          // Bold specific columns (labels)
+  
+          applyStatusRowStyle(typeAndStoreRow3, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+  
+  
+  
+          // Header style for center alignment
+          const headerStyle = {
+              font: { bold: true, family: getfontstyle, size: getdatafontsize },
+              alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
+              fill: {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb: "FFC6D9F7" },
+              },
+              border: {
+                  top: { style: "thin" },
+                  left: { style: "thin" },
+                  bottom: { style: "thin" },
+                  right: { style: "thin" },
+              },
+          };
+  
+          // Add headers
+          const headers = [
+             "Date", "Trn#", "Customer", "Amount"
+          ];
+          const headerRow = worksheet.addRow(headers);
+  
+          // Apply styles and center alignment to the header row
+          headerRow.eachCell((cell) => {
+              cell.style = { ...headerStyle };
+          });
+  
+          // Add data rows
+  
+          // Add data rows
+          tableData.forEach((item) => {
+              const row = worksheet.addRow([
+                item.Date,
+                item["Inv#"],
+                item.Customer,
+                item.Amount,
+              ]);
+  
+              // Apply custom styles to each cell in the row
+              row.eachCell((cell, colIndex) => {
+                  cell.font = {
+                      family: getfontstyle, // Set your desired font family
+                      size: getdatafontsize, // Set the font size
+                      bold: false, // Make the font bold
+                  };
+  
+                  cell.border = {
+                      top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                      left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                      bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                      right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                  };
+  
+                  // Align cell content based on columnAlignments array
+                  const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                  cell.alignment = {
+                      horizontal: alignment,
+                      vertical: "middle", // Vertically align to the middle
+                  };
+              });
+          });
+  
+  
+  
+          const totalRow = worksheet.addRow([
+  
+              "", "", "Total", String(totalDebit)
+          ]);
+  
+          // total row added
+  
+          totalRow.eachCell((cell, colNumber) => {
+              cell.font = { bold: true };
+              cell.border = {
+                  top: { style: "thin" },
+                  left: { style: "thin" },
+                  bottom: { style: "thin" },
+                  right: { style: "thin" },
+              };
+  
+              // Align only the "Total" text to the right
+              if (colNumber === 4 ) {
+                  cell.alignment = { horizontal: "right" };
+              }
+          });
+  
+          // Set column widths
+  
+  
+          [13, 12, 50, 25].forEach((width, index) => {
+              worksheet.getColumn(index + 1).width = width;
+          });
+  
+  
+  
+          const getCurrentDate = () => {
+              const today = new Date();
+              const dd = String(today.getDate()).padStart(2, "0");
+              const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+              const yyyy = today.getFullYear();
+              return dd + "/" + mm + "/" + yyyy;
+          };
+  
+          const currentdate = getCurrentDate();
+  
+          // Generate Excel file buffer and save
+          const buffer = await workbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          saveAs(blob, `MobileLedgerReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+      };
 
     const dispatch = useDispatch();
 
@@ -925,14 +1095,13 @@ export default function MobileLedger() {
         return filteredData;
     };
 
-
     const handleMobilePress = (e, nextInputRef) => {
-        const fromDateElement = document.getElementById('phone');
+        const fromDateElement = document.getElementById("phone");
         const mobileNumber = e.target.value;
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
             e.preventDefault();
             // Mobile number validation
-            if (mobileNumber.length !== 11 || !mobileNumber.startsWith('03')) {
+            if (mobileNumber.length !== 11 || !mobileNumber.startsWith("03")) {
                 toast.error("Invalid Mobile Number");
                 fromDateElement.style.border = "2px solid red";
                 return;
@@ -949,7 +1118,6 @@ export default function MobileLedger() {
     const handleMobilenumberInputChange = (e) => {
         setmobileNumber(e.target.value);
     };
-
 
     const firstColWidth = {
         width: "15%",
@@ -994,7 +1162,7 @@ export default function MobileLedger() {
         backgroundColor: getcolor,
         width: isSidebarVisible ? "calc(50vw - 0%)" : "50vw",
         position: "relative",
-        top: "35%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1007,7 +1175,7 @@ export default function MobileLedger() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "1000px",
+        maxWidth: "900px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1114,18 +1282,17 @@ export default function MobileLedger() {
     }, [selectedRadio]);
 
     function closeAlert(errorType) {
+        const alertElement = document.getElementById("someElementId");
+        alertElement.innerHTML = ""; // Clears the alert content
 
-        const alertElement = document.getElementById('someElementId');
-        alertElement.innerHTML = ''; // Clears the alert content
-
-        if (errorType === 'mobilevalidation') {
+        if (errorType === "mobilevalidation") {
             input2Ref.current.focus(); // Focus back on the input field if the error occurred in the 'from date' input field
         }
 
-        if (errorType === 'formvalidation') {
+        if (errorType === "formvalidation") {
             fromRef.current.select();
         }
-        if (errorType === 'todatevalidation') {
+        if (errorType === "todatevalidation") {
             toRef.current.select();
         }
     }
@@ -1147,21 +1314,22 @@ export default function MobileLedger() {
                     }}
                 >
                     <NavComponent textdata="Mobile Ledger" />
-                    <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
-
-                        <div style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "0px",
-                            padding: "0px",
-                            justifyContent: "space-between",
-                        }}>
-
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
                             <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
+                                <div className="mx-5"></div>
 
                                 <div
                                     className="d-flex align-items-center"
@@ -1188,7 +1356,7 @@ export default function MobileLedger() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="custom">Custom</label>
+                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>Custom</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1205,7 +1373,7 @@ export default function MobileLedger() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="30">30 Days</label>
+                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>30 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1222,7 +1390,7 @@ export default function MobileLedger() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="60">60 Days</label>
+                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>60 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1239,17 +1407,12 @@ export default function MobileLedger() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="90">90 Days</label>
+                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>90 Days</label>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
-
                     </div>
 
                     <div
@@ -1267,11 +1430,23 @@ export default function MobileLedger() {
                             }}
                         >
                             {/* ------ */}
-                            <div className='d-flex align-items-center '
-                            >
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Mobile :</span>  <br /></label>
+
+                            <div className="d-flex align-items-center ">
+                                <div
+                                    style={{
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                            Mobile :
+                                        </span>{" "}
+                                        <br />
+                                    </label>
                                 </div>
+
                                 <input
                                     ref={input2Ref}
                                     value={mobileNumber}
@@ -1281,22 +1456,27 @@ export default function MobileLedger() {
                                     type="tel"
                                     id="phone"
                                     name="phone"
-                                    placeholder="123-45-678"
-                                    style={{ color: fontcolor, width: '200px', height: '24px', fontSize: '12px', border: `1px solid ${fontcolor}`, backgroundColor: getcolor, outline: 'none', paddingLeft: '10px', marginLeft: '3px' }}
+                                    placeholder="0302-1127364"
+                                    style={{
+                                        color: fontcolor,
+                                        width: "200px",
+                                        height: "24px",
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, border: `1px solid ${fontcolor}`,
+                                        backgroundColor: getcolor,
+                                        outline: "none",
+                                        paddingLeft: "10px",
+                                        marginLeft: "3px",
+                                    }}
                                     onFocus={(e) =>
                                         (e.currentTarget.style.border = "2px solid red")
                                     }
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-
                                 />
                             </div>
-
-
                         </div>
                     </div>
-
 
                     <div
                         className="row"
@@ -1321,7 +1501,7 @@ export default function MobileLedger() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             From :
                                         </span>
                                     </label>
@@ -1352,8 +1532,7 @@ export default function MobileLedger() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1391,8 +1570,7 @@ export default function MobileLedger() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1405,7 +1583,6 @@ export default function MobileLedger() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "15px" }}
                             >
                                 <div
                                     style={{
@@ -1415,7 +1592,7 @@ export default function MobileLedger() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             To :
                                         </span>
                                     </label>
@@ -1447,8 +1624,7 @@ export default function MobileLedger() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
-                                            backgroundColor: getcolor,
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                                             pointerEvents:
@@ -1485,8 +1661,7 @@ export default function MobileLedger() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
-                                                        color: fontcolor,
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
                                                     disabled={selectedRadio !== "custom"}
@@ -1499,7 +1674,7 @@ export default function MobileLedger() {
                             </div>
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "4px" }}>
-                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                         Search :
                                     </span>{" "}
                                 </label>
@@ -1510,12 +1685,12 @@ export default function MobileLedger() {
                                     id="searchsubmit"
                                     placeholder="Item description"
                                     value={searchQuery}
+                                    autoComplete="off"
                                     style={{
                                         marginRight: "22px",
-                                        width: "200px",
+                                        width: "150px",
                                         height: "24px",
-                                        fontSize: "12px",
-                                        color: fontcolor,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1527,8 +1702,10 @@ export default function MobileLedger() {
                                     onBlur={(e) =>
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                                    onChange={(e) =>
+                                        setSearchQuery((e.target.value || "").toUpperCase())
+
+                                    } />
                             </div>
                         </div>
                     </div>
@@ -1543,14 +1720,14 @@ export default function MobileLedger() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
                             >
                                 <thead
                                     style={{
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1577,7 +1754,6 @@ export default function MobileLedger() {
                                         <td className="border-dark" style={forthColWidth}>
                                             Amount
                                         </td>
-
                                     </tr>
                                 </thead>
                             </table>
@@ -1588,7 +1764,7 @@ export default function MobileLedger() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "40vh",
+                                maxHeight: "53vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1597,8 +1773,7 @@ export default function MobileLedger() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: "12px",
-                                    width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                 }}
                             >
@@ -1636,7 +1811,6 @@ export default function MobileLedger() {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
-
                                             </tr>
                                         </>
                                     ) : (
@@ -1668,7 +1842,6 @@ export default function MobileLedger() {
                                                         <td className="text-end" style={forthColWidth}>
                                                             {item.Amount}
                                                         </td>
-
                                                     </tr>
                                                 );
                                             })}
@@ -1694,7 +1867,6 @@ export default function MobileLedger() {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
-
                                             </tr>
                                         </>
                                     )}
@@ -1703,7 +1875,6 @@ export default function MobileLedger() {
                         </div>
                     </div>
 
-
                     <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
@@ -1711,7 +1882,7 @@ export default function MobileLedger() {
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
+                            width: "101.2%",
                         }}
                     >
                         <div
@@ -1734,8 +1905,7 @@ export default function MobileLedger() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...forthColWidth,
@@ -1744,9 +1914,7 @@ export default function MobileLedger() {
                             }}
                         >
                             <span className="mobileledger_total">{totalDebit}</span>
-
                         </div>
-
                     </div>
                     <div
                         style={{

@@ -50,8 +50,8 @@ import CustomerLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/Cust
 import BankRegisterLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger1.js";
 import CustomerProgressLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerprogressReport.js";
 import MobileLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileLedger.js";
-import BankRegisterLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger.js";
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
+import ItemLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemLedgerReport.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import DailyCashReceipts from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashReceipts.js";
@@ -130,7 +130,10 @@ function App() {
                 <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
                 <Route exact path="/CustomerProgress" element={<CustomerProgressLedger />} />
                 <Route exact path="/MobileLedger" element={<MobileLedger />} />
+                <Route exact path="/ItemLedger" element={<ItemLedgerReport/>} />
 
+
+              
                 {/* Rountes for ledgers reports */}
                 <Route exact path="/CashBook" element={<DailyCashReceipts />} />
                 <Route exact path="/Journal" element={<JournalReport />} />
