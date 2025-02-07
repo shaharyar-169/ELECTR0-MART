@@ -1000,6 +1000,8 @@ export default function CashFlowReport() {
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+   
+
     useEffect(() => {
         const handleResize = () => {
             setWindowWidth(window.innerWidth);
@@ -1035,70 +1037,82 @@ export default function CashFlowReport() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-    const [isFilterApplied, setIsFilterApplied] = useState(false);
-    useEffect(() => {
-        if (isFilterApplied || tableData.length > 0) {
-            setSelectedIndex(0);
-            rowRefs.current[0]?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        } else {
-            setSelectedIndex(-1);
-        }
-    }, [tableData, isFilterApplied]);
 
-    let totalEnteries = 0;
-    const [selectedRowId, setSelectedRowId] = useState(null);
+
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const rowRefs = useRef([]);
+
+    // Merge Receipts and Payments with section headings
+    const mergedData = [
+        { type: "receipt-heading" }, // Receipt Section Heading
+        ...tableData.map((item, i) => ({ ...item, type: "receipt", index: i })),
+        { type: "payment-heading" }, // Payment Section Heading
+        ...Paymentdata.map((item, i) => ({ ...item, type: "payment", index: tableData.length + i }))
+    ];
+
+    // Function to find the first selectable row (non-heading)
+    const getFirstSelectableRow = () => mergedData.findIndex(row => !row.type.includes("heading"));
+
+    // Set the first selectable row when data is loaded
+    useEffect(() => {
+        const firstRow = getFirstSelectableRow();
+        if (firstRow !== -1) {
+            setSelectedIndex(firstRow);
+            setTimeout(() => scrollToSelectedRow(firstRow), 100); // Prevent too many re-renders
+        }
+    }, [tableData, Paymentdata]); // Runs when data changes
+
+    // Handle row click
     const handleRowClick = (index) => {
+        if (mergedData[index]?.type.includes("heading")) return; // Prevent selection of headings
         setSelectedIndex(index);
     };
-    useEffect(() => {
-        if (selectedRowId !== null) {
-            const newIndex = tableData.findIndex(
-                (item) => item.tcmpcod === selectedRowId
-            );
-            setSelectedIndex(newIndex);
-        }
-    }, [tableData, selectedRowId]);
-    const handleKeyDown = (e) => {
-        if (selectedIndex === -1 || e.target.id === "searchInput") return;
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-            scrollToSelectedRow();
-        } else if (e.key === "ArrowDown") {
-            e.preventDefault();
-            setSelectedIndex((prevIndex) =>
-                Math.min(prevIndex + 1, tableData.length - 1)
-            );
-            scrollToSelectedRow();
-        }
-    };
-    const scrollToSelectedRow = () => {
-        if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
-            rowRefs.current[selectedIndex].scrollIntoView({
+
+    // Scroll to selected row
+    const scrollToSelectedRow = (index) => {
+        if (index !== -1 && rowRefs.current[index]) {
+            rowRefs.current[index].scrollIntoView({
                 behavior: "smooth",
                 block: "nearest",
             });
         }
     };
+
+    // Handle keyboard navigation
+    const handleKeyDown = (e) => {
+        if (selectedIndex === -1 || e.target.id === "searchInput") return;
+
+        let newIndex = selectedIndex;
+
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            do {
+                newIndex = Math.max(newIndex - 1, 0);
+            } while (mergedData[newIndex]?.type.includes("heading") && newIndex > 0);
+        } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            do {
+                newIndex = Math.min(newIndex + 1, mergedData.length - 1);
+            } while (mergedData[newIndex]?.type.includes("heading") && newIndex < mergedData.length - 1);
+        }
+
+        if (newIndex !== selectedIndex) {
+            setSelectedIndex(newIndex);
+            setTimeout(() => scrollToSelectedRow(newIndex), 50); // Prevent excessive scrolling
+        }
+    };
+
+    // Attach event listener
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
     }, [selectedIndex]);
-    useEffect(() => {
-        if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
-            rowRefs.current[selectedIndex].scrollIntoView({
-                behavior: "smooth",
-                block: "nearest",
-            });
-        }
-    }, [selectedIndex]);
+
+
+
+    
 
     const parseDate = (dateString) => {
         const [day, month, year] = dateString.split("-").map(Number);
@@ -1132,6 +1146,10 @@ export default function CashFlowReport() {
             handleRadioChange(days);
         }
     }, [selectedRadio]);
+
+
+   
+
 
     return (
         <>
@@ -1515,202 +1533,15 @@ export default function CashFlowReport() {
                                 <tbody id="tablebody">
                                     {isLoading ? (
                                         <>
-                                            <tr
-                                                style={{
-                                                    backgroundColor: getcolor,
-                                                }}
-                                            >
+                                            <tr style={{ backgroundColor: getcolor }}>
                                                 <td colSpan="5" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
-                                            {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                                                (_, rowIndex) => (
-                                                    <tr
-                                                        key={`blank-${rowIndex}`}
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        {Array.from({ length: 5 }).map((_, colIndex) => (
-                                                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                                                                &nbsp;
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                )
-                                            )}
-                                            <tr>
-                                                <td style={firstColWidth}></td>
-                                                <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
-                                                <td style={fifthColWidth}></td>
-
-                                            </tr>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <>
-                                                {/* Existing Receipt Mapping */}
-                                                {tableData.map((item, i) => {
-                                                    totalEnteries += 1;
-                                                    return (
-                                                        <tr
-                                                            key={`${i}-${selectedIndex}`}
-                                                            ref={(el) => (rowRefs.current[i] = el)}
-                                                            onClick={() => handleRowClick(i)}
-                                                            className={selectedIndex === i ? "selected-background" : ""}
-                                                            style={{
-                                                                backgroundColor: getcolor,
-                                                                color: fontcolor,
-                                                            }}
-                                                        >
-                                                            {/* First column - tacccod or empty */}
-                                                            <td
-                                                                className="text-start"
-                                                                style={{
-                                                                    ...firstColWidth,
-                                                                    textAlign: "center", // Center align
-                                                                    fontWeight: "normal", // Normal weight for first column
-                                                                    backgroundColor: "transparent", // No background for first column
-                                                                }}
-                                                            >
-                                                                {i === 0 ? "-" : i === 1 ? "" : item.tacccod}
-                                                            </td>
-
-                                                            {/* Second column - Custom description or Receipt heading */}
-                                                            <td
-                                                                className={`text-start ${i === 1 ? "heading-cell" : ""}`}
-                                                                style={{
-                                                                    ...secondColWidth,
-                                                                    // textAlign: i === 1 ? "center" : "center", // Center align for heading
-                                                                   textAlign:"center !important",
-                                                                    fontWeight: i === 1 ? "bold" : "normal", // Bold for heading
-                                                                    backgroundColor: i === 1 ? "#3368B5" : "transparent", // Background color for heading
-                                                                    color: i === 1 ? `${fontcolor}` : `${fontcolor}`, // Text color for heading
-                                                                }}
-                                                            >
-                                                                {i === 0 ? "Opening Balance" : i === 1 ? "Receipt" : item.Description}
-                                                            </td>
-
-                                                            {/* Third column - Receipt values */}
-                                                            <td className="text-end" style={thirdColWidth}>
-                                                                {i === 0 ? "-" : i === 1 ? "" : item.Receipts}
-                                                            </td>
-
-                                                            {/* Fourth column - Payment values */}
-                                                            <td className="text-end" style={forthColWidth}>
-                                                                {i === 0 ? "-" : item.Payment}
-                                                            </td>
-
-                                                            {/* Fifth column - Opening balance or empty */}
-                                                            <td className="text-end" style={fifthColWidth}>
-                                                                {i === 0 ? openingbalance : ""}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-
-
-
-                                                {/* Payment Heading */}
-                                                {tableData.length > 0 && (
-                                                    <tr>
-                                                        {/* First column - Payment heading */}
-                                                        <td
-                                                            style={{
-                                                                ...firstColWidth,
-                                                                backgroundColor: "#021A33", // Same background color as the heading
-                                                            }}
-                                                        >
-                                                        </td>
-
-                                                        {/* Other columns - Empty cells */}
-                                                        <td
-
-                                                            style={{
-                                                                textAlign: "left",
-                                                                fontWeight: "bold",
-                                                                backgroundColor: "#3368B5", // Example background color
-                                                                color: "white",
-                                                            }}
-                                                        >
-                                                            Payment
-                                                        </td>
-                                                        <td
-                                                            style={{
-                                                                ...thirdColWidth,
-                                                                backgroundColor: `${getcolor}`,
-                                                            }}
-                                                        ></td>
-                                                        <td
-                                                            style={{
-                                                                ...forthColWidth,
-                                                                backgroundColor: `${getcolor}`,
-                                                            }}
-                                                        ></td>
-                                                        <td
-                                                            style={{
-                                                                ...fifthColWidth,
-                                                                backgroundColor: `${getcolor}`,
-                                                            }}
-                                                        ></td>
-                                                    </tr>
-                                                )}
-
-
-
-                                                {/* Payment Data Mapping */}
-                                                {Paymentdata.map((item, i) => (
-                                                    <tr
-
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        <td className="text-start" style={firstColWidth}>
-                                                            {item.tacccod}
-                                                        </td>
-
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
-                                                        </td>
-
-                                                        <td className="text-end" style={thirdColWidth}>
-                                                            {""}
-                                                        </td>
-
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {item.Payments}
-                                                        </td>
-
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {""}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </>
-
-
-
-
-                                            {Array.from({
-                                                length: Math.max(0, 27 - tableData.length),
-                                            }).map((_, rowIndex) => (
-                                                <tr
-                                                    key={`blank-${rowIndex}`}
-                                                    style={{
-                                                        backgroundColor: getcolor,
-                                                        color: fontcolor,
-                                                    }}
-                                                >
+                                            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+                                                <tr key={`blank-${rowIndex}`} style={{ backgroundColor: getcolor, color: fontcolor }}>
                                                     {Array.from({ length: 5 }).map((_, colIndex) => (
-                                                        <td key={`blank-${rowIndex}-${colIndex}`}>
-                                                            &nbsp;
-                                                        </td>
+                                                        <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                                                     ))}
                                                 </tr>
                                             ))}
@@ -1720,11 +1551,109 @@ export default function CashFlowReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
+                                            </tr>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {mergedData.map((item, i) => {
+                                                // Handle Payment Heading Row
+                                                if (item.type === "payment-heading") {
+                                                    return (
+                                                        <tr key={`payment-heading-${i}`}
+                                                        style={{backgroundColor: getcolor,
+                                                            color: fontcolor}}
+                                                        >
+                                                            <td style={{ ...firstColWidth, backgroundColor: "#021A33" }}></td>
+                                                            <td style={{ textAlign: "start", fontWeight: "bold", backgroundColor: "#3368B5", color: "white" }}>
+                                                                Payment
+                                                            </td>
+                                                            <td style={{ ...thirdColWidth, backgroundColor: getcolor }}></td>
+                                                            <td style={{ ...forthColWidth, backgroundColor: getcolor }}></td>
+                                                            <td style={{ ...fifthColWidth, backgroundColor: getcolor }}></td>
+                                                        </tr>
+                                                    );
+                                                }
 
+                                                // Normal & Payment Rows
+                                                return (
+                                                    <tr
+                                                        key={`row-${i}`}
+                                                        ref={(el) => (rowRefs.current[i] = el)}
+                                                        onClick={() => handleRowClick(i)}
+                                                        className={selectedIndex === i ? "selected-background" : ""}
+                                                        style={{ backgroundColor: getcolor, color: fontcolor }}
+                                                    >
+                                                        {/* First Column */}
+                                                        <td
+                                                            className="text-start"
+                                                            style={{
+                                                                ...firstColWidth,
+                                                                textAlign: "center",
+                                                                fontWeight: "normal",
+                                                                backgroundColor: "transparent",
+                                                            }}
+                                                        >
+                                                            {item.type === "receipt" ? (item.index === 0 ? "-" : item.index === 1 ? "" : item.tacccod) : item.tacccod}
+                                                        </td>
+
+                                                        {/* Second Column (Description) */}
+                                                        <td
+                                                            className={`text-start ${item.index === 1 ? "heading-cell" : ""}`}
+                                                            style={{
+                                                                ...secondColWidth,
+                                                                textAlign: "center",
+                                                                fontWeight: item.index === 1 ? "bold" : "normal",
+                                                                backgroundColor: item.index === 1 ? "#3368B5" : "transparent",
+                                                                color: fontcolor,
+                                                            }}
+                                                        >
+                                                            {item.type === "receipt"
+                                                                ? item.index === 0
+                                                                    ? "Opening Balance"
+                                                                    : item.index === 1
+                                                                        ? "Receipt"
+                                                                        : item.Description
+                                                                : item.Description}
+                                                        </td>
+
+                                                        {/* Third Column */}
+                                                        <td className="text-end" style={thirdColWidth}>
+                                                            {item.type === "receipt" ? (item.index === 0 ? "-" : item.index === 1 ? "" : item.Receipts) : ""}
+                                                        </td>
+
+                                                        {/* Fourth Column (Payment) */}
+                                                        <td className="text-end" style={forthColWidth}>
+                                                            {item.type === "receipt" ? (item.index === 0 ? "-" : item.Payment) : item.Payments}
+                                                        </td>
+
+                                                        {/* Fifth Column (Opening Balance) */}
+                                                        <td className="text-end" style={fifthColWidth}>
+                                                            {item.type === "receipt" ? (item.index === 0 ? openingbalance : "") : ""}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+
+                                            {/* Blank Rows */}
+                                            {Array.from({ length: Math.max(0, 27 - tableData.length) }).map((_, rowIndex) => (
+                                                <tr key={`blank-${rowIndex}`} style={{ backgroundColor: getcolor, color: fontcolor }}>
+                                                    {Array.from({ length: 5 }).map((_, colIndex) => (
+                                                        <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+
+                                            <tr>
+                                                <td style={firstColWidth}></td>
+                                                <td style={secondColWidth}></td>
+                                                <td style={thirdColWidth}></td>
+                                                <td style={forthColWidth}></td>
+                                                <td style={fifthColWidth}></td>
                                             </tr>
                                         </>
                                     )}
                                 </tbody>
+
                             </table>
                         </div>
                     </div>

@@ -1712,9 +1712,9 @@ export default function ItemList() {
                             <td className="text-start" style={firstColWidth}>
                               {item.Code}
                             </td>
-                            
-
-                            <td className="text-start" style={secondColWidth} title={item.Description || ""}>
+                                                        
+                          <td className="text-start" 
+                          style={secondColWidth} title={item.Description || ""}>
                               {item.Description && typeof item.Description === "string"
                                 ? item.Description.trim().length > 35
                                   ? `${item.Description.trim().slice(0, 35)}...`
