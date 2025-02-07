@@ -72,7 +72,8 @@ export default function ChartofAccount() {
     const formData = new URLSearchParams({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,      FSchTxt: searchQuery,
+      FYerDsc: yeardescription || getYearDescription,   
+      FSchTxt: searchQuery,
     }).toString();
 
     axios

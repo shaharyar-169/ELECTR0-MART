@@ -8,7 +8,6 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
-import axios from "axios";
 import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
@@ -34,10 +33,13 @@ import MessagePopup from "./Message/Message";
 import NotificationPopup from "./Notification/Notification";
 import BrightnessPopup from "./Brightness/Brightness";
 import Admin from "./Admin/Admin";
-import './Header.css';
-
-
-
+import CustomDropdown from "../Dropdown/Dropdown";
+import { useSelector, useDispatch } from "react-redux";
+// import {
+//   fetchGetActiveUserLocation,
+//   fetchGetActiveUserYear,
+// } from "../../Redux/action";
+import axios from "axios";
 
 const Threelineiconheader = () => {
   return (
@@ -102,63 +104,95 @@ const SearchIcon = () => {
 };
 export default function Header() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = getUserData();
   const organisation = getOrganisationData();
+  const {
+    isSidebarVisible,
+    toggleSidebar,
+    getcolor,
+    fontcolor,
+    toggleChangeColor,
+    setFromDate,
+    setToDate,
+    setLocationNumber,
+    setYearDescription,
+    getnavbarbackgroundcolor,
+    getnavbarfontcolor,
+    getheaderfontsize,
+    getdatafontsize,
+    getfontstyle,
+  } = useTheme();
 
-  const [yearList, setyearList] = useState([]);
-  console.log('years data', yearList);
+  const yeardata = {
+    id: 1,
+    tyerdsc: "2022",
+    tenddat: "2022-12-31",
+    tstrdat: "2022-01-01",
+  }
 
-  const [branchlist, setbranchlist] = useState([
+  const locationdata = {
+    id: 1,
+    tlocnam: "Location 1",
+  }
 
-    {
-      "branch_id": 1,
-      "branch_name": "electro-mart branch lahore",
-    }
+  // const {
+  //   data: yeardata,
+  //   loading: yearloading,
+  //   error: yearerror,
+  // } = useSelector((state) => state.getactiveuseryear);
+  // const {
+  //   data: locationdata,
+  //   loading: locationloading,
+  //   error: locationerror,
+  // } = useSelector((state) => state.getactiveuserlocation);
 
-  ])
-
-
-  ///////////////////////////// YEARS POST API ////////////////////////
-
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveUserYear.php"
-    const formData = new URLSearchParams({
-      FUsrId: 'emart',
-      code: 'EMART',
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then(response => {
-        setyearList(response.data);
-        console.log('yaser data', response.data);
-
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, []);
-
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [tyerdsc, setTyerdsc] = useState("");
+  const [tstrdat, setTstrdat] = useState("");
+  const [tenddat, setTenddat] = useState("");
+  const [tlocnam, setTlocnam] = useState("");
 
   // useEffect(() => {
-  //   const apiUrl = apiLinks + "/GetActiveUserYear.php"
-  //   const formData = new URLSearchParams({
-  //     FUsrId: 'emart',
-  //     code: 'EMART',
-  //   }).toString();
-  //   axios
-  //     .post(apiUrl, formData)
-  //     .then(response => {
-  //       setyearList(response.data);
-  //       console.log('yaser data', response.data);
+  //   dispatch(
+  //     fetchGetActiveUserYear(user.tusrid, organisation && organisation.code)
+  //   );
+  //   dispatch(
+  //     fetchGetActiveUserLocation(user.tusrid, organisation && organisation.code)
+  //   );
+  // }, [dispatch, organisation && organisation.code]);
 
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error);
-  //     });
-  // }, []);
+  // const handleYearChange = (e) => {
+  //   const selectedYear =
+  //     yeardata.find((year) => year.id === e.target.value) || yeardata[0];
+  //   setSelectedYear(selectedYear);
+  //   setFromDate(selectedYear.tstrdat);
+  //   setToDate(selectedYear.tenddat);
+  //   setTyerdsc(selectedYear.tyerdsc);
+  //   setYearDescription(selectedYear.tyerdsc);
+  //   localStorage.setItem(
+  //     "yeardescription",
+  //     JSON.stringify(selectedYear.tyerdsc)
+  //   );
+  //   setTstrdat(selectedYear.tstrdat);
+  //   setTenddat(selectedYear.tenddat);
+  // };
 
+  // // Handle selection of location
+  // const handleLocationChange = (e) => {
+  //   const selectedLocation =
+  //     locationdata.find((year) => year.id === e.target.value) ||
+  //     locationdata[0];
+  //   setLocationNumber(selectedLocation.tloccod);
+  //   localStorage.setItem(
+  //     "locationnumber",
+  //     JSON.stringify(selectedLocation.tloccod)
+  //   );
 
+  //   setSelectedLocation(selectedLocation);
+  //   setTlocnam(selectedLocation.tloccod);
+  // };
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -166,20 +200,7 @@ export default function Header() {
   }, [navigate]);
 
   const { primaryColor, secondaryColor } = useTheme();
-  const {
-    apiLinks,
-    setYearDescription,
-    getyeardescription,
-    setFromDate,
-    setToDate,
-    getfromdate,
-    gettodate,
-
-  } = useTheme();
-
-  console.log('getyeardescription data', getyeardescription)
-  console.log('gettodate data', getfromdate)
-  console.log('getfromdate data', gettodate)
+  const { apiLinks } = useTheme();
 
   const imagelink = `https://crystalsolutions.com.pk/images/${organisation && organisation.code
     }`;
@@ -313,33 +334,6 @@ export default function Header() {
         >
           My Profile
         </MenuItem>
-        <MenuItem
-          onClick={handleMenuClose}
-          sx={{
-            color: "white",
-            padding: "12px 16px",
-            fontSize: "12px", // Adjusted font size to 12px
-            transition: "background 0.3s",
-            "&:hover": { backgroundColor: "#1f3b56" },
-          }}
-        >
-          My Projects
-        </MenuItem>
-        <MenuItem
-          onClick={handleMenuClose}
-          sx={{
-            color: "white",
-            padding: "12px 16px",
-            fontSize: "12px", // Adjusted font size to 12px
-            transition: "background 0.3s",
-            "&:hover": { backgroundColor: "#1f3b56" },
-          }}
-        >
-          <ListItemIcon sx={{ color: "white" }}>
-            <Inbox fontSize="small" />
-          </ListItemIcon>
-          Inbox
-        </MenuItem>
 
         <Divider sx={{ borderBottom: "2px solid #efefef" }} />
 
@@ -389,6 +383,26 @@ export default function Header() {
           </ListItemIcon>
           Sign Out
         </MenuItem>
+
+        {/* Version and Time */}
+        <div
+          style={{
+            textAlign: "center",
+            borderTop: "1px solid #efefef",
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: "lightgray",
+              marginTop: "2%",
+
+              fontSize: "11px",
+            }}
+          >
+            Version: 16.01.2025 | 1:45 PM
+          </Typography>
+        </div>
       </Menu>
     </div>
   );
@@ -483,8 +497,7 @@ export default function Header() {
       setadminopen((prev) => !prev);
     }
   };
-  const { isSidebarVisible, toggleSidebar, getcolor, toggleChangeColor } =
-    useTheme();
+
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [fontColor, setFontColor] = useState("#000000");
@@ -500,23 +513,34 @@ export default function Header() {
   const handleFontColorChange = (color) => {
     setFontColor(color.hex);
   };
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Function to toggle the mode
+  const toggleChangeColorr = () => {
+    setIsDarkMode((prevMode) => !prevMode);
+    toggleChangeColor();
+    // You can also add logic here to change the theme or colors globally
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
         position="static"
         style={{
-          background: "#3368b5",
+          background: getnavbarbackgroundcolor,
           height: "55px",
           borderBottom: "1px solid gray",
         }}
       >
         <Toolbar>
           <div
+            className="header-container"
             style={{
               position: "relative",
             }}
           >
             <img
+              className="header-logo"
               src={`${imagelink}01.jpg`}
               alt="Company Logo"
               style={{
@@ -532,8 +556,9 @@ export default function Header() {
               fontSize: "15px",
               fontWeight: "400",
               fontStyle: "normal",
-              color: "white",
-              fontFamily: "Poppins, sans-serif",
+              color: getnavbarfontcolor,
+              fontFamily: getfontstyle,
+              fontWeight: "bold",
               lineHeight: "22.5px",
               textAlign: "center",
               alignItems: "center",
@@ -544,6 +569,7 @@ export default function Header() {
             {organisation && organisation.description}
           </h6>
           <IconButton
+            className="header-icon-button"
             style={{ marginLeft: "60px" }}
             size="small"
             edge="start"
@@ -560,6 +586,7 @@ export default function Header() {
             <Threelineiconheader />
           </IconButton>
           <IconButton
+            className="header-icon-button"
             size="small"
             edge="start"
             color="inherit"
@@ -577,76 +604,198 @@ export default function Header() {
           </IconButton>
           <QuikLinks isOpen={isfilesOpen} />
 
-          {/* <IconButton
-            size="small"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{
-              ml: 2,
-              "&:hover": {
-                backgroundColor: "rgba(191, 191, 191,0.5)",
-                borderRadius: "50%",
-              },
-            }}
-          >
-            <SearchIcon />
-          </IconButton> */}
           <Box sx={{ flexGrow: 1 }} />
-          <div className="yearslimitation" >
 
-            <select
-              className="yearselectstyling"
-              value={getyeardescription}
-              onChange={(e) => {
-                const selectedId = e.target.value;
-                const selectedData = yearList.find((data) => data.id === selectedId);
-
-                setYearDescription(selectedId); // Update year description
-
-                // setYearDescription(selectedData.tyerdsc); // Update year description
-
-
-                if (selectedData) {
-                  setFromDate(selectedData.tstrdat); // Set fromDate from selected option
-                  setToDate(selectedData.tenddat);   // Set toDate from selected option
-                }
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              className="header-icon-button"
+              size="small"
+              edge="start"
+              color="inherit"
+              aria-label="open drawer"
+              sx={{
+                "&:hover": {
+                  backgroundColor: "rgba(191, 191, 191,0.5)",
+                  borderRadius: "50%",
+                },
+              }}
+              onClick={toggleChangeColor}
+            >
+              <i className="bi bi-brightness-high fs-5 text-white"></i>
+            </IconButton>
+            <IconButton
+              className="header-icon-button"
+              size="large"
+              aria-label="show new mails"
+              color="inherit"
+              onClick={() => handleToggle("mail")}
+              sx={{
+                "&:hover": {
+                  backgroundColor: "rgba(191, 191, 191,0.5)",
+                  borderRadius: "50%",
+                },
               }}
             >
-              <option value="" disabled>Select Year</option>
-              {yearList.map((data) => (
-                <option className="yearselectstyling" key={data.id} value={data.id}>
-                  {data.tyerdsc}
-                </option>
-              ))}
-            </select>
-
-
-
-          </div>
-
-          {/* //////////////////////// BRANCH DROPDOWN ///////////////////////// */}
-
-          <div className="branlist" >
-            <select className=" branlist">
-              {branchlist.map((data) => {
-                return <option
-                  className=" branlist"
-                  key={data.branch_id}
-                  value={data.id}>
-                  {data.branch_name}
-                </option>
-              })}
-            </select>
-
-          </div>
-
-
+              <Badge badgeContent={5} color="error">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </Badge>
+            </IconButton>
+            <MessagePopup isOpen={isOpenmail} />
+            <IconButton
+              className="header-icon-button"
+              size="large"
+              aria-label="show new notification"
+              color="inherit"
+              onClick={() => handleToggle("notification")}
+              sx={{
+                "&:hover": {
+                  backgroundColor: "rgba(191, 191, 191,0.5)",
+                  borderRadius: "50%",
+                },
+              }}
+            >
+              <Badge badgeContent={17} color="error">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </Badge>
+            </IconButton>
+            <NotificationPopup isOpen={isOpennotification} />
+            <IconButton
+              className="header-icon-button"
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              color="inherit"
+              onClick={handleProfileMenuOpen}
+            >
+              <Avatar
+                alt="Profile"
+                src={man}
+                sx={{ height: "30px", width: "30px", marginTop: "-10px" }}
+              />
+            </IconButton>
+          </Box>
 
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <select
+              id="yearDropdown"
+              // onChange={handleYearChange}
+              style={{
+                backgroundColor: getnavbarbackgroundcolor,
+                color: getnavbarfontcolor,
+                height: "25px",
+                padding: "5px 30px 5px 10px",
+                fontFamily: getfontstyle,
+                fontSize: "11px",
+                border: `1px solid ${fontcolor}`,
+                borderRadius: "8px",
+                appearance: "none",
+                WebkitAppearance: "none",
+                MozAppearance: "none",
+                cursor: "pointer",
+                marginTop: "11px",
+                marginRight: "5px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                transition: "border-color 0.3s, box-shadow 0.3s",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = "#007BFF")}
+              onBlur={(e) => (e.target.style.borderColor = fontcolor)}
+            >
+              {/* {yeardata &&  yeardata.map((year) => (
+                  <option key={year.id} value={year.id}>
+                    {year.tyerdsc}
+                  </option>
+                ))} */}
+
+              <option value='2024-2024'>2024-2024</option>
+
+            </select>
+
+            <select
+              id="locationDropdown"
+              // onChange={handleLocationChange}
+              style={{
+                backgroundColor: getnavbarbackgroundcolor,
+                color: getnavbarfontcolor,
+                height: "25px",
+                padding: "5px 30px 5px 10px",
+                fontFamily: getfontstyle,
+                fontSize: "11px",
+                border: `1px solid ${fontcolor}`,
+                borderRadius: "8px",
+                appearance: "none",
+                WebkitAppearance: "none",
+                MozAppearance: "none",
+                cursor: "pointer",
+                marginTop: "11px",
+                marginRight: "5px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                transition: "border-color 0.3s, box-shadow 0.3s",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = "#007BFF")} // Highlight on focus
+              onBlur={(e) => (e.target.style.borderColor = fontcolor)} // Revert on blur
+            >
+              {/* {locationdata &&
+                locationdata.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.tlocdsc}
+                  </option>
+                
+                ))} */}
+                <option value='Nasir Traders Abid Market'>Nasir Traders Abid Market</option>
+
+
+
+            </select>
+
+            {/* Add a custom dropdown arrow using CSS */}
+            <style>
+              {`
+    #yearDropdown, #locationDropdown {
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23${fontcolor.replace(
+                "#",
+                ""
+              )}' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 12px;
+    }
+    #yearDropdown:hover, #locationDropdown:hover {
+      border-color: #007BFF; // Change border color on hover
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); // Enhance shadow on hover
+    }
+  `}
+            </style>
             {organisation && organisation.code === "CRYSTAL" && (
               <>
                 <IconButton
+                  className="header-icon-button"
                   size="small"
                   edge="start"
                   color="inherit"
@@ -666,9 +815,11 @@ export default function Header() {
             )}
 
             <Admin isOpen={isadminopen} handleToggle={handleToggle} />
+
             {user && user.tusrtyp === "A" && (
               <>
                 <IconButton
+                  className="header-icon-button"
                   size="small"
                   edge="start"
                   color="inherit"
@@ -687,28 +838,34 @@ export default function Header() {
               </>
             )}
             <IconButton
+              className="header-icon-button"
               size="small"
               edge="start"
               color="inherit"
               aria-label="open drawer"
               sx={{
                 "&:hover": {
-                  backgroundColor: "rgba(191, 191, 191,0.5)",
+                  backgroundColor: "rgba(191, 191, 191, 0.5)",
                   borderRadius: "50%",
                 },
               }}
-              onClick={() => handleToggle("brightness")}
-            // onClick={toggleChangeColor}
+              onClick={toggleChangeColorr}
             >
-              <i className="bi bi-brightness-high fs-5 text-white"></i>
+              {isDarkMode ? (
+                <i className="bi bi-moon fs-5" style={{ color: "#ffffff" }}></i>
+              ) : (
+                <i
+                  className="bi bi-brightness-high fs-5"
+                  style={{ color: "#ffffff" }}
+                ></i>
+              )}
             </IconButton>
-            <BrightnessPopup isOpen={isbrightnessopen} />
 
             <IconButton
+              className="header-icon-button"
               size="large"
               aria-label="show new mails"
               color="inherit"
-              // onClick={handleClickmail}
               onClick={() => handleToggle("mail")}
               sx={{
                 "&:hover": {
@@ -737,10 +894,10 @@ export default function Header() {
             <MessagePopup isOpen={isOpenmail} />
 
             <IconButton
+              className="header-icon-button"
               size="large"
               aria-label="show new notification"
               color="inherit"
-              // onClick={handleClicknotification}
               onClick={() => handleToggle("notification")}
               sx={{
                 "&:hover": {
@@ -769,6 +926,7 @@ export default function Header() {
             <NotificationPopup isOpen={isOpennotification} />
 
             <IconButton
+              className="header-icon-button"
               size="large"
               edge="end"
               aria-label="account of current user"

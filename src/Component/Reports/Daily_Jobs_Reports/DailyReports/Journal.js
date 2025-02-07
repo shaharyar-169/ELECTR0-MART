@@ -55,7 +55,7 @@ export default function JournalReport() {
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
     const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
+    const locationnumber = getLocationnumber();
 
     const {
         isSidebarVisible,
@@ -365,7 +365,7 @@ export default function JournalReport() {
             FFnlDat: toInputDate,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+            FYerDsc: yeardescription || getYearDescription,
             FSchTxt: searchQuery
         }).toString();
 
@@ -803,7 +803,7 @@ export default function JournalReport() {
 
 
 
-       
+
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
                 // Check if the current cell is in the boldColumns array
@@ -1202,7 +1202,7 @@ export default function JournalReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="custom" style={{fontSize: getdatafontsize,fontFamily:getfontstyle}}>Custom</label>
+                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>Custom</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1219,7 +1219,7 @@ export default function JournalReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="30" style={{fontSize: getdatafontsize,fontFamily:getfontstyle, }}>30 Days</label>
+                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>30 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1236,7 +1236,7 @@ export default function JournalReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="60" style={{fontSize: getdatafontsize,fontFamily:getfontstyle, }}>60 Days</label>
+                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>60 Days</label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1253,7 +1253,7 @@ export default function JournalReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="90" style={{fontSize: getdatafontsize,fontFamily:getfontstyle, }}>90 Days</label>
+                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>90 Days</label>
                                         </div>
                                     </div>
                                 </div>
@@ -1280,7 +1280,7 @@ export default function JournalReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle, fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             From :
                                         </span>
                                     </label>
@@ -1311,7 +1311,7 @@ export default function JournalReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle,
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1350,7 +1350,7 @@ export default function JournalReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
@@ -1374,7 +1374,7 @@ export default function JournalReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                             To :
                                         </span>
                                     </label>
@@ -1406,7 +1406,7 @@ export default function JournalReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                            fontSize: getdatafontsize, fontFamily: getfontstyle,
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1444,7 +1444,7 @@ export default function JournalReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
@@ -1510,7 +1510,7 @@ export default function JournalReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
                                     width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
@@ -1518,7 +1518,7 @@ export default function JournalReport() {
                             >
                                 <thead
                                     style={{
-                                        fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1567,7 +1567,7 @@ export default function JournalReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize,fontFamily:getfontstyle,                                     width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
                                     position: "relative",
                                 }}
                             >

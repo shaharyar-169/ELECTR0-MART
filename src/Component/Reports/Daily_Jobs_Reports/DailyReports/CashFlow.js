@@ -1563,7 +1563,7 @@ export default function CashFlowReport() {
                                                         style={{backgroundColor: getcolor,
                                                             color: fontcolor}}
                                                         >
-                                                            <td style={{ ...firstColWidth, backgroundColor: "#021A33" }}></td>
+                                                            <td style={{ ...firstColWidth, backgroundColor: getcolor }}></td>
                                                             <td style={{ textAlign: "start", fontWeight: "bold", backgroundColor: "#3368B5", color: "white" }}>
                                                                 Payment
                                                             </td>
@@ -1604,7 +1604,8 @@ export default function CashFlowReport() {
                                                                 textAlign: "center",
                                                                 fontWeight: item.index === 1 ? "bold" : "normal",
                                                                 backgroundColor: item.index === 1 ? "#3368B5" : "transparent",
-                                                                color: fontcolor,
+                                                                // color: fontcolor,
+                                                                color: item.index === 1 ? "white" : '', 
                                                             }}
                                                         >
                                                             {item.type === "receipt"

@@ -1039,13 +1039,11 @@ export default function MobileLedger() {
           });
   
           // Set column widths
-  
-  
+    
           [13, 12, 50, 25].forEach((width, index) => {
               worksheet.getColumn(index + 1).width = width;
           });
-  
-  
+   
   
           const getCurrentDate = () => {
               const today = new Date();

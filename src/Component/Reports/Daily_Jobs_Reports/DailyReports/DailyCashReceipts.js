@@ -518,8 +518,6 @@ const yeardescription = getYearDescription();
         ]);
 
 
-
-
         // Define table column headers and individual column widths
         const headers = [
             "Receipts",
