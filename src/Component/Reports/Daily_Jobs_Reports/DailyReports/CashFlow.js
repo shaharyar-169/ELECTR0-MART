@@ -34,6 +34,13 @@ export default function CashFlowReport() {
     const toRef = useRef(null);
     const fromRef = useRef(null);
 
+    const [tableData, setTableData] = useState([]);
+    const [Paymentdata, setPaymentdata] = useState([])
+
+    console.log('Recept data', tableData)
+    console.log('payment data', Paymentdata)
+
+
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
@@ -67,6 +74,8 @@ export default function CashFlowReport() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getfontstyle,
+        getdatafontsize
     } = useTheme();
 
     useEffect(() => {
@@ -452,39 +461,63 @@ export default function CashFlowReport() {
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
-        // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const globalfontsize = 12;
+        console.log("gobal font data", globalfontsize);
 
-        // Define table data (rows)
-        const rows = tableData.map((item) => [
-            item["Jvr#"],
-            item.Date,
-            item.Description,
-            item.Debit,
-            item.Credit,
-        ]);
+        // Create a new jsPDF instance with landscape orientation
+        const doc = new jsPDF({ orientation: "landscape" });
+
+        // Add Opening Balance row
+        const openingBalanceRow = ["-", "Opening Balance", '-', "-", openingbalance];
+
+        // Map receipt data with the "Receipt" header
+        const receipt = tableData.length > 0
+            ? [["", "Receipt", "", "", ""], ...tableData.map((item) => [
+                item.tacccod,
+                item.Description,
+                item.Receipts,
+                "",
+                "",
+            ])]
+            : [];
+
+        // Map payment data with the "Payment" header
+        const payment = Paymentdata.length > 0
+            ? [["", "Payment", "", "", ""], ...Paymentdata.map((item) => [
+                item.tacccod,
+                item.Description,
+                "",
+                item.Payments,
+                "",
+            ])]
+            : [];
+
+        // Combine all rows
+        const rows = [openingBalanceRow, ...receipt, ...payment];
 
         // Add summary row to the table
-        // rows.push([
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
+        rows.push([
+            "",
+            "Total",
+            String(totalDebit),
+            String(totalCredit),
+            String(closingBalance),
 
-        // ]);
+
+        ]);
+
 
         // Define table column headers and individual column widths
-        const headers = [
 
-            "Jvr#",
-            "Date",
+        const headers = [
+            "Code",
             "Description",
-            "Debit",
-            "Credit",
+            "Receipt",
+            "Patyment",
+            "Balance",
 
         ];
-        const columnWidths = [12, 17, 80, 20, 20];
+        const columnWidths = [20, 80, 25, 25, 25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -494,14 +527,14 @@ export default function CashFlowReport() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont("verdana");
+        doc.setFont(getfontstyle);
         doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
+            doc.setFont(getfontstyle, "bold"); // Set font to bold
+            doc.setFontSize(12); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -524,117 +557,98 @@ export default function CashFlowReport() {
             });
 
             // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
+            doc.setFont(getfontstyle);
+            doc.setFontSize(12);
         };
 
+
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
+            const rowHeight = 5; // Adjust row height
+            const fontSize = 10; // Adjust font size for regular text
+            const boldFont = "bold"; // Bold font
+            const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
             doc.setFontSize(fontSize);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 100000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
-
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
-                }
-
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
-
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
+                let currentX = startX; // Track current column position
 
                 row.forEach((cell, cellIndex) => {
                     const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
+                    const cellX = currentX + 2;
 
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
+                    // Reset default colors for each cell
+                    let backgroundColor = null;
+
+                    // Apply styling only for "Receipt" or "Payment" in column index 1
+                    if (cellIndex === 1) {
+                        if (cell === "Receipt") {
+                            backgroundColor = [169, 169, 169]; // Light grey background   
+                            textColor = [0, 0, 0]; // White text
+                            fontName = boldFont;
+                        } else if (cell === "Payment") {
+                            backgroundColor = [169, 169, 169]; // Light grey background      
+                            textColor = [0, 0, 0]; // White text
+                            fontName = boldFont;
+                        }
+                    }
+
+                    // Draw cell background if applicable
+                    if (backgroundColor) {
+                        doc.setFillColor(...backgroundColor);
+                        doc.rect(currentX, startY + (i - startIndex + 2) * rowHeight, columnWidths[cellIndex], rowHeight, "F");
+                    }
+
+                    // Set text color and font
+                    doc.setTextColor(...textColor);
                     doc.setFont(fontName, "normal");
 
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-
-
-                    if (cellIndex === 3 || cellIndex === 4) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                    // Right-align specific columns (like Balance column)
+                    if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+                        const rightAlignX = currentX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    }
-
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
+                    // Draw column borders
+                    doc.rect(currentX, startY + (i - startIndex + 2) * rowHeight, columnWidths[cellIndex], rowHeight);
 
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+                    // Move to next column
+                    currentX += columnWidths[cellIndex];
+                });
             }
 
+
+
             // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+            const lineWidth = tableWidth;
+            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+            const lineY = pageHeight - 15;
             doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+            doc.line(lineX, lineY, lineX + lineWidth, lineY);
+            const headingFontSize = 12;
 
             // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
+            const headingX = lineX + 2;
+            const headingY = lineY + 5;
+            doc.setFontSize(headingFontSize);
+            doc.setTextColor(0);
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
-        // Function to calculate total table width
+
+
         const getTotalTableWidth = () => {
             let totalWidth = 0;
             columnWidths.forEach((width) => (totalWidth += width));
@@ -648,7 +662,7 @@ export default function CashFlowReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
+        const rowsPerPage = 27; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -659,9 +673,8 @@ export default function CashFlowReport() {
                 time,
                 pageNumber,
                 startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
+                titleFontSize = 18,
+                pageNumberFontSize = 10
             ) => {
                 doc.setFontSize(titleFontSize); // Set the font size for the title
                 doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -671,20 +684,12 @@ export default function CashFlowReport() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 20,
+                    rightX - 50,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -695,55 +700,97 @@ export default function CashFlowReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(
-                    `Journal Report From: ${fromInputDate} To: ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
+                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                startY += 5; // Adjust vertical position for the company title
 
-                // const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                // const labelsY = startY + 2; // Position the labels below the titles and above the table
+                addTitle(`Daily Cash Flow Report From: ${fromInputDate} To: ${toInputDate}`
+                    , "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                startY += 5;
+
+                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+                const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
+                doc.setFontSize(12);
+                doc.setFont(getfontstyle, "300");
 
-                // let typeText = transectionType ? transectionType : "";
-                // let typeItem = saleType ? saleType : "";
 
-                // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
+                //   let RepRate = Retrate === "A"
+                //       ? "ALL"
+                //       : Retrate === "P"
+                //           ? "PURCHASE RATE"
+                //           : Retrate === "S"
+                //               ? "SALE MAN RATE "
+                //               : Retrate === "A"
+                //                   ? "ACTUAL RATE "
+                //                   : "ALL";
 
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
 
-                startY += 0; // Adjust vertical position for the labels
+                //   let Typefilter = transectionType === "A"
+                //       ? "ALL"
+                //       : transectionType === "S"
+                //           ? "CASH"
+                //           : transectionType === "R"
+                //               ? "CREDIT"
+                //               : "ALL";
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+
+
+                //   let typeItem = Companyselectdatavalue.label
+                //       ? Companyselectdatavalue.label
+                //       : "ALL";
+
+
+                // let status = transectionType ? transectionType : "All";
+                let search = searchQuery ? searchQuery : "";
+
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
+
+                // doc.text(`COMPANY : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
+                // doc.text(`CAPACITY : ${typeText}`, labelsX + 180, labelsY); // Adjust x-coordinate for From Date
+                // doc.text(`CATEGORY : ${category}`, labelsX, labelsY + 4.3); // Adjust x-coordinate for From Date
+
+                // doc.text(`TYPE : ${typename}`, labelsX + 180, labelsY + 4.3); // Adjust x-coordinate for From Date
+                // doc.text(`STATUS : ${status}`, labelsX, labelsY + 8.5); // Adjust x-coordinate for From Date
+                // doc.text(`SEARCH : ${search}`, labelsX + 180, labelsY + 8.5); // Adjust x-coordinate for From Date
+
+                //   doc.setFont(getfontstyle, "bold"); // Set font to bold
+                //   doc.text(`REP RATE :`, labelsX, labelsY); // Draw bold label
+                //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                //   doc.text(`${RepRate}`, labelsX + 25, labelsY); // Draw the value next to the label
+
+
+                //   doc.setFont(getfontstyle, "bold"); // Set font to bold
+                //   doc.text(`TYPE :`, labelsX, labelsY + 4.3); // Draw bold label
+                //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                //   doc.text(`${Typefilter}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+
+                //    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                //    doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                //    doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
+
+                //    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                //    doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+                //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                //    doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 200, labelsY + 4.3); // Draw the value next to the label
+                }
+
+                // // Reset font weight to normal if necessary for subsequent text
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.setFontSize(10);
+
+                startY += -4; // Adjust vertical position for the labels
+
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 25);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -763,9 +810,9 @@ export default function CashFlowReport() {
         const getCurrentDate = () => {
             const today = new Date();
             const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return `${dd}-${mm}-${yyyy}`;
         };
 
         // Function to get current time in the format HH:MM:SS
@@ -783,15 +830,8 @@ export default function CashFlowReport() {
         // Call function to handle pagination
         handlePagination();
 
-        // Save the PDF file
-        doc.save("JournalReport.pdf");
-
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
+        // Save the PDF files
+        doc.save(`DailyCashFlowReport From ${fromInputDate} To ${toInputDate}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
@@ -799,64 +839,65 @@ export default function CashFlowReport() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 5; // Number of columns
-
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
+        const numColumns = 6; // Number of columns
 
         const columnAlignments = [
             "left",
             "left",
-            "left",
             "right",
             "right",
+            "right",
+
+
         ];
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
         // Add title rows
-        [
-            comapnyname,
-            `Journal Report From ${fromInputDate} To ${toInputDate}`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+
+        [comapnyname, `Daily Cash Flow Report From: ${fromInputDate} To: ${toInputDate}`].forEach((title, index) => {
+            // Define custom styles for each title
+            let customStyle;
+            let rowHeight = 20;  // Default row height
+            if (index === 0) {
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
+            } else {
+                // Style for "Item List"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
+            }
+
+            // Add row with the title
+            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+
+            // Adjust the row height for the company name or other titles
+            worksheet.getRow(index + 2).height = rowHeight;
+
+            // Merge the cells for the title
             worksheet.mergeCells(
                 `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
         });
 
-        worksheet.addRow([]); // Empty row for spacing
 
-        // let typeText = transectionType ? transectionType : "All";
-        // let typeItem = saleType ? saleType : "All";
 
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            // `Account: ${typeItem}`,
-            // "",
-            // "",
-            // "",
-            // "",
-            // "",
-            // `Type: ${typeText}`,
+        // Add an empty row after the title section
+        worksheet.addRow([]);  // This is where you add the empty row
 
-        ]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
 
-        worksheet.addRow([]); // Empty row for spacing
 
+        // Header style for center alignment
         const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
+            font: { bold: true, family: getfontstyle, size: getdatafontsize },
+            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
             fill: {
                 type: "pattern",
                 pattern: "solid",
@@ -872,73 +913,149 @@ export default function CashFlowReport() {
 
         // Add headers
         const headers = [
-            "Jvr#",
-            "Date",
+            "Code",
             "Description",
-            "Debit",
-            "Credit",
+            "Receipt",
+            "Patyment",
+            "Balance",
         ];
         const headerRow = worksheet.addRow(headers);
+
+        // Apply styles and center alignment to the header row
         headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+            cell.style = { ...headerStyle };
         });
 
         // Add data rows
-        tableData.forEach((item) => {
-            worksheet.addRow([
-                item["Jvr#"],
-                item.Date,
-                item.Description,
-                item.Debit,
-                item.Credit,
-            ]);
+
+        // Add Opening Balance Row
+        const openingBalanceRow = ["-", "Opening Balance", "-", "-", openingbalance];
+
+        // Map Receipt Data
+        const receipt =
+            tableData.length > 0
+                ? [["", "Receipt", "", "", ""]].concat(
+                    tableData.map((item) => [
+                        item.tacccod || "",
+                        item.Description || "",
+                        item.Receipts || "",
+                        "",
+                        "",
+                    ])
+                )
+                : [];
+        
+        // Map Payment Data
+        const payment =
+            Paymentdata.length > 0
+                ? [["", "Payment", "", "", ""]].concat(
+                    Paymentdata.map((item) => [
+                        item.tacccod || "",
+                        item.Description || "",
+                        "",
+                        item.Payments || "",
+                        "",
+                    ])
+                )
+                : [];
+        
+        // Combine Rows for Final Data
+        const rows = [openingBalanceRow, ...receipt, ...payment];
+        
+        // Add Data Rows to Worksheet
+        rows.forEach((rowData) => {
+            const row = worksheet.addRow(rowData);
+        
+            // Apply styles to each row
+            row.eachCell((cell, colIndex) => {
+                cell.font = {
+                    family: getfontstyle,
+                    size: getdatafontsize,
+                    bold: false,
+                };
+        
+                cell.border = {
+                    top: { style: "thin", color: { argb: "FF000000" } },
+                    left: { style: "thin", color: { argb: "FF000000" } },
+                    bottom: { style: "thin", color: { argb: "FF000000" } },
+                    right: { style: "thin", color: { argb: "FF000000" } },
+                };
+        
+                // Align content based on column index
+                if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
+                    cell.alignment = { horizontal: "right", vertical: "middle" };
+                } else {
+                    cell.alignment = { horizontal: "left", vertical: "middle" };
+                }
+            });
+        
+            // Apply specific styling for "Receipt" and "Payment" header rows
+            if (rowData[1] === "Receipt" || rowData[1] === "Payment") {
+                const targetCell = row.getCell(2); // Column index 2 (1-based index in ExcelJS)
+            
+                targetCell.font = { bold: true }; // Make text bold
+                targetCell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FFC6D9F7" }, // Light Orange Background
+                };
+                targetCell.alignment = { horizontal: "left", vertical: "middle" };
+            }
+            
+        });
+        
+
+        // Add Total Row
+        const totalRow = worksheet.addRow([
+            "",
+            "Total",
+            String(totalDebit),
+            String(totalCredit),
+            String(closingBalance),
+        ]);
+
+        // Apply Styles to Total Row
+        totalRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true };
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            };
+
+            if (colNumber === 3 || colNumber === 4 || colNumber === 5) {
+                cell.alignment = { horizontal: "right" };
+            }
         });
 
-        // Add total row and bold it
-        // const totalRow = worksheet.addRow([
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",           
-        // ]);
-        // totalRow.eachCell((cell) => {
-        //     cell.font = { bold: true };
-        // });
+
 
         // Set column widths
-        [7, 10, 50, 15, 15].forEach((width, index) => {
+
+
+        [12, 40, 20, 20, 20].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
-            }
-        });
+
+
+        const getCurrentDate = () => {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, "0");
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const yyyy = today.getFullYear();
+            return dd + "/" + mm + "/" + yyyy;
+        };
+
+        const currentdate = getCurrentDate();
 
         // Generate Excel file buffer and save
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, "JournalReport.xlsx");
+        saveAs(blob, `DailyCashFlowReport As on ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -951,8 +1068,7 @@ export default function CashFlowReport() {
     const btnColor = "#3368B5";
     const textColor = "white";
 
-    const [tableData, setTableData] = useState([]);
-    const [Paymentdata, setPaymentdata] = useState([])
+
 
     console.log('cash flow data ', tableData);
     const [selectedSearch, setSelectedSearch] = useState("");
@@ -1000,7 +1116,7 @@ export default function CashFlowReport() {
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-   
+
 
     useEffect(() => {
         const handleResize = () => {
@@ -1112,7 +1228,7 @@ export default function CashFlowReport() {
 
 
 
-    
+
 
     const parseDate = (dateString) => {
         const [day, month, year] = dateString.split("-").map(Number);
@@ -1148,7 +1264,7 @@ export default function CashFlowReport() {
     }, [selectedRadio]);
 
 
-   
+
 
 
     return (
@@ -1557,11 +1673,14 @@ export default function CashFlowReport() {
                                         <>
                                             {mergedData.map((item, i) => {
                                                 // Handle Payment Heading Row
-                                                if (item.type === "payment-heading") {
+                                                const hasPaymentData = mergedData.some((data) => data.type === "payment");
+                                                if (item.type === "payment-heading" && hasPaymentData) {
                                                     return (
                                                         <tr key={`payment-heading-${i}`}
-                                                        style={{backgroundColor: getcolor,
-                                                            color: fontcolor}}
+                                                            style={{
+                                                                backgroundColor: getcolor,
+                                                                color: fontcolor
+                                                            }}
                                                         >
                                                             <td style={{ ...firstColWidth, backgroundColor: getcolor }}></td>
                                                             <td style={{ textAlign: "start", fontWeight: "bold", backgroundColor: "#3368B5", color: "white" }}>
@@ -1605,7 +1724,7 @@ export default function CashFlowReport() {
                                                                 fontWeight: item.index === 1 ? "bold" : "normal",
                                                                 backgroundColor: item.index === 1 ? "#3368B5" : "transparent",
                                                                 // color: fontcolor,
-                                                                color: item.index === 1 ? "white" : '', 
+                                                                color: item.index === 1 ? "white" : '',
                                                             }}
                                                         >
                                                             {item.type === "receipt"
