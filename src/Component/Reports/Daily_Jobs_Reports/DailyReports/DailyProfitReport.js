@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData , getLocationnumber, getYearDescription } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -72,8 +72,8 @@ export default function DailyProfitReport() {
 
 
     const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber()
-  
+    const locationnumber = getLocationnumber()
+
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -414,8 +414,6 @@ export default function DailyProfitReport() {
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
             FRepRat: Retrate,
-          
-
             code: 'NASIRTRD',
             FLocCod: '001',
             FYerDsc: '2024-2024',
@@ -554,6 +552,7 @@ export default function DailyProfitReport() {
         const rows = [...profitRows, ...expenseRows];
 
         // Add summary row to the table
+        // Add "Total" row
         rows.push([
             "",
             "",
@@ -565,11 +564,45 @@ export default function DailyProfitReport() {
             String(totalDebit),
             String(totalCredit),
             String(closingBalance),
-            // String(totalExpense),
             "",
             "",
-
         ]);
+
+        // Add "Opening Balance" row
+        rows.push([
+            "",
+            "",
+            "",
+            "",
+            "OPENING BAL :",
+            "",
+            "",
+            "",
+            "",
+            String(totalDebit), // Right-aligned inside the box
+            "",
+            "",
+        ]);
+
+        // Add "Closing Balance" row
+        rows.push([
+            "",
+            "",
+            "",
+            "",
+            "CLOSING BAL :",
+            "",
+            "",
+            "",
+            "",
+            String(totalDebit), // Right-aligned inside the box
+            "",
+            "",
+        ]);
+
+
+
+
 
 
         // Define table column headers and individual column widths
@@ -707,6 +740,8 @@ export default function DailyProfitReport() {
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
+
+
         // Function to calculate total table width
         const getTotalTableWidth = () => {
             let totalWidth = 0;
@@ -742,15 +777,6 @@ export default function DailyProfitReport() {
 
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
-
-                // if (date) {
-                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                //     if (time) {
-                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-                //     } else {
-                //         doc.text(date, rightX - 10, startY, { align: "right" });
-                //     }
-                // }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
@@ -804,9 +830,6 @@ export default function DailyProfitReport() {
 
 
 
-                //   let typeItem = Companyselectdatavalue.label
-                //       ? Companyselectdatavalue.label
-                //       : "ALL";
 
 
                 // let status = transectionType ? transectionType : "All";
@@ -816,13 +839,6 @@ export default function DailyProfitReport() {
                 doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
                 doc.setFontSize(10); // Font size
 
-                // doc.text(`COMPANY : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`CAPACITY : ${typeText}`, labelsX + 180, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`CATEGORY : ${category}`, labelsX, labelsY + 4.3); // Adjust x-coordinate for From Date
-
-                // doc.text(`TYPE : ${typename}`, labelsX + 180, labelsY + 4.3); // Adjust x-coordinate for From Date
-                // doc.text(`STATUS : ${status}`, labelsX, labelsY + 8.5); // Adjust x-coordinate for From Date
-                // doc.text(`SEARCH : ${search}`, labelsX + 180, labelsY + 8.5); // Adjust x-coordinate for From Date
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`REP RATE :`, labelsX, labelsY); // Draw bold label
@@ -834,16 +850,6 @@ export default function DailyProfitReport() {
                 doc.text(`TYPE :`, labelsX, labelsY + 4.3); // Draw bold label
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${Typefilter}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
-
-                //    doc.setFont(getfontstyle, "bold"); // Set font to bold
-                //    doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-                //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                //    doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
-
-                //    doc.setFont(getfontstyle, "bold"); // Set font to bold
-                //    doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-                //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                //    doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
                 if (searchQuery) {
                     doc.setFont(getfontstyle, "bold"); // Set font to bold
@@ -947,12 +953,12 @@ export default function DailyProfitReport() {
 
         worksheet.addRow([]);
 
-        let raprate = Retrate === "P" ? 
-        "PURCHASE RATE" : Retrate === "S" ? "SALE MAN RATE" : "ALL";
+        let raprate = Retrate === "P" ?
+            "PURCHASE RATE" : Retrate === "S" ? "SALE MAN RATE" : "ALL";
 
 
-        let typestatus = transectionType === "S" ? 
-        "CASH" : transectionType === "C" ? "CREDIT" : "ALL";
+        let typestatus = transectionType === "S" ?
+            "CASH" : transectionType === "C" ? "CREDIT" : "ALL";
 
 
         let typesearch = searchQuery ? searchQuery : "";
@@ -1294,7 +1300,7 @@ export default function DailyProfitReport() {
     }, [selectedIndex]);
 
 
-  
+
 
 
     const parseDate = (dateString) => {
@@ -2274,7 +2280,7 @@ export default function DailyProfitReport() {
                                                                 // onClick={() => handleRowClick(i)}
                                                                 // className={
                                                                 //     selectedIndex === i ? "selected-background" : ""
-                                                               
+
                                                                 // }
                                                                 style={{
                                                                     backgroundColor: getcolor,

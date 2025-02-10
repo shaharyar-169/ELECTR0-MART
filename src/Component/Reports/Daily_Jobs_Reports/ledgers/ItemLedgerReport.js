@@ -415,7 +415,7 @@ export default function ItemLedgerReport() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
-          
+
 
         }).toString();
 
@@ -461,19 +461,104 @@ export default function ItemLedgerReport() {
             sessionStorage.setItem("componentMounted", "true");
         }
     }, []);
-    useEffect(() => {
-        const currentDate = new Date();
-        setSelectedToDate(currentDate);
-        settoInputDate(formatDate(currentDate));
 
+
+    // useEffect(() => {
+    //     const storedData = sessionStorage.getItem("itemLedgerData");
+    //     const summryclickdata = storedData ? JSON.parse(storedData) : null;
+
+    //     const currentDate = new Date();
+    //     setSelectedToDate(currentDate);
+
+       
+    //     if (summryclickdata && summryclickdata.toInputDate) {
+    //         settoInputDate(summryclickdata.toInputDate);
+    //     } else {
+    //         settoInputDate(formatDate(currentDate));
+    //     }
+
+    //     const firstDateOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    //     setSelectedfromDate(firstDateOfCurrentMonth);
+
+    //     if (summryclickdata && summryclickdata.fromInputDate) {
+    //         setfromInputDate(summryclickdata.fromInputDate);
+    //     } else {
+    //         setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    //     }
+    // }, []);
+
+  
+  
+    useEffect(() => {
+        // Check if the report was opened via double-click
+        const isOpenedFromDoubleClick = sessionStorage.getItem("openedFromDoubleClick") === "true";
+    
+        const storedData = sessionStorage.getItem("itemLedgerData");
+        const summryclickdata = storedData ? JSON.parse(storedData) : null;
+    
+        const currentDate = new Date();
         const firstDateOfCurrentMonth = new Date(
             currentDate.getFullYear(),
             currentDate.getMonth(),
             1
         );
-        setSelectedfromDate(firstDateOfCurrentMonth);
-        setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    
+        if (isOpenedFromDoubleClick && summryclickdata?.fromInputDate && summryclickdata?.toInputDate) {
+            // ✅ Use stored session values ONLY when opened via double-click
+            setSelectedfromDate(new Date(summryclickdata.fromInputDate));
+            setfromInputDate(summryclickdata.fromInputDate);
+    
+            setSelectedToDate(new Date(summryclickdata.toInputDate));
+            settoInputDate(summryclickdata.toInputDate);
+    
+            // ✅ Clear the flag AFTER ensuring stored values are used
+            setTimeout(() => {
+                sessionStorage.removeItem("openedFromDoubleClick");
+            }, 500); // Small delay to prevent premature removal
+        } else {
+            // ❌ Ignore session storage when opened independently
+            setSelectedfromDate(firstDateOfCurrentMonth);
+            setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    
+            setSelectedToDate(currentDate);
+            settoInputDate(formatDate(currentDate));
+        }
+       
+
     }, []);
+
+ 
+    useEffect(() => {
+        if (selectedRadio === "custom") {
+            const storedData = sessionStorage.getItem("itemLedgerData");
+            const summryclickdata = storedData ? JSON.parse(storedData) : null;
+
+            const currentDate = new Date();
+            const firstDateOfCurrentMonth = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                1
+            );
+
+            setSelectedfromDate(firstDateOfCurrentMonth);
+            setfromInputDate(
+                summryclickdata?.fromInputDate ? summryclickdata.fromInputDate : formatDate(firstDateOfCurrentMonth)
+            );
+
+            setSelectedToDate(currentDate);
+            settoInputDate(
+                summryclickdata?.toInputDate ? summryclickdata.toInputDate : formatDate(currentDate)
+            );
+        } else {
+            const days = parseInt(selectedRadio.replace("days", ""));
+            handleRadioChange(days);
+        }
+    }, [selectedRadio]);
+   
+   
+    
+    
+    
     useEffect(() => {
         const apiUrl = apiLinks + "/GetItem.php";
         const formData = new URLSearchParams({
@@ -565,6 +650,7 @@ export default function ItemLedgerReport() {
         const selectedTransactionType = event.target.value;
         settransectionType(selectedTransactionType);
     };
+
 
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
@@ -1190,7 +1276,7 @@ export default function ItemLedgerReport() {
 
 
         const totalRow = worksheet.addRow([
-           "",
+            "",
             "",
             "",
             "",
@@ -1216,7 +1302,7 @@ export default function ItemLedgerReport() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9 || colNumber === 10 || colNumber === 11 || colNumber === 12 ) {
+            if (colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9 || colNumber === 10 || colNumber === 11 || colNumber === 12) {
                 cell.alignment = { horizontal: "right" };
             }
         });
@@ -1224,7 +1310,7 @@ export default function ItemLedgerReport() {
         // Set column widths
 
 
-        [12, 8, 7,7, 40, 11, 11, 11, 11, 11, 11,11].forEach((width, index) => {
+        [12, 8, 7, 7, 40, 11, 11, 11, 11, 11, 11, 11].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1441,23 +1527,8 @@ export default function ItemLedgerReport() {
         setSelectedRadio(days === 0 ? "custom" : `${days}days`);
     };
 
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(formatDate(firstDateOfCurrentMonth));
-            setSelectedToDate(currentDate);
-            settoInputDate(formatDate(currentDate));
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
-            handleRadioChange(days);
-        }
-    }, [selectedRadio]);
+
+
 
     return (
         <>
@@ -1617,7 +1688,7 @@ export default function ItemLedgerReport() {
                                                 setCompanyselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: labelPart, // Set only the 'NGS' part of the label
-                                                  });
+                                                });
                                             } else {
                                                 setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                                                 setCompanyselectdatavalue('')

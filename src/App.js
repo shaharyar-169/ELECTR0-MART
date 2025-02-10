@@ -42,6 +42,8 @@ import UserList from "./Component/Reports/Daily_Jobs_Reports/List/UserList.js";
 import ItemList from "./Component/Reports/Daily_Jobs_Reports/List/itemList.js";
 import ItemPriceList from "./Component/Reports/Daily_Jobs_Reports/List/ItemPriceList.js";
 import ItemPriceListA from "./Component/Reports/Daily_Jobs_Reports/List/ItemPriceListA.js";
+import MobileListReport from "./Component/Reports/Daily_Jobs_Reports/List/MobileListReport.js";
+import TechnicianList from "./Component/Reports/Daily_Jobs_Reports/List/TechnicionList.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -72,6 +74,10 @@ import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/Ins
 import InstallmentSaleReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentSaleReport.js";
 import InstallmentCollectReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectReport.js";
 import InstallmentLedgerReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentLedgerReport.js";
+
+//////////////////////////// Item reports //////////////////////////////
+import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
+
 
 function App() {
   const queryClient = new QueryClient();
@@ -120,6 +126,8 @@ function App() {
                 <Route exact path="/ItemList" element={<ItemList />} />
                 <Route exact path="/PriceList" element={<ItemPriceList />} />
                 <Route exact path="/PriceListA" element={<ItemPriceListA />} />
+                <Route exact path="/MobileList" element={<MobileListReport />} />
+                <Route exact path="/TechnicianList" element={<TechnicianList />} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -147,14 +155,16 @@ function App() {
                 <Route exact path="/Cash&BankBalance" element={<DailyCashBankBalance />} />
                 <Route exact path="/SaleReport" element={<DailySaleReport />} />
                 <Route exact path="/PurchaseReport" element={<DailyPurchaseReport />} />
-
-              
+             
               
                 {/* Rountes for Installments reports */}
                 <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} />
                 <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />
                 <Route exact path="/InstallmentSaleReport" element={<InstallmentSaleReport />} />
                 <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
+                
+                {/* Rountes for Installments reports */}
+                <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
 
 
                 {/* Rountes for Dashboard */}
