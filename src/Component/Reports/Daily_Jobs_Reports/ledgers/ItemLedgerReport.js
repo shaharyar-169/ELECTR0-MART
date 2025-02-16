@@ -36,11 +36,14 @@ export default function ItemLedgerReport() {
     const fromRef = useRef(null);
 
     const [saleType, setSaleType] = useState("");
+    console.log('saleTypedataset', saleType)
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
+    console.log('supplierList', supplierList)
+
 
     const [totalpurchase, settotalpurchase] = useState(0);
     const [totalpurchaseReturn, settotalpurchaseReturn] = useState(0);
@@ -57,13 +60,30 @@ export default function ItemLedgerReport() {
 
 
     // state for from DatePicker
-    const [selectedfromDate, setSelectedfromDate] = useState(null);
-    const [fromInputDate, setfromInputDate] = useState("");
+    // const [selectedfromDate, setSelectedfromDate] = useState(null);
+    // const [fromInputDate, setfromInputDate] = useState();
     const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
     // state for To DatePicker
-    const [selectedToDate, setSelectedToDate] = useState(null);
-    const [toInputDate, settoInputDate] = useState("");
+    // const [selectedToDate, setSelectedToDate] = useState(null);
+    // const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+    const storedData = JSON.parse(sessionStorage.getItem("itemLedgerData")) || {};
+
+    // Helper function to parse "dd-mm-yyyy" format to a valid Date object
+    const parseDate1 = (dateStr) => {
+        if (!dateStr) return null;
+        const [day, month, year] = dateStr.split("-").map(Number);
+        return new Date(year, month - 1, day); // Convert dd-mm-yyyy to Date object
+    };
+
+    // Initialize states from sessionStorage or set default values
+    const [selectedfromDate, setSelectedfromDate] = useState(parseDate1(storedData.fromInputDate) || null);
+    const [fromInputDate, setfromInputDate] = useState(storedData.fromInputDate || '');
+
+    const [selectedToDate, setSelectedToDate] = useState(parseDate1(storedData.toInputDate) || null);
+    const [toInputDate, settoInputDate] = useState(storedData.toInputDate || '');
+
 
 
     const yeardescription = getYearDescription();
@@ -463,102 +483,135 @@ export default function ItemLedgerReport() {
     }, []);
 
 
-    // useEffect(() => {
-    //     const storedData = sessionStorage.getItem("itemLedgerData");
-    //     const summryclickdata = storedData ? JSON.parse(storedData) : null;
 
-    //     const currentDate = new Date();
-    //     setSelectedToDate(currentDate);
-
-       
-    //     if (summryclickdata && summryclickdata.toInputDate) {
-    //         settoInputDate(summryclickdata.toInputDate);
-    //     } else {
-    //         settoInputDate(formatDate(currentDate));
-    //     }
-
-    //     const firstDateOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    //     setSelectedfromDate(firstDateOfCurrentMonth);
-
-    //     if (summryclickdata && summryclickdata.fromInputDate) {
-    //         setfromInputDate(summryclickdata.fromInputDate);
-    //     } else {
-    //         setfromInputDate(formatDate(firstDateOfCurrentMonth));
-    //     }
-    // }, []);
-
-  
-  
     useEffect(() => {
         // Check if the report was opened via double-click
         const isOpenedFromDoubleClick = sessionStorage.getItem("openedFromDoubleClick") === "true";
-    
+
         const storedData = sessionStorage.getItem("itemLedgerData");
         const summryclickdata = storedData ? JSON.parse(storedData) : null;
-    
+
         const currentDate = new Date();
         const firstDateOfCurrentMonth = new Date(
             currentDate.getFullYear(),
             currentDate.getMonth(),
-            1
+
         );
-    
-        if (isOpenedFromDoubleClick && summryclickdata?.fromInputDate && summryclickdata?.toInputDate) {
-            // ✅ Use stored session values ONLY when opened via double-click
-            setSelectedfromDate(new Date(summryclickdata.fromInputDate));
-            setfromInputDate(summryclickdata.fromInputDate);
-    
-            setSelectedToDate(new Date(summryclickdata.toInputDate));
-            settoInputDate(summryclickdata.toInputDate);
-    
-            // ✅ Clear the flag AFTER ensuring stored values are used
+
+        if (
+            isOpenedFromDoubleClick &&
+            summryclickdata?.fromInputDate &&
+            summryclickdata?.toInputDate
+        ) {
+            // Convert stored string to a valid Date format
+            const fromDate = parseDate(summryclickdata.fromInputDate);
+            const toDate = parseDate(summryclickdata.toInputDate);
+
+            if (fromDate && toDate) {
+                // ✅ Use stored session values ONLY when opened via double-click
+                setSelectedfromDate(fromDate);
+                setfromInputDate(formatDate(fromDate)); // Ensure correct formatting
+
+                setSelectedToDate(toDate);
+                settoInputDate(formatDate(toDate)); // Ensure correct formatting
+            }
+
+            // ✅ Clear session storage AFTER using stored data
             setTimeout(() => {
                 sessionStorage.removeItem("openedFromDoubleClick");
-            }, 500); // Small delay to prevent premature removal
+                sessionStorage.removeItem("itemLedgerData");
+            }, 2000); // Delay to avoid premature removal
         } else {
             // ❌ Ignore session storage when opened independently
             setSelectedfromDate(firstDateOfCurrentMonth);
             setfromInputDate(formatDate(firstDateOfCurrentMonth));
-    
+
             setSelectedToDate(currentDate);
             settoInputDate(formatDate(currentDate));
         }
-       
-
     }, []);
 
- 
+
+
+    // const storedData = JSON.parse(sessionStorage.getItem("itemLedgerData")) || {};
+    // const customfromdate = storedData.fromInputDate || null;
+    // console.log('customfromdate', customfromdate);
+
+
+    // useEffect(() => {
+    //     const storedData = JSON.parse(sessionStorage.getItem("itemLedgerData")) || {};
+    //     const lastCustomData = JSON.parse(localStorage.getItem("lastCustomDate")) || {};
+
+    //     // Retrieve dates from session storage (if available)
+    //     const storedFromDate = storedData.fromInputDate ? new Date(storedData.fromInputDate) : null;
+    //     const storedToDate = storedData.toInputDate ? new Date(storedData.toInputDate) : null;
+
+    //     // Retrieve last selected custom date from localStorage (if available)
+    //     const lastCustomFromDate = lastCustomData.fromInputDate ? new Date(lastCustomData.fromInputDate) : null;
+    //     const lastCustomToDate = lastCustomData.toInputDate ? new Date(lastCustomData.toInputDate) : null;
+
+    //     if (selectedRadio === "custom") {
+    //         // If session storage has data, use it
+    //         // Else, use the last custom date from localStorage
+    //         // Else, use the first day of the current month as default
+
+    //         const currentDate = new Date();
+    //         const firstDateOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+    //         const finalFromDate = storedFromDate || lastCustomFromDate || firstDateOfCurrentMonth;
+    //         const finalToDate = storedToDate || lastCustomToDate || currentDate;
+
+    //         setSelectedfromDate(finalFromDate);
+    //         setfromInputDate(formatDate(finalFromDate)); // Format to dd-mm-yyyy
+    //         setSelectedToDate(finalToDate);
+    //         settoInputDate(formatDate(finalToDate)); // Format to dd-mm-yyyy
+
+    //         // Store the selected custom date in localStorage
+    //         localStorage.setItem("lastCustomDate", JSON.stringify({ 
+    //             fromInputDate: formatDate(finalFromDate), 
+    //             toInputDate: formatDate(finalToDate) 
+    //         }));
+    //     } else {
+    //         // Calculate dates based on days selection (30, 60, 90)
+    //         const currentDate = new Date();
+    //         const days = parseInt(selectedRadio.replace("days", ""));
+    //         const calculatedFromDate = new Date();
+    //         calculatedFromDate.setDate(currentDate.getDate() - days);
+
+    //         setSelectedfromDate(calculatedFromDate);
+    //         setfromInputDate(formatDate(calculatedFromDate)); // Format to dd-mm-yyyy
+    //         setSelectedToDate(currentDate);
+    //         settoInputDate(formatDate(currentDate)); // Format to dd-mm-yyyy
+    //     }
+    // }, [selectedRadio]);
+
+
+
     useEffect(() => {
         if (selectedRadio === "custom") {
-            const storedData = sessionStorage.getItem("itemLedgerData");
-            const summryclickdata = storedData ? JSON.parse(storedData) : null;
+            // Ensure stored dates are in a valid format before converting to Date objects
+            const parseDate = (dateStr) => {
+                if (!dateStr) return null;
+                const [day, month, year] = dateStr.split("-").map(Number);
+                return new Date(year, month - 1, day); // Convert dd-mm-yyyy to Date object
+            };
 
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
+            const fromDate = parseDate(fromInputDate) || new Date();
+            const toDate = parseDate(toInputDate) || new Date();
 
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(
-                summryclickdata?.fromInputDate ? summryclickdata.fromInputDate : formatDate(firstDateOfCurrentMonth)
-            );
-
-            setSelectedToDate(currentDate);
-            settoInputDate(
-                summryclickdata?.toInputDate ? summryclickdata.toInputDate : formatDate(currentDate)
-            );
+            setSelectedfromDate(fromDate);
+            setfromInputDate(formatDate(fromDate)); // Convert back to dd-mm-yyyy
+            setSelectedToDate(toDate);
+            settoInputDate(formatDate(toDate)); // Convert back to dd-mm-yyyy
         } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
+            const days = parseInt(selectedRadio.replace("days", ""), 10);
             handleRadioChange(days);
         }
     }, [selectedRadio]);
-   
-   
-    
-    
-    
+
+
+
+
     useEffect(() => {
         const apiUrl = apiLinks + "/GetItem.php";
         const formData = new URLSearchParams({

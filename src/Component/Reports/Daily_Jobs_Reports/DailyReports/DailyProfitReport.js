@@ -600,11 +600,6 @@ export default function DailyProfitReport() {
             "",
         ]);
 
-
-
-
-
-
         // Define table column headers and individual column widths
 
         const headers = [
@@ -740,8 +735,7 @@ export default function DailyProfitReport() {
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
-
-
+        
         // Function to calculate total table width
         const getTotalTableWidth = () => {
             let totalWidth = 0;

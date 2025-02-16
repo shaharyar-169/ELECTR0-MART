@@ -648,7 +648,6 @@ export default function CashFlowReport() {
         };
 
 
-
         const getTotalTableWidth = () => {
             let totalWidth = 0;
             columnWidths.forEach((width) => (totalWidth += width));

@@ -756,11 +756,7 @@ const yeardescription = getYearDescription();
 
 
 
-
-
-
                 let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null
-
                 let search = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null;
 
 
