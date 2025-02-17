@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData , getYearDescription, getLocationnumber} from "../../../Auth";
+import { getUserData, getOrganisationData, getYearDescription, getLocationnumber } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -66,8 +66,6 @@ export default function StoreList() {
     }
   };
 
-
-  
   function fetchReceivableReport() {
     const apiUrl = apiLinks + "/StoreList.php";
     setIsLoading(true);
@@ -75,7 +73,7 @@ export default function StoreList() {
       FStrSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+   
       FSchTxt: searchQuery,
     }).toString();
 
@@ -125,7 +123,7 @@ export default function StoreList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -377,11 +375,12 @@ export default function StoreList() {
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
+        if(searchQuery){
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.text(`SEARCH :`, labelsX + 90, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${search}`, labelsX + 110, labelsY + 8.5); // Draw the value next to the label
-
+}
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -493,12 +492,11 @@ export default function StoreList() {
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow3 = worksheet.addRow([
-      "STATUS:",
-      typestatus,
-      "SEARCH:",
-      typesearch,
-    ]);
+    const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery
+        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+        : ["STATUS :", typestatus, ""]
+    );
 
     const applyStatusRowStyle = (row, boldColumns = []) => {
       row.eachCell((cell, colIndex) => {
@@ -716,7 +714,6 @@ export default function StoreList() {
   };
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
-  
   useEffect(() => {
     if (isFilterApplied || tableData.length > 0) {
       setSelectedIndex(0);
@@ -822,7 +819,13 @@ export default function StoreList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -848,7 +851,7 @@ export default function StoreList() {
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
                     fontSize: getdatafontsize,
-                    fontFamily:getfontstyle,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                   }}
                 >
@@ -860,7 +863,13 @@ export default function StoreList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ display:'flex',alignItems:'center',justifyContent:'center',fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>
@@ -877,7 +886,7 @@ export default function StoreList() {
                     width: "200px",
                     height: "24px",
                     fontSize: getdatafontsize,
-                    fontFamily:getfontstyle,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,

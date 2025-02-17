@@ -72,14 +72,11 @@ export default function TechnicianList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FTchSts: transectionType,
-    //   code: organisation.code,
-    //   FLocCod: locationnumber || getLocationNumber,
-    //   FYerDsc: yeardescription || getYearDescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
-
-      code: 'CRYCOMP',
-      FLocCod: '001',
-      FYerDsc: '2024-2024',
+      
     }).toString();
 
     axios
@@ -128,7 +125,7 @@ export default function TechnicianList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [

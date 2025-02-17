@@ -73,6 +73,7 @@ export default function UserList() {
       FUsrSts: transectionType,
       code: organisation.code,
       FLocCod: getLocationNumber || locationnumber,
+   
       FSchTxt: searchQuery,
     }).toString();
 
@@ -861,7 +862,13 @@ export default function UserList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -886,7 +893,8 @@ export default function UserList() {
                     marginLeft: "5px",
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize, fontFamily: getfontstyle, 
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                   }}
                 >
@@ -898,7 +906,13 @@ export default function UserList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize, fontFamily: getfontstyle,  fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>
@@ -914,7 +928,8 @@ export default function UserList() {
                     marginRight: "20px",
                     width: "200px",
                     height: "24px",
-                    fontSize: getdatafontsize, fontFamily: getfontstyle, 
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
@@ -945,7 +960,8 @@ export default function UserList() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle, 
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                   paddingRight: "2%",
@@ -953,7 +969,8 @@ export default function UserList() {
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize, fontFamily: getfontstyle, 
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -1052,7 +1069,8 @@ export default function UserList() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle, 
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                 }}

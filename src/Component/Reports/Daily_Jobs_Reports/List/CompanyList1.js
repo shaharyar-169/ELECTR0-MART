@@ -73,8 +73,7 @@ export default function CompanyList() {
     const formData = new URLSearchParams({
       FCmpSts: transectionType,
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+     
       FSchTxt: searchQuery,
     }).toString();
 
@@ -124,7 +123,7 @@ export default function CompanyList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -807,7 +806,13 @@ export default function CompanyList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -845,7 +850,13 @@ export default function CompanyList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ display:'flex',alignItems:'center',justifyContent:'center',fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>

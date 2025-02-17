@@ -28,8 +28,6 @@ export default function ItemList() {
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
 
-
-
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -81,8 +79,6 @@ export default function ItemList() {
     getfontstyle,
   } = useTheme();
 
-
-
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
     document.documentElement.style.setProperty("--font-color", fontcolor);
@@ -99,10 +95,10 @@ export default function ItemList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FItmSts: transectionType,
-      code: organisation.code,
       FCtgCod: Companyselectdata,
       FCapCod: Capacityselectdata,
       FTypCod: Typeselectdata,
+      code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
       FCmpCod: Companyselectdata,
@@ -400,7 +396,6 @@ export default function ItemList() {
   //   }),
   // });
 
-
   const DropdownOption = (props) => {
     return (
       <components.Option {...props}>
@@ -430,9 +425,9 @@ export default function ItemList() {
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
       color: fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+      caretColor: getcolor === "white" ? "black" : "white",
       borderRadius: 0,
-      border: `1px solid ${fontcolor}`, // Fixed Template Literal
+      border: `1px solid ${fontcolor}`,
       transition: "border-color 0.15s ease-in-out",
       "&:hover": {
         borderColor: state.isFocused ? base.borderColor : "black",
@@ -1240,9 +1235,17 @@ export default function ItemList() {
                     justifyContent: "end",
                   }}
                 >
-
                   <label htmlFor="transactionType">
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Company :
                     </span>
                   </label>
@@ -1290,7 +1293,13 @@ export default function ItemList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Type :
                     </span>
                   </label>
@@ -1324,8 +1333,6 @@ export default function ItemList() {
                   />
                 </div>
               </div>
-
-
             </div>
           </div>
           {/* //////////////// SECOND ROW ///////////////////////// */}
@@ -1356,7 +1363,13 @@ export default function ItemList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Category :
                     </span>
                   </label>
@@ -1391,8 +1404,6 @@ export default function ItemList() {
                 </div>
               </div>
 
-
-
               <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
@@ -1406,7 +1417,13 @@ export default function ItemList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -1431,7 +1448,8 @@ export default function ItemList() {
                     marginLeft: "3px",
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                     paddingLeft: "7px",
                   }}
@@ -1459,7 +1477,6 @@ export default function ItemList() {
                 justifyContent: "space-between",
               }}
             >
-
               <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
@@ -1473,7 +1490,13 @@ export default function ItemList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Capacity :
                     </span>
                   </label>
@@ -1508,11 +1531,15 @@ export default function ItemList() {
                 </div>
               </div>
 
-
-
               <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>
@@ -1528,7 +1555,8 @@ export default function ItemList() {
                     marginRight: "20px",
                     width: "250px",
                     height: "24px",
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
@@ -1561,7 +1589,8 @@ export default function ItemList() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                   paddingRight: "2%",
@@ -1569,7 +1598,8 @@ export default function ItemList() {
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -1651,7 +1681,8 @@ export default function ItemList() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                 }}
@@ -1703,7 +1734,9 @@ export default function ItemList() {
                             key={`${i}-${selectedIndex}`}
                             ref={(el) => (rowRefs.current[i] = el)}
                             onClick={() => handleRowClick(i)}
-                            className={selectedIndex === i ? "selected-background" : ""}
+                            className={
+                              selectedIndex === i ? "selected-background" : ""
+                            }
                             style={{
                               backgroundColor: getcolor,
                               color: fontcolor,
@@ -1712,10 +1745,14 @@ export default function ItemList() {
                             <td className="text-start" style={firstColWidth}>
                               {item.Code}
                             </td>
-                                                        
-                          <td className="text-start" 
-                          style={secondColWidth} title={item.Description || ""}>
-                              {item.Description && typeof item.Description === "string"
+
+                            <td
+                              className="text-start"
+                              style={secondColWidth}
+                              title={item.Description || ""}
+                            >
+                              {item.Description &&
+                              typeof item.Description === "string"
                                 ? item.Description.trim().length > 35
                                   ? `${item.Description.trim().slice(0, 35)}...`
                                   : item.Description.trim()
@@ -1729,7 +1766,6 @@ export default function ItemList() {
                             <td className="text-start" style={forthColWidth}>
                               {item.Category}
                             </td>
-                          
 
                             <td className="text-start" style={fifthColWidth}>
                               {item.Capacity}
@@ -1738,9 +1774,6 @@ export default function ItemList() {
                             <td className="text-start" style={sixthColWidth}>
                               {item.Type}
                             </td>
-                            
-
-                          
                           </tr>
                         );
                       })}

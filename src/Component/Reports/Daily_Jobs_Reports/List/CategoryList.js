@@ -72,8 +72,6 @@ export default function CategoryList() {
     const formData = new URLSearchParams({
       FCtgSts: transectionType,
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
     }).toString();
 
@@ -123,7 +121,7 @@ export default function CategoryList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -360,8 +358,8 @@ export default function CategoryList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-              ? "ACTIVE"
-              : "ALL";
+            ? "ACTIVE"
+            : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -806,7 +804,13 @@ export default function CategoryList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ display:'flex',alignItems:'center',justifyContent:'center',fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -844,11 +848,13 @@ export default function CategoryList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle, fontWeight: "bold",
-                    display:'flex',alignItems:'center',justifyContent:'center',
-                  }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>

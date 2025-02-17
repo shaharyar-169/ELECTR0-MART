@@ -126,7 +126,7 @@ export default function MobileListReport() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [

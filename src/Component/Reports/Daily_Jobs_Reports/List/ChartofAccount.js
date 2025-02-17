@@ -70,9 +70,9 @@ export default function ChartofAccount() {
     const apiUrl = apiLinks + "/ChartOfAccountList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
+      FAccSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,   
       FSchTxt: searchQuery,
     }).toString();
 
@@ -122,7 +122,7 @@ export default function ChartofAccount() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -359,8 +359,8 @@ export default function ChartofAccount() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-              ? "ACTIVE"
-              : "ALL";
+            ? "ACTIVE"
+            : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -585,19 +585,19 @@ export default function ChartofAccount() {
     const getCurrentDate = () => {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
       const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
+      return dd + "-" + mm + "-" + yyyy;
     };
 
-    const currentdate = getCurrentDate();
+    const date = getCurrentDate();
 
     // Generate Excel file buffer and save
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ChartOfAccountList As On ${currentdate}.xlsx`);
+    saveAs(blob, `ChartOfAccountList As On ${date}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -805,7 +805,13 @@ export default function ChartofAccount() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -843,7 +849,13 @@ export default function ChartofAccount() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>

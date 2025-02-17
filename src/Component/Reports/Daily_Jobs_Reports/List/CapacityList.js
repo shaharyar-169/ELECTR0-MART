@@ -73,8 +73,6 @@ export default function CapacityList() {
     const formData = new URLSearchParams({
       FCapSts: transectionType,
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
     }).toString();
 
@@ -124,7 +122,7 @@ export default function CapacityList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -693,7 +691,7 @@ export default function CapacityList() {
     overflowY: "hidden",
     wordBreak: "break-word",
     textAlign: "center",
-    maxWidth: "800px",
+    maxWidth: "600px",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
@@ -807,7 +805,13 @@ export default function CapacityList() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -832,7 +836,8 @@ export default function CapacityList() {
                     marginLeft: "5px",
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                   }}
                 >
@@ -844,7 +849,13 @@ export default function CapacityList() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>
@@ -860,7 +871,8 @@ export default function CapacityList() {
                     marginRight: "20px",
                     width: "200px",
                     height: "24px",
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     color: fontcolor,
                     backgroundColor: getcolor,
                     border: `1px solid ${fontcolor}`,
@@ -891,7 +903,8 @@ export default function CapacityList() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                   paddingRight: "2%",
@@ -899,7 +912,8 @@ export default function CapacityList() {
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -957,7 +971,8 @@ export default function CapacityList() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                 }}

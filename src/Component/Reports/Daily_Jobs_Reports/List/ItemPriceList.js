@@ -85,12 +85,17 @@ export default function ItemPriceList() {
     // Toggle the ToDATE && FromDATE CalendarOpen state on each click
 
     function fetchReceivableReport() {
-        const apiUrl = apiLinks + "/ItemPriceListA.php";
+        const apiUrl = apiLinks + "/ItemPriceList.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription,
+
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
+
             FCtgCod: Companyselectdata,
             FCapCod: Capacityselectdata,
             FTypCod: Typeselectdata,
@@ -398,8 +403,6 @@ export default function ItemPriceList() {
             item.Description,
             item.Stk,
             item.Comm,
-            item["Act Rate"],
-            item["Pur Rate"],
             item["SM Rate"],
             item["Sale Rate"],
             item.MRP,
@@ -415,14 +418,12 @@ export default function ItemPriceList() {
             "Description",
             "StK",
             "Comm",
-            "Act Rate",
-            "Pur Rate",
             "SM Rate",
             "Sale Rate",
             "MRP",
             "Fix Rate",
         ];
-        const columnWidths = [35, 87, 10, 19, 19, 19, 19, 19, 19, 19];
+        const columnWidths = [35, 95, 10, 19,19, 19, 19, 19];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -527,8 +528,7 @@ export default function ItemPriceList() {
                             baseline: "middle",
                         });
                     } else if (
-                        cellIndex === 3 ||
-                        cellIndex === 4 ||
+                      
                         cellIndex === 5 ||
                         cellIndex === 6 ||
                         cellIndex === 7 ||
@@ -645,7 +645,7 @@ export default function ItemPriceList() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Item Price List A`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Item Price List `, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += 5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -772,8 +772,7 @@ export default function ItemPriceList() {
             "left",
             "center",
             "right",
-            "right",
-            "right",
+           
             "right",
             "right",
             "right",
@@ -899,9 +898,7 @@ export default function ItemPriceList() {
             "Description",
             "StK",
             "Comm",
-            "Act Rate",
-            "Pur Rate",
-            "SM Rate",
+           "SM Rate",
             "Sale Rate",
             "MRP",
             "Fix Rate",
@@ -922,8 +919,6 @@ export default function ItemPriceList() {
                 item.Description,
                 item.Stk,
                 item.Comm,
-                item["Act Rate"],
-                item["Pur Rate"],
                 item["SM Rate"],
                 item["Sale Rate"],
                 item.MRP,
@@ -955,7 +950,7 @@ export default function ItemPriceList() {
         });
 
         // Set column widths
-        [22, 40, 6, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
+        [22, 40, 6, 12, 12, 12, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1048,12 +1043,7 @@ export default function ItemPriceList() {
     const ninthColWidth = {
         width: "8.5%",
     };
-    const tenthColWidth = {
-        width: "8.5%",
-    };
-    const elewenthColWidth = {
-        width: "8.5%",
-    };
+   
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1523,22 +1513,7 @@ export default function ItemPriceList() {
                                             Comm{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
-                                        <td
-                                            className="border-dark"
-                                            style={tenthColWidth}
-                                            onClick={() => handleSorting("Act Rate")}
-                                        >
-                                            Act Rate{" "}
-                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
-                                        </td>
-                                        <td
-                                            className="border-dark"
-                                            style={elewenthColWidth}
-                                            onClick={() => handleSorting("Pur Rate")}
-                                        >
-                                            Pur Rate{" "}
-                                            <i className="fa-solid fa-caret-down caretIconStyle"></i>
-                                        </td>
+                                      
                                         <td
                                             className="border-dark"
                                             style={fifthColWidth}
@@ -1603,7 +1578,7 @@ export default function ItemPriceList() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="10" className="text-center">
+                                                <td colSpan="8" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1616,7 +1591,7 @@ export default function ItemPriceList() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 8 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1633,8 +1608,7 @@ export default function ItemPriceList() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
+                                                
                                             </tr>
                                         </>
                                     ) : (
@@ -1672,12 +1646,7 @@ export default function ItemPriceList() {
                                                         <td className="text-end" style={forthColWidth}>
                                                             {item.Comm}
                                                         </td>
-                                                        <td className="text-end" style={tenthColWidth}>
-                                                            {item["Act Rate"]}
-                                                        </td>
-                                                        <td className="text-end" style={elewenthColWidth}>
-                                                            {item["Pur Rate"]}
-                                                        </td>
+                                                       
                                                         <td className="text-end" style={fifthColWidth}>
                                                             {item["SM Rate"]}
                                                         </td>
@@ -1703,7 +1672,7 @@ export default function ItemPriceList() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 8 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1719,8 +1688,7 @@ export default function ItemPriceList() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
+                                               
                                             </tr>
                                         </>
                                     )}
