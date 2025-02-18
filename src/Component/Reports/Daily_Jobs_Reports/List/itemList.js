@@ -20,6 +20,7 @@ import "react-toastify/dist/ReactToastify.css";
 import './list.css';
 import './demo.css';
 import { getcompanyData } from "../../../File/Category_Maintenance/Category_Maintenance_Api";
+import { SkipNextSharp } from "@mui/icons-material";
 
 export default function ItemList() {
   const navigate = useNavigate();
@@ -1068,19 +1069,19 @@ export default function ItemList() {
   };
 
   const firstColWidth = {
-    width: "16.7%",
+    width: "14%",
   };
   const secondColWidth = {
-    width: "35%",
+    width: "37%",
   };
   const thirdColWidth = {
-    width: "10%",
+    width: "10.5%",
   };
   const forthColWidth = {
-    width: "12%",
+    width: "11%",
   };
   const fifthColWidth = {
-    width: "9%",
+    width: "10%",
   };
   const sixthColWidth = {
     width: "16%",
@@ -1105,7 +1106,7 @@ export default function ItemList() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(80vw - 0%)" : "65vw",
+    width: isSidebarVisible ? "calc(65vw - 0%)" : "55vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -1685,6 +1686,7 @@ export default function ItemList() {
                   fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
+                  tableLayout: 'fixed'
                 }}
               >
                 <tbody id="tablebody">
@@ -1742,36 +1744,75 @@ export default function ItemList() {
                               color: fontcolor,
                             }}
                           >
-                            <td className="text-start" style={firstColWidth}>
+                            <td className="text-start"
+                              title={item.Code}
+                              style={{
+                                ...firstColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                              }}                            >
                               {item.Code}
                             </td>
 
-                            <td
-                              className="text-start"
-                              style={secondColWidth}
-                              title={item.Description || ""}
+                            <td className="text-start"
+                              title={item.Description}
+
+                              style={{
+                                ...secondColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                              }}
+
                             >
-                              {item.Description &&
-                              typeof item.Description === "string"
-                                ? item.Description.trim().length > 35
-                                  ? `${item.Description.trim().slice(0, 35)}...`
-                                  : item.Description.trim()
-                                : ""}
+                              {item.Description}
                             </td>
 
-                            <td className="text-start" style={thirdColWidth}>
+
+                            <td className="text-start"
+                              title={item.Company}
+
+                              style={{
+                                ...thirdColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                              }}                            >
                               {item.Company}
                             </td>
 
-                            <td className="text-start" style={forthColWidth}>
+                            <td className="text-start"
+                              title={item.Category}
+                              style={{
+                                ...forthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                              }}                            >
                               {item.Category}
                             </td>
 
-                            <td className="text-start" style={fifthColWidth}>
+                            <td className="text-start"
+                              title={item.Capacity}
+                              style={{
+                                ...fifthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                              }}                            >
                               {item.Capacity}
                             </td>
 
-                            <td className="text-start" style={sixthColWidth}>
+                            <td className="text-start"
+                              title={item.Type}
+                              style={{
+                                ...sixthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+
+                              }}>
                               {item.Type}
                             </td>
                           </tr>
@@ -1811,58 +1852,59 @@ export default function ItemList() {
           </div>
 
           {/* <div
-                          style={{
-                              borderBottom: `1px solid ${fontcolor}`,
-                              borderTop: `1px solid ${fontcolor}`,
-                              height: "24px",
-                              display: "flex",
-                              paddingRight: "1.2%",
-                              width: "101.2%",
-                          }}
-                      >
-                          <div
-                              style={{
-                                  ...firstColWidth,
-                                  background: getcolor,
-                                  borderRight: `1px solid ${fontcolor}`,
-                              }}
-                          ></div>
-                          <div
-                              style={{
-                                  ...secondColWidth,
-                                  background: getcolor,
-                                  borderRight: `1px solid ${fontcolor}`,
-                              }}
-                          ></div>
-                          <div
-                              style={{
-                                  ...thirdColWidth,
-                                  background: getcolor,
-                                  borderRight: `1px solid ${fontcolor}`,
-                              }}
-                          ></div>
-                          <div
-                              style={{
-                                  ...forthColWidth,
-                                  background: getcolor,
-                                  borderRight: `1px solid ${fontcolor}`,
-                              }}
-                          ></div>
-                          <div
-                              style={{
-                                  ...fifthColWidth,
-                                  background: getcolor,
-                                  borderRight: `1px solid ${fontcolor}`,
-                              }}
-                          ></div>
-                          <div
-                              style={{
-                                  ...sixthColWidth,
-                                  background: getcolor,
-                                  borderRight: `1px solid ${fontcolor}`,
-                              }}
-                          ></div>
-                      </div> */}
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
+              style={{
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+          </div> */}
+
           <div
             style={{
               margin: "5px",

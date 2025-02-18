@@ -57,7 +57,7 @@ export default function ItemPriceList() {
     const [typeselectdatavalue, settypeselectdatavalue] = useState("");
 
     const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
+    const locationnumber = getLocationnumber();
 
     const {
         isSidebarVisible,
@@ -423,7 +423,7 @@ export default function ItemPriceList() {
             "MRP",
             "Fix Rate",
         ];
-        const columnWidths = [35, 95, 10, 19,19, 19, 19, 19];
+        const columnWidths = [35, 95, 10, 19, 19, 19, 19, 19];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -528,7 +528,7 @@ export default function ItemPriceList() {
                             baseline: "middle",
                         });
                     } else if (
-                      
+
                         cellIndex === 5 ||
                         cellIndex === 6 ||
                         cellIndex === 7 ||
@@ -772,7 +772,7 @@ export default function ItemPriceList() {
             "left",
             "center",
             "right",
-           
+
             "right",
             "right",
             "right",
@@ -898,7 +898,7 @@ export default function ItemPriceList() {
             "Description",
             "StK",
             "Comm",
-           "SM Rate",
+            "SM Rate",
             "Sale Rate",
             "MRP",
             "Fix Rate",
@@ -1020,16 +1020,16 @@ export default function ItemPriceList() {
     };
 
     const firstColWidth = {
-        width: "12.3%",
+        width: "10.3%",
     };
     const secondColWidth = {
         width: "24.5%",
     };
     const thirdColWidth = {
-        width: "4%",
+        width: "5%",
     };
     const forthColWidth = {
-        width: "7%",
+        width: "8%",
     };
     const fifthColWidth = {
         width: "8.5%",
@@ -1043,7 +1043,7 @@ export default function ItemPriceList() {
     const ninthColWidth = {
         width: "8.5%",
     };
-   
+
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1064,7 +1064,7 @@ export default function ItemPriceList() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(85vw - 0%)" : "85vw",
+        width: isSidebarVisible ? "calc(65vw - 0%)" : "55vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1513,7 +1513,7 @@ export default function ItemPriceList() {
                                             Comm{" "}
                                             <i className="fa-solid fa-caret-down caretIconStyle"></i>
                                         </td>
-                                      
+
                                         <td
                                             className="border-dark"
                                             style={fifthColWidth}
@@ -1568,6 +1568,7 @@ export default function ItemPriceList() {
                                     fontSize: getdatafontsize, fontFamily: getfontstyle,
                                     width: "100%",
                                     position: "relative",
+                                    tableLayout: "fixed"
                                 }}
                             >
                                 <tbody id="tablebody">
@@ -1608,7 +1609,7 @@ export default function ItemPriceList() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
-                                                
+
                                             </tr>
                                         </>
                                     ) : (
@@ -1628,10 +1629,17 @@ export default function ItemPriceList() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-start" style={firstColWidth}>
+                                                        <td className="text-start"
+                                                           title={item.Code}
+                                                            style={{
+                                                                ...firstColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                        >
                                                             {item.Code}
                                                         </td>
-                                                        <td
+                                                        {/* <td
                                                             className="text-start"
                                                             style={secondColWidth}
                                                             title={item.Description || ""}
@@ -1639,24 +1647,77 @@ export default function ItemPriceList() {
                                                             {item.Description && item.Description.length > 30
                                                                 ? `${item.Description.substring(0, 30)}...`
                                                                 : item.Description || ""}
+                                                        </td> */}
+                                                        <td className="text-start"
+                                                           title={item.Description}
+                                                            style={{
+                                                                ...secondColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                         >
+                                                            {item.Description}
                                                         </td>
-                                                        <td className="text-center" style={thirdColWidth}>
+
+                                                        <td className="text-center"
+                                                           title={item.Stk}
+                                                            style={{
+                                                                ...thirdColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                        >
                                                             {item.Stk}
                                                         </td>
-                                                        <td className="text-end" style={forthColWidth}>
+                                                        <td className="text-end"
+                                                           title={item.Comm}
+                                                            style={{
+                                                                ...forthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                        >
                                                             {item.Comm}
                                                         </td>
-                                                       
-                                                        <td className="text-end" style={fifthColWidth}>
+
+                                                        <td className="text-end"
+                                                           title={item['SM Rate']}
+                                                            style={{
+                                                                ...fifthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                        >
                                                             {item["SM Rate"]}
                                                         </td>
-                                                        <td className="text-end" style={sixthColWidth}>
+                                                        <td className="text-end"
+                                                           title={item['Sale Rate']}
+                                                            style={{
+                                                                ...sixthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                         >
                                                             {item["Sale Rate"]}
                                                         </td>
-                                                        <td className="text-end" style={eightColWidth}>
+                                                        <td className="text-end"
+                                                           title={item.MRP}
+                                                            style={{
+                                                                ...eightColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                        >
                                                             {item.MRP}
                                                         </td>
-                                                        <td className="text-end" style={ninthColWidth}>
+                                                        <td className="text-end"
+                                                           title={item['Fix Rate']}
+                                                            style={{
+                                                                ...ninthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis"
+                                                            }}                                                         >
                                                             {item["Fix Rate"]}
                                                         </td>
                                                     </tr>
@@ -1688,7 +1749,7 @@ export default function ItemPriceList() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
-                                               
+
                                             </tr>
                                         </>
                                     )}
