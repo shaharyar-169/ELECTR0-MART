@@ -22,6 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function BankRegisterLedger1() {
+
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -399,8 +400,7 @@ export default function BankRegisterLedger1() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
-
-
+      
         }).toString();
 
         axios
@@ -480,6 +480,9 @@ export default function BankRegisterLedger1() {
         value: item.tacccod,
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
+
+   
+    
 
     const DropdownOption = (props) => {
         return (
@@ -1567,6 +1570,12 @@ export default function BankRegisterLedger1() {
                                         isClearable
                                         placeholder="ALL"
                                     />
+
+                                    
+
+                                   
+
+
                                 </div>
                             </div>
 

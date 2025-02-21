@@ -158,7 +158,6 @@ export default function ItemLedgerReport() {
     const handlefromInputChange = (e) => {
         setfromInputDate(e.target.value);
     };
-
     const handlefromKeyPress = (e, inputId) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -214,7 +213,6 @@ export default function ItemLedgerReport() {
             }
         }
     };
-
     const handleToKeyPress = (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -278,8 +276,6 @@ export default function ItemLedgerReport() {
             }
         }
     };
-
-
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : "");
@@ -467,7 +463,9 @@ export default function ItemLedgerReport() {
                 console.error("Error:", error);
                 setIsLoading(false);
             });
+
     }
+
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
@@ -482,12 +480,9 @@ export default function ItemLedgerReport() {
         }
     }, []);
 
-
-
     useEffect(() => {
         // Check if the report was opened via double-click
         const isOpenedFromDoubleClick = sessionStorage.getItem("openedFromDoubleClick") === "true";
-
         const storedData = sessionStorage.getItem("itemLedgerData");
         const summryclickdata = storedData ? JSON.parse(storedData) : null;
 
@@ -531,62 +526,6 @@ export default function ItemLedgerReport() {
         }
     }, []);
 
-
-
-    // const storedData = JSON.parse(sessionStorage.getItem("itemLedgerData")) || {};
-    // const customfromdate = storedData.fromInputDate || null;
-    // console.log('customfromdate', customfromdate);
-
-
-    // useEffect(() => {
-    //     const storedData = JSON.parse(sessionStorage.getItem("itemLedgerData")) || {};
-    //     const lastCustomData = JSON.parse(localStorage.getItem("lastCustomDate")) || {};
-
-    //     // Retrieve dates from session storage (if available)
-    //     const storedFromDate = storedData.fromInputDate ? new Date(storedData.fromInputDate) : null;
-    //     const storedToDate = storedData.toInputDate ? new Date(storedData.toInputDate) : null;
-
-    //     // Retrieve last selected custom date from localStorage (if available)
-    //     const lastCustomFromDate = lastCustomData.fromInputDate ? new Date(lastCustomData.fromInputDate) : null;
-    //     const lastCustomToDate = lastCustomData.toInputDate ? new Date(lastCustomData.toInputDate) : null;
-
-    //     if (selectedRadio === "custom") {
-    //         // If session storage has data, use it
-    //         // Else, use the last custom date from localStorage
-    //         // Else, use the first day of the current month as default
-
-    //         const currentDate = new Date();
-    //         const firstDateOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-
-    //         const finalFromDate = storedFromDate || lastCustomFromDate || firstDateOfCurrentMonth;
-    //         const finalToDate = storedToDate || lastCustomToDate || currentDate;
-
-    //         setSelectedfromDate(finalFromDate);
-    //         setfromInputDate(formatDate(finalFromDate)); // Format to dd-mm-yyyy
-    //         setSelectedToDate(finalToDate);
-    //         settoInputDate(formatDate(finalToDate)); // Format to dd-mm-yyyy
-
-    //         // Store the selected custom date in localStorage
-    //         localStorage.setItem("lastCustomDate", JSON.stringify({ 
-    //             fromInputDate: formatDate(finalFromDate), 
-    //             toInputDate: formatDate(finalToDate) 
-    //         }));
-    //     } else {
-    //         // Calculate dates based on days selection (30, 60, 90)
-    //         const currentDate = new Date();
-    //         const days = parseInt(selectedRadio.replace("days", ""));
-    //         const calculatedFromDate = new Date();
-    //         calculatedFromDate.setDate(currentDate.getDate() - days);
-
-    //         setSelectedfromDate(calculatedFromDate);
-    //         setfromInputDate(formatDate(calculatedFromDate)); // Format to dd-mm-yyyy
-    //         setSelectedToDate(currentDate);
-    //         settoInputDate(formatDate(currentDate)); // Format to dd-mm-yyyy
-    //     }
-    // }, [selectedRadio]);
-
-
-
     useEffect(() => {
         if (selectedRadio === "custom") {
             // Ensure stored dates are in a valid format before converting to Date objects
@@ -609,9 +548,6 @@ export default function ItemLedgerReport() {
         }
     }, [selectedRadio]);
 
-
-
-
     useEffect(() => {
         const apiUrl = apiLinks + "/GetItem.php";
         const formData = new URLSearchParams({
@@ -632,6 +568,20 @@ export default function ItemLedgerReport() {
         value: item.titmcod,
         label: `${item.titmcod}-${item.titmdsc.trim()}`,
     }));
+
+    useEffect(() => {
+        const storedData = sessionStorage.getItem("itemLedgerData");
+        const summryclickdata = storedData ? JSON.parse(storedData) : null;
+    
+        if (options.length > 0 && summryclickdata?.code) {
+            const searchOption = options.find((option) => option.value === summryclickdata.code);
+    
+            if (searchOption) {
+                setSaleType(searchOption.value); 
+            }
+        }
+    }, [supplierList, options]); 
+
 
     const DropdownOption = (props) => {
         return (
@@ -703,8 +653,6 @@ export default function ItemLedgerReport() {
         const selectedTransactionType = event.target.value;
         settransectionType(selectedTransactionType);
     };
-
-
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
@@ -1103,9 +1051,6 @@ export default function ItemLedgerReport() {
 
 
     };
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
-
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -1406,16 +1351,7 @@ export default function ItemLedgerReport() {
 
     let totalEntries = 0;
 
-    const getFilteredTableData = () => {
-        let filteredData = tableData;
-        if (selectedSearch.trim() !== "") {
-            const query = selectedSearch.trim().toLowerCase();
-            filteredData = filteredData.filter(
-                (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-            );
-        }
-        return filteredData;
-    };
+  
 
     const firstColWidth = {
         width: "8%",
@@ -1582,7 +1518,6 @@ export default function ItemLedgerReport() {
 
 
 
-
     return (
         <>
             <ToastContainer />
@@ -1727,8 +1662,7 @@ export default function ItemLedgerReport() {
                                     <label htmlFor="fromDatePicker"><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Account :</span>  <br /></label>
                                 </div>
                                 <div style={{ marginLeft: '5px' }} >
-                                    <Select
-
+                                    {/* <Select
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
@@ -1749,6 +1683,36 @@ export default function ItemLedgerReport() {
                                         }}
                                         components={{ Option: DropdownOption }}
                                         // styles={customStyles1}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    /> */}
+
+
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        value={options.find((option) => option.value === saleType) || null} // Ensure proper value
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelParts = selectedOption.label.split("-"); // Split by "-"
+                                                const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+                                                setSaleType(selectedOption ? selectedOption.value : ""); // Correctly update state
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: description, // Keep only the description
+
+                                                });
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('')
+                                            }
+
+                                        }}
+                                        components={{ Option: DropdownOption }}
                                         styles={customStyles1(!saleType)}
                                         isClearable
                                         placeholder="ALL"

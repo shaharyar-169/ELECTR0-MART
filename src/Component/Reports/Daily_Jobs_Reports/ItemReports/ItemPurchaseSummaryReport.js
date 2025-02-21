@@ -1443,10 +1443,15 @@ export default function ItemPurchaseSummary() {
     const [menuCapacityIsOpen, setMenuCapacityIsOpen] = useState(false);
     const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
 
+
     const focusNextElement = (currentRef, nextRef) => {
         if (currentRef.current && nextRef.current) {
             currentRef.current.focus();
             nextRef.current.focus();
+            if(nextRef.current == toRef){
+              nextRef.current.select();
+            }
+            
         }
     };
 
@@ -1488,8 +1493,10 @@ export default function ItemPurchaseSummary() {
         e.target.value = formattedDate;
         setfromInputDate(formattedDate); // Update the state with formatted date
 
+        
         // Move focus to the next element
         focusNextElement(fromRef, toRef);
+
     };
 
     const handleToDateEnter = (e) => {
@@ -1579,29 +1586,15 @@ export default function ItemPurchaseSummary() {
     };
 
 
-    // const openReport = (code) => {
-    //     const reportUrl = `/crystalsol/ItemLedger`; // URL with query param
-    //     window.open(reportUrl, "_blank"); // Opens in a new tab
-    // };
-
-
-    // const openReport = (code) => {
-    //     // Store values in sessionStorage (or use localStorage)
-    //     sessionStorage.setItem("itemLedgerData", JSON.stringify({ code, fromInputDate, toInputDate }));
-
-    //     // Open new tab without passing parameters in URL
-    //     window.open("/crystalsol/ItemLedger", "_blank");
-    // };
 
 
     const openReport = (code) => {
-        // Store session flag when opening from a double-click
+       
         sessionStorage.setItem("openedFromDoubleClick", "true");
         sessionStorage.setItem("itemLedgerData", JSON.stringify({ fromInputDate, toInputDate, code }));
-    
         window.open("/crystalsol/ItemLedger", "_blank");
     };
-    
+
 
 
     return (
@@ -1653,7 +1646,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            From:&nbsp;&nbsp;
+                                            From :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1750,7 +1743,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            To:&nbsp;&nbsp;
+                                            To :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -1966,7 +1959,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Company:&nbsp;&nbsp;
+                                            Company :&nbsp;
                                         </span>{" "}
                                         <br />
                                     </label>
@@ -1995,7 +1988,7 @@ export default function ItemPurchaseSummary() {
                                         // styles={customStylesStore}
                                         styles={customStylesCompany(!companyType)}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                         menuIsOpen={menuCompanyIsOpen}
                                         onMenuOpen={() => setMenuCompanyIsOpen(true)}
                                         onMenuClose={() => setMenuCompanyIsOpen(false)}
@@ -2022,7 +2015,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Store:&nbsp;&nbsp;
+                                            Store :&nbsp;
                                         </span>{" "}
                                         <br />
                                     </label>
@@ -2052,7 +2045,7 @@ export default function ItemPurchaseSummary() {
                                         // styles={customStylesStore}
                                         styles={customStylesStore()}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                         menuIsOpen={menuStoreIsOpen}
                                         onMenuOpen={() => setMenuStoreIsOpen(true)}
                                         onMenuClose={() => setMenuStoreIsOpen(false)}
@@ -2096,7 +2089,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Category:&nbsp;&nbsp;
+                                            Category :&nbsp;
                                         </span>{" "}
                                         <br />
                                     </label>
@@ -2125,7 +2118,7 @@ export default function ItemPurchaseSummary() {
                                         // styles={customStylesStore}
                                         styles={customStylesCategory()}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                         menuIsOpen={menuCategoryIsOpen}
                                         onMenuOpen={() => setMenuCategoryIsOpen(true)}
                                         onMenuClose={() => setMenuCategoryIsOpen(false)}
@@ -2152,7 +2145,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Type:&nbsp;&nbsp;
+                                            Type :&nbsp;
                                         </span>
                                     </label>
                                 </div>
@@ -2221,7 +2214,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Capacity:&nbsp;&nbsp;
+                                            Capacity :&nbsp;
                                         </span>{" "}
                                         <br />
                                     </label>
@@ -2250,7 +2243,7 @@ export default function ItemPurchaseSummary() {
                                         // styles={customStylesStore}
                                         styles={customStylesCapacity()}
                                         isClearable
-                                        placeholder="Search or select..."
+                                        placeholder="ALL"
                                         menuIsOpen={menuCapacityIsOpen}
                                         onMenuOpen={() => setMenuCapacityIsOpen(true)}
                                         onMenuClose={() => setMenuCapacityIsOpen(false)}
@@ -2271,7 +2264,7 @@ export default function ItemPurchaseSummary() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Search:&nbsp;&nbsp;
+                                            Search :&nbsp;
                                         </span>
                                     </label>
                                 </div>

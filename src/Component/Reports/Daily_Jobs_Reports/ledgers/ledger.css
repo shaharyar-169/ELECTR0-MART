@@ -344,3 +344,21 @@ h2.react-datepicker__current-month {
   display: flex !important;
   flex-wrap: nowrap !important;
 }
+
+
+/* /////////////// css for select center the content & indicator ////////////////// */
+/* ///////// CSS FOR SELECT WHITE THEME/////////// */
+.css-1cxvzw-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+.css-13blbfz-control {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+.css-o7vua0-singleValue, .css-rf12kz-indicatorContainer, .css-vin8kd-indicatorContainer, .css-15h0duz-indicatorContainer, .css-az2bga-indicatorContainer, .css-1crk2i0-singleValue  {
+  margin-top: 0px !important;
+}
+
+
+
