@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function ItemEvaluationReport() {
+export default function ItemAggingReport() {
 
     const navigate = useNavigate();
     const user = getUserData();
@@ -36,14 +36,12 @@ export default function ItemEvaluationReport() {
     const fromRef = useRef(null);
 
     const [saleType, setSaleType] = useState("");
-    console.log('saleTypedataset', saleType)
+
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-    console.log('companyselectdatavalue', Companyselectdatavalue)
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("A");
     const [supplierList, setSupplierList] = useState([]);
-    console.log('supplierList', supplierList)
 
 
     const [totalpurchase, settotalpurchase] = useState(0);
@@ -59,6 +57,8 @@ export default function ItemEvaluationReport() {
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
 
+    const [tableData, setTableData] = useState([]);
+    console.log('tableData', tableData)
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -79,7 +79,7 @@ export default function ItemEvaluationReport() {
     };
 
     // Initialize states from sessionStorage or set default values
-   
+
 
 
     const yeardescription = getYearDescription();
@@ -134,14 +134,14 @@ export default function ItemEvaluationReport() {
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
     // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-  
+
     const formatDate = (date) => {
         const day = date.getDate().toString().padStart(2, "0");
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
     };
-   
+
     const handleSaleKeypress = (event, inputId) => {
         if (event.key === "Enter") {
             const selectedOption = saleSelectRef.current.state.selectValue;
@@ -167,7 +167,7 @@ export default function ItemEvaluationReport() {
     };
 
     function fetchReceivableReport() {
-       
+
         let hasError = false;
         let errorType = "";
 
@@ -175,29 +175,27 @@ export default function ItemEvaluationReport() {
             case !saleType:
                 errorType = 'saleType';
                 break;
-          
+
             default:
                 hasError = false;
                 break;
         }
-    
+
         switch (errorType) {
             case 'saleType':
                 toast.error("Please select a Account Code");
                 return;
-              default:
+            default:
                 break;
         }
-        const apiUrl = apiLinks + "/ItemEvaluation.php";
+        const apiUrl = apiLinks + "/ItemAgging.php";
         setIsLoading(true);
+
         const formData = new URLSearchParams({
-            FRepTyp: transectionType,
             FltmCod: saleType,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
-
-
         }).toString();
 
         axios
@@ -206,12 +204,10 @@ export default function ItemEvaluationReport() {
                 setIsLoading(false);
                 // Update total amount and quantity
                 settotalpurchase(response.data["Total Purchase "]);
-                settotalpurchaseReturn(response.data["Total Pur Return "]);
-                // settotalReceive(response.data["Total Receive "]);
-                // settotalissue(response.data["Total Issue "]);
+                settotalpurchaseReturn(response.data["Total Diff"]);
                 settotalsale(response.data["Total Sale "]);
-                settotalsaleReturn(response.data["Total Sale Return"]);
-                settotalclosingbalance(response.data["Closing Balance"]);
+                settotalsaleReturn(response.data["Total Amount"]);
+                settotalclosingbalance(response.data["Average Rate"]);
 
 
                 if (response.data && Array.isArray(response.data.Detail)) {
@@ -228,7 +224,6 @@ export default function ItemEvaluationReport() {
                 console.error("Error:", error);
                 setIsLoading(false);
             });
-
     }
 
     useEffect(() => {
@@ -245,7 +240,7 @@ export default function ItemEvaluationReport() {
         }
     }, []);
 
-    
+
     useEffect(() => {
         const apiUrl = apiLinks + "/GetItem.php";
         const formData = new URLSearchParams({
@@ -364,49 +359,44 @@ export default function ItemEvaluationReport() {
         const rows = tableData.map((item) => [
             item.Date,
             item["Trn#"],
+            item.Type,
             item.Description,
             item.Rate,
             item.Purchase,
-            item['Pur-Ret'],
             item.Sale,
-            item['Sale-Ret'],
-            item.Balance,
-            item.amount,
-            item.Average
+            item.Diff,
+            item.Amount,
         ]);
 
         // Add summary row to the table
         rows.push([
             "",
             "",
-            "Total",
             "",
-            String(totalpurchase),
-            String(totalpurchaseReturn),
-            String(totalsale),
-            String(totalsaleReturn),
             String(totalclosingbalance),
             "",
-            "",
-
+            String(totalpurchase),
+            String(totalsale),
+            String(totalpurchaseReturn),
+            String(totalsaleReturn),
+           
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
             "Date",
-            "Ref #",
+            "Trn#",
+            "Type",
             "Description",
             "Rate",
             "Purchase",
-            "Pur-Ret",
+          
             "Sale",
-            "Sale-Ret",
-            "Balance",
+            "Diff",
             "Amount",
-            "Average",
 
         ];
-        const columnWidths = [20, 14, 70, 18, 18, 18, 18, 18, 18, 22, 18];
+        const columnWidths = [20, 14, 12, 70, 18, 18, 18, 18,18];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -493,7 +483,7 @@ export default function ItemEvaluationReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10) {
+                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -593,7 +583,7 @@ export default function ItemEvaluationReport() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 35,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -607,7 +597,7 @@ export default function ItemEvaluationReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Item Evalution Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Item Agging Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -637,10 +627,10 @@ export default function ItemEvaluationReport() {
                 doc.text(`${search}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`Type :`, labelsX + 200, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${status}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
+                // doc.setFont(getfontstyle, "bold"); // Set font to bold
+                // doc.text(`Type :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                // doc.text(`${status}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -690,7 +680,7 @@ export default function ItemEvaluationReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`ItemEvaluationReport As On ${date}.pdf`);
+        doc.save(`ItemAggingReport As On ${date}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
@@ -703,14 +693,13 @@ export default function ItemEvaluationReport() {
             "left",
             "left",
             "left",
+            "left",
             "right",
             "right",
             "right",
             "right",
             "right",
-            "right",
-            "right",
-            "right",
+            
         ];
 
         // Add an empty row at the start
@@ -720,7 +709,7 @@ export default function ItemEvaluationReport() {
 
 
 
-        [comapnyname, `Item Evaluation Report`].forEach((title, index) => {
+        [comapnyname, `Item Agging Report`].forEach((title, index) => {
             // Define custom styles for each title
             let customStyle;
             let rowHeight = 20; // Default row height
@@ -774,7 +763,7 @@ export default function ItemEvaluationReport() {
 
         let typesearch = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
         const typeAndStoreRow3 = worksheet.addRow([
-            "Item :", typesearch, "", "", "", "", "", "", "", "Type :", typestatus
+            "Item :", typesearch 
         ]);
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
@@ -822,17 +811,16 @@ export default function ItemEvaluationReport() {
 
         // Add headers
         const headers = [
-            "Date",
-            "Ref #",
+          "Date",
+            "Trn#",
+            "Type",
             "Description",
             "Rate",
             "Purchase",
-            "Pur-Ret",
+          
             "Sale",
-            "Sale-Ret",
-            "Balance",
-            "Amoount",
-            "Avg Rete",
+            "Diff",
+            "Amount",
         ];
         const headerRow = worksheet.addRow(headers);
 
@@ -848,15 +836,13 @@ export default function ItemEvaluationReport() {
             const row = worksheet.addRow([
                 item.Date,
                 item["Trn#"],
+                item.Type,
                 item.Description,
                 item.Rate,
                 item.Purchase,
-                item['Pur-Ret'],
                 item.Sale,
-                item['Sale-Ret'],
-                item.Balance,
-                item.amount,
-                item.Average
+                item.Diff,
+                item.Amount,
 
             ]);
 
@@ -887,17 +873,15 @@ export default function ItemEvaluationReport() {
 
 
         const totalRow = worksheet.addRow([
+           "",
             "",
             "",
-            "Total",
-            "",
-            String(totalpurchase),
-            String(totalpurchaseReturn),
-            String(totalsale),
-            String(totalsaleReturn),
             String(totalclosingbalance),
             "",
-            "",
+            String(totalpurchase),
+            String(totalsale),
+            String(totalpurchaseReturn),
+            String(totalsaleReturn),
         ]);
 
         // total row added
@@ -912,7 +896,7 @@ export default function ItemEvaluationReport() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9) {
+            if (colNumber === 4 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9) {
                 cell.alignment = { horizontal: "right" };
             }
         });
@@ -920,7 +904,7 @@ export default function ItemEvaluationReport() {
         // Set column widths
 
 
-        [12, 8, 40, 11, 11, 11, 11, 11, 11, 14, 11].forEach((width, index) => {
+        [12, 8,7,40, 11, 11, 11, 11, 11].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -931,7 +915,7 @@ export default function ItemEvaluationReport() {
             const dd = String(today.getDate()).padStart(2, "0");
             const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return dd + "-" + mm + "-" + yyyy;
         };
 
         const currentdate = getCurrentDate();
@@ -941,7 +925,7 @@ export default function ItemEvaluationReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `ItemEvaluationReport As on ${currentdate}.xlsx`);
+        saveAs(blob, `ItemAggingReport As on ${currentdate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -952,7 +936,7 @@ export default function ItemEvaluationReport() {
     const btnColor = "#3368B5";
     const textColor = "white";
 
-    const [tableData, setTableData] = useState([]);
+
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -969,32 +953,32 @@ export default function ItemEvaluationReport() {
         width: "8%",
     };
     const secondColWidth = {
-        width: "5.5%",
+        width: "6%",
     };
     const thirdColWidth = {
-        width: "3.7%",
+        width: "4.5%",
     };
     const fifthColWidth = {
-        width: "7%",
+        width: "10%",
     };
     const sixthColWidth = {
-        width: "22.8%",
+        width: "30.3%",
     };
     const seventhColWidth = {
-        width: "7.5%",
+        width: "10%",
     };
     const eightColWidth = {
-        width: "7.5%",
+        width: "10%",
     };
     const ninthColWidth = {
-        width: "7.5%",
+        width: "10%",
     };
     const tenthColWidth = {
-        width: "7.5%",
+        width: "10%",
     };
 
     const elewenthColWidth = {
-        width: "8.5%",
+        width: "10%",
     };
     const tewlthColWidth = {
         width: "8.5%",
@@ -1143,7 +1127,7 @@ export default function ItemEvaluationReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Item Evaluation Report" />
+                    <NavComponent textdata="Item Agging Report" />
 
                     <div
                         className="row"
@@ -1174,7 +1158,7 @@ export default function ItemEvaluationReport() {
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "typeButton")}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1204,53 +1188,7 @@ export default function ItemEvaluationReport() {
 
                             </div>
 
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    id="typeButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                    }}
-                                >
-
-                                    <option value="A">Average</option>
-                                    <option value="W">Weighted Average</option>
-
-                                </select>
-                            </div>
 
                         </div>
                     </div>
@@ -1295,11 +1233,11 @@ export default function ItemEvaluationReport() {
                                             Date
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Ref #
+                                            Trn #
                                         </td>
-                                        {/* <td className="border-dark" style={thirdColWidth}>
-                                            Typ
-                                        </td> */}
+                                        <td className="border-dark" style={thirdColWidth}>
+                                            Type
+                                        </td>
                                         {/* <td className="border-dark" style={forthColWidth}>
                                             Item Code
                                         </td> */}
@@ -1311,26 +1249,22 @@ export default function ItemEvaluationReport() {
                                             Rate
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            Pur Qnt
+                                            Purcahse
                                         </td>
-                                        <td className="border-dark" style={eightColWidth}>
-                                            P Ret
-                                        </td>
+                                        {/* <td className="border-dark" style={eightColWidth}>
+                                            amount
+                                        </td> */}
                                         <td className="border-dark" style={ninthColWidth}>
-                                            Sale Qnt
+                                            Sale
                                         </td>
                                         <td className="border-dark" style={tenthColWidth}>
-                                            S Ret
+                                            Diff
                                         </td>
                                         <td className="border-dark" style={elewenthColWidth}>
-                                            Balance
-                                        </td>
-                                        <td className="border-dark" style={tewlthColWidth}>
                                             Amount
                                         </td>
-                                        <td className="border-dark" style={thirteenColWidth}>
-                                            Avg Rate
-                                        </td>
+
+
                                     </tr>
 
                                 </thead>
@@ -1365,7 +1299,7 @@ export default function ItemEvaluationReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="11" className="text-center">
+                                                <td colSpan="9" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1378,7 +1312,7 @@ export default function ItemEvaluationReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 11 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1389,17 +1323,16 @@ export default function ItemEvaluationReport() {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                {/* <td style={thirdColWidth}></td> */}
+                                                <td style={thirdColWidth}></td>
                                                 {/* <td style={forthColWidth}></td> */}
                                                 <td style={sixthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eightColWidth}></td>
+                                                {/* <td style={eightColWidth}></td> */}
                                                 <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
                                                 <td style={elewenthColWidth}></td>
-                                                <td style={tewlthColWidth}></td>
-                                                <td style={thirteenColWidth}></td>
+
                                             </tr>
                                         </>
                                     ) : (
@@ -1425,9 +1358,9 @@ export default function ItemEvaluationReport() {
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item["Trn#"]}
                                                         </td>
-                                                        {/* <td className="text-center" style={thirdColWidth}>
+                                                        <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
-                                                        </td> */}
+                                                        </td>
                                                         <td className="text-start"
                                                             title={item.Description}
 
@@ -1447,40 +1380,26 @@ export default function ItemEvaluationReport() {
                                                         <td className="text-end" style={seventhColWidth}>
                                                             {item.Purchase}
                                                         </td>
-                                                        <td className="text-end" style={eightColWidth}>
-                                                            {item['Pur-Ret']}
-                                                        </td>
+                                                        {/* <td className="text-end" style={eightColWidth}>
+                                                            {item.amount}
+                                                        </td> */}
                                                         <td className="text-end" style={ninthColWidth}>
                                                             {item.Sale}
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item['Sale-Ret']}
+                                                            {item.Diff}
                                                         </td>
                                                         <td className="text-end"
                                                             style={elewenthColWidth}>
-                                                            {item.Balance}
+                                                            {item.Amount}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.amount}
 
-                                                            style={{
-                                                                ...tewlthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis"
-                                                            }}
-                                                        >
-                                                            {item.amount}
-                                                        </td>
-                                                        <td className="text-end" style={thirteenColWidth}>
-                                                            {item.Average}
-                                                        </td>
 
                                                     </tr>
                                                 );
                                             })}
                                             {Array.from({
-                                                length: Math.max(0, 27 - tableData.length),
+                                                length: Math.max(0, 28 - tableData.length),
                                             }).map((_, rowIndex) => (
                                                 <tr
                                                     key={`blank-${rowIndex}`}
@@ -1489,7 +1408,7 @@ export default function ItemEvaluationReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 11 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1499,17 +1418,16 @@ export default function ItemEvaluationReport() {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                {/* <td style={thirdColWidth}></td> */}
+                                                <td style={thirdColWidth}></td>
                                                 {/* <td style={forthColWidth}></td> */}
                                                 <td style={sixthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eightColWidth}></td>
+                                                {/* <td style={eightColWidth}></td> */}
                                                 <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
                                                 <td style={elewenthColWidth}></td>
-                                                <td style={tewlthColWidth}></td>
-                                                <td style={thirteenColWidth}></td>
+
                                             </tr>
                                         </>
                                     )}
@@ -1523,8 +1441,10 @@ export default function ItemEvaluationReport() {
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        {/* <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div> */}
-                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <span className="mobileledger_total">{totalclosingbalance}</span>
+                        </div>
 
                         <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
 
@@ -1533,26 +1453,20 @@ export default function ItemEvaluationReport() {
 
                         </div>
 
-                        <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                            <span className="mobileledger_total">{totalpurchaseReturn}</span>
-                        </div>
+                        {/* <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        </div> */}
                         <div style={{ ...ninthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalsale}</span>
                         </div>
                         <div style={{ ...tenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                            <span className="mobileledger_total">{totalsaleReturn}</span>
+                            <span className="mobileledger_total">{totalpurchaseReturn}</span>
                         </div>
 
                         <div style={{ ...elewenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                            <span className="mobileledger_total">{totalclosingbalance}</span>
+                            <span className="mobileledger_total">{totalsaleReturn}</span>
 
                         </div>
-                        <div style={{ ...tewlthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
 
-                        </div>
-                        <div style={{ ...thirteenColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-
-                        </div>
 
 
                     </div>

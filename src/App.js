@@ -55,7 +55,7 @@ import MobileLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileL
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
 import ItemLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemLedgerReport.js";
 import ItemEvaluationReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemEvaluationReport.js";
-
+import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemAggingReport.js";
 
 //////////////////////////// Daily reports //////////////////////////////
 import DailyCashReceipts from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashReceipts.js";
@@ -141,6 +141,7 @@ function App() {
                 <Route exact path="/CustomerProgress" element={<CustomerProgressLedger />} />
                 <Route exact path="/MobileLedger" element={<MobileLedger />} />
                 <Route exact path="/ItemLedger" element={<ItemLedgerReport/>} />
+                <Route exact path="/ItemAgging" element={<ItemAggingReport/>} />
 
               
                 {/* Rountes for ledgers reports */}
