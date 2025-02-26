@@ -35,6 +35,8 @@ export default function InvoiceLedgerReport() {
     const toRef = useRef(null);
     const fromRef = useRef(null);
 
+    const [mobileNumber, setmobileNumber] = useState("");
+
     const [saleType, setSaleType] = useState("");
 
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
@@ -208,10 +210,10 @@ export default function InvoiceLedgerReport() {
             .then((response) => {
                 setIsLoading(false);
                 // Update total amount and quantity
-            
+
                 settotalsale(response.data["Total Sale "]);
                 settotalsaleReturn(response.data["Total Collection "]);
-                
+
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
                 } else {
@@ -242,6 +244,29 @@ export default function InvoiceLedgerReport() {
         }
     }, []);
 
+    const handleMobilenumberInputChange = (e) => {
+        setmobileNumber(e.target.value);
+    };
+
+     const handleMobilePress = (e, nextInputRef) => {
+            const fromDateElement = document.getElementById("selectedsale");
+            const mobileNumber = e.target.value;
+            if (e.key === "Enter") {
+                e.preventDefault();
+                // Mobile number validation
+                // if (mobileNumber.length !== 11 || !mobileNumber.startsWith("03")) {
+                //     toast.error("Invalid Mobile Number");
+                //     fromDateElement.style.border = "2px solid red";
+                //     return;
+                // }
+                fromDateElement.style.border = "1px solid black";
+                // Move focus to next input if validation passes
+                if (nextInputRef.current) {
+                    nextInputRef.current.focus();
+                    // nextInputRef.current.select();
+                }
+            }
+        };
 
     useEffect(() => {
         const apiUrl = apiLinks + "/GetItem.php";
@@ -365,7 +390,7 @@ export default function InvoiceLedgerReport() {
             item.Description,
             item.Sale,
             item.Collection,
-          
+
         ]);
 
         // Add summary row to the table
@@ -376,7 +401,7 @@ export default function InvoiceLedgerReport() {
             "Total",
             String(totalsale),
             String(totalsaleReturn),
-           
+
         ]);
 
         // Define table column headers and individual column widths
@@ -689,8 +714,8 @@ export default function InvoiceLedgerReport() {
             "left",
             "right",
             "right",
-           
-            
+
+
         ];
 
         // Add an empty row at the start
@@ -705,31 +730,31 @@ export default function InvoiceLedgerReport() {
             let customStyle;
             let rowHeight = 20; // Default row height
             if (index === 0) {
-              // Style for company name
-              customStyle = {
-                font: { family: getfontstyle, size: 18, bold: true },
-                alignment: { horizontal: "center" },
-              };
-              rowHeight = 30; // Increase row height for company name to avoid overlap
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
             } else {
-              // Style for "Item List"
-              customStyle = {
-                font: { family: getfontstyle, size: getdatafontsize, bold: false },
-                alignment: { horizontal: "center" },
-              };
+                // Style for "Item List"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
             }
-      
+
             // Add row with the title
             worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-      
+
             // Adjust the row height for the company name or other titles
             worksheet.getRow(index + 2).height = rowHeight;
-      
+
             // Merge the cells for the title
             worksheet.mergeCells(
-              `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
             );
-          });
+        });
 
 
 
@@ -750,7 +775,7 @@ export default function InvoiceLedgerReport() {
 
         let typesearch = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
         const typeAndStoreRow3 = worksheet.addRow([
-            "Item :", typesearch 
+            "Item :", typesearch
         ]);
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
@@ -798,13 +823,13 @@ export default function InvoiceLedgerReport() {
 
         // Add headers
         const headers = [
-          "Date",
+            "Date",
             "Trn#",
             "Type",
             "Description",
             "Sale",
             "Collection",
-           
+
         ];
         const headerRow = worksheet.addRow(headers);
 
@@ -854,11 +879,11 @@ export default function InvoiceLedgerReport() {
 
 
         const totalRow = worksheet.addRow([
-           "",
             "",
             "",
-           "Total",
-           String(totalsale),
+            "",
+            "Total",
+            String(totalsale),
             String(totalsaleReturn),
         ]);
 
@@ -874,7 +899,7 @@ export default function InvoiceLedgerReport() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 5 || colNumber === 6 ) {
+            if (colNumber === 5 || colNumber === 6) {
                 cell.alignment = { horizontal: "right" };
             }
         });
@@ -882,7 +907,7 @@ export default function InvoiceLedgerReport() {
         // Set column widths
 
 
-        [12, 8,7,50, 14, 14].forEach((width, index) => {
+        [12, 8, 7, 50, 14, 14].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -945,9 +970,9 @@ export default function InvoiceLedgerReport() {
     const seventhColWidth = {
         width: "15%",
     };
-   
 
-    
+
+
 
 
 
@@ -1110,7 +1135,7 @@ export default function InvoiceLedgerReport() {
                             {/* ------ */}
 
 
-                            <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
+                            {/* <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
                                 <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
                                     <label htmlFor="fromDatePicker"><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Item :</span>  <br /></label>
                                 </div>
@@ -1147,8 +1172,52 @@ export default function InvoiceLedgerReport() {
                                 </div>
 
 
-                            </div>
+                            </div> */}
 
+                            <div className="d-flex align-items-center ">
+                                <div
+                                    style={{
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                            Invoice :
+                                        </span>{" "}
+                                        <br />
+                                    </label>
+                                </div>
+
+                                <input
+                                    ref={saleSelectRef}
+                                    value={mobileNumber}
+                                    onKeyDown={(e) => handleMobilePress(e, input3Ref)}
+                                    onChange={handleMobilenumberInputChange}
+                                    autoComplete="off"
+                                    type="tel"
+                                    id="selectedsale"
+                                    name="phone"
+                                    placeholder="Enter Invoice"
+                                    style={{
+                                        color: fontcolor,
+                                        width: "200px",
+                                        height: "24px",
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, border: `1px solid ${fontcolor}`,
+                                        backgroundColor: getcolor,
+                                        outline: "none",
+                                        paddingLeft: "10px",
+                                        marginLeft: "3px",
+                                    }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                />
+                            </div>
 
 
                         </div>
@@ -1212,7 +1281,7 @@ export default function InvoiceLedgerReport() {
                                         <td className="border-dark" style={seventhColWidth}>
                                             Collection
                                         </td>
-                                       
+
 
 
                                     </tr>
@@ -1278,7 +1347,7 @@ export default function InvoiceLedgerReport() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                
+
                                             </tr>
                                         </>
                                     ) : (
@@ -1326,7 +1395,7 @@ export default function InvoiceLedgerReport() {
                                                         <td className="text-end" style={seventhColWidth}>
                                                             {item.Collection}
                                                         </td>
-                                                        
+
 
 
                                                     </tr>
@@ -1357,7 +1426,7 @@ export default function InvoiceLedgerReport() {
                                                 <td style={sixthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                              
+
 
                                             </tr>
                                         </>
@@ -1377,14 +1446,14 @@ export default function InvoiceLedgerReport() {
                         </div>
 
                         <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                        <span className="mobileledger_total">{totalsale}</span>
+                            <span className="mobileledger_total">{totalsale}</span>
                         </div>
 
                         <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalsaleReturn}</span>
                         </div>
 
-                       
+
 
 
 
