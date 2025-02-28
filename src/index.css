@@ -12,10 +12,7 @@ code {
     monospace;
 }
 
-/* @font-face {
-  font-family: 'MyCustomFont';
-  src: url('/fonts/Myfont.woff.ttf') format('woff2'),
-       url('/fonts/Myfont.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-} */
+@font-face {
+  font-family: 'CustomFont'; 
+  src: url('/src/fonts/Myfont.woff.ttf') format('truetype');
+}

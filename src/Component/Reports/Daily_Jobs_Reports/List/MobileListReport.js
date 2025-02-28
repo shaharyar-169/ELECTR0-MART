@@ -435,173 +435,103 @@ export default function MobileListReport() {
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
-
-    const numColumns = 6; // Number of columns
-
-    const columnAlignments = ["left", "left", "center"];
-
-    // Add an empty row at the start
-    worksheet.addRow([]);
-
-    // Add title rows
-
-    [comapnyname, `Mobile List`].forEach((title, index) => {
-      // Define custom styles for each title
-      let customStyle;
-      let rowHeight = 20; // Default row height
-      if (index === 0) {
-        // Style for company name
-        customStyle = {
-          font: { family: getfontstyle, size: 18, bold: true },
-          alignment: { horizontal: "center" },
+ const handleDownloadCSV = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Sheet1");
+      
+        const numColumns = 3; // Ensure this matches the actual number of columns
+      
+        const columnAlignments = ["left", "left", "center"];
+      
+        // Define fonts for different sections
+        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
+        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+      
+        // Add an empty row at the start
+        worksheet.addRow([]);
+      
+        // Add company name
+        const companyRow = worksheet.addRow([comapnyname]);
+        companyRow.eachCell((cell) => {
+          cell.font = fontCompanyName;
+          cell.alignment = { horizontal: "center" };
+        });
+      
+        worksheet.getRow(companyRow.number).height = 30;
+        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+      
+        // Add Store List row
+        const storeListRow = worksheet.addRow(["Mobile List"]);
+        storeListRow.eachCell((cell) => {
+          cell.font = fontStoreList;
+          cell.alignment = { horizontal: "center" };
+        });
+      
+        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+      
+        // Add an empty row after the title section
+        worksheet.addRow([]);
+      
+        let typestatus = transectionType === "N" ? "Non-Active" : transectionType === "A" ? "Active" : "All";
+        let typesearch = searchQuery || "";
+      
+        const typeAndStoreRow3 = worksheet.addRow(
+          searchQuery
+          ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+          : ["STATUS :", typestatus, ""]    );
+      
+        // Apply styling for the status row
+        typeAndStoreRow3.eachCell((cell, colIndex) => {
+          cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
+          cell.alignment = { horizontal: "left", vertical: "middle" };
+        });
+      
+        // Header style
+        const headerStyle = {
+          font: fontHeader,
+          alignment: { horizontal: "center", vertical: "middle" },
+          fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+          border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
         };
-        rowHeight = 30; // Increase row height for company name to avoid overlap
-      } else {
-        // Style for "Item List"
-        customStyle = {
-          font: { family: getfontstyle, size: getdatafontsize, bold: false },
-          alignment: { horizontal: "center" },
+      
+        // Add headers
+        const headers = ["Mobile", "Name", "Status"];
+        const headerRow = worksheet.addRow(headers);
+        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+      
+        // Add data rows
+        tableData.forEach((item) => {
+          const row = worksheet.addRow([item.tmobnum, item.tcstnam, item.tmobsts]);
+      
+          row.eachCell((cell, colIndex) => {
+            cell.font = fontTableContent;
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+            cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
+          });
+        });
+      
+        // Set column widths
+        [13, 40, 8].forEach((width, index) => {
+          worksheet.getColumn(index + 1).width = width;
+        });
+      
+        // Get current date
+        const getCurrentDate = () => {
+          const today = new Date();
+          const day = String(today.getDate()).padStart(2, "0");
+          const month = String(today.getMonth() + 1).padStart(2, "0");
+          const year = today.getFullYear();
+          return `${day}-${month}-${year}`;
         };
-      }
-
-      // Add row with the title
-      worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-      // Adjust the row height for the company name or other titles
-      worksheet.getRow(index + 2).height = rowHeight;
-
-      // Merge the cells for the title
-      worksheet.mergeCells(
-        `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-      );
-    });
-
-    // Add an empty row after the title section
-    worksheet.addRow([]); // This is where you add the empty row
-
-    let typestatus = "";
-
-    if (transectionType === "N") {
-      typestatus = "Non-Active";
-    } else if (transectionType === "A") {
-      typestatus = "Active";
-    } else {
-      typestatus = "All"; // Default value if transectionType is neither 'N' nor 'A'
-    }
-
-    let typesearch = searchQuery ? searchQuery : "";
-
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-        : ["STATUS :", typestatus, ""]
-    );
-
-    const applyStatusRowStyle = (row, boldColumns = []) => {
-      row.eachCell((cell, colIndex) => {
-        // Check if the current cell is in the boldColumns array
-        const isBold = boldColumns.includes(colIndex);
-
-        cell.font = {
-          family: getfontstyle, // Your desired font family
-          size: getdatafontsize, // Your desired font size
-          bold: isBold, // Bold only for specific columns
-        };
-
-        cell.alignment = {
-          horizontal: "left", // Align text to the left
-          vertical: "middle", // Vertically align to the middle
-        };
-
-        cell.border = null; // Remove borders
-      });
-    };
-
-    // Bold specific columns (labels)
-
-    applyStatusRowStyle(typeAndStoreRow3, [1, 3]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-    // Header style for center alignment
-    const headerStyle = {
-      font: { bold: true, family: getfontstyle, size: getdatafontsize },
-      alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = ["Mobile", "Name", "Status"];
-    const headerRow = worksheet.addRow(headers);
-
-    // Apply styles and center alignment to the header row
-    headerRow.eachCell((cell) => {
-      cell.style = { ...headerStyle };
-    });
-
-    // Add data rows
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([item.tmobnum, item.tcstnam, item.tmobsts]);
-
-      // Apply custom styles to each cell in the row
-      row.eachCell((cell, colIndex) => {
-        cell.font = {
-          family: getfontstyle, // Set your desired font family
-          size: getdatafontsize, // Set the font size
-          bold: false, // Make the font bold
-        };
-
-        cell.border = {
-          top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-          left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-          bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-          right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-        };
-
-        // Align cell content based on columnAlignments array
-        const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-        cell.alignment = {
-          horizontal: alignment,
-          vertical: "middle", // Vertically align to the middle
-        };
-      });
-    });
-
-    // Set column widths
-
-    [16, 40, 10].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    const getCurrentDate = () => {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
-    };
-
-    const currentdate = getCurrentDate();
-
-    // Generate Excel file buffer and save
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `MobileList As On ${currentdate}.xlsx`);
+      
+        const currentdate = getCurrentDate();
+      
+        // Generate and save the Excel file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, `MobileList As On ${currentdate}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 

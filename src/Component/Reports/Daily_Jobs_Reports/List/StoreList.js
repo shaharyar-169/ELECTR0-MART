@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
+import '../../../../index.css';
 
 export default function StoreList() {
   const navigate = useNavigate();
@@ -442,10 +443,10 @@ export default function StoreList() {
     const columnAlignments = ["left", "left", "center", "left", "center"];
   
     // Define fonts for different sections
-    const fontCompanyName = { name: getfontstyle || "Arial", size: 18, bold: true };
-    const fontStoreList = { name: getfontstyle || "Arial", size: 12, bold: false };
-    const fontHeader = { name: getfontstyle || "Arial", size: 10, bold: true };
-    const fontTableContent = { name: getfontstyle || "Arial", size: 10, bold: false };
+    const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
+    const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
   
     // Add an empty row at the start
     worksheet.addRow([]);
@@ -476,12 +477,13 @@ export default function StoreList() {
     let typesearch = searchQuery || "";
   
     const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery ? ["STATUS :", typestatus, "SEARCH :", typesearch] : ["STATUS :", typestatus, ""]
-    );
+      searchQuery
+      ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+      : ["STATUS :", typestatus, ""]    );
   
     // Apply styling for the status row
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = { name: getfontstyle || "Arial", size: 10, bold: [1, 3].includes(colIndex) };
+      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
   
@@ -517,7 +519,10 @@ export default function StoreList() {
     // Get current date
     const getCurrentDate = () => {
       const today = new Date();
-      return today.toISOString().split("T")[0].replace(/-/g, "/");
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
     };
   
     const currentdate = getCurrentDate();

@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription} from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -74,6 +74,7 @@ export default function EmployeeList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FSchTxt: searchQuery,
+
     }).toString();
 
     axios
@@ -377,8 +378,8 @@ export default function EmployeeList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
+              ? "ACTIVE"
+              : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -452,108 +453,69 @@ export default function EmployeeList() {
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
-
-    const numColumns = 6;
-
-    const columnAlignments = [
-      "left",
-      "left",
-      "center",
-      "left",
-      "right",
-      "left",
-      "left",
-    ];
+  
+    const numColumns = 7; // Ensure this matches the actual number of columns
+  
+    // Define alignment for each column separately
+    const columnAlignments = {
+      1: "left",   // Code
+      2: "left",   // Employee
+      3: "center", // Status
+      4: "left",   // Designation
+      5: "left",  // Contact
+      6: "left", // Adv Code
+      7: "left", // Dlv Code
+    };
+  
+    // Define fonts for different sections
+    const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
+    const fontStoreList = { name: "CustomFont", size: 12, bold: false };
+    const fontHeader = { name: "CustomFont", size: 10, bold: true };
+    const fontTableContent = { name: "CustomFont", size: 10, bold: false };
+  
     // Add an empty row at the start
     worksheet.addRow([]);
-
-    // Add title rows
-
-    [comapnyname, `Employee List`].forEach((title, index) => {
-      // Define custom styles for each title
-      let customStyle;
-      let rowHeight = 20; // Default row height
-      if (index === 0) {
-        // Style for company name
-        customStyle = {
-          font: { family: getfontstyle, size: 18, bold: true },
-          alignment: { horizontal: "center" },
-        };
-        rowHeight = 30; // Increase row height for company name to avoid overlap
-      } else {
-        // Style for "Item List"
-        customStyle = {
-          font: { family: getfontstyle, size: getdatafontsize, bold: false },
-          alignment: { horizontal: "center" },
-        };
-      }
-
-      // Add row with the title
-      worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-      // Adjust the row height for the company name or other titles
-      worksheet.getRow(index + 2).height = rowHeight;
-
-      // Merge the cells for the title
-      worksheet.mergeCells(
-        `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-      );
+  
+    // Add company name
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
     });
-
+  
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+  
+    // Add Store List row
+    const storeListRow = worksheet.addRow(["Employee List"]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+  
+    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+  
     // Add an empty row after the title section
-    worksheet.addRow([]); // This is where you add the empty row
-
-    let typestatus = "";
-
-    if (transectionType === "N") {
-      typestatus = "Non-Active";
-    } else if (transectionType === "A") {
-      typestatus = "Active";
-    } else {
-      typestatus = "All"; // Default value if transectionType is neither 'N' nor 'A'
-    }
-
-    let typesearch = searchQuery ? searchQuery : "";
-
+    worksheet.addRow([]);
+  
+    let typestatus = transectionType === "N" ? "Non-Active" : transectionType === "A" ? "Active" : "All";
+    let typesearch = searchQuery || "";
+  
     const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["STATUS :", typestatus, "", "", "SEARCH :", typesearch]
-        : ["STATUS :", typestatus, ""]
+      searchQuery ? ["STATUS :", typestatus, "SEARCH :", typesearch] : ["STATUS :", typestatus, ""]
     );
-
-    const applyStatusRowStyle = (row, boldColumns = []) => {
-      row.eachCell((cell, colIndex) => {
-        // Check if the current cell is in the boldColumns array
-        const isBold = boldColumns.includes(colIndex);
-
-        cell.font = {
-          family: getfontstyle, // Your desired font family
-          size: getdatafontsize, // Your desired font size
-          bold: isBold, // Bold only for specific columns
-        };
-
-        cell.alignment = {
-          horizontal: "left", // Align text to the left
-          vertical: "middle", // Vertically align to the middle
-        };
-
-        cell.border = null; // Remove borders
-      });
-    };
-
-    // Bold specific columns (labels)
-
-    applyStatusRowStyle(typeAndStoreRow3, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-    // Header style for center alignment
+  
+    // Apply styling for the status row
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = { name: "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+  
+    // Header style
     const headerStyle = {
-      font: { bold: true, family: getfontstyle, size: getdatafontsize },
-      alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
       border: {
         top: { style: "thin" },
         left: { style: "thin" },
@@ -561,26 +523,12 @@ export default function EmployeeList() {
         right: { style: "thin" },
       },
     };
-
+  
     // Add headers
-    const headers = [
-      "Code",
-      "Employee",
-      "Status",
-      "Designation",
-      "Contact",
-      "Adv Code",
-      "Dlv Code",
-    ];
+    const headers = ["Code", "Employee", "Status", "Designation", "Contact", "Adv Code", "Dlv Code"];
     const headerRow = worksheet.addRow(headers);
-
-    // Apply styles and center alignment to the header row
-    headerRow.eachCell((cell) => {
-      cell.style = { ...headerStyle };
-    });
-
-    // Add data rows
-
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+  
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
@@ -592,54 +540,47 @@ export default function EmployeeList() {
         item["Adv Code"],
         item["Dlv Code"],
       ]);
-
-      // Apply custom styles to each cell in the row
+  
       row.eachCell((cell, colIndex) => {
-        cell.font = {
-          family: getfontstyle, // Set your desired font family
-          size: getdatafontsize, // Set the font size
-          bold: false, // Make the font bold
-        };
-
+        cell.font = fontTableContent;
         cell.border = {
-          top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-          left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-          bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-          right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
-
-        // Align cell content based on columnAlignments array
-        const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+  
+        // Apply individual alignment for each column
         cell.alignment = {
-          horizontal: alignment,
-          vertical: "middle", // Vertically align to the middle
+          horizontal: columnAlignments[colIndex] || "left",
+          vertical: "middle",
         };
       });
     });
-
+  
     // Set column widths
-
-    [10, 30, 10, 30, 15, 15, 15].forEach((width, index) => {
+    [10, 30, 8, 30, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
+  
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
     };
-
+  
     const currentdate = getCurrentDate();
-
-    // Generate Excel file buffer and save
+  
+    // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     saveAs(blob, `EmployeeList As On ${currentdate}.xlsx`);
   };
+  
+  
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -1130,7 +1071,7 @@ export default function EmployeeList() {
                             <td className="text-start" style={forthColWidth}>
                               {item.Designation}
                             </td>
-                            <td className="text-end" style={fifthColWidth}>
+                            <td className="text-start" style={fifthColWidth}>
                               {item["COntact #"]}
                             </td>
                             <td className="text-start" style={sixthColWidth}>

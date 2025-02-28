@@ -89,8 +89,10 @@ export default function ItemPriceListA() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getYearDescription,
+      FLocCod: '001',
+      FYerDsc: '2024-2024',
       FCtgCod: Companyselectdata,
       FCapCod: Capacityselectdata,
       FTypCod: Typeselectdata,
@@ -332,7 +334,8 @@ export default function ItemPriceListA() {
       <components.Option {...props}>
         <div
           style={{
-            fontSize: getdatafontsize, fontFamily: getfontstyle,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
             paddingBottom: "5px",
             lineHeight: "3px",
             color: "black",
@@ -350,9 +353,11 @@ export default function ItemPriceListA() {
       height: "24px",
       minHeight: "unset",
       width: 250,
-      fontSize: getdatafontsize, fontFamily: getfontstyle,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
       backgroundColor: getcolor,
       color: fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
       borderRadius: 0,
       border: `1px solid ${fontcolor}`,
       transition: "border-color 0.15s ease-in-out",
@@ -370,13 +375,18 @@ export default function ItemPriceListA() {
       marginTop: "-5px",
       fontSize: "18px",
       display: "flex",
-      textAlign: "center !important",
+      textAlign: "center",
     }),
     singleValue: (base) => ({
       ...base,
       marginTop: "-5px",
       textAlign: "left",
       color: fontcolor,
+    }),
+    input: (base) => ({
+      ...base,
+      color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+      caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
     }),
     clearIndicator: (base) => ({
       ...base,
@@ -761,64 +771,56 @@ export default function ItemPriceListA() {
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
-
-    const numColumns = 6; // Number of columns
-
-    const columnAlignments = [
-      "left",
-      "left",
-      "center",
-      "right",
-      "right",
-      "right",
-      "right",
-      "right",
-      "right",
-      "right",
-    ];
-    // Add an empty row at the start
-    worksheet.addRow([]);
-
-    // Add title rows
-
-    [comapnyname, `Item Price List A`].forEach((title, index) => {
-      // Define custom styles for each title
-      let customStyle;
-      let rowHeight = 20; // Default row height
-      if (index === 0) {
-        // Style for company name
-        customStyle = {
-          font: { family: getfontstyle, size: 18, bold: true },
-          alignment: { horizontal: "center" },
-        };
-        rowHeight = 30; // Increase row height for company name to avoid overlap
-      } else {
-        // Style for "Item List"
-        customStyle = {
-          font: { family: getfontstyle, size: getdatafontsize, bold: false },
-          alignment: { horizontal: "center" },
-        };
-      }
-
-      // Add row with the title
-      worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-      // Adjust the row height for the company name or other titles
-      worksheet.getRow(index + 2).height = rowHeight;
-
-      // Merge the cells for the title
-      worksheet.mergeCells(
-        `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-      );
-    });
-
-    // Add an empty row after the title section
-    worksheet.addRow([]); // This is where you add the empty row
-
-    let typecompany = Companyselectdatavalue.label
+ const handleDownloadCSV = async () => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Sheet1");
+    
+      const numColumns = 3; // Ensure this matches the actual number of columns
+    
+      const columnAlignments = [ 
+        "left",
+        "left",
+        "center",
+        "right",
+        "right",
+        "right",
+        "right",
+        "right",
+        "right",
+        "right",];
+    
+      // Define fonts for different sections
+      const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+      const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
+      const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+      const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+    
+      // Add an empty row at the start
+      worksheet.addRow([]);
+    
+      // Add company name
+      const companyRow = worksheet.addRow([comapnyname]);
+      companyRow.eachCell((cell) => {
+        cell.font = fontCompanyName;
+        cell.alignment = { horizontal: "center" };
+      });
+    
+      worksheet.getRow(companyRow.number).height = 30;
+      worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number}`);
+    
+      // Add Store List row
+      const storeListRow = worksheet.addRow(["Price List A"]);
+      storeListRow.eachCell((cell) => {
+        cell.font = fontStoreList;
+        cell.alignment = { horizontal: "center" };
+      });
+    
+      worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number}`);
+    
+      // Add an empty row after the title section
+      worksheet.addRow([]);
+    
+      let typecompany = Companyselectdatavalue.label
       ? Companyselectdatavalue.label
       : "ALL";
     let typecapacity = capacityselectdatavalue.label
@@ -851,51 +853,34 @@ export default function ItemPriceListA() {
         : ["CAPACITY :", typecapacity, ""]
     );
 
-    const applyStatusRowStyle = (row, boldColumns = []) => {
-      row.eachCell((cell, colIndex) => {
-        // Check if the current cell is in the boldColumns array
-        const isBold = boldColumns.includes(colIndex);
-
-        cell.font = {
-          family: getfontstyle, // Your desired font family
-          size: getdatafontsize, // Your desired font size
-          bold: isBold, // Bold only for specific columns
-        };
-
-        cell.alignment = {
-          horizontal: "left", // Align text to the left
-          vertical: "middle", // Vertically align to the middle
-        };
-
-        cell.border = null; // Remove borders
+   
+      // Apply styling for the status row
+      typeAndStoreRow.eachCell((cell, colIndex) => {
+        cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
+        cell.alignment = { horizontal: "left", vertical: "middle" };
       });
-    };
 
-    // Bold specific columns (labels)
-    applyStatusRowStyle(typeAndStoreRow, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-    applyStatusRowStyle(typeAndStoreRow2, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-    applyStatusRowStyle(typeAndStoreRow3, [1, 6]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+      typeAndStoreRow2.eachCell((cell, colIndex) => {
+        cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
+        cell.alignment = { horizontal: "left", vertical: "middle" };
+      });
+      typeAndStoreRow3.eachCell((cell, colIndex) => {
+        cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
+        cell.alignment = { horizontal: "left", vertical: "middle" };
+      });
 
-    // Header style for center alignment
-    const headerStyle = {
-      font: { bold: true, family: getfontstyle, size: getdatafontsize },
-      alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = [
-      "Code",
+    
+    
+      // Header style
+      const headerStyle = {
+        font: fontHeader,
+        alignment: { horizontal: "center", vertical: "middle" },
+        fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+        border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+      };
+    
+      // Add headers
+      const headers = ["Code",
       "Description",
       "StK",
       "Comm",
@@ -904,78 +889,51 @@ export default function ItemPriceListA() {
       "SM Rate",
       "Sale Rate",
       "MRP",
-      "Fix Rate",
-    ];
-    const headerRow = worksheet.addRow(headers);
-
-    // Apply styles and center alignment to the header row
-    headerRow.eachCell((cell) => {
-      cell.style = { ...headerStyle };
-    });
-
-    // Add data rows
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([
-        item.Code,
-        item.Description,
-        item.Stk,
-        item.Comm,
-        item["Act Rate"],
-        item["Pur Rate"],
-        item["SM Rate"],
-        item["Sale Rate"],
-        item.MRP,
-        item["Fix Rate"],
-      ]);
-
-      // Apply custom styles to each cell in the row
-      row.eachCell((cell, colIndex) => {
-        cell.font = {
-          family: getfontstyle, // Set your desired font family
-          size: getdatafontsize, // Set the font size
-          bold: false, // Make the font bold
-        };
-
-        cell.border = {
-          top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-          left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-          bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-          right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-        };
-
-        // Align cell content based on columnAlignments array
-        const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-        cell.alignment = {
-          horizontal: alignment,
-          vertical: "middle", // Vertically align to the middle
-        };
+      "Fix Rate",];
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+    
+      // Add data rows
+      tableData.forEach((item) => {
+        const row = worksheet.addRow([ item.Code,
+          item.Description,
+          item.Stk,
+          item.Comm,
+          item["Act Rate"],
+          item["Pur Rate"],
+          item["SM Rate"],
+          item["Sale Rate"],
+          item.MRP,
+          item["Fix Rate"],]);
+    
+        row.eachCell((cell, colIndex) => {
+          cell.font = fontTableContent;
+          cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+          cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
+        });
       });
-    });
-
-    // Set column widths
-    [22, 40, 6, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    const getCurrentDate = () => {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
+    
+      // Set column widths
+      [22, 40, 6, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
+        worksheet.getColumn(index + 1).width = width;
+      });
+    
+      // Get current date
+      const getCurrentDate = () => {
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, "0");
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const year = today.getFullYear();
+        return `${day}-${month}-${year}`;
+      };
+    
+      const currentdate = getCurrentDate();
+    
+      // Generate and save the Excel file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, `PriceListA As On ${currentdate}.xlsx`);
     };
-
-    const currentdate = getCurrentDate();
-
-    // Generate Excel file buffer and save
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `ItemPriceList As On ${currentdate}.xlsx`);
-  };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -1074,7 +1032,7 @@ export default function ItemPriceListA() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(80vw - 0%)" : "70vw",
+    width: isSidebarVisible ? "calc(85vw - 0%)" : "85vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -1205,7 +1163,13 @@ export default function ItemPriceListA() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Company :
                     </span>
                   </label>
@@ -1269,7 +1233,13 @@ export default function ItemPriceListA() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Category :
                     </span>
                   </label>
@@ -1317,7 +1287,13 @@ export default function ItemPriceListA() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Type :
                     </span>
                   </label>
@@ -1382,7 +1358,13 @@ export default function ItemPriceListA() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Capacity :
                     </span>
                   </label>
@@ -1419,7 +1401,13 @@ export default function ItemPriceListA() {
 
               <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>
@@ -1468,7 +1456,8 @@ export default function ItemPriceListA() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
                   paddingRight: "2%",
@@ -1476,7 +1465,8 @@ export default function ItemPriceListA() {
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -1590,10 +1580,10 @@ export default function ItemPriceListA() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
-                  tableLayout:'fixed',
                 }}
               >
                 <tbody id="tablebody">
@@ -1655,117 +1645,40 @@ export default function ItemPriceListA() {
                               color: fontcolor,
                             }}
                           >
-                            <td className="text-start"
-                              title={item.Code}
-                              style={{
-                                ...firstColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}
-                            >
+                            <td className="text-start" style={firstColWidth}>
                               {item.Code}
                             </td>
-                            {/* <td
-                                className="text-start"
-                                style={secondColWidth}
-                                title={item.Description || ""}
-                              >
-                                {item.Description && item.Description.length > 30
-                                  ? `${item.Description.substring(0, 30)}...`
-                                  : item.Description || ""}
-                              </td> */}
-
-                            <td className="text-start"
-                              title={item.Description}
-                              style={{
-                                ...secondColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                            >
-                              {item.Description}
+                            <td
+                              className="text-start"
+                              style={secondColWidth}
+                              title={item.Description || ""}
+                            >
+                              {item.Description && item.Description.length > 30
+                                ? `${item.Description.substring(0, 30)}...`
+                                : item.Description || ""}
                             </td>
-
-                            <td className="text-center"
-                              title={item.Stk}
-                              style={{
-                                ...thirdColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                            >
+                            <td className="text-center" style={thirdColWidth}>
                               {item.Stk}
                             </td>
-                            <td className="text-end"
-                              title={item.Comm}
-                              style={{
-                                ...forthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                            >
+                            <td className="text-end" style={forthColWidth}>
                               {item.Comm}
                             </td>
-                            <td className="text-end"
-                              title={item['Act Rate']}
-                              style={{
-                                ...fifthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}
-                            >
+                            <td className="text-end" style={tenthColWidth}>
                               {item["Act Rate"]}
                             </td>
-                            <td className="text-end"
-                              title={item['Pur Rate']}
-                              style={{
-                                ...sixthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                             >
+                            <td className="text-end" style={elewenthColWidth}>
                               {item["Pur Rate"]}
                             </td>
-                            <td className="text-end"
-                              title={item['SM Rate']}
-                              style={{
-                                ...eightColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                             >
+                            <td className="text-end" style={fifthColWidth}>
                               {item["SM Rate"]}
                             </td>
-                            <td className="text-end"
-                              title={item['Sale Rate']}
-                              style={{
-                                ...ninthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                              >
+                            <td className="text-end" style={sixthColWidth}>
                               {item["Sale Rate"]}
                             </td>
-                            <td className="text-end"
-                              title={item.MRP}
-                              style={{
-                                ...tenthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                             >
+                            <td className="text-end" style={eightColWidth}>
                               {item.MRP}
                             </td>
-                            <td className="text-end"
-                              title={item['Fix Rate']}
-                              style={{
-                                ...elewenthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis"
-                              }}                             >
+                            <td className="text-end" style={ninthColWidth}>
                               {item["Fix Rate"]}
                             </td>
                           </tr>
