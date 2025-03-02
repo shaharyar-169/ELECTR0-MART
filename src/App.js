@@ -55,7 +55,7 @@ import MobileLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileL
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
 import ItemLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemLedgerReport.js";
 import ItemEvaluationReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemEvaluationReport.js";
-import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemAggingReport.js";
+// import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemAggingReport.js";
 import InvoiceLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/InvoiceLedger.js";
 
 //////////////////////////// Daily reports //////////////////////////////
@@ -80,8 +80,7 @@ import InstallmentLedgerReport from "./Component/Reports/Daily_Jobs_Reports/Inst
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
-
-
+import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemAggingReport.js";
 function App() {
   const queryClient = new QueryClient();
 
@@ -170,6 +169,7 @@ function App() {
                 
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
+                <Route exact path="/ItemAgging" element={<ItemAggingReport />} />
 
 
                 {/* Rountes for Dashboard */}

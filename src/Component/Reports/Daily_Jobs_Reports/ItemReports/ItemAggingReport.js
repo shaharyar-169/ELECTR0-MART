@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function BankRegisterLedger1() {
+export default function ItemAggingReport() {
 
     const navigate = useNavigate();
     const user = getUserData();
@@ -43,10 +43,11 @@ export default function BankRegisterLedger1() {
     const [supplierList, setSupplierList] = useState([]);
 
     const [totalQnty, setTotalQnty] = useState(0);
-    const [totalOpening, setTotalOpening] = useState(0);
+    const [amount, setamount] = useState(0);
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
+   
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -56,6 +57,7 @@ export default function BankRegisterLedger1() {
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
 
     const yeardescription = getYearDescription();
     const locationnumber = getLocationnumber();
@@ -74,6 +76,7 @@ export default function BankRegisterLedger1() {
         getfontstyle,
         getdatafontsize
     } = useTheme();
+
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
@@ -128,6 +131,7 @@ export default function BankRegisterLedger1() {
     const handlefromInputChange = (e) => {
         setfromInputDate(e.target.value);
     };
+
     const handlefromKeyPress = (e, inputId) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -183,6 +187,7 @@ export default function BankRegisterLedger1() {
             }
         }
     };
+
     const handleToKeyPress = (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -246,6 +251,8 @@ export default function BankRegisterLedger1() {
             }
         }
     };
+
+
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : "");
@@ -279,124 +286,12 @@ export default function BankRegisterLedger1() {
     };
 
     function fetchReceivableReport() {
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
-
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-
-        let hasError = false;
-        let errorType = "";
-
-        switch (true) {
-            case !saleType:
-                errorType = "saleType";
-                break;
-            case !fromInputDate:
-                errorType = "fromDate";
-                break;
-            case !toInputDate:
-                errorType = "toDate";
-                break;
-            default:
-                hasError = false;
-                break;
-        }
-
-        if (!dateRegex.test(fromInputDate)) {
-            errorType = "fromDateInvalid";
-        } else if (!dateRegex.test(toInputDate)) {
-            errorType = "toDateInvalid";
-        } else {
-            const formattedFromInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [fromDay, fromMonth, fromYear] = formattedFromInput
-                .split("-")
-                .map(Number);
-            const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
-            const formattedToInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-            const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-            if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-                errorType = "fromDateBeforeGlobal";
-            } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-                errorType = "fromDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = "toDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = "toDateBeforeGlobal";
-            } else if (enteredToDate < enteredFromDate) {
-                errorType = "toDateBeforeFromDate";
-            }
-        }
-
-        switch (errorType) {
-            case "saleType":
-                toast.error("Please select a Account Code");
-                return;
-
-            case "fromDate":
-                toast.error("From date is required");
-                return;
-            case "toDate":
-                toast.error("To date is required");
-                return;
-            case "fromDateInvalid":
-                toast.error("From date must be in the format dd-mm-yyyy");
-                return;
-            case "toDateInvalid":
-                toast.error("To date must be in the format dd-mm-yyyy");
-                return;
-            case "fromDateBeforeGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "fromDateAfterGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateAfterGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeFromDate":
-                toast.error("To date must be after from date");
-                return;
-
-            default:
-                break;
-        }
-
-
-        // console.log(data);
-        document.getElementById(
-            "fromdatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-        document.getElementById(
-            "todatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-
-        const apiUrl = apiLinks + "/BankRegister.php";
+           
+        const apiUrl = apiLinks + "/ItemAgging.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
-            FTrnTyp: transectionType,
-            FAccCod: saleType,
+          
+            FItmCod: '',
             // code: organisation.code,
             // FLocCod: locationnumber || getLocationNumber,
             // FYerDsc: yeardescription || getYearDescription,
@@ -411,11 +306,13 @@ export default function BankRegisterLedger1() {
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
-                console.log("Response:", response.data);
-                // setTotalOpening(response.data["Total Opening"]);
-                setTotalDebit(response.data["Total Debit "]);
-                setTotalCredit(response.data["Total Credit"]);
-                setClosingBalance(response.data["Closing Bal "]);
+                // Update total amount and quantity
+                setTotalQnty(response.data["Average Rate"]);
+                setTotalDebit(response.data["Total Purchase "]);
+                setTotalCredit(response.data["Total Sale "]);
+                setClosingBalance(response.data["Total Diff"]);
+                setamount(response.data["Total Amount"]);
+
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -432,24 +329,19 @@ export default function BankRegisterLedger1() {
                 setIsLoading(false);
             });
     }
-
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (
-            !hasComponentMountedPreviously ||
-            (saleSelectRef && saleSelectRef.current)
-        ) {
-            if (saleSelectRef && saleSelectRef.current) {
+        if (!hasComponentMountedPreviously || (input3Ref && input3Ref.current)) {
+            if (input3Ref && input3Ref.current) {
                 setTimeout(() => {
-                    saleSelectRef.current.focus();
+                    input3Ref.current.focus();
                     // saleSelectRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
         }
     }, []);
-
     useEffect(() => {
         const currentDate = new Date();
         setSelectedToDate(currentDate);
@@ -463,9 +355,8 @@ export default function BankRegisterLedger1() {
         setSelectedfromDate(firstDateOfCurrentMonth);
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
-
     useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveBanks.php";
+        const apiUrl = apiLinks + "/GetActiveCustomer.php";
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,
@@ -484,9 +375,6 @@ export default function BankRegisterLedger1() {
         value: item.tacccod,
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
-
-
-
 
     const DropdownOption = (props) => {
         return (
@@ -559,6 +447,7 @@ export default function BankRegisterLedger1() {
         settransectionType(selectedTransactionType);
     };
 
+
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
 
@@ -574,11 +463,11 @@ export default function BankRegisterLedger1() {
             item["Trn#"],
             item.Type,
             item.Description,
-            item["Chq Date"],
-            item["Chq #"],
-            item.Debit,
-            item.Credit,
-            item.Balance,
+            item.Rate,
+            item.Purchase,
+            item.Sale,
+            item.Diff,
+            item.Amount,
         ]);
 
         // Add summary row to the table
@@ -587,12 +476,13 @@ export default function BankRegisterLedger1() {
             "",
             "",
             "",
-            "",
-            "",
             "Total",
+            String(totalQnty),
             String(totalDebit),
             String(totalCredit),
             String(closingBalance),
+            String(amount),
+
         ]);
 
         // Define table column headers and individual column widths
@@ -601,13 +491,13 @@ export default function BankRegisterLedger1() {
             "Trn#",
             "Type",
             "Description",
-            "Chq Date",
-            "Chq #",
+            "Qnty",
+            "Rate",
             "Debit",
             "Credit",
             "Balance",
         ];
-        const columnWidths = [22, 15, 15, 80,20,30, 25, 25, 25];
+        const columnWidths = [20, 14, 11, 80, 10, 25, 25, 25, 25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -705,20 +595,25 @@ export default function BankRegisterLedger1() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-
                     if (cellIndex === 2) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "center",
                             baseline: "middle",
                         });
-                    } else if (cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
+
+                    }
+
+                    else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    } else {
+
+                    }
+
+                    else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
 
@@ -813,7 +708,7 @@ export default function BankRegisterLedger1() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 20,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -828,7 +723,7 @@ export default function BankRegisterLedger1() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Bank Register Ledger Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Item Agging Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -837,57 +732,6 @@ export default function BankRegisterLedger1() {
                 // Set font size and weight for the labels
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
-
-
-
-
-                let status = transectionType === "A"
-                    ? "ALL"
-                    : transectionType === "CRV"
-                        ? "Cash Receive Voucher"
-                        : transectionType === "CPV"
-                            ? "Cash Payment Voucher"
-                            : transectionType === "BRV"
-                                ? "Bank Receive Voucher"
-                                : transectionType === "BPV"
-                                    ? "Bank Payment Voucher"
-                                    : transectionType === "JRV"
-                                        ? "Journal Voucher"
-                                        : transectionType === "INV"
-                                            ? "Item Sale"
-                                            : transectionType === "SRN"
-                                                ? "Sale Return"
-                                                : transectionType === "BIL"
-                                                    ? "Purchase"
-                                                    : transectionType === "PRN"
-                                                        ? "Purchase Return"
-                                                        : transectionType === "ISS"
-                                                            ? "Issue"
-                                                            : transectionType === "REC"
-                                                                ? "Received"
-                                                                : transectionType === "SLY"
-                                                                    ? "Salary"
-                                                                    : "ALL";
-
-                let search = Companyselectdatavalue.label
-                    ? Companyselectdatavalue.label
-                    : "ALL";
-
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
-
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`ACCOUNT :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 200, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
 
 
 
@@ -919,7 +763,7 @@ export default function BankRegisterLedger1() {
             const dd = String(today.getDate()).padStart(2, "0");
             const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return dd + "-" + mm + "-" + yyyy;
         };
 
         // Function to get current time in the format HH:MM:SS
@@ -938,11 +782,12 @@ export default function BankRegisterLedger1() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`BAnkRegisterLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`ItemAggingReport As on ${date}.pdf`);
 
 
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
@@ -954,15 +799,13 @@ export default function BankRegisterLedger1() {
         const columnAlignments = [
             "left",
             "left",
-            "left",
-            "left",
-            "left",
+            "center",
             "left",
             "right",
             "right",
             "right",
-
-
+            "right",
+            "right",
         ];
 
         // Add an empty row at the start
@@ -972,7 +815,7 @@ export default function BankRegisterLedger1() {
 
 
 
-        [comapnyname, `Bank Register Ledger Report From ${fromInputDate} To ${toInputDate} `].forEach((title, index) => {
+        [comapnyname, `Item Agging Report`].forEach((title, index) => {
             // Define custom styles for each title
             let customStyle;
             let rowHeight = 20; // Default row height
@@ -1013,48 +856,7 @@ export default function BankRegisterLedger1() {
         worksheet.addRow([]);  // This is where you add the empty row
 
 
-        let typestatus = "";
-
-        if (transectionType === "A") {
-            typestatus = "ALL";
-        } else if (transectionType === "CRV") {
-            typestatus = "Cash Receive Voucher";
-        } else if (transectionType === "CPV") {
-            typestatus = "Cash Payment Voucher";
-        } else if (transectionType === "BRV") {
-            typestatus = "Bank Receive Voucher";
-        } else if (transectionType === "BPV") {
-            typestatus = "Bank Payment Voucher";
-        } else if (transectionType === "JRV") {
-            typestatus = "Journal Voucher";
-        } else if (transectionType === "INV") {
-            typestatus = "Item Sale";
-        } else if (transectionType === "SRN") {
-            typestatus = "Sale Return";
-        } else if (transectionType === "BIL") {
-            typestatus = "Purchase";
-        } else if (transectionType === "PRN") {
-            typestatus = "Purchase Return";
-        } else if (transectionType === "ISS") {
-            typestatus = "Issue";
-        } else if (transectionType === "REC") {
-            typestatus = "Received";
-        } else if (transectionType === "SLY") {
-            typestatus = "Salary";
-        } else {
-            typestatus = "ALL"; // Default value
-        }
-
-
-        let typesearch = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-
-        const typeAndStoreRow3 = worksheet.addRow([
-            "ACCOUNT:", typesearch, "", "", "", "", "TYPE :", typestatus
-        ]);
-
-
-
-
+        
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
                 // Check if the current cell is in the boldColumns array
@@ -1075,11 +877,7 @@ export default function BankRegisterLedger1() {
             });
         };
 
-        // Bold specific columns (labels)
-
-        applyStatusRowStyle(typeAndStoreRow3, [1,7]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-
+      
 
         // Header style for center alignment
         const headerStyle = {
@@ -1104,11 +902,11 @@ export default function BankRegisterLedger1() {
             "Trn#",
             "Type",
             "Description",
-            "Chq Date",
-            "Chq #",
-            "Debit",
-            "Credit",
-            "Balance",
+            "Rate",
+            "Purchase",
+            "Sale",
+            "Diff",
+            "Amount",
         ];
         const headerRow = worksheet.addRow(headers);
 
@@ -1126,11 +924,11 @@ export default function BankRegisterLedger1() {
                 item["Trn#"],
                 item.Type,
                 item.Description,
-                item["Chq Date"],
-                item["Chq #"],
-                item.Debit,
-                item.Credit,
-                item.Balance,
+                item.Rate,
+                item.Purchase,
+                item.Sale,
+                item.Diff,
+                item.Amount,
             ]);
 
             // Apply custom styles to each cell in the row
@@ -1160,16 +958,15 @@ export default function BankRegisterLedger1() {
 
 
         const totalRow = worksheet.addRow([
-
             "",
             "",
             "",
             "Total",
-            "",
-            "",
+            totalQnty,
             totalDebit,
             totalCredit,
             closingBalance,
+            amount
         ]);
 
         // total row added
@@ -1184,7 +981,7 @@ export default function BankRegisterLedger1() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 7 || colNumber === 8 || colNumber === 9) {
+            if (colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9) {
                 cell.alignment = { horizontal: "right" };
             }
         });
@@ -1192,7 +989,7 @@ export default function BankRegisterLedger1() {
         // Set column widths
 
 
-        [12, 8, 6, 40,12,18, 12, 12, 12].forEach((width, index) => {
+        [12, 8, 7, 50, 5, 12, 12, 12, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1203,7 +1000,7 @@ export default function BankRegisterLedger1() {
             const dd = String(today.getDate()).padStart(2, "0");
             const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return dd + "-" + mm + "-" + yyyy;
         };
 
         const currentdate = getCurrentDate();
@@ -1213,9 +1010,8 @@ export default function BankRegisterLedger1() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `BankRegisterLedgerReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `ItemAggingReport As on ${currentdate}.xlsx`);
     };
-    ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
 
@@ -1248,25 +1044,22 @@ export default function BankRegisterLedger1() {
     };
 
     const firstColWidth = {
-        width: "9%",
+        width: "8%",
     };
     const secondColWidth = {
-        width: "6%",
+        width: "5.5%",
     };
     const thirdColWidth = {
-        width: "4%",
-    };
-    const forthColWidth = {
-        width: "28.7%",
+        width: "3.7%",
     };
     const fifthColWidth = {
-        width: "10%",
+        width: "36.5%",
     };
     const sixthColWidth = {
-        width: "10%",
+        width: "9%",
     };
     const seventhColWidth = {
-        width: "10%",
+        width: "9%",
     };
     const eightColWidth = {
         width: "9%",
@@ -1274,11 +1067,9 @@ export default function BankRegisterLedger1() {
     const ninthColWidth = {
         width: "9%",
     };
-
-    const CheckColWidth = {
-        width: "3%",
+    const tenthColWidth = {
+        width: "9%",
     };
-
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1314,7 +1105,7 @@ export default function BankRegisterLedger1() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "900px",
+        maxWidth: "1000px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1433,484 +1224,22 @@ export default function BankRegisterLedger1() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Bank Register Ledger" />
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5"></div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>90 Days</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            {/* ------ */}
-
-                            <div
-                                className="d-flex align-items-center  "
-                                style={{ marginRight: "1px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Account :
-                                        </span>{" "}
-                                        <br />
-                                    </label>
-                                </div>
-                                <div style={{ marginLeft: "5px" }}>
-                                    <Select
-                                        className="List-select-class "
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-
-                                                const labelParts = selectedOption.label.split("-"); // Split by "-"
-                                                const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
-
-                                                setSaleType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: description, // Keep only the description
-
-                                                });
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue('')
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-
-
-
-
-
-
-                                </div>
-                            </div>
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">All</option>
-                                    <option value="CRV">Cash Receive Vorcher</option>
-                                    <option value="CPV">Cash Payment Vorcher</option>
-                                    <option value="BRV">Bank Receive Vorcher</option>
-                                    <option value="BPV">Bank Payment Vorcher</option>
-                                    <option value="JRV">Journal Vorcher</option>
-                                    <option value="INV">Item Sale</option>
-                                    <option value="SRN">Sale Return</option>
-                                    <option value="BIL">Purchase</option>
-                                    <option value="PRN">Purchase Return</option>
-                                    <option value="ISS">Issue</option>
-                                    <option value="REC">Received</option>
-                                    <option value="SLY">Salary</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center">
-                                <div
-                                    style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            From :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="fromdatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "5px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        id="frominputid"
-                                        value={fromInputDate}
-                                        ref={fromRef}
-                                        onChange={handlefromInputChange}
-                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedfromDate}
-                                        onChange={handlefromDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={fromCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleFromCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginLeft: "15px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            To :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="todatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "5px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        ref={toRef}
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        value={toInputDate}
-                                        onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
-                                        id="toDatePicker"
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="To Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedToDate}
-                                        onChange={handleToDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={toCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleToCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                        Search :
-                                    </span>{" "}
-                                </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
-                                    autoComplete="off"
-                                    style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    onChange={(e) =>
-                                        setSearchQuery((e.target.value || "").toUpperCase())
-
-                                    } />
-                            </div>
-                        </div>
-                    </div>
+                    <NavComponent textdata="Item Agging Report" />
+                   
                     <div>
                         <div
                             style={{
                                 overflowY: "auto",
                                 width: "98.8%",
+                                marginTop:'10px'
                             }}
                         >
                             <table
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
@@ -1941,32 +1270,29 @@ export default function BankRegisterLedger1() {
                                         <td className="border-dark" style={thirdColWidth}>
                                             Typ
                                         </td>
-                                        <td className="border-dark" style={forthColWidth}>
+                                        {/* <td className="border-dark" style={forthColWidth}>
+                                            Item Code
+                                        </td> */}
+                                        <td className="border-dark" style={fifthColWidth}>
                                             Description
                                         </td>
-
-                                        <td className="border-dark" style={eightColWidth}>
-                                            Chq Date
-                                        </td>
-
-                                        <td className="border-dark" style={ninthColWidth}>
-                                            Chq #
-                                        </td>
-
-                                        <td className="border-dark" style={fifthColWidth}>
-                                            Debit
-                                        </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Credit
+                                            Rate
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            Balance
+                                            Purchase
                                         </td>
-                                        <td className="border-dark" style={{ ...CheckColWidth, textAlign: "right", paddingRight: "3px" }}>
-                                            <input type="checkbox" disabled />
+                                        <td className="border-dark" style={eightColWidth}>
+                                            Sale
                                         </td>
-
+                                        <td className="border-dark" style={ninthColWidth}>
+                                            Diff
+                                        </td>
+                                        <td className="border-dark" style={tenthColWidth}>
+                                            Amount
+                                        </td>
                                     </tr>
+
                                 </thead>
                             </table>
                         </div>
@@ -1976,7 +1302,7 @@ export default function BankRegisterLedger1() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "50vh",
+                                maxHeight: "60vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1985,9 +1311,9 @@ export default function BankRegisterLedger1() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    width: "100%",
                                     position: "relative",
-                                    tableLayout: "fixed"
                                 }}
                             >
                                 <tbody id="tablebody">
@@ -1998,7 +1324,7 @@ export default function BankRegisterLedger1() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="10" className="text-center">
+                                                <td colSpan="9" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2011,7 +1337,7 @@ export default function BankRegisterLedger1() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2023,13 +1349,13 @@ export default function BankRegisterLedger1() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
-                                                <td style={eightColWidth}></td>
-                                                <td style={ninthColWidth}></td>
+                                                {/* <td style={forthColWidth}></td> */}
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={CheckColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -2058,48 +1384,24 @@ export default function BankRegisterLedger1() {
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-start"
 
-                                                            title={item.Description}
-                                                            style={{
-                                                                ...forthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-
-
-                                                        >
+                                                        <td className="text-start" style={fifthColWidth}>
                                                             {item.Description}
                                                         </td>
-
-                                                        <td className="text-start" style={eightColWidth}>
-                                                            {item['Chq Date']}
-                                                        </td>
-
-                                                        <td className="text-start"
-                                                            title={item['Chq #']}
-                                                            style={{
-                                                                ...ninthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item['Chq #']}
-                                                        </td>
-
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item.Debit}
-                                                        </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Credit}
+                                                            {item.Rate}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Balance}
+                                                            {item.Purchase}
                                                         </td>
-                                                        <td className="text-end" style={CheckColWidth}>
-                                                            <input type="checkbox" />
+                                                        <td className="text-end" style={eightColWidth}>
+                                                            {item.Sale}
+                                                        </td>
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item.Diff}
+                                                        </td>
+                                                        <td className="text-end" style={tenthColWidth}>
+                                                            {item.Amount}
                                                         </td>
                                                     </tr>
                                                 );
@@ -2114,7 +1416,7 @@ export default function BankRegisterLedger1() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2125,14 +1427,13 @@ export default function BankRegisterLedger1() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
-                                                <td style={eightColWidth}></td>
-                                                <td style={ninthColWidth}></td>
+                                                {/* <td style={forthColWidth}></td> */}
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={CheckColWidth}></td>
-
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -2141,96 +1442,32 @@ export default function BankRegisterLedger1() {
                         </div>
                     </div>
 
-                    <div
-                        style={{
-                            borderBottom: `1px solid ${fontcolor}`,
-                            borderTop: `1px solid ${fontcolor}`,
-                            height: "24px",
-                            display: "flex",
-                            paddingRight: "1.2%",
-                            width: "101.2%",
-                        }}
-                    >
-                        <div
-                            style={{
-                                ...firstColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...secondColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...thirdColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...forthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...eightColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
 
-                        <div
-                            style={{
-                                ...ninthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
 
-                        <div
-                            style={{
-                                ...fifthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total">{totalDebit}</span>
+                        <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{totalQnty}</span>
                         </div>
-                        <div
-                            style={{
-                                ...sixthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
+                        <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <span className="mobileledger_total">{totalDebit}</span>
+  
+                        </div>
+
+                        <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{totalCredit}</span>
                         </div>
-                        <div
-                            style={{
-                                ...seventhColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
+                        <div style={{ ...ninthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
                             <span className="mobileledger_total">{closingBalance}</span>
                         </div>
-                        <div
-                            style={{
-                                ...CheckColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
+                        <div style={{ ...tenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                            <span className="mobileledger_total">{amount}</span>
                         </div>
                     </div>
+
                     <div
                         style={{
                             margin: "5px",
@@ -2281,3 +1518,6 @@ export default function BankRegisterLedger1() {
         </>
     );
 }
+
+
+
