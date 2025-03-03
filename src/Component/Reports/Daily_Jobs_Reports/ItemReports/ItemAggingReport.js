@@ -38,6 +38,8 @@ export default function ItemAggingReport() {
     const [saleType, setSaleType] = useState("");
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
+    console.log('Companyselectdatavalue', Companyselectdatavalue)
+
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
@@ -47,7 +49,7 @@ export default function ItemAggingReport() {
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
-   
+
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -270,7 +272,7 @@ export default function ItemAggingReport() {
             const nextInput = document.getElementById(inputId);
             if (nextInput) {
                 nextInput.focus();
-                nextInput.select();
+                // nextInput.select();
             } else {
                 document.getElementById("submitButton").click();
             }
@@ -286,16 +288,15 @@ export default function ItemAggingReport() {
     };
 
     function fetchReceivableReport() {
-           
+
         const apiUrl = apiLinks + "/ItemAgging.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-          
+
             FItmCod: '',
             // code: organisation.code,
             // FLocCod: locationnumber || getLocationNumber,
             // FYerDsc: yeardescription || getYearDescription,
-
             code: 'NASIRTRD',
             FLocCod: '001',
             FYerDsc: '2024-2024',
@@ -332,10 +333,10 @@ export default function ItemAggingReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (input3Ref && input3Ref.current)) {
-            if (input3Ref && input3Ref.current) {
+        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+            if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
-                    input3Ref.current.focus();
+                    saleSelectRef.current.focus();
                     // saleSelectRef.current.select();
                 }, 0);
             }
@@ -356,7 +357,7 @@ export default function ItemAggingReport() {
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
     useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveCustomer.php";
+        const apiUrl = apiLinks + "/GetItem.php";
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,
@@ -372,8 +373,8 @@ export default function ItemAggingReport() {
     }, []);
 
     const options = supplierList.map((item) => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`,
+        value: item.titmcod,
+        label: `${item.titmcod}-${item.titmdsc.trim()}`,
     }));
 
     const DropdownOption = (props) => {
@@ -735,6 +736,21 @@ export default function ItemAggingReport() {
 
 
 
+                let search = Companyselectdatavalue.label
+                    ? Companyselectdatavalue.label
+                    : "ALL";
+
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
+
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`Item :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${search}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+
+
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
@@ -856,7 +872,12 @@ export default function ItemAggingReport() {
         worksheet.addRow([]);  // This is where you add the empty row
 
 
-        
+        let typesearch = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+
+        const typeAndStoreRow3 = worksheet.addRow([
+            "Item:", typesearch 
+        ]);
+
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
                 // Check if the current cell is in the boldColumns array
@@ -877,7 +898,12 @@ export default function ItemAggingReport() {
             });
         };
 
-      
+        // Bold specific columns (labels)
+
+        applyStatusRowStyle(typeAndStoreRow3, [1, 10]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+
+
+
 
         // Header style for center alignment
         const headerStyle = {
@@ -989,7 +1015,7 @@ export default function ItemAggingReport() {
         // Set column widths
 
 
-        [12, 8, 7, 50, 5, 12, 12, 12, 15].forEach((width, index) => {
+        [12, 8, 7, 50, 12, 12, 12, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1225,13 +1251,74 @@ export default function ItemAggingReport() {
                     }}
                 >
                     <NavComponent textdata="Item Agging Report" />
-                   
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+
+
+                            {/* ------ */}
+
+
+                            <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
+                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Item :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '5px' }} >
+                                     <Select
+                                        className="List-select-class "
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setSaleType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('')
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+
+                                </div>
+
+
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
                     <div>
                         <div
                             style={{
                                 overflowY: "auto",
                                 width: "98.8%",
-                                marginTop:'10px'
+                                marginTop: '10px'
                             }}
                         >
                             <table
@@ -1453,8 +1540,8 @@ export default function ItemAggingReport() {
                             <span className="mobileledger_total">{totalQnty}</span>
                         </div>
                         <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
-                        <span className="mobileledger_total">{totalDebit}</span>
-  
+                            <span className="mobileledger_total">{totalDebit}</span>
+
                         </div>
 
                         <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
