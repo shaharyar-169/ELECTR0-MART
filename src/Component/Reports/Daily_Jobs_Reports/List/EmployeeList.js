@@ -73,6 +73,7 @@ export default function EmployeeList() {
       FEmpSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
+
       FSchTxt: searchQuery,
 
     }).toString();
@@ -469,9 +470,9 @@ export default function EmployeeList() {
   
     // Define fonts for different sections
     const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
-    const fontStoreList = { name: "CustomFont", size: 12, bold: false };
-    const fontHeader = { name: "CustomFont", size: 10, bold: true };
-    const fontTableContent = { name: "CustomFont", size: 10, bold: false };
+    const fontStoreList = { name: "CustomFont", size: getdatafontsize, bold: false };
+    const fontHeader = { name: "CustomFont", size: getdatafontsize, bold: true };
+    const fontTableContent = { name: "CustomFont", size: getdatafontsize, bold: false };
   
     // Add an empty row at the start
     worksheet.addRow([]);
@@ -507,7 +508,7 @@ export default function EmployeeList() {
   
     // Apply styling for the status row
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = { name: "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
+      cell.font = { name: "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
   
@@ -559,7 +560,7 @@ export default function EmployeeList() {
     });
   
     // Set column widths
-    [10, 30, 8, 30, 12, 12, 12].forEach((width, index) => {
+    [10, 40, 8, 30, 14, 14, 14].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
   

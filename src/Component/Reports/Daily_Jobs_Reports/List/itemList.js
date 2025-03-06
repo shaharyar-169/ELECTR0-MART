@@ -102,8 +102,7 @@ export default function ItemList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
-
-     
+   
       FCmpCod: Companyselectdata,
       FSchTxt: searchQuery,
     }).toString();
@@ -829,9 +828,9 @@ export default function ItemList() {
 
     // Define fonts for different sections
     const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
-    const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+    const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
+    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
 
     // Add an empty row at the start
     worksheet.addRow([]);
@@ -900,15 +899,15 @@ export default function ItemList() {
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
+      cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 4].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
     typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
+      cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 4].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
+      cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 4].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
@@ -949,7 +948,7 @@ export default function ItemList() {
     });
 
     // Set column widths
-    [22, 50, 15, 20, 14, 25].forEach((width, index) => {
+    [22, 55, 15, 20, 14, 30].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 

@@ -441,9 +441,9 @@ export default function CapacityList() {
       
         // Define fonts for different sections
         const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+        const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
+        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
       
         // Add an empty row at the start
         worksheet.addRow([]);
@@ -480,7 +480,7 @@ export default function CapacityList() {
       
         // Apply styling for the status row
         typeAndStoreRow3.eachCell((cell, colIndex) => {
-          cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
+          cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
           cell.alignment = { horizontal: "left", vertical: "middle" };
         });
       
