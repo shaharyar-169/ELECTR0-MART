@@ -70,7 +70,9 @@ export default function InstallmentLedgerReport() {
         getLocationNumber,
         getyeardescription,
         getfromdate,
-        gettodate
+        gettodate,
+        getfontstyle,
+        getdatafontsize
 
     } = useTheme();
 
@@ -367,542 +369,438 @@ export default function InstallmentLedgerReport() {
 
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-    const exportPDFHandler = () => {
-        // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "landscape" });
-
-        // Define table data (rows)
-        const rows = tableData.map((item) => [
-            item.tinscod,
-            item.Customer,
-            item['Sale Date'],
-            item.Sale,
-            item.Advance,
-            item.Collection,
-            item['Ins #'],
-            item['Ins Amt'],
-            item['Last Date'],
-            item.Balance,
-            item.Collector
-
-        ]);
-
-        // Add summary row to the table
-        rows.push([
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-        ]);
-
-        // Define table column headers and individual column widths
-        const headers = [
-            "Code",
-            "Customer",
-            "Sale Date",
-            'Sale',
-            'Advance',
-            'Collection',
-            "Ins #",
-            "Ins Amt",
-            'Last Date',
-            'Balance',
-            'Collector'
-
-        ];
-        const columnWidths = [18, 60, 18, 18, 18, 18, 12, 18, 18, 18, 18];
-
-        // Calculate total table width
-        const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-
-        // Define page height and padding
-        const pageHeight = doc.internal.pageSize.height;
-        const paddingTop = 15;
-
-        // Set font properties for the table
-        doc.setFont("verdana");
-        doc.setFontSize(10);
-
-        // Function to add table headers
-        const addTableHeaders = (startX, startY) => {
-            // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
-
-            headers.forEach((header, index) => {
-                const cellWidth = columnWidths[index];
-                const cellHeight = 6; // Height of the header row
-                const cellX = startX + cellWidth / 2; // Center the text horizontally
-                const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-                // Draw the grey background for the header
-                doc.setFillColor(200, 200, 200); // Grey color
-                doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-                // Draw the outer border
-                doc.setLineWidth(0.2); // Set the width of the outer border
-                doc.rect(startX, startY, cellWidth, cellHeight);
-
-                // Set text alignment to center
-                doc.setTextColor(0); // Set text color to black
-                doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-                startX += columnWidths[index]; // Move to the next column
+   const exportPDFHandler = () => {
+     const globalfontsize = 12;
+     console.log("gobal font data", globalfontsize);
+ 
+     // Create a new jsPDF instance with landscape orientation
+     const doc = new jsPDF({ orientation: "potraite" });
+ 
+     // Define table data (rows)
+     const rows = tableData.map((item) => [
+       item.Date,
+       item['Trn#'],
+       item.Type,
+       item.Description,
+       item.Sale,
+       item.Collection,
+       item.Balance,
+     ]);
+ 
+     // Add summary row to the table
+     rows.push(["", "", "", "", "", "", ""]);
+ 
+     // Define table column headers and individual column widths
+     const headers = ["Date", "Trn#", "Type", "Description", "Sale", "Collection"," Balance"];
+     const columnWidths = [20, 14, 11,80, 22, 22, 22];
+ 
+     // Calculate total table width
+     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+ 
+     // Define page height and padding
+     const pageHeight = doc.internal.pageSize.height;
+     const paddingTop = 15;
+ 
+     // Set font properties for the table
+     doc.setFont(getfontstyle);
+     doc.setFontSize(10);
+ 
+     // Function to add table headers
+     const addTableHeaders = (startX, startY) => {
+       // Set font style and size for headers
+       doc.setFont(getfontstyle, "bold"); // Set font to bold
+       doc.setFontSize(12); // Set font size for headers
+ 
+       headers.forEach((header, index) => {
+         const cellWidth = columnWidths[index];
+         const cellHeight = 6; // Height of the header row
+         const cellX = startX + cellWidth / 2; // Center the text horizontally
+         const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+ 
+         // Draw the grey background for the header
+         doc.setFillColor(200, 200, 200); // Grey color
+         doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+ 
+         // Draw the outer border
+         doc.setLineWidth(0.2); // Set the width of the outer border
+         doc.rect(startX, startY, cellWidth, cellHeight);
+ 
+         // Set text alignment to center
+         doc.setTextColor(0); // Set text color to black
+         doc.text(header, cellX, cellY, { align: "center" }); // Center the text
+         startX += columnWidths[index]; // Move to the next column
+       });
+ 
+       // Reset font style and size after adding headers
+       doc.setFont(getfontstyle);
+       doc.setFontSize(12);
+     };
+ 
+     const addTableRows = (startX, startY, startIndex, endIndex) => {
+       const rowHeight = 5; // Adjust this value to decrease row height
+       const fontSize = 10; // Adjust this value to decrease font size
+       const boldFont = 400; // Bold font
+       const normalFont = getfontstyle; // Default font
+       const tableWidth = getTotalTableWidth(); // Calculate total table width
+ 
+       doc.setFontSize(fontSize);
+ 
+       for (let i = startIndex; i < endIndex; i++) {
+         const row = rows[i];
+         const isOddRow = i % 2 !== 0; // Check if the row index is odd
+         const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
+         let textColor = [0, 0, 0]; // Default text color
+         let fontName = normalFont; // Default font
+ 
+         if (isRedRow) {
+           textColor = [255, 0, 0]; // Red color
+           fontName = boldFont; // Set bold font for red-colored row
+         }
+ 
+         // Set background color for odd-numbered rows
+         // if (isOddRow) {
+         // 	doc.setFillColor(240); // Light background color
+         // 	doc.rect(
+         // 		startX,
+         // 		startY + (i - startIndex + 2) * rowHeight,
+         // 		tableWidth,
+         // 		rowHeight,
+         // 		"F"
+         // 	);
+         // }
+ 
+         // Draw row borders
+         doc.setDrawColor(0); // Set color for borders
+         doc.rect(
+           startX,
+           startY + (i - startIndex + 2) * rowHeight,
+           tableWidth,
+           rowHeight
+         );
+ 
+         row.forEach((cell, cellIndex) => {
+           const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
+           const cellX = startX + 2;
+ 
+           // Set text color
+           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+           // Set font
+           doc.setFont(fontName, "normal");
+ 
+           // Ensure the cell value is a string
+           const cellValue = String(cell);
+ 
+           if (cellIndex === 2 ) {
+             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "center",
+               baseline: "middle",
+             });
+           } 
+           else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+            doc.text(cellValue, rightAlignX, cellY, {
+                align: "right",
+                baseline: "middle",
             });
-
-            // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
-        };
-
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-            doc.setFontSize(fontSize);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
-
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
-                }
-
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
-
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
-
-                row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
-
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
-
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
-
-                    if (cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-
-                    }
-
-                    else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-                    }
-
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
-
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
             }
-
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
-
-        // Function to calculate total table width
-        const getTotalTableWidth = () => {
-            let totalWidth = 0;
-            columnWidths.forEach((width) => (totalWidth += width));
-            return totalWidth;
-        };
-
-        // Function to add a new page and reset startY
-        const addNewPage = (startY) => {
-            doc.addPage();
-            return paddingTop; // Set startY for each new page
-        };
-
-        // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
-
-        // Function to handle pagination
-        const handlePagination = () => {
-            // Define the addTitle function
-            const addTitle = (
-                title,
-                date,
-                time,
-                pageNumber,
-                startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
-            ) => {
-                doc.setFontSize(titleFontSize); // Set the font size for the title
-                doc.text(title, doc.internal.pageSize.width / 2, startY, {
-                    align: "center",
-                });
-
-                // Calculate the x-coordinate for the right corner
-                const rightX = doc.internal.pageSize.width - 10;
-
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
-
-                // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
-                    `Page ${pageNumber}`,
-                    rightX - 20,
-                    doc.internal.pageSize.height - 10,
-                    { align: "right" }
-                );
-            };
-
-            let currentPageIndex = 0;
-            let startY = paddingTop; // Initialize startY
-            let pageNumber = 1; // Initialize page number
-
-            while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(
-                    `Installment Balance Report`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
-
-                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 2; // Position the labels below the titles and above the table
-
-                // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
-
-                // let typeText = selectedOptionType ? selectedOptionType : "All";
-                // let typeItem = selectedOptionCustomer ? selectedOptionCustomer : "All";
-
-                // let typeText = transectionType ? transectionType : "";
-                //    let typeItem = transectionType ? transectionType : "All";
-
-                //    doc.text(`Status: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
-
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
-
-                startY += 0; // Adjust vertical position for the labels
-
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
-                const startIndex = currentPageIndex * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-                startY = addTableRows(
-                    (doc.internal.pageSize.width - totalWidth) / 2,
-                    startY,
-                    startIndex,
-                    endIndex
-                );
-                if (endIndex < rows.length) {
-                    startY = addNewPage(startY); // Add new page and update startY
-                    pageNumber++; // Increment page number
-                }
-                currentPageIndex++;
-            }
-        };
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
-        };
-
-        // Function to get current time in the format HH:MM:SS
-        const getCurrentTime = () => {
-            const today = new Date();
-            const hh = String(today.getHours()).padStart(2, "0");
-            const mm = String(today.getMinutes()).padStart(2, "0");
-            const ss = String(today.getSeconds()).padStart(2, "0");
-            return hh + ":" + mm + ":" + ss;
-        };
-
-        const date = getCurrentDate(); // Get current date
-        const time = getCurrentTime(); // Get current time
-
-        // Call function to handle pagination
-        handlePagination();
-
-        // Save the PDF file
-        doc.save("InstallmentBalanceReport.pdf");
-
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
-    };
+           else {
+             doc.text(cellValue, cellX, cellY, { baseline: "middle" });
+           }
+ 
+           // Draw column borders (excluding the last column)
+           if (cellIndex < row.length - 1) {
+             doc.rect(
+               startX,
+               startY + (i - startIndex + 2) * rowHeight,
+               columnWidths[cellIndex],
+               rowHeight
+             );
+             startX += columnWidths[cellIndex];
+           }
+         });
+ 
+         // Draw border for the last column
+         doc.rect(
+           startX,
+           startY + (i - startIndex + 2) * rowHeight,
+           columnWidths[row.length - 1],
+           rowHeight
+         );
+         startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+       }
+ 
+       // Draw line at the bottom of the page with padding
+       const lineWidth = tableWidth; // Match line width with table width
+       const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
+       const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+       doc.setLineWidth(0.3);
+       doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
+       const headingFontSize = 12; // Adjust as needed
+ 
+       // Add heading "Crystal Solution" aligned left bottom of the line
+       const headingX = lineX + 2; // Padding from left
+       const headingY = lineY + 5; // Padding from bottom
+       doc.setFontSize(headingFontSize); // Set the font size for the heading
+       doc.setTextColor(0); // Reset text color to default
+       doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+     };
+ 
+     // Function to calculate total table width
+     const getTotalTableWidth = () => {
+       let totalWidth = 0;
+       columnWidths.forEach((width) => (totalWidth += width));
+       return totalWidth;
+     };
+ 
+     // Function to add a new page and reset startY
+     const addNewPage = (startY) => {
+       doc.addPage();
+       return paddingTop; // Set startY for each new page
+     };
+ 
+     // Define the number of rows per page
+     const rowsPerPage = 27; // Adjust this value based on your requirements
+ 
+     // Function to handle pagination
+     const handlePagination = () => {
+       // Define the addTitle function
+       const addTitle = (
+         title,
+         date,
+         time,
+         pageNumber,
+         startY,
+         titleFontSize = 18,
+         pageNumberFontSize = 10
+       ) => {
+         doc.setFontSize(titleFontSize); // Set the font size for the title
+         doc.text(title, doc.internal.pageSize.width / 2, startY, {
+           align: "center",
+         });
+ 
+         // Calculate the x-coordinate for the right corner
+         const rightX = doc.internal.pageSize.width - 10;
+ 
+         // if (date) {
+         //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+         //     if (time) {
+         //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+         //     } else {
+         //         doc.text(date, rightX - 10, startY, { align: "right" });
+         //     }
+         // }
+ 
+         // Add page numbering
+         doc.setFontSize(pageNumberFontSize);
+         doc.text(
+           `Page ${pageNumber}`,
+           rightX - 2 ,
+           doc.internal.pageSize.height - 10,
+           { align: "right" }
+         );
+       };
+ 
+       let currentPageIndex = 0;
+       let startY = paddingTop; // Initialize startY
+       let pageNumber = 1; // Initialize page number
+ 
+       while (currentPageIndex * rowsPerPage < rows.length) {
+         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+         startY += 5; // Adjust vertical position for the company title
+ 
+         addTitle(`Installment Ledger Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+         startY += -5;
+ 
+         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+         const labelsY = startY + 4; // Position the labels below the titles and above the table
+ 
+         // Set font size and weight for the labels
+         doc.setFontSize(12);
+         doc.setFont(getfontstyle, "300");
+ 
+        //  let status =
+        //    transectionType === "N"
+        //      ? "NON-ACTIVE"
+        //      : transectionType === "A"
+        //      ? "ACTIVE"
+        //      : "ALL";
+        //  let search = searchQuery ? searchQuery : "";
+ 
+         // Set font style, size, and family
+        //  doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+        //  doc.setFontSize(10); // Font size
+ 
+        //  doc.setFont(getfontstyle, "bold"); // Set font to bold
+        //  doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
+        //  doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        //  doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
+ 
+        //  if (searchQuery) {
+        //    doc.setFont(getfontstyle, "bold"); // Set font to bold
+        //    doc.text(`SEARCH :`, labelsX + 70, labelsY + 8.5); // Draw bold label
+        //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        //    doc.text(`${search}`, labelsX + 90, labelsY + 8.5); // Draw the value next to the label
+        //  }
+ 
+        //  // // Reset font weight to normal if necessary for subsequent text
+        //  doc.setFont(getfontstyle, "bold"); // Set font to bold
+        //  doc.setFontSize(10);
+ 
+         startY += 10; // Adjust vertical position for the labels
+ 
+         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+         const startIndex = currentPageIndex * rowsPerPage;
+         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+         startY = addTableRows(
+           (doc.internal.pageSize.width - totalWidth) / 2,
+           startY,
+           startIndex,
+           endIndex
+         );
+         if (endIndex < rows.length) {
+           startY = addNewPage(startY); // Add new page and update startY
+           pageNumber++; // Increment page number
+         }
+         currentPageIndex++;
+       }
+     };
+ 
+     const getCurrentDate = () => {
+       const today = new Date();
+       const dd = String(today.getDate()).padStart(2, "0");
+       const mm = String(today.getMonth() + 1).padStart(2, "0");
+       const yyyy = today.getFullYear();
+       return `${dd}-${mm}-${yyyy}`;
+     };
+ 
+     // Function to get current time in the format HH:MM:SS
+     const getCurrentTime = () => {
+       const today = new Date();
+       const hh = String(today.getHours()).padStart(2, "0");
+       const mm = String(today.getMinutes()).padStart(2, "0");
+       const ss = String(today.getSeconds()).padStart(2, "0");
+       return hh + ":" + mm + ":" + ss;
+     };
+ 
+     const date = getCurrentDate(); // Get current date
+     const time = getCurrentTime(); // Get current time
+ 
+     // Call function to handle pagination
+     handlePagination();
+ 
+     // Save the PDF files
+     doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
+   };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-
-        const numColumns = 11; // Number of columns
-
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
-
-        const columnAlignments = [
-            "left",
-            "left",
-            "left",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-
-        ];
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-        // Add title rows
-        [
-            comapnyname,
-            `Installment Balance Report`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
-        });
-
-        //    worksheet.addRow([]); // Empty row for spacing
-
-        // let typeText = selectedOptionType ? selectedOptionType : "All";
-        let typeItem = transectionType ? transectionType : "All";
-
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            //    `Status: ${typeItem}`,
-            "",
-            "",
-            // `Type: ${typeText}`,
-            "",
-            "",
-            "",
-        ]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-
-        worksheet.addRow([]); // Empty row for spacing
-
-        const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
-        };
-
-        // Add headers
-        const headers = [
-            "Code",
-            "Customer",
-            "Sale Date",
-            'Sale',
-            'Advance',
-            'Collection',
-            "Ins #",
-            "Ins Amt",
-            'Last Date',
-            'Balance',
-            'Collector'
-
-        ];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
-        });
-
-        // Add data rows
-        tableData.forEach((item) => {
-            worksheet.addRow([
-                item.tinscod,
-                item.Customer,
-                item['Sale Date'],
+           const workbook = new ExcelJS.Workbook();
+           const worksheet = workbook.addWorksheet("Sheet1");
+         
+           const numColumns = 7; // Ensure this matches the actual number of columns
+         
+           const columnAlignments = ["left", "left", "center","left", "right",'right',"right"];
+         
+           // Define fonts for different sections
+           const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+           const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+           const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
+           const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+         
+           // Add an empty row at the start
+           worksheet.addRow([]);
+         
+           // Add company name
+           const companyRow = worksheet.addRow([comapnyname]);
+           companyRow.eachCell((cell) => {
+             cell.font = fontCompanyName;
+             cell.alignment = { horizontal: "center" };
+           });
+         
+           worksheet.getRow(companyRow.number).height = 30;
+           worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+         
+           // Add Store List row
+           const storeListRow = worksheet.addRow(["Installment Ledger Report"]);
+           storeListRow.eachCell((cell) => {
+             cell.font = fontStoreList;
+             cell.alignment = { horizontal: "center" };
+           });
+         
+           worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+         
+           // Add an empty row after the title section
+           worksheet.addRow([]);
+         
+        //    let typestatus = transectionType === "N" ? "Non-Active" : transectionType === "A" ? "Active" : "All";
+        //    let typesearch = searchQuery || "";
+         
+        //    const typeAndStoreRow3 = worksheet.addRow(
+        //      searchQuery
+        //      ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+        //      : ["STATUS :", typestatus, ""]    );
+         
+           // Apply styling for the status row
+        //    typeAndStoreRow3.eachCell((cell, colIndex) => {
+        //      cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
+        //      cell.alignment = { horizontal: "left", vertical: "middle" };
+        //    });
+         
+           // Header style
+           const headerStyle = {
+             font: fontHeader,
+             alignment: { horizontal: "center", vertical: "middle" },
+             fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+             border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+           };
+         
+           // Add headers
+           const headers = ["Date", "Trn#", "Type", "Description", "Sale", "Collection"," Balance"];
+           const headerRow = worksheet.addRow(headers);
+           headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+         
+           // Add data rows
+           tableData.forEach((item) => {
+             const row = worksheet.addRow([
+                item.Date,
+                item['Trn#'],
+                item.Type,
+                item.Description,
                 item.Sale,
-                item.Advance,
                 item.Collection,
-                item['Ins #'],
-                item['Ins Amt'],
-                item['Last Date'],
-                item.Balance,
-                item.Collector
-            ]);
-        });
-
-        // Add total row and bold it
-        const totalRow = worksheet.addRow([
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-
-        ]);
-        totalRow.eachCell((cell) => {
-            cell.font = { bold: true };
-        });
-
-        // Set column widths
-        [10, 30, 10, 10, 10, 10, 7, 10, 10, 10, 10].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
-            }
-        });
-
-        // Generate Excel file buffer and save
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, "InstallmentBalanceReport.xlsx");
-    };
+                item.Balance,            ]);
+         
+             row.eachCell((cell, colIndex) => {
+               cell.font = fontTableContent;
+               cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+               cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
+             });
+           });
+         
+           // Set column widths
+           [12, 10,8,45, 15,15,15 ].forEach((width, index) => {
+             worksheet.getColumn(index + 1).width = width;
+           });
+         
+           // Get current date
+           const getCurrentDate = () => {
+             const today = new Date();
+             const day = String(today.getDate()).padStart(2, "0");
+             const month = String(today.getMonth() + 1).padStart(2, "0");
+             const year = today.getFullYear();
+             return `${day}-${month}-${year}`;
+           };
+         
+           const currentdate = getCurrentDate();
+         
+           // Generate and save the Excel file
+           const buffer = await workbook.xlsx.writeBuffer();
+           const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+           saveAs(blob, `InstallmentLedgerReport As On ${currentdate}.xlsx`);
+         };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
 
@@ -954,25 +852,25 @@ export default function InstallmentLedgerReport() {
 
 
     const firstColWidth = {
-        width: "10%",
-    };
-    const secondColWidth = {
-        width: "10%",
-    };
-    const thirdColWidth = {
         width: "8%",
     };
+    const secondColWidth = {
+        width: "6%",
+    };
+    const thirdColWidth = {
+        width: "4%",
+    };
     const forthColWidth = {
-        width: "40.8%",
+        width: "41.8%",
     };
     const fifthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const sixthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const seventhColWidth = {
-        width: "10%",
+        width: "13%",
     };
 
 

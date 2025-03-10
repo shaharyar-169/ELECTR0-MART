@@ -1586,16 +1586,12 @@ export default function ItemPurchaseSummary() {
     };
 
 
-
-
     const openReport = (code) => {
        
         sessionStorage.setItem("openedFromDoubleClick", "true");
         sessionStorage.setItem("itemLedgerData", JSON.stringify({ fromInputDate, toInputDate, code }));
         window.open("/crystalsol/ItemLedger", "_blank");
     };
-
-
 
     return (
         <>

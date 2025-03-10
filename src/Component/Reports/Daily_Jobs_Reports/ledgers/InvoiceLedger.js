@@ -195,13 +195,10 @@ export default function InvoiceLedgerReport() {
 
         const formData = new URLSearchParams({
             FInvnUm: '',
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
-
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+           FYerDsc: yeardescription || getYearDescription,
+        
 
         }).toString();
 

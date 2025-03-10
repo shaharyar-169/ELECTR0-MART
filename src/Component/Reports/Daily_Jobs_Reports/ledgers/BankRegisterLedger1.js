@@ -397,13 +397,11 @@ export default function BankRegisterLedger1() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
 
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+          
 
         }).toString();
 
@@ -1191,8 +1189,7 @@ export default function BankRegisterLedger1() {
 
         // Set column widths
 
-
-        [12, 8, 6, 40,12,18, 12, 12, 12].forEach((width, index) => {
+        [12,8,6,40,12,18,12,12,12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 

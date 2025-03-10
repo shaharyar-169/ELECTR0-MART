@@ -69,7 +69,7 @@ export default function DailyCashBankBalance() {
     getfromdate,
     gettodate,
     getfontstyle,
-    getdatafontsize
+    getdatafontsize,
   } = useTheme();
 
   const comapnyname = organisation.description;
@@ -369,7 +369,6 @@ export default function DailyCashBankBalance() {
         break;
     }
 
-
     console.log(data);
     document.getElementById(
       "fromdatevalidation"
@@ -383,7 +382,7 @@ export default function DailyCashBankBalance() {
     const formData = new URLSearchParams({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+      FYerDsc: yeardescription || getyeardescription,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FSchTxt: searchQuery,
@@ -437,8 +436,6 @@ export default function DailyCashBankBalance() {
 
     setSelectedToDate(currentDate);
     settoInputDate(formatDate(currentDate));
-
-
   }, []);
 
   useEffect(() => {
@@ -514,9 +511,8 @@ export default function DailyCashBankBalance() {
   };
 
   const exportPDFHandler = () => {
-
     const globalfontsize = 12;
-    console.log('gobal font data', globalfontsize)
+    console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
@@ -539,7 +535,6 @@ export default function DailyCashBankBalance() {
       String(totalDebit),
       String(totalCredit),
       String(closingBalance),
-
     ]);
 
     // Define table column headers and individual column widths
@@ -649,8 +644,6 @@ export default function DailyCashBankBalance() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-
-
           if (
             cellIndex === 2 ||
             cellIndex === 3 ||
@@ -665,8 +658,6 @@ export default function DailyCashBankBalance() {
           } else {
             doc.text(cellValue, cellX, cellY, { baseline: "middle" });
           }
-
-
 
           // Draw column borders (excluding the last column)
           if (cellIndex < row.length - 1) {
@@ -724,8 +715,6 @@ export default function DailyCashBankBalance() {
 
     // Function to handle pagination
     const handlePagination = () => {
-
-
       // Define the addTitle function
       const addTitle = (
         title,
@@ -768,11 +757,17 @@ export default function DailyCashBankBalance() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
 
-        addTitle(`Daily Cash Bank Balance Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+        addTitle(
+          `Daily Cash Bank Balance Report From: ${fromInputDate} To: ${toInputDate}`,
+          "",
+          "",
+          pageNumber,
+          startY,
+          12
+        ); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -782,13 +777,12 @@ export default function DailyCashBankBalance() {
         doc.setFontSize(12);
         doc.setFont(getfontstyle, "300");
 
-
         // Set font style, size, and family
         doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
         doc.setFontSize(10); // Font size
 
         // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, 'bold'); // Set font to bold
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
         startY += 6; // Adjust vertical position for the labels
@@ -834,166 +828,94 @@ export default function DailyCashBankBalance() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`DailyCashBankBalance Report From ${fromInputDate} To ${toInputDate}.pdf`);
-
-
+    doc.save(
+      `DailyCashBankBalance Report From ${fromInputDate} To ${toInputDate}.pdf`
+    );
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
-
-    const numColumns = 6; // Number of columns
-
-    const columnAlignments = ["center",
+  
+    const numColumns = 3; // Ensure this matches the actual number of columns
+  
+    const columnAlignments = [ "center",
       "left",
       "right",
       "right",
       "right",
       "right",];
-
+  
+    // Define fonts for different sections
+    const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+    const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
+    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+  
     // Add an empty row at the start
     worksheet.addRow([]);
-
-    // Add title rows
-
-    [comapnyname, `Daily Cash Bank Balance Report From ${fromInputDate} To ${toInputDate}`
-    ].forEach((title, index) => {
-      // Define custom styles for each title
-      let customStyle;
-      let rowHeight = 20;  // Default row height
-      if (index === 0) {
-        // Style for company name
-        customStyle = {
-          font: { family: getfontstyle, size: 18, bold: true },
-          alignment: { horizontal: "center" },
-        };
-        rowHeight = 30; // Increase row height for company name to avoid overlap
-      } else {
-        // Style for "Item List"
-        customStyle = {
-          font: { family: getfontstyle, size: getdatafontsize, bold: false },
-          alignment: { horizontal: "center" },
-        };
-      }
-
-      // Add row with the title
-      worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-      // Adjust the row height for the company name or other titles
-      worksheet.getRow(index + 2).height = rowHeight;
-
-      // Merge the cells for the title
-      worksheet.mergeCells(
-        `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-      );
+  
+    // Add company name
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
     });
-
-
-
+  
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number}`);
+  
+    // Add Store List row
+    const storeListRow = worksheet.addRow([`Cash&BankBalance Report From ${fromInputDate} To ${toInputDate}`]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+  
+    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number}`);
+  
     // Add an empty row after the title section
-    worksheet.addRow([]);  // This is where you add the empty row
-
-
-
-    const applyStatusRowStyle = (row, boldColumns = []) => {
-      row.eachCell((cell, colIndex) => {
-        // Check if the current cell is in the boldColumns array
-        const isBold = boldColumns.includes(colIndex);
-
-        cell.font = {
-          family: getfontstyle, // Your desired font family
-          size: getdatafontsize, // Your desired font size
-          bold: isBold, // Bold only for specific columns
-        };
-
-        cell.alignment = {
-          horizontal: "left", // Align text to the left
-          vertical: "middle", // Vertically align to the middle
-        };
-
-        cell.border = null; // Remove borders
-      });
-    };
-
-    // Bold specific columns (labels)
-
-
-
-
-    // Header style for center alignment
+    worksheet.addRow([]);
+  
+       
+    // Header style
     const headerStyle = {
-      font: { bold: true, family: getfontstyle, size: getdatafontsize },
-      alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      },
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+      border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
     };
-
+  
     // Add headers
-    const headers = ["Code",
+    const headers = [ "Code",
       "Description",
       "Opening",
       "Debit",
       "Credit",
       "Balance",];
     const headerRow = worksheet.addRow(headers);
-
-    // Apply styles and center alignment to the header row
-    headerRow.eachCell((cell) => {
-      cell.style = { ...headerStyle };
-    });
-
-    // Add data rows
-
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+  
     // Add data rows
     tableData.forEach((item) => {
-      const row = worksheet.addRow([
-        item.Code,
+      const row = worksheet.addRow([   item.Code,
         item.Description,
         item.Opening,
         item.Debit,
         item.Credit,
-        item.Balance,
-      ]);
-
-      // Apply custom styles to each cell in the row
+        item.Balance,]);
+  
       row.eachCell((cell, colIndex) => {
-        cell.font = {
-          family: getfontstyle, // Set your desired font family
-          size: getdatafontsize, // Set the font size
-          bold: false, // Make the font bold
-        };
-
-        cell.border = {
-          top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-          left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-          bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-          right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-        };
-
-        // Align cell content based on columnAlignments array
-        const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-        cell.alignment = {
-          horizontal: alignment,
-          vertical: "middle", // Vertically align to the middle
-        };
+        cell.font = fontTableContent;
+        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
       });
     });
-
-
-
-
-    // total row added
-
+  
+    // Set column widths
+    [14, 45, 15, 15, 15, 15 ].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
 
     const totalRow = worksheet.addRow([
       "",
@@ -1007,7 +929,7 @@ export default function DailyCashBankBalance() {
     // total row added
 
     totalRow.eachCell((cell, colNumber) => {
-      cell.font = { bold: true };
+      cell.font = { name: 'CustomFont', size: getdatafontsize, bold: true }; // Apply CustomFont
       cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
@@ -1016,37 +938,31 @@ export default function DailyCashBankBalance() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
+      if (
+        colNumber === 3 ||
+        colNumber === 4 ||
+        colNumber === 5 ||
+        colNumber === 6
+      ) {
         cell.alignment = { horizontal: "right" };
       }
     });
-
-
-    // Set column widths
-
-
-    [14, 45, 12, 15, 15, 15].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-
-
+  
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-      const yyyy = today.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
     };
-
+  
     const currentdate = getCurrentDate();
-
-    // Generate Excel file buffer and save
+  
+    // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `DailyCashBankBalanceReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `BankBalance Report From ${fromInputDate} To ${toInputDate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1318,7 +1234,15 @@ export default function DailyCashBankBalance() {
                         }
                       />
                       &nbsp;
-                      <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>Custom</label>
+                      <label
+                        htmlFor="custom"
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                        }}
+                      >
+                        Custom
+                      </label>
                     </div>
                     <div className="d-flex align-items-baseline mx-2">
                       <input
@@ -1335,7 +1259,15 @@ export default function DailyCashBankBalance() {
                         }
                       />
                       &nbsp;
-                      <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>30 Days</label>
+                      <label
+                        htmlFor="30"
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                        }}
+                      >
+                        30 Days
+                      </label>
                     </div>
                     <div className="d-flex align-items-baseline mx-2">
                       <input
@@ -1352,7 +1284,15 @@ export default function DailyCashBankBalance() {
                         }
                       />
                       &nbsp;
-                      <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>60 Days</label>
+                      <label
+                        htmlFor="60"
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                        }}
+                      >
+                        60 Days
+                      </label>
                     </div>
                     <div className="d-flex align-items-baseline mx-2">
                       <input
@@ -1369,7 +1309,15 @@ export default function DailyCashBankBalance() {
                         }
                       />
                       &nbsp;
-                      <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>90 Days</label>
+                      <label
+                        htmlFor="90"
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                        }}
+                      >
+                        90 Days
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -1402,7 +1350,13 @@ export default function DailyCashBankBalance() {
                   }}
                 >
                   <label htmlFor="fromDatePicker">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       From :
                     </span>
                   </label>
@@ -1433,7 +1387,9 @@ export default function DailyCashBankBalance() {
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
-                      fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      backgroundColor: getcolor,
                       color: fontcolor,
                       opacity: selectedRadio === "custom" ? 1 : 0.5,
                       pointerEvents:
@@ -1471,7 +1427,9 @@ export default function DailyCashBankBalance() {
                                 ? "pointer"
                                 : "default",
                             marginLeft: "18px",
-                            fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            color: fontcolor,
                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                           }}
                           disabled={selectedRadio !== "custom"}
@@ -1494,7 +1452,13 @@ export default function DailyCashBankBalance() {
                   }}
                 >
                   <label htmlFor="toDatePicker">
-                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       To :
                     </span>
                   </label>
@@ -1526,7 +1490,9 @@ export default function DailyCashBankBalance() {
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
-                      fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      backgroundColor: getcolor,
                       color: fontcolor,
                       opacity: selectedRadio === "custom" ? 1 : 0.5,
                       pointerEvents:
@@ -1563,7 +1529,9 @@ export default function DailyCashBankBalance() {
                                 ? "pointer"
                                 : "default",
                             marginLeft: "18px",
-                            fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            color: fontcolor,
                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                           }}
                           disabled={selectedRadio !== "custom"}
@@ -1574,7 +1542,6 @@ export default function DailyCashBankBalance() {
                   />
                 </div>
               </div>
-
             </div>
           </div>
           <div>
@@ -1588,14 +1555,17 @@ export default function DailyCashBankBalance() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  width: "100%",
                   position: "relative",
                   paddingRight: "2%",
                 }}
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -1647,7 +1617,9 @@ export default function DailyCashBankBalance() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  width: "100%",
                   position: "relative",
                 }}
               >
@@ -1827,7 +1799,6 @@ export default function DailyCashBankBalance() {
             <SingleButton
               to="/MainPage"
               text="Return"
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1836,7 +1807,6 @@ export default function DailyCashBankBalance() {
             <SingleButton
               text="PDF"
               onClick={exportPDFHandler}
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1845,7 +1815,6 @@ export default function DailyCashBankBalance() {
             <SingleButton
               text="Excel"
               onClick={handleDownloadCSV}
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1856,7 +1825,6 @@ export default function DailyCashBankBalance() {
               text="Select"
               ref={input3Ref}
               onClick={fetchDailyCashBankBalance}
-              style={{ backgroundColor: "#186DB7", width: "120px" }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

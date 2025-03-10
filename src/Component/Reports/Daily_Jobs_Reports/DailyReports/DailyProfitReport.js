@@ -414,9 +414,9 @@ export default function DailyProfitReport() {
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
             FRepRat: Retrate,
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
 
             FSchTxt: searchQuery
         }).toString();

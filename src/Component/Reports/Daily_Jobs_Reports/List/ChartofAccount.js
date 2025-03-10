@@ -72,7 +72,8 @@ export default function ChartofAccount() {
     const formData = new URLSearchParams({
       FAccSts: transectionType,
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
+      // FLocCod: locationnumber || getLocationNumber,
+      FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
@@ -345,7 +346,7 @@ export default function ChartofAccount() {
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
 
-        addTitle(`ChartOfAccount List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+        addTitle(`Chart Of Account List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -459,7 +460,7 @@ export default function ChartofAccount() {
      worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
    
      // Add Store List row
-     const storeListRow = worksheet.addRow(["ChartOfAccount List"]);
+     const storeListRow = worksheet.addRow(["Chart Of Account List"]);
      storeListRow.eachCell((cell) => {
        cell.font = fontStoreList;
        cell.alignment = { horizontal: "center" };
@@ -509,7 +510,7 @@ export default function ChartofAccount() {
      });
    
      // Set column widths
-     [12, 50, 10, ].forEach((width, index) => {
+     [12, 50, 13 ].forEach((width, index) => {
        worksheet.getColumn(index + 1).width = width;
      });
    
@@ -706,7 +707,7 @@ export default function ChartofAccount() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="ChartOfAccount List" />
+          <NavComponent textdata="Chart Of Account List" />
 
           <div
             className="row"

@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -63,6 +63,8 @@ export default function CashFlowReport() {
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
 
+      const yeardescription = getYearDescription();
+        const locationnumber = getLocationnumber()
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -376,9 +378,11 @@ export default function CashFlowReport() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            code: 'NASIRTRD',
+            code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getyeardescription,
+             FLocCod: '001',
             FYerDsc: '2024-2024',
-            FLocCod: '001',
             FAccCod: "12-01-0001"
 
         }).toString();

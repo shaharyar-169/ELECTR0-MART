@@ -60,8 +60,8 @@ export default function DailyCashReceipts() {
 
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
 
-const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber()
+    const yeardescription = getYearDescription();
+    const locationnumber = getLocationnumber()
 
     const {
         isSidebarVisible,
@@ -287,6 +287,8 @@ const yeardescription = getYearDescription();
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription
 
+           
+
         }).toString();
 
         axios
@@ -314,12 +316,9 @@ const yeardescription = getYearDescription();
         setIsLoading(true);
         const formData = new URLSearchParams({
             FTrnDat: toInputDate,
-            code: 'NASIRTRD',
-            // code: organisation.code,
-            // FYerDsc: getyeardescription,
-            FYerDsc: '2024-2024',
-            // FLocCod: getLocationNumber,
-            FLocCod: '001',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
 
         }).toString();
 
@@ -771,37 +770,37 @@ const yeardescription = getYearDescription();
                 const fixedWidth = 20; // Set a fixed width for both rectangles
                 const fixedHeight = 5; // Keep height constant
                 const rightPadding = 3; // Padding from the right side
-                
+
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.text(`OPENING BAL :`, labelsX + 62, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                
+
                 // Draw the value inside the border
                 const textWidthStatus = doc.getTextWidth(status); // Get the width of the status text
                 const statusX = labelsX + 92 + fixedWidth - textWidthStatus - rightPadding; // Right-align with padding
                 const statusY = labelsY + 8.5;
-                
+
                 doc.text(`${status}`, statusX, statusY); // Draw the text
-                
+
                 // Draw a rectangle with fixed width and height
                 doc.rect(labelsX + 90, statusY - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
-                
+
                 // Positioning for CLOSING BALANCE
                 const closingLabelX = labelsX + 172; // Space after OPENING BAL
                 doc.setFont(getfontstyle, 'bold');
                 doc.text(`CLOSING BAL :`, closingLabelX, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal');
-                
+
                 // Draw the value inside the border
                 const textWidthSearch = doc.getTextWidth(search); // Get the width of the search text
                 const statusX1 = closingLabelX + 30 + fixedWidth - textWidthSearch - rightPadding; // Right-align with padding
                 const statusY1 = labelsY + 8.5;
-                
+
                 doc.text(`${search}`, statusX1, statusY1); // Draw the text
-                
+
                 // Draw a rectangle with fixed width and height
                 doc.rect(closingLabelX + 28, statusY1 - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
-                
+
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -856,209 +855,209 @@ const yeardescription = getYearDescription();
 
     };
 
-     const handleDownloadCSV = async () => {
-                  const workbook = new ExcelJS.Workbook();
-                  const worksheet = workbook.addWorksheet("Sheet1");
-          
-                  const numColumns = 6; // Number of columns
-          
-                  const columnAlignments = ["left", "right", "left", "right"];
-          
-                  // Add an empty row at the start
-                  worksheet.addRow([]);
-          
-                  // Add title rows
-                  
-               [comapnyname,  `Daily Cash Book From ${toInputDate}`,].forEach((title, index) => {
-                   // Define custom styles for each title
-                   let customStyle;
-                   let rowHeight = 20;  // Default row height
-                   if (index === 0) {
-                       // Style for company name
-                       customStyle = {
-                           font: { family: getfontstyle, size: 18, bold: true },
-                           alignment: { horizontal: "center" },
-                       };
-                       rowHeight = 30; // Increase row height for company name to avoid overlap
-                   } else {
-                       // Style for "Item List"
-                       customStyle = {
-                           font: { family: getfontstyle, size: getdatafontsize, bold: false },
-                           alignment: { horizontal: "center" },
-                       };
-                   }
-       
-                   // Add row with the title
-                   worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-       
-                   // Adjust the row height for the company name or other titles
-                   worksheet.getRow(index + 2).height = rowHeight;
-       
-                   // Merge the cells for the title
-                   worksheet.mergeCells(
-                       `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-                   );
-               });
-          
-          
-          
-                  // Add an empty row after the title section
-                  worksheet.addRow([]);  // This is where you add the empty row
-          
-          
-                let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null
-                let search = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null;
-          
-                  const typeAndStoreRow3 = worksheet.addRow(
-                       ["ONPENING BAL :", status,  "CLOSING BAL :", search]
-                  );
-          
-                  const applyStatusRowStyle = (row, boldColumns = []) => {
-                      row.eachCell((cell, colIndex) => {
-                          // Check if the current cell is in the boldColumns array
-                          const isBold = boldColumns.includes(colIndex);
-          
-                          cell.font = {
-                              family: getfontstyle, // Your desired font family
-                              size: getdatafontsize, // Your desired font size
-                              bold: isBold, // Bold only for specific columns
-                          };
-          
-                          cell.alignment = {
-                              horizontal: "right", // Align text to the left
-                              vertical: "middle", // Vertically align to the middle
-                          };
-          
-                          cell.border = null; // Remove borders
-                      });
-                  };
-          
-                  // Bold specific columns (labels)
-          
-                  applyStatusRowStyle(typeAndStoreRow3, [1,3]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-          
-          
-          
-                  // Header style for center alignment
-                  const headerStyle = {
-                      font: { bold: true, family: getfontstyle, size: getdatafontsize },
-                      alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-                      fill: {
-                          type: "pattern",
-                          pattern: "solid",
-                          fgColor: { argb: "FFC6D9F7" },
-                      },
-                      border: {
-                          top: { style: "thin" },
-                          left: { style: "thin" },
-                          bottom: { style: "thin" },
-                          right: { style: "thin" },
-                      },
-                  };
-          
-                  // Add headers
-                  const headers = [
-                  "Receipt",
+    const handleDownloadCSV = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Sheet1");
+
+        const numColumns = 6; // Number of columns
+
+        const columnAlignments = ["left", "right", "left", "right"];
+
+        // Add an empty row at the start
+        worksheet.addRow([]);
+
+        // Add title rows
+
+        [comapnyname, `Daily Cash Book From ${toInputDate}`,].forEach((title, index) => {
+            // Define custom styles for each title
+            let customStyle;
+            let rowHeight = 20;  // Default row height
+            if (index === 0) {
+                // Style for company name
+                customStyle = {
+                    font: { family: getfontstyle, size: 18, bold: true },
+                    alignment: { horizontal: "center" },
+                };
+                rowHeight = 30; // Increase row height for company name to avoid overlap
+            } else {
+                // Style for "Item List"
+                customStyle = {
+                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
+                    alignment: { horizontal: "center" },
+                };
+            }
+
+            // Add row with the title
+            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
+
+            // Adjust the row height for the company name or other titles
+            worksheet.getRow(index + 2).height = rowHeight;
+
+            // Merge the cells for the title
+            worksheet.mergeCells(
+                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+            );
+        });
+
+
+
+        // Add an empty row after the title section
+        worksheet.addRow([]);  // This is where you add the empty row
+
+
+        let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null
+        let search = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null;
+
+        const typeAndStoreRow3 = worksheet.addRow(
+            ["ONPENING BAL :", status, "CLOSING BAL :", search]
+        );
+
+        const applyStatusRowStyle = (row, boldColumns = []) => {
+            row.eachCell((cell, colIndex) => {
+                // Check if the current cell is in the boldColumns array
+                const isBold = boldColumns.includes(colIndex);
+
+                cell.font = {
+                    family: getfontstyle, // Your desired font family
+                    size: getdatafontsize, // Your desired font size
+                    bold: isBold, // Bold only for specific columns
+                };
+
+                cell.alignment = {
+                    horizontal: "right", // Align text to the left
+                    vertical: "middle", // Vertically align to the middle
+                };
+
+                cell.border = null; // Remove borders
+            });
+        };
+
+        // Bold specific columns (labels)
+
+        applyStatusRowStyle(typeAndStoreRow3, [1, 3]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
+
+
+
+        // Header style for center alignment
+        const headerStyle = {
+            font: { bold: true, family: getfontstyle, size: getdatafontsize },
+            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
+            fill: {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFC6D9F7" },
+            },
+            border: {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            },
+        };
+
+        // Add headers
+        const headers = [
+            "Receipt",
             "Amount",
             "Payments",
             "Amount",
-                  ];
-                  const headerRow = worksheet.addRow(headers);
-          
-                  // Apply styles and center alignment to the header row
-                  headerRow.eachCell((cell) => {
-                      cell.style = { ...headerStyle };
-                  });
-          
-                  // Add data rows
-          
-                  // Add data rows
-                  CashPaymentData.forEach((cashPaymentItem, index) => {
-                    // Retrieve corresponding data from tableData
-                    const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
-                
-                    // Add a new row and store the reference
-                    const row = worksheet.addRow([
-                        tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
-                        tableItem.Amount || "", // Second column - From tableData
-                        cashPaymentItem['Trn#'] ? `${cashPaymentItem['Trn#']} - ${cashPaymentItem.Description}` : "", // Third column - From CashPaymentData
-                        cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
-                    ]);
-                
-                    // Apply custom styles to each cell in the row
-                    row.eachCell((cell, colIndex) => {
-                        cell.font = {
-                            family: getfontstyle, // Set your desired font family
-                            size: getdatafontsize, // Set the font size
-                            bold: false, // Make the font bold
-                        };
-                
-                        cell.border = {
-                            top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-                            left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-                            bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-                            right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-                        };
-                
-                        // Align cell content based on columnAlignments array
-                        const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-                        cell.alignment = {
-                            horizontal: alignment,
-                            vertical: "middle", // Vertically align to the middle
-                        };
-                    });
-                });
-                
-          
-                  // Set column widths
-       
-                  const totalRow = worksheet.addRow([
-                    "",
-                    totalDebit,
-                    "",
-                    totalCredit,
-               ]);
-       
-               // total row added
-       
-               totalRow.eachCell((cell, colNumber) => {
-                   cell.font = { bold: true };
-                   cell.border = {
-                       top: { style: "thin" },
-                       left: { style: "thin" },
-                       bottom: { style: "thin" },
-                       right: { style: "thin" },
-                   };
-       
-                   // Align only the "Total" text to the right
-                   if (colNumber === 5) {
-                       cell.alignment = { horizontal: "right" };
-                   }
-               });
-                   
-          
-               [48, 12, 48, 12].forEach((width, index) => {
-                      worksheet.getColumn(index + 1).width = width;
-                  });
-       
-        
-                  const getCurrentDate = () => {
-                      const today = new Date();
-                      const dd = String(today.getDate()).padStart(2, "0");
-                      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-                      const yyyy = today.getFullYear();
-                      return dd + "-" + mm + "-" + yyyy;
-                  };
-          
-                  const currentdate = getCurrentDate();
-          
-                  // Generate Excel file buffer and save
-                  const buffer = await workbook.xlsx.writeBuffer();
-                  const blob = new Blob([buffer], {
-                      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                  });
-                  saveAs(blob, `DailyCashBookReport As on ${currentdate}.xlsx`);
-              };
+        ];
+        const headerRow = worksheet.addRow(headers);
+
+        // Apply styles and center alignment to the header row
+        headerRow.eachCell((cell) => {
+            cell.style = { ...headerStyle };
+        });
+
+        // Add data rows
+
+        // Add data rows
+        CashPaymentData.forEach((cashPaymentItem, index) => {
+            // Retrieve corresponding data from tableData
+            const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
+
+            // Add a new row and store the reference
+            const row = worksheet.addRow([
+                tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
+                tableItem.Amount || "", // Second column - From tableData
+                cashPaymentItem['Trn#'] ? `${cashPaymentItem['Trn#']} - ${cashPaymentItem.Description}` : "", // Third column - From CashPaymentData
+                cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
+            ]);
+
+            // Apply custom styles to each cell in the row
+            row.eachCell((cell, colIndex) => {
+                cell.font = {
+                    family: getfontstyle, // Set your desired font family
+                    size: getdatafontsize, // Set the font size
+                    bold: false, // Make the font bold
+                };
+
+                cell.border = {
+                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
+                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
+                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
+                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
+                };
+
+                // Align cell content based on columnAlignments array
+                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
+                cell.alignment = {
+                    horizontal: alignment,
+                    vertical: "middle", // Vertically align to the middle
+                };
+            });
+        });
+
+
+        // Set column widths
+
+        const totalRow = worksheet.addRow([
+            "",
+            totalDebit,
+            "",
+            totalCredit,
+        ]);
+
+        // total row added
+
+        totalRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true };
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            };
+
+            // Align only the "Total" text to the right
+            if (colNumber === 5) {
+                cell.alignment = { horizontal: "right" };
+            }
+        });
+
+
+        [48, 12, 48, 12].forEach((width, index) => {
+            worksheet.getColumn(index + 1).width = width;
+        });
+
+
+        const getCurrentDate = () => {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, "0");
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const yyyy = today.getFullYear();
+            return dd + "-" + mm + "-" + yyyy;
+        };
+
+        const currentdate = getCurrentDate();
+
+        // Generate Excel file buffer and save
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        saveAs(blob, `DailyCashBookReport As on ${currentdate}.xlsx`);
+    };
 
 
     const getDayName = (dateString) => {
