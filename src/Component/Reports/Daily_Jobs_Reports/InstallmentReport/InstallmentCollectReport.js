@@ -1432,14 +1432,14 @@ export default function InstallmentCollectReport() {
                             >
                                 <div
                                     style={{
-                                        width: "60px",
+                                        width: "75px",
                                         display: "flex",
                                         justifyContent: "end",
                                     }}
                                 >
                                     <label htmlFor="transactionType">
                                         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                            Type :
+                                            A/C Type :
                                         </span>
                                     </label>
                                 </div>
@@ -1504,9 +1504,9 @@ export default function InstallmentCollectReport() {
                             {/* ------ */}
 
 
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '2px' }}>
+                            <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
                                 <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Account :</span>  <br /></label>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Collector :</span>  <br /></label>
                                 </div>
                                 <div style={{ marginLeft: '3px' }} >
                                     <Select
