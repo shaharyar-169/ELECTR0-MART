@@ -32,6 +32,13 @@ export default function TechnicianList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+      const [isAscendingdec, setisAscendingdec] = useState(true);
+      const [isAscendingmobile, setisAscendingmobile] = useState(true);
+      const [isAscendingcnic, setisAscendingcnic] = useState(true);
+      const [isAscendingaera, setisAscendingaera] = useState(true);
+      const [isAscendingsts, setisAscendingsts] = useState(true);
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -446,9 +453,9 @@ export default function TechnicianList() {
        
          // Define fonts for different sections
          const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-         const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
-         const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
-         const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+         const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+         const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+         const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
        
          // Add an empty row at the start
          worksheet.addRow([]);
@@ -485,7 +492,7 @@ export default function TechnicianList() {
        
          // Apply styling for the status row
          typeAndStoreRow3.eachCell((cell, colIndex) => {
-           cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
+           cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
            cell.alignment = { horizontal: "left", vertical: "middle" };
          });
        
@@ -562,29 +569,40 @@ export default function TechnicianList() {
   let totalEntries = 0;
 
   const handleSorting = async (col) => {
+    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
+  
     const parseValue = (value) => {
-      // Remove commas and parse the string to a float
-      return parseFloat(value.replace(/,/g, ""));
+      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
     };
-
+  
     const sorted = [...tableData].sort((a, b) => {
-      const aValue = a[col] !== null ? a[col].toString() : "";
-      const bValue = b[col] !== null ? b[col].toString() : "";
-
-      const numA = parseValue(aValue);
-      const numB = parseValue(bValue);
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return sortData === "ASC" ? numA - numB : numB - numA;
+      const aValue = parseValue(a[col]);
+      const bValue = parseValue(b[col]);
+  
+      if (!isNaN(aValue) && !isNaN(bValue)) {
+        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
       } else {
-        return sortData === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+        return newSortOrder === "ASC"
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue)); // String sorting
       }
     });
-
+  
     setTableData(sorted);
-    setSortData(sortData === "ASC" ? "DSC" : "ASC");
+    setSortData(newSortOrder); // Update sort order
+  
+    const columnMappings = {
+      "ttchcod": setisAscendingcode,
+      "ttchdsc": setisAscendingdec,
+      "tmobnum": setisAscendingmobile,
+      "tnicnum": setisAscendingcnic,
+      "Area": setisAscendingaera,
+      "ttchsts": setisAscendingsts,
+    };
+  
+    if (columnMappings[col]) {
+      columnMappings[col](newSortOrder === "ASC");
+    }
   };
 
   const firstColWidth = {
@@ -872,7 +890,13 @@ export default function TechnicianList() {
                       onClick={() => handleSorting("ttchcod")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -880,7 +904,13 @@ export default function TechnicianList() {
                       onClick={() => handleSorting("ttchdsc")}
                     >
                       Description{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdec ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -888,7 +918,13 @@ export default function TechnicianList() {
                       onClick={() => handleSorting("tmobnum")}
                     >
                       Mobile{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingmobile ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingmobile ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -896,7 +932,13 @@ export default function TechnicianList() {
                       onClick={() => handleSorting("tnicnum")}
                     >
                       Cnic{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcnic ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcnic ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -904,7 +946,13 @@ export default function TechnicianList() {
                       onClick={() => handleSorting("Area")}
                     >
                       Area{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingaera ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingaera ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -912,7 +960,13 @@ export default function TechnicianList() {
                       onClick={() => handleSorting("ttchsts")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                   </tr>
                 </thead>

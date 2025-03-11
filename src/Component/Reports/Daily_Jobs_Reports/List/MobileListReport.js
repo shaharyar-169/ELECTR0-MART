@@ -33,6 +33,10 @@ export default function MobileListReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+  const [isAscendingdec, setisAscendingdec] = useState(true);
+  const [isAscendingsts, setisAscendingsts] = useState(true);
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -445,9 +449,9 @@ export default function MobileListReport() {
       
         // Define fonts for different sections
         const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
       
         // Add an empty row at the start
         worksheet.addRow([]);
@@ -484,7 +488,7 @@ export default function MobileListReport() {
       
         // Apply styling for the status row
         typeAndStoreRow3.eachCell((cell, colIndex) => {
-          cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
+          cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
           cell.alignment = { horizontal: "left", vertical: "middle" };
         });
       
@@ -556,29 +560,37 @@ export default function MobileListReport() {
   let totalEntries = 0;
 
   const handleSorting = async (col) => {
+    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
+  
     const parseValue = (value) => {
-      // Remove commas and parse the string to a float
-      return parseFloat(value.replace(/,/g, ""));
+      return parseFloat(value.replace(/,/g, "")); // Remove commas and parse as float
     };
-
+  
     const sorted = [...tableData].sort((a, b) => {
       const aValue = a[col] !== null ? a[col].toString() : "";
       const bValue = b[col] !== null ? b[col].toString() : "";
-
+  
       const numA = parseValue(aValue);
       const numB = parseValue(bValue);
-
+  
       if (!isNaN(numA) && !isNaN(numB)) {
-        return sortData === "ASC" ? numA - numB : numB - numA;
+        return newSortOrder === "ASC" ? numA - numB : numB - numA; // Use newSortOrder instead of state
       } else {
-        return sortData === "ASC"
+        return newSortOrder === "ASC"
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
     });
-
+  
     setTableData(sorted);
-    setSortData(sortData === "ASC" ? "DSC" : "ASC");
+    setSortData(newSortOrder); // Update sort order
+    if (col === "tmobnum") {
+      setisAscendingcode(newSortOrder === "ASC");
+    } else if (col === "tcstnam") {
+      setisAscendingdec(newSortOrder === "ASC");
+    } else if (col === "tmobsts") {
+      setisAscendingsts(newSortOrder === "ASC");
+    }
   };
 
   const firstColWidth = {
@@ -856,7 +868,13 @@ export default function MobileListReport() {
                       onClick={() => handleSorting("tmobnum")}
                     >
                       Mobile{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -864,7 +882,13 @@ export default function MobileListReport() {
                       onClick={() => handleSorting("tcstnam")}
                     >
                       Name{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdec ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -872,7 +896,13 @@ export default function MobileListReport() {
                       onClick={() => handleSorting("tmobsts")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                   </tr>
                 </thead>

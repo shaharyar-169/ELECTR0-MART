@@ -32,6 +32,15 @@ export default function EmployeeList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
+      const [isAscendingcode, setisAscendingcode] = useState(true);
+      const [isAscendingemploye, setisAscendingemploye] = useState(true);
+      const [isAscendingsts, setisAscendingsts] = useState(true);
+      
+      const [isAscendingdesig, setisAscendingdesig] = useState(true);
+      const [isAscendingcontect, setisAscendingcontect] = useState(true);
+      const [isAscendingadv, setisAscendingadv] = useState(true);
+      const [isAscendingdlv, setisAscendingdlv] = useState(true);
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -73,7 +82,6 @@ export default function EmployeeList() {
       FEmpSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-
       FSchTxt: searchQuery,
 
     }).toString();
@@ -604,31 +612,47 @@ export default function EmployeeList() {
 
   let totalEntries = 0;
 
+ 
+
   const handleSorting = async (col) => {
+    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
+  
     const parseValue = (value) => {
-      // Remove commas and parse the string to a float
-      return parseFloat(value.replace(/,/g, ""));
+      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
     };
-
+  
     const sorted = [...tableData].sort((a, b) => {
-      const aValue = a[col] !== null ? a[col].toString() : "";
-      const bValue = b[col] !== null ? b[col].toString() : "";
-
-      const numA = parseValue(aValue);
-      const numB = parseValue(bValue);
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return sortData === "ASC" ? numA - numB : numB - numA;
+      const aValue = parseValue(a[col]);
+      const bValue = parseValue(b[col]);
+  
+      if (!isNaN(aValue) && !isNaN(bValue)) {
+        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
       } else {
-        return sortData === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+        return newSortOrder === "ASC"
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue)); // String sorting
       }
     });
-
+  
     setTableData(sorted);
-    setSortData(sortData === "ASC" ? "DSC" : "ASC");
+    setSortData(newSortOrder); // Update sort order
+  
+    const columnMappings = {
+      "Code": setisAscendingcode,
+      "Employee": setisAscendingemploye,
+      "Status": setisAscendingsts,
+      "Designation": setisAscendingdesig,
+      "COntact #": setisAscendingcontect,
+      "Adv Code": setisAscendingadv,
+      "Exp Code": setisAscendingdlv,
+    };
+  
+    if (columnMappings[col]) {
+      columnMappings[col](newSortOrder === "ASC");
+    }
   };
+  
+
 
   const firstColWidth = {
     width: "6.5%",
@@ -929,7 +953,14 @@ export default function EmployeeList() {
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -937,7 +968,14 @@ export default function EmployeeList() {
                       onClick={() => handleSorting("Employee")}
                     >
                       Employee{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingemploye ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingemploye ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -945,7 +983,14 @@ export default function EmployeeList() {
                       onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -953,7 +998,14 @@ export default function EmployeeList() {
                       onClick={() => handleSorting("Designation")}
                     >
                       Designation{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdesig ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdesig ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -961,7 +1013,14 @@ export default function EmployeeList() {
                       onClick={() => handleSorting("COntact #")}
                     >
                       Contact{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcontect ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcontect ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -969,7 +1028,14 @@ export default function EmployeeList() {
                       onClick={() => handleSorting("Adv Code")}
                     >
                       Adv Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingadv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingadv ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -977,7 +1043,14 @@ export default function EmployeeList() {
                       onClick={() => handleSorting("Exp Code")}
                     >
                       Dlv Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdlv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdlv ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+
+                      ></i>
                     </td>
                   </tr>
                 </thead>

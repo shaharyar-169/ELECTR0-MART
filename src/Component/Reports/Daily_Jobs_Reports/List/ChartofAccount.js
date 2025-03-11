@@ -446,9 +446,9 @@ export default function ChartofAccount() {
    
      // Define fonts for different sections
      const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-     const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
-     const fontHeader = { name: 'CustomFont' || "CustomFont", size: 12, bold: true };
-     const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
+     const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+     const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+     const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
    
      // Add an empty row at the start
      worksheet.addRow([]);
@@ -485,7 +485,7 @@ export default function ChartofAccount() {
    
      // Apply styling for the status row
      typeAndStoreRow3.eachCell((cell, colIndex) => {
-       cell.font = { name: 'CustomFont' || "CustomFont", size: 12, bold: [1, 3].includes(colIndex) };
+       cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
        cell.alignment = { horizontal: "left", vertical: "middle" };
      });
    
@@ -514,7 +514,7 @@ export default function ChartofAccount() {
      });
    
      // Set column widths
-     [12, 50, 13 ].forEach((width, index) => {
+     [11, 50, 13 ].forEach((width, index) => {
        worksheet.getColumn(index + 1).width = width;
      });
    
@@ -556,35 +556,7 @@ export default function ChartofAccount() {
 
   let totalEntries = 0;
 
-  // const handleSorting = async (col) => {
-
-
-  //   const parseValue = (value) => {
-  //     // Remove commas and parse the string to a float
-  //     return parseFloat(value.replace(/,/g, ""));
-  //   };
-
-  //   const sorted = [...tableData].sort((a, b) => {
-  //     const aValue = a[col] !== null ? a[col].toString() : "";
-  //     const bValue = b[col] !== null ? b[col].toString() : "";
-
-  //     const numA = parseValue(aValue);
-  //     const numB = parseValue(bValue);
-
-  //     if (!isNaN(numA) && !isNaN(numB)) {
-  //       return sortData === "ASC" ? numA - numB : numB - numA;
-  //     } else {
-  //       return sortData === "ASC"
-  //         ? aValue.localeCompare(bValue)
-  //         : bValue.localeCompare(aValue);
-  //     }
-  //   });
-
-  //   setTableData(sorted);
-  //   setSortData(sortData === "ASC" ? "DSC" : "ASC");
-  //   setIsAscending(sortData !== "ASC"); // Toggle isAscending state
-  // };
-
+  
   const handleSorting = async (col) => {
     const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
   
@@ -909,10 +881,11 @@ export default function ChartofAccount() {
                     >
                       Code{" "}
                       <i className="fa-solid fa-caret-down caretIconStyle"
-                        style={{
-                          transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                          transition: "transform 0.3s ease",
-                        }}
+                          style={{
+                            transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // Rotate the icon
+                            color: isAscendingcode ? "white" : "red", // Blue for ascending, Red for descending
+                            transition: "transform 0.3s ease, color 0.3s ease", // Smooth transition
+                          }}
                       ></i>
                       
                     </td>
@@ -925,6 +898,7 @@ export default function ChartofAccount() {
                       <i className="fa-solid fa-caret-down caretIconStyle"
                        style={{
                         transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdec ? "white" : "red", // Blue for ascending, Red for descending
                         transition: "transform 0.3s ease",
                       }}
                       ></i>
@@ -939,6 +913,7 @@ export default function ChartofAccount() {
                       <i className="fa-solid fa-caret-down caretIconStyle"
                        style={{
                         transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red", // Blue for ascending, Red for descending
                         transition: "transform 0.3s ease",
                       }}
                       ></i>

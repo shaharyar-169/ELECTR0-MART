@@ -77,6 +77,8 @@ export default function CompanyList() {
     const formData = new URLSearchParams({
       FCmpSts: transectionType,
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FSchTxt: searchQuery,
     }).toString();
 
@@ -445,9 +447,9 @@ export default function CompanyList() {
     
       // Define fonts for different sections
       const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-      const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
-      const fontHeader = { name: 'CustomFont' || "CustomFont", size: 12, bold: true };
-      const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 12, bold: false };
+      const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+      const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+      const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
     
       // Add an empty row at the start
       worksheet.addRow([]);
@@ -484,7 +486,7 @@ export default function CompanyList() {
     
       // Apply styling for the status row
       typeAndStoreRow3.eachCell((cell, colIndex) => {
-        cell.font = { name: 'CustomFont' || "CustomFont", size: 12, bold: [1, 3].includes(colIndex) };
+        cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
         cell.alignment = { horizontal: "left", vertical: "middle" };
       });
     
@@ -879,6 +881,7 @@ export default function CompanyList() {
                       <i className="fa-solid fa-caret-down caretIconStyle"
                        style={{
                         transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
                         transition: "transform 0.3s ease",
                       }}
                       ></i>
@@ -892,6 +895,7 @@ export default function CompanyList() {
                       <i className="fa-solid fa-caret-down caretIconStyle"
                        style={{
                         transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdec ? "white" : "red",
                         transition: "transform 0.3s ease",
                       }}
                       ></i>
@@ -905,6 +909,7 @@ export default function CompanyList() {
                       <i className="fa-solid fa-caret-down caretIconStyle"
                        style={{
                         transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
                         transition: "transform 0.3s ease",
                       }}
                       ></i>

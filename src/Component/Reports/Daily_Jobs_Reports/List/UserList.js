@@ -32,6 +32,17 @@ export default function UserList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
+
+        const [isAscendingcode, setisAscendingcode] = useState(true);
+        const [isAscendingemploye, setisAscendingemploye] = useState(true);
+        const [isAscendingsts, setisAscendingsts] = useState(true);
+        const [isAscendingdesig, setisAscendingdesig] = useState(true);
+        const [isAscendingcontect, setisAscendingcontect] = useState(true);
+        const [isAscendingadv, setisAscendingadv] = useState(true);
+        const [isAscendingdlv, setisAscendingdlv] = useState(true);
+        const [isAscendingdate, setisAscendingdate] = useState(true);
+       
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -464,9 +475,9 @@ export default function UserList() {
       
         // Define fonts for different sections
         const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
       
         // Add an empty row at the start
         worksheet.addRow([]);
@@ -503,7 +514,7 @@ export default function UserList() {
       
         // Apply styling for the status row
         typeAndStoreRow3.eachCell((cell, colIndex) => {
-          cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
+          cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
           cell.alignment = { horizontal: "left", vertical: "middle" };
         });
       
@@ -589,30 +600,45 @@ export default function UserList() {
   let totalEntries = 0;
 
   const handleSorting = async (col) => {
+    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
+  
     const parseValue = (value) => {
-      // Remove commas and parse the string to a float
-      return parseFloat(value.replace(/,/g, ""));
+      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
     };
-
+  
     const sorted = [...tableData].sort((a, b) => {
-      const aValue = a[col] !== null ? a[col].toString() : "";
-      const bValue = b[col] !== null ? b[col].toString() : "";
-
-      const numA = parseValue(aValue);
-      const numB = parseValue(bValue);
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return sortData === "ASC" ? numA - numB : numB - numA;
+      const aValue = parseValue(a[col]);
+      const bValue = parseValue(b[col]);
+  
+      if (!isNaN(aValue) && !isNaN(bValue)) {
+        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
       } else {
-        return sortData === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+        return newSortOrder === "ASC"
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue)); // String sorting
       }
     });
-
+  
     setTableData(sorted);
-    setSortData(sortData === "ASC" ? "DSC" : "ASC");
+    setSortData(newSortOrder); // Update sort order
+  
+    const columnMappings = {
+      "ID": setisAscendingcode,
+      "Name": setisAscendingemploye,
+      "Status": setisAscendingsts,
+      "Type": setisAscendingdesig,
+      "Mobile": setisAscendingcontect,
+      "Email": setisAscendingadv,
+      "Log Date": setisAscendingdlv,
+      "Log Time": setisAscendingdate,
+     
+    };
+  
+    if (columnMappings[col]) {
+      columnMappings[col](newSortOrder === "ASC");
+    }
   };
+  
 
   const firstColWidth = {
     width: "10%",
@@ -916,7 +942,13 @@ export default function UserList() {
                       onClick={() => handleSorting("ID")}
                     >
                       ID{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -924,7 +956,13 @@ export default function UserList() {
                       onClick={() => handleSorting("Name")}
                     >
                       Name{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingemploye ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingemploye ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -932,7 +970,13 @@ export default function UserList() {
                       onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -940,7 +984,13 @@ export default function UserList() {
                       onClick={() => handleSorting("Type")}
                     >
                       Type{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdesig ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdesig ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -948,7 +998,13 @@ export default function UserList() {
                       onClick={() => handleSorting("Mobile")}
                     >
                       Mobile{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcontect ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcontect ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -956,7 +1012,13 @@ export default function UserList() {
                       onClick={() => handleSorting("Email")}
                     >
                       Email{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingadv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingadv ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -964,7 +1026,13 @@ export default function UserList() {
                       onClick={() => handleSorting("Log Date")}
                     >
                       Log Date{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdlv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdlv ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
 
                     <td
@@ -973,7 +1041,13 @@ export default function UserList() {
                       onClick={() => handleSorting("Log Time")}
                     >
                       Log Time{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdate ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdate ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                   </tr>
                 </thead>

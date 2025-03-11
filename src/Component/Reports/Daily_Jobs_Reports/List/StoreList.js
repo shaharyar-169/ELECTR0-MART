@@ -33,6 +33,12 @@ export default function StoreList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+      const [isAscendingdec, setisAscendingdec] = useState(true);
+      const [isAscendingsts, setisAscendingsts] = useState(true);
+      const [isAscendingabb, setisAscendingabb] = useState(true);
+      const [isAscendingstk, setisAscendingstk] = useState(true);
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -444,9 +450,9 @@ export default function StoreList() {
   
     // Define fonts for different sections
     const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
-    const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
-    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+    const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
   
     // Add an empty row at the start
     worksheet.addRow([]);
@@ -483,7 +489,7 @@ export default function StoreList() {
   
     // Apply styling for the status row
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
+      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
   
@@ -556,29 +562,43 @@ export default function StoreList() {
   let totalEntries = 0;
 
   const handleSorting = async (col) => {
+    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
+  
     const parseValue = (value) => {
-      // Remove commas and parse the string to a float
-      return parseFloat(value.replace(/,/g, ""));
+      return parseFloat(value.replace(/,/g, "")); // Remove commas and parse as float
     };
-
+  
     const sorted = [...tableData].sort((a, b) => {
       const aValue = a[col] !== null ? a[col].toString() : "";
       const bValue = b[col] !== null ? b[col].toString() : "";
-
+  
       const numA = parseValue(aValue);
       const numB = parseValue(bValue);
-
+  
       if (!isNaN(numA) && !isNaN(numB)) {
-        return sortData === "ASC" ? numA - numB : numB - numA;
+        return newSortOrder === "ASC" ? numA - numB : numB - numA; // Use newSortOrder instead of state
       } else {
-        return sortData === "ASC"
+        return newSortOrder === "ASC"
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
     });
-
+  
     setTableData(sorted);
-    setSortData(sortData === "ASC" ? "DSC" : "ASC");
+    setSortData(newSortOrder); // Update sort order
+    if (col === "Code") {
+      setisAscendingcode(newSortOrder === "ASC");
+    } else if (col === "Description") {
+      setisAscendingdec(newSortOrder === "ASC");
+    } else if (col === "Status") {
+      setisAscendingsts(newSortOrder === "ASC");
+    }
+    else if (col === "Abb") {
+      setisAscendingsts(newSortOrder === "ASC");
+    }
+    else if (col === "Stk") {
+      setisAscendingsts(newSortOrder === "ASC");
+    }
   };
 
   const firstColWidth = {
@@ -874,7 +894,13 @@ export default function StoreList() {
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -882,7 +908,13 @@ export default function StoreList() {
                       onClick={() => handleSorting("Description")}
                     >
                       Description{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdec ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -890,7 +922,13 @@ export default function StoreList() {
                       onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -898,7 +936,13 @@ export default function StoreList() {
                       onClick={() => handleSorting("Abb")}
                     >
                       Abb{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingabb ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingabb ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -906,7 +950,13 @@ export default function StoreList() {
                       onClick={() => handleSorting("Stk")}
                     >
                       Stk{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                      style={{
+                        transform: isAscendingstk ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingstk ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                   </tr>
                 </thead>
