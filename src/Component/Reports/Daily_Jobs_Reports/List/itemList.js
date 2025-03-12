@@ -65,6 +65,16 @@ export default function ItemList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
+
+
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+  const [isAscendingemploye, setisAscendingemploye] = useState(true);
+  const [isAscendingsts, setisAscendingsts] = useState(true);
+
+  const [isAscendingdesig, setisAscendingdesig] = useState(true);
+  const [isAscendingcontect, setisAscendingcontect] = useState(true);
+  const [isAscendingadv, setisAscendingadv] = useState(true);
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -102,7 +112,7 @@ export default function ItemList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
-   
+
       FCmpCod: Companyselectdata,
       FSchTxt: searchQuery,
     }).toString();
@@ -948,7 +958,7 @@ export default function ItemList() {
     });
 
     // Set column widths
-    [22, 55, 15, 20, 14, 30].forEach((width, index) => {
+    [22, 50, 15, 15, 15, 22].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -992,29 +1002,41 @@ export default function ItemList() {
   let totalEntries = 0;
 
   const handleSorting = async (col) => {
+    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
+  
     const parseValue = (value) => {
-      // Remove commas and parse the string to a float
-      return parseFloat(value.replace(/,/g, ""));
+      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
     };
-
+  
     const sorted = [...tableData].sort((a, b) => {
-      const aValue = a[col] !== null ? a[col].toString() : "";
-      const bValue = b[col] !== null ? b[col].toString() : "";
-
-      const numA = parseValue(aValue);
-      const numB = parseValue(bValue);
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return sortData === "ASC" ? numA - numB : numB - numA;
+      const aValue = parseValue(a[col]);
+      const bValue = parseValue(b[col]);
+  
+      if (!isNaN(aValue) && !isNaN(bValue)) {
+        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
       } else {
-        return sortData === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+        return newSortOrder === "ASC"
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue)); // String sorting
       }
     });
-
+  
     setTableData(sorted);
-    setSortData(sortData === "ASC" ? "DSC" : "ASC");
+    setSortData(newSortOrder); // Update sort order
+  
+    const columnMappings = {
+      "Code": setisAscendingcode,
+      "Description": setisAscendingemploye,
+      "Company": setisAscendingsts,
+      "Category": setisAscendingdesig,
+      "Capacity": setisAscendingcontect,
+      "Type": setisAscendingadv,
+ 
+    };
+  
+    if (columnMappings[col]) {
+      columnMappings[col](newSortOrder === "ASC");
+    }
   };
 
   const firstColWidth = {
@@ -1055,7 +1077,7 @@ export default function ItemList() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
+    width: isSidebarVisible ? "calc(60vw - 0%)" : "60vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -1570,7 +1592,13 @@ export default function ItemList() {
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1578,7 +1606,13 @@ export default function ItemList() {
                       onClick={() => handleSorting("Description")}
                     >
                       Description{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingemploye ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingemploye ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1586,7 +1620,13 @@ export default function ItemList() {
                       onClick={() => handleSorting("Company")}
                     >
                       Company{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1594,7 +1634,13 @@ export default function ItemList() {
                       onClick={() => handleSorting("Category")}
                     >
                       Category{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdesig ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdesig ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1602,7 +1648,13 @@ export default function ItemList() {
                       onClick={() => handleSorting("Capacity")}
                     >
                       Capacity{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcontect ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcontect ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1610,7 +1662,13 @@ export default function ItemList() {
                       onClick={() => handleSorting("Type")}
                     >
                       Type{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingadv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingadv ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                   </tr>
                 </thead>

@@ -59,6 +59,17 @@ export default function ItemPriceListA() {
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
 
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+  const [isAscendingemploye, setisAscendingemploye] = useState(true);
+  const [isAscendingsts, setisAscendingsts] = useState(true);
+  const [isAscendingdesig, setisAscendingdesig] = useState(true);
+  const [isAscendingcontect, setisAscendingcontect] = useState(true);
+  const [isAscendingadv, setisAscendingadv] = useState(true);
+  const [isAscendingdlv, setisAscendingdlv] = useState(true);
+  const [isAscendingsaleret, setisAscendingsaleret] = useState(true);
+  const [isAscendingmrp, setisAscendingmrp] = useState(true);
+  const [isAscendingfix, setisAscendingfix] = useState(true);
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -91,7 +102,6 @@ export default function ItemPriceListA() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
-     
       FCtgCod: Companyselectdata,
       FCapCod: Capacityselectdata,
       FTypCod: Typeselectdata,
@@ -956,29 +966,44 @@ export default function ItemPriceListA() {
   let totalEntries = 0;
 
   const handleSorting = async (col) => {
+    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
+  
     const parseValue = (value) => {
-      // Remove commas and parse the string to a float
-      return parseFloat(value.replace(/,/g, ""));
+      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
     };
-
+  
     const sorted = [...tableData].sort((a, b) => {
-      const aValue = a[col] !== null ? a[col].toString() : "";
-      const bValue = b[col] !== null ? b[col].toString() : "";
-
-      const numA = parseValue(aValue);
-      const numB = parseValue(bValue);
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return sortData === "ASC" ? numA - numB : numB - numA;
+      const aValue = parseValue(a[col]);
+      const bValue = parseValue(b[col]);
+  
+      if (!isNaN(aValue) && !isNaN(bValue)) {
+        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
       } else {
-        return sortData === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+        return newSortOrder === "ASC"
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue)); // String sorting
       }
     });
-
+  
     setTableData(sorted);
-    setSortData(sortData === "ASC" ? "DSC" : "ASC");
+    setSortData(newSortOrder); // Update sort order
+  
+    const columnMappings = {
+      "Code": setisAscendingcode,
+      "Description": setisAscendingemploye,
+      "Stk": setisAscendingsts,
+      "Comm": setisAscendingdesig,
+      "Act Rate": setisAscendingcontect,
+      "Pur Rate": setisAscendingadv,
+      "SM Rate": setisAscendingdlv,
+      "Sale Rate": setisAscendingsaleret,
+      "MRP": setisAscendingmrp,
+      "Fix Rate": setisAscendingfix,
+    };
+  
+    if (columnMappings[col]) {
+      columnMappings[col](newSortOrder === "ASC");
+    }
   };
 
   const firstColWidth = {
@@ -1486,7 +1511,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcode ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1494,7 +1525,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Description")}
                     >
                       Description{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingemploye ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingemploye ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1502,7 +1539,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Stk")}
                     >
                       Stk{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsts ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1510,7 +1553,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Comm")}
                     >
                       Comm{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdesig ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdesig ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1518,7 +1567,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Act Rate")}
                     >
                       Act Rate{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingcontect ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingcontect ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1526,7 +1581,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Pur Rate")}
                     >
                       Pur Rate{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingadv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingadv ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1534,7 +1595,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("SM Rate")}
                     >
                       SM Rate{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingdlv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingdlv ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1542,7 +1609,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Sale Rate")}
                     >
                       Sale Rate{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingsaleret ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingsaleret ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1550,7 +1623,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("MRP")}
                     >
                       MRP{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingmrp ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingmrp ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
@@ -1558,7 +1637,13 @@ export default function ItemPriceListA() {
                       onClick={() => handleSorting("Fix Rate")}
                     >
                       Fix Rate{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"></i>
+                      <i className="fa-solid fa-caret-down caretIconStyle"
+                       style={{
+                        transform: isAscendingfix ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                        color: isAscendingfix ? "white" : "red",
+                        transition: "transform 0.3s ease",
+                      }}
+                      ></i>
                     </td>
                   </tr>
                 </thead>
@@ -1583,6 +1668,7 @@ export default function ItemPriceListA() {
                   fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
+                  tableLayout:'fixed'
                 }}
               >
                 <tbody id="tablebody">
@@ -1649,12 +1735,17 @@ export default function ItemPriceListA() {
                             </td>
                             <td
                               className="text-start"
-                              style={secondColWidth}
-                              title={item.Description || ""}
+                              title={item.Description}
+                              style={{
+                                ...secondColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
                             >
-                              {item.Description && item.Description.length > 30
-                                ? `${item.Description.substring(0, 30)}...`
-                                : item.Description || ""}
+                              {item.Description}
+                            
+                              
                             </td>
                             <td className="text-center" style={thirdColWidth}>
                               {item.Stk}
