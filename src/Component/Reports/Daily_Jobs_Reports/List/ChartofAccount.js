@@ -76,8 +76,7 @@ export default function ChartofAccount() {
     const formData = new URLSearchParams({
       FAccSts: transectionType,
       code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      FLocCod: '001',
+      FLocCod: locationnumber || getLocationNumber,
       FSchTxt: searchQuery,
     }).toString();
 

@@ -71,7 +71,7 @@ import DailyPaymentReport from "./Component/Reports/Daily_Jobs_Reports/DailyRepo
 import DailyCashBankBalance from "./Component/Reports/Daily_Jobs_Reports/DailyReports/CashBankBalanceReport.js";
 import DailySaleReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySaleReport.js";
 import DailyPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPurchaseReport.js";
-
+import DailyJobReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyJobReport.js";
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
 import InstallmentSaleReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentSaleReport.js";
@@ -145,7 +145,7 @@ function App() {
                 <Route exact path="/InvoiceLedger" element={<InvoiceLedgerReport/>} />
 
               
-                {/* Rountes for ledgers reports */}
+                {/* Rountes for Daily reports */}
                 <Route exact path="/CashBook" element={<DailyCashReceipts />} />
                 <Route exact path="/Journal" element={<JournalReport />} />
                 <Route exact path="/EditDocumentReport" element={<DocumentEditReport />} />
@@ -159,8 +159,11 @@ function App() {
                 <Route exact path="/SaleReport" element={<DailySaleReport />} />
                 <Route exact path="/PurchaseReport" element={<DailyPurchaseReport />} />
                 <Route exact path="/ItemEvaluation" element={<ItemEvaluationReport/>} />
+                <Route exact path="/DailyJobReport" element={<DailyJobReport/>} />
 
               
+               
+
                 {/* Rountes for Installments reports */}
                 <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} />
                 <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />

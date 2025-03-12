@@ -790,9 +790,9 @@ export default function ItemPriceListA() {
     
       // Define fonts for different sections
       const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-      const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
-      const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
-      const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+      const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+      const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+      const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
     
       // Add an empty row at the start
       worksheet.addRow([]);
@@ -855,16 +855,16 @@ export default function ItemPriceListA() {
    
       // Apply styling for the status row
       typeAndStoreRow.eachCell((cell, colIndex) => {
-        cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 6].includes(colIndex) };
+        cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
         cell.alignment = { horizontal: "left", vertical: "middle" };
       });
 
       typeAndStoreRow2.eachCell((cell, colIndex) => {
-        cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 6].includes(colIndex) };
+        cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
         cell.alignment = { horizontal: "left", vertical: "middle" };
       });
       typeAndStoreRow3.eachCell((cell, colIndex) => {
-        cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 6].includes(colIndex) };
+        cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
         cell.alignment = { horizontal: "left", vertical: "middle" };
       });
 
