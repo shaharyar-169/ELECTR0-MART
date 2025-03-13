@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import { getUserData, getOrganisationData , getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -16,7 +16,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function MobileListReport() {
+export default function AreaList() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -34,8 +34,8 @@ export default function MobileListReport() {
   const [transectionType, settransectionType] = useState("");
 
   const [isAscendingcode, setisAscendingcode] = useState(true);
-  const [isAscendingdec, setisAscendingdec] = useState(true);
-  const [isAscendingsts, setisAscendingsts] = useState(true);
+      const [isAscendingdec, setisAscendingdec] = useState(true);
+      const [isAscendingsts, setisAscendingsts] = useState(true);
 
   const {
     isSidebarVisible,
@@ -72,16 +72,12 @@ export default function MobileListReport() {
   };
 
   function fetchReceivableReport() {
-    const apiUrl = apiLinks + "/MobileList.php";
+    const apiUrl = apiLinks + "/AreaList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FMobSts: transectionType,
-      FSchTxt: searchQuery,
+      FCapSts: transectionType,
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
-   
-
+      FSchTxt: searchQuery,
     }).toString();
 
     axios
@@ -134,17 +130,17 @@ export default function MobileListReport() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.tmobnum,
-      item.tcstnam,
-      item.tmobsts,
+      item.Code,
+      item.Description,
+      item.Status,
     ]);
 
     // Add summary row to the table
     // rows.push(["", "", "", "", "", ""]);
 
     // Define table column headers and individual column widths
-    const headers = ["Mobile", "Name", "Status"];
-    const columnWidths = [25, 90, 15];
+    const headers = ["Code", "Description", "Status"];
+    const columnWidths = [22, 90, 15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -200,7 +196,7 @@ export default function MobileListReport() {
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
         const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        const isRedRow = row[0] && parseInt(row[0]) > 1000000000000000000000000000000000000; // Check if tctgcod is greater than 100
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
         let textColor = [0, 0, 0]; // Default text color
         let fontName = normalFont; // Default font
 
@@ -237,7 +233,7 @@ export default function MobileListReport() {
           // Set text color
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
           // Set font
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont(fontName, "normal");
 
           // Ensure the cell value is a string
           const cellValue = String(cell);
@@ -353,7 +349,7 @@ export default function MobileListReport() {
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
 
-        addTitle(`Mobile List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+        addTitle(`Area List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -434,18 +430,18 @@ export default function MobileListReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`MobileList As On ${date}.pdf`);
+    doc.save(`AreaList As On ${date}.pdf`);
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
- const handleDownloadCSV = async () => {
+   const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
       
         const numColumns = 3; // Ensure this matches the actual number of columns
       
-        const columnAlignments = ["left", "left", "center"];
+        const columnAlignments = ["left", "left", "center",];
       
         // Define fonts for different sections
         const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
@@ -467,7 +463,7 @@ export default function MobileListReport() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
       
         // Add Store List row
-        const storeListRow = worksheet.addRow(["Mobile List"]);
+        const storeListRow = worksheet.addRow(["Area List"]);
         storeListRow.eachCell((cell) => {
           cell.font = fontStoreList;
           cell.alignment = { horizontal: "center" };
@@ -501,13 +497,13 @@ export default function MobileListReport() {
         };
       
         // Add headers
-        const headers = ["Mobile", "Name", "Status"];
+        const headers = ["Code", "Description", "Status"];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
       
         // Add data rows
         tableData.forEach((item) => {
-          const row = worksheet.addRow([item.tmobnum, item.tcstnam, item.tmobsts]);
+          const row = worksheet.addRow([item.Code, item.Description, item.Status]);
       
           row.eachCell((cell, colIndex) => {
             cell.font = fontTableContent;
@@ -517,7 +513,7 @@ export default function MobileListReport() {
         });
       
         // Set column widths
-        [13, 50, 10].forEach((width, index) => {
+        [10, 40, 10, ].forEach((width, index) => {
           worksheet.getColumn(index + 1).width = width;
         });
       
@@ -535,8 +531,8 @@ export default function MobileListReport() {
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `MobileList As On ${currentdate}.xlsx`);
-  };
+        saveAs(blob, `AreaList As On ${currentdate}.xlsx`);
+      };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -584,20 +580,20 @@ export default function MobileListReport() {
   
     setTableData(sorted);
     setSortData(newSortOrder); // Update sort order
-    if (col === "tmobnum") {
+    if (col === "Code") {
       setisAscendingcode(newSortOrder === "ASC");
-    } else if (col === "tcstnam") {
+    } else if (col === "Description") {
       setisAscendingdec(newSortOrder === "ASC");
-    } else if (col === "tmobsts") {
+    } else if (col === "Status") {
       setisAscendingsts(newSortOrder === "ASC");
     }
   };
 
   const firstColWidth = {
-    width: "17%",
+    width: "15%",
   };
   const secondColWidth = {
-    width: "66%",
+    width: "68%",
   };
   const thirdColWidth = {
     width: "15%",
@@ -622,7 +618,7 @@ export default function MobileListReport() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(40vw - 0%)" : "40vw",
+    width: isSidebarVisible ? "calc(45vw - 0%)" : "45vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -637,7 +633,7 @@ export default function MobileListReport() {
     overflowY: "hidden",
     wordBreak: "break-word",
     textAlign: "center",
-    maxWidth: "800px",
+    maxWidth: "600px",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
@@ -722,7 +718,7 @@ export default function MobileListReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Mobile List" />
+          <NavComponent textdata="Area List" />
 
           <div
             className="row"
@@ -751,7 +747,13 @@ export default function MobileListReport() {
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{display:'flex',alignItems:'center',justifyContent:'center', fontSize: getdatafontsize,fontFamily: getfontstyle, fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
                       Status :
                     </span>
                   </label>
@@ -789,7 +791,13 @@ export default function MobileListReport() {
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span style={{ display:'flex',alignItems:'center',justifyContent:'center',fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
                     Search :
                   </span>{" "}
                 </label>
@@ -865,9 +873,9 @@ export default function MobileListReport() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("tmobnum")}
+                      onClick={() => handleSorting("Code")}
                     >
-                      Mobile{" "}
+                      Code{" "}
                       <i className="fa-solid fa-caret-down caretIconStyle"
                       style={{
                         transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
@@ -879,9 +887,9 @@ export default function MobileListReport() {
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("tcstnam")}
+                      onClick={() => handleSorting("Description")}
                     >
-                      Name{" "}
+                      Description{" "}
                       <i className="fa-solid fa-caret-down caretIconStyle"
                       style={{
                         transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
@@ -893,7 +901,7 @@ export default function MobileListReport() {
                     <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("tmobsts")}
+                      onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
                       <i className="fa-solid fa-caret-down caretIconStyle"
@@ -982,13 +990,13 @@ export default function MobileListReport() {
                             }}
                           >
                             <td className="text-start" style={firstColWidth}>
-                              {item.tmobnum}
+                              {item.Code}
                             </td>
                             <td className="text-start" style={secondColWidth}>
-                              {item.tcstnam}
+                              {item.Description}
                             </td>
                             <td className="text-center" style={thirdColWidth}>
-                              {item.tmobsts}
+                              {item.Status}
                             </td>
                           </tr>
                         );

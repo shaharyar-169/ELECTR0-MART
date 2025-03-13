@@ -44,6 +44,11 @@ import ItemPriceList from "./Component/Reports/Daily_Jobs_Reports/List/ItemPrice
 import ItemPriceListA from "./Component/Reports/Daily_Jobs_Reports/List/ItemPriceListA.js";
 import MobileListReport from "./Component/Reports/Daily_Jobs_Reports/List/MobileListReport.js";
 import TechnicianList from "./Component/Reports/Daily_Jobs_Reports/List/TechnicionList.js";
+import CityList from "./Component/Reports/Daily_Jobs_Reports/List/CityList.js";
+import AreaList from "./Component/Reports/Daily_Jobs_Reports/List/AreaList.js";
+import ComplaintList from "./Component/Reports/Daily_Jobs_Reports/List/ComplaintList.js";
+import ReferenceList from "./Component/Reports/Daily_Jobs_Reports/List/ReferenceList.js";
+import ControlList from "./Component/Reports/Daily_Jobs_Reports/List/ControlList.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -72,6 +77,7 @@ import DailyCashBankBalance from "./Component/Reports/Daily_Jobs_Reports/DailyRe
 import DailySaleReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySaleReport.js";
 import DailyPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPurchaseReport.js";
 import DailyJobReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyJobReport.js";
+import DailyCollectionSummary from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCollectionSummary.js";
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
 import InstallmentSaleReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentSaleReport.js";
@@ -130,6 +136,11 @@ function App() {
                 <Route exact path="/PriceListA" element={<ItemPriceListA />} />
                 <Route exact path="/MobileList" element={<MobileListReport />} />
                 <Route exact path="/TechnicianList" element={<TechnicianList />} />
+                <Route exact path="/CityList" element={<CityList />} />
+                <Route exact path="/AreaList" element={<AreaList />} />
+                <Route exact path="/ComplaintList" element={<ComplaintList />} />
+                <Route exact path="/ReferenceList" element={<ReferenceList />} />
+                <Route exact path="/ControlList" element={<ControlList />} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -160,10 +171,9 @@ function App() {
                 <Route exact path="/PurchaseReport" element={<DailyPurchaseReport />} />
                 <Route exact path="/ItemEvaluation" element={<ItemEvaluationReport/>} />
                 <Route exact path="/DailyJobReport" element={<DailyJobReport/>} />
+                <Route exact path="/DailyCollectionSummary" element={<DailyCollectionSummary/>} />
 
               
-               
-
                 {/* Rountes for Installments reports */}
                 <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} />
                 <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />

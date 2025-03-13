@@ -337,7 +337,7 @@ export default function CompanyList() {
         doc.setFontSize(pageNumberFontSize);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 75,
+          rightX - 40,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );

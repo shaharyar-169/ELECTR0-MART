@@ -359,3 +359,18 @@ h2.react-datepicker__current-month {
 }
 
 
+
+
+.css-yk5vey-control {
+  display: flex !important;
+  flex-wrap: nowrap !important  ;
+}
+
+.css-5q4twd-control {
+  display: flex !important;
+  flex-wrap: nowrap !important  ;
+}
+
+.css-yk5vey-control:hover {
+  border-color: white !important;
+}
