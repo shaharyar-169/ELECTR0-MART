@@ -1134,17 +1134,16 @@ export default function DailyJobReport() {
             worksheet.getColumn(index + 1).width = width;
         });
 
-
         const totalRow = worksheet.addRow([
-            "",
-            "",
-            "",
-            "Total",
-            "",
-            "",
-            "",
-            "",
             String(totalDebit),
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
         ]);
 
         // total row added
@@ -1401,7 +1400,7 @@ export default function DailyJobReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Installment Collectoin Report" />
+                    <NavComponent textdata="Daily Job Report" />
                     <div className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px", }}>
 
@@ -1585,9 +1584,9 @@ export default function DailyJobReport() {
                             {/* ------ */}
 
 
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Collector :</span>  <br /></label>
+                            <div className="d-flex align-items-center  " style={{ marginLeft: '15px' }}>
+                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Technician :</span>  <br /></label>
                                 </div>
                                 <div style={{ marginLeft: '5px' }} >
                                     <Select
@@ -1703,7 +1702,7 @@ export default function DailyJobReport() {
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
-                                        marginLeft: '5px'
+                                        marginLeft: '20px'
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
@@ -2194,7 +2193,10 @@ export default function DailyJobReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+                            <span className="mobileledger_total1" style={{textAlign:'left'}}>{totalDebit}</span>
+                            
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2259,7 +2261,6 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalDebit}</span>
 
                         </div>
 
