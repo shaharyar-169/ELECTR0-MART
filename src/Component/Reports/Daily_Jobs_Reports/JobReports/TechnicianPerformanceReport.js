@@ -22,7 +22,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function DailyJobReport() {
+export default function TechnicianPerformanceReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -47,12 +47,15 @@ export default function DailyJobReport() {
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
 
-    const [totalQnty, setTotalQnty] = useState(0);
-    const [totalOpening, setTotalOpening] = useState(0);
-    const [totalDebit, setTotalDebit] = useState(0);
-    const [totalCredit, setTotalCredit] = useState(0);
-    const [closingBalance, setClosingBalance] = useState(0);
-    const [totalDif, settotalDif] = useState(0);
+    const [TotalRepairing, setTotalRepairing] = useState(0);
+    const [TotalService, setTotalService] = useState(0);
+    const [TotalInstalaltions, setTotalInstalaltions] = useState(0);
+    const [TotalWorkshop, setTotalWorkshop] = useState(0);
+    const [TotalJobs, setTotalJobs] = useState(0);
+    const [TotalCharges, setTotalCharges] = useState(0);
+    const [TotalParts, setTotalParts] = useState(0);
+    const [TotalProfit, setTotalProfit] = useState(0);
+    const [TotalAmt, setTotalAmt] = useState(0);
 
 
     // state for from DatePicker
@@ -248,9 +251,9 @@ export default function DailyJobReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input1Reftype.current) {
+                if (input3Ref.current) {
                     e.preventDefault();
-                    input1Reftype.current.focus();
+                    input3Ref.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -401,7 +404,7 @@ export default function DailyJobReport() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/DailyJobReport.php";
+        const apiUrl = apiLinks + "/TechnicianPerformance.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
 
@@ -416,8 +419,6 @@ export default function DailyJobReport() {
             FYerDsc: yeardescription || getyeardescription,
 
            
-
-
         }).toString();
 
         axios
@@ -425,9 +426,15 @@ export default function DailyJobReport() {
             .then((response) => {
                 setIsLoading(false);
 
-                setTotalDebit(response.data["Total "]);
-
-
+                setTotalRepairing(response.data["TotalRepairing "]);
+                setTotalService(response.data["TotalService "]);
+                setTotalInstalaltions(response.data["TotalInstalaltions "]);
+                setTotalWorkshop(response.data["TotalWorkshop "]);
+                setTotalJobs(response.data["TotalJobs "]);
+                setTotalCharges(response.data["TotalCharges "]);
+                setTotalParts(response.data["TotalParts "]);
+                setTotalProfit(response.data["TotalProfit "]);
+                setTotalAmt(response.data["TotalAmt "]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -580,45 +587,51 @@ export default function DailyJobReport() {
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item.Date,
-            item["Job#"],
-            item.Customer,
-            item.Mobile,
-            item.Item,
+            item.Code,
             item.Technician,
-            item.Type,
-            item.Status,
-            item.Day
+            item.Repairing,
+            item.Service,
+            item.Workshop,
+            item.Instalaltions,
+            item.TotalJobs,
+            item.Charges,
+            item.Parts,
+            item.Profit,
+            item.TotalAmt,
         ]);
 
         // Add summary row to the table
 
         rows.push([
-            String(totalDebit),
             "",
             "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            
+            String(TotalRepairing),
+            String(TotalService),
+            String(TotalWorkshop),
+            String(TotalInstalaltions),
+            String(TotalJobs),
+            String(TotalCharges),
+            String(TotalParts),
+            String(TotalProfit),
+            String(TotalAmt),
+
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
-            "Date",
-            "job#",
-            "Customer",
-            "Mobile",
-            "Item",
+            "Code",
             "Technician",
-            "Type",
-            "Status",
-            "Day"
+            "Repairing",
+            "Service",
+            "Workshop",
+            "Instalaltions",
+            "TotalJobs",
+            "Charges",
+            "Parts",
+            "Profit",
+            "TotalAmt",
         ];
-        const columnWidths = [19, 14, 50, 23, 50, 45, 28, 27, 15];
+        const columnWidths = [19, 50, 22,22,22,25,22,22,22,22,22 ];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -716,13 +729,7 @@ export default function DailyJobReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 6 || cellIndex === 7) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
-                    } else if (cellIndex === 8) {
+                    if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -823,7 +830,7 @@ export default function DailyJobReport() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 1,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -838,89 +845,20 @@ export default function DailyJobReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Daily Job Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Technician Performance Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-                // Set font size and weight for the labels
-                doc.setFontSize(12);
-                doc.setFont(getfontstyle, "300");
-
-
-                let status = transectionType === "N"
-                    ? "UnAssign"
-                    : transectionType === "P"
-                        ? "Pending "
-                        : transectionType === "W"
-                            ? "Workshop"
-                            : transectionType === "R"
-                                ? "Spare Parts"
-                                : transectionType === "D"
-                                    ? "Done "
-                                    : transectionType === "S"
-                                        ? "Closed"
-                                        : transectionType === "C"
-                                            ? "Cancel"
-                                            : "ALL"
-
-
-                let type = transectionType2 === "REPAIRING"
-                    ? "Repairing"
-                    : transectionType2 === "INSTALLATION"
-                        ? "Installation"
-                        : transectionType2 === "SERVICE"
-                            ? "Services"
-                            : transectionType2 === "WORKSHO"
-                                ? "Workshop"
-                                : "ALL"
-
-
-                let search = Companyselectdatavalue.label
-                    ? Companyselectdatavalue.label
-                    : "ALL";
-
-
-                let search1 = searchQuery ? searchQuery : "";
-
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
-
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TECNICIAN :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`STATUS :`, labelsX + 200, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 220, labelsY + 8.5); // Draw the value next to the label
-
-
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX, labelsY + 14); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${type}`, labelsX + 15, labelsY + 14); // Draw the value next to the label
-
-                if (searchQuery) {
-                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 200, labelsY + 14); // Draw bold label
-                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${search1}`, labelsX + 220, labelsY + 14); // Draw the value next to the label
-
-                }
+           
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 16; // Adjust vertical position for the labels
+                startY += 5; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 35);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 24);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -961,7 +899,7 @@ export default function DailyJobReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`DailyJobReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`TechnicianPerformanceReport Form ${fromInputDate} To ${toInputDate}.pdf`);
 
 
     };
@@ -978,12 +916,14 @@ export default function DailyJobReport() {
         const columnAlignments = [
             "left",
             "left",
-            "left",
-            "left",
-            "left",
-            "left",
-            "left",
-            "center",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
             "right",
         ];
 
@@ -1007,7 +947,7 @@ export default function DailyJobReport() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Daily Job Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Technician Performance Report From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1018,71 +958,7 @@ export default function DailyJobReport() {
         // Add an empty row after the title section
         worksheet.addRow([]);
 
-        let typecompany = Companyselectdatavalue.label
-            ? Companyselectdatavalue.label
-            : "ALL";
-
-        let status = transectionType === "N"
-            ? "UnAssign"
-            : transectionType === "P"
-                ? "Pending "
-                : transectionType === "W"
-                    ? "Workshop"
-                    : transectionType === "R"
-                        ? "Spare Parts"
-                        : transectionType === "D"
-                            ? "Done "
-                            : transectionType === "S"
-                                ? "Closed"
-                                : transectionType === "C"
-                                    ? "Cancel"
-                                    : "ALL"
-
-
-        let type = transectionType2 === "REPAIRING"
-            ? "Repairing"
-            : transectionType2 === "INSTALLATION"
-                ? "Installation"
-                : transectionType2 === "SERVICE"
-                    ? "Services"
-                    : transectionType2 === "WORKSHO"
-                        ? "Workshop"
-                        : "ALL"
-
-
-
-        // Add first row
-        const typeAndStoreRow = worksheet.addRow([
-            "TECHNICIAN :",
-            typecompany,
-            "",
-            "",
-            "",
-            "",
-            "STATUS :",
-            status
-        ]);
-
-        let typesearch = searchQuery || "";
-
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["TYPE :", type, "", "", "", "", "SEARCH :", typesearch]
-                : ["TYPE :", type, ""]);
-
-
-
-        // Apply styling for the status row
-        typeAndStoreRow.eachCell((cell, colIndex) => {
-            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
-
-        typeAndStoreRow3.eachCell((cell, colIndex) => {
-            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
-
+     
         // Header style
         const headerStyle = {
             font: fontHeader,
@@ -1093,15 +969,17 @@ export default function DailyJobReport() {
 
         // Add headers
         const headers = [
-            "Date",
-            "job#",
-            "Customer",
-            "Mobile",
-            "Item",
+           "Code",
             "Technician",
-            "Type",
-            "Status",
-            "Day"
+            "Repairing",
+            "Service",
+            "Workshop",
+            "Instalaltions",
+            "TotalJobs",
+            "Charges",
+            "Parts",
+            "Profit",
+            "TotalAmt",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1109,15 +987,18 @@ export default function DailyJobReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                item.Date,
-                item["Job#"],
-                item.Customer,
-                item.Mobile,
-                item.Item,
+                item.Code,
                 item.Technician,
-                item.Type,
-                item.Status,
-                item.Day
+                item.Repairing,
+                item.Service,
+                item.Workshop,
+                item.Instalaltions,
+                item.TotalJobs,
+                item.Charges,
+                item.Parts,
+                item.Profit,
+                item.TotalAmt,
+    
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -1128,20 +1009,22 @@ export default function DailyJobReport() {
         });
 
         // Set column widths
-        [11, 7, 25, 12, 25, 20, 15, 13, 13,].forEach((width, index) => {
+        [8,25, 15,15,15,15,15,15,15,15,15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
-            String(totalDebit),
+           "",
             "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
+            String(TotalRepairing),
+            String(TotalService),
+            String(TotalWorkshop),
+            String(TotalInstalaltions),
+            String(TotalJobs),
+            String(TotalCharges),
+            String(TotalParts),
+            String(TotalProfit),
+            String(TotalAmt),
         ]);
 
         // total row added
@@ -1158,7 +1041,7 @@ export default function DailyJobReport() {
             // Align only the "Total" text to the right
             if (
 
-                colNumber === 9
+                colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9 || colNumber === 10 || colNumber === 11
             ) {
                 cell.alignment = { horizontal: "right" };
             }
@@ -1179,7 +1062,7 @@ export default function DailyJobReport() {
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `DailyJobReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `TechnicianPerformanceReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1216,31 +1099,37 @@ export default function DailyJobReport() {
     };
 
     const firstColWidth = {
-        width: "9%",
-    };
-    const secondColWidth = {
         width: "6%",
     };
-    const thirdColWidth = {
-        width: "18%",
-    };
-    const forthColWidth = {
-        width: "10%",
-    };
-    const fifthColWidth = {
-        width: "14%",
-    };
-    const sixthColWidth = {
+    const secondColWidth = {
         width: "15%",
     };
+    const thirdColWidth = {
+        width: "8%",
+    };
+    const forthColWidth = {
+        width: "7%",
+    };
+    const fifthColWidth = {
+        width: "8%",
+    };
+    const sixthColWidth = {
+        width: "10%",
+    };
     const seventhColWidth = {
-        width: "10.7%",
+        width: "9%",
     };
     const eighthColWidth = {
-        width: "8%",
+        width: "9%",
     };
     const ninhthColWidth = {
-        width: "8%",
+        width: "9%",
+    };
+    const tenthColWidth = {
+        width: "9%",
+    };
+    const elawentheColWidth = {
+        width: "9%",
     };
 
 
@@ -1264,7 +1153,7 @@ export default function DailyJobReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
+        width: isSidebarVisible ? "calc(85vw - 0%)" : "85vw",
         position: "relative",
         top: "35%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1398,286 +1287,11 @@ export default function DailyJobReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Daily Job Report" />
-                    <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", }}>
+                    <NavComponent textdata="Spare Parts Profit Report" />
 
-                        <div style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "0px",
-                            padding: "0px",
-                            justifyContent: "space-between",
-                        }}>
-
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            {/* CODE FOR SELECT */}
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "75px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Reftype}
-                                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
-                                    id="firsttype"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
-                                    <option value="REPAIRING">Repairing</option>
-                                    <option value="INSTALLATION">Installation</option>
-                                    <option value="SERVICE">Services</option>
-                                    <option value="WORKSHOP">Workshop</option>
-
-
-                                </select>
-                            </div>
-
-                        </div>
-
-
-
-                    </div>
 
                     {/* CODE FOR CODE SELECT */}
 
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-
-
-
-                            {/* ------ */}
-
-
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '18px' }}>
-                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Technician :</span>  <br /></label>
-                                </div>
-                                <div style={{ marginLeft: '5px' }} >
-                                    <Select
-                                        className="List-select-class"
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setSaleType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart, // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue("");
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-
-                                </div>
-
-
-                            </div>
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Status :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
-                                    <option value="N">UnAssign</option>
-                                    <option value="P">Pending </option>
-                                    <option value="W">Workshop</option>
-                                    <option value="R">Spare Parts</option>
-                                    <option value="D">Done </option>
-                                    <option value="S">Closed</option>
-                                    <option value="C">Cancel</option>
-
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-                    {/* ///////////////////////// */}
-
-
 
 
                     <div
@@ -1691,7 +1305,7 @@ export default function DailyJobReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                // justifyContent: "space-between",
                             }}
                         >
                             <div className="d-flex align-items-center">
@@ -1788,7 +1402,7 @@ export default function DailyJobReport() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "20px" }}
+                                style={{ marginLeft: "130px" }}
                             >
                                 <div
                                     style={{
@@ -1839,7 +1453,7 @@ export default function DailyJobReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, 'firsttype')}
+                                        onKeyDown={(e) => handleToKeyPress(e, 'searchsubmit')}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1881,42 +1495,93 @@ export default function DailyJobReport() {
                                 </div>
                             </div>
 
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                        Search :
-                                    </span>{" "}
-                                </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
-                                    autoComplete="off"
-                                    style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontFamily: getfontstyle,
-                                        fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    onChange={(e) =>
-                                        setSearchQuery((e.target.value || "").toUpperCase())
-                                    } />
+                            <div className="d-flex align-items-center justify-content-center" style={{ marginLeft: '60px' }}>
+
+
+                                <div
+                                    className="d-flex align-items-center"
+                                    style={{ marginRight: "15px" }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "evenly",
+                                        }}
+                                    >
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="custom"
+                                                checked={selectedRadio === "custom"}
+                                                onChange={() => handleRadioChange(0)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="30"
+                                                checked={selectedRadio === "30days"}
+                                                onChange={() => handleRadioChange(30)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="60"
+                                                checked={selectedRadio === "60days"}
+                                                onChange={() => handleRadioChange(60)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="90"
+                                                checked={selectedRadio === "90days"}
+                                                onChange={() => handleRadioChange(90)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
                             </div>
+
                         </div>
                     </div>
                     <div>
@@ -1954,31 +1619,37 @@ export default function DailyJobReport() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                            Date
+                                            Code
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Job#
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
-                                            Customer
-                                        </td>
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Mobile
-                                        </td>
-                                        <td className="border-dark" style={fifthColWidth}>
-                                            Item
-                                        </td>
-                                        <td className="border-dark" style={sixthColWidth}>
                                             Technician
                                         </td>
+                                        <td className="border-dark" style={thirdColWidth}>
+                                            Repairing
+                                        </td>
+                                        <td className="border-dark" style={forthColWidth}>
+                                            Service
+                                        </td>
+                                        <td className="border-dark" style={fifthColWidth}>
+                                            Workshop
+                                        </td>
+                                        <td className="border-dark" style={sixthColWidth}>
+                                            Instalaltions
+                                        </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            Type
+                                            TotalJobs
                                         </td>
                                         <td className="border-dark" style={eighthColWidth}>
-                                            Status
+                                            Charges
                                         </td>
                                         <td className="border-dark" style={ninhthColWidth}>
-                                            Day
+                                            Parts
+                                        </td>
+                                        <td className="border-dark" style={tenthColWidth}>
+                                            Profit
+                                        </td>
+                                        <td className="border-dark" style={elawentheColWidth}>
+                                            TotalAmt
                                         </td>
 
 
@@ -1992,7 +1663,7 @@ export default function DailyJobReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "45vh",
+                                maxHeight: "50vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -2004,7 +1675,7 @@ export default function DailyJobReport() {
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                    tableLayout:'fixed'
+                                    tableLayout: 'fixed'
                                 }}
                             >
                                 <tbody id="tablebody">
@@ -2015,7 +1686,7 @@ export default function DailyJobReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="11" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2028,7 +1699,7 @@ export default function DailyJobReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 11 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2046,6 +1717,8 @@ export default function DailyJobReport() {
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+                                                <td style={elawentheColWidth}></td>
 
                                             </tr>
                                         </>
@@ -2067,71 +1740,77 @@ export default function DailyJobReport() {
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {item.Date}
+                                                            {item.Code}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
-                                                            {item['Job#']}
-                                                        </td>
-                                                        <td className="text-start" 
-                                                         title={item.Customer}
-                                                         style={{
-                                                           ...thirdColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
-                                                        >
-                                                            {item.Customer}
-                                                        </td>
-                                                        <td className="text-start" style={forthColWidth}>
-                                                            {item.Mobile}
-                                                        </td>
-                                                        <td className="text-start" 
-                                                         title={item.Item}
-                                                         style={{
-                                                           ...fifthColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
-                                                        >
-                                                            {item.Item}
-                                                        </td>
-                                                        <td className="text-start" 
-                                                         title={item.Technician}
-                                                         style={{
-                                                           ...sixthColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
-                                                        >
                                                             {item.Technician}
                                                         </td>
-                                                        <td className="text-start" 
-                                                         title={item.Type}
-                                                         style={{
-                                                           ...seventhColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
+                                                        <td className="text-end"
+                                                            title={item.Repairing}
+                                                            style={{
+                                                                ...thirdColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
-                                                            {item.Type}
+                                                            {item.Repairing}
                                                         </td>
-                                                        <td className="text-center" 
-                                                        title={item.Status}
-                                                        style={{
-                                                          ...eighthColWidth,
-                                                          whiteSpace: "nowrap",
-                                                          overflow: "hidden",
-                                                          textOverflow: "ellipsis",
-                                                        }}
+                                                        <td className="text-end" style={forthColWidth}>
+                                                            {item.Service}
+                                                        </td>
+                                                        <td className="text-end"
+                                                            title={item.Workshop}
+                                                            style={{
+                                                                ...fifthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
-                                                            {item.Status}
+                                                            {item.Workshop}
+                                                        </td>
+                                                        <td className="text-end"
+                                                            title={item.Instalaltions}
+                                                            style={{
+                                                                ...sixthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.Instalaltions}
+                                                        </td>
+                                                        <td className="text-end"
+                                                            title={item.TotalJobs}
+                                                            style={{
+                                                                ...seventhColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.TotalJobs}
+                                                        </td>
+                                                        <td className="text-end"
+                                                            title={item.Charges}
+                                                            style={{
+                                                                ...eighthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.Charges}
                                                         </td>
                                                         <td className="text-end" style={ninhthColWidth}>
-                                                            {item.Day}
+                                                            {item.Parts}
+                                                        </td>
+                                                        <td className="text-end" style={tenthColWidth}>
+                                                            {item.Profit}
+                                                        </td>
+                                                        <td className="text-end" style={elawentheColWidth}>
+                                                            {item.TotalAmt}
                                                         </td>
 
                                                     </tr>
@@ -2192,8 +1871,7 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total1" style={{textAlign:'left'}}>{totalDebit}</span>
-                            
+
                         </div>
                         <div
                             style={{
@@ -2209,6 +1887,8 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalRepairing}</span>
+
                         </div>
                         <div
                             style={{
@@ -2217,6 +1897,8 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalService}</span>
+
                         </div>
                         <div
                             style={{
@@ -2225,6 +1907,8 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalWorkshop}</span>
+
                         </div>
                         <div
                             style={{
@@ -2233,6 +1917,8 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalInstalaltions}</span>
+
                         </div>
                         <div
                             style={{
@@ -2241,6 +1927,7 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalJobs}</span>
 
                         </div>
                         <div
@@ -2250,6 +1937,7 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalCharges}</span>
 
                         </div>
                         <div
@@ -2259,6 +1947,27 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalParts}</span>
+
+                        </div>
+                        <div
+                            style={{
+                                ...tenthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalProfit}</span>
+
+                        </div>
+                        <div
+                            style={{
+                                ...elawentheColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalAmt}</span>
 
                         </div>
 

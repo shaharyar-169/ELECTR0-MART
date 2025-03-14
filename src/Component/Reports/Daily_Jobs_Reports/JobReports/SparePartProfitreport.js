@@ -22,7 +22,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function DailyJobReport() {
+export default function SparePartProfitReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -248,9 +248,9 @@ export default function DailyJobReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input1Reftype.current) {
+                if (input3Ref.current) {
                     e.preventDefault();
-                    input1Reftype.current.focus();
+                    input3Ref.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -401,7 +401,7 @@ export default function DailyJobReport() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/DailyJobReport.php";
+        const apiUrl = apiLinks + "/SparePartsProfitReport.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
 
@@ -415,8 +415,6 @@ export default function DailyJobReport() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-           
-
 
         }).toString();
 
@@ -426,6 +424,8 @@ export default function DailyJobReport() {
                 setIsLoading(false);
 
                 setTotalDebit(response.data["Total "]);
+                setTotalCredit(response.data["TotalParts "]);
+                setTotalQnty(response.data["TotalProfit "]);
 
 
 
@@ -587,8 +587,8 @@ export default function DailyJobReport() {
             item.Item,
             item.Technician,
             item.Type,
-            item.Status,
-            item.Day
+            item.Parts,
+            item.Profit
         ]);
 
         // Add summary row to the table
@@ -601,8 +601,8 @@ export default function DailyJobReport() {
             "",
             "",
             "",
-            "",
-            "",
+            String(totalCredit),
+            String(totalQnty),
             
         ]);
 
@@ -615,8 +615,8 @@ export default function DailyJobReport() {
             "Item",
             "Technician",
             "Type",
-            "Status",
-            "Day"
+            "Parts",
+            "Profit"
         ];
         const columnWidths = [19, 14, 50, 23, 50, 45, 28, 27, 15];
 
@@ -716,13 +716,7 @@ export default function DailyJobReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 6 || cellIndex === 7) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
-                    } else if (cellIndex === 8) {
+                    if (cellIndex === 7 || cellIndex === 8) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -838,7 +832,7 @@ export default function DailyJobReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Daily Job Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Spare Parts Profit Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -895,32 +889,32 @@ export default function DailyJobReport() {
                 doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
 
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`STATUS :`, labelsX + 200, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 220, labelsY + 8.5); // Draw the value next to the label
+                // doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                // doc.text(`STATUS :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+                // doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                // doc.text(`${status}`, labelsX + 220, labelsY + 8.5); // Draw the value next to the label
 
 
 
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX, labelsY + 14); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${type}`, labelsX + 15, labelsY + 14); // Draw the value next to the label
+                // doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                // doc.text(`TYPE :`, labelsX, labelsY + 14); // Draw bold label
+                // doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                // doc.text(`${type}`, labelsX + 15, labelsY + 14); // Draw the value next to the label
 
-                if (searchQuery) {
-                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 200, labelsY + 14); // Draw bold label
-                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${search1}`, labelsX + 220, labelsY + 14); // Draw the value next to the label
+                // if (searchQuery) {
+                //     doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                //     doc.text(`SEARCH :`, labelsX + 200, labelsY + 14); // Draw bold label
+                //     doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                //     doc.text(`${search1}`, labelsX + 220, labelsY + 14); // Draw the value next to the label
 
-                }
+                // }
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 16; // Adjust vertical position for the labels
+                startY += 10; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 35);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -961,7 +955,7 @@ export default function DailyJobReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`DailyJobReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`SparePartsProfitReport Form ${fromInputDate} To ${toInputDate}.pdf`);
 
 
     };
@@ -983,7 +977,7 @@ export default function DailyJobReport() {
             "left",
             "left",
             "left",
-            "center",
+            "right",
             "right",
         ];
 
@@ -1007,7 +1001,7 @@ export default function DailyJobReport() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Daily Job Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Spare Parts Profit Report From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1059,16 +1053,16 @@ export default function DailyJobReport() {
             "",
             "",
             "",
-            "STATUS :",
-            status
+            "",
+            "",
         ]);
 
         let typesearch = searchQuery || "";
 
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["TYPE :", type, "", "", "", "", "SEARCH :", typesearch]
-                : ["TYPE :", type, ""]);
+        // const typeAndStoreRow3 = worksheet.addRow(
+        //     searchQuery
+        //         ? ["TYPE :", type, "", "", "", "", "SEARCH :", typesearch]
+        //         : ["TYPE :", type, ""]);
 
 
 
@@ -1078,10 +1072,10 @@ export default function DailyJobReport() {
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
 
-        typeAndStoreRow3.eachCell((cell, colIndex) => {
-            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
+        // typeAndStoreRow3.eachCell((cell, colIndex) => {
+        //     cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
+        //     cell.alignment = { horizontal: "left", vertical: "middle" };
+        // });
 
         // Header style
         const headerStyle = {
@@ -1100,8 +1094,8 @@ export default function DailyJobReport() {
             "Item",
             "Technician",
             "Type",
-            "Status",
-            "Day"
+            "Parts",
+            "Profit"
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1116,8 +1110,8 @@ export default function DailyJobReport() {
                 item.Item,
                 item.Technician,
                 item.Type,
-                item.Status,
-                item.Day
+                item.Parts,
+                item.Profit
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -1128,7 +1122,7 @@ export default function DailyJobReport() {
         });
 
         // Set column widths
-        [11, 7, 25, 12, 25, 20, 15, 13, 13,].forEach((width, index) => {
+        [13, 7, 25, 12, 25, 20, 15, 13, 13,].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1140,8 +1134,8 @@ export default function DailyJobReport() {
             "",
             "",
             "",
-            "",
-            "",
+            String(totalCredit),
+            String(totalQnty),
         ]);
 
         // total row added
@@ -1158,7 +1152,7 @@ export default function DailyJobReport() {
             // Align only the "Total" text to the right
             if (
 
-                colNumber === 9
+                colNumber === 8 ||  colNumber === 9
             ) {
                 cell.alignment = { horizontal: "right" };
             }
@@ -1179,7 +1173,7 @@ export default function DailyJobReport() {
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `DailyJobReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `SparePartsProfitReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1398,18 +1392,66 @@ export default function DailyJobReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Daily Job Report" />
-                    <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", }}>
+                    <NavComponent textdata="Spare Parts Profit Report" />
+                  
 
-                        <div style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "0px",
-                            padding: "0px",
-                            justifyContent: "space-between",
-                        }}>
+                    {/* CODE FOR CODE SELECT */}
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+
+
+                            {/* ------ */}
+
+
+                            <div className="d-flex align-items-center  " style={{ marginLeft: '18px' }}>
+                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Technician :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '5px' }} >
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setSaleType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue("");
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+
+                                </div>
+
+
+                            </div>
 
                             <div className="d-flex align-items-center justify-content-center">
                                 <div className="mx-5">
@@ -1499,180 +1541,6 @@ export default function DailyJobReport() {
 
                             </div>
 
-                            {/* CODE FOR SELECT */}
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "75px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Reftype}
-                                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
-                                    id="firsttype"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
-                                    <option value="REPAIRING">Repairing</option>
-                                    <option value="INSTALLATION">Installation</option>
-                                    <option value="SERVICE">Services</option>
-                                    <option value="WORKSHOP">Workshop</option>
-
-
-                                </select>
-                            </div>
-
-                        </div>
-
-
-
-                    </div>
-
-                    {/* CODE FOR CODE SELECT */}
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-
-
-
-                            {/* ------ */}
-
-
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '18px' }}>
-                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Technician :</span>  <br /></label>
-                                </div>
-                                <div style={{ marginLeft: '5px' }} >
-                                    <Select
-                                        className="List-select-class"
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setSaleType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart, // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue("");
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-
-                                </div>
-
-
-                            </div>
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Status :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
-                                    <option value="N">UnAssign</option>
-                                    <option value="P">Pending </option>
-                                    <option value="W">Workshop</option>
-                                    <option value="R">Spare Parts</option>
-                                    <option value="D">Done </option>
-                                    <option value="S">Closed</option>
-                                    <option value="C">Cancel</option>
-
-                                </select>
-                            </div>
-
                         </div>
                     </div>
                     {/* ///////////////////////// */}
@@ -1691,7 +1559,7 @@ export default function DailyJobReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                // justifyContent: "space-between",
                             }}
                         >
                             <div className="d-flex align-items-center">
@@ -1788,7 +1656,7 @@ export default function DailyJobReport() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "20px" }}
+                                style={{ marginLeft: "150px" }}
                             >
                                 <div
                                     style={{
@@ -1839,7 +1707,7 @@ export default function DailyJobReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, 'firsttype')}
+                                        onKeyDown={(e) => handleToKeyPress(e, 'searchsubmit')}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1881,7 +1749,7 @@ export default function DailyJobReport() {
                                 </div>
                             </div>
 
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
+                            {/* <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
                                     <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
                                         Search :
@@ -1916,7 +1784,7 @@ export default function DailyJobReport() {
                                     onChange={(e) =>
                                         setSearchQuery((e.target.value || "").toUpperCase())
                                     } />
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div>
@@ -1975,10 +1843,10 @@ export default function DailyJobReport() {
                                             Type
                                         </td>
                                         <td className="border-dark" style={eighthColWidth}>
-                                            Status
+                                            Part
                                         </td>
                                         <td className="border-dark" style={ninhthColWidth}>
-                                            Day
+                                            Profits
                                         </td>
 
 
@@ -1992,7 +1860,7 @@ export default function DailyJobReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "45vh",
+                                maxHeight: "50vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -2119,7 +1987,7 @@ export default function DailyJobReport() {
                                                         >
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-center" 
+                                                        <td className="text-end" 
                                                         title={item.Status}
                                                         style={{
                                                           ...eighthColWidth,
@@ -2128,10 +1996,10 @@ export default function DailyJobReport() {
                                                           textOverflow: "ellipsis",
                                                         }}
                                                         >
-                                                            {item.Status}
+                                                            {item.Parts}
                                                         </td>
                                                         <td className="text-end" style={ninhthColWidth}>
-                                                            {item.Day}
+                                                            {item.Profit}
                                                         </td>
 
                                                     </tr>
@@ -2250,6 +2118,7 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{textAlign:'left'}}>{totalCredit}</span>
 
                         </div>
                         <div
@@ -2259,6 +2128,7 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{textAlign:'left'}}>{totalQnty}</span>
 
                         </div>
 

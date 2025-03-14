@@ -51,6 +51,11 @@ import ReferenceList from "./Component/Reports/Daily_Jobs_Reports/List/Reference
 import ControlList from "./Component/Reports/Daily_Jobs_Reports/List/ControlList.js";
 import WorkShopItemList from "./Component/Reports/Daily_Jobs_Reports/List/WorkshopItemList.js";
 
+//////////////////////////// JOb reports //////////////////////////////
+import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
+import SparePartProfitSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitSummary.js";
+import TechnicianPerformanceReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianPerformanceReport.js";
+
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
 import SupplierLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger1.js";
@@ -150,16 +155,22 @@ function App() {
                 <Route exact path="/GeneralLedger1" element={<GeneralLedger1 />} />
                 <Route exact path="/SupplierLedger" element={<SupplierLedger1 />} />
                 <Route exact path="/CustomerLedger" element={<CustomerLedger1 />} />
-                <Route exact path="/BankRegister" element={<BankRegisterLedger1  />} />
+                <Route exact path="/BankRegister" element={<BankRegisterLedger1 />} />
                 <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
                 <Route exact path="/CustomerProgress" element={<CustomerProgressLedger />} />
                 <Route exact path="/MobileLedger" element={<MobileLedger />} />
-                <Route exact path="/ItemLedger" element={<ItemLedgerReport/>} />
-                <Route exact path="/ItemAgging" element={<ItemAggingReport/>} />
-                <Route exact path="/InvoiceLedger" element={<InvoiceLedgerReport/>} />
-                <Route exact path="/MobileLedgerJob" element={<MobileLedgerJob/>} />
+                <Route exact path="/ItemLedger" element={<ItemLedgerReport />} />
+                <Route exact path="/ItemAgging" element={<ItemAggingReport />} />
+                <Route exact path="/InvoiceLedger" element={<InvoiceLedgerReport />} />
+                <Route exact path="/MobileLedgerJob" element={<MobileLedgerJob />} />
 
-              
+
+                {/* Rountes for ledgers reports */}
+                <Route exact path="/SparePartsProfitReport" element={<SparePartProfitReport />} />
+                <Route exact path="SparePartsProfitSummary" element={<SparePartProfitSummary />} />
+                <Route exact path="TechnicianPerformance" element={<TechnicianPerformanceReport />} />
+
+
                 {/* Rountes for Daily reports */}
                 <Route exact path="/CashBook" element={<DailyCashReceipts />} />
                 <Route exact path="/Journal" element={<JournalReport />} />
@@ -173,17 +184,17 @@ function App() {
                 <Route exact path="/Cash&BankBalance" element={<DailyCashBankBalance />} />
                 <Route exact path="/SaleReport" element={<DailySaleReport />} />
                 <Route exact path="/PurchaseReport" element={<DailyPurchaseReport />} />
-                <Route exact path="/ItemEvaluation" element={<ItemEvaluationReport/>} />
-                <Route exact path="/DailyJobReport" element={<DailyJobReport/>} />
-                <Route exact path="/DailyCollectionSummary" element={<DailyCollectionSummary/>} />
+                <Route exact path="/ItemEvaluation" element={<ItemEvaluationReport />} />
+                <Route exact path="/DailyJobReport" element={<DailyJobReport />} />
+                <Route exact path="/DailyCollectionSummary" element={<DailyCollectionSummary />} />
 
-              
+
                 {/* Rountes for Installments reports */}
                 <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} />
                 <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />
                 <Route exact path="/InstallmentSaleReport" element={<InstallmentSaleReport />} />
                 <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
-                
+
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
                 <Route exact path="/ItemAgging" element={<ItemAggingReport />} />
