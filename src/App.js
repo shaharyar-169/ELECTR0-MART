@@ -49,6 +49,7 @@ import AreaList from "./Component/Reports/Daily_Jobs_Reports/List/AreaList.js";
 import ComplaintList from "./Component/Reports/Daily_Jobs_Reports/List/ComplaintList.js";
 import ReferenceList from "./Component/Reports/Daily_Jobs_Reports/List/ReferenceList.js";
 import ControlList from "./Component/Reports/Daily_Jobs_Reports/List/ControlList.js";
+import WorkShopItemList from "./Component/Reports/Daily_Jobs_Reports/List/WorkshopItemList.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -142,6 +143,7 @@ function App() {
                 <Route exact path="/ComplaintList" element={<ComplaintList />} />
                 <Route exact path="/ReferenceList" element={<ReferenceList />} />
                 <Route exact path="/ControlList" element={<ControlList />} />
+                <Route exact path="/WorkShopItem" element={<WorkShopItemList />} />
 
 
                 {/* Rountes for ledgers reports */}

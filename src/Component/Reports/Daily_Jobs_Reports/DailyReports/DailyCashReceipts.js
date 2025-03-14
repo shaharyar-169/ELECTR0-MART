@@ -283,10 +283,13 @@ export default function DailyCashReceipts() {
         setIsLoading(true);
         const formData2 = new URLSearchParams({
             FTrnDat: toInputDate,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription
 
+            code: 'MAKKAHCOMP',
+            FLocCod: '001',
+            FYerDsc: '2025-2025',
            
 
         }).toString();
@@ -316,9 +319,13 @@ export default function DailyCashReceipts() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             FTrnDat: toInputDate,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getyeardescription,
+
+            code: 'MAKKAHCOMP',
+            FLocCod: '001',
+            FYerDsc: '2025-2025',
 
         }).toString();
 
@@ -350,9 +357,13 @@ export default function DailyCashReceipts() {
         setIsLoading(true);
         const formData3 = new URLSearchParams({
             FTrnDat: toInputDate,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription
+
+            code: 'MAKKAHCOMP',
+            FLocCod: '001',
+            FYerDsc: '2025-2025',
 
         }).toString();
 
@@ -411,80 +422,7 @@ export default function DailyCashReceipts() {
 
     }, []);
 
-    useEffect(() => {
-
-        const apiUrl = apiLinks + "/GetActiveSupplier.php"
-        const formData = new URLSearchParams({
-            FLocCod: getLocationNumber,
-            code: organisation.code,
-        }).toString();
-        axios
-            .post(apiUrl, formData)
-            .then(response => {
-                setSupplierList(response.data);
-
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
-    }, []);
-
-    // Transforming fetched data into options array
-    const options = supplierList.map(item => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`
-    }));
-
-    const DropdownOption = (props) => {
-        return (
-            <components.Option {...props}>
-                <div style={{
-                    fontSize: '12px',
-                    paddingBottom: '5px',
-                    lineHeight: '3px',
-                    color: 'black',
-                    textAlign: 'start',
-
-                }}>
-                    {props.data.label}
-                </div>
-            </components.Option>
-        );
-    };
-    const customStyles1 = (hasError) => ({
-        control: (base, state) => ({
-            ...base,
-            height: '24px',
-            minHeight: 'unset',
-            width: 418,
-            fontSize: '12px',
-            backgroundColor: getcolor,
-            color: fontcolor,
-            borderRadius: 0,
-            border: hasError ? '2px solid red' : `1px solid ${fontcolor}`, // Conditionally change border color
-            transition: 'border-color 0.15s ease-in-out',
-            '&:hover': {
-                borderColor: state.isFocused ? base.borderColor : 'black',
-            },
-            padding: '0 8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-
-        }),
-        dropdownIndicator: base => ({
-            ...base,
-            padding: 0,
-            fontSize: '18px',
-            display: 'flex',
-            textAlign: 'center !important',
-        }),
-    });
-
-    const handleTransactionTypeChange = (event) => {
-        const selectedTransactionType = event.target.value;
-        settransectionType(selectedTransactionType);
-    };
+   
 
     const exportPDFHandler = () => {
 
@@ -854,7 +792,6 @@ export default function DailyCashReceipts() {
 
 
     };
-
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
@@ -1058,16 +995,12 @@ export default function DailyCashReceipts() {
         });
         saveAs(blob, `DailyCashBookReport As on ${currentdate}.xlsx`);
     };
-
-
     const getDayName = (dateString) => {
         const dateParts = dateString.split("-").map(Number); // Split date string into parts (day, month, year)
         const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // Create Date object
         return date.toLocaleDateString("en-US", { weekday: "long" }); // Get day name
     };
-
-
-    ///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
     const user = getUserData();
