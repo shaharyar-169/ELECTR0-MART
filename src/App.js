@@ -55,6 +55,11 @@ import WorkShopItemList from "./Component/Reports/Daily_Jobs_Reports/List/Worksh
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
 import SparePartProfitSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitSummary.js";
 import TechnicianPerformanceReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianPerformanceReport.js";
+import TechnicianAggingReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianAggingreport.js";
+import CompanyPerformanceReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyPerformance.js";
+import ReferencePerformanceReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferencePerformancereport.js";
+import ReferenceReceivableReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferenceRecievable.js";
+import CompanyReceivableReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyRecievable.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -165,10 +170,15 @@ function App() {
                 <Route exact path="/MobileLedgerJob" element={<MobileLedgerJob />} />
 
 
-                {/* Rountes for ledgers reports */}
+                {/* Rountes for Job reports */}
                 <Route exact path="/SparePartsProfitReport" element={<SparePartProfitReport />} />
-                <Route exact path="SparePartsProfitSummary" element={<SparePartProfitSummary />} />
-                <Route exact path="TechnicianPerformance" element={<TechnicianPerformanceReport />} />
+                <Route exact path="/SparePartsProfitSummary" element={<SparePartProfitSummary />} />
+                <Route exact path="/TechnicianPerformance" element={<TechnicianPerformanceReport />} />
+                <Route exact path="/TechnicianAgging" element={<TechnicianAggingReport />} />
+                <Route exact path="/CompanyPerformance" element={<CompanyPerformanceReport />} />
+                <Route exact path="/ReferencePerformance" element={<ReferencePerformanceReport />} />
+                <Route exact path="/ReferenceReceivable" element={<ReferenceReceivableReport />} />
+                <Route exact path="/CompanyReceivable" element={<CompanyReceivableReport />} />
 
 
                 {/* Rountes for Daily reports */}
