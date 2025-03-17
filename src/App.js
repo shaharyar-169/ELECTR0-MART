@@ -76,7 +76,7 @@ import InvoiceLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/
 import MobileLedgerJob from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileLedgerJob.js";
 
 //////////////////////////// Daily reports //////////////////////////////
-import DailyCashReceipts from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashReceipts.js";
+import DailyCashBook from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBook.js";
 import JournalReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/Journal.js";
 import DailyCreditReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCreditMemo.js";
 import DocumentEditReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DocumentEditReport.js";
@@ -182,7 +182,7 @@ function App() {
 
 
                 {/* Rountes for Daily reports */}
-                <Route exact path="/CashBook" element={<DailyCashReceipts />} />
+                <Route exact path="/CashBook" element={<DailyCashBook />} />
                 <Route exact path="/Journal" element={<JournalReport />} />
                 <Route exact path="/EditDocumentReport" element={<DocumentEditReport />} />
                 <Route exact path="/DailyCreditMemo" element={<DailyCreditReport />} />

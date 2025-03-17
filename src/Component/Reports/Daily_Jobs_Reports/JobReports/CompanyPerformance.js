@@ -1592,8 +1592,7 @@ export default function CompanyPerformanceReport() {
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                    tableLayout: 'fixed'
-                                }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})                                  }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (

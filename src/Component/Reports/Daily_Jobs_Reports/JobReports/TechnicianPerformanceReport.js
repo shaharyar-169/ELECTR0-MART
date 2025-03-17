@@ -455,11 +455,11 @@ export default function TechnicianPerformanceReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
-            if (saleSelectRef && saleSelectRef.current) {
+        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+            if (fromRef && fromRef.current) {
                 setTimeout(() => {
-                    saleSelectRef.current.focus();
-                    // saleSelectRef.current.select();
+                    fromRef.current.focus();
+                    fromRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -1129,7 +1129,7 @@ export default function TechnicianPerformanceReport() {
         width: "9%",
     };
     const elawentheColWidth = {
-        width: "9%",
+        width: "8.8%",
     };
 
 
@@ -1287,7 +1287,7 @@ export default function TechnicianPerformanceReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Spare Parts Profit Report" />
+                    <NavComponent textdata="Technician Performance Report" />
 
 
                     {/* CODE FOR CODE SELECT */}
@@ -1675,8 +1675,8 @@ export default function TechnicianPerformanceReport() {
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                    tableLayout: 'fixed'
-                                }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})       
+                                                           }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (
@@ -1826,7 +1826,7 @@ export default function TechnicianPerformanceReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 11 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1843,6 +1843,8 @@ export default function TechnicianPerformanceReport() {
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+                                                <td style={elawentheColWidth}></td>
 
 
                                             </tr>

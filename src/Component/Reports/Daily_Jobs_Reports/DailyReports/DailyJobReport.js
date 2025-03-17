@@ -1264,7 +1264,7 @@ export default function DailyJobReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
+        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
         position: "relative",
         top: "35%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -2004,8 +2004,7 @@ export default function DailyJobReport() {
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                    tableLayout:'fixed'
-                                }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})                                }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (

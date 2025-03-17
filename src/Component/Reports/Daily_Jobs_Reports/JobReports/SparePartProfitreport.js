@@ -448,11 +448,11 @@ export default function SparePartProfitReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
-            if (saleSelectRef && saleSelectRef.current) {
+        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+            if (fromRef && fromRef.current) {
                 setTimeout(() => {
-                    saleSelectRef.current.focus();
-                    // saleSelectRef.current.select();
+                    fromRef.current.focus();
+                    fromRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -1872,8 +1872,7 @@ export default function SparePartProfitReport() {
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                    tableLayout:'fixed'
-                                }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})                                  }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (

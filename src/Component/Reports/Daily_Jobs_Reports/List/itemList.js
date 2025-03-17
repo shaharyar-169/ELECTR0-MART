@@ -244,6 +244,7 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetCompany.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -271,6 +272,7 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetCapacity.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -299,6 +301,7 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetCatg.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -327,6 +330,7 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetType.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -1693,8 +1697,8 @@ export default function ItemList() {
                   fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
-                  tableLayout: "fixed",
-                }}
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}), 
+                                }}
               >
                 <tbody id="tablebody">
                   {isLoading ? (

@@ -23,8 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import callAddFont from "../../../../vardana-normal";
 import { color } from "@mui/system";
 
-export default function DailyCashReceipts() {
-
+export default function DailyCashBook() {
 
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
@@ -58,7 +57,15 @@ export default function DailyCashReceipts() {
     const [toInputDate, settoInputDate] = useState('');
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////    
+    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////   
+
+
+    //////////////////////// States for row highlights ///////////
+    const [isFilterApplied, setIsFilterApplied] = useState(false);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [selectedRowId, setSelectedRowId] = useState(null);
+    const rowRefs = useRef([]);
+    //////////////////////////////////////////////////////////////  
 
     const yeardescription = getYearDescription();
     const locationnumber = getLocationnumber()
@@ -290,7 +297,7 @@ export default function DailyCashReceipts() {
             code: 'MAKKAHCOMP',
             FLocCod: '001',
             FYerDsc: '2025-2025',
-           
+
 
         }).toString();
 
@@ -422,20 +429,18 @@ export default function DailyCashReceipts() {
 
     }, []);
 
-   
+
 
     const exportPDFHandler = () => {
-
-        const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
 
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
-        const rows = CashPaymentData.map((cashPaymentItem, index) => {
-            // Retrieve corresponding data from tableData
-            const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
+        const rows = Array.from({ length: Math.max(tableData.length, CashPaymentData.length) }).map((_, index) => {
+            // Retrieve corresponding data from both arrays, or fallback to an empty object
+            const tableItem = tableData[index] || {};
+            const cashPaymentItem = CashPaymentData[index] || {};
 
             return [
                 tableItem['Trn#'] ? `${tableItem['Trn#']} - ${tableItem.Description}` : "", // First column - From tableData
@@ -444,6 +449,7 @@ export default function DailyCashReceipts() {
                 cashPaymentItem.Amount || "", // Fourth column - From CashPaymentData
             ];
         });
+
 
         // Add summary row to the table
         rows.push([
@@ -474,13 +480,13 @@ export default function DailyCashReceipts() {
 
         // Set font properties for the table
         doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+        doc.setFontSize(11);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
             doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+            doc.setFontSize(11); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -504,7 +510,7 @@ export default function DailyCashReceipts() {
 
             // Reset font style and size after adding headers
             doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+            doc.setFontSize(11);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
@@ -514,7 +520,7 @@ export default function DailyCashReceipts() {
             const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
-            doc.setFontSize(fontSize);
+            doc.setFontSize(11);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
@@ -605,7 +611,7 @@ export default function DailyCashReceipts() {
             const lineY = pageHeight - 15; // Position the line 20 units from the bottom
             doc.setLineWidth(0.3);
             doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+            const headingFontSize = 11; // Adjust as needed
 
             // Add heading "Crystal Solution" aligned left bottom of the line
             const headingX = lineX + 2; // Padding from left
@@ -688,7 +694,7 @@ export default function DailyCashReceipts() {
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(12);
+                doc.setFontSize(11);
                 doc.setFont(getfontstyle, "300");
 
 
@@ -699,10 +705,7 @@ export default function DailyCashReceipts() {
 
                 // Set font style, size, and family
                 doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
-
-
-
+                doc.setFontSize(11); // Font size
 
 
                 const fixedWidth = 20; // Set a fixed width for both rectangles
@@ -710,7 +713,7 @@ export default function DailyCashReceipts() {
                 const rightPadding = 3; // Padding from the right side
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`OPENING BAL :`, labelsX + 62, labelsY + 8.5); // Draw bold label
+                doc.text(`OPENING BAL :`, labelsX + 58, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
 
                 // Draw the value inside the border
@@ -726,7 +729,7 @@ export default function DailyCashReceipts() {
                 // Positioning for CLOSING BALANCE
                 const closingLabelX = labelsX + 172; // Space after OPENING BAL
                 doc.setFont(getfontstyle, 'bold');
-                doc.text(`CLOSING BAL :`, closingLabelX, labelsY + 8.5); // Draw bold label
+                doc.text(`CLOSING BAL :`,labelsX + 168 , labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal');
 
                 // Draw the value inside the border
@@ -743,7 +746,7 @@ export default function DailyCashReceipts() {
 
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.setFontSize(10);
+                doc.setFontSize(11);
 
                 startY += 10; // Adjust vertical position for the labels
 
@@ -796,100 +799,68 @@ export default function DailyCashReceipts() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 6; // Number of columns
+        const numColumns = 10; // Ensure this matches the actual number of columns
 
-        const columnAlignments = ["left", "right", "left", "right"];
+        const columnAlignments = [
+            "left",
+            "right",
+            "left",
+            "right",
+
+        ];
+
+        // Define fonts for different sections
+        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
-        // Add title rows
-
-        [comapnyname, `Daily Cash Book From ${toInputDate}`,].forEach((title, index) => {
-            // Define custom styles for each title
-            let customStyle;
-            let rowHeight = 20;  // Default row height
-            if (index === 0) {
-                // Style for company name
-                customStyle = {
-                    font: { family: getfontstyle, size: 18, bold: true },
-                    alignment: { horizontal: "center" },
-                };
-                rowHeight = 30; // Increase row height for company name to avoid overlap
-            } else {
-                // Style for "Item List"
-                customStyle = {
-                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
-                    alignment: { horizontal: "center" },
-                };
-            }
-
-            // Add row with the title
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-            // Adjust the row height for the company name or other titles
-            worksheet.getRow(index + 2).height = rowHeight;
-
-            // Merge the cells for the title
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
+        // Add company name
+        const companyRow = worksheet.addRow([comapnyname]);
+        companyRow.eachCell((cell) => {
+            cell.font = fontCompanyName;
+            cell.alignment = { horizontal: "center" };
         });
 
+        worksheet.getRow(companyRow.number).height = 30;
+        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(60 + numColumns - 1)}${companyRow.number}`);
 
+        // Add Store List row
+        const storeListRow = worksheet.addRow([`Daily Cash Book Report From ${toInputDate}`]);
+        storeListRow.eachCell((cell) => {
+            cell.font = fontStoreList;
+            cell.alignment = { horizontal: "center" };
+        });
+
+        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(60 + numColumns - 1)}${storeListRow.number}`);
 
         // Add an empty row after the title section
-        worksheet.addRow([]);  // This is where you add the empty row
+        worksheet.addRow([]);
+       
 
-
-        let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null
+        let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null;
         let search = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null;
 
-        const typeAndStoreRow3 = worksheet.addRow(
-            ["ONPENING BAL :", status, "CLOSING BAL :", search]
-        );
+        const typeAndStoreRow3 = worksheet.addRow(["OPENING BAL :", status, "CLOSING BAL :", search]);
 
-        const applyStatusRowStyle = (row, boldColumns = []) => {
-            row.eachCell((cell, colIndex) => {
-                // Check if the current cell is in the boldColumns array
-                const isBold = boldColumns.includes(colIndex);
+        typeAndStoreRow3.eachCell((cell, colIndex) => {
+            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+            // Apply right alignment to both labels and values
+            cell.alignment = {
+                horizontal: "right", // Align everything to the right
+                vertical: "middle"
+            };
+        });
 
-                cell.font = {
-                    family: getfontstyle, // Your desired font family
-                    size: getdatafontsize, // Your desired font size
-                    bold: isBold, // Bold only for specific columns
-                };
-
-                cell.alignment = {
-                    horizontal: "right", // Align text to the left
-                    vertical: "middle", // Vertically align to the middle
-                };
-
-                cell.border = null; // Remove borders
-            });
-        };
-
-        // Bold specific columns (labels)
-
-        applyStatusRowStyle(typeAndStoreRow3, [1, 3]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-
-
-        // Header style for center alignment
+        // Header style
         const headerStyle = {
-            font: { bold: true, family: getfontstyle, size: getdatafontsize },
-            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
+            font: fontHeader,
+            alignment: { horizontal: "center", vertical: "middle" },
+            fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+            border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
         };
 
         // Add headers
@@ -900,18 +871,15 @@ export default function DailyCashReceipts() {
             "Amount",
         ];
         const headerRow = worksheet.addRow(headers);
-
-        // Apply styles and center alignment to the header row
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle };
-        });
+        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
         // Add data rows
+        const maxRows = Math.max(tableData.length, CashPaymentData.length);
 
-        // Add data rows
-        CashPaymentData.forEach((cashPaymentItem, index) => {
-            // Retrieve corresponding data from tableData
-            const tableItem = tableData[index] || {}; // Fallback to an empty object if index doesn't exist
+        Array.from({ length: maxRows }).forEach((_, index) => {
+            // Retrieve corresponding data from both arrays, or fallback to an empty object
+            const tableItem = tableData[index] || {};
+            const cashPaymentItem = CashPaymentData[index] || {};
 
             // Add a new row and store the reference
             const row = worksheet.addRow([
@@ -923,30 +891,18 @@ export default function DailyCashReceipts() {
 
             // Apply custom styles to each cell in the row
             row.eachCell((cell, colIndex) => {
-                cell.font = {
-                    family: getfontstyle, // Set your desired font family
-                    size: getdatafontsize, // Set the font size
-                    bold: false, // Make the font bold
-                };
-
-                cell.border = {
-                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-                };
-
-                // Align cell content based on columnAlignments array
-                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-                cell.alignment = {
-                    horizontal: alignment,
-                    vertical: "middle", // Vertically align to the middle
-                };
+                cell.font = fontTableContent;
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
             });
         });
 
 
+
         // Set column widths
+        [48, 12, 48, 12].forEach((width, index) => {
+            worksheet.getColumn(index + 1).width = width;
+        });
 
         const totalRow = worksheet.addRow([
             "",
@@ -958,7 +914,7 @@ export default function DailyCashReceipts() {
         // total row added
 
         totalRow.eachCell((cell, colNumber) => {
-            cell.font = { bold: true };
+            cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
             cell.border = {
                 top: { style: "thin" },
                 left: { style: "thin" },
@@ -967,40 +923,39 @@ export default function DailyCashReceipts() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 5) {
+            if (
+
+                colNumber === 2 || colNumber === 4
+            ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
 
 
-        [48, 12, 48, 12].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-
+        // Get current date
         const getCurrentDate = () => {
             const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "-" + mm + "-" + yyyy;
+            const day = String(today.getDate()).padStart(2, "0");
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const year = today.getFullYear();
+            return `${day}-${month}-${year}`;
         };
 
         const currentdate = getCurrentDate();
 
-        // Generate Excel file buffer and save
+        // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, `DailyCashBookReport As on ${currentdate}.xlsx`);
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, `DailyCashBookReport As on ${toInputDate}.xlsx`);
     };
+
+
     const getDayName = (dateString) => {
         const dateParts = dateString.split("-").map(Number); // Split date string into parts (day, month, year)
         const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // Create Date object
         return date.toLocaleDateString("en-US", { weekday: "long" }); // Get day name
     };
-///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
     const user = getUserData();
@@ -1105,51 +1060,46 @@ export default function DailyCashReceipts() {
 
 
     //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
-    const [isFilterApplied, setIsFilterApplied] = useState(false);
+
+    // Calculate the maximum number of rows between both datasets
+    const maxRows = Math.max(CashPaymentData.length, tableData.length);
+
     useEffect(() => {
-        if (isFilterApplied || CashPaymentData.length > 0) {
-            setSelectedIndex(0); // Set the selected index to the first row
+        if (isFilterApplied || maxRows > 0) {
+            setSelectedIndex(0);
             rowRefs.current[0]?.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
             });
         } else {
-            setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
+            setSelectedIndex(-1);
         }
-    }, [CashPaymentData, isFilterApplied]);
+    }, [CashPaymentData, tableData, isFilterApplied]);
 
-    let totalEnteries = 0;
-    const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
-
-    // state initialize for table row highlight
-    const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
-    const rowRefs = useRef([]); // Array of refs for rows
     const handleRowClick = (index) => {
         setSelectedIndex(index);
-        // setSelectedRowId(getFilteredTableData[index].tcmpdsc); // Save the selected row's tctgcod
     };
+
     useEffect(() => {
         if (selectedRowId !== null) {
-            const newIndex = tableData.findIndex(
-                (item) => item.tcmpcod === selectedRowId
-            );
+            const newIndex = tableData.findIndex((item) => item.tcmpcod === selectedRowId);
             setSelectedIndex(newIndex);
         }
-    }, [CashPaymentData, selectedRowId]);
+    }, [tableData, selectedRowId]);
+
     const handleKeyDown = (e) => {
-        if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
+        if (selectedIndex === -1 || e.target.id === "searchInput") return;
         if (e.key === "ArrowUp") {
             e.preventDefault();
             setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
             scrollToSelectedRow();
         } else if (e.key === "ArrowDown") {
             e.preventDefault();
-            setSelectedIndex((prevIndex) =>
-                Math.min(prevIndex + 1, CashPaymentData.length - 1)
-            );
+            setSelectedIndex((prevIndex) => Math.min(prevIndex + 1, maxRows - 1));
             scrollToSelectedRow();
         }
     };
+
     const scrollToSelectedRow = () => {
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
@@ -1158,23 +1108,23 @@ export default function DailyCashReceipts() {
             });
         }
     };
+
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
-
-        // Cleanup event listener on component unmount
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [selectedIndex]); // Add selectedIndex as a dependency
+    }, [selectedIndex]);
+
     useEffect(() => {
-        // Scroll the selected row into view
         if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
             rowRefs.current[selectedIndex].scrollIntoView({
                 behavior: "smooth",
                 block: "nearest",
             });
         }
-    }, [selectedIndex]); // Add selectedIndex as a dependency
+    }, [selectedIndex]);
+
     //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
 
 
@@ -1297,9 +1247,9 @@ export default function DailyCashReceipts() {
                             </div>
 
                             {/* Opening Balance  */}
-                            <div style={{ display: 'flex', marginLeft: '25px' }}>
-                                <div style={{ width: '110px' }}>
-                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Opening Bal :</span> </label>
+                            <div style={{ display: 'flex', marginLeft: '27px' }}>
+                                <div style={{ width: '100px' }}>
+                                    <label for="searchInput" ><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Opening Bal :</span> </label>
                                 </div>
                                 <div
                                     style={{
@@ -1308,7 +1258,6 @@ export default function DailyCashReceipts() {
                                         fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
-
                                     }}
                                 >
                                     <span className="mobileledger_total">{CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null}</span>
@@ -1316,9 +1265,9 @@ export default function DailyCashReceipts() {
                             </div>
 
                             {/* Closing Balance  */}
-                            <div style={{ display: 'flex', marginLeft: '280px' }}>
-                                <div style={{ width: '110px' }}>
-                                    <label for="searchInput" style={{ marginRight: '5px' }}><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Closing Bal :</span> </label>
+                            <div style={{ display: 'flex', marginLeft: '295px' }}>
+                                <div style={{ width: '95px' }}>
+                                    <label for="searchInput" ><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Closing Bal :</span> </label>
                                 </div>
                                 <div
                                     style={{
@@ -1449,42 +1398,14 @@ export default function DailyCashReceipts() {
                                         </>
                                     ) : (
                                         <>
-                                            {/* {tableData.map((item, i) => {
-                                                totalEnteries += 1;
-                                                return (
-                                                    <tr
-                                                        key={`${i}-${selectedIndex}`}
-                                                        ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
-                                                        onClick={() => handleRowClick(i)}
-                                                        className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{ backgroundColor: '#021A33' }}
-                                                    >
-                                                        <td className="text-start" style={firstColWidth}>
-                                                            {`${item['Trn#']}-${item['A/C']} - ${item.Description}`}
-                                                        </td>
-                                                        <td className="text-end" style={secondColWidth}>
-                                                            {item.Amount} 
-                                                        </td>
-
-                                                        <td className="text-start" style={thirdColWidth}>
-                                                        {`${item['Trn#']}-${item['A/C']} - ${item.Description}`}
-
-                                                        </td>
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {item.Amount}
-                                                        </td>
 
 
-                                                    </tr>
-                                                );
-                                            })} */}
+                                            {Array.from({ length: Math.max(tableData.length, CashPaymentData.length) }).map((_, i) => {
+                                                // totalEnteries += 1;
 
-
-                                            {CashPaymentData.map((cashPaymentItem, i) => {
-                                                totalEnteries += 1;
-
-                                                // Retrieve corresponding data from tableData if it exists
-                                                const tableItem = tableData[i] || {}; // Fallback to an empty object if index doesn't exist
+                                                // Get corresponding data from both arrays, or fallback to an empty object
+                                                const tableItem = tableData[i] || {};
+                                                const cashPaymentItem = CashPaymentData[i] || {};
 
                                                 return (
                                                     <tr
@@ -1496,35 +1417,29 @@ export default function DailyCashReceipts() {
                                                     >
                                                         {/* First Column - From tableData if available */}
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {tableItem['Trn#']
-                                                                ? `${tableItem['Trn#']}- ${tableItem.Description}`
-                                                                : ""}
+                                                            {tableItem['Trn#'] ? `${tableItem['Trn#']}- ${tableItem.Description}` : ""}
                                                         </td>
 
-                                                        {/* Second Column - From CashPaymentData */}
+                                                        {/* Second Column - From tableData if available */}
                                                         <td className="text-end" style={secondColWidth}>
                                                             {tableItem.Amount || ""}
                                                         </td>
 
-                                                        {/* Third Column - From CashPaymentData */}
+                                                        {/* Third Column - From CashPaymentData if available */}
                                                         <td className="text-start" style={thirdColWidth}>
-                                                            {`${cashPaymentItem['Trn#'] || ""}-${cashPaymentItem.Description || ""}`}
+                                                            {cashPaymentItem['Trn#'] ? `${cashPaymentItem['Trn#']}-${cashPaymentItem.Description}` : ""}
                                                         </td>
 
-                                                        {/* Fourth Column - From tableData if available */}
+                                                        {/* Fourth Column - From CashPaymentData if available */}
                                                         <td className="text-end" style={forthColWidth}>
                                                             {cashPaymentItem.Amount || ""}
-
                                                         </td>
                                                     </tr>
                                                 );
                                             })}
 
-
-
-                                            {Array.from({
-                                                length: Math.max(0, 27 - tableData.length),
-                                            }).map((_, rowIndex) => (
+                                            {/* Fill blank rows if needed */}
+                                            {Array.from({ length: Math.max(0, 27 - Math.max(tableData.length, CashPaymentData.length)) }).map((_, rowIndex) => (
                                                 <tr key={`blank-${rowIndex}`}
                                                     style={{
                                                         backgroundColor: getcolor,
@@ -1538,6 +1453,8 @@ export default function DailyCashReceipts() {
                                                     ))}
                                                 </tr>
                                             ))}
+
+
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
