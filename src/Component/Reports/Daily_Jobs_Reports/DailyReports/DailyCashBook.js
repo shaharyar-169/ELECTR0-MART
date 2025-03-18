@@ -1413,8 +1413,12 @@ export default function DailyCashBook() {
                                                         ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
                                                         onClick={() => handleRowClick(i)}
                                                         className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{ backgroundColor: '#021A33' }}
-                                                    >
+                                                        style={{
+                                                            backgroundColor: getcolor,
+                                                            color: fontcolor,
+                                                          }}
+                                                  
+                                                  >
                                                         {/* First Column - From tableData if available */}
                                                         <td className="text-start" style={firstColWidth}>
                                                             {tableItem['Trn#'] ? `${tableItem['Trn#']}- ${tableItem.Description}` : ""}
