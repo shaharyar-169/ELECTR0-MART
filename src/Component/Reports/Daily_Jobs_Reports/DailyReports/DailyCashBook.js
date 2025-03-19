@@ -83,6 +83,7 @@ export default function DailyCashBook() {
         gettodate,
         getfontstyle,
         getdatafontsize,
+        
     } = useTheme();
 
     console.log('select year: ' + getyeardescription)
@@ -290,13 +291,10 @@ export default function DailyCashBook() {
         setIsLoading(true);
         const formData2 = new URLSearchParams({
             FTrnDat: toInputDate,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription
-
-            code: 'MAKKAHCOMP',
-            FLocCod: '001',
-            FYerDsc: '2025-2025',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
+          
 
 
         }).toString();
@@ -326,9 +324,9 @@ export default function DailyCashBook() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             FTrnDat: toInputDate,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
 
             code: 'MAKKAHCOMP',
             FLocCod: '001',
@@ -364,13 +362,10 @@ export default function DailyCashBook() {
         setIsLoading(true);
         const formData3 = new URLSearchParams({
             FTrnDat: toInputDate,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription
 
-            code: 'MAKKAHCOMP',
-            FLocCod: '001',
-            FYerDsc: '2025-2025',
 
         }).toString();
 

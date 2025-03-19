@@ -28,6 +28,7 @@ export default function DailyJobReport() {
     const organisation = getOrganisationData();
 
     const saleSelectRef = useRef(null);
+    const Referenceref = useRef(null);
     const input1Ref = useRef(null);
     const input1Reftype = useRef(null);
     const input2Ref = useRef(null);
@@ -37,14 +38,19 @@ export default function DailyJobReport() {
     const fromRef = useRef(null);
 
     const [saleType, setSaleType] = useState("");
+    const [ReferenceCode, setReferenceCode] = useState("");
+
+
+
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [transectionType2, settransectionType2] = useState("");
 
     const [supplierList, setSupplierList] = useState([]);
-    console.log('getactivecollectordata', supplierList)
+    const [Referenceapidata, setReferenceapidata] = useState([]);
 
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    const [referenceselectdatavalue, setreferenceselectdatavalue] = useState("");
 
 
     const [totalQnty, setTotalQnty] = useState(0);
@@ -274,6 +280,23 @@ export default function DailyJobReport() {
             if (selectedOption && selectedOption.value) {
                 setSaleType(selectedOption.value);
             }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
+    const handleReferenceKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = Referenceref.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setSaleType(selectedOption.value);
+            }
             const nextInput = document.getElementById(inputId);
             if (nextInput) {
                 nextInput.focus();
@@ -283,6 +306,8 @@ export default function DailyJobReport() {
             }
         }
     };
+
+
 
     const handleKeyPress = (e, nextInputRef) => {
         if (e.key === "Enter") {
@@ -408,15 +433,13 @@ export default function DailyJobReport() {
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FTchCod: saleType,
+            FRefCod: ReferenceCode,
             FJobSts: transectionType,
             FJobTyp: transectionType2,
             FSchTxt: searchQuery,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
-
-           
-
 
         }).toString();
 
@@ -493,6 +516,31 @@ export default function DailyJobReport() {
         value: item.ttchcod,
         label: `${item.ttchcod}-${item.ttchdsc.trim()}`,
     }));
+
+    /////////////// api for Reference code ////////////////////
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetActiveReference.php";
+        const formData = new URLSearchParams({
+            FLocCod: locationnumber || getLocationNumber,
+            code: organisation.code,
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                setReferenceapidata(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    }, []);
+
+    const refoptions = Referenceapidata.map((item) => ({
+        value: item.trefcod,
+        label: `${item.trefcod}-${item.trefdsc.trim()}`,
+    }));
+
+    /////////////////////////////////////////////////////////
 
     const DropdownOption = (props) => {
         return (
@@ -603,7 +651,7 @@ export default function DailyJobReport() {
             "",
             "",
             "",
-            
+
         ]);
 
         // Define table column headers and individual column widths
@@ -881,6 +929,10 @@ export default function DailyJobReport() {
                     ? Companyselectdatavalue.label
                     : "ALL";
 
+                    let Referencecodelable = referenceselectdatavalue.label
+                    ? referenceselectdatavalue.label
+                    : "ALL";
+
 
                 let search1 = searchQuery ? searchQuery : "";
 
@@ -896,31 +948,41 @@ export default function DailyJobReport() {
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`STATUS :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+                doc.text(`TYPE :`, labelsX + 200, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 220, labelsY + 8.5); // Draw the value next to the label
+                doc.text(`${type}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
 
 
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX, labelsY + 14); // Draw bold label
+                doc.text(`REFERENCE :`, labelsX, labelsY + 14); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${type}`, labelsX + 15, labelsY + 14); // Draw the value next to the label
+                doc.text(`${Referencecodelable}`, labelsX + 25, labelsY + 14); // Draw the value next to the label
+
+              
+                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                    doc.text(`Status :`, labelsX + 200, labelsY + 14); // Draw bold label
+                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                    doc.text(`${status}`, labelsX + 215, labelsY + 14); // Draw the value next to the label
+
+               
+
 
                 if (searchQuery) {
                     doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 200, labelsY + 14); // Draw bold label
+                    doc.text(`SEARCH :`, labelsX + 200, labelsY + 19.5); // Draw bold label
                     doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${search1}`, labelsX + 220, labelsY + 14); // Draw the value next to the label
+                    doc.text(`${search1}`, labelsX + 220, labelsY + 19.5); // Draw the value next to the label
 
                 }
+
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 16; // Adjust vertical position for the labels
+                startY += 21; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 35);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 40);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -1022,6 +1084,10 @@ export default function DailyJobReport() {
             ? Companyselectdatavalue.label
             : "ALL";
 
+            let referencevalue = referenceselectdatavalue.label
+            ? referenceselectdatavalue.label
+            : "ALL";
+
         let status = transectionType === "N"
             ? "UnAssign"
             : transectionType === "P"
@@ -1054,6 +1120,17 @@ export default function DailyJobReport() {
         // Add first row
         const typeAndStoreRow = worksheet.addRow([
             "TECHNICIAN :",
+            referencevalue,
+            "",
+            "",
+            "",
+            "",
+            "TYPE :",
+            type
+        ]);
+
+        const typeAndStoreRow4 = worksheet.addRow([
+            "REFERENCE :",
             typecompany,
             "",
             "",
@@ -1067,8 +1144,8 @@ export default function DailyJobReport() {
 
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
-                ? ["TYPE :", type, "", "", "", "", "SEARCH :", typesearch]
-                : ["TYPE :", type, ""]);
+                ? ["", "", "", "", "", "", "SEARCH :", typesearch]
+                : [""]);
 
 
 
@@ -1078,10 +1155,16 @@ export default function DailyJobReport() {
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
 
+        typeAndStoreRow4.eachCell((cell, colIndex) => {
+            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
+            cell.alignment = { horizontal: "left", vertical: "middle" };
+        });
+
         typeAndStoreRow3.eachCell((cell, colIndex) => {
             cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
+
 
         // Header style
         const headerStyle = {
@@ -1128,7 +1211,7 @@ export default function DailyJobReport() {
         });
 
         // Set column widths
-        [11, 7, 25, 12, 25, 20, 15, 13, 13,].forEach((width, index) => {
+        [14, 7, 25, 12, 25, 20, 15, 13, 13,].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1591,7 +1674,7 @@ export default function DailyJobReport() {
                                         className="List-select-class"
                                         ref={saleSelectRef}
                                         options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handleSaleKeypress(e, Referenceref)}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -1618,89 +1701,13 @@ export default function DailyJobReport() {
 
                             </div>
 
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Status :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
-                                    <option value="N">UnAssign</option>
-                                    <option value="P">Pending </option>
-                                    <option value="W">Workshop</option>
-                                    <option value="R">Spare Parts</option>
-                                    <option value="D">Done </option>
-                                    <option value="S">Closed</option>
-                                    <option value="C">Cancel</option>
-
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-                    {/* ///////////////////////// */}
-
-
-
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center">
+                            <div className="d-flex align-items-center" style={{marginRight:'20px'}}>
                                 <div
                                     style={{
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
-                                        marginLeft: '20px'
+                                      
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
@@ -1786,9 +1793,122 @@ export default function DailyJobReport() {
                                     />
                                 </div>
                             </div>
+
+
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "20px" }}
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            Status :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType}
+                                    onChange={handleTransactionTypeChange}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">ALL</option>
+                                    <option value="N">UnAssign</option>
+                                    <option value="P">Pending </option>
+                                    <option value="W">Workshop</option>
+                                    <option value="R">Spare Parts</option>
+                                    <option value="D">Done </option>
+                                    <option value="S">Closed</option>
+                                    <option value="C">Cancel</option>
+
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    {/* ///////////////////////// */}
+
+
+
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                             <div className="d-flex align-items-center  " style={{ marginLeft: '22.5px' }}>
+                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Reference :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '5px' }} >
+                                    <Select
+                                        className="List-select-class"
+                                        ref={Referenceref}
+                                        options={refoptions}
+                                        onKeyDown={(e) => handleReferenceKeypress(e, "frominputid")}
+                                        id="referencecodee"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setReferenceCode(selectedOption.value);
+                                                setreferenceselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setReferenceCode(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setreferenceselectdatavalue("");
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+
+                                </div>
+
+
+                            </div>
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "6px" }}
                             >
                                 <div
                                     style={{
@@ -2004,7 +2124,9 @@ export default function DailyJobReport() {
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})                                }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})
+
+                                }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (
@@ -2071,61 +2193,61 @@ export default function DailyJobReport() {
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item['Job#']}
                                                         </td>
-                                                        <td className="text-start" 
-                                                         title={item.Customer}
-                                                         style={{
-                                                           ...thirdColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
+                                                        <td className="text-start"
+                                                            title={item.Customer}
+                                                            style={{
+                                                                ...thirdColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
                                                             {item.Customer}
                                                         </td>
                                                         <td className="text-start" style={forthColWidth}>
                                                             {item.Mobile}
                                                         </td>
-                                                        <td className="text-start" 
-                                                         title={item.Item}
-                                                         style={{
-                                                           ...fifthColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
+                                                        <td className="text-start"
+                                                            title={item.Item}
+                                                            style={{
+                                                                ...fifthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
                                                             {item.Item}
                                                         </td>
-                                                        <td className="text-start" 
-                                                         title={item.Technician}
-                                                         style={{
-                                                           ...sixthColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
+                                                        <td className="text-start"
+                                                            title={item.Technician}
+                                                            style={{
+                                                                ...sixthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
                                                             {item.Technician}
                                                         </td>
-                                                        <td className="text-start" 
-                                                         title={item.Type}
-                                                         style={{
-                                                           ...seventhColWidth,
-                                                           whiteSpace: "nowrap",
-                                                           overflow: "hidden",
-                                                           textOverflow: "ellipsis",
-                                                         }}
+                                                        <td className="text-start"
+                                                            title={item.Type}
+                                                            style={{
+                                                                ...seventhColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-center" 
-                                                        title={item.Status}
-                                                        style={{
-                                                          ...eighthColWidth,
-                                                          whiteSpace: "nowrap",
-                                                          overflow: "hidden",
-                                                          textOverflow: "ellipsis",
-                                                        }}
+                                                        <td className="text-center"
+                                                            title={item.Status}
+                                                            style={{
+                                                                ...eighthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
                                                             {item.Status}
                                                         </td>
@@ -2191,8 +2313,8 @@ export default function DailyJobReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total1" style={{textAlign:'left'}}>{totalDebit}</span>
-                            
+                            <span className="mobileledger_total1" style={{ textAlign: 'left' }}>{totalDebit}</span>
+
                         </div>
                         <div
                             style={{
