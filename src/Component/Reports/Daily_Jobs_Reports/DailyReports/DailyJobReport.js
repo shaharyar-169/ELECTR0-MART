@@ -40,8 +40,7 @@ export default function DailyJobReport() {
     const [saleType, setSaleType] = useState("");
     const [ReferenceCode, setReferenceCode] = useState("");
 
-
-
+   
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [transectionType2, settransectionType2] = useState("");
@@ -1299,33 +1298,36 @@ export default function DailyJobReport() {
     };
 
     const firstColWidth = {
-        width: "9%",
+        width: "8%",
     };
     const secondColWidth = {
         width: "6%",
     };
     const thirdColWidth = {
-        width: "18%",
+        width: "12%",
     };
     const forthColWidth = {
-        width: "10%",
+        width: "9%",
     };
     const fifthColWidth = {
-        width: "14%",
+        width: "12%",
     };
     const sixthColWidth = {
-        width: "15%",
+        width: "12%",
     };
     const seventhColWidth = {
         width: "10.7%",
     };
     const eighthColWidth = {
-        width: "8%",
+        width: "10%",
     };
     const ninhthColWidth = {
-        width: "8%",
+        width: "7%",
     };
 
+    const tenthColWidth = {
+        width: "12%",
+    };
 
 
     useHotkeys("s", fetchReceivableReport);
@@ -1347,7 +1349,7 @@ export default function DailyJobReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
         position: "relative",
         top: "35%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -2091,6 +2093,9 @@ export default function DailyJobReport() {
                                         <td className="border-dark" style={sixthColWidth}>
                                             Technician
                                         </td>
+                                        <td className="border-dark" style={tenthColWidth}>
+                                            Reference
+                                        </td>
                                         <td className="border-dark" style={seventhColWidth}>
                                             Type
                                         </td>
@@ -2136,7 +2141,7 @@ export default function DailyJobReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="10" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2149,7 +2154,7 @@ export default function DailyJobReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2164,6 +2169,7 @@ export default function DailyJobReport() {
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
@@ -2230,6 +2236,17 @@ export default function DailyJobReport() {
                                                             {item.Technician}
                                                         </td>
                                                         <td className="text-start"
+                                                            title={referenceselectdatavalue?.label}
+                                                            style={{
+                                                                ...tenthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {referenceselectdatavalue?.label}
+                                                        </td>
+                                                        <td className="text-start"
                                                             title={item.Type}
                                                             style={{
                                                                 ...seventhColWidth,
@@ -2268,7 +2285,7 @@ export default function DailyJobReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2282,6 +2299,7 @@ export default function DailyJobReport() {
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
@@ -2350,6 +2368,14 @@ export default function DailyJobReport() {
                         <div
                             style={{
                                 ...sixthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+                        <div
+                            style={{
+                                ...tenthColWidth ,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}

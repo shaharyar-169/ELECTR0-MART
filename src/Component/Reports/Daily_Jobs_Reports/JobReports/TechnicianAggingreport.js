@@ -1639,7 +1639,15 @@ export default function TechnicianAggingReport() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
+                                                        <td className="text-start" 
+                                                         title={item.Technician}
+                                                         style={{
+                                                           ...secondColWidth,
+                                                           whiteSpace: "nowrap",
+                                                           overflow: "hidden",
+                                                           textOverflow: "ellipsis",
+                                                         }}
+                                                        >
                                                             {item.Technician}
                                                         </td>
                                                         <td className="text-end"

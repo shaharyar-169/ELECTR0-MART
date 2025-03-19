@@ -1659,7 +1659,15 @@ export default function CompanyPerformanceReport() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
+                                                        <td className="text-start" 
+                                                         title={item.Company}
+                                                         style={{
+                                                           ...secondColWidth,
+                                                           whiteSpace: "nowrap",
+                                                           overflow: "hidden",
+                                                           textOverflow: "ellipsis",
+                                                         }}
+                                                        >
                                                             {item.Company}
                                                         </td>
                                                         <td className="text-end"
