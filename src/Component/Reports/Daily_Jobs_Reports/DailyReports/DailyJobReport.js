@@ -40,7 +40,12 @@ export default function DailyJobReport() {
     const [saleType, setSaleType] = useState("");
     const [ReferenceCode, setReferenceCode] = useState("");
 
-   
+    const [Companyselectdata, setCompanyselectdata] = useState("");
+
+    console.log("Companyselectdata", Companyselectdata);
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    const [GetCompany, setGetCompany] = useState([]);
+
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [transectionType2, settransectionType2] = useState("");
@@ -48,8 +53,14 @@ export default function DailyJobReport() {
     const [supplierList, setSupplierList] = useState([]);
     const [Referenceapidata, setReferenceapidata] = useState([]);
 
-    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    const [Technicianselectdatavalue, setTechnicianselectdatavalue] = useState("");
     const [referenceselectdatavalue, setreferenceselectdatavalue] = useState("");
+
+
+    const [Categoryselectdata, setCategoryselectdata] = useState("");
+    const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
+
+    const [GetCategory, setGetCategory] = useState([]);
 
 
     const [totalQnty, setTotalQnty] = useState(0);
@@ -539,6 +550,65 @@ export default function DailyJobReport() {
         label: `${item.trefcod}-${item.trefdsc.trim()}`,
     }));
 
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetCompany.php";
+        const formData = new URLSearchParams({
+            // code: organisation.code,
+            code: 'NASIRTRD',
+            FLocCod: locationnumber || getLocationNumber,
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                if (response.data && Array.isArray(response.data)) {
+                    setGetCompany(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setGetCompany([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    }, []);
+    const comptions = GetCompany.map((item) => ({
+        value: item.tcmpcod,
+        label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+    }));
+
+     useEffect(() => {
+        const apiUrl = apiLinks + "/GetCatg.php";
+        const formData = new URLSearchParams({
+          code: organisation.code,
+          FLocCod: locationnumber || getLocationNumber,
+        }).toString();
+        axios
+          .post(apiUrl, formData)
+          .then((response) => {
+            if (response.data && Array.isArray(response.data)) {
+              setGetCategory(response.data);
+            } else {
+              console.warn(
+                "Response data structure is not as expected:",
+                response.data
+              );
+              setGetCategory([]);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }, []);
+    
+      const categoryoptions = GetCategory.map((item) => ({
+        value: item.tctgcod,
+        label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+      }));
+
     /////////////////////////////////////////////////////////
 
     const DropdownOption = (props) => {
@@ -615,6 +685,43 @@ export default function DailyJobReport() {
         const selectedTransactionType2 = event.target.value;
         settransectionType2(selectedTransactionType2);
     };
+
+    const handlecompanyKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCompanyselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
+    const handlecategoryKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setCategoryselectdata(selectedOption.value);
+            }
+            // const nextInput = document.getElementById(inputId);
+            const nextInput = inputId.current;
+
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
@@ -928,7 +1035,7 @@ export default function DailyJobReport() {
                     ? Companyselectdatavalue.label
                     : "ALL";
 
-                    let Referencecodelable = referenceselectdatavalue.label
+                let Referencecodelable = referenceselectdatavalue.label
                     ? referenceselectdatavalue.label
                     : "ALL";
 
@@ -958,13 +1065,13 @@ export default function DailyJobReport() {
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                 doc.text(`${Referencecodelable}`, labelsX + 25, labelsY + 14); // Draw the value next to the label
 
-              
-                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`Status :`, labelsX + 200, labelsY + 14); // Draw bold label
-                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${status}`, labelsX + 215, labelsY + 14); // Draw the value next to the label
 
-               
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`Status :`, labelsX + 200, labelsY + 14); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${status}`, labelsX + 215, labelsY + 14); // Draw the value next to the label
+
+
 
 
                 if (searchQuery) {
@@ -1083,7 +1190,7 @@ export default function DailyJobReport() {
             ? Companyselectdatavalue.label
             : "ALL";
 
-            let referencevalue = referenceselectdatavalue.label
+        let referencevalue = referenceselectdatavalue.label
             ? referenceselectdatavalue.label
             : "ALL";
 
@@ -1496,220 +1603,13 @@ export default function DailyJobReport() {
                             justifyContent: "space-between",
                         }}>
 
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            {/* CODE FOR SELECT */}
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "75px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Reftype}
-                                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
-                                    id="firsttype"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
-                                    <option value="REPAIRING">Repairing</option>
-                                    <option value="INSTALLATION">Installation</option>
-                                    <option value="SERVICE">Services</option>
-                                    <option value="WORKSHOP">Workshop</option>
-
-
-                                </select>
-                            </div>
-
-                        </div>
-
-
-
-                    </div>
-
-                    {/* CODE FOR CODE SELECT */}
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-
-
-
-                            {/* ------ */}
-
-
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '18px' }}>
-                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Technician :</span>  <br /></label>
-                                </div>
-                                <div style={{ marginLeft: '5px' }} >
-                                    <Select
-                                        className="List-select-class"
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, Referenceref)}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setSaleType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart, // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue("");
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-
-                                </div>
-
-
-                            </div>
-
-                            <div className="d-flex align-items-center" style={{marginRight:'20px'}}>
+                            <div className="d-flex align-items-center" style={{ marginLeft: '19px' }}>
                                 <div
                                     style={{
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
-                                      
+
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
@@ -1796,121 +1696,9 @@ export default function DailyJobReport() {
                                 </div>
                             </div>
 
-
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Status :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
-                                    <option value="N">UnAssign</option>
-                                    <option value="P">Pending </option>
-                                    <option value="W">Workshop</option>
-                                    <option value="R">Spare Parts</option>
-                                    <option value="D">Done </option>
-                                    <option value="S">Closed</option>
-                                    <option value="C">Cancel</option>
-
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-                    {/* ///////////////////////// */}
-
-
-
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                             <div className="d-flex align-items-center  " style={{ marginLeft: '22.5px' }}>
-                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Reference :</span>  <br /></label>
-                                </div>
-                                <div style={{ marginLeft: '5px' }} >
-                                    <Select
-                                        className="List-select-class"
-                                        ref={Referenceref}
-                                        options={refoptions}
-                                        onKeyDown={(e) => handleReferenceKeypress(e, "frominputid")}
-                                        id="referencecodee"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setReferenceCode(selectedOption.value);
-                                                setreferenceselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart, // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setReferenceCode(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setreferenceselectdatavalue("");
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-
-                                </div>
-
-
-                            </div>
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "6px" }}
+                                style={{ marginLeft: "22px" }}
                             >
                                 <div
                                     style={{
@@ -2003,6 +1791,350 @@ export default function DailyJobReport() {
                                 </div>
                             </div>
 
+                            {/* CODE FOR SELECT */}
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "75px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Reftype}
+                                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
+                                    id="firsttype"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType2}
+                                    onChange={handleTransactionTypeChange2}
+                                    style={{
+                                        width: "150px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">ALL</option>
+                                    <option value="REPAIRING">Repairing</option>
+                                    <option value="INSTALLATION">Installation</option>
+                                    <option value="SERVICE">Services</option>
+                                    <option value="WORKSHOP">Workshop</option>
+
+
+                                </select>
+                            </div>
+
+                        </div>
+
+
+
+                    </div>
+
+                    {/* CODE FOR CODE SELECT */}
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+
+
+                            {/* ------ */}
+
+
+                            <div className="d-flex align-items-center  " style={{ marginLeft: '18px' }}>
+                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Technician :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '5px' }} >
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        onKeyDown={(e) => handleSaleKeypress(e, Referenceref)}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setSaleType(selectedOption.value);
+                                                setTechnicianselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setTechnicianselectdatavalue("");
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+
+                                </div>
+
+
+                            </div>
+
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: "10px",
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Company :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div style={{ marginLeft: "3px" }}>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={saleSelectRef}
+                                        options={comptions}
+                                        onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setCompanyselectdata(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue("");
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!Companyselectdata)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+                                </div>
+                            </div>
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            Status :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType}
+                                    onChange={handleTransactionTypeChange}
+                                    style={{
+                                        width: "150px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">ALL</option>
+                                    <option value="N">UnAssign</option>
+                                    <option value="P">Pending </option>
+                                    <option value="W">Workshop</option>
+                                    <option value="R">Spare Parts</option>
+                                    <option value="D">Done </option>
+                                    <option value="S">Closed</option>
+                                    <option value="C">Cancel</option>
+
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    {/* ///////////////////////// */}
+
+
+
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <div className="d-flex align-items-center  " style={{ marginLeft: '22.5px' }}>
+                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Reference :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '5px' }} >
+                                    <Select
+                                        className="List-select-class"
+                                        ref={Referenceref}
+                                        options={refoptions}
+                                        onKeyDown={(e) => handleReferenceKeypress(e, "frominputid")}
+                                        id="referencecodee"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setReferenceCode(selectedOption.value);
+                                                setreferenceselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setReferenceCode(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setreferenceselectdatavalue("");
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+
+                                </div>
+
+
+                            </div>
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "25px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: "10px",
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Category :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div style={{ marginLeft: "3px" }}>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={input1Ref}
+                                        options={categoryoptions}
+                                        onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setCategoryselectdata(selectedOption.value);
+                                                setcategoryselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcategoryselectdatavalue("");
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        // styles={customStyles1}
+                                        styles={customStyles1(!Categoryselectdata)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+                                </div>
+                            </div>
+
+
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
                                     <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
@@ -2019,7 +2151,7 @@ export default function DailyJobReport() {
                                     autoComplete="off"
                                     style={{
                                         marginRight: "20px",
-                                        width: "200px",
+                                        width: "150px",
                                         height: "24px",
                                         fontFamily: getfontstyle,
                                         fontSize: getdatafontsize,
@@ -2375,7 +2507,7 @@ export default function DailyJobReport() {
                         </div>
                         <div
                             style={{
-                                ...tenthColWidth ,
+                                ...tenthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}

@@ -60,6 +60,10 @@ import CompanyPerformanceReport from "./Component/Reports/Daily_Jobs_Reports/Job
 import ReferencePerformanceReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferencePerformancereport.js";
 import ReferenceReceivableReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferenceRecievable.js";
 import CompanyReceivableReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyRecievable.js";
+import TechnicianJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianJobstatus.js";
+import ReferenceJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferenceJobStatus.js";
+import TechnicianMonthlyJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianMonthlyJobStatus.js";
+import ReferenceMonthlyJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferenceMonthlyJobStatus.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -90,11 +94,15 @@ import DailySaleReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports
 import DailyPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPurchaseReport.js";
 import DailyJobReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyJobReport.js";
 import DailyCollectionSummary from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCollectionSummary.js";
+
 //////////////////////////// Installments reports //////////////////////////////
+
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
 import InstallmentSaleReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentSaleReport.js";
 import InstallmentCollectReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectReport.js";
 import InstallmentLedgerReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentLedgerReport.js";
+import InstallmentCollectionDailyComparison from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectionDailyComparison.js";
+import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectionMonthlyComparison.js";
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
@@ -179,6 +187,10 @@ function App() {
                 <Route exact path="/ReferencePerformance" element={<ReferencePerformanceReport />} />
                 <Route exact path="/ReferenceReceivable" element={<ReferenceReceivableReport />} />
                 <Route exact path="/CompanyReceivable" element={<CompanyReceivableReport />} />
+                <Route exact path="/TechnicianJobStatus" element={<TechnicianJobStatusReport />} />
+                <Route exact path="/ReferenceJobStatus" element={<ReferenceJobStatusReport />} />
+                <Route exact path="/TechnicianMonthlyJobStatus" element={<TechnicianMonthlyJobStatusReport />} />
+                <Route exact path="/ReferenceMonthlyJobStatus" element={<ReferenceMonthlyJobStatusReport />} />
 
 
                 {/* Rountes for Daily reports */}
@@ -204,6 +216,9 @@ function App() {
                 <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />
                 <Route exact path="/InstallmentSaleReport" element={<InstallmentSaleReport />} />
                 <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
+                <Route exact path="/InstallmentCollectionDailyComparison" element={<InstallmentCollectionDailyComparison />} />
+                <Route exact path="/InstallmentCollectorMonthlyComparison" element={<InstallmentCollectionMonthlyComparison />} />
+
 
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />

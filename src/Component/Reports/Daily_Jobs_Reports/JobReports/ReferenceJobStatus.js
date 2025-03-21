@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -22,13 +22,14 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function InstallmentSaleReport() {
+export default function ReferenceJobStatusReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
 
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
+    const input1Reftype = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
 
@@ -38,13 +39,21 @@ export default function InstallmentSaleReport() {
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
-    const [supplierList, setSupplierList] = useState([]);
+    const [transectionType2, settransectionType2] = useState("");
 
-    const [totalQnty, setTotalQnty] = useState(0);
-    const [totalOpening, setTotalOpening] = useState(0);
-    const [totalDebit, setTotalDebit] = useState(0);
-    const [totalCredit, setTotalCredit] = useState(0);
-    const [closingBalance, setClosingBalance] = useState(0);
+    const [supplierList, setSupplierList] = useState([]);
+    console.log('getactivecollectordata', supplierList)
+
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+
+
+    const [TotalUnAssigned, setTotalUnAssigned] = useState(0);
+    const [TotalPending, setTotalPending] = useState(0);
+    const [TotalDone, setTotalDone] = useState(0);
+    const [TotalClose, setTotalClose] = useState(0);
+    const [TotalJobs, setTotalJobs] = useState(0);
+   
+
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -54,6 +63,9 @@ export default function InstallmentSaleReport() {
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+    const yeardescription = getYearDescription();
+    const locationnumber = getLocationnumber();
 
 
     const {
@@ -67,6 +79,8 @@ export default function InstallmentSaleReport() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getdatafontsize,
+        getfontstyle
     } = useTheme();
 
     useEffect(() => {
@@ -180,7 +194,7 @@ export default function InstallmentSaleReport() {
         }
     };
 
-    const handleToKeyPress = (e, nextref) => {
+    const handleToKeyPress = (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
             const toDateElement = document.getElementById("todatevalidation");
@@ -234,7 +248,7 @@ export default function InstallmentSaleReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (nextref.current) {
+                if (input3Ref.current) {
                     e.preventDefault();
                     input3Ref.current.focus();
                 }
@@ -387,20 +401,16 @@ export default function InstallmentSaleReport() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/InstallmentSaleReport.php";
+        const apiUrl = apiLinks + "/ReferenceJobStatus.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
+
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            // FTrnTyp: transectionType,
-            // FAccCod: saleType,
-            // code: organisation.code,
-            // FYerDsc: getyeardescription,
-            // FLocCod: getLocationNumber,
-            FLocCod: '001',
-            code: 'HAJVERY',
-
-
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
+                    
         }).toString();
 
         axios
@@ -408,9 +418,12 @@ export default function InstallmentSaleReport() {
             .then((response) => {
                 setIsLoading(false);
 
-                setTotalDebit(response.data["Total Amount"]);
-                setTotalCredit(response.data["Total Advance"]);
-                setClosingBalance(response.data["Percentage"]);
+                setTotalUnAssigned(response.data["TotalUnAssigned "]);
+                setTotalPending(response.data["TotalPending "]);
+                setTotalDone(response.data["TotalDone "]);
+                setTotalClose(response.data["TotalClose "]);
+                setTotalJobs(response.data["TotalJobs "]);
+              
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -456,123 +469,56 @@ export default function InstallmentSaleReport() {
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
 
-    useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveAccounts.php";
-        const formData = new URLSearchParams({
-            FLocCod: getLocationNumber,
-            code: organisation.code,
-        }).toString();
-        axios
-            .post(apiUrl, formData)
-            .then((response) => {
-                setSupplierList(response.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-            });
-    }, []);
 
-    const options = supplierList.map((item) => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`,
-    }));
-
-    const DropdownOption = (props) => {
-        return (
-            <components.Option {...props}>
-                <div
-                    style={{
-                        fontSize: "12px",
-                        paddingBottom: "5px",
-                        lineHeight: "3px",
-                        color: "black",
-                        textAlign: "start",
-                    }}
-                >
-                    {props.data.label}
-                </div>
-            </components.Option>
-        );
-    };
-    const customStyles1 = (hasError) => ({
-        control: (base, state) => ({
-            ...base,
-            height: "24px",
-            minHeight: "unset",
-            width: 418,
-            fontSize: "12px",
-            backgroundColor: getcolor,
-            color: fontcolor,
-            borderRadius: 0,
-            border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-            transition: "border-color 0.15s ease-in-out",
-            "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
-            },
-            padding: "0 8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-        }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            fontSize: "18px",
-            display: "flex",
-            textAlign: "center !important",
-        }),
-    });
-
-    const handleTransactionTypeChange = (event) => {
-        const selectedTransactionType = event.target.value;
-        settransectionType(selectedTransactionType);
-    };
+  
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
+
+        const globalfontsize = 12;
+        console.log('gobal font data', globalfontsize)
+
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "portrait" });
+        const doc = new jsPDF({ orientation: "potraite" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item.Date,
-            item.INV,
-            item.Customer,
-            item.Mobile,
-            item['Sale Amt'],
-            item.Advance,
-            item.age,
-            item['Ins Nos'],
-            item['Ins Amt'],
-
+            item.Code,
+            item.Reference,
+            item.UnAssigned,
+            item.Pending,
+            item.Done,
+            item.Closed,
+            item.TotalJobs,
+         
         ]);
 
         // Add summary row to the table
+
         rows.push([
             "",
             "",
-            "",
-            "",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
-            "",
-            "",
+            String(TotalUnAssigned),
+            String(TotalPending),
+            String(TotalDone),
+            String(TotalClose),
+            String(TotalJobs),
+          
+
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
-            "Date",
-            "INV",
-            "Customer",
-            "Mobile",
-            "Sale Amt",
-            "Advance",
-            "age",
-            "Ins",
-            "Ins Amt",
+            "Code",
+            "Technician",
+            "UnAssigned",
+            "Pending",
+            "Done",
+            "Close",
+            "TotalJobs",
+          
         ];
-        const columnWidths = [18, 12, 50, 20, 20, 20, 10, 10, 20];
+        const columnWidths = [19, 50, 25,22,22,22,22];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -582,14 +528,14 @@ export default function InstallmentSaleReport() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont("verdana");
+        doc.setFont(getfontstyle);
         doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont("bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
+            doc.setFont(getfontstyle, "bold"); // Set font to bold
+            doc.setFontSize(12); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -612,15 +558,15 @@ export default function InstallmentSaleReport() {
             });
 
             // Reset font style and size after adding headers
-            doc.setFont("verdana");
-            doc.setFontSize(10);
+            doc.setFont(getfontstyle);
+            doc.setFontSize(12);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 8; // Adjust this value to decrease font size
-            const boldFont = "verdana"; // Bold font
-            const normalFont = "verdana"; // Default font
+            const fontSize = 10; // Adjust this value to decrease font size
+            const boldFont = 400; // Bold font
+            const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
             doc.setFontSize(fontSize);
@@ -628,7 +574,7 @@ export default function InstallmentSaleReport() {
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 100; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -670,18 +616,17 @@ export default function InstallmentSaleReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-
-                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
+                    if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-                    }
-
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
+
+
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
@@ -735,10 +680,12 @@ export default function InstallmentSaleReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 46; // Adjust this value based on your requirements
+        const rowsPerPage = 47; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
+
+
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -746,9 +693,8 @@ export default function InstallmentSaleReport() {
                 time,
                 pageNumber,
                 startY,
-                titleFontSize = 16,
-                dateTimeFontSize = 8,
-                pageNumberFontSize = 8
+                titleFontSize = 18,
+                pageNumberFontSize = 10
             ) => {
                 doc.setFontSize(titleFontSize); // Set the font size for the title
                 doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -758,20 +704,20 @@ export default function InstallmentSaleReport() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                if (date) {
-                    doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                    if (time) {
-                        doc.text(date + " " + time, rightX, startY, { align: "right" });
-                    } else {
-                        doc.text(date, rightX - 10, startY, { align: "right" });
-                    }
-                }
+                // if (date) {
+                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                //     if (time) {
+                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                //     } else {
+                //         doc.text(date, rightX - 10, startY, { align: "right" });
+                //     }
+                // }
 
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 10,
+                    rightX - 5,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -782,55 +728,24 @@ export default function InstallmentSaleReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(
-                    comapnyname,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    20,
-                    10
-                ); // Render company title with default font size, only date, and page number
-                startY += 7; // Adjust vertical position for the company title
-                // addTitle(
-                // 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-                // 	time,
-                // 	"",
-                // 	pageNumber,
-                // 	startY,
-                // 	14,
-                // 	10
-                // ); // Render sale report title with decreased font size, provide the time, and page number
-                // startY += 7;
-                addTitle(
-                    `Installment Sale Report From: ${fromInputDate} To: ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    14
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 13;
+
+                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                startY += 5; // Adjust vertical position for the company title
+
+                addTitle(`Reference Job Status Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 2; // Position the labels below the titles and above the table
+                const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-                // Set font size and weight for the labels
-                doc.setFontSize(14);
-                doc.setFont("verdana", "bold");
+           
+                // // Reset font weight to normal if necessary for subsequent text
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFontSize(10);
 
-                // let typeText = transectionType ? transectionType : "";
-                // let typeItem = saleType ? saleType : "";
+                startY += 5; // Adjust vertical position for the labels
 
-                // doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-                // doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
-
-                // Reset font weight to normal if necessary for subsequent text
-                doc.setFont("verdana", "normal");
-
-                startY += 0; // Adjust vertical position for the labels
-
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 24);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -870,179 +785,155 @@ export default function InstallmentSaleReport() {
         // Call function to handle pagination
         handlePagination();
 
-        // Save the PDF file
-        doc.save("Installmentsalereport.pdf");
+        // Save the PDF files
+        doc.save(`ReferenceJobStatusReport Form ${fromInputDate} To ${toInputDate}.pdf`);
 
-        const pdfBlob = doc.output("blob");
-        const pdfFile = new File([pdfBlob], "table_data.pdf", {
-            type: "application/pdf",
-        });
-        // setPdfFile(pdfFile);
-        // setShowMailModal(true); // Show the mail modal after downloading PDF
+
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 7; // Number of columns
-
-        // Common styles
-        const titleStyle = {
-            font: { bold: true, size: 12 },
-            alignment: { horizontal: "center" },
-        };
+        const numColumns = 10; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
             "left",
             "left",
-            "left",
-            "left",
             "right",
             "right",
             "right",
             "right",
             "right",
+          
         ];
+
+        // Define fonts for different sections
+        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
+        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
-        // Add title rows
-        [
-            comapnyname,
-            `Installment Sale Report From ${fromInputDate} To ${toInputDate}`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
+        // Add company name
+        const companyRow = worksheet.addRow([comapnyname]);
+        companyRow.eachCell((cell) => {
+            cell.font = fontCompanyName;
+            cell.alignment = { horizontal: "center" };
         });
 
-        worksheet.addRow([]); // Empty row for spacing
-        // let typeText = transectionType ? transectionType : "All";
-        // let typeItem = saleType ? saleType : "All";
+        worksheet.getRow(companyRow.number).height = 30;
+        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(63 + numColumns - 1)}${companyRow.number}`);
 
-        // Add type and store row and bold it
-        const typeAndStoreRow = worksheet.addRow([
-            // " ",
-            // "",
-            // "",
-            // `Account: ${typeItem}`,
-            // "",
-            // "",
-            // "",
-            // "",
-            // "",
-            // `Type: ${typeText}`,
-
-        ]);
-        typeAndStoreRow.eachCell((cell) => {
-            cell.font = { bold: true };
+        // Add Store List row
+        const storeListRow = worksheet.addRow([`Reference Job Status Report From ${fromInputDate} To ${toInputDate}`]);
+        storeListRow.eachCell((cell) => {
+            cell.font = fontStoreList;
+            cell.alignment = { horizontal: "center" };
         });
 
-        worksheet.addRow([]); // Empty row for spacing
+        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(63 + numColumns - 1)}${storeListRow.number}`);
 
+        // Add an empty row after the title section
+        worksheet.addRow([]);
+
+     
+        // Header style
         const headerStyle = {
-            font: { bold: true },
-            alignment: { horizontal: "center" }, // Keep headers centered
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
+            font: fontHeader,
+            alignment: { horizontal: "center", vertical: "middle" },
+            fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+            border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
         };
 
         // Add headers
         const headers = [
-            "Date",
-            "INV",
-            "Customer",
-            "Mobile",
-            "Sale Amt",
-            "Advance",
-            "age",
-            "Ins",
-            "Ins Amt",
+            "Code",
+            "Reference",
+            "UnAssigned",
+            "Pending",
+            "Done",
+            "Close",
+            "TotalJobs",
         ];
         const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
-        });
+        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
         // Add data rows
         tableData.forEach((item) => {
-            worksheet.addRow([
-                item.Date,
-                item.INV,
-                item.Customer,
-                item.Mobile,
-                item['Sale Amt'],
-                item.Advance,
-                item.age,
-                item['Ins Nos'],
-                item['Ins Amt'],
+            const row = worksheet.addRow([
+                item.Code,
+            item.Reference,
+            item.UnAssigned,
+            item.Pending,
+            item.Done,
+            item.Closed,
+            item.TotalJobs,
+    
             ]);
-        });
 
-        // Add total row and bold it
-        const totalRow = worksheet.addRow([
-            "",
-            "",
-            "",
-            "",
-            totalDebit,
-            totalCredit,
-            closingBalance,
-            "",
-            "",
-        ]);
-        totalRow.eachCell((cell) => {
-            cell.font = { bold: true };
+            row.eachCell((cell, colIndex) => {
+                cell.font = fontTableContent;
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
+            });
         });
 
         // Set column widths
-        [10, 7, 30, 12, 12, 12,6,6 ,10].forEach((width, index) => {
+        [8,25, 15,15,15,15,15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
-        // Apply individual alignment and borders to each column
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber > 5) {
-                // Skip title rows and the empty row
-                row.eachCell((cell, colNumber) => {
-                    if (rowNumber === 7) {
-                        // Keep headers centered
-                        cell.alignment = { horizontal: "center" };
-                    } else {
-                        // Apply individual alignment to body cells
-                        cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
-                    }
-                    cell.border = {
-                        top: { style: "thin" },
-                        left: { style: "thin" },
-                        bottom: { style: "thin" },
-                        right: { style: "thin" },
-                    };
-                });
+        const totalRow = worksheet.addRow([
+        "",
+            "",
+            String(TotalUnAssigned),
+            String(TotalPending),
+            String(TotalDone),
+            String(TotalClose),
+            String(TotalJobs),
+        ]);
+
+        // total row added
+
+        totalRow.eachCell((cell, colNumber) => {
+            cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            };
+
+            // Align only the "Total" text to the right
+            if (
+
+                colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 
+            ) {
+                cell.alignment = { horizontal: "right" };
             }
         });
 
-        // Generate Excel file buffer and save
+
+        // Get current date
+        const getCurrentDate = () => {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, "0");
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const year = today.getFullYear();
+            return `${day}-${month}-${year}`;
+        };
+
+        const currentdate = getCurrentDate();
+
+        // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, "installmentSalereport.xlsx");
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, `ReferenceJobStatusReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1079,32 +970,27 @@ export default function InstallmentSaleReport() {
     };
 
     const firstColWidth = {
-        width: "9%",
+        width: "8.3%",
     };
     const secondColWidth = {
-        width: "6%",
+        width: "25%",
     };
     const thirdColWidth = {
-        width: "31.8%",
+        width: "13%",
     };
     const forthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const fifthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const sixthColWidth = {
-        width: "10%",
+        width: "13%",
     };
     const seventhColWidth = {
-        width: "6%",
+        width: "13%",
     };
-    const eighthColWidth = {
-        width: "6%",
-    };
-    const ninthColWidth = {
-        width: "10%",
-    };
+   
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1125,7 +1011,7 @@ export default function InstallmentSaleReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+        width: isSidebarVisible ? "calc(55vw - 0%)" : "55vw",
         position: "relative",
         top: "35%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1259,112 +1145,10 @@ export default function InstallmentSaleReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Installment Sale Report" />
-                    <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
-
-                        <div style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "0px",
-                            padding: "0px",
-                            justifyContent: "space-between",
-                        }}>
-
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom">Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30">30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60">60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90">90 Days</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
+                    <NavComponent textdata="Reference Job Status Report" />
 
 
-                    </div>
-
+                    {/* CODE FOR CODE SELECT */}
 
 
 
@@ -1391,7 +1175,7 @@ export default function InstallmentSaleReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold", marginLeft: '2px' }}>
                                             From :
                                         </span>
                                     </label>
@@ -1422,7 +1206,7 @@ export default function InstallmentSaleReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
+                                            fontFamily: getfontstyle, fontSize: getdatafontsize,
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1461,7 +1245,7 @@ export default function InstallmentSaleReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
+                                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
@@ -1475,7 +1259,6 @@ export default function InstallmentSaleReport() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "15px" }}
                             >
                                 <div
                                     style={{
@@ -1485,7 +1268,7 @@ export default function InstallmentSaleReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
                                             To :
                                         </span>
                                     </label>
@@ -1517,7 +1300,7 @@ export default function InstallmentSaleReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontSize: "12px",
+                                            fontFamily: getfontstyle, fontSize: getdatafontsize,
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1526,7 +1309,7 @@ export default function InstallmentSaleReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
+                                        onKeyDown={(e) => handleToKeyPress(e, 'searchsubmit')}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1555,7 +1338,7 @@ export default function InstallmentSaleReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontSize: "12px",
+                                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
@@ -1567,39 +1350,94 @@ export default function InstallmentSaleReport() {
                                     />
                                 </div>
                             </div>
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                                        Search :
-                                    </span>{" "}
-                                </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
-                                    style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+
+                            <div className="d-flex align-items-center justify-content-center" style={{ marginLeft: '10px' }}>
+
+
+                                <div
+                                    className="d-flex align-items-center"
+                                    style={{ marginRight: "15px" }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "evenly",
+                                        }}
+                                    >
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="custom"
+                                                checked={selectedRadio === "custom"}
+                                                onChange={() => handleRadioChange(0)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="30"
+                                                checked={selectedRadio === "30days"}
+                                                onChange={() => handleRadioChange(30)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="60"
+                                                checked={selectedRadio === "60days"}
+                                                onChange={() => handleRadioChange(60)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
+                                        </div>
+                                        <div className="d-flex align-items-baseline mx-2">
+                                            <input
+                                                type="radio"
+                                                name="dateRange"
+                                                id="90"
+                                                checked={selectedRadio === "90days"}
+                                                onChange={() => handleRadioChange(90)}
+                                                onFocus={(e) =>
+                                                    (e.currentTarget.style.border = "2px solid red")
+                                                }
+                                                onBlur={(e) =>
+                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                }
+                                            />
+                                            &nbsp;
+                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
                             </div>
+
                         </div>
                     </div>
                     <div>
@@ -1613,7 +1451,7 @@ export default function InstallmentSaleReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: "12px",
+                                    fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
@@ -1621,6 +1459,7 @@ export default function InstallmentSaleReport() {
                             >
                                 <thead
                                     style={{
+                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1636,32 +1475,29 @@ export default function InstallmentSaleReport() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                            Date
+                                            Code
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            INV
+                                        Reference
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Customer
+                                        UnAssigned
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
-                                            Mobile
+                                        Pending
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                            Sale Amt
+                                        Done
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Advance
+                                        Closed
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            age
+                                        TotalJobs
                                         </td>
-                                        <td className="border-dark" style={eighthColWidth}>
-                                            Ins
-                                        </td>
-                                        <td className="border-dark" style={ninthColWidth}>
-                                            Ins Amt
-                                        </td>
+                                       
+
+
                                     </tr>
                                 </thead>
                             </table>
@@ -1672,7 +1508,7 @@ export default function InstallmentSaleReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "45vh",
+                                maxHeight: "50vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1681,10 +1517,11 @@ export default function InstallmentSaleReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: "12px",
+                                    fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})       
+                                                           }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (
@@ -1694,7 +1531,7 @@ export default function InstallmentSaleReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="7" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1707,7 +1544,7 @@ export default function InstallmentSaleReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1723,8 +1560,7 @@ export default function InstallmentSaleReport() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninthColWidth}></td>
+                                              
 
                                             </tr>
                                         </>
@@ -1746,32 +1582,68 @@ export default function InstallmentSaleReport() {
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {item.Date}
+                                                            {item.Code}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.INV}
+                                                        <td className="text-start" 
+                                                          title={item.Reference}
+                                                          style={{
+                                                              ...secondColWidth,
+                                                              whiteSpace: "nowrap",
+                                                              overflow: "hidden",
+                                                              textOverflow: "ellipsis",
+                                                          }}
+                                                        >
+                                                            {item.Reference}
                                                         </td>
-                                                        <td className="text-start" style={thirdColWidth}>
-                                                            {item.Customer}
+                                                        <td className="text-end"
+                                                            title={item.UnAssigned}
+                                                            style={{
+                                                                ...thirdColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.UnAssigned}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
-                                                            {item.Mobile}
+                                                        <td className="text-end" style={forthColWidth}>
+                                                            {item.Pending}
                                                         </td>
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item['Sale Amt']}
+                                                        <td className="text-end"
+                                                            title={item.Done}
+                                                            style={{
+                                                                ...fifthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.Done}
                                                         </td>
-                                                        <td className="text-end" style={sixthColWidth}>
-                                                            {item.Advance}
+                                                        <td className="text-end"
+                                                            title={item.Closed}
+                                                            style={{
+                                                                ...sixthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.Closed}
                                                         </td>
-                                                        <td className="text-end" style={seventhColWidth}>
-                                                            {item.age}
+                                                        <td className="text-end"
+                                                            title={item.TotalJobs}
+                                                            style={{
+                                                                ...seventhColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.TotalJobs}
                                                         </td>
-                                                        <td className="text-end" style={eighthColWidth}>
-                                                            {item['Ins Nos']}
-                                                        </td>
-                                                        <td className="text-end" style={ninthColWidth}>
-                                                            {item['Ins Amt']}
-                                                        </td>
+                                                      
+
                                                     </tr>
                                                 );
                                             })}
@@ -1785,7 +1657,7 @@ export default function InstallmentSaleReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1800,8 +1672,8 @@ export default function InstallmentSaleReport() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninthColWidth}></td>
+                                               
+
 
                                             </tr>
                                         </>
@@ -1828,7 +1700,9 @@ export default function InstallmentSaleReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -1843,6 +1717,8 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalUnAssigned}</span>
+
                         </div>
                         <div
                             style={{
@@ -1851,6 +1727,8 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalPending}</span>
+
                         </div>
                         <div
                             style={{
@@ -1859,7 +1737,8 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalDebit}</span>
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalDone}</span>
+
                         </div>
                         <div
                             style={{
@@ -1868,7 +1747,8 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalCredit}</span>
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalClose}</span>
+
                         </div>
                         <div
                             style={{
@@ -1877,25 +1757,11 @@ export default function InstallmentSaleReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{closingBalance}</span>
+                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalJobs}</span>
+
                         </div>
-                        <div
-                            style={{
-                                ...eighthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                        </div>
-                        <div
-                            style={{
-                                ...ninthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                        </div>
-                    </div>
+                                         
+                                       </div>
                     <div
                         style={{
                             margin: "5px",
