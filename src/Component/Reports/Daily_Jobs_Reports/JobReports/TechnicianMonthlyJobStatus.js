@@ -31,7 +31,12 @@ export default function TechnicianMonthlyJobStatusReport() {
 
     const input3Ref = useRef(null);
 
-  
+    const input1Ref = useRef(null);
+    const input1Reftype = useRef(null);
+    const [transectionType2, settransectionType2] = useState("");
+    console.log('transectionType2', transectionType2)
+
+    const [supplierList, setSupplierList] = useState([]);
 
 
     const [Totaljan, setTotaljan] = useState(0);
@@ -111,20 +116,19 @@ export default function TechnicianMonthlyJobStatusReport() {
     //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
     // Toggle the ToDATE && FromDATE CalendarOpen state on each click
- 
+
 
     function fetchReceivableReport() {
-         
+
         const apiUrl = apiLinks + "/TechnicianMonthlyJobStatus.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
 
-                   
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
+            // FRepYer: yeardescription || getyeardescription,
+            FRepYer: transectionType2
 
-                  
         }).toString();
 
         axios
@@ -165,19 +169,49 @@ export default function TechnicianMonthlyJobStatusReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (input3Ref && input3Ref.current)) {
-            if (input3Ref && input3Ref.current) {
+        if (!hasComponentMountedPreviously || (input1Reftype && input1Reftype.current)) {
+            if (input1Reftype && input1Reftype.current) {
                 setTimeout(() => {
-                    input3Ref.current.focus();
-                    // input3Ref.current.select();
+                    input1Reftype.current.focus();
+                    // input1Reftype.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
         }
     }, []);
 
- 
-  
+
+    const handleTransactionTypeChange2 = (event) => {
+        const selectedTransactionType2 = event.target.value;
+        settransectionType2(selectedTransactionType2);
+    };
+
+
+    const handleKeyPress = (e, nextInputRef) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (nextInputRef.current) {
+                nextInputRef.current.focus();
+            }
+        }
+    };
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetJobDataYear.php";
+        const formData = new URLSearchParams({
+            FLocCod: locationnumber || getLocationNumber,
+            code: organisation.code,
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                setSupplierList(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    }, []);
+
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
 
@@ -247,7 +281,7 @@ export default function TechnicianMonthlyJobStatusReport() {
             "Total",
 
         ];
-        const columnWidths = [15, 50, 16,16,16,16,16,16,16,16,16,16,16,16,16 ];
+        const columnWidths = [15, 50, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -461,20 +495,33 @@ export default function TechnicianMonthlyJobStatusReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Technician Monthly Job Status Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Technician Monthly Job Status Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-           
+
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 5; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 24);
+                let search1 = transectionType2 ? transectionType2 : "";
+
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
+
+
+                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.text(`Year :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.text(`${search1}`, labelsX + 12, labelsY + 8.5); // Draw the value next to the label
+
+
+                startY += 10; // Adjust vertical position for the labels
+
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -497,7 +544,7 @@ export default function TechnicianMonthlyJobStatusReport() {
             const month = String(today.getMonth() + 1).padStart(2, "0");
             const year = today.getFullYear();
             return `${day}-${month}-${year}`;
-          };
+        };
 
         // Function to get current time in the format HH:MM:SS
         const getCurrentTime = () => {
@@ -567,7 +614,7 @@ export default function TechnicianMonthlyJobStatusReport() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Technician Monthly Job Status Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Technician Monthly Job Status Report `]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -578,7 +625,25 @@ export default function TechnicianMonthlyJobStatusReport() {
         // Add an empty row after the title section
         worksheet.addRow([]);
 
-     
+        let search1 = transectionType2 ? transectionType2 : "";
+
+
+        const typeAndStoreRow = worksheet.addRow([
+                   "Year :",
+                   search1,
+                   "",
+                   "",
+                   "",
+                   "",
+                
+               ]);
+       
+         typeAndStoreRow.eachCell((cell, colIndex) => {
+                   cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1].includes(colIndex) };
+                   cell.alignment = { horizontal: "left", vertical: "middle" };
+               });
+
+
         // Header style
         const headerStyle = {
             font: fontHeader,
@@ -589,7 +654,7 @@ export default function TechnicianMonthlyJobStatusReport() {
 
         // Add headers
         const headers = [
-           "Code",
+            "Code",
             "Technician",
             "Jan",
             "Feb",
@@ -612,21 +677,21 @@ export default function TechnicianMonthlyJobStatusReport() {
         tableData.forEach((item) => {
             const row = worksheet.addRow([
                 item.ttchcod,
-            item.Technician,
-            item.Jan,
-            item.Feb,
-            item.Mar,
-            item.Apr,
-            item.May,
-            item.Jun,
-            item.Jul,
-            item.Aug,
-            item.Sep,
-            item.Oct,
-            item.Nov,
-            item.Dec,
-            item.Total,
-    
+                item.Technician,
+                item.Jan,
+                item.Feb,
+                item.Mar,
+                item.Apr,
+                item.May,
+                item.Jun,
+                item.Jul,
+                item.Aug,
+                item.Sep,
+                item.Oct,
+                item.Nov,
+                item.Dec,
+                item.Total,
+
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -637,12 +702,12 @@ export default function TechnicianMonthlyJobStatusReport() {
         });
 
         // Set column widths
-        [8,30,9,9,9,9,9,9,9,9,9,9,9,9,9].forEach((width, index) => {
+        [8, 30, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
-        "",
+            "",
             "",
             String(Totaljan),
             String(Totalfeb),
@@ -885,8 +950,14 @@ export default function TechnicianMonthlyJobStatusReport() {
         }
     }, [selectedIndex]);
 
-  
-  
+
+    useEffect(() => {
+        if (supplierList.length > 0) {
+            settransectionType2(supplierList[0].year);  // Set first item as default
+        }
+    }, [supplierList]);
+
+
 
     return (
         <>
@@ -904,7 +975,78 @@ export default function TechnicianMonthlyJobStatusReport() {
                     <NavComponent textdata="Technician Monthly Job Status Report" />
 
                     {/* CODE FOR CODE SELECT */}
-                
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "75px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            Year :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Reftype}
+                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                    id="firsttype"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType2 || ""}
+                                    onChange={handleTransactionTypeChange2}
+                                    style={{
+                                        width: "150px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    {supplierList.map((item, index) => (
+                                        <option key={index} value={item.year}>
+                                            {item.year}
+                                        </option>
+                                    ))}
+
+
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
                     <div>
                         <div
                             style={{
@@ -920,7 +1062,6 @@ export default function TechnicianMonthlyJobStatusReport() {
                                     width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
-                                    marginTop:'10px'
                                 }}
                             >
                                 <thead
@@ -944,25 +1085,25 @@ export default function TechnicianMonthlyJobStatusReport() {
                                             Code
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Technician
+                                        Technician
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                        Jan
+                                            Jan
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
-                                        Feb
+                                            Feb
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                        Mar
+                                            Mar
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                        Apr
+                                            Apr
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
                                             May
                                         </td>
                                         <td className="border-dark" style={eighthColWidth}>
-                                        Jun
+                                            Jun
                                         </td>
                                         <td className="border-dark" style={ninhthColWidth}>
                                             Jul
@@ -971,19 +1112,19 @@ export default function TechnicianMonthlyJobStatusReport() {
                                             Aug
                                         </td>
                                         <td className="border-dark" style={elawentheColWidth}>
-                                        Sep
+                                            Sep
                                         </td>
                                         <td className="border-dark" style={tweltheColWidth}>
-                                        Oct
+                                            Oct
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                        Nov
+                                            Nov
                                         </td>
                                         <td className="border-dark" style={fourteenColWidth}>
-                                        Dec
+                                            Dec
                                         </td>
                                         <td className="border-dark" style={fifteenColWidth}>
-                                        Total
+                                            Total
                                         </td>
 
 
@@ -1009,8 +1150,8 @@ export default function TechnicianMonthlyJobStatusReport() {
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
                                     width: "100%",
                                     position: "relative",
-                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})       
-                                                           }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})
+                                }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (
@@ -1080,14 +1221,14 @@ export default function TechnicianMonthlyJobStatusReport() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.ttchcod}
                                                         </td>
-                                                        <td className="text-start" 
-                                                          title={item.Technician}
-                                                          style={{
-                                                              ...secondColWidth,
-                                                              whiteSpace: "nowrap",
-                                                              overflow: "hidden",
-                                                              textOverflow: "ellipsis",
-                                                          }}
+                                                        <td className="text-start"
+                                                            title={item.Technician}
+                                                            style={{
+                                                                ...secondColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
                                                         >
                                                             {item.Technician}
                                                         </td>
@@ -1194,7 +1335,7 @@ export default function TechnicianMonthlyJobStatusReport() {
                                                 </tr>
                                             ))}
                                             <tr>
-                                            <td style={firstColWidth}></td>
+                                                <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
