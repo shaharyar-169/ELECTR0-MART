@@ -64,6 +64,12 @@ import TechnicianJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/Jo
 import ReferenceJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferenceJobStatus.js";
 import TechnicianMonthlyJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianMonthlyJobStatus.js";
 import ReferenceMonthlyJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/ReferenceMonthlyJobStatus.js";
+import CompanyJobComparison from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyJobComparison.js";
+import CategoryJobComparison from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryJobComparison.js";
+import CompanyMonthlyJobComparison from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyMonthlyJobComparison.js";
+import CategoryMonthlyJobComparison from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryMonthlyJobComparison.js";
+import CompanyJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyJobSummary.js";
+import CategoryJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryJobSummary.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -191,6 +197,12 @@ function App() {
                 <Route exact path="/ReferenceJobStatus" element={<ReferenceJobStatusReport />} />
                 <Route exact path="/TechnicianMonthlyJobStatus" element={<TechnicianMonthlyJobStatusReport />} />
                 <Route exact path="/ReferenceMonthlyJobStatus" element={<ReferenceMonthlyJobStatusReport />} />
+                <Route exact path="/CompanyJobComparison" element={<CompanyJobComparison />} />
+                <Route exact path="/CategoryJobComparison" element={<CategoryJobComparison />} />
+                <Route exact path="/CompanyMonthlyJobComparison" element={<CompanyMonthlyJobComparison/>} />
+                <Route exact path="/CategoryMonthlyJobComparison" element={<CategoryMonthlyJobComparison/>} />
+                <Route exact path="/CompanyJobSummary" element={<CompanyJobSummary/>} />
+                <Route exact path="/CategoryJobSummary" element={<CategoryJobSummary/>} />
 
 
                 {/* Rountes for Daily reports */}

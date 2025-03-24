@@ -22,7 +22,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function ReferenceMonthlyJobStatusReport() {
+export default function CompanyMonthlyJobComparison() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -120,7 +120,7 @@ export default function ReferenceMonthlyJobStatusReport() {
 
     function fetchReceivableReport() {
 
-        const apiUrl = apiLinks + "/ReferenceMonthlyJobStatus.php";
+        const apiUrl = apiLinks + "/CompanyMonthlyJobComparison.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
 
@@ -201,7 +201,6 @@ export default function ReferenceMonthlyJobStatusReport() {
         const formData = new URLSearchParams({
             FLocCod: locationnumber || getLocationNumber,
             code: organisation.code,
-            FRepYer: '2025'
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -224,8 +223,8 @@ export default function ReferenceMonthlyJobStatusReport() {
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item.trefcod,
-            item.Reference,
+            item.tcmpcod,
+            item.Company,
             item.Jan,
             item.Feb,
             item.Mar,
@@ -266,7 +265,7 @@ export default function ReferenceMonthlyJobStatusReport() {
         const headers = [
 
             "Code",
-            "Reference",
+            "Company",
             "Jan",
             "Feb",
             "Mar",
@@ -496,7 +495,7 @@ export default function ReferenceMonthlyJobStatusReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Reference Monthly Job Status Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Company Monthly Job Comparison Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -563,7 +562,7 @@ export default function ReferenceMonthlyJobStatusReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`ReferenceMonthlyJobStatusReport As on ${date}.pdf`);
+        doc.save(`CompanyMonthlyJobComparisonReport As on ${date}.pdf`);
 
 
     };
@@ -615,7 +614,7 @@ export default function ReferenceMonthlyJobStatusReport() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Reference Monthly Job Status Report `]);
+        const storeListRow = worksheet.addRow([`Company Monthly Job Comparison Report `]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -656,7 +655,7 @@ export default function ReferenceMonthlyJobStatusReport() {
         // Add headers
         const headers = [
             "Code",
-            "Reference",
+            "Company",
             "Jan",
             "Feb",
             "Mar",
@@ -677,8 +676,8 @@ export default function ReferenceMonthlyJobStatusReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                item.trefcod,
-                item.Reference,
+                item.tcmpcod,
+                item.Company,
                 item.Jan,
                 item.Feb,
                 item.Mar,
@@ -760,7 +759,7 @@ export default function ReferenceMonthlyJobStatusReport() {
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `ReferenceMonthlyJobStatusReport As on ${currentdate}.xlsx`);
+        saveAs(blob, `CompanyMonthlyJobComparisonReport As on ${currentdate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -973,7 +972,7 @@ export default function ReferenceMonthlyJobStatusReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Reference Monthly Job Status Report" />
+                    <NavComponent textdata="Company Monthly Job Comparison Report" />
 
                     {/* CODE FOR CODE SELECT */}
 
@@ -1086,7 +1085,7 @@ export default function ReferenceMonthlyJobStatusReport() {
                                             Code
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Reference
+                                            Company
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
                                             Jan
@@ -1220,10 +1219,10 @@ export default function ReferenceMonthlyJobStatusReport() {
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {item.trefcod}
+                                                            {item.tcmpcod}
                                                         </td>
                                                         <td className="text-start"
-                                                            title={item.Reference}
+                                                            title={item.Company}
                                                             style={{
                                                                 ...secondColWidth,
                                                                 whiteSpace: "nowrap",
@@ -1231,7 +1230,7 @@ export default function ReferenceMonthlyJobStatusReport() {
                                                                 textOverflow: "ellipsis",
                                                             }}
                                                         >
-                                                            {item.Reference}
+                                                            {item.Company}
                                                         </td>
 
                                                         <td className="text-end"
