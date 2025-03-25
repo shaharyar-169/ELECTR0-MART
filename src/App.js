@@ -113,6 +113,10 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
 import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemAggingReport.js";
+
+//////////////////////////// FBR DATA reports //////////////////////////////
+import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
+
 function App() {
   const queryClient = new QueryClient();
 
@@ -199,10 +203,10 @@ function App() {
                 <Route exact path="/ReferenceMonthlyJobStatus" element={<ReferenceMonthlyJobStatusReport />} />
                 <Route exact path="/CompanyJobComparison" element={<CompanyJobComparison />} />
                 <Route exact path="/CategoryJobComparison" element={<CategoryJobComparison />} />
-                <Route exact path="/CompanyMonthlyJobComparison" element={<CompanyMonthlyJobComparison/>} />
-                <Route exact path="/CategoryMonthlyJobComparison" element={<CategoryMonthlyJobComparison/>} />
-                <Route exact path="/CompanyJobSummary" element={<CompanyJobSummary/>} />
-                <Route exact path="/CategoryJobSummary" element={<CategoryJobSummary/>} />
+                <Route exact path="/CompanyMonthlyJobComparison" element={<CompanyMonthlyJobComparison />} />
+                <Route exact path="/CategoryMonthlyJobComparison" element={<CategoryMonthlyJobComparison />} />
+                <Route exact path="/CompanyJobSummary" element={<CompanyJobSummary />} />
+                <Route exact path="/CategoryJobSummary" element={<CategoryJobSummary />} />
 
 
                 {/* Rountes for Daily reports */}
@@ -235,6 +239,9 @@ function App() {
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
                 <Route exact path="/ItemAgging" element={<ItemAggingReport />} />
+
+                {/* Rountes for item reports */}
+                <Route exact path="/FBRData" element={<FbrDataReport />} />
 
 
                 {/* Rountes for Dashboard */}
