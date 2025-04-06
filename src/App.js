@@ -50,6 +50,10 @@ import ComplaintList from "./Component/Reports/Daily_Jobs_Reports/List/Complaint
 import ReferenceList from "./Component/Reports/Daily_Jobs_Reports/List/ReferenceList.js";
 import ControlList from "./Component/Reports/Daily_Jobs_Reports/List/ControlList.js";
 import WorkShopItemList from "./Component/Reports/Daily_Jobs_Reports/List/WorkshopItemList.js";
+import SalesmanList from "./Component/Reports/Daily_Jobs_Reports/List/SalesmanList.js";
+import ManagerList from "./Component/Reports/Daily_Jobs_Reports/List/ManagerList.js";
+import RegionList from "./Component/Reports/Daily_Jobs_Reports/List/RegionList.js";
+import CustomerListAmerican from "./Component/Reports/Daily_Jobs_Reports/List/CustomerListAmerican.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -70,6 +74,7 @@ import CompanyMonthlyJobComparison from "./Component/Reports/Daily_Jobs_Reports/
 import CategoryMonthlyJobComparison from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryMonthlyJobComparison.js";
 import CompanyJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyJobSummary.js";
 import CategoryJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryJobSummary.js";
+
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -172,6 +177,10 @@ function App() {
                 <Route exact path="/ReferenceList" element={<ReferenceList />} />
                 <Route exact path="/ControlList" element={<ControlList />} />
                 <Route exact path="/WorkShopItem" element={<WorkShopItemList />} />
+                <Route exact path="/SalesmanList" element={<SalesmanList />} />
+                <Route exact path="/ManagerList" element={<ManagerList />} />
+                <Route exact path="/RegionList" element={<RegionList />} />
+                <Route exact path="/CustomerList" element={<CustomerListAmerican />} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -207,6 +216,7 @@ function App() {
                 <Route exact path="/CategoryMonthlyJobComparison" element={<CategoryMonthlyJobComparison />} />
                 <Route exact path="/CompanyJobSummary" element={<CompanyJobSummary />} />
                 <Route exact path="/CategoryJobSummary" element={<CategoryJobSummary />} />
+               
 
 
                 {/* Rountes for Daily reports */}
