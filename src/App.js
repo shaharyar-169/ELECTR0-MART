@@ -54,6 +54,7 @@ import SalesmanList from "./Component/Reports/Daily_Jobs_Reports/List/SalesmanLi
 import ManagerList from "./Component/Reports/Daily_Jobs_Reports/List/ManagerList.js";
 import RegionList from "./Component/Reports/Daily_Jobs_Reports/List/RegionList.js";
 import CustomerListAmerican from "./Component/Reports/Daily_Jobs_Reports/List/CustomerListAmerican.js";
+import InstallerList from "./Component/Reports/Daily_Jobs_Reports/List/InstallarList.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -181,6 +182,7 @@ function App() {
                 <Route exact path="/ManagerList" element={<ManagerList />} />
                 <Route exact path="/RegionList" element={<RegionList />} />
                 <Route exact path="/CustomerList" element={<CustomerListAmerican />} />
+                <Route exact path="/InstallarList" element={<InstallerList />} />
 
 
                 {/* Rountes for ledgers reports */}
