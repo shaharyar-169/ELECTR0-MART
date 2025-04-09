@@ -51,7 +51,7 @@ export default function GeneralLedger() {
     const [closingBalance, setClosingBalance] = useState(0);
 
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-    console.log('Companyselectdatavalue', Companyselectdatavalue.label)
+    console.log('Companyselectdatavalue', Companyselectdatavalue)
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);

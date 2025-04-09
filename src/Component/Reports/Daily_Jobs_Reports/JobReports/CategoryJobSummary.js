@@ -485,7 +485,7 @@ export default function CategoryJobSummary() {
         const formData = new URLSearchParams({
             FLocCod: locationnumber || getLocationNumber,
             code: organisation.code,
-          
+
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -497,19 +497,27 @@ export default function CategoryJobSummary() {
             });
     }, []);
 
+    const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
+    useEffect(() => {
+        if (supplierList.length > 0) {
+            setIsOptionsLoaded(true);
+        }
+    }, [supplierList]);
+
     const options = supplierList.map((item) => ({
         value: item.tctgcod,
         label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
     }));
 
-
-
-    useEffect(() => {
-        if (options.length > 0 && !Companyselectdatavalue && saleType === "") {
-            setSaleType(options[0].value);
-            setCompanyselectdatavalue(options[0]);
-        }
-    }, []); // No need to include saleType
+   useEffect(() => {
+    if (isOptionsLoaded && options.length > 0 && !saleType) {
+        setSaleType(options[0].value);
+        setCompanyselectdatavalue({
+            value: options[0].value,
+            label: options[0].label.split("-")[1],
+        });
+    }
+}, [isOptionsLoaded]);
 
 
 
@@ -1392,9 +1400,8 @@ export default function CategoryJobSummary() {
                                         placeholder="ALL"
                                     />
 
-
+                                
                                 </div>
-
 
                             </div>
 

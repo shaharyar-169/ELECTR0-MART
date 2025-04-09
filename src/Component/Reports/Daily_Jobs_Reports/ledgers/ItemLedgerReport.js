@@ -28,6 +28,7 @@ export default function ItemLedgerReport() {
     const organisation = getOrganisationData();
 
     const saleSelectRef = useRef(null);
+    const saleSelectRef1 = useRef(null);
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
@@ -36,12 +37,15 @@ export default function ItemLedgerReport() {
     const fromRef = useRef(null);
 
     const [saleType, setSaleType] = useState("");
+    const [saleType1, setSaleType1] = useState("");
     console.log('saleTypedataset', saleType)
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    const [Storeselectdatavalue, setStoreselectdatavalue] = useState("");
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
+    const [storeList, setstoreList] = useState([]);
     console.log('supplierList', supplierList)
 
 
@@ -63,7 +67,7 @@ export default function ItemLedgerReport() {
     // const [selectedfromDate, setSelectedfromDate] = useState(null);
     // const [fromInputDate, setfromInputDate] = useState();
     const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
-    // state for To DatePicker
+    // // state for To DatePicker
     // const [selectedToDate, setSelectedToDate] = useState(null);
     // const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
@@ -299,6 +303,21 @@ export default function ItemLedgerReport() {
             }
         }
     };
+    const handleStoreKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setSaleType(selectedOption.value);
+            }
+            const nextInput = document.getElementById(inputId);
+            if (nextInput) {
+                nextInput.focus();
+                nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
     const handleKeyPress = (e, nextInputRef) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -428,6 +447,7 @@ export default function ItemLedgerReport() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
+            FStrCod: saleType1,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
@@ -480,6 +500,20 @@ export default function ItemLedgerReport() {
         }
     }, []);
 
+    //  useEffect(() => {
+    //         const currentDate = new Date();
+    //         setSelectedToDate(currentDate);
+    //         settoInputDate(formatDate(currentDate));
+    
+    //         const firstDateOfCurrentMonth = new Date(
+    //             currentDate.getFullYear(),
+    //             currentDate.getMonth(),
+    //             1
+    //         );
+    //         setSelectedfromDate(firstDateOfCurrentMonth);
+    //         setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    //     }, []);
+
     useEffect(() => {
         // Check if the report was opened via double-click
         const isOpenedFromDoubleClick = sessionStorage.getItem("openedFromDoubleClick") === "true";
@@ -490,8 +524,11 @@ export default function ItemLedgerReport() {
         const firstDateOfCurrentMonth = new Date(
             currentDate.getFullYear(),
             currentDate.getMonth(),
-
+           1
         );
+
+        setSelectedfromDate(firstDateOfCurrentMonth);
+        setfromInputDate(formatDate(firstDateOfCurrentMonth));
 
         if (
             isOpenedFromDoubleClick &&
@@ -526,27 +563,31 @@ export default function ItemLedgerReport() {
         }
     }, []);
 
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            // Ensure stored dates are in a valid format before converting to Date objects
-            const parseDate = (dateStr) => {
-                if (!dateStr) return null;
-                const [day, month, year] = dateStr.split("-").map(Number);
-                return new Date(year, month - 1, day); // Convert dd-mm-yyyy to Date object
-            };
+  
 
-            const fromDate = parseDate(fromInputDate) || new Date();
-            const toDate = parseDate(toInputDate) || new Date();
+    // useEffect(() => {
+    //     if (selectedRadio === "custom") {
+    //         // Ensure stored dates are in a valid format before converting to Date objects
+    //         const parseDate = (dateStr) => {
+    //             if (!dateStr) return null;
+    //             const [day, month, year] = dateStr.split("-").map(Number);
+    //             return new Date(year, month - 1, day); // Convert dd-mm-yyyy to Date object
+    //         };
 
-            setSelectedfromDate(fromDate);
-            setfromInputDate(formatDate(fromDate)); // Convert back to dd-mm-yyyy
-            setSelectedToDate(toDate);
-            settoInputDate(formatDate(toDate)); // Convert back to dd-mm-yyyy
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""), 10);
-            handleRadioChange(days);
-        }
-    }, [selectedRadio]);
+    //         const fromDate = parseDate(fromInputDate) || new Date();
+    //         const toDate = parseDate(toInputDate) || new Date();
+
+    //         setSelectedfromDate(fromDate);
+    //         setfromInputDate(formatDate(fromDate)); // Convert back to dd-mm-yyyy
+    //         setSelectedToDate(toDate);
+    //         settoInputDate(formatDate(toDate)); // Convert back to dd-mm-yyyy
+    //     } else {
+    //         const days = parseInt(selectedRadio.replace("days", ""), 10);
+    //         handleRadioChange(days);
+    //     }
+    // }, [selectedRadio]);
+
+
 
     useEffect(() => {
         const apiUrl = apiLinks + "/GetItem.php";
@@ -582,6 +623,27 @@ export default function ItemLedgerReport() {
         }
     }, [supplierList, options]); 
 
+
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetActiveStore.php";
+        const formData = new URLSearchParams({
+            FLocCod: getLocationNumber,
+            code: organisation.code,
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                setstoreList(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    }, []);
+
+    const storeoption = storeList.map((item) => ({
+        value: item.tstrcod,
+        label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
+    }));
 
     const DropdownOption = (props) => {
         return (
@@ -1363,33 +1425,33 @@ export default function ItemLedgerReport() {
         width: "3.7%",
     };
     const fifthColWidth = {
-        width: "5%",
+        width: "8.8%",
     };
     const sixthColWidth = {
         width: "24%",
     };
     const seventhColWidth = {
-        width: "7.5%",
+        width: "7%",
     };
     const eightColWidth = {
-        width: "7.5%",
+        width: "7%",
     };
     const ninthColWidth = {
-        width: "7.5%",
+        width: "7%",
     };
     const tenthColWidth = {
-        width: "7.5%",
+        width: "7%",
     };
 
     const elewenthColWidth = {
-        width: "7.5%",
+        width: "7%",
     };
     const tewlthColWidth = {
-        width: "7.5%",
+        width: "7%",
     };
 
     const thirteenColWidth = {
-        width: "7.5%",
+        width: "7%",
     };
 
 
@@ -1413,7 +1475,7 @@ export default function ItemLedgerReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+        width: isSidebarVisible ? "calc(85vw - 0%)" : "85vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1428,7 +1490,7 @@ export default function ItemLedgerReport() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "1000px",
+        maxWidth: "85vw",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1724,6 +1786,46 @@ export default function ItemLedgerReport() {
                             </div>
 
 
+                            <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
+                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Store :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '5px' }} >
+                                 
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef1}
+                                        options={storeoption}
+                                        onKeyDown={(e) => handleStoreKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        // value={options.find((option) => option.value === saleType1) || null} // Ensure proper value
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelParts = selectedOption.label.split("-"); // Split by "-"
+                                                const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+                                                setSaleType1(selectedOption ? selectedOption.value : ""); // Correctly update state
+                                                setStoreselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: description, // Keep only the description
+
+                                                });
+                                            } else {
+                                                setSaleType1(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setStoreselectdatavalue('')
+                                            }
+
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        styles={customStyles1(!saleType)}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+
+                                </div>
+
+
+                            </div>
+
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "21px" }}
@@ -1801,98 +1903,95 @@ export default function ItemLedgerReport() {
                             }}
                         >
                             <div className="d-flex align-items-center">
-                                <div
-                                    style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            From :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="fromdatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "5px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: getdatafontsize,
-                                            fontFamily: getfontstyle,
-                                            backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        id="frominputid"
-                                        value={fromInputDate}
-                                        ref={fromRef}
-                                        onChange={handlefromInputChange}
-                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedfromDate}
-                                        onChange={handlefromDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={fromCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleFromCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontSize: getdatafontsize,
-                                                        fontFamily: getfontstyle,
-                                                        color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
+                                                           <div
+                                                               style={{
+                                                                   width: "80px",
+                                                                   display: "flex",
+                                                                   justifyContent: "end",
+                                                               }}
+                                                           >
+                                                               <label htmlFor="fromDatePicker">
+                                                                   <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                                                       From :
+                                                                   </span>
+                                                               </label>
+                                                           </div>
+                                                           <div
+                                                               id="fromdatevalidation"
+                                                               style={{
+                                                                   width: "135px",
+                                                                   border: `1px solid ${fontcolor}`,
+                                                                   display: "flex",
+                                                                   alignItems: "center",
+                                                                   height: "24px",
+                                                                   justifyContent: "center",
+                                                                   marginLeft: "5px",
+                                                                   background: getcolor,
+                                                               }}
+                                                               onFocus={(e) =>
+                                                                   (e.currentTarget.style.border = "2px solid red")
+                                                               }
+                                                               onBlur={(e) =>
+                                                                   (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                               }
+                                                           >
+                                                               <input
+                                                                   style={{
+                                                                       height: "20px",
+                                                                       width: "90px",
+                                                                       paddingLeft: "5px",
+                                                                       outline: "none",
+                                                                       border: "none",
+                                                                       fontSize: "12px",
+                                                                       backgroundColor: getcolor,
+                                                                       color: fontcolor,
+                                                                       opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                       pointerEvents:
+                                                                           selectedRadio === "custom" ? "auto" : "none",
+                                                                   }}
+                                                                   id="frominputid"
+                                                                   value={fromInputDate}
+                                                                   ref={fromRef}
+                                                                   onChange={handlefromInputChange}
+                                                                   onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                                                                   autoComplete="off"
+                                                                   placeholder="dd-mm-yyyy"
+                                                                   aria-label="Date Input"
+                                                                   disabled={selectedRadio !== "custom"}
+                                                               />
+                                                               <DatePicker
+                                                                   selected={selectedfromDate}
+                                                                   onChange={handlefromDateChange}
+                                                                   dateFormat="dd-MM-yyyy"
+                                                                   popperPlacement="bottom"
+                                                                   showPopperArrow={false}
+                                                                   open={fromCalendarOpen}
+                                                                   dropdownMode="select"
+                                                                   customInput={
+                                                                       <div>
+                                                                           <BsCalendar
+                                                                               onClick={
+                                                                                   selectedRadio === "custom"
+                                                                                       ? toggleFromCalendar
+                                                                                       : undefined
+                                                                               }
+                                                                               style={{
+                                                                                   cursor:
+                                                                                       selectedRadio === "custom"
+                                                                                           ? "pointer"
+                                                                                           : "default",
+                                                                                   marginLeft: "18px",
+                                                                                   fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                                                                   opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                               }}
+                                                                               disabled={selectedRadio !== "custom"}
+                                                                           />
+                                                                       </div>
+                                                                   }
+                                                                   disabled={selectedRadio !== "custom"}
+                                                               />
+                                                           </div>
+                                                       </div>
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginLeft: "15px" }}
@@ -2198,7 +2297,8 @@ export default function ItemLedgerReport() {
                                                         </td>
 
                                                         <td className="text-start" style={fifthColWidth}>
-                                                            {item.Str}
+                                                        {item.Str}
+                                                      
                                                         </td>
                                                         <td className="text-start" style={sixthColWidth}>
                                                             {item.Description}

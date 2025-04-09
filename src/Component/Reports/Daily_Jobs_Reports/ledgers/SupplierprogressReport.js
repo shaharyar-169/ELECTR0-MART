@@ -35,7 +35,8 @@ export default function SupplierProgressLedger() {
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("");
+    const currentYear1 = new Date().getFullYear().toString();
+    const [transectionType, settransectionType] = useState(currentYear1);
     const [supplierList, setSupplierList] = useState([]);
 
     const [totalQnty, setTotalQnty] = useState(0);
@@ -419,11 +420,28 @@ export default function SupplierProgressLedger() {
             });
     }, []);
 
+    const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
+    useEffect(() => {
+        if (supplierList.length > 0) {
+            setIsOptionsLoaded(true);
+        }
+    }, [supplierList]);
+
     // Transforming fetched data into options array
     const options = supplierList.map((item) => ({
         value: item.tacccod,
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
+
+    useEffect(() => {
+        if (isOptionsLoaded && options.length > 0 && !saleType) {
+            setSaleType(options[0].value);
+            setCompanyselectdatavalue({
+                value: options[0].value,
+                label: options[0].label.split("-")[1],
+            });
+        }
+    }, [isOptionsLoaded]);
 
     const DropdownOption = (props) => {
         return (
@@ -1263,6 +1281,7 @@ export default function SupplierProgressLedger() {
                                     <Select
                                         className="List-select-class "
                                         ref={saleSelectRef}
+                                        value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
                                         options={options}
                                         onKeyDown={(e) => handleSaleKeypress(e, "toDatePicker")}
                                         id="selectedsale"

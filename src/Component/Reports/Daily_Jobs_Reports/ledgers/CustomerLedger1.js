@@ -485,11 +485,27 @@ export default function CustomerLedger() {
                 console.error("Error fetching data:", error);
             });
     }, []);
+    const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
+    useEffect(() => {
+        if (supplierList.length > 0) {
+            setIsOptionsLoaded(true);
+        }
+    }, [supplierList]);
 
     const options = supplierList.map((item) => ({
         value: item.tacccod,
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
+
+    useEffect(() => {
+        if (isOptionsLoaded && options.length > 0 && !saleType) {
+            setSaleType(options[0].value);
+            setCompanyselectdatavalue({
+                value: options[0].value,
+                label: options[0].label.split("-")[1],
+            });
+        }
+    }, [isOptionsLoaded]);
 
     const DropdownOption = (props) => {
         return (
@@ -1570,6 +1586,7 @@ export default function CustomerLedger() {
                                         className="List-select-class "
                                         ref={saleSelectRef}
                                         options={options}
+                                        value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
                                         onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {

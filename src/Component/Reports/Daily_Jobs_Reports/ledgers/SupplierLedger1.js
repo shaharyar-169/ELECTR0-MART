@@ -22,7 +22,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function SupplierLedger1() {
-
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -37,6 +36,8 @@ export default function SupplierLedger1() {
 
     const [saleType, setSaleType] = useState("");
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+
+    console.log('Companyselectdatavalue', Companyselectdatavalue)
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
@@ -57,7 +58,6 @@ export default function SupplierLedger1() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-
     const yeardescription = getYearDescription();
     const locationnumber = getLocationnumber();
 
@@ -73,9 +73,8 @@ export default function SupplierLedger1() {
         getfromdate,
         gettodate,
         getfontstyle,
-        getdatafontsize
+        getdatafontsize,
     } = useTheme();
-
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
@@ -251,7 +250,6 @@ export default function SupplierLedger1() {
         }
     };
 
-
     const handleToDateChange = (date) => {
         setSelectedToDate(date);
         settoInputDate(date ? formatDate(date) : "");
@@ -295,7 +293,7 @@ export default function SupplierLedger1() {
 
         switch (true) {
             case !saleType:
-                errorType = 'saleType';
+                errorType = "saleType";
                 break;
             case !fromInputDate:
                 errorType = "fromDate";
@@ -343,8 +341,7 @@ export default function SupplierLedger1() {
         }
 
         switch (errorType) {
-
-            case 'saleType':
+            case "saleType":
                 toast.error("Please select a Account Code");
                 return;
 
@@ -384,7 +381,6 @@ export default function SupplierLedger1() {
                 toast.error("To date must be after from date");
                 return;
 
-
             default:
                 break;
         }
@@ -396,7 +392,7 @@ export default function SupplierLedger1() {
             FAccCod: saleType,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
+            FYerDsc: yeardescription || getyeardescription,
         };
         console.log(data);
         document.getElementById(
@@ -415,8 +411,7 @@ export default function SupplierLedger1() {
             FAccCod: saleType,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
-
+            FYerDsc: yeardescription || getyeardescription,
         }).toString();
 
         axios
@@ -447,7 +442,10 @@ export default function SupplierLedger1() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+        if (
+            !hasComponentMountedPreviously ||
+            (saleSelectRef && saleSelectRef.current)
+        ) {
             if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
                     saleSelectRef.current.focus();
@@ -486,10 +484,28 @@ export default function SupplierLedger1() {
             });
     }, []);
 
+    const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
+    useEffect(() => {
+        if (supplierList.length > 0) {
+            setIsOptionsLoaded(true);
+        }
+    }, [supplierList]);
+
     const options = supplierList.map((item) => ({
         value: item.tacccod,
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
+
+
+    useEffect(() => {
+        if (isOptionsLoaded && options.length > 0 && !saleType) {
+            setSaleType(options[0].value);
+            setCompanyselectdatavalue({
+                value: options[0].value,
+                label: options[0].label.split("-")[1],
+            });
+        }
+    }, [isOptionsLoaded]);
 
     const DropdownOption = (props) => {
         return (
@@ -515,7 +531,7 @@ export default function SupplierLedger1() {
             ...base,
             height: "24px",
             minHeight: "unset",
-            width: 250,
+            width: 330,
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             backgroundColor: getcolor,
@@ -562,12 +578,10 @@ export default function SupplierLedger1() {
         settransectionType(selectedTransactionType);
     };
 
-
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
-
         const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
+        console.log("gobal font data", globalfontsize);
 
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
@@ -715,23 +729,21 @@ export default function SupplierLedger1() {
                             align: "center",
                             baseline: "middle",
                         });
-
-                    }
-
-                    else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
+                    } else if (
+                        cellIndex === 4 ||
+                        cellIndex === 5 ||
+                        cellIndex === 6 ||
+                        cellIndex === 7 ||
+                        cellIndex === 8
+                    ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
-
-                    }
-
-                    else {
+                    } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
-
-
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
@@ -789,8 +801,6 @@ export default function SupplierLedger1() {
 
         // Function to handle pagination
         const handlePagination = () => {
-
-
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -833,11 +843,17 @@ export default function SupplierLedger1() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Supplier Ledger Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(
+                    `Supplier Ledger Report From: ${fromInputDate} To: ${toInputDate}`,
+                    "",
+                    "",
+                    pageNumber,
+                    startY,
+                    12
+                ); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -847,36 +863,34 @@ export default function SupplierLedger1() {
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
 
-
-
-
-                let status = transectionType === "A"
-                    ? "ALL"
-                    : transectionType === "CRV"
-                        ? "Cash Receive Voucher"
-                        : transectionType === "CPV"
-                            ? "Cash Payment Voucher"
-                            : transectionType === "BRV"
-                                ? "Bank Receive Voucher"
-                                : transectionType === "BPV"
-                                    ? "Bank Payment Voucher"
-                                    : transectionType === "JRV"
-                                        ? "Journal Voucher"
-                                        : transectionType === "INV"
-                                            ? "Item Sale"
-                                            : transectionType === "SRN"
-                                                ? "Sale Return"
-                                                : transectionType === "BIL"
-                                                    ? "Purchase"
-                                                    : transectionType === "PRN"
-                                                        ? "Purchase Return"
-                                                        : transectionType === "ISS"
-                                                            ? "Issue"
-                                                            : transectionType === "REC"
-                                                                ? "Received"
-                                                                : transectionType === "SLY"
-                                                                    ? "Salary"
-                                                                    : "ALL";
+                let status =
+                    transectionType === "A"
+                        ? "ALL"
+                        : transectionType === "CRV"
+                            ? "Cash Receive Voucher"
+                            : transectionType === "CPV"
+                                ? "Cash Payment Voucher"
+                                : transectionType === "BRV"
+                                    ? "Bank Receive Voucher"
+                                    : transectionType === "BPV"
+                                        ? "Bank Payment Voucher"
+                                        : transectionType === "JRV"
+                                            ? "Journal Voucher"
+                                            : transectionType === "INV"
+                                                ? "Item Sale"
+                                                : transectionType === "SRN"
+                                                    ? "Sale Return"
+                                                    : transectionType === "BIL"
+                                                        ? "Purchase"
+                                                        : transectionType === "PRN"
+                                                            ? "Purchase Return"
+                                                            : transectionType === "ISS"
+                                                                ? "Issue"
+                                                                : transectionType === "REC"
+                                                                    ? "Received"
+                                                                    : transectionType === "SLY"
+                                                                        ? "Salary"
+                                                                        : "ALL";
 
                 let search = Companyselectdatavalue.label
                     ? Companyselectdatavalue.label
@@ -886,22 +900,18 @@ export default function SupplierLedger1() {
                 doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
                 doc.setFontSize(10); // Font size
 
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`ACCOUNT :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`TYPE :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${status}`, labelsX + 195, labelsY + 8.5); // Draw the value next to the label
 
-
-
                 // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.setFontSize(10);
 
                 startY += 10; // Adjust vertical position for the labels
@@ -947,12 +957,11 @@ export default function SupplierLedger1() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`SupplierLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
-
-
+        doc.save(
+            `SupplierLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`
+        );
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
@@ -978,9 +987,10 @@ export default function SupplierLedger1() {
 
         // Add title rows
 
-
-
-        [comapnyname, `Supplier Ledger Report From ${fromInputDate} To ${toInputDate} `].forEach((title, index) => {
+        [
+            comapnyname,
+            `Supplier Ledger Report From ${fromInputDate} To ${toInputDate} `,
+        ].forEach((title, index) => {
             // Define custom styles for each title
             let customStyle;
             let rowHeight = 20; // Default row height
@@ -1014,12 +1024,8 @@ export default function SupplierLedger1() {
             );
         });
 
-
-
-
         // Add an empty row after the title section
-        worksheet.addRow([]);  // This is where you add the empty row
-
+        worksheet.addRow([]); // This is where you add the empty row
 
         let typestatus = "";
 
@@ -1053,15 +1059,20 @@ export default function SupplierLedger1() {
             typestatus = "ALL"; // Default value
         }
 
-
-        let typesearch = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+        let typesearch = Companyselectdatavalue.label
+            ? Companyselectdatavalue.label
+            : "ALL";
 
         const typeAndStoreRow3 = worksheet.addRow([
-            "ACCOUNT:", typesearch, "", "", "", "", "TYPE :", typestatus
+            "ACCOUNT:",
+            typesearch,
+            "",
+            "",
+            "",
+            "",
+            "TYPE :",
+            typestatus,
         ]);
-
-
-
 
         const applyStatusRowStyle = (row, boldColumns = []) => {
             row.eachCell((cell, colIndex) => {
@@ -1086,8 +1097,6 @@ export default function SupplierLedger1() {
         // Bold specific columns (labels)
 
         applyStatusRowStyle(typeAndStoreRow3, [1, 7]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-
 
         // Header style for center alignment
         const headerStyle = {
@@ -1165,8 +1174,6 @@ export default function SupplierLedger1() {
             });
         });
 
-
-
         const totalRow = worksheet.addRow([
             "",
             "",
@@ -1191,19 +1198,21 @@ export default function SupplierLedger1() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 5 || colNumber === 7 || colNumber === 8 || colNumber === 9) {
+            if (
+                colNumber === 5 ||
+                colNumber === 7 ||
+                colNumber === 8 ||
+                colNumber === 9
+            ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
 
         // Set column widths
 
-
         [12, 8, 7, 50, 5, 12, 12, 12, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
-
-
 
         const getCurrentDate = () => {
             const today = new Date();
@@ -1220,7 +1229,10 @@ export default function SupplierLedger1() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `SupplierLedgerReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(
+            blob,
+            `SupplierLedgerReport From ${fromInputDate} To ${toInputDate}.xlsx`
+        );
     };
 
     const dispatch = useDispatch();
@@ -1435,21 +1447,22 @@ export default function SupplierLedger1() {
                     }}
                 >
                     <NavComponent textdata="Supplier Ledger" />
-                    <div className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}>
-
-                        <div style={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "0px",
-                            padding: "0px",
-                            justifyContent: "space-between",
-                        }}>
-
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
                             <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
+                                <div className="mx-5"></div>
 
                                 <div
                                     className="d-flex align-items-center"
@@ -1476,7 +1489,15 @@ export default function SupplierLedger1() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>Custom</label>
+                                            <label
+                                                htmlFor="custom"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                Custom
+                                            </label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1493,7 +1514,15 @@ export default function SupplierLedger1() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>30 Days</label>
+                                            <label
+                                                htmlFor="30"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                30 Days
+                                            </label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1510,7 +1539,15 @@ export default function SupplierLedger1() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>60 Days</label>
+                                            <label
+                                                htmlFor="60"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                60 Days
+                                            </label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1527,17 +1564,20 @@ export default function SupplierLedger1() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>90 Days</label>
+                                            <label
+                                                htmlFor="90"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                90 Days
+                                            </label>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
-
                     </div>
 
                     <div
@@ -1554,22 +1594,38 @@ export default function SupplierLedger1() {
                                 justifyContent: "space-between",
                             }}
                         >
-
-
-
                             {/* ------ */}
 
-
-                            <div className="d-flex align-items-center  " style={{ marginRight: '1px' }}>
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: 'bold' }}>Account :</span>  <br /></label>
+                            <div
+                                className="d-flex align-items-center  "
+                                style={{ marginRight: "1px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Account :
+                                        </span>{" "}
+                                        <br />
+                                    </label>
                                 </div>
-                                <div style={{ marginLeft: '5px' }} >
+                                <div style={{ marginLeft: "5px" }}>
                                     <Select
-
-                                        className="List-select-class "
+                                        className="List-select-class"
                                         ref={saleSelectRef}
                                         options={options}
+                                        value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
                                         onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
@@ -1584,7 +1640,7 @@ export default function SupplierLedger1() {
 
                                                 });
                                             } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setSaleType("");
                                                 setCompanyselectdatavalue('')
                                             }
                                         }}
@@ -1594,12 +1650,8 @@ export default function SupplierLedger1() {
                                         isClearable
                                         placeholder="ALL"
                                     />
-
                                 </div>
-
-
                             </div>
-
 
                             <div
                                 className="d-flex align-items-center"
@@ -1613,13 +1665,17 @@ export default function SupplierLedger1() {
                                     }}
                                 >
                                     <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
                                             Type :
                                         </span>
                                     </label>
                                 </div>
-
-
 
                                 <select
                                     ref={input1Ref}
@@ -1662,7 +1718,6 @@ export default function SupplierLedger1() {
                         </div>
                     </div>
 
-
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1686,7 +1741,13 @@ export default function SupplierLedger1() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
                                             From :
                                         </span>
                                     </label>
@@ -1782,7 +1843,13 @@ export default function SupplierLedger1() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
                                             To :
                                         </span>
                                     </label>
@@ -1868,7 +1935,13 @@ export default function SupplierLedger1() {
                             </div>
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                    <span
+                                        style={{
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
                                         Search :
                                     </span>{" "}
                                 </label>
@@ -1885,7 +1958,8 @@ export default function SupplierLedger1() {
                                         width: "200px",
                                         height: "24px",
                                         fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle, color: fontcolor,
+                                        fontFamily: getfontstyle,
+                                        color: fontcolor,
                                         backgroundColor: getcolor,
                                         border: `1px solid ${fontcolor}`,
                                         outline: "none",
@@ -1899,8 +1973,8 @@ export default function SupplierLedger1() {
                                     }
                                     onChange={(e) =>
                                         setSearchQuery((e.target.value || "").toUpperCase())
-
-                                    } />
+                                    }
+                                />
                             </div>
                         </div>
                     </div>
@@ -1915,7 +1989,8 @@ export default function SupplierLedger1() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    fontSize: getdatafontsize,
+                                    fontFamily: getfontstyle,
                                     width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
@@ -1923,7 +1998,8 @@ export default function SupplierLedger1() {
                             >
                                 <thead
                                     style={{
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1969,7 +2045,6 @@ export default function SupplierLedger1() {
                                             Balance
                                         </td>
                                     </tr>
-
                                 </thead>
                             </table>
                         </div>
@@ -1988,7 +2063,8 @@ export default function SupplierLedger1() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    fontSize: getdatafontsize,
+                                    fontFamily: getfontstyle,
                                     width: "100%",
                                     position: "relative",
                                 }}
@@ -2119,25 +2195,84 @@ export default function SupplierLedger1() {
                         </div>
                     </div>
 
-
-                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
-
-                        <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...thirdColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...fifthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
-                        <div style={{ ...sixthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                    <div
+                        style={{
+                            borderBottom: `1px solid ${fontcolor}`,
+                            borderTop: `1px solid ${fontcolor}`,
+                            height: "24px",
+                            display: "flex",
+                        }}
+                    >
+                        <div
+                            style={{
+                                ...firstColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
+                        <div
+                            style={{
+                                ...secondColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
+                        <div
+                            style={{
+                                ...thirdColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
+                        <div
+                            style={{
+                                ...fifthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
+                        <div
+                            style={{
+                                ...sixthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
                             <span className="mobileledger_total">{totalQnty}</span>
                         </div>
-                        <div style={{ ...seventhColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
+                        <div
+                            style={{
+                                ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
 
-                        <div style={{ ...eightColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <div
+                            style={{
+                                ...eightColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
                             <span className="mobileledger_total">{totalDebit}</span>
                         </div>
-                        <div style={{ ...ninthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <div
+                            style={{
+                                ...ninthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
                             <span className="mobileledger_total">{totalCredit}</span>
                         </div>
-                        <div style={{ ...tenthColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}>
+                        <div
+                            style={{
+                                ...tenthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
                             <span className="mobileledger_total">{closingBalance}</span>
                         </div>
                     </div>
@@ -2151,7 +2286,6 @@ export default function SupplierLedger1() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2160,7 +2294,6 @@ export default function SupplierLedger1() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2169,7 +2302,6 @@ export default function SupplierLedger1() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2180,7 +2312,6 @@ export default function SupplierLedger1() {
                             text="Select"
                             ref={input3Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
