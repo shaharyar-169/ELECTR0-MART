@@ -500,20 +500,7 @@ export default function ItemLedgerReport() {
         }
     }, []);
 
-    //  useEffect(() => {
-    //         const currentDate = new Date();
-    //         setSelectedToDate(currentDate);
-    //         settoInputDate(formatDate(currentDate));
-    
-    //         const firstDateOfCurrentMonth = new Date(
-    //             currentDate.getFullYear(),
-    //             currentDate.getMonth(),
-    //             1
-    //         );
-    //         setSelectedfromDate(firstDateOfCurrentMonth);
-    //         setfromInputDate(formatDate(firstDateOfCurrentMonth));
-    //     }, []);
-
+ 
     useEffect(() => {
         // Check if the report was opened via double-click
         const isOpenedFromDoubleClick = sessionStorage.getItem("openedFromDoubleClick") === "true";
@@ -562,8 +549,7 @@ export default function ItemLedgerReport() {
             settoInputDate(formatDate(currentDate));
         }
     }, []);
-
-  
+ 
 
     // useEffect(() => {
     //     if (selectedRadio === "custom") {
@@ -665,6 +651,53 @@ export default function ItemLedgerReport() {
     };
 
     const customStyles1 = (hasError) => ({
+        control: (base, state) => ({
+            ...base,
+            height: "24px",
+            minHeight: "unset",
+            width: 430,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            backgroundColor: getcolor,
+            color: fontcolor,
+            caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+            borderRadius: 0,
+            border: `1px solid ${fontcolor}`, // Fixed Template Literal
+            transition: "border-color 0.15s ease-in-out",
+            "&:hover": {
+                borderColor: state.isFocused ? base.borderColor : "black",
+            },
+            padding: "0 8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            padding: 0,
+            marginTop: "-5px",
+            fontSize: "18px",
+            display: "flex",
+            textAlign: "center",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            textAlign: "left",
+            color: fontcolor,
+        }),
+        input: (base) => ({
+            ...base,
+            color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+            caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            marginTop: "-5px",
+        }),
+    });
+
+    const customStyles2 = (hasError) => ({
         control: (base, state) => ({
             ...base,
             height: "24px",
@@ -1816,7 +1849,7 @@ export default function ItemLedgerReport() {
 
                                         }}
                                         components={{ Option: DropdownOption }}
-                                        styles={customStyles1(!saleType)}
+                                        styles={customStyles2(!saleType)}
                                         isClearable
                                         placeholder="ALL"
                                     />
@@ -1994,7 +2027,7 @@ export default function ItemLedgerReport() {
                                                        </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "15px" }}
+                                style={{ marginLeft: "196px" }}
                             >
                                 <div
                                     style={{

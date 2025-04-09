@@ -467,7 +467,7 @@ export default function DailySaleReport() {
       "Qnty",
       "Amount",
     ];
-    const columnWidths = [22, 13, 10, 12, 90, 50, 22, 20, 12, 20];
+    const columnWidths = [22, 13, 10, 12, 90, 70, 22, 20, 12, 20];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
