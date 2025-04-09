@@ -36,6 +36,8 @@ export default function SupplierLedger1() {
 
     const [saleType, setSaleType] = useState("");
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+    console.log('Companyselectdatavalue', Companyselectdatavalue)
+
 
     console.log('Companyselectdatavalue', Companyselectdatavalue)
 
@@ -497,15 +499,32 @@ export default function SupplierLedger1() {
     }));
 
 
+    // useEffect(() => {
+    //     if (isOptionsLoaded && options.length > 0 && !saleType) {
+    //         setSaleType(options[0].value);
+    //         setCompanyselectdatavalue({
+    //             value: options[0].value,
+    //             label: options[0].label.split("-")[1],
+    //         });
+    //     }
+    // }, [isOptionsLoaded]);
+
     useEffect(() => {
         if (isOptionsLoaded && options.length > 0 && !saleType) {
-            setSaleType(options[0].value);
+            const firstOption = options[0];
+            setSaleType(firstOption.value);
+            
+            // Extract description after the last hyphen
+            const fullLabel = firstOption.label;
+            const description = fullLabel.split('-').pop()?.trim(); // "M.ABDULLAH ABID MARKET"
+            
             setCompanyselectdatavalue({
-                value: options[0].value,
-                label: options[0].label.split("-")[1],
+                value: firstOption.value,
+                label: description, // Only the descriptive part
+                fullLabel: fullLabel // Optional: keep original if needed
             });
         }
-    }, [isOptionsLoaded]);
+    }, [isOptionsLoaded, options, saleType]);
 
     const DropdownOption = (props) => {
         return (
