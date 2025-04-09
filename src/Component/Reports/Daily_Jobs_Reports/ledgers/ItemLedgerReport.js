@@ -591,10 +591,34 @@ export default function ItemLedgerReport() {
             });
     }, []);
 
+    const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
+    useEffect(() => {
+        if (supplierList.length > 0) {
+            setIsOptionsLoaded(true);
+        }
+    }, [supplierList]);
     const options = supplierList.map((item) => ({
         value: item.titmcod,
         label: `${item.titmcod}-${item.titmdsc.trim()}`,
     }));
+
+
+    useEffect(() => {
+        if (isOptionsLoaded && options.length > 0 && !saleType) {
+            const firstOption = options[0];
+            setSaleType(firstOption.value);
+            
+            // Extract description after the last hyphen
+            const fullLabel = firstOption.label;
+            const description = fullLabel.split('-').pop()?.trim(); // "M.ABDULLAH ABID MARKET"
+            
+            setCompanyselectdatavalue({
+                value: firstOption.value,
+                label: description, // Only the descriptive part
+                fullLabel: fullLabel // Optional: keep original if needed
+            });
+        }
+    }, [isOptionsLoaded, options, saleType]);
 
     useEffect(() => {
         const storedData = sessionStorage.getItem("itemLedgerData");
@@ -1458,10 +1482,10 @@ export default function ItemLedgerReport() {
         width: "3.7%",
     };
     const fifthColWidth = {
-        width: "8.8%",
+        width: "4.8%",
     };
     const sixthColWidth = {
-        width: "24%",
+        width: "28%",
     };
     const seventhColWidth = {
         width: "7%",
@@ -1788,9 +1812,9 @@ export default function ItemLedgerReport() {
                                         className="List-select-class"
                                         ref={saleSelectRef}
                                         options={options}
+                                        value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
                                         onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
                                         id="selectedsale"
-                                        value={options.find((option) => option.value === saleType) || null} // Ensure proper value
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
                                                 const labelParts = selectedOption.label.split("-"); // Split by "-"
