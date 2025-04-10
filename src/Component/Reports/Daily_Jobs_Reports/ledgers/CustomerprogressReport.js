@@ -28,6 +28,9 @@ export default function CustomerProgressLedger() {
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
 
+    // Add this at the top of your component
+    const hasInitialized = useRef(false);
+
     const toRef = useRef(null);
     const fromRef = useRef(null);
 
@@ -437,21 +440,25 @@ export default function CustomerProgressLedger() {
     }));
 
     useEffect(() => {
-                if (isOptionsLoaded && options.length > 0 && !saleType) {
-                    const firstOption = options[0];
-                    setSaleType(firstOption.value);
-                    
-                    // Extract description after the last hyphen
-                    const fullLabel = firstOption.label;
-                    const description = fullLabel.split('-').pop()?.trim(); // "M.ABDULLAH ABID MARKET"
-                    
-                    setCompanyselectdatavalue({
-                        value: firstOption.value,
-                        label: description, // Only the descriptive part
-                        fullLabel: fullLabel // Optional: keep original if needed
-                    });
-                }
-            }, [isOptionsLoaded, options, saleType]);
+        if (isOptionsLoaded && options.length > 0 && !saleType && !hasInitialized.current) {
+            const firstOption = options[0];
+            setSaleType(firstOption.value);
+            
+            const fullLabel = firstOption.label;
+            const description = fullLabel.split('-').pop()?.trim();
+            
+            setCompanyselectdatavalue({
+                value: firstOption.value,
+                label: description,
+                fullLabel: fullLabel
+            });
+    
+            // Mark as initialized
+            hasInitialized.current = true;
+        }
+    }, [isOptionsLoaded, options, saleType]);
+    
+    
 
     const DropdownOption = (props) => {
         return (
@@ -519,9 +526,29 @@ export default function CustomerProgressLedger() {
         }),
     });
 
-    const handleTransactionTypeChange = (event) => {
-        const selectedTransactionType = event.target.value;
-        settransectionType(selectedTransactionType);
+ 
+
+    const handleTransactionTypeChange = (e) => {
+        const selectedYear = e.target.value;
+        settransectionType(selectedYear);
+        
+        // If a year is selected (not the empty "Select" option)
+        if (selectedYear) {
+            const currentYear = new Date().getFullYear();
+            
+            if (parseInt(selectedYear) === currentYear) {
+                // For current year, set today's date
+                const today = new Date();
+                const day = String(today.getDate()).padStart(2, '0');
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const formattedDate = `${day}-${month}-${currentYear}`;
+                settoInputDate(formattedDate);
+            } else {
+                // For previous years, set 31st December
+                const formattedDate = `31-12-${selectedYear}`;
+                settoInputDate(formattedDate);
+            }
+        }
     };
 
     const exportPDFHandler = () => {
@@ -1355,7 +1382,7 @@ export default function CustomerProgressLedger() {
                                         color: fontcolor,
                                     }}
                                 >
-                                    <option value="">Select</option>
+                                   
                                     {years.map((year) => (
                                         <option key={year} value={year}>
                                             {year}
@@ -1469,7 +1496,7 @@ export default function CustomerProgressLedger() {
                             </div>
 
                             {/* Search Item  */}
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
+                            {/* <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
                                     <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
                                         Search :
@@ -1498,7 +1525,7 @@ export default function CustomerProgressLedger() {
                                         setSearchQuery((e.target.value || "").toUpperCase())
 
                                     } />
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 

@@ -31,6 +31,9 @@ export default function SupplierLedger1() {
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
 
+     // Add this at the top of your component
+     const hasInitialized = useRef(false);
+
     const toRef = useRef(null);
     const fromRef = useRef(null);
 
@@ -499,32 +502,26 @@ export default function SupplierLedger1() {
     }));
 
 
-    // useEffect(() => {
-    //     if (isOptionsLoaded && options.length > 0 && !saleType) {
-    //         setSaleType(options[0].value);
-    //         setCompanyselectdatavalue({
-    //             value: options[0].value,
-    //             label: options[0].label.split("-")[1],
-    //         });
-    //     }
-    // }, [isOptionsLoaded]);
-
     useEffect(() => {
-        if (isOptionsLoaded && options.length > 0 && !saleType) {
+        if (isOptionsLoaded && options.length > 0 && !saleType && !hasInitialized.current) {
             const firstOption = options[0];
             setSaleType(firstOption.value);
             
-            // Extract description after the last hyphen
             const fullLabel = firstOption.label;
-            const description = fullLabel.split('-').pop()?.trim(); // "M.ABDULLAH ABID MARKET"
+            const description = fullLabel.split('-').pop()?.trim();
             
             setCompanyselectdatavalue({
                 value: firstOption.value,
-                label: description, // Only the descriptive part
-                fullLabel: fullLabel // Optional: keep original if needed
+                label: description,
+                fullLabel: fullLabel
             });
+    
+            // Mark as initialized
+            hasInitialized.current = true;
         }
     }, [isOptionsLoaded, options, saleType]);
+    
+   
 
     const DropdownOption = (props) => {
         return (

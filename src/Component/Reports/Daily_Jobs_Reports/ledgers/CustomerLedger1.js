@@ -496,7 +496,7 @@ export default function CustomerLedger() {
         value: item.tacccod,
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
-
+   
     useEffect(() => {
             if (isOptionsLoaded && options.length > 0 && !saleType) {
                 const firstOption = options[0];

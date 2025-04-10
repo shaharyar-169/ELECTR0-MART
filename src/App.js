@@ -87,9 +87,9 @@ import MobileLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileL
 import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierprogressReport.js";
 import ItemLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemLedgerReport.js";
 import ItemEvaluationReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemEvaluationReport.js";
-// import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemAggingReport.js";
 import InvoiceLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/InvoiceLedger.js";
 import MobileLedgerJob from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileLedgerJob.js";
+import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemAggingReport.js";
 
 //////////////////////////// Daily reports //////////////////////////////
 import DailyCashBook from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBook.js";
@@ -118,7 +118,7 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
-import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemAggingReport.js";
+// import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemAggingReport.js";
 
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
@@ -250,7 +250,7 @@ function App() {
 
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
-                <Route exact path="/ItemAgging" element={<ItemAggingReport />} />
+                {/* <Route exact path="/ItemAgging" element={<ItemAggingReport />} /> */}
 
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />
