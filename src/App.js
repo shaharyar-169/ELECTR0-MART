@@ -29,6 +29,9 @@ import MenuAdmin from "./Component/MainComponent/Header/Admin/MenuAdmin/MenuAdmi
 
 //////////////////////////// DASHBOARD //////////////////////////////
 import Dashboard from "./Component/MainComponent/Dashboard/Dashboard.jsx";
+//////////////////////////// DASHBOARD //////////////////////////////
+import Dasboard2 from "./Component/MainComponent/Dashboard2/Dashboard2.jsx";
+
 
 //////////////////////////// List reports //////////////////////////////
 import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList1.js";
@@ -118,7 +121,6 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
-// import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemAggingReport.js";
 
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
@@ -258,7 +260,7 @@ function App() {
 
                 {/* Rountes for Dashboard */}
                 <Route exact path="/salesdashboad" element={<Dashboard />} />
-
+                <Route exact path="/AdminDealer" element={<Dasboard2 />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
