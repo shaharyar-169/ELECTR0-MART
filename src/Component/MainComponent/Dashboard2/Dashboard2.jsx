@@ -9,7 +9,9 @@ import DatePicker from "react-datepicker";
 import { BsCalendar } from "react-icons/bs";
 import { getOrganisationData, getUserData } from "../../Auth";
 import { useTheme } from "../../../ThemeContext";
+import { faToggleOff } from "@fortawesome/free-solid-svg-icons";
 import Donut1 from "./Chart/SmallChart";
+import Button from 'react-bootstrap/Button';
 import { Dashboard } from "@mui/icons-material";
 export default function Dasboard2() {
 
@@ -285,7 +287,85 @@ export default function Dasboard2() {
     setCurrentYear(today.getFullYear());
   }, []);
 
+  const [isOn, setIsOn] = useState(false);
 
+  const toggleSwitch = () => {
+    setIsOn(!isOn);
+  };
+
+  const [isOn2, setIsOn2] = useState(false);
+
+  const toggleSwitch2 = () => {
+    setIsOn2(!isOn2);
+  };
+  const [amountData, setAmountData] = useState({});
+  console.log('amountData', amountData)
+
+  useEffect(() => {
+    function fetchReceivableReport() {
+      const apiUrl = apiLinks + "/AdminInfo.php";
+      setIsLoading(true);
+
+      const formData = new URLSearchParams({
+        code: 'AMRELEC',
+      }).toString();
+
+      axios
+        .post(apiUrl, formData)
+        .then((response) => {
+          setIsLoading(false);
+          if (response.data) {
+            setAmountData(response.data);
+          } else {
+            console.warn("Response data structure is not as expected:", response.data);
+            setAmountData({});
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setIsLoading(false);
+        });
+    }
+
+    fetchReceivableReport();
+  }, []);
+
+  const [outstandingdata, setoutstandingdata] = useState({});
+  console.log('outstandingdata', outstandingdata.Nos001)
+
+  useEffect(() => {
+    function fetchReceivableReport() {
+      const apiUrl = apiLinks + "/AdminAgging.php";
+      setIsLoading(true);
+
+      const formData = new URLSearchParams({
+        code: 'AMRELEC',
+        FRepDat: '12-04-2025'
+      }).toString();
+
+      axios
+        .post(apiUrl, formData)
+        .then((response) => {
+          setIsLoading(false);
+          if (response.data) {
+            setoutstandingdata(response.data);
+          } else {
+            console.warn("Response data structure is not as expected:", response.data);
+            setoutstandingdata({});
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setIsLoading(false);
+        });
+    }
+
+    fetchReceivableReport();
+  }, []);
+
+
+ 
+  
   return (
     <>
 
@@ -350,7 +430,7 @@ export default function Dasboard2() {
 
               <div style={{ width: '110px', height: '40px', border: '1px solid black', marginTop: '12px', borderRadius: '5px' }}>
                 <div style={{ width: '70px', paddingLeft: '3px', marginLeft: '10px', marginTop: '-12px', fontSize: '12px', background: '#F8F8F8', fontWeight: '600' }}>Customers</div>
-                <div style={{ textAlign: 'center' }}>584</div>
+                <div style={{ textAlign: 'center' }}>{amountData && amountData['Total Customer'] ? amountData['Total Customer'] : ''}</div>
               </div>
 
               <div style={{ width: '110px', height: '40px', border: '1px solid black', marginTop: '12px', borderRadius: '5px' }}>
@@ -392,7 +472,7 @@ export default function Dasboard2() {
                     O/S Cus
                   </div>
                   <div className="col-md-8 lable_right_section">
-                    {DailyDashboard.CashBankBal}
+                    {amountData['OutStanding Customer']}
                   </div>
                 </div>
                 <div className="row leable_row_styling" >
@@ -400,7 +480,7 @@ export default function Dasboard2() {
                     Nill Cus
                   </div>
                   <div className="col-md-8 lable_right_section">
-                    {DailyDashboard.Receivable}
+                    {amountData['Nil Customer']}
                   </div>
                 </div>
                 <div className="row leable_row_styling" >
@@ -408,7 +488,7 @@ export default function Dasboard2() {
                     Adv Cus
                   </div>
                   <div className="col-md-8 lable_right_section">
-                    {DailyDashboard.Payable}
+                    {amountData['Advance Customer']}
 
                   </div>
                 </div>
@@ -417,7 +497,7 @@ export default function Dasboard2() {
                     Non Active
                   </div>
                   <div className="col-md-8 lable_right_section">
-                    {0}
+                    {amountData['Non Active']}
                   </div>
                 </div>
 
@@ -442,7 +522,7 @@ export default function Dasboard2() {
                     Receivable
                   </div>
                   <div className="col-md-8 lable_right_section">
-                    {DailyDashboard.Receivable}
+                    {amountData['Total Balance']}
                   </div>
                 </div>
                 <div className="row leable_row_styling" >
@@ -469,7 +549,8 @@ export default function Dasboard2() {
 
 
 
-            <div style={{ backgroundColor: '#F8F8F8', height: '210px', marginTop: '10px', width: '34%', display: 'flex', flexWrap: 'wrap', columnGap: '10px', background: 'white', borderRadius: '10px', boxShadow: 'rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px'
+            <div style={{
+              backgroundColor: '#F8F8F8', height: '210px', marginTop: '10px', width: '34%', display: 'flex', flexWrap: 'wrap', columnGap: '10px', background: 'white', borderRadius: '10px', boxShadow: 'rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px'
             }}>
               {/* <div style={{width:'90px', height:'40px', border:'1px solid black', marginTop:'10px', borderRadius:'5px'}}>
               <div style={{width:'60px',marginLeft:'5px' ,marginTop:'-12px', fontSize:'12px', background:'white'}}>Technician</div>
@@ -690,10 +771,25 @@ export default function Dasboard2() {
 
               </div> */}
 
-              <div className="Card_styling_new" style={{ height: '90px', width: '100%', marginTop: '10px', boxShadow: '5px 5px 10px grey' }}>
+              <div className="Card_styling_new" style={{ height: '90px', width: '100%',  boxShadow: '5px 5px 10px grey' }}>
 
-                <div style={{ color: '#3368B5' }}>Total Receivable</div>
+                <div style={{ display: 'flex', justifyContent: "space-between", width: '100%' }}>
 
+                  <div style={{ color: '#3368B5' }}>Total Receivable <span style={{color:'black', marginLeft:'10px', fontSize:'14px'}}>{outstandingdata.Total}</span> </div>
+
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ color: '#3368B5', marginLeft: '50px', fontWeight: isOn === false ? 'bold' : 'normal' }}>Amount</div>
+
+                    <div
+                      style={{ marginLeft: '10px' }}
+                      className={`switch ${isOn ? 'on' : 'off'}`}
+                      onClick={toggleSwitch}
+                    >
+                      <div className="switch-toggle"></div>
+                    </div>
+                    <div style={{ color: '#3368B5', marginLeft: '10px', paddingRight: '5px',  fontWeight: isOn === true ? 'bold' : 'normal' }}>Numbers</div>
+                  </div>
+                </div>
                 <div style={{ display: 'flex', width: '100%', flexWrap: 'wrap', height: '75.5%' }}>
                   <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     {'< 30'}
@@ -714,17 +810,89 @@ export default function Dasboard2() {
                   <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     {'180+'}
                   </div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
+
+
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+                    {
+                      isOn
+                        ? amountData[`Nos001`] || '' // Show Numbers if switch is ON
+                        : amountData[`Amt001`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+
+                    {
+                      isOn
+                        ? amountData[`Nos002`] || '' // Show Numbers if switch is ON
+                        : amountData[`Amt002`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+
+                    {
+                      isOn
+                        ? amountData[`Nos003`] || '' // Show Numbers if switch is ON
+                        : amountData[`Amt003`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+
+                    {
+                      isOn
+                        ? amountData[`Nos004`] || '' // Show Numbers if switch is ON
+                        : amountData[`Amt004`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+
+                    {
+                      isOn
+                        ? amountData[`Nos005`] || '' // Show Numbers if switch is ON
+                        : amountData[`Amt005`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+
+                    {
+                      isOn
+                        ? amountData[`Nos006`] || '' // Show Numbers if switch is ON
+                        : amountData[`Amt006`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
                 </div>
               </div>
               <div className="Card_styling_new" style={{ height: '90px', width: '100%', marginTop: '10px', boxShadow: '5px 5px 10px lightgrey' }}>
 
-                <div style={{ color: '#3368B5' }}>Outstanding</div>
 
+                <div style={{ display: 'flex', justifyContent: "space-between", width: '100%' }}>
+
+                  <div style={{ color: '#3368B5' }}>Outstanding</div>
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ color: '#3368B5', marginLeft: '50px',   fontWeight: isOn2 === false ? 'bold' : 'normal' }}>Amount</div>
+
+                    <div
+                      style={{ marginLeft: '10px' }}
+                      className={`switch ${isOn2 ? 'on' : 'off'}`}
+                      onClick={toggleSwitch2}
+                    >
+                      <div className="switch-toggle"></div>
+                    </div>
+                    <div style={{ color: '#3368B5', marginLeft: '10px', paddingRight: '5px',   fontWeight: isOn2 === true ? 'bold' : 'normal' }}>Numbers</div>
+                  </div>
+
+                </div>
                 <div style={{ display: 'flex', width: '100%', flexWrap: 'wrap', height: '75.5%' }}>
 
 
@@ -749,13 +917,56 @@ export default function Dasboard2() {
                   <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     {'10M+'}
                   </div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
-                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey' }}></div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos001`] || '' // Show Numbers if switch is ON
+                        : outstandingdata[`amt001`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos002`] || '' // Show Numbers if switch is ON
+                        : outstandingdata[`amt002`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos003`] || '' // Show Numbers if switch is ON
+                        : outstandingdata[`amt003`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos004`] || '' // Show Numbers if switch is ON
+                        : outstandingdata[`amt004`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos005`] || '' // Show Numbers if switch is ON
+                        : outstandingdata[`amt005`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
+                  <div style={{ height: '50%', width: '16.65%', border: '1px solid lightgrey', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos006`] || '' // Show Numbers if switch is ON
+                        : outstandingdata[`amt006`] || '' // Show Amounts if switch is OFF
+                    }
+
+                  </div>
                 </div>
+
               </div>
             </div>
 

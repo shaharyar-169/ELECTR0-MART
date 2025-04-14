@@ -126,7 +126,7 @@ background-color: #f4f4f4;
 .Card_Heading_div {
   width: 100%;
   text-align: center;
-  top: 10 !important;
+  top: 0 !important;
   position: sticky !important;
 }
 
@@ -324,3 +324,40 @@ box-shadow: none !important;
 
 }
 
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.switch.on {
+  background-color: #3368B5;
+}
+
+.switch.off {
+  background-color: #3368B5;
+}
+
+.switch-toggle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.switch.on .switch-toggle {
+  transform: translateX(30px);
+}
+
+.switch.off .switch-toggle {
+  transform: translateX(0);
+}
