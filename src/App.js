@@ -30,7 +30,7 @@ import MenuAdmin from "./Component/MainComponent/Header/Admin/MenuAdmin/MenuAdmi
 //////////////////////////// DASHBOARD //////////////////////////////
 import Dashboard from "./Component/MainComponent/Dashboard/Dashboard.jsx";
 //////////////////////////// DASHBOARD //////////////////////////////
-import Dasboard2 from "./Component/MainComponent/Dashboard2/Dashboard2.jsx";
+import DashboardAdminDealer from "./Component/MainComponent/Dashboard2/Dashboard2.jsx";
 
 
 //////////////////////////// List reports //////////////////////////////
@@ -260,7 +260,7 @@ function App() {
 
                 {/* Rountes for Dashboard */}
                 <Route exact path="/salesdashboad" element={<Dashboard />} />
-                <Route exact path="/AdminDealer" element={<Dasboard2 />} />
+                <Route exact path="/AdminDealer" element={<DashboardAdminDealer />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
