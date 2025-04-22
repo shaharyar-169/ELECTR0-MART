@@ -13,6 +13,10 @@ import { faToggleOff } from "@fortawesome/free-solid-svg-icons";
 import Donut1 from "./Chart/SmallChart";
 import Button from 'react-bootstrap/Button';
 import { Dashboard } from "@mui/icons-material";
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+
+
 export default function DashboardAdminDealer() {
   const [saleData, setsaleData] = useState([]);
   const [purchaseData, setpurchaseData] = useState([]);
@@ -22,8 +26,6 @@ export default function DashboardAdminDealer() {
 
   const [DailyDashboard, setDailyDashboard] = useState([]);
   const [DailyDashboardSale, setDailyDashboardSale] = useState([]);
-
-  console.log("DailyDashboardSale", DailyDashboardSale);
 
   const [selectedfromDate, setSelectedfromDate] = useState(null);
   const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
@@ -72,6 +74,8 @@ export default function DashboardAdminDealer() {
     apiLinks,
     getLocationNumber,
     getyeardescription,
+    getfontstyle,
+    getdatafontsize,
   } = useTheme();
 
   useEffect(() => {
@@ -111,10 +115,10 @@ export default function DashboardAdminDealer() {
     const apiUrl = apiLinks + "/DashboardPurchase.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-    
+
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      
+
     }).toString();
 
     axios
@@ -238,18 +242,18 @@ export default function DashboardAdminDealer() {
   const tableHeadColor = "#3368b5";
   const textColor = "white";
 
-  const firstColWidth = {
-    width: "26%",
-  };
-  const secondColWidth = {
-    width: "12%",
-  };
-  const thirdColWidth = {
-    width: "22%",
-  };
-  const forthColWidth = {
-    width: "18%",
-  };
+  // const firstColWidth = {
+  //   width: "26%",
+  // };
+  // const secondColWidth = {
+  //   width: "12%",
+  // };
+  // const thirdColWidth = {
+  //   width: "22%",
+  // };
+  // const forthColWidth = {
+  //   width: "18%",
+  // };
 
   const getDayName = (dateString) => {
     const dateParts = dateString.split("-").map(Number); // Split date string into parts (day, month, year)
@@ -288,7 +292,8 @@ export default function DashboardAdminDealer() {
       setIsLoading(true);
 
       const formData = new URLSearchParams({
-        code: organisation.code,
+        // code: organisation.code,
+        code: 'AMRELEC',
       }).toString();
 
       axios
@@ -349,6 +354,144 @@ export default function DashboardAdminDealer() {
 
     fetchReceivableReport();
   }, []);
+
+  const [CashBankBalance, setCashBankBalance] = useState([]);
+  const [CashBankBalancetotal, setCashBankBalancetotal] = useState([]);
+  const [TotalReceivable, setTotalReceivable] = useState([]);
+  const [TotalReceivabletotal, setTotalReceivabletotal] = useState([]);
+  const [TotalPayable, setTotalPayable] = useState([]);
+  const [TotalPayabletotal, setTotalPayabletotal] = useState([]);
+  const [ItemStock, setItemStock] = useState([]);
+  const [ItemStocktotal, setItemStocktotal] = useState([]);
+
+
+  useEffect(() => {
+
+    const apiUrl = apiLinks + "/CashBankBalance.php";
+    setIsLoading(true);
+    const formData = new URLSearchParams({
+
+      code: organisation.code,
+
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+
+        setCashBankBalancetotal(response.data["Balance"]);
+
+        if (response.data && Array.isArray(response.data.Detail)) {
+          setCashBankBalance(response.data.Detail);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setCashBankBalance([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, [])
+
+  useEffect(() => {
+
+    const apiUrl = apiLinks + "/TotalReceivable.php";
+    setIsLoading(true);
+    const formData = new URLSearchParams({
+
+      code: organisation.code,
+
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+
+        setTotalReceivabletotal(response.data["Balance"]);
+
+        if (response.data && Array.isArray(response.data.Detail)) {
+          setTotalReceivable(response.data.Detail);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setTotalReceivable([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, [])
+  useEffect(() => {
+
+    const apiUrl = apiLinks + "/TotalPayable.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+
+        setTotalPayabletotal(response.data["Balance"]);
+
+        if (response.data && Array.isArray(response.data.Detail)) {
+          setTotalPayable(response.data.Detail);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setTotalPayable([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, [])
+  useEffect(() => {
+
+    const apiUrl = apiLinks + "/ItemStock.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+
+        setItemStocktotal(response.data["Total Stock"]);
+
+        if (response.data && Array.isArray(response.data.Detail)) {
+          setItemStock(response.data.Detail);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setItemStock([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, [])
+
+  const [showModal, setShowModal] = useState(false);
+
+  const firstColWidth = {
+    width: "16%",
+  };
+  const secondColWidth = {
+    width: "60%",
+  };
+  const thirdColWidth = {
+    width: "20%",
+  };
 
   return (
     <>
@@ -637,8 +780,299 @@ export default function DashboardAdminDealer() {
             </div>
           </div>
 
+          {/* ........ MODAL CODE .............  */}
+
+          {showModal && (
+            <div className="modal fade show" style={{ display: 'block' }} id="exampleModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div className="modal-dialog" role="document">
+                <div className="modal-content modal_container">
+                  <div className="modal-header  modalhearder_styling">
+                    <h5 className="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" className="close" aria-label="Close" onClick={() => setShowModal(false)}>
+                      <span className="closemodal_button" aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div className="modal-body">
+                    {/* Your modal content here */}
+                    <div
+                      style={{
+                        overflowY: "auto",
+                        width: "98%",
+                      }}
+                    >
+                      <table
+                        className="myTable"
+                        id="table"
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                          width: "100%",
+                          position: "relative",
+                          paddingRight: "2%",
+                        }}
+                      >
+                        <thead
+                          style={{
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            fontWeight: "bold",
+                            height: "24px",
+                            position: "sticky",
+                            top: 0,
+                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                            backgroundColor: tableHeadColor,
+                          }}
+                        >
+                          <tr
+                            style={{
+                              backgroundColor: tableHeadColor,
+                              color: "white",
+                            }}
+                          >
+                            <td
+                              className="border-dark"
+                              style={firstColWidth}
+                            // onClick={() => handleSorting("Code")}
+                            >
+                              Code{" "}
+                              {/* <i className="fa-solid fa-caret-down caretIconStyle"
+                                    style={{
+                                      transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                                      color: isAscendingcode ? "white" : "red",
+                                      transition: "transform 0.3s ease",
+                                    }}
+                                    ></i> */}
+                            </td>
+                            <td
+                              className="border-dark"
+                              style={secondColWidth}
+                            // onClick={() => handleSorting("Description")}
+                            >
+                              Description{" "}
+                              {/* <i className="fa-solid fa-caret-down caretIconStyle"
+                                    style={{
+                                      transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                                      color: isAscendingdec ? "white" : "red",
+                                      transition: "transform 0.3s ease",
+                                    }}
+                                    ></i> */}
+                            </td>
+                            <td
+                              className="border-dark"
+                              style={thirdColWidth}
+                            // onClick={() => handleSorting("Status")}
+                            >
+                              Status{" "}
+                              {/* <i className="fa-solid fa-caret-down caretIconStyle"
+                                    style={{
+                                      transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
+                                      color: isAscendingsts ? "white" : "red",
+                                      transition: "transform 0.3s ease",
+                                    }}
+                                    ></i> */}
+                            </td>
+                          </tr>
+                        </thead>
+                      </table>
+                    </div>
+                    <div
+                      className="table-scroll"
+                      style={{
+                        backgroundColor: textColor,
+                        borderBottom: `1px solid ${fontcolor}`,
+                        overflowY: "auto",
+                        maxHeight: "50vh",
+                        width: "100%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      <table
+                        className="myTable"
+                        id="tableBody"
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                          width: "100%",
+                          position: "relative",
+                        }}
+                      >
+                        <tbody id="tablebody">
+                          {isLoading ? (
+                            <>
+                              <tr
+                                style={{
+                                  backgroundColor: getcolor,
+                                }}
+                              >
+                                <td colSpan="3" className="text-center">
+                                  <Spinner animation="border" variant="primary" />
+                                </td>
+                              </tr>
+                              {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                                (_, rowIndex) => (
+                                  <tr
+                                    key={`blank-${rowIndex}`}
+                                    style={{
+                                      backgroundColor: getcolor,
+                                      color: fontcolor,
+                                    }}
+                                  >
+                                    {Array.from({ length: 3 }).map((_, colIndex) => (
+                                      <td key={`blank-${rowIndex}-${colIndex}`}>
+                                        &nbsp;
+                                      </td>
+                                    ))}
+                                  </tr>
+                                )
+                              )}
+                              <tr>
+                                <td style={firstColWidth}></td>
+                                <td style={secondColWidth}></td>
+                                <td style={thirdColWidth}></td>
+                              </tr>
+                            </>
+                          ) : (
+                            <>
+                              {CashBankBalance.map((item, i) => {
+                                // totalEnteries += 1;
+                                return (
+                                  <tr
+                                    // key={`${i}-${selectedIndex}`}
+                                    // ref={(el) => (rowRefs.current[i] = el)}
+                                    // onClick={() => handleRowClick(i)}
+                                    // className={
+                                    //   selectedIndex === i ? "selected-background" : ""
+                                    // }
+                                    style={{
+                                      backgroundColor: getcolor,
+                                      color: fontcolor,
+                                    }}
+                                  >
+                                    <td className="text-start" style={firstColWidth}>
+                                      {item.Code}
+                                    </td>
+                                    <td className="text-start" style={secondColWidth}>
+                                      {item.Customer}
+                                    </td>
+                                    <td className="text-end" style={thirdColWidth}>
+                                      {item.Balance}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                              {Array.from({
+                                length: Math.max(0, 27 - CashBankBalance.length),
+                              }).map((_, rowIndex) => (
+                                <tr
+                                  key={`blank-${rowIndex}`}
+                                  style={{
+                                    backgroundColor: getcolor,
+                                    color: fontcolor,
+                                  }}
+                                >
+                                  {Array.from({ length: 3 }).map((_, colIndex) => (
+                                    <td key={`blank-${rowIndex}-${colIndex}`}>
+                                      &nbsp;
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                              <tr>
+                                <td style={firstColWidth}></td>
+                                <td style={secondColWidth}></td>
+                                <td style={thirdColWidth}></td>
+                              </tr>
+                            </>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          )}
+          {showModal && <div className="modal-backdrop fade show"></div>}
+
+
+          {/* ........ MODAL CODE .............  */}
+
+
           <div className="row Row_styling" style={{ marginTop: "5px" }}>
+
+
             <div
+              className="Card_styling_new"
+              style={{
+                width: "22%",
+                height: "215px",
+                marginTop: "5px",
+                boxShadow: "5px 5px 10px grey",
+              }}
+            >
+              <div className="col-md-12 inner_section_first_column1">
+                <div className="row leable_row_styling">
+                  <div
+                    className="col-md-5 lable_left_section"
+                    style={{ background: "#3368B5", padding: "0px" }}
+                  >
+                    C&B
+                  </div>
+                  <div
+                    className="col-md-7 lable_right_section"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setShowModal(true)}                 >
+                    {CashBankBalancetotal}
+                  </div>
+                </div>
+                <div className="row leable_row_styling">
+                  <div
+                    className="col-md-5 lable_left_section"
+                    style={{ background: "#3368B5", padding: "0px" }}
+                  >
+                    Receivable
+                  </div>
+                  <div className="col-md-7 lable_right_section">
+                    {TotalReceivabletotal}
+                  </div>
+                </div>
+                <div className="row leable_row_styling">
+                  <div
+                    className="col-md-5 lable_left_section"
+                    style={{ background: "#3368B5", padding: "0px" }}
+                  >
+                    Payable
+                  </div>
+                  <div className="col-md-7 lable_right_section">
+                    {TotalPayabletotal}
+                  </div>
+                </div>
+                <div className="row leable_row_styling">
+                  <div
+                    className="col-md-5 lable_left_section"
+                    style={{ background: "#3368B5", padding: "0px" }}
+                  >
+                    Stock
+                  </div>
+                  <div className="col-md-7 lable_right_section">{ItemStocktotal}</div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="second_container_card2"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                background: "white",
+              }}
+            >
+              <BarChart />
+            </div>
+
+            {/* <div
               className="Card_styling_new"
               style={{
                 width: "32%",
@@ -647,9 +1081,7 @@ export default function DashboardAdminDealer() {
                 boxShadow: "5px 5px 10px grey",
               }}
             >
-              {/* <div className="col-md-6 inner_section_first_column"  >
-                  <Donut1 />
-                </div> */}
+
               <div className="col-md-12 inner_section_first_column1">
                 <div className="row leable_row_styling">
                   <div
@@ -696,72 +1128,731 @@ export default function DashboardAdminDealer() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
-            <div
-              className="Card_styling_new"
-              style={{
-                width: "32%",
-                height: "200px",
-                marginTop: "10px",
-                boxShadow: "5px 5px 10px grey",
-              }}
-            >
-              <div className="col-md-12 inner_section_first_column1">
-                <div className="row leable_row_styling">
-                  <div
-                    className="col-md-4 lable_left_section"
-                    style={{ background: "#3368B5", padding: "0px" }}
-                  >
-                    C&B
+            
+          </div>
+          {/* SECOND GRAPH/CHART ROW */}
+          <div className="row Row_styling" style={{ marginTop: "10px" }}>
+            <div style={{ width: "53%", padding: "0px" }}>
+              {/* <div className="Diamond_section" style={{rowGap:'5px'}}>
+                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', columnGap: '15px', flexDirection: 'row' }}>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0',
+                    fontSize: '12px',
+                    height: '40px',
+                    width: '40px',
+                    boxShadow: '5px 5px 10px grey',
+                    background: '#2196F3',
+                    color: 'white',
+                    transform: 'rotate(45deg)',
+                    // position: 'relative',
+                    top: '35px',
+                    borderRadius: '10px',
+
+                  }}>
+                    <div style={{
+                      transform: 'rotate(-45deg)',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-One']}<br />{DailyDashboard['Date-One']}</div>
+                    </div>
                   </div>
-                  <div className="col-md-8 lable_right_section">
-                    {DailyDashboard.CashBankBal}
+                  <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                    {DailyDashboard['Qnty-One']}
+                  </div>
+                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                    {DailyDashboard['Sale-One']}
+                  </div>
+
+                </div>
+
+                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'end', columnGap: '15px', flexDirection: 'row' }}>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0',
+                    fontSize: '12px',
+                    height: '40px',
+                    width: '40px',
+                    boxShadow: '5px 5px 10px grey',
+                    background: '#2196F3',
+                    color: 'white',
+                    transform: 'rotate(45deg)',
+                    // position: 'relative',
+                    top: '35px',
+                    borderRadius: '10px',
+
+                  }}>
+                    <div style={{
+                      transform: 'rotate(-45deg)',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Two']}<br />{DailyDashboard['Date-Two']}</div>
+                    </div>
+                  </div>
+                  <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                    {DailyDashboard['Qnty-Two']}
+                  </div>
+                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                    {DailyDashboard['Sale-Two']}
+                  </div>
+
+                </div>
+
+                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', columnGap: '15px', flexDirection: 'row' }}>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0',
+                    fontSize: '12px',
+                    height: '40px',
+                    width: '40px',
+                    boxShadow: '5px 5px 10px grey',
+                    background: '#2196F3',
+                    color: 'white',
+                    transform: 'rotate(45deg)',
+                    // position: 'relative',
+                    top: '35px',
+                    borderRadius: '10px',
+
+                  }}>
+                    <div style={{
+                      transform: 'rotate(-45deg)',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Three']}<br />{DailyDashboard['Date-Three']}</div>
+                    </div>
+                  </div>
+                  <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey' }}>
+                    {DailyDashboard['Qnty-Three']}
+                  </div>
+                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                    {DailyDashboard['Sale-Three']}
+                  </div>
+
+                </div>
+
+                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'end', columnGap: '15px', flexDirection: 'row' }}>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0',
+                    fontSize: '12px',
+                    height: '40px',
+                    width: '40px',
+                    boxShadow: '5px 5px 10px grey',
+                    background: '#2196F3',
+                    color: 'white',
+                    transform: 'rotate(45deg)',
+                    // position: 'relative',
+                    top: '35px',
+                    borderRadius: '10px',
+
+                  }}>
+                    <div style={{
+                      transform: 'rotate(-45deg)',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Four']}<br />{DailyDashboard['Date-Four']}</div>
+                    </div>
+                  </div>
+                  <div className="Diamond_sale" style={{ padding: "0px", width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                    {DailyDashboard['Qnty-Four']}
+                  </div>
+                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
+                    {DailyDashboard['Sale-Four']}
+                  </div>
+
+                </div>
+
+              </div> */}
+
+              <div
+                className="Card_styling_new"
+                style={{
+                  height: "95px",
+                  width: "100%",
+                  boxShadow: "5px 5px 10px grey",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
+                  <div style={{ color: "#3368B5" }}>
+                    Total Receivable{" "}
+                    <span
+                      style={{
+                        color: "black",
+                        marginLeft: "10px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {outstandingdata.Total}
+                    </span>{" "}
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <div
+                      style={{
+                        color: "#3368B5",
+                        marginLeft: "50px",
+                        fontWeight: isOn2 === false ? "bold" : "normal",
+                      }}
+                    >
+                      Amount
+                    </div>
+
+                    <div
+                      style={{ marginLeft: "10px" }}
+                      className={`switch ${isOn2 ? "on" : "off"}`}
+                      onClick={toggleSwitch2}
+                    >
+                      <div className="switch-toggle"></div>
+                    </div>
+                    <div
+                      style={{
+                        color: "#3368B5",
+                        marginLeft: "10px",
+                        paddingRight: "5px",
+                        fontWeight: isOn2 === true ? "bold" : "normal",
+                      }}
+                    >
+                      Numbers
+                    </div>
                   </div>
                 </div>
-                <div className="row leable_row_styling">
+                <div
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    flexWrap: "wrap",
+                    height: "75.5%",
+                  }}
+                >
                   <div
-                    className="col-md-4 lable_left_section"
-                    style={{ background: "#3368B5", padding: "0px" }}
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                   >
-                    Receivable
+                    {"< 30"}
                   </div>
-                  <div className="col-md-8 lable_right_section">
-                    {amountData["Total Balance"]}
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"31 - 60"}
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"61 - 90"}
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"91 - 120"}
+                  </div>
+
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"121 - 180"}
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"180+"}
+                  </div>
+
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos001`] || "" // Show Numbers if switch is ON
+                        : outstandingdata[`Amt001`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos002`] || "" // Show Numbers if switch is ON
+                        : outstandingdata[`Amt002`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos003`] || "" // Show Numbers if switch is ON
+                        : outstandingdata[`Amt003`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos004`] || "" // Show Numbers if switch is ON
+                        : outstandingdata[`Amt004`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {isOn2
+                      ? outstandingdata[`Nos005`] || ""
+                      : outstandingdata[`Amt005`] || ""}
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn2
+                        ? outstandingdata[`Nos006`] || "" // Show Numbers if switch is ON
+                        : outstandingdata[`Amt006`] || "" // Show Amounts if switch is OFF
+                    }                  </div>
+                </div>
+              </div>
+              <div
+                className="Card_styling_new"
+                style={{
+                  height: "95px",
+                  width: "100%",
+                  marginTop: "10px",
+                  boxShadow: "5px 5px 10px lightgrey",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
+                  <div style={{ color: "#3368B5" }}>Outstanding</div>
+                  <div style={{ display: "flex" }}>
+                    <div
+                      style={{
+                        color: "#3368B5",
+                        marginLeft: "50px",
+                        fontWeight: isOn === false ? "bold" : "normal",
+                      }}
+                    >
+                      Amount
+                    </div>
+
+                    <div
+                      style={{ marginLeft: "10px" }}
+                      className={`switch ${isOn ? "on" : "off"}`}
+                      onClick={toggleSwitch}
+                    >
+                      <div className="switch-toggle"></div>
+                    </div>
+                    <div
+                      style={{
+                        color: "#3368B5",
+                        marginLeft: "10px",
+                        paddingRight: "5px",
+                        fontWeight: isOn === true ? "bold" : "normal",
+                      }}
+                    >
+                      Numbers
+                    </div>
                   </div>
                 </div>
-                <div className="row leable_row_styling">
+                <div
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    flexWrap: "wrap",
+                    height: "75.5%",
+                  }}
+                >
                   <div
-                    className="col-md-4 lable_left_section"
-                    style={{ background: "#3368B5", padding: "0px" }}
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                   >
-                    Payable
+                    {"< 0"}
                   </div>
-                  <div className="col-md-8 lable_right_section">
-                    {DailyDashboard.Payable}
-                  </div>
-                </div>
-                <div className="row leable_row_styling">
                   <div
-                    className="col-md-4 lable_left_section"
-                    style={{ background: "#3368B5", padding: "0px" }}
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                   >
-                    Stock
+                    {"< 1M"}
                   </div>
-                  <div className="col-md-8 lable_right_section">{0}</div>
+
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"< 2M"}
+                  </div>
+
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"< 5M"}
+                  </div>
+
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"< 10M"}
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {"10M+"}
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn
+                        ? amountData[`Nos001`] || "" // Show Numbers if switch is ON
+                        : amountData[`Amt001`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn
+                        ? amountData[`Nos002`] || "" // Show Numbers if switch is ON
+                        : amountData[`Amt002`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn
+                        ? amountData[`Nos003`] || "" // Show Numbers if switch is ON
+                        : amountData[`Amt003`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn
+                        ? amountData[`Nos004`] || "" // Show Numbers if switch is ON
+                        : amountData[`Amt004`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn
+                        ? amountData[`Nos005`] || "" // Show Numbers if switch is ON
+                        : amountData[`Amt005`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
+                  <div
+                    style={{
+                      height: "50%",
+                      width: "16.65%",
+                      border: "1px solid lightgrey",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {
+                      isOn
+                        ? amountData[`Nos006`] || "" // Show Numbers if switch is ON
+                        : amountData[`Amt006`] || "" // Show Amounts if switch is OFF
+                    }
+                  </div>
                 </div>
               </div>
             </div>
 
+            <div className="second_container_card1">
+              <div
+                style={{
+                  width: "115px",
+                  height: "35px",
+                  border: "1px solid black",
+                  marginTop: "12px",
+                  borderRadius: "5px",
+                  marginLeft:'1px'
+                }}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    marginLeft: "5px",
+                    marginTop: "-12px",
+                    fontSize: "12px",
+                    background: "#F8F8F8",
+                    fontWeight: "600",
+                  }}
+                >
+                  O/S Cus
+                </div>
+                <div> {amountData["OutStanding Customer"]}</div>
+              </div>
+              <div
+                style={{
+                  width: "115px",
+                  height: "35px",
+                  border: "1px solid black",
+                  marginTop: "15px",
+                  borderRadius: "5px",
+                   marginLeft:'1px'
+                }}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    marginLeft: "5px",
+                    marginTop: "-12px",
+                    fontSize: "12px",
+                    background: "#F8F8F8",
+                    fontWeight: "600",
+                  }}
+                >
+                  Nill Cus
+                </div>
+                <div>
+                  {amountData["Nil Customer"]}</div>
+              </div>
+
+              <div
+                style={{
+                  width: "115px",
+                  height: "35px",
+                  border: "1px solid black",
+                  marginTop: "15px",
+                  borderRadius: "5px",
+                   marginLeft:'1px'
+                }}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    marginLeft: "5px",
+                    marginTop: "-12px",
+                    fontSize: "12px",
+                    background: "#F8F8F8",
+                    fontWeight: "600",
+                  }}
+                >
+                  Adv Cus
+                </div>
+                <div>{amountData["Advance Customer"]}</div>
+              </div>
+              <div
+                style={{
+                  width: "115px",
+                  height: "35px",
+                  border: "1px solid black",
+                  marginTop: "15px",
+                  borderRadius: "5px",
+                   marginLeft:'1px'
+                }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    marginLeft: "5px",
+                    marginTop: "-12px",
+                    fontSize: "12px",
+                    background: "#F8F8F8",
+                    fontWeight: "600",
+                  }}
+                >
+                  Non Active
+                </div>
+                <div>{amountData["Non Active"]}</div>
+              </div>
+            </div>
+
+
             <div
               style={{
                 backgroundColor: "#F8F8F8",
-                height: "210px",
-                marginTop: "10px",
+                height: "200px",
                 width: "34%",
                 display: "flex",
                 flexWrap: "wrap",
-                columnGap: "10px",
+                columnGap: "5px",
                 background: "white",
                 borderRadius: "10px",
                 boxShadow:
@@ -777,7 +1868,7 @@ export default function DashboardAdminDealer() {
                   width: "90px",
                   height: "40px",
                   border: "1px solid black",
-                  marginTop: "15px",
+                  marginTop: "12px",
                   borderRadius: "5px",
                 }}
               >
@@ -800,7 +1891,7 @@ export default function DashboardAdminDealer() {
                   width: "90px",
                   height: "40px",
                   border: "1px solid black",
-                  marginTop: "15px",
+                  marginTop: "12px",
                   borderRadius: "5px",
                 }}
               >
@@ -823,7 +1914,7 @@ export default function DashboardAdminDealer() {
                   width: "90px",
                   height: "40px",
                   border: "1px solid black",
-                  marginTop: "15px",
+                  marginTop: "12px",
                   borderRadius: "5px",
                 }}
               >
@@ -1026,629 +2117,7 @@ export default function DashboardAdminDealer() {
                 </div>
               </div>
             </div>
-          </div>
-          {/* SECOND GRAPH/CHART ROW */}
-          <div className="row Row_styling" style={{ marginTop: "10px" }}>
-            <div style={{ width: "50%", padding: "0px" }}>
-              {/* <div className="Diamond_section" style={{rowGap:'5px'}}>
-                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', columnGap: '15px', flexDirection: 'row' }}>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0',
-                    fontSize: '12px',
-                    height: '40px',
-                    width: '40px',
-                    boxShadow: '5px 5px 10px grey',
-                    background: '#2196F3',
-                    color: 'white',
-                    transform: 'rotate(45deg)',
-                    // position: 'relative',
-                    top: '35px',
-                    borderRadius: '10px',
-
-                  }}>
-                    <div style={{
-                      transform: 'rotate(-45deg)',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-One']}<br />{DailyDashboard['Date-One']}</div>
-                    </div>
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
-                    {DailyDashboard['Qnty-One']}
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
-                    {DailyDashboard['Sale-One']}
-                  </div>
-
-                </div>
-
-                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'end', columnGap: '15px', flexDirection: 'row' }}>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0',
-                    fontSize: '12px',
-                    height: '40px',
-                    width: '40px',
-                    boxShadow: '5px 5px 10px grey',
-                    background: '#2196F3',
-                    color: 'white',
-                    transform: 'rotate(45deg)',
-                    // position: 'relative',
-                    top: '35px',
-                    borderRadius: '10px',
-
-                  }}>
-                    <div style={{
-                      transform: 'rotate(-45deg)',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Two']}<br />{DailyDashboard['Date-Two']}</div>
-                    </div>
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
-                    {DailyDashboard['Qnty-Two']}
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
-                    {DailyDashboard['Sale-Two']}
-                  </div>
-
-                </div>
-
-                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', columnGap: '15px', flexDirection: 'row' }}>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0',
-                    fontSize: '12px',
-                    height: '40px',
-                    width: '40px',
-                    boxShadow: '5px 5px 10px grey',
-                    background: '#2196F3',
-                    color: 'white',
-                    transform: 'rotate(45deg)',
-                    // position: 'relative',
-                    top: '35px',
-                    borderRadius: '10px',
-
-                  }}>
-                    <div style={{
-                      transform: 'rotate(-45deg)',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Three']}<br />{DailyDashboard['Date-Three']}</div>
-                    </div>
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: '0px', width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey' }}>
-                    {DailyDashboard['Qnty-Three']}
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
-                    {DailyDashboard['Sale-Three']}
-                  </div>
-
-                </div>
-
-                <div className="row  first_diamond" style={{ display: 'flex', alignItems: 'center', justifyContent: 'end', columnGap: '15px', flexDirection: 'row' }}>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0',
-                    fontSize: '12px',
-                    height: '40px',
-                    width: '40px',
-                    boxShadow: '5px 5px 10px grey',
-                    background: '#2196F3',
-                    color: 'white',
-                    transform: 'rotate(45deg)',
-                    // position: 'relative',
-                    top: '35px',
-                    borderRadius: '10px',
-
-                  }}>
-                    <div style={{
-                      transform: 'rotate(-45deg)',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{ lineHeight: '14px' }}>{DailyDashboard['Day-Four']}<br />{DailyDashboard['Date-Four']}</div>
-                    </div>
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: "0px", width: '20%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
-                    {DailyDashboard['Qnty-Four']}
-                  </div>
-                  <div className="Diamond_sale" style={{ padding: '0px', width: '40%', height: '65%', borderRadius: '5px', boxShadow: '5px 5px 10px grey', }}>
-                    {DailyDashboard['Sale-Four']}
-                  </div>
-
-                </div>
-
-              </div> */}
-
-              <div
-                className="Card_styling_new"
-                style={{
-                  height: "90px",
-                  width: "100%",
-                  boxShadow: "5px 5px 10px grey",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: "100%",
-                  }}
-                >
-                  <div style={{ color: "#3368B5" }}>
-                    Total Receivable{" "}
-                    <span
-                      style={{
-                        color: "black",
-                        marginLeft: "10px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {outstandingdata.Total}
-                    </span>{" "}
-                  </div>
-
-                  <div style={{ display: "flex" }}>
-                    <div
-                      style={{
-                        color: "#3368B5",
-                        marginLeft: "50px",
-                        fontWeight: isOn === false ? "bold" : "normal",
-                      }}
-                    >
-                      Amount
-                    </div>
-
-                    <div
-                      style={{ marginLeft: "10px" }}
-                      className={`switch ${isOn ? "on" : "off"}`}
-                      onClick={toggleSwitch}
-                    >
-                      <div className="switch-toggle"></div>
-                    </div>
-                    <div
-                      style={{
-                        color: "#3368B5",
-                        marginLeft: "10px",
-                        paddingRight: "5px",
-                        fontWeight: isOn === true ? "bold" : "normal",
-                      }}
-                    >
-                      Numbers
-                    </div>
-                  </div>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    width: "100%",
-                    flexWrap: "wrap",
-                    height: "75.5%",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"< 30"}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"31 - 60"}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"61 - 90"}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"91 - 120"}
-                  </div>
-
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"121 - 180"}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"180+"}
-                  </div>
-
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn2
-                        ? outstandingdata[`Nos001`] || "" // Show Numbers if switch is ON
-                        : outstandingdata[`amt001`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn2
-                        ? outstandingdata[`Nos002`] || "" // Show Numbers if switch is ON
-                        : outstandingdata[`amt002`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn2
-                        ? outstandingdata[`Nos003`] || "" // Show Numbers if switch is ON
-                        : outstandingdata[`amt003`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn2
-                        ? outstandingdata[`Nos004`] || "" // Show Numbers if switch is ON
-                        : outstandingdata[`amt004`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {isOn2
-                      ? outstandingdata[`Nos005`] || ""
-                      : outstandingdata[`amt005`] || ""}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn2
-                        ? outstandingdata[`Nos006`] || "" // Show Numbers if switch is ON
-                        : outstandingdata[`amt006`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                </div>
-              </div>
-              <div
-                className="Card_styling_new"
-                style={{
-                  height: "90px",
-                  width: "100%",
-                  marginTop: "10px",
-                  boxShadow: "5px 5px 10px lightgrey",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: "100%",
-                  }}
-                >
-                  <div style={{ color: "#3368B5" }}>Outstanding</div>
-                  <div style={{ display: "flex" }}>
-                    <div
-                      style={{
-                        color: "#3368B5",
-                        marginLeft: "50px",
-                        fontWeight: isOn2 === false ? "bold" : "normal",
-                      }}
-                    >
-                      Amount
-                    </div>
-
-                    <div
-                      style={{ marginLeft: "10px" }}
-                      className={`switch ${isOn2 ? "on" : "off"}`}
-                      onClick={toggleSwitch2}
-                    >
-                      <div className="switch-toggle"></div>
-                    </div>
-                    <div
-                      style={{
-                        color: "#3368B5",
-                        marginLeft: "10px",
-                        paddingRight: "5px",
-                        fontWeight: isOn2 === true ? "bold" : "normal",
-                      }}
-                    >
-                      Numbers
-                    </div>
-                  </div>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    width: "100%",
-                    flexWrap: "wrap",
-                    height: "75.5%",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"< 0"}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"< 1M"}
-                  </div>
-
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"< 2M"}
-                  </div>
-
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"< 5M"}
-                  </div>
-
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"< 10M"}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {"10M+"}
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn
-                        ? amountData[`Nos001`] || "" // Show Numbers if switch is ON
-                        : amountData[`Amt001`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn
-                        ? amountData[`Nos002`] || "" // Show Numbers if switch is ON
-                        : amountData[`Amt002`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn
-                        ? amountData[`Nos003`] || "" // Show Numbers if switch is ON
-                        : amountData[`Amt003`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn
-                        ? amountData[`Nos004`] || "" // Show Numbers if switch is ON
-                        : amountData[`Amt004`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn
-                        ? amountData[`Nos005`] || "" // Show Numbers if switch is ON
-                        : amountData[`Amt005`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                  <div
-                    style={{
-                      height: "50%",
-                      width: "16.65%",
-                      border: "1px solid lightgrey",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {
-                      isOn
-                        ? amountData[`Nos006`] || "" // Show Numbers if switch is ON
-                        : amountData[`Amt006`] || "" // Show Amounts if switch is OFF
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="second_container_card2"
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                background: "white",
-              }}
-            >
-              <BarChart />
-            </div>
+          
           </div>
           {/* THIRD TABLE ROW */}
         </div>
