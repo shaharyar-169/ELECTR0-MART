@@ -629,6 +629,42 @@ export default function DashboardAdminDealer() {
               </div>
             </div>
 
+            <div className="Card_styling_new" style={{ width: "11%" }}>
+              {/* <div
+                style={{
+                  width: "105px",
+                  height: "90px",
+                  border: "1px solid black",
+                  marginTop: "15px",
+                  borderRadius: "5px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "70px",
+                    paddingLeft: "5px",
+                    marginLeft: "5px",
+                    marginTop: "-12px",
+                    fontSize: "12px",
+                    background: "#F8F8F8",
+                    fontWeight: "600",
+                  }}
+                >
+                  Technician
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "80%",
+                    width: "100%",
+                  }}
+                >
+                  163
+                </div>
+              </div> */}
+            </div>
             <div
               className="Card_styling_new"
               style={{
@@ -742,42 +778,8 @@ export default function DashboardAdminDealer() {
                 <div style={{ textAlign: "center" }}>22</div>
               </div>
             </div>
-            <div className="Card_styling_new" style={{ width: "11%" }}>
-              <div
-                style={{
-                  width: "105px",
-                  height: "90px",
-                  border: "1px solid black",
-                  marginTop: "15px",
-                  borderRadius: "5px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "70px",
-                    paddingLeft: "5px",
-                    marginLeft: "5px",
-                    marginTop: "-12px",
-                    fontSize: "12px",
-                    background: "#F8F8F8",
-                    fontWeight: "600",
-                  }}
-                >
-                  Technician
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "80%",
-                    width: "100%",
-                  }}
-                >
-                  163
-                </div>
-              </div>
-            </div>
+
+
           </div>
 
           {/* ........ MODAL CODE .............  */}
@@ -1009,7 +1011,7 @@ export default function DashboardAdminDealer() {
                 width: "22%",
                 height: "215px",
                 marginTop: "5px",
-                boxShadow: "5px 5px 10px grey",
+                boxShadow: "5px 5px 5px lightgrey",
               }}
             >
               <div className="col-md-12 inner_section_first_column1">
@@ -1130,7 +1132,7 @@ export default function DashboardAdminDealer() {
               </div>
             </div> */}
 
-            
+
           </div>
           {/* SECOND GRAPH/CHART ROW */}
           <div className="row Row_styling" style={{ marginTop: "10px" }}>
@@ -1283,7 +1285,7 @@ export default function DashboardAdminDealer() {
                 style={{
                   height: "95px",
                   width: "100%",
-                  boxShadow: "5px 5px 10px grey",
+                  boxShadow: "5px 5px 5px grey",
                 }}
               >
                 <div
@@ -1519,7 +1521,7 @@ export default function DashboardAdminDealer() {
                   height: "95px",
                   width: "100%",
                   marginTop: "10px",
-                  boxShadow: "5px 5px 10px lightgrey",
+                  boxShadow: "5px 5px 5px grey",
                 }}
               >
                 <div
@@ -1743,7 +1745,7 @@ export default function DashboardAdminDealer() {
               </div>
             </div>
 
-            <div className="second_container_card1">
+            <div className="second_container_card1" style={{    boxShadow: "5px 5px 5px grey",}}>
               <div
                 style={{
                   width: "115px",
@@ -1751,7 +1753,8 @@ export default function DashboardAdminDealer() {
                   border: "1px solid black",
                   marginTop: "12px",
                   borderRadius: "5px",
-                  marginLeft:'1px'
+                  marginLeft: '1px',
+
                 }}
               >
                 <div
@@ -1775,7 +1778,7 @@ export default function DashboardAdminDealer() {
                   border: "1px solid black",
                   marginTop: "15px",
                   borderRadius: "5px",
-                   marginLeft:'1px'
+                  marginLeft: '1px'
                 }}
               >
                 <div
@@ -1801,7 +1804,7 @@ export default function DashboardAdminDealer() {
                   border: "1px solid black",
                   marginTop: "15px",
                   borderRadius: "5px",
-                   marginLeft:'1px'
+                  marginLeft: '1px'
                 }}
               >
                 <div
@@ -1825,7 +1828,7 @@ export default function DashboardAdminDealer() {
                   border: "1px solid black",
                   marginTop: "15px",
                   borderRadius: "5px",
-                   marginLeft:'1px'
+                  marginLeft: '1px'
                 }}
               >
                 <div
@@ -1855,8 +1858,7 @@ export default function DashboardAdminDealer() {
                 columnGap: "5px",
                 background: "white",
                 borderRadius: "10px",
-                boxShadow:
-                  "rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px",
+                boxShadow: "5px 5px 10px grey",
               }}
             >
               {/* <div style={{width:'90px', height:'40px', border:'1px solid black', marginTop:'10px', borderRadius:'5px'}}>
@@ -1865,7 +1867,7 @@ export default function DashboardAdminDealer() {
             </div> */}
               <div
                 style={{
-                  width: "90px",
+                  width: "86px",
                   height: "40px",
                   border: "1px solid black",
                   marginTop: "12px",
@@ -1874,7 +1876,7 @@ export default function DashboardAdminDealer() {
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "70px",
                     marginLeft: "5px",
                     marginTop: "-12px",
                     fontSize: "12px",
@@ -1888,7 +1890,7 @@ export default function DashboardAdminDealer() {
               </div>
               <div
                 style={{
-                  width: "90px",
+                  width: "86px",
                   height: "40px",
                   border: "1px solid black",
                   marginTop: "12px",
@@ -1897,7 +1899,7 @@ export default function DashboardAdminDealer() {
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "70px",
                     marginLeft: "5px",
                     marginTop: "-12px",
                     fontSize: "12px",
@@ -1911,7 +1913,7 @@ export default function DashboardAdminDealer() {
               </div>
               <div
                 style={{
-                  width: "90px",
+                  width: "86px",
                   height: "40px",
                   border: "1px solid black",
                   marginTop: "12px",
@@ -1920,7 +1922,7 @@ export default function DashboardAdminDealer() {
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "70px",
                     marginLeft: "5px",
                     marginTop: "-12px",
                     fontSize: "12px",
@@ -1933,6 +1935,29 @@ export default function DashboardAdminDealer() {
                 <div>1</div>
               </div>
 
+              <div
+                style={{
+                  width: "86px",
+                  height: "40px",
+                  border: "1px solid black",
+                  marginTop: "12px",
+                  borderRadius: "5px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "70px",
+                    marginLeft: "5px",
+                    marginTop: "-12px",
+                    fontSize: "12px",
+                    background: "#F8F8F8",
+                    fontWeight: "600",
+                  }}
+                >
+                  Technician
+                </div>
+                <div>163</div>
+              </div>
               <div
                 style={{
                   width: "100%",
@@ -2061,6 +2086,8 @@ export default function DashboardAdminDealer() {
                       height: "40px",
                       lineHeight: "18px",
                       width: "60px",
+                      border: '1px solid black',
+                      borderRadius: '5px'
                     }}
                   >
                     <span style={{ color: "black" }}>
@@ -2072,6 +2099,8 @@ export default function DashboardAdminDealer() {
                       height: "40px",
                       lineHeight: "18px",
                       width: "60px",
+                      border: '1px solid black',
+                      borderRadius: '5px'
                     }}
                   >
                     <span style={{ color: "black" }}>
@@ -2084,6 +2113,8 @@ export default function DashboardAdminDealer() {
                       height: "40px",
                       lineHeight: "18px",
                       width: "60px",
+                      border: '1px solid black',
+                      borderRadius: '5px'
                     }}
                   >
                     <span style={{ color: "black" }}>
@@ -2096,6 +2127,8 @@ export default function DashboardAdminDealer() {
                       height: "40px",
                       lineHeight: "18px",
                       width: "60px",
+                      border: '1px solid black',
+                      borderRadius: '5px'
                     }}
                   >
                     <span style={{ color: "black" }}>
@@ -2108,6 +2141,8 @@ export default function DashboardAdminDealer() {
                       height: "40px",
                       lineHeight: "18px",
                       width: "60px",
+                      border: '1px solid black',
+                      borderRadius: '5px'
                     }}
                   >
                     <span style={{ color: "black" }}>
@@ -2117,7 +2152,7 @@ export default function DashboardAdminDealer() {
                 </div>
               </div>
             </div>
-          
+
           </div>
           {/* THIRD TABLE ROW */}
         </div>
