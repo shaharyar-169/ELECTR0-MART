@@ -466,11 +466,12 @@ export default function FbrDataReport() {
     const apiUrl = apiLinks + "/FBRInvoiceDetail.php";
     // setIsLoading(true);
     const formData = new URLSearchParams({
-      // FInvNum:'139235-110325142719-006803',
-      code: organisation.code,
-      FInvNum: selectedInvoice,
-      // code: "UMAIRPOS",
       FLocCod: locationnumber || getLocationNumber,
+      code: organisation.code,
+      FYerDsc: '2021-2025',
+      FTrnNum: '000001',
+      FTrnTyp: 'INV'
+
     }).toString();
 
     axios
@@ -622,7 +623,7 @@ export default function FbrDataReport() {
     // Add summary row to the table
 
     rows.push([
-     
+
       "",
       "",
       "",
@@ -639,7 +640,7 @@ export default function FbrDataReport() {
 
     // Define table column headers and individual column widths
     const headers = [
-         "FBRNo",
+      "FBRNo",
       "Location",
       "Trn#",
       "Type",
@@ -652,7 +653,7 @@ export default function FbrDataReport() {
       "TotalSale",
       "Discount",
     ];
-    const columnWidths = [ 40, 18, 15, 25, 20, 30, 25, 20, 20, 20, 20, 20];
+    const columnWidths = [40, 18, 15, 25, 20, 30, 25, 20, 20, 20, 20, 20];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -717,7 +718,7 @@ export default function FbrDataReport() {
           fontName = boldFont; // Set bold font for red-colored row
         }
 
-       
+
 
         // Draw row borders
         doc.setDrawColor(0); // Set color for borders
@@ -735,8 +736,8 @@ export default function FbrDataReport() {
           // Set text color
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
           // Set font
-        //   doc.setFont(fontName, "normal");
-        doc.setFont(getfontstyle, "300");
+          //   doc.setFont(fontName, "normal");
+          doc.setFont(getfontstyle, "300");
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
@@ -751,9 +752,9 @@ export default function FbrDataReport() {
             cellIndex === 8 ||
             cellIndex === 9 ||
             cellIndex === 10 ||
-            cellIndex === 11 
-        
-        ) {
+            cellIndex === 11
+
+          ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -960,7 +961,7 @@ export default function FbrDataReport() {
     const numColumns = 13; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-    
+
       "left",
       "left",
       "left",
@@ -1009,8 +1010,7 @@ export default function FbrDataReport() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
       }`
     );
 
@@ -1024,8 +1024,7 @@ export default function FbrDataReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -1083,7 +1082,7 @@ export default function FbrDataReport() {
 
     // Add headers
     const headers = [
-    
+
       "FBRNo",
       "Location",
       "Trn#",
@@ -1103,7 +1102,7 @@ export default function FbrDataReport() {
     // Add data rows
     Profits.forEach((item) => {
       const row = worksheet.addRow([
-   
+
         item.FBRNo,
         item.Location,
         item["Trn#"],
@@ -1134,14 +1133,14 @@ export default function FbrDataReport() {
     });
 
     // Set column widths
-    [ 23, 10, 8, 10, 10, 15, 12, 15, 15, 15, 15, 15].forEach(
+    [23, 10, 8, 10, 10, 15, 12, 15, 15, 15, 15, 15].forEach(
       (width, index) => {
         worksheet.getColumn(index + 1).width = width;
       }
     );
 
     const totalRow = worksheet.addRow([
-    
+
       "",
       "",
       "",
@@ -1380,33 +1379,39 @@ export default function FbrDataReport() {
 
   //////////////////// COLUMN WIDTH FOR BOTTOM TABLE  /////////////////////////////////
   const bottomfirstColWidth = {
-    width: "6%",
+    width: "8%",
   };
   const bottomsecondColWidth = {
     width: "11%",
   };
   const bottomthirdColWidth = {
-    width: "26%",
+    width: "12%",
   };
   const bottomforthColWidth = {
-    width: "10%",
+    width: "6%",
   };
-
   const bottomfifthColWidth = {
-    width: "8%",
+    width: "6%",
   };
   const bottomsixthColWidth = {
-    width: "9%",
+    width: "11%",
   };
   const bottomseventhColWidth = {
-    width: "9%",
+    width: "11%",
   };
   const bottomeightColWidth = {
-    width: "9%",
+    width: "11%",
   };
   const bottomninthColWidth = {
-    width: "10%",
+    width: "11%",
   };
+  const bottomtenthColWidth = {
+    width: "6%",
+  };
+  const bottomelewenthColWidth = {
+    width: "5.3%",
+  };
+  
 
   /////////////////////////////////////////////////////////////////////////////////////
 
@@ -1881,6 +1886,7 @@ export default function FbrDataReport() {
                 >
                   <option value="">All</option>
                   <option value="O">Outstanding </option>
+                  <option value="INV">Sale </option>
                 </select>
               </div>
             </div>
@@ -2612,25 +2618,25 @@ export default function FbrDataReport() {
                         }}
                       >
                         <td className="border-dark" style={bottomfirstColWidth}>
-                          Sr
+                          code
                         </td>
                         <td
                           className="border-dark"
                           style={bottomsecondColWidth}
                         >
-                          PCT Code
+                          Name
                         </td>
                         <td className="border-dark" style={bottomthirdColWidth}>
-                          Item Description
+                          PCT
                         </td>
                         <td className="border-dark" style={bottomforthColWidth}>
-                          SLRate
+                          Type
                         </td>
                         <td className="border-dark" style={bottomfifthColWidth}>
                           Qnty
                         </td>
                         <td className="border-dark" style={bottomsixthColWidth}>
-                          SLAmt
+                          Sale
                         </td>
                         <td
                           className="border-dark"
@@ -2639,10 +2645,16 @@ export default function FbrDataReport() {
                           Tax
                         </td>
                         <td className="border-dark" style={bottomeightColWidth}>
-                          TSale
+                          Charge
                         </td>
                         <td className="border-dark" style={bottomninthColWidth}>
-                          Discount
+                          Amt
+                        </td>
+                        <td className="border-dark" style={bottomtenthColWidth}>
+                          Dsct
+                        </td>
+                        <td className="border-dark" style={bottomelewenthColWidth}>
+                          Sr
                         </td>
                       </tr>
                     </thead>
@@ -2678,7 +2690,7 @@ export default function FbrDataReport() {
                               backgroundColor: getcolor,
                             }}
                           >
-                            <td colSpan="9" className="text-center">
+                            <td colSpan="11" className="text-center">
                               <Spinner animation="border" variant="primary" />
                             </td>
                           </tr>
@@ -2691,7 +2703,7 @@ export default function FbrDataReport() {
                                   color: fontcolor,
                                 }}
                               >
-                                {Array.from({ length: 9 }).map(
+                                {Array.from({ length: 11 }).map(
                                   (_, colIndex) => (
                                     <td key={`blank-${rowIndex}-${colIndex}`}>
                                       &nbsp;
@@ -2711,6 +2723,8 @@ export default function FbrDataReport() {
                             <td style={bottomseventhColWidth}></td>
                             <td style={bottomeightColWidth}></td>
                             <td style={bottomninthColWidth}></td>
+                            <td style={bottomtenthColWidth}></td>
+                            <td style={bottomelewenthColWidth}></td>
                           </tr>
                         </>
                       ) : (
@@ -2733,7 +2747,7 @@ export default function FbrDataReport() {
                               >
                                 <td
                                   className="text-start"
-                                  title={item.Sr}
+                                  title={item.ItemCode}
                                   style={{
                                     ...bottomfirstColWidth,
                                     whiteSpace: "nowrap",
@@ -2741,11 +2755,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item.Sr}
+                                  {item.ItemCode}
                                 </td>
                                 <td
                                   className="text-start"
-                                  title={item["PCT Code"]}
+                                  title={item.ItemName}
                                   style={{
                                     ...bottomsecondColWidth,
                                     whiteSpace: "nowrap",
@@ -2753,11 +2767,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item["PCT Code"]}
+                                  {item.ItemName}
                                 </td>
                                 <td
                                   className="text-start"
-                                  title={item.Item}
+                                  title={item.PCTCode}
                                   style={{
                                     ...bottomthirdColWidth,
                                     whiteSpace: "nowrap",
@@ -2765,11 +2779,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item.Item}
+                                  {item.PCTCode}
                                 </td>
                                 <td
                                   className="text-end"
-                                  title={item.SaleRate}
+                                  title={item.InvoiceType}
                                   style={{
                                     ...bottomforthColWidth,
                                     whiteSpace: "nowrap",
@@ -2777,11 +2791,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item.SaleRate}
+                                  {item.InvoiceType}
                                 </td>
                                 <td
                                   className="text-end"
-                                  title={item.Qnty}
+                                  title={item.Quantity}
                                   style={{
                                     ...bottomfifthColWidth,
                                     whiteSpace: "nowrap",
@@ -2789,11 +2803,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item.Qnty}
+                                  {item.Quantity}
                                 </td>
                                 <td
                                   className="text-end"
-                                  title={item.SaleAmt}
+                                  title={item.SaleValue}
                                   style={{
                                     ...bottomsixthColWidth,
                                     whiteSpace: "nowrap",
@@ -2801,11 +2815,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item.SaleAmt}
+                                  {item.SaleValue}
                                 </td>
                                 <td
                                   className="text-end"
-                                  title={item.TaxAmt}
+                                  title={item.TaxRate}
                                   style={{
                                     ...bottomseventhColWidth,
                                     whiteSpace: "nowrap",
@@ -2813,11 +2827,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item.TaxAmt}
+                                  {item.TaxRate}
                                 </td>
                                 <td
                                   className="text-end"
-                                  title={item.TotalSale}
+                                  title={item.TaxCharged}
                                   style={{
                                     ...bottomeightColWidth,
                                     whiteSpace: "nowrap",
@@ -2825,11 +2839,11 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {item.TotalSale}
+                                  {item.TaxCharged}
                                 </td>
                                 <td
                                   className="text-end"
-                                  title={item.Discount}
+                                  title={item.TotalAmount}
                                   style={{
                                     ...bottomninthColWidth,
                                     whiteSpace: "nowrap",
@@ -2837,7 +2851,32 @@ export default function FbrDataReport() {
                                     textOverflow: "ellipsis",
                                   }}
                                 >
+                                  {item.TotalAmount}
+                                </td>
+                                <td
+                                  className="text-end"
+                                  title={item.Discount}
+                                  style={{
+                                    ...bottomtenthColWidth,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
                                   {item.Discount}
+                                </td>
+
+                                <td
+                                  className="text-end"
+                                  title={item.Sr}
+                                  style={{
+                                    ...bottomelewenthColWidth,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {item.Sr}
                                 </td>
                               </tr>
                             );
@@ -2852,7 +2891,7 @@ export default function FbrDataReport() {
                                 color: fontcolor,
                               }}
                             >
-                              {Array.from({ length: 9 }).map((_, colIndex) => (
+                              {Array.from({ length: 11 }).map((_, colIndex) => (
                                 <td key={`blank-${rowIndex}-${colIndex}`}>
                                   &nbsp;
                                 </td>
@@ -2869,6 +2908,8 @@ export default function FbrDataReport() {
                             <td style={bottomseventhColWidth}></td>
                             <td style={bottomeightColWidth}></td>
                             <td style={bottomninthColWidth}></td>
+                            <td style={bottomtenthColWidth}></td>
+                            <td style={bottomelewenthColWidth}></td>
                           </tr>
                         </>
                       )}
@@ -2932,7 +2973,8 @@ export default function FbrDataReport() {
                     }}
                   >
                     <span className="mobileledger_total">
-                      {fbrTotalSaleAmt}
+                    {fbrTotalTotalSale}
+                     
                     </span>
                   </div>
 
@@ -2952,9 +2994,7 @@ export default function FbrDataReport() {
                       borderRight: `1px solid ${fontcolor}`,
                     }}
                   >
-                    <span className="mobileledger_total">
-                      {fbrTotalTotalSale}
-                    </span>
+                  
                   </div>
                   <div
                     style={{
@@ -2963,10 +3003,33 @@ export default function FbrDataReport() {
                       borderRight: `1px solid ${fontcolor}`,
                     }}
                   >
+                      <span className="mobileledger_total">
+                    {fbrTotalSaleAmt}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      ...bottomtenthColWidth,
+                      background: getcolor,
+                      borderRight: `1px solid ${fontcolor}`,
+                    }}
+                  >
+                   
+                  </div>
+
+                  <div
+                    style={{
+                      ...bottomelewenthColWidth,
+                      background: getcolor,
+                      borderRight: `1px solid ${fontcolor}`,
+                    }}
+                  >
                     <span className="mobileledger_total">
                       {fbrTotalDiscount}
                     </span>
                   </div>
+
                 </div>
               </div>
             </div>

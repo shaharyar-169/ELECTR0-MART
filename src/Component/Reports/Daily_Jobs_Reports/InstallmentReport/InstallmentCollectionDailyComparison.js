@@ -388,7 +388,6 @@ export default function InstallmentCollectionDailyComparison() {
                 toast.error("To date must be after from date");
                 return;
 
-
             default:
                 break;
         }

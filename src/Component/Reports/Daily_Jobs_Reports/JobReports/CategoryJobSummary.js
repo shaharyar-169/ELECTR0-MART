@@ -520,12 +520,6 @@ export default function CategoryJobSummary() {
 }, [isOptionsLoaded]);
 
 
-
-
-
-    // console.log('saleType', saleType)
-    // console.log('companyselectdatavalue', companyselectdatavalue)
-
     const DropdownOption = (props) => {
         return (
             <components.Option {...props}>

@@ -367,10 +367,7 @@ export default function JournalReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
       FSchTxt: searchQuery,
-
-     
-
-
+ 
     }).toString();
 
     axios

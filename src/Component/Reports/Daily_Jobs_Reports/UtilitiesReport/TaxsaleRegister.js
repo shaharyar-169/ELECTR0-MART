@@ -16,20 +16,18 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-// import { fetchGetUser } from "../../Redux/action";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function TechnicianPerformanceReport() {
+export default function TaxSaleRegisterReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
 
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
-    const input1Reftype = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
 
@@ -39,24 +37,14 @@ export default function TechnicianPerformanceReport() {
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
-    const [transectionType2, settransectionType2] = useState("");
-
     const [supplierList, setSupplierList] = useState([]);
-    console.log('getactivecollectordata', supplierList)
 
-    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-
-
-    const [TotalRepairing, setTotalRepairing] = useState(0);
-    const [TotalService, setTotalService] = useState(0);
-    const [TotalInstalaltions, setTotalInstalaltions] = useState(0);
-    const [TotalWorkshop, setTotalWorkshop] = useState(0);
-    const [TotalJobs, setTotalJobs] = useState(0);
-    const [TotalCharges, setTotalCharges] = useState(0);
-    const [TotalParts, setTotalParts] = useState(0);
-    const [TotalProfit, setTotalProfit] = useState(0);
-    const [TotalAmt, setTotalAmt] = useState(0);
-
+    const [totalQnty, setTotalQnty] = useState(0);
+    const [ExclAmount, setExclAmount] = useState(0);
+    const [TexAmount, setTexAmount] = useState(0);
+    const [InchAmount, setInchAmount] = useState(0);
+    const [Discount, setDiscount] = useState(0);
+    const [Saleamount, setSaleamount] = useState(0);
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -70,7 +58,6 @@ export default function TechnicianPerformanceReport() {
     const yeardescription = getYearDescription();
     const locationnumber = getLocationnumber();
 
-
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -82,14 +69,13 @@ export default function TechnicianPerformanceReport() {
         getyeardescription,
         getfromdate,
         gettodate,
+        getfontstyle,
         getdatafontsize,
-        getfontstyle
     } = useTheme();
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
-
 
     const comapnyname = organisation.description;
 
@@ -197,7 +183,7 @@ export default function TechnicianPerformanceReport() {
         }
     };
 
-    const handleToKeyPress = (e) => {
+    const handleToKeyPress = (e, inputref) => {
         if (e.key === "Enter") {
             e.preventDefault();
             const toDateElement = document.getElementById("todatevalidation");
@@ -251,9 +237,9 @@ export default function TechnicianPerformanceReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input3Ref.current) {
+                if (inputref.current) {
                     e.preventDefault();
-                    input3Ref.current.focus();
+                    inputref.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -270,32 +256,6 @@ export default function TechnicianPerformanceReport() {
         settoInputDate(e.target.value);
     };
 
-
-    const handleSaleKeypress = (event, inputId) => {
-        if (event.key === "Enter") {
-            const selectedOption = saleSelectRef.current.state.selectValue;
-            if (selectedOption && selectedOption.value) {
-                setSaleType(selectedOption.value);
-            }
-            const nextInput = document.getElementById(inputId);
-            if (nextInput) {
-                nextInput.focus();
-                nextInput.select();
-            } else {
-                document.getElementById("submitButton").click();
-            }
-        }
-    };
-
-    const handleKeyPress = (e, nextInputRef) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            if (nextInputRef.current) {
-                nextInputRef.current.focus();
-            }
-        }
-    };
-
     function fetchReceivableReport() {
         const fromDateElement = document.getElementById("fromdatevalidation");
         const toDateElement = document.getElementById("todatevalidation");
@@ -306,7 +266,6 @@ export default function TechnicianPerformanceReport() {
         let errorType = "";
 
         switch (true) {
-
             case !fromInputDate:
                 errorType = "fromDate";
                 break;
@@ -353,7 +312,6 @@ export default function TechnicianPerformanceReport() {
         }
 
         switch (errorType) {
-
             case "fromDate":
                 toast.error("From date is required");
                 return;
@@ -390,13 +348,10 @@ export default function TechnicianPerformanceReport() {
                 toast.error("To date must be after from date");
                 return;
 
-
             default:
                 break;
         }
 
-
-        console.log(data);
         document.getElementById(
             "fromdatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
@@ -404,21 +359,18 @@ export default function TechnicianPerformanceReport() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/TechnicianPerformance.php";
+        const apiUrl = apiLinks + "/TaxSaleRegister.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            FTchCod: saleType,
-            FJobSts: transectionType,
-            FJobTyp: transectionType2,
-            FSchTxt: searchQuery,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
+            code: 'NASIRTPOS',
+            FLocCod: '001',
+            //   code: organisation.code,
+            //   FLocCod: locationnumber || getLocationNumber,
+            //   FYerDsc: yeardescription || getYearDescription,
+            //   FSchTxt: searchQuery,
 
-           
         }).toString();
 
         axios
@@ -426,15 +378,14 @@ export default function TechnicianPerformanceReport() {
             .then((response) => {
                 setIsLoading(false);
 
-                setTotalRepairing(response.data["TotalRepairing "]);
-                setTotalService(response.data["TotalService "]);
-                setTotalInstalaltions(response.data["TotalInstalaltions "]);
-                setTotalWorkshop(response.data["TotalWorkshop "]);
-                setTotalJobs(response.data["TotalJobs "]);
-                setTotalCharges(response.data["TotalCharges "]);
-                setTotalParts(response.data["TotalParts "]);
-                setTotalProfit(response.data["TotalProfit "]);
-                setTotalAmt(response.data["TotalAmt "]);
+                setTotalQnty(response.data["Total Qnty"]);
+                setExclAmount(response.data["Total Excl Amount"]);
+                setTexAmount(response.data["Total Tax Amount"]);
+                setInchAmount(response.data["Total Incl Amount"]);
+                setDiscount(response.data["Total Discount"]);
+                setSaleamount(response.data["Total Sale Amount"]);
+
+                // setClosingBalance(response.data["Total Balance"]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -480,158 +431,51 @@ export default function TechnicianPerformanceReport() {
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
 
-    useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveTechnician.php";
-        const formData = new URLSearchParams({
-            FLocCod: locationnumber || getLocationNumber,
-            code: organisation.code,
-        }).toString();
-        axios
-            .post(apiUrl, formData)
-            .then((response) => {
-                setSupplierList(response.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-            });
-    }, []);
-
-    const options = supplierList.map((item) => ({
-        value: item.ttchcod,
-        label: `${item.ttchcod}-${item.ttchdsc.trim()}`,
-    }));
-
-    const DropdownOption = (props) => {
-        return (
-            <components.Option {...props}>
-                <div
-                    style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        paddingBottom: "5px",
-                        lineHeight: "3px",
-                        color: "black",
-                        textAlign: "start",
-                    }}
-                >
-                    {props.data.label}
-                </div>
-            </components.Option>
-        );
-    };
-
-    const customStyles1 = (hasError) => ({
-        control: (base, state) => ({
-            ...base,
-            height: "24px",
-            minHeight: "unset",
-            width: 250,
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            backgroundColor: getcolor,
-            color: fontcolor,
-            caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
-            borderRadius: 0,
-            border: `1px solid ${fontcolor}`, // Fixed Template Literal
-            transition: "border-color 0.15s ease-in-out",
-            "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
-            },
-            padding: "0 8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-        }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            marginTop: "-5px",
-            fontSize: "18px",
-            display: "flex",
-            textAlign: "center",
-        }),
-        singleValue: (base) => ({
-            ...base,
-            marginTop: "-5px",
-            textAlign: "left",
-            color: fontcolor,
-        }),
-        input: (base) => ({
-            ...base,
-            color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
-            caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
-        }),
-        clearIndicator: (base) => ({
-            ...base,
-            marginTop: "-5px",
-        }),
-    });
-
-    const handleTransactionTypeChange = (event) => {
-        const selectedTransactionType = event.target.value;
-        settransectionType(selectedTransactionType);
-    };
-    const handleTransactionTypeChange2 = (event) => {
-        const selectedTransactionType2 = event.target.value;
-        settransectionType2(selectedTransactionType2);
-    };
-
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
-
         const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
+        console.log("gobal font data", globalfontsize);
 
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item.Code,
-            item.Technician,
-            item.Repairing,
-            item.Service,
-            item.Workshop,
-            item.Instalaltions,
-            item.TotalJobs,
-            item.Charges,
-            item.Parts,
-            item.Profit,
-            item.TotalAmt,
+            item["Inv#"],
+            item.Date,
+            item.NIC,
+            item.NTN,
+            item.Customer,
+            item.Mobile,
+            item.Description,
+            item.Qnty,
+            item['Excl Amt'],
+            item.Tax,
+            item['Incl Tax'],
+            item.Discount,
+            item['Sale Amt'],
         ]);
 
         // Add summary row to the table
-
         rows.push([
+            "", 
             "",
+            "", 
             "",
-            String(TotalRepairing),
-            String(TotalService),
-            String(TotalWorkshop),
-            String(TotalInstalaltions),
-            String(TotalJobs),
-            String(TotalCharges),
-            String(TotalParts),
-            String(TotalProfit),
-            String(TotalAmt),
-
+            "", 
+            "",
+            "Total",
+            String(totalQnty),
+            String(ExclAmount),
+            String(TexAmount),
+            String(InchAmount),
+            String(Discount),
+            String(Saleamount)
         ]);
 
         // Define table column headers and individual column widths
-        const headers = [
-            "Code",
-            "Technician",
-            "Repairing",
-            "Service",
-            "Workshop",
-            "Instalaltions",
-            "TotalJobs",
-            "Charges",
-            "Parts",
-            "Profit",
-            "TotalAmt",
-        ];
-        const columnWidths = [19, 50, 22,22,22,25,22,22,22,22,22 ];
+        const headers = ["Inv#", "Date", "NIC", "NTN", "Customer", "Mobile","Description","Qnty", "Excl Amt", "Tax","Incl Tax", "Discount","Sale Amt"];
+        const columnWidths = [13,19,28,22,30,22,65,10,17,17,17,17,17 ];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -729,7 +573,7 @@ export default function TechnicianPerformanceReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10) {
+                    if (cellIndex === 7 || cellIndex === 8 || cellIndex=== 9 || cellIndex=== 10 || cellIndex=== 11 || cellIndex=== 12) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -738,8 +582,6 @@ export default function TechnicianPerformanceReport() {
                     } else {
                         doc.text(cellValue, cellX, cellY, { baseline: "middle" });
                     }
-
-
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
@@ -797,8 +639,6 @@ export default function TechnicianPerformanceReport() {
 
         // Function to handle pagination
         const handlePagination = () => {
-
-
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -830,7 +670,7 @@ export default function TechnicianPerformanceReport() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 1,
+                    rightX ,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -841,24 +681,46 @@ export default function TechnicianPerformanceReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Technician Performance Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(
+                    `Tax Sale Register Report From: ${fromInputDate} To: ${toInputDate}`,
+                    "",
+                    "",
+                    pageNumber,
+                    startY,
+                    12
+                ); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-           
+                // Set font size and weight for the labels
+                doc.setFontSize(12);
+                doc.setFont(getfontstyle, "300");
+
+                let search = searchQuery ? searchQuery : "";
+
+                // Set font style, size, and family
+                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                doc.setFontSize(10); // Font size
+
+                if (searchQuery) {
+                    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                    doc.text(`SEARCH :`, labelsX + 100, labelsY + 8.5); // Draw bold label
+                    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                    doc.text(`${search}`, labelsX + 120, labelsY + 8.5); // Draw the value next to the label
+                }
+
                 // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 5; // Adjust vertical position for the labels
+                startY += 6; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 24);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 25);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -899,39 +761,24 @@ export default function TechnicianPerformanceReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`TechnicianPerformanceReport Form ${fromInputDate} To ${toInputDate}.pdf`);
-
-
+        doc.save(`TaxSaleRegisterReport From ${fromInputDate} To ${toInputDate}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 10; // Ensure this matches the actual number of columns
+        const numColumns = 3; // Ensure this matches the actual number of columns
 
-        const columnAlignments = [
-            "left",
-            "left",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-        ];
+        const columnAlignments = ["left", "left", "left", "left", "left", "left",'left', "right", "right", "right", "right", "right", "right"];
 
         // Define fonts for different sections
         const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+        const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
+        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
 
         // Add an empty row at the start
         worksheet.addRow([]);
@@ -944,21 +791,21 @@ export default function TechnicianPerformanceReport() {
         });
 
         worksheet.getRow(companyRow.number).height = 30;
-        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Technician Performance Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Tax Sale Register From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
         });
 
-        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number}`);
 
         // Add an empty row after the title section
         worksheet.addRow([]);
 
-     
+
         // Header style
         const headerStyle = {
             font: fontHeader,
@@ -968,38 +815,28 @@ export default function TechnicianPerformanceReport() {
         };
 
         // Add headers
-        const headers = [
-           "Code",
-            "Technician",
-            "Repairing",
-            "Service",
-            "Workshop",
-            "Instalaltions",
-            "TotalJobs",
-            "Charges",
-            "Parts",
-            "Profit",
-            "TotalAmt",
-        ];
+        const headers = ["Inv#", "Date", "NIC", "NTN", "Customer", "Mobile","Description","Qnty", "Excl Amt", "Tax","Incl Tax", "Discount","Sale Amt"];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
         // Add data rows
         tableData.forEach((item) => {
-            const row = worksheet.addRow([
-                item.Code,
-                item.Technician,
-                item.Repairing,
-                item.Service,
-                item.Workshop,
-                item.Instalaltions,
-                item.TotalJobs,
-                item.Charges,
-                item.Parts,
-                item.Profit,
-                item.TotalAmt,
-    
-            ]);
+            const row = worksheet.addRow(
+            [
+                item["Inv#"],
+                item.Date,
+                item.NIC,
+                item.NTN,
+                item.Customer,
+                item.Mobile,
+                item.Description,
+                item.Qnty,
+                item['Excl Amt'],
+                item.Tax,
+                item['Incl Tax'],
+                item.Discount,
+                item['Sale Amt'],
+        ]);
 
             row.eachCell((cell, colIndex) => {
                 cell.font = fontTableContent;
@@ -1009,28 +846,30 @@ export default function TechnicianPerformanceReport() {
         });
 
         // Set column widths
-        [8,25, 15,15,15,15,15,15,15,15,15].forEach((width, index) => {
+        [9,12,18,14,30,15,40,15,15,15,15,15,15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
-           "",
+           "", 
             "",
-            String(TotalRepairing),
-            String(TotalService),
-            String(TotalWorkshop),
-            String(TotalInstalaltions),
-            String(TotalJobs),
-            String(TotalCharges),
-            String(TotalParts),
-            String(TotalProfit),
-            String(TotalAmt),
+            "", 
+            "",
+            "", 
+            "",
+            "Total",
+            String(totalQnty),
+            String(ExclAmount),
+            String(TexAmount),
+            String(InchAmount),
+            String(Discount),
+            String(Saleamount)
         ]);
 
         // total row added
 
         totalRow.eachCell((cell, colNumber) => {
-            cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
+            cell.font = { name: 'CustomFont', size: getdatafontsize, bold: true }; // Apply CustomFont
             cell.border = {
                 top: { style: "thin" },
                 left: { style: "thin" },
@@ -1040,13 +879,17 @@ export default function TechnicianPerformanceReport() {
 
             // Align only the "Total" text to the right
             if (
+                colNumber === 8 ||
+                colNumber === 9 ||
+                colNumber === 10 ||
+                colNumber === 11 ||
+                colNumber === 12 ||
+                colNumber === 13 
 
-                colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9 || colNumber === 10 || colNumber === 11
             ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
-
 
         // Get current date
         const getCurrentDate = () => {
@@ -1062,10 +905,9 @@ export default function TechnicianPerformanceReport() {
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `TechnicianPerformanceReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `TaxSaleRegisterReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
 
     const dispatch = useDispatch();
 
@@ -1076,7 +918,8 @@ export default function TechnicianPerformanceReport() {
     const textColor = "white";
 
     const [tableData, setTableData] = useState([]);
-    console.log('installment sale reports data', tableData)
+
+    console.log("jpurnal tableData", tableData);
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1099,38 +942,47 @@ export default function TechnicianPerformanceReport() {
     };
 
     const firstColWidth = {
-        width: "6%",
+        width: "5%",
     };
     const secondColWidth = {
-        width: "15%",
-    };
-    const thirdColWidth = {
-        width: "8%",
-    };
-    const forthColWidth = {
         width: "7%",
     };
-    const fifthColWidth = {
+    const thirdColWidth = {
+        width: "10.5%",
+    };
+    const forthColWidth = {
         width: "8%",
     };
-    const sixthColWidth = {
+    const fifthColWidth = {
         width: "10%",
     };
+    const sixthColWidth = {
+        width: "8%",
+    };
     const seventhColWidth = {
-        width: "9%",
+        width: "11.3%",
     };
-    const eighthColWidth = {
-        width: "9%",
+    const eightColWidth = {
+        width: "4%",
     };
-    const ninhthColWidth = {
-        width: "9%",
+    const ninthColWidth = {
+        width: "7%",
     };
     const tenthColWidth = {
-        width: "9%",
+        width: "7%",
     };
-    const elawentheColWidth = {
-        width: "8.8%",
+
+    const elewnthColWidth = {
+        width: "7%",
     };
+    const tweltheColWidth = {
+        width: "7%",
+    };
+    const thirteenColWidth = {
+        width: "7%",
+    };
+
+
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1151,9 +1003,9 @@ export default function TechnicianPerformanceReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(85vw - 0%)" : "85vw",
+        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
         position: "relative",
-        top: "35%",
+        top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
         transform: "translate(-50%, -50%)",
         transition: isSidebarVisible
@@ -1166,7 +1018,7 @@ export default function TechnicianPerformanceReport() {
         overflowY: "hidden",
         wordBreak: "break-word",
         textAlign: "center",
-        maxWidth: "1000px",
+        maxWidth: "80vw",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
@@ -1272,6 +1124,15 @@ export default function TechnicianPerformanceReport() {
         }
     }, [selectedRadio]);
 
+    const handleKeyPress = (e, nextInputRef) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (nextInputRef.current) {
+                nextInputRef.current.focus();
+            }
+        }
+    };
+
     return (
         <>
             <ToastContainer />
@@ -1285,17 +1146,19 @@ export default function TechnicianPerformanceReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Technician Performance Report" />
-
-
-                    {/* CODE FOR CODE SELECT */}
-
-
+                    <NavComponent textdata="Tex Sale Register Report" />
 
                     <div
                         className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                        style={{
+                            height: "24px",
+                            marginTop: "8px",
+                            marginBottom: "8px",
+                            display: "flex",
+                        }}
                     >
+
+
                         <div
                             style={{
                                 width: "100%",
@@ -1303,7 +1166,7 @@ export default function TechnicianPerformanceReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                // justifyContent: "space-between",
+                                justifyContent: "start",
                             }}
                         >
                             <div className="d-flex align-items-center">
@@ -1312,11 +1175,16 @@ export default function TechnicianPerformanceReport() {
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
-                                        marginLeft: '20px'
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold", marginLeft: '2px' }}>
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
                                             From :
                                         </span>
                                     </label>
@@ -1347,7 +1215,8 @@ export default function TechnicianPerformanceReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1386,7 +1255,8 @@ export default function TechnicianPerformanceReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                                        fontSize: getdatafontsize,
+                                                        fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
@@ -1398,9 +1268,10 @@ export default function TechnicianPerformanceReport() {
                                     />
                                 </div>
                             </div>
+
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "130px" }}
+                                style={{ marginLeft: "100px" }}
                             >
                                 <div
                                     style={{
@@ -1410,7 +1281,13 @@ export default function TechnicianPerformanceReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
                                             To :
                                         </span>
                                     </label>
@@ -1442,7 +1319,8 @@ export default function TechnicianPerformanceReport() {
                                             paddingLeft: "5px",
                                             outline: "none",
                                             border: "none",
-                                            fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1451,7 +1329,7 @@ export default function TechnicianPerformanceReport() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, 'searchsubmit')}
+                                        onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1480,7 +1358,8 @@ export default function TechnicianPerformanceReport() {
                                                                 ? "pointer"
                                                                 : "default",
                                                         marginLeft: "18px",
-                                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                                        fontSize: getdatafontsize,
+                                                        fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
@@ -1493,17 +1372,14 @@ export default function TechnicianPerformanceReport() {
                                 </div>
                             </div>
 
-                            <div className="d-flex align-items-center justify-content-center" style={{ marginLeft: '60px' }}>
-
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
+                            <div className="d-flex align-items-center justify-content-center">
+                                <div className="d-flex align-items-center">
                                     <div
                                         style={{
                                             display: "flex",
                                             justifyContent: "evenly",
+                                            marginLeft: "100px",
+                                            marginBottom: "4px",
                                         }}
                                     >
                                         <div className="d-flex align-items-baseline mx-2">
@@ -1521,7 +1397,15 @@ export default function TechnicianPerformanceReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
+                                            <label
+                                                htmlFor="custom"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                Custom
+                                            </label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1538,7 +1422,15 @@ export default function TechnicianPerformanceReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
+                                            <label
+                                                htmlFor="30"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                30 Days
+                                            </label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1555,7 +1447,15 @@ export default function TechnicianPerformanceReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
+                                            <label
+                                                htmlFor="60"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                60 Days
+                                            </label>
                                         </div>
                                         <div className="d-flex align-items-baseline mx-2">
                                             <input
@@ -1572,16 +1472,57 @@ export default function TechnicianPerformanceReport() {
                                                 }
                                             />
                                             &nbsp;
-                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
+                                            <label
+                                                htmlFor="90"
+                                                style={{
+                                                    fontSize: getdatafontsize,
+                                                    fontFamily: getfontstyle,
+                                                }}
+                                            >
+                                                90 Days
+                                            </label>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
 
+                            {/* <div id="lastDiv" style={{ marginRight: "5px" }}>
+                                  <label for="searchInput" style={{ marginRight: "5px" }}>
+                                      <span style={{ fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
+                                          Search :
+                                      </span>{" "}
+                                  </label>
+                                  <input
+                                      ref={input2Ref}
+                                      onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                      type="text"
+                                      id="searchsubmit"
+                                      placeholder="Item description"
+                                      value={searchQuery}
+                                      autoComplete="off"
+                                      style={{
+                                          marginRight: "20px",
+                                          width: "200px",
+                                          height: "24px",
+                                          fontSize: getdatafontsize,fontFamily:getfontstyle, 
+                                          color: fontcolor,
+                                          backgroundColor: getcolor,
+                                          border: `1px solid ${fontcolor}`,
+                                          outline: "none",
+                                          paddingLeft: "10px",
+                                      }}
+                                      onFocus={(e) =>
+                                          (e.currentTarget.style.border = "2px solid red")
+                                      }
+                                      onBlur={(e) =>
+                                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                      }
+                                      onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
+  
+                              </div> */}
                         </div>
                     </div>
+
                     <div>
                         <div
                             style={{
@@ -1593,7 +1534,8 @@ export default function TechnicianPerformanceReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                    fontSize: getdatafontsize,
+                                    fontFamily: getfontstyle,
                                     width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
@@ -1601,7 +1543,8 @@ export default function TechnicianPerformanceReport() {
                             >
                                 <thead
                                     style={{
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
                                         fontWeight: "bold",
                                         height: "24px",
                                         position: "sticky",
@@ -1617,40 +1560,44 @@ export default function TechnicianPerformanceReport() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                            Code
+                                            Inv#
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Technician
+                                            Date
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Repairing
+                                            NIC
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
-                                            Service
+                                            NTN
                                         </td>
                                         <td className="border-dark" style={fifthColWidth}>
-                                            Workshop
+                                            Customer
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Instalaltions
+                                            Mobile
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
-                                            TotalJobs
+                                            Description
                                         </td>
-                                        <td className="border-dark" style={eighthColWidth}>
-                                            Charges
+                                        <td className="border-dark" style={eightColWidth}>
+                                            Qnty
                                         </td>
-                                        <td className="border-dark" style={ninhthColWidth}>
-                                            Parts
+                                        <td className="border-dark" style={ninthColWidth}>
+                                            Excl Amt
                                         </td>
                                         <td className="border-dark" style={tenthColWidth}>
-                                            Profit
+                                            Tax
                                         </td>
-                                        <td className="border-dark" style={elawentheColWidth}>
-                                            TotalAmt
+                                        <td className="border-dark" style={elewnthColWidth}>
+                                            Incl Tax
                                         </td>
-
-
+                                        <td className="border-dark" style={tweltheColWidth}>
+                                            Discount
+                                        </td>
+                                        <td className="border-dark" style={thirteenColWidth}>
+                                            Sale Amt
+                                        </td>
                                     </tr>
                                 </thead>
                             </table>
@@ -1661,7 +1608,7 @@ export default function TechnicianPerformanceReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "50vh",
+                                maxHeight: "55vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}
@@ -1670,11 +1617,12 @@ export default function TechnicianPerformanceReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontFamily: getfontstyle, fontSize: getdatafontsize,
+                                    fontSize: getdatafontsize,
+                                    fontFamily: getfontstyle,
                                     width: "100%",
                                     position: "relative",
-                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})       
-                                                           }}
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                                }}
                             >
                                 <tbody id="tablebody">
                                     {isLoading ? (
@@ -1684,7 +1632,7 @@ export default function TechnicianPerformanceReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="11" className="text-center">
+                                                <td colSpan="13" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -1697,7 +1645,7 @@ export default function TechnicianPerformanceReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 11 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 13 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -1713,11 +1661,12 @@ export default function TechnicianPerformanceReport() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninhthColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
-                                                <td style={elawentheColWidth}></td>
-
+                                                <td style={elewnthColWidth}></td>
+                                                <td style={tweltheColWidth}></td>
+                                                <td style={thirteenColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -1738,27 +1687,19 @@ export default function TechnicianPerformanceReport() {
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {item.Code}
+                                                            {item["Inv#"]}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
-                                                            {item.Technician}
+                                                            {item.Date}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.Repairing}
-                                                            style={{
-                                                                ...thirdColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.Repairing}
+                                                        <td className="text-start" style={thirdColWidth}>
+                                                            {item.NIC}
                                                         </td>
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {item.Service}
+                                                        <td className="text-start" style={forthColWidth}>
+                                                            {item.NTN}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.Workshop}
+                                                        <td className="text-start"
+                                                            title={item.Customer}
                                                             style={{
                                                                 ...fifthColWidth,
                                                                 whiteSpace: "nowrap",
@@ -1766,21 +1707,13 @@ export default function TechnicianPerformanceReport() {
                                                                 textOverflow: "ellipsis",
                                                             }}
                                                         >
-                                                            {item.Workshop}
+                                                            {item.Customer}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.Instalaltions}
-                                                            style={{
-                                                                ...sixthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.Instalaltions}
+                                                        <td className="text-start" style={sixthColWidth}>
+                                                            {item.Mobile}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.TotalJobs}
+                                                        <td className="text-start"
+                                                            title={item.Description}
                                                             style={{
                                                                 ...seventhColWidth,
                                                                 whiteSpace: "nowrap",
@@ -1788,29 +1721,26 @@ export default function TechnicianPerformanceReport() {
                                                                 textOverflow: "ellipsis",
                                                             }}
                                                         >
-                                                            {item.TotalJobs}
+                                                            {item.Description}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.Charges}
-                                                            style={{
-                                                                ...eighthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.Charges}
+                                                        <td className="text-end" style={eightColWidth}>
+                                                            {item.Qnty}
                                                         </td>
-                                                        <td className="text-end" style={ninhthColWidth}>
-                                                            {item.Parts}
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item['Excl Amt']}
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item.Profit}
+                                                            {item.Tax}
                                                         </td>
-                                                        <td className="text-end" style={elawentheColWidth}>
-                                                            {item.TotalAmt}
+                                                        <td className="text-end" style={elewnthColWidth}>
+                                                            {item['Incl Tax']}
                                                         </td>
-
+                                                        <td className="text-end" style={tweltheColWidth}>
+                                                            {item.Discount}
+                                                        </td>
+                                                        <td className="text-end" style={thirteenColWidth}>
+                                                            {item['Sale Amt']}
+                                                        </td>
                                                     </tr>
                                                 );
                                             })}
@@ -1824,7 +1754,7 @@ export default function TechnicianPerformanceReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 11 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 13 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -1839,12 +1769,12 @@ export default function TechnicianPerformanceReport() {
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninhthColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
-                                                <td style={elawentheColWidth}></td>
-
-
+                                                <td style={elewnthColWidth}></td>
+                                                <td style={tweltheColWidth}></td>
+                                                <td style={thirteenColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -1853,7 +1783,6 @@ export default function TechnicianPerformanceReport() {
                         </div>
                     </div>
 
-
                     <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
@@ -1861,7 +1790,7 @@ export default function TechnicianPerformanceReport() {
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
+                            width: "101.2%",
                         }}
                     >
                         <div
@@ -1870,9 +1799,7 @@ export default function TechnicianPerformanceReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -1886,10 +1813,7 @@ export default function TechnicianPerformanceReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalRepairing}</span>
-
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...forthColWidth,
@@ -1897,8 +1821,6 @@ export default function TechnicianPerformanceReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalService}</span>
-
                         </div>
                         <div
                             style={{
@@ -1907,9 +1829,8 @@ export default function TechnicianPerformanceReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalWorkshop}</span>
-
                         </div>
+
                         <div
                             style={{
                                 ...sixthColWidth,
@@ -1917,9 +1838,8 @@ export default function TechnicianPerformanceReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalInstalaltions}</span>
-
                         </div>
+
                         <div
                             style={{
                                 ...seventhColWidth,
@@ -1927,29 +1847,28 @@ export default function TechnicianPerformanceReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalJobs}</span>
-
                         </div>
+
                         <div
                             style={{
-                                ...eighthColWidth,
+                                ...eightColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalCharges}</span>
-
+                            <span className="mobileledger_total">{totalQnty}</span>
                         </div>
+
                         <div
                             style={{
-                                ...ninhthColWidth,
+                                ...ninthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalParts}</span>
-
+                            <span className="mobileledger_total">{ExclAmount}</span>
                         </div>
+
                         <div
                             style={{
                                 ...tenthColWidth,
@@ -1957,20 +1876,37 @@ export default function TechnicianPerformanceReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalProfit}</span>
-
+                            <span className="mobileledger_total">{TexAmount}</span>
                         </div>
+
                         <div
                             style={{
-                                ...elawentheColWidth,
+                                ...elewnthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalAmt}</span>
-
+                            <span className="mobileledger_total">{InchAmount}</span>
                         </div>
 
+                        <div
+                            style={{
+                                ...tweltheColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{Discount}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...thirteenColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{Saleamount}</span>
+                        </div>
 
                     </div>
                     <div
@@ -1982,7 +1918,6 @@ export default function TechnicianPerformanceReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1991,7 +1926,6 @@ export default function TechnicianPerformanceReport() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2000,7 +1934,6 @@ export default function TechnicianPerformanceReport() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2011,7 +1944,6 @@ export default function TechnicianPerformanceReport() {
                             text="Select"
                             ref={input3Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

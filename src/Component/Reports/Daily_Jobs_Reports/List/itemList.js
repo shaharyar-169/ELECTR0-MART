@@ -172,6 +172,7 @@ export default function ItemList() {
       }
     }
   };
+  
   const handlecategoryKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = saleSelectRef.current.state.selectValue;
@@ -1698,7 +1699,7 @@ export default function ItemList() {
                   width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}), 
-                                }}
+                }}
               >
                 <tbody id="tablebody">
                   {isLoading ? (

@@ -22,7 +22,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function CategoryJobComparison() {
+export default function CompanyJobComparison() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -404,7 +404,7 @@ export default function CategoryJobComparison() {
             "todatevalidation"
         ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/CategoryJobComparison.php";
+        const apiUrl = apiLinks + "/CompanyJobComparison.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
 
@@ -500,7 +500,7 @@ export default function CategoryJobComparison() {
         // Define table data (rows)
         const rows = tableData.map((item) => [
             item.Code,
-            item.Category,
+            item.Company,
             item.Repairing,
             item.Service,
             item.Workshop,
@@ -533,7 +533,7 @@ export default function CategoryJobComparison() {
         // Define table column headers and individual column widths
         const headers = [
             "Code",
-            "Category",
+            "Company",
             "Repairing",
             "Service",
             "Workshop",
@@ -758,7 +758,7 @@ export default function CategoryJobComparison() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Category Job Comparison Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Company Job Comparison Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -812,7 +812,7 @@ export default function CategoryJobComparison() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`CategoryJobComparisonReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`CompanyJobComparisonReport Form ${fromInputDate} To ${toInputDate}.pdf`);
 
 
     };
@@ -860,7 +860,7 @@ export default function CategoryJobComparison() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Category Job Comparison Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Company Job Comparison Report From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -882,7 +882,7 @@ export default function CategoryJobComparison() {
         // Add headers
         const headers = [
             "Code",
-            "Category",
+            "Company",
             "Repairing",
             "Service",
             "Workshop",
@@ -900,7 +900,7 @@ export default function CategoryJobComparison() {
         tableData.forEach((item) => {
             const row = worksheet.addRow([
                 item.Code,
-            item.Category,
+            item.Company,
             item.Repairing,
             item.Service,
             item.Workshop,
@@ -974,7 +974,7 @@ export default function CategoryJobComparison() {
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `CategoryJobComparisonReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `CompanyJobComparisonReport From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1201,7 +1201,7 @@ export default function CategoryJobComparison() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Category Job Comparison Report" />
+                    <NavComponent textdata="Company Job Comparison Report" />
 
 
                     {/* CODE FOR CODE SELECT */}
@@ -1535,7 +1535,7 @@ export default function CategoryJobComparison() {
                                             Code
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                        Category
+                                        Company
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
                                         Repairing
@@ -1656,7 +1656,7 @@ export default function CategoryJobComparison() {
                                                             {item.Code}
                                                         </td>
                                                         <td className="text-start" 
-                                                         title={item.Category}
+                                                         title={item.Company}
                                                          style={{
                                                            ...secondColWidth,
                                                            whiteSpace: "nowrap",
@@ -1664,7 +1664,7 @@ export default function CategoryJobComparison() {
                                                            textOverflow: "ellipsis",
                                                          }}
                                                         >
-                                                            {item.Category}
+                                                            {item.Company}
                                                         </td>
                                                         <td className="text-end"
                                                             title={item.Repairing}

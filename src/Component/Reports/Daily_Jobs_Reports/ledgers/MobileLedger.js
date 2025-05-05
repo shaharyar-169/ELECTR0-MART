@@ -411,14 +411,10 @@ export default function MobileLedger() {
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FMobNum: mobileNumber,
-
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
-
-            code: 'NASIRTRD',
-            FYerDsc: '2024-2024',
-            FLocCod: '001',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
+        
 
 
         }).toString();

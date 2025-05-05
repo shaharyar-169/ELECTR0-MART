@@ -201,7 +201,6 @@ export default function ReferenceMonthlyJobStatusReport() {
         const formData = new URLSearchParams({
             FLocCod: locationnumber || getLocationNumber,
             code: organisation.code,
-            FRepYer: '2025'
         }).toString();
         axios
             .post(apiUrl, formData)

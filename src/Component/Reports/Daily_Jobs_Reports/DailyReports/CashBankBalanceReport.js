@@ -386,6 +386,7 @@ export default function DailyCashBankBalance() {
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FSchTxt: searchQuery,
+      
     }).toString();
 
     axios

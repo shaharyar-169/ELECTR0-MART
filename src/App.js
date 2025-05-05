@@ -124,7 +124,7 @@ import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemRepo
 
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
-
+import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/TaxsaleRegister.js";
 function App() {
   const queryClient = new QueryClient();
 
@@ -256,6 +256,7 @@ function App() {
 
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />
+                <Route exact path="/SalesTaxRegister" element={<TaxSaleRegisterReport/>} />
 
 
                 {/* Rountes for Dashboard */}

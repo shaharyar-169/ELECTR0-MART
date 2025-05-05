@@ -412,8 +412,7 @@ export default function InstallmentCollectReport() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
-           
-
+         
 
         }).toString();
 

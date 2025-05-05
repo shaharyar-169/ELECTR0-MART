@@ -328,8 +328,9 @@ export default function DashboardAdminDealer() {
       setIsLoading(true);
 
       const formData = new URLSearchParams({
-        code: organisation.code,
-        FRepDat: "16-04-2025",
+        // code: organisation.code,
+        code: 'AMRELEC',
+        FRepDat: "30-04-2025",
       }).toString();
 
       axios

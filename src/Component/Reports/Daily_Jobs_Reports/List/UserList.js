@@ -84,7 +84,6 @@ export default function UserList() {
       FUsrSts: transectionType,
       code: organisation.code,
       FLocCod: getLocationNumber || locationnumber,
-   
       FSchTxt: searchQuery,
     }).toString();
 
