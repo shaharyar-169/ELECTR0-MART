@@ -35,7 +35,14 @@ export default function FbrDataReport() {
 
   const Referenceref = useRef(null);
   const [selectedInvoice, setSelectedInvoice] = useState("");
-  console.log("selectedInvoice", selectedInvoice);
+  const [selectedTrnNum, setSelectedTrnNum] = useState("");
+  const [selectedTrnTyp, setSelectedTrnTyp] = useState("");
+
+  const [selectedLocationCode, setSelectedLocationCode] = useState("");
+
+  const [selectedFBRNO, setSelectedFBRNO] = useState("");
+
+  // console.log("selectedInvoice", selectedInvoice);
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
@@ -466,8 +473,17 @@ export default function FbrDataReport() {
     const apiUrl = apiLinks + "/FBRInvoiceDetail.php";
     // setIsLoading(true);
     const formData = new URLSearchParams({
-      FLocCod: locationnumber || getLocationNumber,
-      code: organisation.code,
+      // FInvNum:'139235-110325142719-006803',
+      // code: organisation.code,
+      // FInvNum: selectedInvoice,
+      // FTrnNum: selectedTrnNum,
+      // FTrnTyp: selectedTrnTyp,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+
+
+      FLocCod: '001',
+      code: 'NASIRTPOS',
       FYerDsc: '2021-2025',
       FTrnNum: '000001',
       FTrnTyp: 'INV'
@@ -519,9 +535,15 @@ export default function FbrDataReport() {
   }, [selectedInvoice]);
   const fetchSaleData = async () => {
     const apiUrl = apiLinks + "/SavePOSSaleJason.php";
+    console.log("savepossalejson", selectedLocationCode, selectedTrnNum);
     const formData = new URLSearchParams({
       code: organisation.code,
-      FInvNum: selectedInvoice,
+      FLocCod: "001",
+      FTrnNum: selectedTrnNum,
+      // FInvTyp: selectedTrnNum,
+      // FRefNum: selectedTrnNum,
+
+      // FInvNum: selectedInvoice,
     }).toString();
 
     try {
@@ -531,9 +553,9 @@ export default function FbrDataReport() {
       setTimeout(() => {
         setopenmodel(true);
       }, 1000);
-      console.log("response.data:", response.data);
+      // console.log("response.data:", response.data);
     } catch (error) {
-      console.error("Error fetching sale data:", error);
+      // console.error("Error fetching sale data:", error);
     }
   };
 
@@ -552,10 +574,10 @@ export default function FbrDataReport() {
       // setopenmodel(true);
       setTimeout(() => {
         setopenmodelUpdate(true);
-      }, 1000);
-      console.log("response.data:", response.data);
+      }, 500);
+      // console.log("response.data:", response.data);
     } catch (error) {
-      console.error("Error fetching sale data:", error);
+      // console.error("Error fetching sale data:", error);
     }
   };
   useEffect(() => {
@@ -623,7 +645,6 @@ export default function FbrDataReport() {
     // Add summary row to the table
 
     rows.push([
-
       "",
       "",
       "",
@@ -709,7 +730,8 @@ export default function FbrDataReport() {
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
         const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        const isRedRow = row[0] && parseInt(row[0]) > 1000000000000000000000000000000; // Check if tctgcod is greater than 100
+        const isRedRow =
+          row[0] && parseInt(row[0]) > 1000000000000000000000000000000; // Check if tctgcod is greater than 100
         let textColor = [0, 0, 0]; // Default text color
         let fontName = normalFont; // Default font
 
@@ -717,8 +739,6 @@ export default function FbrDataReport() {
           textColor = [255, 0, 0]; // Red color
           fontName = boldFont; // Set bold font for red-colored row
         }
-
-
 
         // Draw row borders
         doc.setDrawColor(0); // Set color for borders
@@ -753,7 +773,6 @@ export default function FbrDataReport() {
             cellIndex === 9 ||
             cellIndex === 10 ||
             cellIndex === 11
-
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
@@ -961,7 +980,6 @@ export default function FbrDataReport() {
     const numColumns = 13; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-
       "left",
       "left",
       "left",
@@ -1082,7 +1100,6 @@ export default function FbrDataReport() {
 
     // Add headers
     const headers = [
-
       "FBRNo",
       "Location",
       "Trn#",
@@ -1102,7 +1119,6 @@ export default function FbrDataReport() {
     // Add data rows
     Profits.forEach((item) => {
       const row = worksheet.addRow([
-
         item.FBRNo,
         item.Location,
         item["Trn#"],
@@ -1133,14 +1149,11 @@ export default function FbrDataReport() {
     });
 
     // Set column widths
-    [23, 10, 8, 10, 10, 15, 12, 15, 15, 15, 15, 15].forEach(
-      (width, index) => {
-        worksheet.getColumn(index + 1).width = width;
-      }
-    );
+    [23, 10, 8, 10, 10, 15, 12, 15, 15, 15, 15, 15].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
 
     const totalRow = worksheet.addRow([
-
       "",
       "",
       "",
@@ -1229,7 +1242,7 @@ export default function FbrDataReport() {
         setSupplierList(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        // console.error("Error fetching data:", error);
       });
   }, []);
 
@@ -1314,7 +1327,7 @@ export default function FbrDataReport() {
 
   const [tableData, setTableData] = useState([]);
 
-  console.log("tableData", tableData);
+  // console.log("tableData", tableData);
 
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -1341,10 +1354,10 @@ export default function FbrDataReport() {
     width: "8%",
   };
   const secondColWidth = {
-    width: "16%",
+    width: "14%",
   };
   const thirdColWidth = {
-    width: "6%",
+    width: "8%",
   };
   const forthColWidth = {
     width: "6%",
@@ -1411,7 +1424,7 @@ export default function FbrDataReport() {
   const bottomelewenthColWidth = {
     width: "5.3%",
   };
-  
+
 
   /////////////////////////////////////////////////////////////////////////////////////
 
@@ -1620,6 +1633,7 @@ export default function FbrDataReport() {
                       if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
                         setSaleType(selectedOption.value);
+                        setSelectedLocationCode(selectedOption);
                         setTechnicianselectdatavalue({
                           value: selectedOption.value,
                           label: labelPart, // Set only the 'NGS' part of the label
@@ -1886,7 +1900,6 @@ export default function FbrDataReport() {
                 >
                   <option value="">All</option>
                   <option value="O">Outstanding </option>
-                  <option value="INV">Sale </option>
                 </select>
               </div>
             </div>
@@ -2053,7 +2066,12 @@ export default function FbrDataReport() {
                             ref={(el) => (rowRefs.current[i] = el)}
                             // onClick={() => handleRowClick(i)}
                             onClick={() => {
+                              console.log("item", item);
                               setSelectedInvoice(item.InvNo);
+                              setSelectedFBRNO(item.FBRNo);
+                              setSelectedTrnNum(item["Trn#"]);
+                              setSelectedTrnTyp(item.Type);
+
                               handleRowClick(i);
                             }}
                             className={
@@ -2408,6 +2426,7 @@ export default function FbrDataReport() {
                       padding: "0px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
+                      textAlign: "left",
                     }}
                   >
                     <span className="mobileledger_total1">
@@ -2474,7 +2493,7 @@ export default function FbrDataReport() {
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
-                      padding: "0px",
+                      textAlign: "left",
                     }}
                   >
                     <span className="mobileledger_total">
@@ -2508,6 +2527,7 @@ export default function FbrDataReport() {
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
                       padding: "0px",
+                      textAlign: "left",
                     }}
                   >
                     <span className="mobileledger_total1">
@@ -2682,6 +2702,7 @@ export default function FbrDataReport() {
                       ...(fbrdetail.length > 0 ? { tableLayout: "fixed" } : {}),
                     }}
                   >
+
                     <tbody id="tablebody">
                       {isLoading ? (
                         <>
@@ -2914,6 +2935,7 @@ export default function FbrDataReport() {
                         </>
                       )}
                     </tbody>
+
                   </table>
                 </div>
 
@@ -2973,8 +2995,7 @@ export default function FbrDataReport() {
                     }}
                   >
                     <span className="mobileledger_total">
-                    {fbrTotalTotalSale}
-                     
+                      {fbrTotalSaleAmt}
                     </span>
                   </div>
 
@@ -2994,7 +3015,9 @@ export default function FbrDataReport() {
                       borderRight: `1px solid ${fontcolor}`,
                     }}
                   >
-                  
+                    <span className="mobileledger_total">
+                      {fbrTotalTotalSale}
+                    </span>
                   </div>
                   <div
                     style={{
@@ -3003,33 +3026,10 @@ export default function FbrDataReport() {
                       borderRight: `1px solid ${fontcolor}`,
                     }}
                   >
-                      <span className="mobileledger_total">
-                    {fbrTotalSaleAmt}
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      ...bottomtenthColWidth,
-                      background: getcolor,
-                      borderRight: `1px solid ${fontcolor}`,
-                    }}
-                  >
-                   
-                  </div>
-
-                  <div
-                    style={{
-                      ...bottomelewenthColWidth,
-                      background: getcolor,
-                      borderRight: `1px solid ${fontcolor}`,
-                    }}
-                  >
                     <span className="mobileledger_total">
                       {fbrTotalDiscount}
                     </span>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -3081,7 +3081,14 @@ export default function FbrDataReport() {
               // id="searchsubmit"
               text="Update"
               ref={input3Ref}
-              onClick={fetchSaleDataUpdate}
+              onClick={() => {
+                if (selectedFBRNO !== null && selectedFBRNO.trim() !== "") {
+                  toast.dismiss();
+                  toast.error("Already Updated");
+                } else {
+                  fetchSaleDataUpdate();
+                }
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
