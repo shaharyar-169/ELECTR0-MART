@@ -2637,6 +2637,9 @@ export default function FbrDataReport() {
                           color: "white",
                         }}
                       >
+                         <td className="border-dark" style={bottomelewenthColWidth}>
+                          Sr
+                        </td>
                         <td className="border-dark" style={bottomfirstColWidth}>
                           code
                         </td>
@@ -2673,9 +2676,7 @@ export default function FbrDataReport() {
                         <td className="border-dark" style={bottomtenthColWidth}>
                           Dsct
                         </td>
-                        <td className="border-dark" style={bottomelewenthColWidth}>
-                          Sr
-                        </td>
+                       
                       </tr>
                     </thead>
                   </table>
@@ -2735,6 +2736,7 @@ export default function FbrDataReport() {
                             )
                           )}
                           <tr>
+                          <td style={bottomelewenthColWidth}></td>
                             <td style={bottomfirstColWidth}></td>
                             <td style={bottomsecondColWidth}></td>
                             <td style={bottomthirdColWidth}></td>
@@ -2745,7 +2747,7 @@ export default function FbrDataReport() {
                             <td style={bottomeightColWidth}></td>
                             <td style={bottomninthColWidth}></td>
                             <td style={bottomtenthColWidth}></td>
-                            <td style={bottomelewenthColWidth}></td>
+                          
                           </tr>
                         </>
                       ) : (
@@ -2766,6 +2768,18 @@ export default function FbrDataReport() {
                                   color: fontcolor,
                                 }}
                               >
+                                 <td
+                                  className="text-center"
+                                  title={item.Sr}
+                                  style={{
+                                    ...bottomelewenthColWidth,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {item.Sr}
+                                </td>
                                 <td
                                   className="text-start"
                                   title={item.ItemCode}
@@ -2887,18 +2901,7 @@ export default function FbrDataReport() {
                                   {item.Discount}
                                 </td>
 
-                                <td
-                                  className="text-end"
-                                  title={item.Sr}
-                                  style={{
-                                    ...bottomelewenthColWidth,
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                  }}
-                                >
-                                  {item.Sr}
-                                </td>
+                               
                               </tr>
                             );
                           })}
@@ -2920,6 +2923,7 @@ export default function FbrDataReport() {
                             </tr>
                           ))}
                           <tr>
+                            <td style={bottomelewenthColWidth}></td>
                             <td style={bottomfirstColWidth}></td>
                             <td style={bottomsecondColWidth}></td>
                             <td style={bottomthirdColWidth}></td>
@@ -2930,7 +2934,7 @@ export default function FbrDataReport() {
                             <td style={bottomeightColWidth}></td>
                             <td style={bottomninthColWidth}></td>
                             <td style={bottomtenthColWidth}></td>
-                            <td style={bottomelewenthColWidth}></td>
+                         
                           </tr>
                         </>
                       )}
@@ -2949,6 +2953,15 @@ export default function FbrDataReport() {
                     width: "101.2%",
                   }}
                 >
+                  <div
+                    style={{
+                      ...bottomelewenthColWidth,
+                      background: getcolor,
+                      borderRight: `1px solid ${fontcolor}`,
+                    }}
+                  >                   
+                    
+                  </div>
                   <div
                     style={{
                       ...bottomfirstColWidth,
@@ -3029,6 +3042,17 @@ export default function FbrDataReport() {
                     <span className="mobileledger_total">
                       {fbrTotalDiscount}
                     </span>
+
+                  </div>
+                  <div
+                    style={{
+                      ...bottomtenthColWidth,
+                      background: getcolor,
+                      borderRight: `1px solid ${fontcolor}`,
+                    }}
+                  >
+                   
+                    
                   </div>
                 </div>
               </div>
