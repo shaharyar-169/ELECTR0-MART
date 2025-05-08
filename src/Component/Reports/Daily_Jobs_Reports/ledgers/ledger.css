@@ -122,6 +122,16 @@ background: transparent !important;
   font-size: 12px !important;
   padding-left: 2px !important;
 }
+.mobileledger_total2{
+  font-family: Verdana !important;
+  height: 100% !important;
+  display: flex;
+  justify-content: start;
+  align-items: left;
+  /* font-weight: bold; */
+  font-size: 12px !important;
+  padding-left: 2px !important;
+}
 
 
 /* /////////////////////   SUNDAY CODE ///////////////////////// */

@@ -481,20 +481,18 @@ export default function FbrDataReport() {
       // FLocCod: locationnumber || getLocationNumber,
       // FYerDsc: yeardescription || getyeardescription,
 
-
-      FLocCod: '001',
-      code: 'NASIRTPOS',
-      FYerDsc: '2021-2025',
-      FTrnNum: '000001',
-      FTrnTyp: 'INV'
-
+      FLocCod: "001",
+      code: "NASIRTPOS",
+      FYerDsc: "2021-2025",
+      FTrnNum: "000001",
+      FTrnTyp: "INV",
     }).toString();
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
         // setIsLoading(false);
-
+        console.log(response, "response");
         setfbrTotalSaleAmt(response.data["TotalSaleAmt "]);
         setfbrTotalQnty(response.data["TotalQnty "]);
         setfbrTotalTaxAmt(response.data["TotalTaxAmt "]);
@@ -532,13 +530,14 @@ export default function FbrDataReport() {
         console.error("Error:", error);
         setIsLoading(false);
       });
-  }, [selectedInvoice]);
+  }, [selectedTrnNum, selectedTrnTyp]);
   const fetchSaleData = async () => {
     const apiUrl = apiLinks + "/SavePOSSaleJason.php";
     console.log("savepossalejson", selectedLocationCode, selectedTrnNum);
     const formData = new URLSearchParams({
       code: organisation.code,
-      FLocCod: "001",
+      FLocCod: locationnumber || getLocationNumber,
+
       FTrnNum: selectedTrnNum,
       // FInvTyp: selectedTrnNum,
       // FRefNum: selectedTrnNum,
@@ -1028,7 +1027,8 @@ export default function FbrDataReport() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        companyRow.number
       }`
     );
 
@@ -1042,7 +1042,8 @@ export default function FbrDataReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        storeListRow.number
       }`
     );
 
@@ -1392,13 +1393,13 @@ export default function FbrDataReport() {
 
   //////////////////// COLUMN WIDTH FOR BOTTOM TABLE  /////////////////////////////////
   const bottomfirstColWidth = {
-    width: "8%",
+    width: "13%",
   };
   const bottomsecondColWidth = {
     width: "11%",
   };
   const bottomthirdColWidth = {
-    width: "12%",
+    width: "10%",
   };
   const bottomforthColWidth = {
     width: "6%",
@@ -1407,24 +1408,23 @@ export default function FbrDataReport() {
     width: "6%",
   };
   const bottomsixthColWidth = {
-    width: "11%",
+    width: "9%",
   };
   const bottomseventhColWidth = {
-    width: "11%",
+    width: "8%",
   };
   const bottomeightColWidth = {
-    width: "11%",
+    width: "10%",
   };
   const bottomninthColWidth = {
-    width: "11%",
+    width: "10%",
   };
   const bottomtenthColWidth = {
-    width: "6%",
+    width: "10%",
   };
   const bottomelewenthColWidth = {
     width: "5.3%",
   };
-
 
   /////////////////////////////////////////////////////////////////////////////////////
 
@@ -2399,7 +2399,7 @@ export default function FbrDataReport() {
             </div>
 
             <div style={{ display: "flex" }}>
-              <div style={{ width: "35%", marginTop: "5px" }}>
+              <div style={{ width: "30%", marginTop: "5px" }}>
                 <div
                   className="row"
                   style={{
@@ -2421,7 +2421,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "30%",
+                      width: "35%",
                       border: `1px solid ${fontcolor} `,
                       padding: "0px",
                       fontSize: getdatafontsize,
@@ -2455,7 +2455,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "40%",
+                      width: "45%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2489,7 +2489,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "40%",
+                      width: "45%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2522,7 +2522,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "70%",
+                      width: "60%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2530,7 +2530,7 @@ export default function FbrDataReport() {
                       textAlign: "left",
                     }}
                   >
-                    <span className="mobileledger_total1">
+                    <span className="mobileledger_total2">
                       {fbrheader.length > 0 ? fbrheader[0].Customer : ""}
                     </span>
                   </div>
@@ -2557,7 +2557,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "40%",
+                      width: "45%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2590,21 +2590,23 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "40%",
+                      width: "45%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
                       padding: "0px",
                     }}
                   >
-                    <span className="mobileledger_total1">
+                    <span className="mobileledger_total2">
                       {fbrheader.length > 0 ? fbrheader[0].NTN : ""}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div style={{ width: "65%", border: "1px solid white" }}>
+
+
+              <div style={{ width: "70%", border: "1px solid white" }}>
                 <div
                   style={{
                     overflowY: "auto",
@@ -2637,7 +2639,10 @@ export default function FbrDataReport() {
                           color: "white",
                         }}
                       >
-                         <td className="border-dark" style={bottomelewenthColWidth}>
+                        <td
+                          className="border-dark"
+                          style={bottomelewenthColWidth}
+                        >
                           Sr
                         </td>
                         <td className="border-dark" style={bottomfirstColWidth}>
@@ -2665,18 +2670,18 @@ export default function FbrDataReport() {
                           className="border-dark"
                           style={bottomseventhColWidth}
                         >
-                          Tax
-                        </td>
+                          Tax Rt 
+                                                  </td>
                         <td className="border-dark" style={bottomeightColWidth}>
-                          Charge
+                        Tax Amt
                         </td>
                         <td className="border-dark" style={bottomninthColWidth}>
-                          Amt
+                        Tot Sale
+
                         </td>
                         <td className="border-dark" style={bottomtenthColWidth}>
-                          Dsct
+                        Discont 
                         </td>
-                       
                       </tr>
                     </thead>
                   </table>
@@ -2703,7 +2708,6 @@ export default function FbrDataReport() {
                       ...(fbrdetail.length > 0 ? { tableLayout: "fixed" } : {}),
                     }}
                   >
-
                     <tbody id="tablebody">
                       {isLoading ? (
                         <>
@@ -2736,7 +2740,7 @@ export default function FbrDataReport() {
                             )
                           )}
                           <tr>
-                          <td style={bottomelewenthColWidth}></td>
+                            <td style={bottomelewenthColWidth}></td>
                             <td style={bottomfirstColWidth}></td>
                             <td style={bottomsecondColWidth}></td>
                             <td style={bottomthirdColWidth}></td>
@@ -2747,7 +2751,6 @@ export default function FbrDataReport() {
                             <td style={bottomeightColWidth}></td>
                             <td style={bottomninthColWidth}></td>
                             <td style={bottomtenthColWidth}></td>
-                          
                           </tr>
                         </>
                       ) : (
@@ -2768,7 +2771,7 @@ export default function FbrDataReport() {
                                   color: fontcolor,
                                 }}
                               >
-                                 <td
+                                <td
                                   className="text-center"
                                   title={item.Sr}
                                   style={{
@@ -2900,8 +2903,6 @@ export default function FbrDataReport() {
                                 >
                                   {item.Discount}
                                 </td>
-
-                               
                               </tr>
                             );
                           })}
@@ -2934,12 +2935,10 @@ export default function FbrDataReport() {
                             <td style={bottomeightColWidth}></td>
                             <td style={bottomninthColWidth}></td>
                             <td style={bottomtenthColWidth}></td>
-                         
                           </tr>
                         </>
                       )}
                     </tbody>
-
                   </table>
                 </div>
 
@@ -2959,9 +2958,7 @@ export default function FbrDataReport() {
                       background: getcolor,
                       borderRight: `1px solid ${fontcolor}`,
                     }}
-                  >                   
-                    
-                  </div>
+                  ></div>
                   <div
                     style={{
                       ...bottomfirstColWidth,
@@ -3018,12 +3015,19 @@ export default function FbrDataReport() {
                       background: getcolor,
                       borderRight: `1px solid ${fontcolor}`,
                     }}
+                  ></div>
+                  <div
+                    style={{
+                      ...bottomeightColWidth,
+                      background: getcolor,
+                      borderRight: `1px solid ${fontcolor}`,
+                    }}
                   >
                     <span className="mobileledger_total">{fbrTotalTaxAmt}</span>
                   </div>
                   <div
                     style={{
-                      ...bottomeightColWidth,
+                      ...bottomninthColWidth,
                       background: getcolor,
                       borderRight: `1px solid ${fontcolor}`,
                     }}
@@ -3034,7 +3038,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      ...bottomninthColWidth,
+                      ...bottomtenthColWidth,
                       background: getcolor,
                       borderRight: `1px solid ${fontcolor}`,
                     }}
@@ -3042,17 +3046,6 @@ export default function FbrDataReport() {
                     <span className="mobileledger_total">
                       {fbrTotalDiscount}
                     </span>
-
-                  </div>
-                  <div
-                    style={{
-                      ...bottomtenthColWidth,
-                      background: getcolor,
-                      borderRight: `1px solid ${fontcolor}`,
-                    }}
-                  >
-                   
-                    
                   </div>
                 </div>
               </div>
