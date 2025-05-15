@@ -875,6 +875,7 @@ export default function ItemList() {
     let typecompany = Companyselectdatavalue.label
       ? Companyselectdatavalue.label
       : "ALL";
+      
     let typecapacity = capacityselectdatavalue.label
       ? capacityselectdatavalue.label
       : "ALL";
@@ -917,6 +918,7 @@ export default function ItemList() {
       cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
+
     typeAndStoreRow2.eachCell((cell, colIndex) => {
       cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
