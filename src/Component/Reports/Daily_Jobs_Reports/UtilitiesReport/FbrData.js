@@ -2040,7 +2040,7 @@ export default function FbrDataReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 12 }).map((_, colIndex) => (
+                            {Array.from({ length: 13 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
