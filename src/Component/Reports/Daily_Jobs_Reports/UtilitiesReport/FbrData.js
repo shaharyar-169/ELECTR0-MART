@@ -104,6 +104,7 @@ export default function FbrDataReport() {
     getfromdate,
     gettodate,
     getfontstyle,
+    getposid,
     getdatafontsize,
   } = useTheme();
 
@@ -474,18 +475,18 @@ export default function FbrDataReport() {
     // setIsLoading(true);
     const formData = new URLSearchParams({
       // FInvNum:'139235-110325142719-006803',
-      // code: organisation.code,
-      // FInvNum: selectedInvoice,
-      // FTrnNum: selectedTrnNum,
-      // FTrnTyp: selectedTrnTyp,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FInvNum: selectedInvoice,
+      FTrnNum: selectedTrnNum,
+      FTrnTyp: selectedTrnTyp,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
 
-      FLocCod: "001",
-      code: "NASIRTPOS",
-      FYerDsc: "2021-2025",
-      FTrnNum: "000001",
-      FTrnTyp: "INV",
+      // FLocCod: "001",
+      // code: "NASIRTPOS",
+      // FYerDsc: "2021-2025",
+      // FTrnNum: "000001",
+      // FTrnTyp: "INV",
     }).toString();
 
     axios
@@ -564,11 +565,14 @@ export default function FbrDataReport() {
     const apiUrl = apiLinks + "/SavePOSSale.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      FInvNum: selectedInvoice,
+      FLocCod: locationnumber || getLocationNumber,
+      FTrnNum: selectedTrnNum,
     }).toString();
 
     try {
       const response = await axios.post(apiUrl, formData);
+      console.log(response.data, "response", formData);
+      fetchReceivableReport();
       setmodelshowingdataUpdate(response.data);
       // setopenmodel(true);
       setTimeout(() => {
@@ -1352,10 +1356,10 @@ export default function FbrDataReport() {
   };
 
   const firstColWidth = {
-    width: "8%",
+    width: "5%",
   };
   const secondColWidth = {
-    width: "14%",
+    width: "9%",
   };
   const thirdColWidth = {
     width: "8%",
@@ -1521,6 +1525,12 @@ export default function FbrDataReport() {
       });
     }
   };
+  useEffect(() => {
+  if (Profits.length > 0) {
+    setSelectedIndex(Profits.length - 1); // Select the last row
+  }
+}, [Profits]);
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -1941,9 +1951,9 @@ export default function FbrDataReport() {
                       color: "white",
                     }}
                   >
-                    {/* <td className="border-dark" style={firstColWidth}>
-                      InvNo
-                    </td> */}
+                    <td className="border-dark" style={firstColWidth}>
+                      SrNo
+                    </td>
                     <td className="border-dark" style={secondColWidth}>
                       FBRNo
                     </td>
@@ -2017,7 +2027,7 @@ export default function FbrDataReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="12" className="text-center">
+                        <td colSpan="13" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -2039,7 +2049,7 @@ export default function FbrDataReport() {
                         )
                       )}
                       <tr>
-                        {/* <td style={firstColWidth}></td> */}
+                        <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
@@ -2068,7 +2078,7 @@ export default function FbrDataReport() {
                             onClick={() => {
                               console.log("item", item);
                               setSelectedInvoice(item.InvNo);
-                              setSelectedFBRNO(item.FBRNo);
+                              setSelectedFBRNO(item.FBRNo || "");
                               setSelectedTrnNum(item["Trn#"]);
                               setSelectedTrnTyp(item.Type);
 
@@ -2082,7 +2092,7 @@ export default function FbrDataReport() {
                               color: fontcolor,
                             }}
                           >
-                            {/* <td
+                            <td
                               className="text-start"
                               title={item.InvNo}
                               style={{
@@ -2092,8 +2102,8 @@ export default function FbrDataReport() {
                                 textOverflow: "ellipsis",
                               }}
                             >
-                              {item.InvNo}
-                            </td> */}
+                              {item.SrNo}
+                            </td>
                             <td
                               className="text-start"
                               title={item.FBRNo}
@@ -2255,7 +2265,7 @@ export default function FbrDataReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 12 }).map((_, colIndex) => (
+                          {Array.from({ length: 13 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2263,7 +2273,7 @@ export default function FbrDataReport() {
                         </tr>
                       ))}
                       <tr>
-                        {/* <td style={firstColWidth}></td> */}
+                        <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
@@ -2293,13 +2303,13 @@ export default function FbrDataReport() {
                 width: "101.2%",
               }}
             >
-              {/* <div
+              <div
                 style={{
                   ...firstColWidth,
                   background: getcolor,
                   borderRight: `1px solid ${fontcolor}`,
                 }}
-              ></div> */}
+              ></div>
               <div
                 style={{
                   ...secondColWidth,
@@ -2421,7 +2431,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "35%",
+                      width: "20%",
                       border: `1px solid ${fontcolor} `,
                       padding: "0px",
                       fontSize: getdatafontsize,
@@ -2455,10 +2465,11 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "45%",
+                      width: "30%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
+                      textAlign: "left",
                       padding: "0px",
                     }}
                   >
@@ -2489,7 +2500,7 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "45%",
+                      width: "35%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2557,10 +2568,12 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "45%",
+                      width: "40%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
+                      textAlign: "left",
+
                       padding: "0px",
                     }}
                   >
@@ -2590,10 +2603,11 @@ export default function FbrDataReport() {
                   </div>
                   <div
                     style={{
-                      width: "45%",
+                      width: "30%",
                       border: `1px solid ${fontcolor} `,
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
+                      textAlign: "left",
                       padding: "0px",
                     }}
                   >
@@ -2603,8 +2617,6 @@ export default function FbrDataReport() {
                   </div>
                 </div>
               </div>
-
-
 
               <div style={{ width: "70%", border: "1px solid white" }}>
                 <div
@@ -2670,17 +2682,16 @@ export default function FbrDataReport() {
                           className="border-dark"
                           style={bottomseventhColWidth}
                         >
-                          Tax Rt 
-                                                  </td>
+                          Tax Rt
+                        </td>
                         <td className="border-dark" style={bottomeightColWidth}>
-                        Tax Amt
+                          Tax Amt
                         </td>
                         <td className="border-dark" style={bottomninthColWidth}>
-                        Tot Sale
-
+                          Tot Sale
                         </td>
                         <td className="border-dark" style={bottomtenthColWidth}>
-                        Discont 
+                          Discont
                         </td>
                       </tr>
                     </thead>
@@ -3095,15 +3106,27 @@ export default function FbrDataReport() {
             />
 
             <SingleButton
-              // id="searchsubmit"
               text="Update"
               ref={input3Ref}
               onClick={() => {
-                if (selectedFBRNO !== null && selectedFBRNO.trim() !== "") {
+                // Check if selectedFBRNO is blank/null/undefined
+                if (!selectedFBRNO) {
+                  fetchSaleDataUpdate();
+                  // alert(`1 alert ${selectedFBRNO}`);
+                  // alert(`${getposid}2 alert ${selectedFBRNO}`);
+
+                  return;
+                }
+
+                // Check if first 6 characters match (you need to define what they should match with)
+                // Assuming you want to compare first 6 chars of getposid and selectedFBRNO
+                if (
+                  getposid.substring(0, 6) === selectedFBRNO.substring(0, 6)
+                ) {
                   toast.dismiss();
                   toast.error("Already Updated");
                 } else {
-                  fetchSaleDataUpdate();
+                  toast.error("Problem your FBR Number");
                 }
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
@@ -3130,7 +3153,7 @@ export default function FbrDataReport() {
             <CustomerModalUpdate
               isOpen={openmodelUpdate}
               handleClose={handleCloseModalUpdate}
-              title="FBR DATA"
+              title="FBR DATA UPDATE"
               invoiceData={getmodelshowingdataUpdate}
             /> */}
           </div>
