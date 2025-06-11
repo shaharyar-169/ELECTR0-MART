@@ -38,7 +38,7 @@ export default function TaxSaleRegisterReport() {
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
-    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState('')
+    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [ExclAmount, setExclAmount] = useState(0);
@@ -366,11 +366,10 @@ export default function TaxSaleRegisterReport() {
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FLocCod: saleType,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
-
-
+              code: organisation.code,
+              FLocCod: locationnumber || getLocationNumber,
+              FYerDsc: yeardescription || getyeardescription,
+       
         }).toString();
 
         axios
@@ -406,7 +405,10 @@ export default function TaxSaleRegisterReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+        if (
+            !hasComponentMountedPreviously ||
+            (saleSelectRef && saleSelectRef.current)
+        ) {
             if (saleSelectRef && saleSelectRef.current) {
                 setTimeout(() => {
                     saleSelectRef.current.focus();
@@ -449,11 +451,11 @@ export default function TaxSaleRegisterReport() {
             item.Mobile,
             item.Description,
             item.Qnty,
-            item['Excl Amt'],
+            item["Excl Amt"],
             item.Tax,
-            item['Incl Tax'],
+            item["Incl Tax"],
             item.Discount,
-            item['Sale Amt'],
+            item["Sale Amt"],
         ]);
 
         // Add summary row to the table
@@ -470,11 +472,25 @@ export default function TaxSaleRegisterReport() {
             String(TexAmount),
             String(InchAmount),
             String(Discount),
-            String(Saleamount)
+            String(Saleamount),
         ]);
 
         // Define table column headers and individual column widths
-        const headers = ["Inv#", "Date", "NIC", "NTN", "Customer", "Mobile", "Description", "Qnty", "Excl Amt", "Tax", "Incl Tax", "Discount", "Sale Amt"];
+        const headers = [
+            "Inv#",
+            "Date",
+            "NIC",
+            "NTN",
+            "Customer",
+            "Mobile",
+            "Description",
+            "Qnty",
+            "Excl Amt",
+            "Tax",
+            "Incl Tax",
+            "Discount",
+            "Sale Amt",
+        ];
         const columnWidths = [13, 19, 28, 22, 30, 22, 65, 10, 17, 17, 17, 17, 17];
 
         // Calculate total table width
@@ -573,7 +589,14 @@ export default function TaxSaleRegisterReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 7 || cellIndex === 8 || cellIndex === 9 || cellIndex === 10 || cellIndex === 11 || cellIndex === 12) {
+                    if (
+                        cellIndex === 7 ||
+                        cellIndex === 8 ||
+                        cellIndex === 9 ||
+                        cellIndex === 10 ||
+                        cellIndex === 11 ||
+                        cellIndex === 12
+                    ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -714,7 +737,6 @@ export default function TaxSaleRegisterReport() {
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${search}`, labelsX + 23, labelsY + 8.5); // Draw the value next to the label
 
-
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.setFontSize(10);
@@ -762,7 +784,9 @@ export default function TaxSaleRegisterReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`TaxSaleRegisterReport From ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(
+            `TaxSaleRegisterReport From ${fromInputDate} To ${toInputDate}.pdf`
+        );
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
@@ -773,13 +797,43 @@ export default function TaxSaleRegisterReport() {
 
         const numColumns = 3; // Ensure this matches the actual number of columns
 
-        const columnAlignments = ["left", "left", "left", "left", "left", "left", 'left', "right", "right", "right", "right", "right", "right"];
+        const columnAlignments = [
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+        ];
 
         // Define fonts for different sections
-        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+        const fontCompanyName = {
+            name: "CustomFont" || "CustomFont",
+            size: 18,
+            bold: true,
+        };
+        const fontStoreList = {
+            name: "CustomFont" || "CustomFont",
+            size: getdatafontsize,
+            bold: false,
+        };
+        const fontHeader = {
+            name: "CustomFont" || "CustomFont",
+            size: getdatafontsize,
+            bold: true,
+        };
+        const fontTableContent = {
+            name: "CustomFont" || "CustomFont",
+            size: getdatafontsize,
+            bold: false,
+        };
 
         // Add an empty row at the start
         worksheet.addRow([]);
@@ -792,16 +846,24 @@ export default function TaxSaleRegisterReport() {
         });
 
         worksheet.getRow(companyRow.number).height = 30;
-        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number}`);
+        worksheet.mergeCells(
+            `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
+            }`
+        );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Tax Sale Register From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([
+            `Tax Sale Register From ${fromInputDate} To ${toInputDate}`,
+        ]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
         });
 
-        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number}`);
+        worksheet.mergeCells(
+            `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
+            }`
+        );
 
         // Add an empty row after the title section
         worksheet.addRow([]);
@@ -815,59 +877,95 @@ export default function TaxSaleRegisterReport() {
             typecompany,
             "",
             "",
-            "", ,
+            "",
+            ,
         ]);
 
         // Apply styling for the status row
         typeAndStoreRow.eachCell((cell, colIndex) => {
-            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                bold: [1, 4].includes(colIndex),
+            };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
-
 
         // Header style
         const headerStyle = {
             font: fontHeader,
             alignment: { horizontal: "center", vertical: "middle" },
-            fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-            border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+            fill: {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFC6D9F7" },
+            },
+            border: {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            },
         };
 
         // Add headers
-        const headers = ["Inv#", "Date", "NIC", "NTN", "Customer", "Mobile", "Description", "Qnty", "Excl Amt", "Tax", "Incl Tax", "Discount", "Sale Amt"];
+        const headers = [
+            "Inv#",
+            "Date",
+            "NIC",
+            "NTN",
+            "Customer",
+            "Mobile",
+            "Description",
+            "Qnty",
+            "Excl Amt",
+            "Tax",
+            "Incl Tax",
+            "Discount",
+            "Sale Amt",
+        ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
         // Add data rows
         tableData.forEach((item) => {
-            const row = worksheet.addRow(
-                [
-                    item["Inv#"],
-                    item.Date,
-                    item.NIC,
-                    item.NTN,
-                    item.Customer,
-                    item.Mobile,
-                    item.Description,
-                    item.Qnty,
-                    item['Excl Amt'],
-                    item.Tax,
-                    item['Incl Tax'],
-                    item.Discount,
-                    item['Sale Amt'],
-                ]);
+            const row = worksheet.addRow([
+                item["Inv#"],
+                item.Date,
+                item.NIC,
+                item.NTN,
+                item.Customer,
+                item.Mobile,
+                item.Description,
+                item.Qnty,
+                item["Excl Amt"],
+                item.Tax,
+                item["Incl Tax"],
+                item.Discount,
+                item["Sale Amt"],
+            ]);
 
             row.eachCell((cell, colIndex) => {
                 cell.font = fontTableContent;
-                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-                cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
+                cell.border = {
+                    top: { style: "thin" },
+                    left: { style: "thin" },
+                    bottom: { style: "thin" },
+                    right: { style: "thin" },
+                };
+                cell.alignment = {
+                    horizontal: columnAlignments[colIndex - 1] || "left",
+                    vertical: "middle",
+                };
             });
         });
 
         // Set column widths
-        [11, 12, 18, 14, 30, 15, 40, 15, 15, 15, 15, 15, 15].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
+        [11, 12, 18, 14, 30, 15, 40, 15, 15, 15, 15, 15, 15].forEach(
+            (width, index) => {
+                worksheet.getColumn(index + 1).width = width;
+            }
+        );
 
         const totalRow = worksheet.addRow([
             "",
@@ -882,13 +980,13 @@ export default function TaxSaleRegisterReport() {
             String(TexAmount),
             String(InchAmount),
             String(Discount),
-            String(Saleamount)
+            String(Saleamount),
         ]);
 
         // total row added
 
         totalRow.eachCell((cell, colNumber) => {
-            cell.font = { name: 'CustomFont', size: getdatafontsize, bold: true }; // Apply CustomFont
+            cell.font = { name: "CustomFont", size: getdatafontsize, bold: true }; // Apply CustomFont
             cell.border = {
                 top: { style: "thin" },
                 left: { style: "thin" },
@@ -904,7 +1002,6 @@ export default function TaxSaleRegisterReport() {
                 colNumber === 11 ||
                 colNumber === 12 ||
                 colNumber === 13
-
             ) {
                 cell.alignment = { horizontal: "right" };
             }
@@ -923,8 +1020,13 @@ export default function TaxSaleRegisterReport() {
 
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `TaxSaleRegisterReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        saveAs(
+            blob,
+            `TaxSaleRegisterReport From ${fromInputDate} To ${toInputDate}.xlsx`
+        );
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -964,8 +1066,6 @@ export default function TaxSaleRegisterReport() {
             }
         }
     };
-
-
 
     const DropdownOption = (props) => {
         return (
@@ -1033,11 +1133,10 @@ export default function TaxSaleRegisterReport() {
         }),
     });
 
-
     useEffect(() => {
-        const apiUrl = apiLinks + "/GetActiveAccounts.php";
+        const apiUrl = apiLinks + "/GetActiveUserLocations.php";
         const formData = new URLSearchParams({
-            FLocCod: getLocationNumber,
+            FUsrId: user.tusrid,
             code: organisation.code,
         }).toString();
         axios
@@ -1051,11 +1150,9 @@ export default function TaxSaleRegisterReport() {
     }, []);
 
     const options = supplierList.map((item) => ({
-        value: item.tacccod,
-        label: `${item.tacccod}-${item.taccdsc.trim()}`,
+        value: item.tloccod,
+        label: `${item.tloccod}-${item.tlocdsc.trim()}`,
     }));
-
-
     const firstColWidth = {
         width: "5%",
     };
@@ -1096,8 +1193,6 @@ export default function TaxSaleRegisterReport() {
     const thirteenColWidth = {
         width: "7%",
     };
-
-
 
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
@@ -1261,7 +1356,7 @@ export default function TaxSaleRegisterReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Tex Sale Register Report" />
+                    <NavComponent textdata="Tax Sale Register " />
 
                     <div
                         className="row"
@@ -1272,8 +1367,6 @@ export default function TaxSaleRegisterReport() {
                             display: "flex",
                         }}
                     >
-
-
                         <div
                             style={{
                                 width: "100%",
@@ -1281,10 +1374,9 @@ export default function TaxSaleRegisterReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: 'space-between'
+                                justifyContent: "space-between",
                             }}
                         >
-
                             <div
                                 className="d-flex align-items-center  "
                                 style={{ marginRight: "1px" }}
@@ -1297,8 +1389,14 @@ export default function TaxSaleRegisterReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Account :
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Shop :
                                         </span>{" "}
                                         <br />
                                     </label>
@@ -1319,11 +1417,10 @@ export default function TaxSaleRegisterReport() {
                                                 setCompanyselectdatavalue({
                                                     value: selectedOption.value,
                                                     label: description, // Keep only the description
-
                                                 });
                                             } else {
                                                 setSaleType("");
-                                                setCompanyselectdatavalue('')
+                                                setCompanyselectdatavalue("");
                                             }
                                         }}
                                         components={{ Option: DropdownOption }}
@@ -1435,10 +1532,7 @@ export default function TaxSaleRegisterReport() {
                                 </div>
                             </div>
 
-                            <div
-                                className="d-flex align-items-center"
-
-                            >
+                            <div className="d-flex align-items-center">
                                 <div
                                     style={{
                                         width: "60px",
@@ -1538,7 +1632,10 @@ export default function TaxSaleRegisterReport() {
                                 </div>
                             </div>
 
-                            <div className="d-flex align-items-center justify-content-center" style={{ marginRight: '10px' }}>
+                            <div
+                                className="d-flex align-items-center justify-content-center"
+                                style={{ marginRight: "10px" }}
+                            >
                                 <div className="d-flex align-items-center">
                                     <div
                                         style={{
@@ -1854,16 +1951,33 @@ export default function TaxSaleRegisterReport() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item["Inv#"]}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
+                                                        <td className="text-start"
+                                                            title={item.Date}
+                                                            style={{
+                                                                ...secondColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-start" style={thirdColWidth}>
+                                                        <td className="text-start"
+                                                            title={item.NIC}
+                                                            style={{
+                                                                ...thirdColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
                                                             {item.NIC}
                                                         </td>
                                                         <td className="text-start" style={forthColWidth}>
                                                             {item.NTN}
                                                         </td>
-                                                        <td className="text-start"
+                                                        <td
+                                                            className="text-start"
                                                             title={item.Customer}
                                                             style={{
                                                                 ...fifthColWidth,
@@ -1874,10 +1988,19 @@ export default function TaxSaleRegisterReport() {
                                                         >
                                                             {item.Customer}
                                                         </td>
-                                                        <td className="text-start" style={sixthColWidth}>
+                                                        <td className="text-start" 
+                                                         title={item.Mobile}
+                                                            style={{
+                                                                ...sixthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
                                                             {item.Mobile}
                                                         </td>
-                                                        <td className="text-start"
+                                                        <td
+                                                            className="text-start"
                                                             title={item.Description}
                                                             style={{
                                                                 ...seventhColWidth,
@@ -1892,19 +2015,19 @@ export default function TaxSaleRegisterReport() {
                                                             {item.Qnty}
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item['Excl Amt']}
+                                                            {item["Excl Amt"]}
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
                                                             {item.Tax}
                                                         </td>
                                                         <td className="text-end" style={elewnthColWidth}>
-                                                            {item['Incl Tax']}
+                                                            {item["Incl Tax"]}
                                                         </td>
                                                         <td className="text-end" style={tweltheColWidth}>
                                                             {item.Discount}
                                                         </td>
                                                         <td className="text-end" style={thirteenColWidth}>
-                                                            {item['Sale Amt']}
+                                                            {item["Sale Amt"]}
                                                         </td>
                                                     </tr>
                                                 );
@@ -1985,16 +2108,14 @@ export default function TaxSaleRegisterReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...fifthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
 
                         <div
                             style={{
@@ -2002,8 +2123,7 @@ export default function TaxSaleRegisterReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
 
                         <div
                             style={{
@@ -2011,8 +2131,7 @@ export default function TaxSaleRegisterReport() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-                        </div>
+                        ></div>
 
                         <div
                             style={{
@@ -2072,7 +2191,6 @@ export default function TaxSaleRegisterReport() {
                         >
                             <span className="mobileledger_total">{Saleamount}</span>
                         </div>
-
                     </div>
                     <div
                         style={{

@@ -442,7 +442,7 @@ export default function CategoryListPos() {
      
        const numColumns = 3; // Ensure this matches the actual number of columns
      
-       const columnAlignments = ["left", "left","left", "center",];
+       const columnAlignments = ["left", "left","left","center",];
      
        // Define fonts for different sections
        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
