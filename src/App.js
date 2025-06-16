@@ -110,6 +110,7 @@ import DailySaleReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports
 import DailyPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPurchaseReport.js";
 import DailyJobReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyJobReport.js";
 import DailyCollectionSummary from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCollectionSummary.js";
+import DailySaleReportPosReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySaleReportPos.js";
 
 //////////////////////////// Installments reports //////////////////////////////
 
@@ -241,6 +242,7 @@ function App() {
                 <Route exact path="/ItemEvaluation" element={<ItemEvaluationReport />} />
                 <Route exact path="/DailyJobReport" element={<DailyJobReport />} />
                 <Route exact path="/DailyCollectionSummary" element={<DailyCollectionSummary />} />
+                <Route exact path="/DailySaleReportPOS" element={<DailySaleReportPosReport />} />
 
 
                 {/* Rountes for Installments reports */}
