@@ -32,14 +32,14 @@ export default function EmployeeList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
-      const [isAscendingcode, setisAscendingcode] = useState(true);
-      const [isAscendingemploye, setisAscendingemploye] = useState(true);
-      const [isAscendingsts, setisAscendingsts] = useState(true);
-      
-      const [isAscendingdesig, setisAscendingdesig] = useState(true);
-      const [isAscendingcontect, setisAscendingcontect] = useState(true);
-      const [isAscendingadv, setisAscendingadv] = useState(true);
-      const [isAscendingdlv, setisAscendingdlv] = useState(true);
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+  const [isAscendingemploye, setisAscendingemploye] = useState(true);
+  const [isAscendingsts, setisAscendingsts] = useState(true);
+
+  const [isAscendingdesig, setisAscendingdesig] = useState(true);
+  const [isAscendingcontect, setisAscendingcontect] = useState(true);
+  const [isAscendingadv, setisAscendingadv] = useState(true);
+  const [isAscendingdlv, setisAscendingdlv] = useState(true);
 
   const {
     isSidebarVisible,
@@ -80,10 +80,11 @@ export default function EmployeeList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FEmpSts: transectionType,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+        code: 'NASIRTRD',
+      FLocCod: '001',
       FSchTxt: searchQuery,
-
     }).toString();
 
     axios
@@ -462,69 +463,102 @@ export default function EmployeeList() {
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
-  
+
     const numColumns = 7; // Ensure this matches the actual number of columns
-  
+
     // Define alignment for each column separately
     const columnAlignments = {
-      1: "left",   // Code
-      2: "left",   // Employee
+      1: "left", // Code
+      2: "left", // Employee
       3: "center", // Status
-      4: "left",   // Designation
-      5: "left",  // Contact
+      4: "left", // Designation
+      5: "left", // Contact
       6: "left", // Adv Code
       7: "left", // Dlv Code
     };
-  
+
     // Define fonts for different sections
     const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
-    const fontStoreList = { name: "CustomFont", size: getdatafontsize, bold: false };
-    const fontHeader = { name: "CustomFont", size: getdatafontsize, bold: true };
-    const fontTableContent = { name: "CustomFont", size: getdatafontsize, bold: false };
-  
+    const fontStoreList = {
+      name: "CustomFont",
+      size: getdatafontsize,
+      bold: false,
+    };
+    const fontHeader = {
+      name: "CustomFont",
+      size: getdatafontsize,
+      bold: true,
+    };
+    const fontTableContent = {
+      name: "CustomFont",
+      size: getdatafontsize,
+      bold: false,
+    };
+
     // Add an empty row at the start
     worksheet.addRow([]);
-  
+
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
     companyRow.eachCell((cell) => {
       cell.font = fontCompanyName;
       cell.alignment = { horizontal: "center" };
     });
-  
+
     worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
-  
+    worksheet.mergeCells(
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+      }`
+    );
+
     // Add Store List row
     const storeListRow = worksheet.addRow(["Employee List"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
-  
-    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
-  
+
+    worksheet.mergeCells(
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+      }`
+    );
+
     // Add an empty row after the title section
     worksheet.addRow([]);
-  
-    let typestatus = transectionType === "N" ? "Non-Active" : transectionType === "A" ? "Active" : "All";
+
+    let typestatus =
+      transectionType === "N"
+        ? "Non-Active"
+        : transectionType === "A"
+          ? "Active"
+          : "All";
     let typesearch = searchQuery || "";
-  
+
     const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery ? ["STATUS :", typestatus, "SEARCH :", typesearch] : ["STATUS :", typestatus, ""]
+      searchQuery
+        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+        : ["STATUS :", typestatus, ""]
     );
-  
+
     // Apply styling for the status row
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = { name: "CustomFont", size: getdatafontsize, bold: [1, 3].includes(colIndex) };
+      cell.font = {
+        name: "CustomFont",
+        size: getdatafontsize,
+        bold: [1, 3].includes(colIndex),
+      };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-  
+
     // Header style
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
-      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC6D9F7" },
+      },
       border: {
         top: { style: "thin" },
         left: { style: "thin" },
@@ -532,12 +566,20 @@ export default function EmployeeList() {
         right: { style: "thin" },
       },
     };
-  
+
     // Add headers
-    const headers = ["Code", "Employee", "Status", "Designation", "Contact", "Adv Code", "Dlv Code"];
+    const headers = [
+      "Code",
+      "Employee",
+      "Status",
+      "Designation",
+      "Contact",
+      "Adv Code",
+      "Dlv Code",
+    ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-  
+
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
@@ -549,7 +591,7 @@ export default function EmployeeList() {
         item["Adv Code"],
         item["Dlv Code"],
       ]);
-  
+
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
         cell.border = {
@@ -558,7 +600,7 @@ export default function EmployeeList() {
           bottom: { style: "thin" },
           right: { style: "thin" },
         };
-  
+
         // Apply individual alignment for each column
         cell.alignment = {
           horizontal: columnAlignments[colIndex] || "left",
@@ -566,12 +608,12 @@ export default function EmployeeList() {
         };
       });
     });
-  
+
     // Set column widths
     [10, 40, 8, 30, 14, 14, 14].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-  
+
     // Get current date
     const getCurrentDate = () => {
       const today = new Date();
@@ -580,16 +622,17 @@ export default function EmployeeList() {
       const year = today.getFullYear();
       return `${day}-${month}-${year}`;
     };
-  
+
     const currentdate = getCurrentDate();
-  
+
     // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     saveAs(blob, `EmployeeList As On ${currentdate}.xlsx`);
   };
-  
-  
+
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -611,48 +654,6 @@ export default function EmployeeList() {
   };
 
   let totalEntries = 0;
-
- 
-
-  const handleSorting = async (col) => {
-    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
-  
-    const parseValue = (value) => {
-      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
-    };
-  
-    const sorted = [...tableData].sort((a, b) => {
-      const aValue = parseValue(a[col]);
-      const bValue = parseValue(b[col]);
-  
-      if (!isNaN(aValue) && !isNaN(bValue)) {
-        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
-      } else {
-        return newSortOrder === "ASC"
-          ? String(aValue).localeCompare(String(bValue))
-          : String(bValue).localeCompare(String(aValue)); // String sorting
-      }
-    });
-  
-    setTableData(sorted);
-    setSortData(newSortOrder); // Update sort order
-  
-    const columnMappings = {
-      "Code": setisAscendingcode,
-      "Employee": setisAscendingemploye,
-      "Status": setisAscendingsts,
-      "Designation": setisAscendingdesig,
-      "COntact #": setisAscendingcontect,
-      "Adv Code": setisAscendingadv,
-      "Exp Code": setisAscendingdlv,
-    };
-  
-    if (columnMappings[col]) {
-      columnMappings[col](newSortOrder === "ASC");
-    }
-  };
-  
-
 
   const firstColWidth = {
     width: "6.5%",
@@ -783,6 +784,217 @@ export default function EmployeeList() {
     }
   }, [selectedIndex]);
 
+  const [columns, setColumns] = useState({
+    Code: [],
+    Employee: [],
+    Status: [],
+    Designation: [],
+    "COntact #": [],
+    "Adv Code": [],
+    "Dlv Code": []
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Code: "ASC",
+    Employee: "ASC",
+    Status: "ASC",
+    Designation: "ASC",
+    "COntact #": "ASC",
+    "Adv Code": "ASC",
+    "Dlv Code": "ASC"
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Code: tableData.map(row => row.Code),
+        Employee: tableData.map(row => row.Employee),
+        Status: tableData.map(row => row.Status),
+        Designation: tableData.map(row => row.Designation),
+        "COntact #": tableData.map(row => row["COntact #"]),
+        "Adv Code": tableData.map(row => row["Adv Code"]),
+        "Dlv Code": tableData.map(row => row["Dlv Code"])
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const columnData = [...columns[col]];
+
+    columnData.sort((a, b) => {
+      const aValue = a !== null ? a.toString() : "";
+      const bValue = b !== null ? b.toString() : "";
+
+      const numA = parseFloat(aValue.replace(/,/g, ""));
+      const numB = parseFloat(bValue.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+    });
+
+    // Update only the clicked column's data
+    setColumns((prev) => ({
+      ...prev,
+      [col]: columnData,
+    }));
+
+    // Reset all columns' sort order except the current one
+    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {});
+    setColumnSortOrders(resetSortOrders);
+  };
+
+
+
+ const renderTableData = () => {
+  const rowCount = Math.max(
+    columns.Code.length,
+    columns.Employee.length,
+    columns.Status.length,
+    columns.Designation.length,
+    columns["COntact #"].length,
+    columns["Adv Code"].length,
+    columns["Dlv Code"].length
+  );
+
+  const rows = [];
+  for (let i = 0; i < rowCount; i++) {
+    rows.push({
+      Code: columns.Code[i],
+      Employee: columns.Employee[i],
+      Status: columns.Status[i],
+      Designation: columns.Designation[i],
+      "COntact #": columns["COntact #"][i],
+      "Adv Code": columns["Adv Code"][i],
+      "Dlv Code": columns["Dlv Code"][i]
+    });
+  }
+
+  return (
+    <>
+      {isLoading ? (
+        <>
+          <tr style={{ backgroundColor: getcolor }}>
+            <td colSpan="7" className="text-center">
+              <Spinner animation="border" variant="primary" />
+            </td>
+          </tr>
+          {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+            <tr
+              key={`blank-${rowIndex}`}
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              {Array.from({ length: 7 }).map((_, colIndex) => (
+                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+              ))}
+            </tr>
+          ))}
+          <tr>
+            <td style={firstColWidth}></td>
+            <td style={secondColWidth}></td>
+            <td style={thirdColWidth}></td>
+            <td style={forthColWidth}></td>
+            <td style={fifthColWidth}></td>
+            <td style={sixthColWidth}></td>
+            <td style={seventhColWidth}></td>
+          </tr>
+        </>
+      ) : (
+        <>
+          {rows.map((item, i) => {
+            totalEnteries += 1;
+            return (
+              <tr
+                key={`${i}-${selectedIndex}`}
+                ref={(el) => (rowRefs.current[i] = el)}
+                onClick={() => handleRowClick(i)}
+                className={selectedIndex === i ? "selected-background" : ""}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                <td className="text-start" style={firstColWidth}>
+                  {item.Code}
+                </td>
+                <td className="text-start" style={secondColWidth}>
+                  {item.Employee}
+                </td>
+                <td className="text-center" style={thirdColWidth}>
+                  {item.Status}
+                </td>
+                <td className="text-start" style={forthColWidth}>
+                  {item.Designation}
+                </td>
+                <td className="text-start" style={fifthColWidth}>
+                  {item["COntact #"]}
+                </td>
+                <td className="text-start" style={sixthColWidth}>
+                  {item["Adv Code"]}
+                </td>
+                <td className="text-start" style={seventhColWidth}>
+                  {item["Dlv Code"]}
+                </td>
+              </tr>
+            );
+          })}
+          {Array.from({
+            length: Math.max(0, 27 - rows.length),
+          }).map((_, rowIndex) => (
+            <tr
+              key={`blank-${rowIndex}`}
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              {Array.from({ length: 7 }).map((_, colIndex) => (
+                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+              ))}
+            </tr>
+          ))}
+          <tr>
+            <td style={firstColWidth}></td>
+            <td style={secondColWidth}></td>
+            <td style={thirdColWidth}></td>
+            <td style={forthColWidth}></td>
+            <td style={fifthColWidth}></td>
+            <td style={sixthColWidth}></td>
+            <td style={seventhColWidth}></td>
+          </tr>
+        </>
+      )}
+    </>
+  );
+};
+
+  const getIconStyle = (colKey) => ({
+    transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+    color: columnSortOrders[colKey]
+      ? columnSortOrders[colKey] === "ASC"
+        ? "white"
+        : "red"
+      : "white", // default to white if no sort
+    transition: "transform 0.3s ease, color 0.3s ease",
+  });
+
+
+
   return (
     <>
       <div style={contentStyle}>
@@ -878,36 +1090,56 @@ export default function EmployeeList() {
                     Search :
                   </span>{" "}
                 </label>
-                <input
-                  ref={input2Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                  type="text"
-                  id="searchsubmit"
-                  placeholder="Item description"
-                  value={searchQuery}
-                  autoComplete="off"
-                  style={{
-                    marginRight: "20px",
-                    width: "200px",
-                    height: "24px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    outline: "none",
-                    paddingLeft: "10px",
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  onChange={(e) =>
-                    setSearchQuery((e.target.value || "").toUpperCase())
-                  }
-                />
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input2Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "200px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -941,115 +1173,88 @@ export default function EmployeeList() {
                     backgroundColor: tableHeadColor,
                   }}
                 >
-                  <tr
-                    style={{
-                      backgroundColor: tableHeadColor,
-                      color: "white",
-                    }}
-                  >
+                  <tr style={{ backgroundColor: tableHeadColor, color: "white" }}>
                     <td
                       className="border-dark"
                       style={firstColWidth}
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingcode ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
-
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={secondColWidth}
                       onClick={() => handleSorting("Employee")}
                     >
                       Employee{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingemploye ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingemploye ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
-
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Employee")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={thirdColWidth}
                       onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingsts ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
-
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Status")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={forthColWidth}
                       onClick={() => handleSorting("Designation")}
                     >
                       Designation{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingdesig ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingdesig ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
-
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Designation")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={fifthColWidth}
                       onClick={() => handleSorting("COntact #")}
                     >
                       Contact{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingcontect ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingcontect ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
-
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("COntact #")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={sixthColWidth}
                       onClick={() => handleSorting("Adv Code")}
                     >
                       Adv Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingadv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingadv ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
-
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Adv Code")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={seventhColWidth}
-                      onClick={() => handleSorting("Exp Code")}
+                      onClick={() => handleSorting("Dlv Code")}
                     >
                       Dlv Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingdlv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingdlv ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
-
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Dlv Code")}
                       ></i>
                     </td>
                   </tr>
@@ -1078,113 +1283,7 @@ export default function EmployeeList() {
                 }}
               >
                 <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="7" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 7 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        )
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.Code}
-                            </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Employee}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Status}
-                            </td>
-                            <td className="text-start" style={forthColWidth}>
-                              {item.Designation}
-                            </td>
-                            <td className="text-start" style={fifthColWidth}>
-                              {item["COntact #"]}
-                            </td>
-                            <td className="text-start" style={sixthColWidth}>
-                              {item["Adv Code"]}
-                            </td>
-                            <td className="text-start" style={seventhColWidth}>
-                              {item["Dlv Code"]}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 7 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                      </tr>
-                    </>
-                  )}
+                  {renderTableData()}
                 </tbody>
               </table>
             </div>
