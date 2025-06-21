@@ -65,8 +65,6 @@ export default function ItemList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
-
-
   const [isAscendingcode, setisAscendingcode] = useState(true);
   const [isAscendingemploye, setisAscendingemploye] = useState(true);
   const [isAscendingsts, setisAscendingsts] = useState(true);
@@ -106,12 +104,12 @@ export default function ItemList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FItmSts: transectionType,
-      FCtgCod: Companyselectdata,
+      FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FTypCod: Typeselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+      FYerDsc: yeardescription || getyeardescription,
 
       FCmpCod: Companyselectdata,
       FSchTxt: searchQuery,
@@ -172,7 +170,6 @@ export default function ItemList() {
       }
     }
   };
-  
   const handlecategoryKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = saleSelectRef.current.state.selectValue;
@@ -245,7 +242,6 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetCompany.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -273,7 +269,6 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetCapacity.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -302,7 +297,6 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetCatg.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -331,7 +325,6 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetType.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -842,10 +835,26 @@ export default function ItemList() {
     const columnAlignments = ["left", "left", "left", "left", "left", "left"];
 
     // Define fonts for different sections
-    const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-    const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
+    const fontCompanyName = {
+      name: "CustomFont" || "CustomFont",
+      size: 18,
+      bold: true,
+    };
+    const fontStoreList = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+    const fontHeader = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: true,
+    };
+    const fontTableContent = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
 
     // Add an empty row at the start
     worksheet.addRow([]);
@@ -858,7 +867,10 @@ export default function ItemList() {
     });
 
     worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+    worksheet.mergeCells(
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+      }`
+    );
 
     // Add Store List row
     const storeListRow = worksheet.addRow(["Item List"]);
@@ -867,7 +879,10 @@ export default function ItemList() {
       cell.alignment = { horizontal: "center" };
     });
 
-    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+    worksheet.mergeCells(
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+      }`
+    );
 
     // Add an empty row after the title section
     worksheet.addRow([]);
@@ -875,7 +890,6 @@ export default function ItemList() {
     let typecompany = Companyselectdatavalue.label
       ? Companyselectdatavalue.label
       : "ALL";
-      
     let typecapacity = capacityselectdatavalue.label
       ? capacityselectdatavalue.label
       : "ALL";
@@ -915,16 +929,27 @@ export default function ItemList() {
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 4].includes(colIndex),
+      };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-
     typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 4].includes(colIndex),
+      };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 4].includes(colIndex) };
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 4].includes(colIndex),
+      };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
@@ -932,8 +957,17 @@ export default function ItemList() {
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
-      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-      border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC6D9F7" },
+      },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
     };
 
     // Add headers
@@ -943,7 +977,8 @@ export default function ItemList() {
       "Company",
       "Category",
       "Capacity",
-      "Type",];
+      "Type",
+    ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
@@ -955,12 +990,21 @@ export default function ItemList() {
         item.Company,
         item.Category,
         item.Capacity,
-        item.Type,]);
+        item.Type,
+      ]);
 
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
-        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-        cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = {
+          horizontal: columnAlignments[colIndex - 1] || "left",
+          vertical: "middle",
+        };
       });
     });
 
@@ -982,7 +1026,9 @@ export default function ItemList() {
 
     // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     saveAs(blob, `ItemList As On ${currentdate}.xlsx`);
   };
 
@@ -1008,43 +1054,6 @@ export default function ItemList() {
 
   let totalEntries = 0;
 
-  const handleSorting = async (col) => {
-    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
-  
-    const parseValue = (value) => {
-      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
-    };
-  
-    const sorted = [...tableData].sort((a, b) => {
-      const aValue = parseValue(a[col]);
-      const bValue = parseValue(b[col]);
-  
-      if (!isNaN(aValue) && !isNaN(bValue)) {
-        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
-      } else {
-        return newSortOrder === "ASC"
-          ? String(aValue).localeCompare(String(bValue))
-          : String(bValue).localeCompare(String(aValue)); // String sorting
-      }
-    });
-  
-    setTableData(sorted);
-    setSortData(newSortOrder); // Update sort order
-  
-    const columnMappings = {
-      "Code": setisAscendingcode,
-      "Description": setisAscendingemploye,
-      "Company": setisAscendingsts,
-      "Category": setisAscendingdesig,
-      "Capacity": setisAscendingcontect,
-      "Type": setisAscendingadv,
- 
-    };
-  
-    if (columnMappings[col]) {
-      columnMappings[col](newSortOrder === "ASC");
-    }
-  };
 
   const firstColWidth = {
     width: "14%",
@@ -1171,6 +1180,276 @@ export default function ItemList() {
       });
     }
   }, [selectedIndex]);
+
+  const [columns, setColumns] = useState({
+    Code: [],
+    Description: [],
+    Company: [],
+    Category: [],
+    Capacity: [],
+    Type: []
+  });
+
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Code: "ASC",
+    Description: "ASC",
+    Company: "ASC",
+    Category: "ASC",
+    Capacity: "ASC",
+    Type: "ASC"
+  });
+
+  // Transform table data into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Code: tableData.map(row => row.Code),
+        Description: tableData.map(row => row.Description),
+        Company: tableData.map(row => row.Company),
+        Category: tableData.map(row => row.Category),
+        Capacity: tableData.map(row => row.Capacity),
+        Type: tableData.map(row => row.Type)
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const columnData = [...columns[col]];
+
+    columnData.sort((a, b) => {
+      const aValue = a !== null ? a.toString() : "";
+      const bValue = b !== null ? b.toString() : "";
+
+      const numA = parseFloat(aValue.replace(/,/g, ""));
+      const numB = parseFloat(bValue.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+    });
+
+    // Update only the clicked column's data
+    setColumns((prev) => ({
+      ...prev,
+      [col]: columnData,
+    }));
+
+    // Reset all columns' sort order except the current one
+    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {});
+    setColumnSortOrders(resetSortOrders);
+  };
+
+
+const renderTableData = () => {
+  const rowCount = Math.max(
+    columns.Code?.length || 0,
+    columns.Description?.length || 0,
+    columns.Company?.length || 0,
+    columns.Category?.length || 0,
+    columns.Capacity?.length || 0,
+    columns.Type?.length || 0
+  );
+
+  const rows = [];
+  for (let i = 0; i < rowCount; i++) {
+    rows.push({
+      Code: columns.Code[i],
+      Description: columns.Description[i],
+      Company: columns.Company[i],
+      Category: columns.Category[i],
+      Capacity: columns.Capacity[i],
+      Type: columns.Type[i]
+    });
+  }
+
+  return (
+    <>
+      {isLoading ? (
+        <>
+          <tr style={{ backgroundColor: getcolor }}>
+            <td colSpan="6" className="text-center">
+              <Spinner animation="border" variant="primary" />
+            </td>
+          </tr>
+          {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+            <tr
+              key={`blank-${rowIndex}`}
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              {Array.from({ length: 6 }).map((_, colIndex) => (
+                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+              ))}
+            </tr>
+          ))}
+          <tr>
+            <td style={firstColWidth}></td>
+            <td style={secondColWidth}></td>
+            <td style={thirdColWidth}></td>
+            <td style={forthColWidth}></td>
+            <td style={fifthColWidth}></td>
+            <td style={sixthColWidth}></td>
+          </tr>
+        </>
+      ) : (
+        <>
+          {rows.map((item, i) => {
+            totalEnteries += 1;
+            return (
+              <tr
+                key={`${i}-${selectedIndex}`}
+                ref={(el) => (rowRefs.current[i] = el)}
+                onClick={() => handleRowClick(i)}
+                className={selectedIndex === i ? "selected-background" : ""}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                <td
+                  className="text-start"
+                  title={item.Code}
+                  style={{
+                    ...firstColWidth,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.Code}
+                </td>
+                <td
+                  className="text-start"
+                  title={item.Description}
+                  style={{
+                    ...secondColWidth,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.Description}
+                </td>
+                <td
+                  className="text-start"
+                  title={item.Company}
+                  style={{
+                    ...thirdColWidth,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.Company}
+                </td>
+                <td
+                  className="text-start"
+                  title={item.Category}
+                  style={{
+                    ...forthColWidth,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.Category}
+                </td>
+                <td
+                  className="text-start"
+                  title={item.Capacity}
+                  style={{
+                    ...fifthColWidth,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.Capacity}
+                </td>
+                <td
+                  className="text-start"
+                  title={item.Type}
+                  style={{
+                    ...sixthColWidth,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.Type}
+                </td>
+              </tr>
+            );
+          })}
+          {Array.from({
+            length: Math.max(0, 27 - rows.length),
+          }).map((_, rowIndex) => (
+            <tr
+              key={`blank-${rowIndex}`}
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              {Array.from({ length: 6 }).map((_, colIndex) => (
+                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+              ))}
+            </tr>
+          ))}
+          <tr>
+            <td style={firstColWidth}></td>
+            <td style={secondColWidth}></td>
+            <td style={thirdColWidth}></td>
+            <td style={forthColWidth}></td>
+            <td style={fifthColWidth}></td>
+            <td style={sixthColWidth}></td>
+          </tr>
+        </>
+      )}
+    </>
+  );
+};
+
+// Reusable Column Cell Component
+const ColumnCell = ({ value, style, title }) => (
+  <td
+    className="text-start"
+    title={title}
+    style={{
+      ...style,
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    }}
+  >
+    {value}
+  </td>
+);
+
+  const getIconStyle = (colKey) => ({
+    transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+    color: columnSortOrders[colKey]
+      ? columnSortOrders[colKey] === "ASC"
+        ? "white"
+        : "red"
+      : "white", // default to white if no sort
+    transition: "transform 0.3s ease, color 0.3s ease",
+  });
+
 
   return (
     <>
@@ -1522,36 +1801,56 @@ export default function ItemList() {
                     Search :
                   </span>{" "}
                 </label>
-                <input
-                  ref={input5Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input6Ref)}
-                  type="text"
-                  id="searchsubmit"
-                  placeholder="Item description"
-                  value={searchQuery}
-                  autoComplete="off"
-                  style={{
-                    marginRight: "20px",
-                    width: "250px",
-                    height: "24px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    outline: "none",
-                    paddingLeft: "10px",
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  onChange={(e) =>
-                    setSearchQuery((e.target.value || "").toUpperCase())
-                  }
-                />
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input5Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input6Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "250px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1587,94 +1886,76 @@ export default function ItemList() {
                     backgroundColor: tableHeadColor,
                   }}
                 >
-                  <tr
-                    style={{
-                      backgroundColor: tableHeadColor,
-                      color: "white",
-                    }}
-                  >
+                  <tr style={{ backgroundColor: tableHeadColor, color: "white" }}>
                     <td
                       className="border-dark"
                       style={firstColWidth}
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingcode ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={secondColWidth}
                       onClick={() => handleSorting("Description")}
                     >
                       Description{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingemploye ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingemploye ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={thirdColWidth}
                       onClick={() => handleSorting("Company")}
                     >
                       Company{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingsts ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Company")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={forthColWidth}
                       onClick={() => handleSorting("Category")}
                     >
                       Category{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingdesig ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingdesig ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Category")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={fifthColWidth}
                       onClick={() => handleSorting("Capacity")}
                     >
                       Capacity{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingcontect ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingcontect ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Capacity")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={sixthColWidth}
                       onClick={() => handleSorting("Type")}
                     >
                       Type{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingadv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingadv ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Type")}
                       ></i>
                     </td>
                   </tr>
@@ -1700,172 +1981,11 @@ export default function ItemList() {
                   fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
-                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}), 
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="6" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 6 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        )
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            <td
-                              className="text-start"
-                              title={item.Code}
-                              style={{
-                                ...firstColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.Code}
-                            </td>
-
-                            <td
-                              className="text-start"
-                              title={item.Description}
-                              style={{
-                                ...secondColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.Description}
-                            </td>
-
-                            <td
-                              className="text-start"
-                              title={item.Company}
-                              style={{
-                                ...thirdColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.Company}
-                            </td>
-
-                            <td
-                              className="text-start"
-                              title={item.Category}
-                              style={{
-                                ...forthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.Category}
-                            </td>
-
-                            <td
-                              className="text-start"
-                              title={item.Capacity}
-                              style={{
-                                ...fifthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.Capacity}
-                            </td>
-
-                            <td
-                              className="text-start"
-                              title={item.Type}
-                              style={{
-                                ...sixthColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.Type}
-                            </td>
-                          </tr>
-                        );
-                      })}
-
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 6 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                      </tr>
-                    </>
-                  )}
+                  {renderTableData()}
                 </tbody>
               </table>
             </div>

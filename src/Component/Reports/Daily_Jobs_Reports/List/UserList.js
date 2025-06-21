@@ -32,16 +32,14 @@ export default function UserList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
-
-        const [isAscendingcode, setisAscendingcode] = useState(true);
-        const [isAscendingemploye, setisAscendingemploye] = useState(true);
-        const [isAscendingsts, setisAscendingsts] = useState(true);
-        const [isAscendingdesig, setisAscendingdesig] = useState(true);
-        const [isAscendingcontect, setisAscendingcontect] = useState(true);
-        const [isAscendingadv, setisAscendingadv] = useState(true);
-        const [isAscendingdlv, setisAscendingdlv] = useState(true);
-        const [isAscendingdate, setisAscendingdate] = useState(true);
-       
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+  const [isAscendingemploye, setisAscendingemploye] = useState(true);
+  const [isAscendingsts, setisAscendingsts] = useState(true);
+  const [isAscendingdesig, setisAscendingdesig] = useState(true);
+  const [isAscendingcontect, setisAscendingcontect] = useState(true);
+  const [isAscendingadv, setisAscendingadv] = useState(true);
+  const [isAscendingdlv, setisAscendingdlv] = useState(true);
+  const [isAscendingdate, setisAscendingdate] = useState(true);
 
   const {
     isSidebarVisible,
@@ -84,6 +82,7 @@ export default function UserList() {
       FUsrSts: transectionType,
       code: organisation.code,
       FLocCod: getLocationNumber || locationnumber,
+
       FSchTxt: searchQuery,
     }).toString();
 
@@ -384,8 +383,8 @@ export default function UserList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
+              ? "ACTIVE"
+              : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -456,126 +455,182 @@ export default function UserList() {
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-   const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-      
-        const numColumns = 3; // Ensure this matches the actual number of columns
-      
-        const columnAlignments = [ 
-          "left",
-          "left",
-          "center",
-          "center",
-          "left",
-          "left",
-          "left",
-          "center",];
-      
-        // Define fonts for different sections
-        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-      
-        // Add an empty row at the start
-        worksheet.addRow([]);
-      
-        // Add company name
-        const companyRow = worksheet.addRow([comapnyname]);
-        companyRow.eachCell((cell) => {
-          cell.font = fontCompanyName;
-          cell.alignment = { horizontal: "center" };
-        });
-      
-        worksheet.getRow(companyRow.number).height = 30;
-        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number}`);
-      
-        // Add Store List row
-        const storeListRow = worksheet.addRow(["User List"]);
-        storeListRow.eachCell((cell) => {
-          cell.font = fontStoreList;
-          cell.alignment = { horizontal: "center" };
-        });
-      
-        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number}`);
-      
-        // Add an empty row after the title section
-        worksheet.addRow([]);
-      
-        let typestatus = transectionType === "N" ? "Non-Active" : transectionType === "A" ? "Active" : "All";
-        let typesearch = searchQuery || "";
-      
-        const typeAndStoreRow3 = worksheet.addRow(
-          searchQuery
-          ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-          : ["STATUS :", typestatus, ""]    );
-      
-        // Apply styling for the status row
-        typeAndStoreRow3.eachCell((cell, colIndex) => {
-          cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
-          cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
-      
-        // Header style
-        const headerStyle = {
-          font: fontHeader,
-          alignment: { horizontal: "center", vertical: "middle" },
-          fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-          border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
-        };
-      
-        // Add headers
-        const headers = ["ID",
+  const handleDownloadCSV = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    const numColumns = 3; // Ensure this matches the actual number of columns
+
+    const columnAlignments = [
+      "left",
+      "left",
+      "center",
+      "center",
+      "left",
+      "left",
+      "left",
+      "center",
+    ];
+
+    // Define fonts for different sections
+    const fontCompanyName = {
+      name: "CustomFont" || "CustomFont",
+      size: 18,
+      bold: true,
+    };
+    const fontStoreList = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+    const fontHeader = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: true,
+    };
+    const fontTableContent = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+
+    // Add an empty row at the start
+    worksheet.addRow([]);
+
+    // Add company name
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(
+      `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
+      }`
+    );
+
+    // Add Store List row
+    const storeListRow = worksheet.addRow(["User List"]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.mergeCells(
+      `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
+      }`
+    );
+
+    // Add an empty row after the title section
+    worksheet.addRow([]);
+
+    let typestatus =
+      transectionType === "N"
+        ? "Non-Active"
+        : transectionType === "A"
+          ? "Active"
+          : "All";
+    let typesearch = searchQuery || "";
+
+    const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery
+        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+        : ["STATUS :", typestatus, ""]
+    );
+
+    // Apply styling for the status row
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 3].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+
+    // Header style
+    const headerStyle = {
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC6D9F7" },
+      },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    // Add headers
+    const headers = [
+      "ID",
       "Name",
       "Status",
       "Type",
       "Mobile",
       "Email",
       "Log Date",
-      "Log Time",];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-      
-        // Add data rows
-        tableData.forEach((item) => {
-          const row = worksheet.addRow([item.ID,
-            item.Name,
-            item.Status,
-            item.Type,
-            item.Mobile,
-            item.Email,
-            item["Log Date"],
-            item["Log Time"],]);
-      
-          row.eachCell((cell, colIndex) => {
-            cell.font = fontTableContent;
-            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-            cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
-          });
-        });
-      
-        // Set column widths
-        [10, 40, 10, 10, 15, 25, 13, 12].forEach((width, index) => {
-          worksheet.getColumn(index + 1).width = width;
-        });
-      
-        // Get current date
-        const getCurrentDate = () => {
-          const today = new Date();
-          const day = String(today.getDate()).padStart(2, "0");
-          const month = String(today.getMonth() + 1).padStart(2, "0");
-          const year = today.getFullYear();
-          return `${day}-${month}-${year}`;
+      "Log Time",
+    ];
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    // Add data rows
+    tableData.forEach((item) => {
+      const row = worksheet.addRow([
+        item.ID,
+        item.Name,
+        item.Status,
+        item.Type,
+        item.Mobile,
+        item.Email,
+        item["Log Date"],
+        item["Log Time"],
+      ]);
+
+      row.eachCell((cell, colIndex) => {
+        cell.font = fontTableContent;
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
-      
-        const currentdate = getCurrentDate();
-      
-        // Generate and save the Excel file
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `UserList As On ${currentdate}.xlsx`);
-      };
+        cell.alignment = {
+          horizontal: columnAlignments[colIndex - 1] || "left",
+          vertical: "middle",
+        };
+      });
+    });
+
+    // Set column widths
+    [10, 40, 10, 10, 15, 25, 13, 12].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
+    // Get current date
+    const getCurrentDate = () => {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+
+    const currentdate = getCurrentDate();
+
+    // Generate and save the Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `UserList As On ${currentdate}.xlsx`);
+  };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -598,52 +653,13 @@ export default function UserList() {
 
   let totalEntries = 0;
 
-  const handleSorting = async (col) => {
-    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
-  
-    const parseValue = (value) => {
-      return value ? parseFloat(value.toString().replace(/,/g, "")) || value : ""; // Remove commas, parse numbers, fallback to original value
-    };
-  
-    const sorted = [...tableData].sort((a, b) => {
-      const aValue = parseValue(a[col]);
-      const bValue = parseValue(b[col]);
-  
-      if (!isNaN(aValue) && !isNaN(bValue)) {
-        return newSortOrder === "ASC" ? aValue - bValue : bValue - aValue; // Numeric sorting
-      } else {
-        return newSortOrder === "ASC"
-          ? String(aValue).localeCompare(String(bValue))
-          : String(bValue).localeCompare(String(aValue)); // String sorting
-      }
-    });
-  
-    setTableData(sorted);
-    setSortData(newSortOrder); // Update sort order
-  
-    const columnMappings = {
-      "ID": setisAscendingcode,
-      "Name": setisAscendingemploye,
-      "Status": setisAscendingsts,
-      "Type": setisAscendingdesig,
-      "Mobile": setisAscendingcontect,
-      "Email": setisAscendingadv,
-      "Log Date": setisAscendingdlv,
-      "Log Time": setisAscendingdate,
-     
-    };
-  
-    if (columnMappings[col]) {
-      columnMappings[col](newSortOrder === "ASC");
-    }
-  };
-  
+
 
   const firstColWidth = {
     width: "10%",
   };
   const secondColWidth = {
-    width: "23%",
+    width: "20%",
   };
   const thirdColWidth = {
     width: "8.2%",
@@ -655,7 +671,7 @@ export default function UserList() {
     width: "11%",
   };
   const sixthColWidth = {
-    width: "16.5%",
+    width: "19.5%",
   };
   const seventhColWidth = {
     width: "10%",
@@ -771,6 +787,224 @@ export default function UserList() {
     }
   }, [selectedIndex]);
 
+  const [columns, setColumns] = useState({
+    ID: [],
+    Name: [],
+    Status: [],
+    Type: [],
+    Mobile: [],
+    Email: [],
+    "Log Date": [],
+    "Log Time": []
+  });
+
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    ID: "ASC",
+    Name: "ASC",
+    Status: "ASC",
+    Type: "ASC",
+    Mobile: "ASC",
+    Email: "ASC",
+    "Log Date": "ASC",
+    "Log Time": "ASC"
+  });
+
+  // Transform table data into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        ID: tableData.map(row => row.ID),
+        Name: tableData.map(row => row.Name),
+        Status: tableData.map(row => row.Status),
+        Type: tableData.map(row => row.Type),
+        Mobile: tableData.map(row => row.Mobile),
+        Email: tableData.map(row => row.Email),
+        "Log Date": tableData.map(row => row["Log Date"]),
+        "Log Time": tableData.map(row => row["Log Time"])
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const columnData = [...columns[col]];
+
+    columnData.sort((a, b) => {
+      const aValue = a !== null ? a.toString() : "";
+      const bValue = b !== null ? b.toString() : "";
+
+      const numA = parseFloat(aValue.replace(/,/g, ""));
+      const numB = parseFloat(bValue.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+    });
+
+    // Update only the clicked column's data
+    setColumns((prev) => ({
+      ...prev,
+      [col]: columnData,
+    }));
+
+    // Reset all columns' sort order except the current one
+    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {});
+    setColumnSortOrders(resetSortOrders);
+  };
+
+  const renderTableData = () => {
+  const rowCount = Math.max(
+    columns.ID?.length || 0,
+    columns.Name?.length || 0,
+    columns.Status?.length || 0,
+    columns.Type?.length || 0,
+    columns.Mobile?.length || 0,
+    columns.Email?.length || 0,
+    columns["Log Date"]?.length || 0,
+    columns["Log Time"]?.length || 0
+  );
+
+  const rows = [];
+  for (let i = 0; i < rowCount; i++) {
+    rows.push({
+      ID: columns.ID[i],
+      Name: columns.Name[i],
+      Status: columns.Status[i],
+      Type: columns.Type[i],
+      Mobile: columns.Mobile[i],
+      Email: columns.Email[i],
+      "Log Date": columns["Log Date"][i],
+      "Log Time": columns["Log Time"][i]
+    });
+  }
+
+  return (
+    <>
+      {isLoading ? (
+        <>
+          <tr style={{ backgroundColor: getcolor }}>
+            <td colSpan="8" className="text-center">
+              <Spinner animation="border" variant="primary" />
+            </td>
+          </tr>
+          {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+            <tr
+              key={`blank-${rowIndex}`}
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              {Array.from({ length: 8 }).map((_, colIndex) => (
+                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+              ))}
+            </tr>
+          ))}
+          <tr>
+            <td style={firstColWidth}></td>
+            <td style={secondColWidth}></td>
+            <td style={thirdColWidth}></td>
+            <td style={forthColWidth}></td>
+            <td style={fifthColWidth}></td>
+            <td style={sixthColWidth}></td>
+            <td style={seventhColWidth}></td>
+            <td style={eightColWidth}></td>
+          </tr>
+        </>
+      ) : (
+        <>
+          {rows.map((item, i) => {
+            totalEnteries += 1;
+            return (
+              <tr
+                key={`${i}-${selectedIndex}`}
+                ref={(el) => (rowRefs.current[i] = el)}
+                onClick={() => handleRowClick(i)}
+                className={selectedIndex === i ? "selected-background" : ""}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                <td className="text-start" style={firstColWidth}>
+                  {item.ID}
+                </td>
+                <td className="text-start" style={secondColWidth}>
+                  {item.Name}
+                </td>
+                <td className="text-center" style={thirdColWidth}>
+                  {item.Status}
+                </td>
+                <td className="text-center" style={forthColWidth}>
+                  {item.Type}
+                </td>
+                <td className="text-start" style={fifthColWidth}>
+                  {item.Mobile}
+                </td>
+                <td className="text-start" style={sixthColWidth}>
+                  {item.Email}
+                </td>
+                <td className="text-start" style={seventhColWidth}>
+                  {item["Log Date"]}
+                </td>
+                <td className="text-start" style={eightColWidth}>
+                  {item["Log Time"]}
+                </td>
+              </tr>
+            );
+          })}
+          {Array.from({
+            length: Math.max(0, 27 - rows.length),
+          }).map((_, rowIndex) => (
+            <tr
+              key={`blank-${rowIndex}`}
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              {Array.from({ length: 8 }).map((_, colIndex) => (
+                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+              ))}
+            </tr>
+          ))}
+          <tr>
+            <td style={firstColWidth}></td>
+            <td style={secondColWidth}></td>
+            <td style={thirdColWidth}></td>
+            <td style={forthColWidth}></td>
+            <td style={fifthColWidth}></td>
+            <td style={sixthColWidth}></td>
+            <td style={seventhColWidth}></td>
+            <td style={eightColWidth}></td>
+          </tr>
+        </>
+      )}
+    </>
+  );
+};
+
+  const getIconStyle = (colKey) => ({
+    transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+    color: columnSortOrders[colKey]
+      ? columnSortOrders[colKey] === "ASC"
+        ? "white"
+        : "red"
+      : "white", // default to white if no sort
+    transition: "transform 0.3s ease, color 0.3s ease",
+  });
+
   return (
     <>
       <div style={contentStyle}>
@@ -866,36 +1100,57 @@ export default function UserList() {
                     Search :
                   </span>{" "}
                 </label>
-                <input
-                  ref={input2Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                  type="text"
-                  id="searchsubmit"
-                  placeholder="Item description"
-                  value={searchQuery}
-                  autoComplete="off"
-                  style={{
-                    marginRight: "20px",
-                    width: "200px",
-                    height: "24px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    outline: "none",
-                    paddingLeft: "10px",
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  onChange={(e) =>
-                    setSearchQuery((e.target.value || "").toUpperCase())
-                  }
-                />
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input2Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "200px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -929,123 +1184,108 @@ export default function UserList() {
                     backgroundColor: tableHeadColor,
                   }}
                 >
-                  <tr
-                    style={{
-                      backgroundColor: tableHeadColor,
-                      color: "white",
-                    }}
-                  >
+                  <tr style={{ backgroundColor: tableHeadColor, color: "white" }}>
+                    {/* ID Column */}
                     <td
                       className="border-dark"
                       style={firstColWidth}
                       onClick={() => handleSorting("ID")}
                     >
                       ID{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingcode ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("ID")}
                       ></i>
                     </td>
+
+                    {/* Name Column */}
                     <td
                       className="border-dark"
                       style={secondColWidth}
                       onClick={() => handleSorting("Name")}
                     >
                       Name{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingemploye ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingemploye ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Name")}
                       ></i>
                     </td>
+
+                    {/* Status Column */}
                     <td
                       className="border-dark"
                       style={thirdColWidth}
                       onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingsts ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Status")}
                       ></i>
                     </td>
+
+                    {/* Type Column */}
                     <td
                       className="border-dark"
                       style={forthColWidth}
                       onClick={() => handleSorting("Type")}
                     >
                       Type{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingdesig ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingdesig ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Type")}
                       ></i>
                     </td>
+
+                    {/* Mobile Column */}
                     <td
                       className="border-dark"
                       style={fifthColWidth}
                       onClick={() => handleSorting("Mobile")}
                     >
                       Mobile{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingcontect ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingcontect ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Mobile")}
                       ></i>
                     </td>
+
+                    {/* Email Column */}
                     <td
                       className="border-dark"
                       style={sixthColWidth}
                       onClick={() => handleSorting("Email")}
                     >
                       Email{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingadv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingadv ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Email")}
                       ></i>
                     </td>
+
+                    {/* Log Date Column */}
                     <td
                       className="border-dark"
                       style={seventhColWidth}
                       onClick={() => handleSorting("Log Date")}
                     >
                       Log Date{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingdlv ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingdlv ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Log Date")}
                       ></i>
                     </td>
 
+                    {/* Log Time Column */}
                     <td
                       className="border-dark"
-                      style={seventhColWidth}
+                      style={eightColWidth}
                       onClick={() => handleSorting("Log Time")}
                     >
                       Log Time{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                       style={{
-                        transform: isAscendingdate ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingdate ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Log Time")}
                       ></i>
                     </td>
                   </tr>
@@ -1074,118 +1314,7 @@ export default function UserList() {
                 }}
               >
                 <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="8" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 8 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        )
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.ID}
-                            </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Name}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Status}
-                            </td>
-                            <td className="text-center" style={forthColWidth}>
-                              {item.Type}
-                            </td>
-                            <td className="text-start" style={fifthColWidth}>
-                              {item.Mobile}
-                            </td>
-                            <td className="text-start" style={sixthColWidth}>
-                              {item.Email}
-                            </td>
-                            <td className="text-start" style={seventhColWidth}>
-                              {item["Log Date"]}
-                            </td>
-                            <td className="text-left" style={seventhColWidth}>
-                              {item["Log Time"]}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 8 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                      </tr>
-                    </>
-                  )}
+                  {renderTableData()}
                 </tbody>
               </table>
             </div>

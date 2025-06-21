@@ -80,10 +80,9 @@ export default function EmployeeList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FEmpSts: transectionType,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-        code: 'NASIRTRD',
-      FLocCod: '001',
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      
       FSchTxt: searchQuery,
     }).toString();
 
@@ -856,8 +855,6 @@ export default function EmployeeList() {
     setColumnSortOrders(resetSortOrders);
   };
 
-
-
  const renderTableData = () => {
   const rowCount = Math.max(
     columns.Code.length,
@@ -992,8 +989,6 @@ export default function EmployeeList() {
       : "white", // default to white if no sort
     transition: "transform 0.3s ease, color 0.3s ease",
   });
-
-
 
   return (
     <>
