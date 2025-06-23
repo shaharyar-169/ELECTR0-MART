@@ -59,6 +59,11 @@ import RegionList from "./Component/Reports/Daily_Jobs_Reports/List/RegionList.j
 import CustomerListAmerican from "./Component/Reports/Daily_Jobs_Reports/List/CustomerListAmerican.js";
 import InstallerList from "./Component/Reports/Daily_Jobs_Reports/List/InstallarList.js";
 import CategoryListPos from "./Component/Reports/Daily_Jobs_Reports/List/CategoryListPos.js";
+import ClassList from "./Component/Reports/Daily_Jobs_Reports/List/ClassList.js";
+import FacilityList from "./Component/Reports/Daily_Jobs_Reports/List/FacilityList.js";
+import SlotList from "./Component/Reports/Daily_Jobs_Reports/List/SlotList.js";
+import MembersList from "./Component/Reports/Daily_Jobs_Reports/List/MmembersList.js";
+import TrainerList from "./Component/Reports/Daily_Jobs_Reports/List/TrainerList.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -189,6 +194,11 @@ function App() {
                 <Route exact path="/CustomerList" element={<CustomerListAmerican />} />
                 <Route exact path="/InstallarList" element={<InstallerList />} />
                 <Route exact path="/CategorListPOS" element={<CategoryListPos />} />
+                <Route exact path="/ClassList" element={<ClassList />} />
+                <Route exact path="/FacilityList" element={<FacilityList />} />
+                <Route exact path="/SlotList" element={<SlotList />} />
+                <Route exact path="/MemberList" element={<MembersList />} />
+                <Route exact path="/TrainerList" element={<TrainerList />} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -225,7 +235,7 @@ function App() {
                 <Route exact path="/CategoryMonthlyJobComparison" element={<CategoryMonthlyJobComparison />} />
                 <Route exact path="/CompanyJobSummary" element={<CompanyJobSummary />} />
                 <Route exact path="/CategoryJobSummary" element={<CategoryJobSummary />} />
-               
+
 
 
                 {/* Rountes for Daily reports */}
@@ -262,7 +272,7 @@ function App() {
 
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />
-                <Route exact path="/SalesTaxRegister" element={<TaxSaleRegisterReport/>} />
+                <Route exact path="/SalesTaxRegister" element={<TaxSaleRegisterReport />} />
 
 
                 {/* Rountes for Dashboard */}
