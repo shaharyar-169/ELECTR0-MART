@@ -132,6 +132,9 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
 
+//////////////////////////// Transection reports //////////////////////////////
+import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
+
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
 import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/TaxsaleRegister.js";
@@ -277,6 +280,10 @@ function App() {
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />
                 <Route exact path="/SalesTaxRegister" element={<TaxSaleRegisterReport />} />
+
+
+                {/* Rountes for Transection reports */}
+                <Route exact path="/CreditMemoBill" element={<MemberCreditMemo />} />
 
 
                 {/* Rountes for Dashboard */}
