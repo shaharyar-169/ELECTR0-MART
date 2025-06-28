@@ -134,6 +134,7 @@ import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemRepo
 
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
+import MemberRecivableReport from "./Component/Transaction/MemberRecievableReport.js";
 
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
@@ -284,6 +285,7 @@ function App() {
 
                 {/* Rountes for Transection reports */}
                 <Route exact path="/CreditMemoBill" element={<MemberCreditMemo />} />
+                <Route exact path="/MemberReceiveableReport" element={<MemberRecivableReport />} />
 
 
                 {/* Rountes for Dashboard */}
