@@ -26,11 +26,14 @@ export default function MembersList() {
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
+    const input4Ref = useRef(null);
+
 
     const [sortData, setSortData] = useState("ASC");
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
+    const [transectionType2, settransectionType2] = useState("");
 
     const [isAscendingcode, setisAscendingcode] = useState(true);
     const [isAscendingemploye, setisAscendingemploye] = useState(true);
@@ -80,9 +83,10 @@ export default function MembersList() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             FMemSts: transectionType,
-              FLocCod: locationnumber || getLocationNumber,
-              code: organisation.code,
-          
+            FMemGnd: transectionType2,
+            FLocCod: locationnumber || getLocationNumber,
+            code: organisation.code,
+
             FSchTxt: searchQuery,
         }).toString();
 
@@ -126,6 +130,11 @@ export default function MembersList() {
         settransectionType(selectedTransactionType);
     };
 
+    const handleTransactionTypeChange2 = (event) => {
+        const selectedTransactionType = event.target.value;
+        settransectionType2(selectedTransactionType);
+    };
+
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
         const globalfontsize = 12;
@@ -138,10 +147,9 @@ export default function MembersList() {
         const rows = tableData.map((item) => [
             item.Code,
             item.Member,
-              item.Mobile,
+            item.Mobile,
             item.Status,
             item.NIC,
-          
             item.Email,
             item.DOB,
             item["Join Date"],
@@ -155,16 +163,15 @@ export default function MembersList() {
         const headers = [
             "Code",
             "Member",
-             "Mobile",
+            "Mobile",
             "Status",
             "NIC",
-           
             "Email",
             "DOB",
             "Join Date"
 
         ];
-        const columnWidths = [15, 50,25, 15, 30, 45, 22, 20];
+        const columnWidths = [15, 50, 25, 15, 30, 45, 22, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -389,6 +396,17 @@ export default function MembersList() {
                         : transectionType === "A"
                             ? "ACTIVE"
                             : "ALL";
+
+                let type =
+                    transectionType2 === "M"
+                        ? "MALE"
+                        : transectionType2 === "C"
+                            ? "CHILD"
+                            : transectionType2 === "F"
+                                ? "FEMALE"
+                                : "ALL";
+
+
                 let search = searchQuery ? searchQuery : "";
 
                 // Set font style, size, and family
@@ -400,11 +418,16 @@ export default function MembersList() {
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.text(`TYPE :`, labelsX + 80, labelsY + 8.5); // Draw bold label
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                doc.text(`${type}`, labelsX + 100, labelsY + 8.5); // Draw the value next to the label
+
                 if (searchQuery) {
                     doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+                    doc.text(`SEARCH :`, labelsX + 160, labelsY + 8.5); // Draw bold label
                     doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
+                    doc.text(`${search}`, labelsX + 180, labelsY + 8.5); // Draw the value next to the label
                 }
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -468,10 +491,9 @@ export default function MembersList() {
         const columnAlignments = [
             "left",
             "left",
-             "left",
+            "left",
             "center",
             "center",
-           
             "left",
             "left",
             "left",
@@ -536,12 +558,22 @@ export default function MembersList() {
                 : transectionType === "A"
                     ? "Active"
                     : "All";
+
+        let type =
+            transectionType === "MN"
+                ? "MALE"
+                : transectionType === "C"
+                    ? "CHILD"
+                    : transectionType === "F"
+                        ? "FEMALE"
+                        : "All";
+
         let typesearch = searchQuery || "";
 
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
-                ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-                : ["STATUS :", typestatus, ""]
+                ? ["STATUS :", typestatus, "", "TYPE", type, "", "SEARCH :", typesearch]
+                : ["STATUS :", typestatus, "", "TYPE", type]
         );
 
         // Apply styling for the status row
@@ -549,7 +581,7 @@ export default function MembersList() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 3].includes(colIndex),
+                bold: [1, 2, 4, 5,7,8].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -575,10 +607,10 @@ export default function MembersList() {
         const headers = [
             "Code",
             "Member",
-              "Mobile",
+            "Mobile",
             "Status",
             "NIC",
-          
+
             "Email",
             "DOB",
             "Join Date"
@@ -592,10 +624,10 @@ export default function MembersList() {
             const row = worksheet.addRow([
                 item.Code,
                 item.Member,
-                 item.Mobile,
+                item.Mobile,
                 item.Status,
                 item.NIC,
-               
+
                 item.Email,
                 item.DOB,
                 item["Join Date"],
@@ -618,7 +650,7 @@ export default function MembersList() {
         });
 
         // Set column widths
-        [10, 40, 10, 10, 15, 25, 13, 12].forEach((width, index) => {
+        [10, 30, 12, 10, 15, 25, 13, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -879,10 +911,10 @@ export default function MembersList() {
         const rowCount = Math.max(
             columns.Code?.length || 0,
             columns.Member?.length || 0,
-             columns.Mobile?.length || 0,
+            columns.Mobile?.length || 0,
             columns.Status?.length || 0,
             columns.NIC?.length || 0,
-           
+
             columns.Email?.length || 0,
             columns.DOB?.length || 0,
             columns["Join Date"]?.length || 0
@@ -894,10 +926,10 @@ export default function MembersList() {
             rows.push({
                 Code: columns.Code[i],
                 Member: columns.Member[i],
-                 Mobile: columns.Mobile[i],
+                Mobile: columns.Mobile[i],
                 Status: columns.Status[i],
                 NIC: columns.NIC[i],
-               
+
                 Email: columns.Email[i],
                 DOB: columns.DOB[i],
                 "Join Date": columns["Join Date"][i]
@@ -930,10 +962,10 @@ export default function MembersList() {
                         <tr>
                             <td style={firstColWidth}></td>
                             <td style={secondColWidth}></td>
-                             <td style={fifthColWidth}></td>
+                            <td style={fifthColWidth}></td>
                             <td style={thirdColWidth}></td>
                             <td style={forthColWidth}></td>
-                           
+
                             <td style={sixthColWidth}></td>
                             <td style={seventhColWidth}></td>
                             <td style={eightColWidth}></td>
@@ -960,7 +992,7 @@ export default function MembersList() {
                                     <td className="text-start" style={secondColWidth}>
                                         {item.Member}
                                     </td>
-                                      <td className="text-start" style={fifthColWidth}>
+                                    <td className="text-start" style={fifthColWidth}>
                                         {item.Mobile}
                                     </td>
                                     <td className="text-center" style={thirdColWidth}>
@@ -969,7 +1001,7 @@ export default function MembersList() {
                                     <td className="text-center" style={forthColWidth}>
                                         {item.NIC}
                                     </td>
-                                  
+
                                     <td className="text-start" style={sixthColWidth}>
                                         {item.Email}
                                     </td>
@@ -1001,10 +1033,10 @@ export default function MembersList() {
                         <tr>
                             <td style={firstColWidth}></td>
                             <td style={secondColWidth}></td>
-                              <td style={fifthColWidth}></td>
+                            <td style={fifthColWidth}></td>
                             <td style={thirdColWidth}></td>
                             <td style={forthColWidth}></td>
-                          
+
                             <td style={sixthColWidth}></td>
                             <td style={seventhColWidth}></td>
                             <td style={eightColWidth}></td>
@@ -1080,7 +1112,7 @@ export default function MembersList() {
 
                                 <select
                                     ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
                                     id="submitButton"
                                     name="type"
                                     onFocus={(e) =>
@@ -1105,6 +1137,61 @@ export default function MembersList() {
                                     <option value="">All</option>
                                     <option value="Active">Active</option>
                                     <option value="Non-Active">Non-Active</option>
+                                </select>
+                            </div>
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: "10px",
+                                        width: "70px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <select
+                                    ref={input4Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType2}
+                                    onChange={handleTransactionTypeChange2}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">All</option>
+                                    <option value="M">Male</option>
+                                    <option value="C">Child</option>
+                                    <option value="F">Female</option>
                                 </select>
                             </div>
 
@@ -1230,7 +1317,7 @@ export default function MembersList() {
                                                 style={getIconStyle("Member")}
                                             ></i>
                                         </td>
-                                         <td
+                                        <td
                                             className="border-dark"
                                             style={fifthColWidth}
                                             onClick={() => handleSorting("Mobile")}
@@ -1269,7 +1356,7 @@ export default function MembersList() {
                                         </td>
 
                                         {/* Mobile Column */}
-                                       
+
 
                                         {/* Email Column */}
                                         <td
