@@ -80,10 +80,9 @@ export default function MembersList() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             FMemSts: transectionType,
-            //   FLocCod: locationnumber || getLocationNumber,
-            //   code: organisation.code,
-            FLocCod: '001',
-            code: 'CRYSTALGYM',
+              FLocCod: locationnumber || getLocationNumber,
+              code: organisation.code,
+          
             FSchTxt: searchQuery,
         }).toString();
 
@@ -139,9 +138,10 @@ export default function MembersList() {
         const rows = tableData.map((item) => [
             item.Code,
             item.Member,
+              item.Mobile,
             item.Status,
             item.NIC,
-            item.Mobile,
+          
             item.Email,
             item.DOB,
             item["Join Date"],
@@ -155,15 +155,16 @@ export default function MembersList() {
         const headers = [
             "Code",
             "Member",
+             "Mobile",
             "Status",
             "NIC",
-            "Mobile",
+           
             "Email",
             "DOB",
             "Join Date"
 
         ];
-        const columnWidths = [15, 50, 15, 15, 25, 45, 22, 20];
+        const columnWidths = [15, 50,25, 15, 30, 45, 22, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -467,9 +468,10 @@ export default function MembersList() {
         const columnAlignments = [
             "left",
             "left",
+             "left",
             "center",
             "center",
-            "left",
+           
             "left",
             "left",
             "left",
@@ -573,9 +575,10 @@ export default function MembersList() {
         const headers = [
             "Code",
             "Member",
+              "Mobile",
             "Status",
             "NIC",
-            "Mobile",
+          
             "Email",
             "DOB",
             "Join Date"
@@ -589,9 +592,10 @@ export default function MembersList() {
             const row = worksheet.addRow([
                 item.Code,
                 item.Member,
+                 item.Mobile,
                 item.Status,
                 item.NIC,
-                item.Mobile,
+               
                 item.Email,
                 item.DOB,
                 item["Join Date"],
@@ -875,9 +879,10 @@ export default function MembersList() {
         const rowCount = Math.max(
             columns.Code?.length || 0,
             columns.Member?.length || 0,
+             columns.Mobile?.length || 0,
             columns.Status?.length || 0,
             columns.NIC?.length || 0,
-            columns.Mobile?.length || 0,
+           
             columns.Email?.length || 0,
             columns.DOB?.length || 0,
             columns["Join Date"]?.length || 0
@@ -889,9 +894,10 @@ export default function MembersList() {
             rows.push({
                 Code: columns.Code[i],
                 Member: columns.Member[i],
+                 Mobile: columns.Mobile[i],
                 Status: columns.Status[i],
                 NIC: columns.NIC[i],
-                Mobile: columns.Mobile[i],
+               
                 Email: columns.Email[i],
                 DOB: columns.DOB[i],
                 "Join Date": columns["Join Date"][i]
@@ -924,9 +930,10 @@ export default function MembersList() {
                         <tr>
                             <td style={firstColWidth}></td>
                             <td style={secondColWidth}></td>
+                             <td style={fifthColWidth}></td>
                             <td style={thirdColWidth}></td>
                             <td style={forthColWidth}></td>
-                            <td style={fifthColWidth}></td>
+                           
                             <td style={sixthColWidth}></td>
                             <td style={seventhColWidth}></td>
                             <td style={eightColWidth}></td>
@@ -953,15 +960,16 @@ export default function MembersList() {
                                     <td className="text-start" style={secondColWidth}>
                                         {item.Member}
                                     </td>
+                                      <td className="text-start" style={fifthColWidth}>
+                                        {item.Mobile}
+                                    </td>
                                     <td className="text-center" style={thirdColWidth}>
                                         {item.Status}
                                     </td>
                                     <td className="text-center" style={forthColWidth}>
                                         {item.NIC}
                                     </td>
-                                    <td className="text-start" style={fifthColWidth}>
-                                        {item.Mobile}
-                                    </td>
+                                  
                                     <td className="text-start" style={sixthColWidth}>
                                         {item.Email}
                                     </td>
@@ -993,9 +1001,10 @@ export default function MembersList() {
                         <tr>
                             <td style={firstColWidth}></td>
                             <td style={secondColWidth}></td>
+                              <td style={fifthColWidth}></td>
                             <td style={thirdColWidth}></td>
                             <td style={forthColWidth}></td>
-                            <td style={fifthColWidth}></td>
+                          
                             <td style={sixthColWidth}></td>
                             <td style={seventhColWidth}></td>
                             <td style={eightColWidth}></td>
@@ -1221,6 +1230,17 @@ export default function MembersList() {
                                                 style={getIconStyle("Member")}
                                             ></i>
                                         </td>
+                                         <td
+                                            className="border-dark"
+                                            style={fifthColWidth}
+                                            onClick={() => handleSorting("Mobile")}
+                                        >
+                                            Mobile{" "}
+                                            <i
+                                                className="fa-solid fa-caret-down caretIconStyle"
+                                                style={getIconStyle("Mobile")}
+                                            ></i>
+                                        </td>
 
                                         {/* Status Column */}
                                         <td
@@ -1249,17 +1269,7 @@ export default function MembersList() {
                                         </td>
 
                                         {/* Mobile Column */}
-                                        <td
-                                            className="border-dark"
-                                            style={fifthColWidth}
-                                            onClick={() => handleSorting("Mobile")}
-                                        >
-                                            Mobile{" "}
-                                            <i
-                                                className="fa-solid fa-caret-down caretIconStyle"
-                                                style={getIconStyle("Mobile")}
-                                            ></i>
-                                        </td>
+                                       
 
                                         {/* Email Column */}
                                         <td
