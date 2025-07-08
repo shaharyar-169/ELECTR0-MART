@@ -429,7 +429,7 @@ export default function ItemPriceList() {
     const headers = [
       "Code",
       "Description",
-      "StK",
+      "Stk",
       "Comm",
       "SM Rate",
       "Sale Rate",
@@ -502,16 +502,16 @@ export default function ItemPriceList() {
         }
 
         // Set background color for odd-numbered rows
-        // if (isOddRow) {
-        // 	doc.setFillColor(240); // Light background color
-        // 	doc.rect(
-        // 		startX,
-        // 		startY + (i - startIndex + 2) * rowHeight,
-        // 		tableWidth,
-        // 		rowHeight,
-        // 		"F"
-        // 	);
-        // }
+        if (isOddRow) {
+        	doc.setFillColor(240); // Light background color
+        	doc.rect(
+        		startX,
+        		startY + (i - startIndex + 2) * rowHeight,
+        		tableWidth,
+        		rowHeight,
+        		"F"
+        	);
+        }
 
         // Draw row borders
         doc.setDrawColor(0); // Set color for borders
@@ -541,11 +541,12 @@ export default function ItemPriceList() {
               baseline: "middle",
             });
           } else if (
+             cellIndex === 2 ||
+            cellIndex === 3 ||
+            cellIndex === 4 ||
             cellIndex === 5 ||
             cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8 ||
-            cellIndex === 9
+            cellIndex === 7
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
@@ -782,7 +783,7 @@ export default function ItemPriceList() {
     const columnAlignments = [
       "left",
       "left",
-      "center",
+      "right",
       "right",
 
       "right",
@@ -824,7 +825,8 @@ export default function ItemPriceList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${
+        companyRow.number
       }`
     );
 
@@ -836,7 +838,8 @@ export default function ItemPriceList() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${
+        storeListRow.number
       }`
     );
 
@@ -969,7 +972,18 @@ export default function ItemPriceList() {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    // Get current date
+    
+  // Add a blank row
+    worksheet.addRow([]);
+    // Get current date and time
+    const getCurrentTime = () => {
+      const today = new Date();
+      const hh = String(today.getHours()).padStart(2, "0");
+      const mm = String(today.getMinutes()).padStart(2, "0");
+      const ss = String(today.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    };
+     // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -977,8 +991,41 @@ export default function ItemPriceList() {
       const year = today.getFullYear();
       return `${day}-${month}-${year}`;
     };
-
+    const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
+    const userid= user.tusrid;
+
+    // Add date and time row
+    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    // Merge across all columns
+    worksheet.mergeCells(
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+    );
+    worksheet.mergeCells(
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+    );
+
+
 
     // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
@@ -1008,8 +1055,6 @@ export default function ItemPriceList() {
   };
 
   let totalEntries = 0;
-
-
 
   const firstColWidth = {
     width: "12.3%",
@@ -1151,37 +1196,36 @@ export default function ItemPriceList() {
     "SM Rate": [],
     "Sale Rate": [],
     MRP: [],
-    "Fix Rate": []
+    "Fix Rate": [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-    Code: "ASC",
-    Description: "ASC",
-    Stk: "ASC",
-    Comm: "ASC",
-    "SM Rate": "ASC",
-    "Sale Rate": "ASC",
-    MRP: "ASC",
-    "Fix Rate": "ASC"
+    Code: "",
+    Description: "",
+    Stk: "",
+    Comm: "",
+    "SM Rate": "",
+    "Sale Rate": "",
+    MRP: "",
+    "Fix Rate": "",
   });
 
   // Transform table data into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        Code: tableData.map(row => row.Code),
-        Description: tableData.map(row => row.Description),
-        Stk: tableData.map(row => row.Stk),
-        Comm: tableData.map(row => row.Comm),
-        "SM Rate": tableData.map(row => row["SM Rate"]),
-        "Sale Rate": tableData.map(row => row["Sale Rate"]),
-        MRP: tableData.map(row => row.MRP),
-        "Fix Rate": tableData.map(row => row["Fix Rate"])
+        Code: tableData.map((row) => row.Code),
+        Description: tableData.map((row) => row.Description),
+        Stk: tableData.map((row) => row.Stk),
+        Comm: tableData.map((row) => row.Comm),
+        "SM Rate": tableData.map((row) => row["SM Rate"]),
+        "Sale Rate": tableData.map((row) => row["Sale Rate"]),
+        MRP: tableData.map((row) => row.MRP),
+        "Fix Rate": tableData.map((row) => row["Fix Rate"]),
       };
       setColumns(newColumns);
     }
   }, [tableData]);
-
 
   const handleSorting = (col) => {
     const currentOrder = columnSortOrders[col];
@@ -1219,154 +1263,153 @@ export default function ItemPriceList() {
     setColumnSortOrders(resetSortOrders);
   };
   const renderTableData = () => {
-  const rowCount = Math.max(
-    columns.Code?.length || 0,
-    columns.Description?.length || 0,
-    columns.Stk?.length || 0,
-    columns.Comm?.length || 0,
-    columns["SM Rate"]?.length || 0,
-    columns["Sale Rate"]?.length || 0,
-    columns.MRP?.length || 0,
-    columns["Fix Rate"]?.length || 0
-  );
+    const rowCount = Math.max(
+      columns.Code?.length || 0,
+      columns.Description?.length || 0,
+      columns.Stk?.length || 0,
+      columns.Comm?.length || 0,
+      columns["SM Rate"]?.length || 0,
+      columns["Sale Rate"]?.length || 0,
+      columns.MRP?.length || 0,
+      columns["Fix Rate"]?.length || 0
+    );
 
-  const rows = [];
-  for (let i = 0; i < rowCount; i++) {
-    rows.push({
-      Code: columns.Code[i],
-      Description: columns.Description[i],
-      Stk: columns.Stk[i],
-      Comm: columns.Comm[i],
-      "SM Rate": columns["SM Rate"][i],
-      "Sale Rate": columns["Sale Rate"][i],
-      MRP: columns.MRP[i],
-      "Fix Rate": columns["Fix Rate"][i]
-    });
-  }
+    const rows = [];
+    for (let i = 0; i < rowCount; i++) {
+      rows.push({
+        Code: columns.Code[i],
+        Description: columns.Description[i],
+        Stk: columns.Stk[i],
+        Comm: columns.Comm[i],
+        "SM Rate": columns["SM Rate"][i],
+        "Sale Rate": columns["Sale Rate"][i],
+        MRP: columns.MRP[i],
+        "Fix Rate": columns["Fix Rate"][i],
+      });
+    }
 
-  return (
-    <>
-      {isLoading ? (
-        <>
-          <tr style={{ backgroundColor: getcolor }}>
-            <td colSpan="8" className="text-center">
-              <Spinner animation="border" variant="primary" />
-            </td>
-          </tr>
-          {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 8 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="8" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={eightColWidth}></td>
-            <td style={ninthColWidth}></td>
-          </tr>
-        </>
-      ) : (
-        <>
-          {rows.map((item, i) => {
-            totalEnteries += 1;
-            return (
+            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
               <tr
-                key={`${i}-${selectedIndex}`}
-                ref={(el) => (rowRefs.current[i] = el)}
-                onClick={() => handleRowClick(i)}
-                className={selectedIndex === i ? "selected-background" : ""}
+                key={`blank-${rowIndex}`}
                 style={{
                   backgroundColor: getcolor,
                   color: fontcolor,
                 }}
               >
-                <td className="text-start" style={firstColWidth}>
-                  {item.Code}
-                </td>
-                <td
-                  className="text-start"
-                  title={item.Description}
+                {Array.from({ length: 8 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
+            </tr>
+          </>
+        ) : (
+          <>
+            {rows.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
                   style={{
-                    ...secondColWidth,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
+                    backgroundColor: getcolor,
+                    color: fontcolor,
                   }}
                 >
-                  {item.Description}
-                </td>
-                <td className="text-center" style={thirdColWidth}>
-                  {item.Stk}
-                </td>
-                <td className="text-end" style={forthColWidth}>
-                  {item.Comm}
-                </td>
-                <td className="text-end" style={fifthColWidth}>
-                  {item["SM Rate"]}
-                </td>
-                <td className="text-end" style={sixthColWidth}>
-                  {item["Sale Rate"]}
-                </td>
-                <td className="text-end" style={eightColWidth}>
-                  {item.MRP}
-                </td>
-                <td className="text-end" style={ninthColWidth}>
-                  {item["Fix Rate"]}
-                </td>
+                  <td className="text-start" style={firstColWidth}>
+                    {item.Code}
+                  </td>
+                  <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
+                  <td className="text-end" style={thirdColWidth}>
+                    {item.Stk}
+                  </td>
+                  <td className="text-end" style={forthColWidth}>
+                    {item.Comm}
+                  </td>
+                  <td className="text-end" style={fifthColWidth}>
+                    {item["SM Rate"]}
+                  </td>
+                  <td className="text-end" style={sixthColWidth}>
+                    {item["Sale Rate"]}
+                  </td>
+                  <td className="text-end" style={eightColWidth}>
+                    {item.MRP}
+                  </td>
+                  <td className="text-end" style={ninthColWidth}>
+                    {item["Fix Rate"]}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 27 - rows.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 8 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
               </tr>
-            );
-          })}
-          {Array.from({
-            length: Math.max(0, 27 - rows.length),
-          }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 8 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={eightColWidth}></td>
-            <td style={ninthColWidth}></td>
-          </tr>
-        </>
-      )}
-    </>
-  );
-};
-  const getSortIconStyle = (colKey) => ({
-    transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: columnSortOrders[colKey]
-      ? columnSortOrders[colKey] === "ASC"
-        ? "white"
-        : "red"
-      : "white", // default to white if no sort
-    transition: "transform 0.3s ease, color 0.3s ease",
-  });
+          </>
+        )}
+      </>
+    );
+  };
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
 
   return (
     <>
@@ -1709,7 +1752,6 @@ export default function ItemPriceList() {
                     </span>
                   )}
                 </div>
-
               </div>
             </div>
           </div>
@@ -1745,7 +1787,9 @@ export default function ItemPriceList() {
                     backgroundColor: tableHeadColor,
                   }}
                 >
-                  <tr style={{ backgroundColor: tableHeadColor, color: "white" }}>
+                  <tr
+                    style={{ backgroundColor: tableHeadColor, color: "white" }}
+                  >
                     <td
                       className="border-dark"
                       style={firstColWidth}
@@ -1754,7 +1798,7 @@ export default function ItemPriceList() {
                       Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("Code")}
+                        style={getIconStyle("Code")}
                       ></i>
                     </td>
 
@@ -1766,7 +1810,7 @@ export default function ItemPriceList() {
                       Description{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("Description")}
+                        style={getIconStyle("Description")}
                       ></i>
                     </td>
 
@@ -1778,7 +1822,7 @@ export default function ItemPriceList() {
                       Stk{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("Stk")}
+                        style={getIconStyle("Stk")}
                       ></i>
                     </td>
 
@@ -1790,7 +1834,7 @@ export default function ItemPriceList() {
                       Comm{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("Comm")}
+                        style={getIconStyle("Comm")}
                       ></i>
                     </td>
 
@@ -1802,7 +1846,7 @@ export default function ItemPriceList() {
                       SM Rate{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("SM Rate")}
+                        style={getIconStyle("SM Rate")}
                       ></i>
                     </td>
 
@@ -1814,7 +1858,7 @@ export default function ItemPriceList() {
                       Sale Rate{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("Sale Rate")}
+                        style={getIconStyle("Sale Rate")}
                       ></i>
                     </td>
 
@@ -1826,7 +1870,7 @@ export default function ItemPriceList() {
                       MRP{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("MRP")}
+                        style={getIconStyle("MRP")}
                       ></i>
                     </td>
 
@@ -1838,7 +1882,7 @@ export default function ItemPriceList() {
                       Fix Rate{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getSortIconStyle("Fix Rate")}
+                        style={getIconStyle("Fix Rate")}
                       ></i>
                     </td>
                   </tr>
@@ -1868,8 +1912,7 @@ export default function ItemPriceList() {
                 }}
               >
                 <tbody id="tablebody">
-                  P{renderTableData()}
-                </tbody>
+                  {renderTableData()}</tbody>
               </table>
             </div>
           </div>

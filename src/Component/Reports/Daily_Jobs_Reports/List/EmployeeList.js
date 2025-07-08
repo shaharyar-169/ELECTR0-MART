@@ -80,9 +80,11 @@ export default function EmployeeList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FEmpSts: transectionType,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+
+       code: "NASIRTRD",
+      FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
@@ -224,16 +226,16 @@ export default function EmployeeList() {
         }
 
         // Set background color for odd-numbered rows
-        // if (isOddRow) {
-        // 	doc.setFillColor(240); // Light background color
-        // 	doc.rect(
-        // 		startX,
-        // 		startY + (i - startIndex + 2) * rowHeight,
-        // 		tableWidth,
-        // 		rowHeight,
-        // 		"F"
-        // 	);
-        // }
+        if (isOddRow) {
+        	doc.setFillColor(240); // Light background color
+        	doc.rect(
+        		startX,
+        		startY + (i - startIndex + 2) * rowHeight,
+        		tableWidth,
+        		rowHeight,
+        		"F"
+        	);
+        }
 
         // Draw row borders
         doc.setDrawColor(0); // Set color for borders
@@ -262,7 +264,7 @@ export default function EmployeeList() {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 4) {
+          } else if (cellIndex === 14) {
             const rightAlignX = startX + columnWidths[cellIndex] + 10; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -324,7 +326,7 @@ export default function EmployeeList() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 47; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -480,17 +482,17 @@ export default function EmployeeList() {
     const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
     const fontStoreList = {
       name: "CustomFont",
-      size: getdatafontsize,
+      size: 10,
       bold: false,
     };
     const fontHeader = {
       name: "CustomFont",
-      size: getdatafontsize,
+      size: 10,
       bold: true,
     };
     const fontTableContent = {
       name: "CustomFont",
-      size: getdatafontsize,
+      size: 10,
       bold: false,
     };
 
@@ -530,7 +532,7 @@ export default function EmployeeList() {
         ? "Non-Active"
         : transectionType === "A"
           ? "Active"
-          : "All";
+          : "ALL";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
@@ -543,7 +545,7 @@ export default function EmployeeList() {
     typeAndStoreRow3.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont",
-        size: getdatafontsize,
+        size: 10,
         bold: [1, 3].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
@@ -613,7 +615,17 @@ export default function EmployeeList() {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    // Get current date
+  // Add a blank row
+    worksheet.addRow([]);
+    // Get current date and time
+    const getCurrentTime = () => {
+      const today = new Date();
+      const hh = String(today.getHours()).padStart(2, "0");
+      const mm = String(today.getMinutes()).padStart(2, "0");
+      const ss = String(today.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    };
+     // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -621,8 +633,39 @@ export default function EmployeeList() {
       const year = today.getFullYear();
       return `${day}-${month}-${year}`;
     };
-
+    const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
+    const userid= user.tusrid;
+
+    // Add date and time row
+    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    // Merge across all columns
+    worksheet.mergeCells(
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+    );
+    worksheet.mergeCells(
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+    );
 
     // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
@@ -793,13 +836,13 @@ export default function EmployeeList() {
     "Dlv Code": []
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
-    Code: "ASC",
-    Employee: "ASC",
-    Status: "ASC",
-    Designation: "ASC",
-    "COntact #": "ASC",
-    "Adv Code": "ASC",
-    "Dlv Code": "ASC"
+    Code: "",
+    Employee: "",
+    Status: "",
+    Designation: "",
+    "COntact #": "",
+    "Adv Code": "",
+    "Dlv Code": ""
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -980,15 +1023,14 @@ export default function EmployeeList() {
   );
 };
 
-  const getIconStyle = (colKey) => ({
-    transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: columnSortOrders[colKey]
-      ? columnSortOrders[colKey] === "ASC"
-        ? "white"
-        : "red"
-      : "white", // default to white if no sort
+   const getIconStyle = (colKey) => {
+  const order = columnSortOrders[colKey];
+  return {
+    transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+    color: order === "ASC" || order === "DSC" ? "red" : "white",
     transition: "transform 0.3s ease, color 0.3s ease",
-  });
+  };
+};
 
   return (
     <>
@@ -1067,9 +1109,9 @@ export default function EmployeeList() {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 

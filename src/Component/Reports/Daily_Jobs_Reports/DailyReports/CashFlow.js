@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription} from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -25,7 +25,8 @@ export default function CashFlowReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
-
+    const yeardescription = getYearDescription();
+    const locationnumber = getLocationnumber();
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
@@ -35,11 +36,10 @@ export default function CashFlowReport() {
     const fromRef = useRef(null);
 
     const [tableData, setTableData] = useState([]);
-    const [Paymentdata, setPaymentdata] = useState([])
+    const [Paymentdata, setPaymentdata] = useState([]);
 
-    console.log('Recept data', tableData)
-    console.log('payment data', Paymentdata)
-
+    console.log("Recept data", tableData);
+    console.log("payment data", Paymentdata);
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +48,7 @@ export default function CashFlowReport() {
 
     const [totalQnty, setTotalQnty] = useState(0);
     const [openingbalance, setopeningbalance] = useState(0);
-    console.log('opening balance', openingbalance)
+    console.log("opening balance", openingbalance);
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
@@ -62,9 +62,6 @@ export default function CashFlowReport() {
     const [toInputDate, settoInputDate] = useState("");
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-
-      const yeardescription = getYearDescription();
-        const locationnumber = getLocationnumber()
     const {
         isSidebarVisible,
         toggleSidebar,
@@ -77,13 +74,12 @@ export default function CashFlowReport() {
         getfromdate,
         gettodate,
         getfontstyle,
-        getdatafontsize
+        getdatafontsize,
     } = useTheme();
 
     useEffect(() => {
         document.documentElement.style.setProperty("--background-color", getcolor);
     }, [getcolor]);
-
 
     const comapnyname = organisation.description;
 
@@ -264,8 +260,6 @@ export default function CashFlowReport() {
         settoInputDate(e.target.value);
     };
 
-
-
     function fetchReceivableReport() {
         const fromDateElement = document.getElementById("fromdatevalidation");
         const toDateElement = document.getElementById("todatevalidation");
@@ -276,7 +270,6 @@ export default function CashFlowReport() {
         let errorType = "";
 
         switch (true) {
-
             case !fromInputDate:
                 errorType = "fromDate";
                 break;
@@ -323,7 +316,6 @@ export default function CashFlowReport() {
         }
 
         switch (errorType) {
-
             case "fromDate":
                 toast.error("From date is required");
                 return;
@@ -360,11 +352,9 @@ export default function CashFlowReport() {
                 toast.error("To date must be after from date");
                 return;
 
-
             default:
                 break;
         }
-
 
         document.getElementById(
             "fromdatevalidation"
@@ -378,21 +368,24 @@ export default function CashFlowReport() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
-             FLocCod: '001',
-            FYerDsc: '2024-2024',
-            FAccCod: "12-01-0001"
+            //   code: organisation.code,
+            //   FLocCod: locationnumber || getLocationNumber,
+            //   FYerDsc: yeardescription || getyeardescription,
 
+            code: 'MAKKAHCOMP',
+            FLocCod: '001',
+            FYerDsc: '2025-2025',
+
+
+            FAccCod: "12-01-0001",
         }).toString();
 
         axios
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
-                setTableData(response.data)
-                setopeningbalance(response.data.Opening)
+                setTableData(response.data);
+                setopeningbalance(response.data.Opening);
                 setTotalDebit(response.data["Total Receipts"]);
                 setTotalCredit(response.data["Total Payments"]);
                 setClosingBalance(response.data["Closing"]);
@@ -417,15 +410,12 @@ export default function CashFlowReport() {
                         );
                         setPaymentdata([]); // Fallback to an empty array
                     }
-                }
-
-                else {
+                } else {
                     console.warn("Response data is null or undefined:", response.data);
                     setTableData([]);
                     setPaymentdata([]);
                 }
             })
-
 
             .catch((error) => {
                 console.error("Error:", error);
@@ -461,40 +451,52 @@ export default function CashFlowReport() {
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
 
-
-
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
         const globalfontsize = 12;
         console.log("gobal font data", globalfontsize);
 
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "landscape" });
+        const doc = new jsPDF({ orientation: "potraite" });
 
         // Add Opening Balance row
-        const openingBalanceRow = ["-", "Opening Balance", '-', "-", openingbalance];
+        const openingBalanceRow = [
+            "-",
+            "Opening Balance",
+            "-",
+            "-",
+            openingbalance,
+        ];
 
         // Map receipt data with the "Receipt" header
-        const receipt = tableData.length > 0
-            ? [["", "Receipt", "", "", ""], ...tableData.map((item) => [
-                item.tacccod,
-                item.Description,
-                item.Receipts,
-                "",
-                "",
-            ])]
-            : [];
+        const receipt =
+            tableData.length > 0
+                ? [
+                    ["", "Receipt", "", "", ""],
+                    ...tableData.map((item) => [
+                        item.tacccod,
+                        item.Description,
+                        item.Receipts,
+                        "",
+                        "",
+                    ]),
+                ]
+                : [];
 
         // Map payment data with the "Payment" header
-        const payment = Paymentdata.length > 0
-            ? [["", "Payment", "", "", ""], ...Paymentdata.map((item) => [
-                item.tacccod,
-                item.Description,
-                "",
-                item.Payments,
-                "",
-            ])]
-            : [];
+        const payment =
+            Paymentdata.length > 0
+                ? [
+                    ["", "Payment", "", "", ""],
+                    ...Paymentdata.map((item) => [
+                        item.tacccod,
+                        item.Description,
+                        "",
+                        item.Payments,
+                        "",
+                    ]),
+                ]
+                : [];
 
         // Combine all rows
         const rows = [openingBalanceRow, ...receipt, ...payment];
@@ -502,25 +504,15 @@ export default function CashFlowReport() {
         // Add summary row to the table
         rows.push([
             "",
-            "Total",
+            "",
             String(totalDebit),
             String(totalCredit),
             String(closingBalance),
-
-
         ]);
-
 
         // Define table column headers and individual column widths
 
-        const headers = [
-            "Code",
-            "Description",
-            "Receipt",
-            "Patyment",
-            "Balance",
-
-        ];
+        const headers = ["Code", "Description", "Receipt", "Patyment", "Balance"];
         const columnWidths = [20, 80, 25, 25, 25];
 
         // Calculate total table width
@@ -565,7 +557,6 @@ export default function CashFlowReport() {
             doc.setFontSize(12);
         };
 
-
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5; // Adjust row height
             const fontSize = 10; // Adjust font size for regular text
@@ -577,12 +568,22 @@ export default function CashFlowReport() {
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
+                const isTotalRow = i === rows.length - 1; // Check if this is the total row
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
                 let currentX = startX; // Track current column position
 
+                // For total row, set bold font and prepare for double border
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, 'bold');
+                }
+
                 row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
+                    // For total row, adjust vertical position to center in the double border
+                    const cellY = isTotalRow
+                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2 
+                        : startY + (i - startIndex + 2) * rowHeight + 3;
+
                     const cellX = currentX + 2;
 
                     // Reset default colors for each cell
@@ -591,11 +592,11 @@ export default function CashFlowReport() {
                     // Apply styling only for "Receipt" or "Payment" in column index 1
                     if (cellIndex === 1) {
                         if (cell === "Receipt") {
-                            backgroundColor = [169, 169, 169]; // Light grey background   
+                            backgroundColor = [169, 169, 169]; // Light grey background
                             textColor = [0, 0, 0]; // White text
                             fontName = boldFont;
                         } else if (cell === "Payment") {
-                            backgroundColor = [169, 169, 169]; // Light grey background      
+                            backgroundColor = [169, 169, 169]; // Light grey background
                             textColor = [0, 0, 0]; // White text
                             fontName = boldFont;
                         }
@@ -604,12 +605,22 @@ export default function CashFlowReport() {
                     // Draw cell background if applicable
                     if (backgroundColor) {
                         doc.setFillColor(...backgroundColor);
-                        doc.rect(currentX, startY + (i - startIndex + 2) * rowHeight, columnWidths[cellIndex], rowHeight, "F");
+                        doc.rect(
+                            currentX,
+                            startY + (i - startIndex + 2) * rowHeight,
+                            columnWidths[cellIndex],
+                            rowHeight,
+                            "F"
+                        );
                     }
 
                     // Set text color and font
                     doc.setTextColor(...textColor);
-                    doc.setFont(fontName, "normal");
+
+                    // For total row, keep bold font
+                    if (!isTotalRow) {
+                        doc.setFont(fontName, "normal");
+                    }
 
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
@@ -622,18 +633,57 @@ export default function CashFlowReport() {
                             baseline: "middle",
                         });
                     } else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
+                        // For empty cells in total row, add "Total" label centered
+                        if (isTotalRow && cellIndex === 0 && cell === "") {
+                            const totalLabelX = currentX + columnWidths[0] / 2;
+                            doc.text("Total", totalLabelX, cellY, {
+                                align: "center",
+                                baseline: "middle"
+                            });
+                        } else {
+                            doc.text(cellValue, cellX, cellY, {
+                                baseline: "middle"
+                            });
+                        }
                     }
 
                     // Draw column borders
-                    doc.rect(currentX, startY + (i - startIndex + 2) * rowHeight, columnWidths[cellIndex], rowHeight);
+                    if (isTotalRow) {
+                        // Double border for total row columns
+                        doc.setLineWidth(0.3);
+                        doc.rect(
+                            currentX,
+                            startY + (i - startIndex + 2) * rowHeight,
+                            columnWidths[cellIndex],
+                            rowHeight
+                        );
+                        doc.setLineWidth(0.3);
+                        doc.rect(
+                            currentX + 0.5,
+                            startY + (i - startIndex + 2) * rowHeight + 0.5,
+                            columnWidths[cellIndex] - 1,
+                            rowHeight - 1
+                        );
+                    } else {
+                        // Normal border for other rows
+                        doc.setLineWidth(0.2);
+                        doc.rect(
+                            currentX,
+                            startY + (i - startIndex + 2) * rowHeight,
+                            columnWidths[cellIndex],
+                            rowHeight
+                        );
+                    }
 
                     // Move to next column
                     currentX += columnWidths[cellIndex];
                 });
+
+                // Reset font after total row
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, "normal");
+                }
             }
-
-
 
             // Draw line at the bottom of the page with padding
             const lineWidth = tableWidth;
@@ -651,7 +701,6 @@ export default function CashFlowReport() {
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
-
         const getTotalTableWidth = () => {
             let totalWidth = 0;
             columnWidths.forEach((width) => (totalWidth += width));
@@ -665,7 +714,7 @@ export default function CashFlowReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 47; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -687,7 +736,6 @@ export default function CashFlowReport() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-
                 // Add page numbering
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
@@ -706,8 +754,14 @@ export default function CashFlowReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Daily Cash Flow Report From: ${fromInputDate} To: ${toInputDate}`
-                    , "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(
+                    `Cash Flow From ${fromInputDate} To ${toInputDate}`,
+                    "",
+                    "",
+                    pageNumber,
+                    startY,
+                    12
+                ); // Render sale report title with decreased font size, provide the time, and page number
                 startY += 5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -716,7 +770,6 @@ export default function CashFlowReport() {
                 // Set font size and weight for the labels
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
-
 
                 //   let RepRate = Retrate === "A"
                 //       ? "ALL"
@@ -728,7 +781,6 @@ export default function CashFlowReport() {
                 //                   ? "ACTUAL RATE "
                 //                   : "ALL";
 
-
                 //   let Typefilter = transectionType === "A"
                 //       ? "ALL"
                 //       : transectionType === "S"
@@ -737,12 +789,9 @@ export default function CashFlowReport() {
                 //               ? "CREDIT"
                 //               : "ALL";
 
-
-
                 //   let typeItem = Companyselectdatavalue.label
                 //       ? Companyselectdatavalue.label
                 //       : "ALL";
-
 
                 // let status = transectionType ? transectionType : "All";
                 let search = searchQuery ? searchQuery : "";
@@ -763,7 +812,6 @@ export default function CashFlowReport() {
                 //   doc.text(`REP RATE :`, labelsX, labelsY); // Draw bold label
                 //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 //   doc.text(`${RepRate}`, labelsX + 25, labelsY); // Draw the value next to the label
-
 
                 //   doc.setFont(getfontstyle, "bold"); // Set font to bold
                 //   doc.text(`TYPE :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -834,7 +882,7 @@ export default function CashFlowReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`DailyCashFlowReport From ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`CashFlowReport From ${fromInputDate} To ${toInputDate}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
@@ -844,25 +892,20 @@ export default function CashFlowReport() {
 
         const numColumns = 6; // Number of columns
 
-        const columnAlignments = [
-            "left",
-            "left",
-            "right",
-            "right",
-            "right",
-
-
-        ];
+        const columnAlignments = ["left", "left", "right", "right", "right"];
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
         // Add title rows
 
-        [comapnyname, `Daily Cash Flow Report From: ${fromInputDate} To: ${toInputDate}`].forEach((title, index) => {
+        [
+            comapnyname,
+            `Cash Flow From ${fromInputDate} To ${toInputDate}`,
+        ].forEach((title, index) => {
             // Define custom styles for each title
             let customStyle;
-            let rowHeight = 20;  // Default row height
+            let rowHeight = 20; // Default row height
             if (index === 0) {
                 // Style for company name
                 customStyle = {
@@ -890,12 +933,8 @@ export default function CashFlowReport() {
             );
         });
 
-
-
         // Add an empty row after the title section
-        worksheet.addRow([]);  // This is where you add the empty row
-
-
+        worksheet.addRow([]); // This is where you add the empty row
 
         // Header style for center alignment
         const headerStyle = {
@@ -915,13 +954,7 @@ export default function CashFlowReport() {
         };
 
         // Add headers
-        const headers = [
-            "Code",
-            "Description",
-            "Receipt",
-            "Patyment",
-            "Balance",
-        ];
+        const headers = ["Code", "Description", "Receipt", "Payment", "Balance"];
         const headerRow = worksheet.addRow(headers);
 
         // Apply styles and center alignment to the header row
@@ -932,7 +965,13 @@ export default function CashFlowReport() {
         // Add data rows
 
         // Add Opening Balance Row
-        const openingBalanceRow = ["-", "Opening Balance", "-", "-", openingbalance];
+        const openingBalanceRow = [
+            "-",
+            "Opening Balance",
+            "-",
+            "-",
+            openingbalance,
+        ];
 
         // Map Receipt Data
         const receipt =
@@ -947,7 +986,7 @@ export default function CashFlowReport() {
                     ])
                 )
                 : [];
-        
+
         // Map Payment Data
         const payment =
             Paymentdata.length > 0
@@ -961,14 +1000,14 @@ export default function CashFlowReport() {
                     ])
                 )
                 : [];
-        
+
         // Combine Rows for Final Data
         const rows = [openingBalanceRow, ...receipt, ...payment];
-        
+
         // Add Data Rows to Worksheet
         rows.forEach((rowData) => {
             const row = worksheet.addRow(rowData);
-        
+
             // Apply styles to each row
             row.eachCell((cell, colIndex) => {
                 cell.font = {
@@ -976,14 +1015,14 @@ export default function CashFlowReport() {
                     size: getdatafontsize,
                     bold: false,
                 };
-        
+
                 cell.border = {
                     top: { style: "thin", color: { argb: "FF000000" } },
                     left: { style: "thin", color: { argb: "FF000000" } },
                     bottom: { style: "thin", color: { argb: "FF000000" } },
                     right: { style: "thin", color: { argb: "FF000000" } },
                 };
-        
+
                 // Align content based on column index
                 if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
                     cell.alignment = { horizontal: "right", vertical: "middle" };
@@ -991,11 +1030,11 @@ export default function CashFlowReport() {
                     cell.alignment = { horizontal: "left", vertical: "middle" };
                 }
             });
-        
+
             // Apply specific styling for "Receipt" and "Payment" header rows
             if (rowData[1] === "Receipt" || rowData[1] === "Payment") {
                 const targetCell = row.getCell(2); // Column index 2 (1-based index in ExcelJS)
-            
+
                 targetCell.font = { bold: true }; // Make text bold
                 targetCell.fill = {
                     type: "pattern",
@@ -1004,9 +1043,7 @@ export default function CashFlowReport() {
                 };
                 targetCell.alignment = { horizontal: "left", vertical: "middle" };
             }
-            
         });
-        
 
         // Add Total Row
         const totalRow = worksheet.addRow([
@@ -1032,16 +1069,11 @@ export default function CashFlowReport() {
             }
         });
 
-
-
         // Set column widths
-
 
         [12, 40, 20, 20, 20].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
-
-
 
         const getCurrentDate = () => {
             const today = new Date();
@@ -1058,10 +1090,12 @@ export default function CashFlowReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `DailyCashFlowReport As on ${toInputDate}.xlsx`);
+        saveAs(
+            blob,
+            `CashFlowReport From ${fromInputDate} To ${toInputDate}.xlsx`
+        );
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
 
     const dispatch = useDispatch();
 
@@ -1071,9 +1105,7 @@ export default function CashFlowReport() {
     const btnColor = "#3368B5";
     const textColor = "white";
 
-
-
-    console.log('cash flow data ', tableData);
+    console.log("cash flow data ", tableData);
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1111,15 +1143,12 @@ export default function CashFlowReport() {
         width: "15%",
     };
 
-
     useHotkeys("s", fetchReceivableReport);
     useHotkeys("alt+p", exportPDFHandler);
     useHotkeys("alt+e", handleDownloadCSV);
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-
 
     useEffect(() => {
         const handleResize = () => {
@@ -1133,7 +1162,7 @@ export default function CashFlowReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(60vw - 0%)" : "60vw",
+        width: isSidebarVisible ? "calc(80vw - 0%)" : "90vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1156,8 +1185,6 @@ export default function CashFlowReport() {
         fontFamily: '"Poppins", sans-serif',
     };
 
-
-
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const rowRefs = useRef([]);
 
@@ -1166,11 +1193,16 @@ export default function CashFlowReport() {
         { type: "receipt-heading" }, // Receipt Section Heading
         ...tableData.map((item, i) => ({ ...item, type: "receipt", index: i })),
         { type: "payment-heading" }, // Payment Section Heading
-        ...Paymentdata.map((item, i) => ({ ...item, type: "payment", index: tableData.length + i }))
+        ...Paymentdata.map((item, i) => ({
+            ...item,
+            type: "payment",
+            index: tableData.length + i,
+        })),
     ];
 
     // Function to find the first selectable row (non-heading)
-    const getFirstSelectableRow = () => mergedData.findIndex(row => !row.type.includes("heading"));
+    const getFirstSelectableRow = () =>
+        mergedData.findIndex((row) => !row.type.includes("heading"));
 
     // Set the first selectable row when data is loaded
     useEffect(() => {
@@ -1212,7 +1244,10 @@ export default function CashFlowReport() {
             e.preventDefault();
             do {
                 newIndex = Math.min(newIndex + 1, mergedData.length - 1);
-            } while (mergedData[newIndex]?.type.includes("heading") && newIndex < mergedData.length - 1);
+            } while (
+                mergedData[newIndex]?.type.includes("heading") &&
+                newIndex < mergedData.length - 1
+            );
         }
 
         if (newIndex !== selectedIndex) {
@@ -1228,10 +1263,6 @@ export default function CashFlowReport() {
             window.removeEventListener("keydown", handleKeyDown);
         };
     }, [selectedIndex]);
-
-
-
-
 
     const parseDate = (dateString) => {
         const [day, month, year] = dateString.split("-").map(Number);
@@ -1266,10 +1297,6 @@ export default function CashFlowReport() {
         }
     }, [selectedRadio]);
 
-
-
-
-
     return (
         <>
             <ToastContainer />
@@ -1287,7 +1314,12 @@ export default function CashFlowReport() {
 
                     <div
                         className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", display: 'flex' }}
+                        style={{
+                            height: "20px",
+                            marginTop: "8px",
+                            marginBottom: "8px",
+                            display: "flex",
+                        }}
                     >
                         <div
                             style={{
@@ -1485,10 +1517,11 @@ export default function CashFlowReport() {
                                 </div>
                             </div>
 
-                            <div style={{ marginLeft: '50px' }} className="d-flex align-items-center justify-content-center">
-                                <div
-                                    className="d-flex align-items-center"
-                                >
+                            <div
+                                style={{ marginLeft: "50px" }}
+                                className="d-flex align-items-center justify-content-center"
+                            >
+                                <div className="d-flex align-items-center">
                                     <div
                                         style={{
                                             display: "flex",
@@ -1564,17 +1597,10 @@ export default function CashFlowReport() {
                                             <label htmlFor="90">90 Days</label>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
-
-
                     </div>
-
 
                     <div>
                         <div
@@ -1624,7 +1650,6 @@ export default function CashFlowReport() {
                                         <td className="border-dark" style={fifthColWidth}>
                                             Balance
                                         </td>
-
                                     </tr>
                                 </thead>
                             </table>
@@ -1657,13 +1682,23 @@ export default function CashFlowReport() {
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
-                                            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
-                                                <tr key={`blank-${rowIndex}`} style={{ backgroundColor: getcolor, color: fontcolor }}>
-                                                    {Array.from({ length: 5 }).map((_, colIndex) => (
-                                                        <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                                                    ))}
-                                                </tr>
-                                            ))}
+                                            {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                                                (_, rowIndex) => (
+                                                    <tr
+                                                        key={`blank-${rowIndex}`}
+                                                        style={{
+                                                            backgroundColor: getcolor,
+                                                            color: fontcolor,
+                                                        }}
+                                                    >
+                                                        {Array.from({ length: 5 }).map((_, colIndex) => (
+                                                            <td key={`blank-${rowIndex}-${colIndex}`}>
+                                                                &nbsp;
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                )
+                                            )}
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
@@ -1676,22 +1711,52 @@ export default function CashFlowReport() {
                                         <>
                                             {mergedData.map((item, i) => {
                                                 // Handle Payment Heading Row
-                                                const hasPaymentData = mergedData.some((data) => data.type === "payment");
+                                                const hasPaymentData = mergedData.some(
+                                                    (data) => data.type === "payment"
+                                                );
                                                 if (item.type === "payment-heading" && hasPaymentData) {
                                                     return (
-                                                        <tr key={`payment-heading-${i}`}
+                                                        <tr
+                                                            key={`payment-heading-${i}`}
                                                             style={{
                                                                 backgroundColor: getcolor,
-                                                                color: fontcolor
+                                                                color: fontcolor,
                                                             }}
                                                         >
-                                                            <td style={{ ...firstColWidth, backgroundColor: getcolor }}></td>
-                                                            <td style={{ textAlign: "start", fontWeight: "bold", backgroundColor: "#3368B5", color: "white" }}>
+                                                            <td
+                                                                style={{
+                                                                    ...firstColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
+                                                            <td
+                                                                style={{
+                                                                    textAlign: "start",
+                                                                    fontWeight: "bold",
+                                                                    backgroundColor: "#3368B5",
+                                                                    color: "white",
+                                                                }}
+                                                            >
                                                                 Payment
                                                             </td>
-                                                            <td style={{ ...thirdColWidth, backgroundColor: getcolor }}></td>
-                                                            <td style={{ ...forthColWidth, backgroundColor: getcolor }}></td>
-                                                            <td style={{ ...fifthColWidth, backgroundColor: getcolor }}></td>
+                                                            <td
+                                                                style={{
+                                                                    ...thirdColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
+                                                            <td
+                                                                style={{
+                                                                    ...forthColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
+                                                            <td
+                                                                style={{
+                                                                    ...fifthColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
                                                         </tr>
                                                     );
                                                 }
@@ -1702,8 +1767,13 @@ export default function CashFlowReport() {
                                                         key={`row-${i}`}
                                                         ref={(el) => (rowRefs.current[i] = el)}
                                                         onClick={() => handleRowClick(i)}
-                                                        className={selectedIndex === i ? "selected-background" : ""}
-                                                        style={{ backgroundColor: getcolor, color: fontcolor }}
+                                                        className={
+                                                            selectedIndex === i ? "selected-background" : ""
+                                                        }
+                                                        style={{
+                                                            backgroundColor: getcolor,
+                                                            color: fontcolor,
+                                                        }}
                                                     >
                                                         {/* First Column */}
                                                         <td
@@ -1715,19 +1785,28 @@ export default function CashFlowReport() {
                                                                 backgroundColor: "transparent",
                                                             }}
                                                         >
-                                                            {item.type === "receipt" ? (item.index === 0 ? "-" : item.index === 1 ? "" : item.tacccod) : item.tacccod}
+                                                            {item.type === "receipt"
+                                                                ? item.index === 0
+                                                                    ? "-"
+                                                                    : item.index === 1
+                                                                        ? ""
+                                                                        : item.tacccod
+                                                                : item.tacccod}
                                                         </td>
 
                                                         {/* Second Column (Description) */}
                                                         <td
-                                                            className={`text-start ${item.index === 1 ? "heading-cell" : ""}`}
+                                                            className={`text-start ${item.index === 1 ? "heading-cell" : ""
+                                                                }`}
                                                             style={{
                                                                 ...secondColWidth,
                                                                 textAlign: "center",
-                                                                fontWeight: item.index === 1 ? "bold" : "normal",
-                                                                backgroundColor: item.index === 1 ? "#3368B5" : "transparent",
+                                                                fontWeight:
+                                                                    item.index === 1 ? "bold" : "normal",
+                                                                backgroundColor:
+                                                                    item.index === 1 ? "#3368B5" : "transparent",
                                                                 // color: fontcolor,
-                                                                color: item.index === 1 ? "white" : '',
+                                                                color: item.index === 1 ? "white" : "",
                                                             }}
                                                         >
                                                             {item.type === "receipt"
@@ -1741,27 +1820,51 @@ export default function CashFlowReport() {
 
                                                         {/* Third Column */}
                                                         <td className="text-end" style={thirdColWidth}>
-                                                            {item.type === "receipt" ? (item.index === 0 ? "-" : item.index === 1 ? "" : item.Receipts) : ""}
+                                                            {item.type === "receipt"
+                                                                ? item.index === 0
+                                                                    ? "-"
+                                                                    : item.index === 1
+                                                                        ? ""
+                                                                        : item.Receipts
+                                                                : ""}
                                                         </td>
 
                                                         {/* Fourth Column (Payment) */}
                                                         <td className="text-end" style={forthColWidth}>
-                                                            {item.type === "receipt" ? (item.index === 0 ? "-" : item.Payment) : item.Payments}
+                                                            {item.type === "receipt"
+                                                                ? item.index === 0
+                                                                    ? "-"
+                                                                    : item.Payment
+                                                                : item.Payments}
                                                         </td>
 
                                                         {/* Fifth Column (Opening Balance) */}
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item.type === "receipt" ? (item.index === 0 ? openingbalance : "") : ""}
+                                                            {item.type === "receipt"
+                                                                ? item.index === 0
+                                                                    ? openingbalance
+                                                                    : ""
+                                                                : ""}
                                                         </td>
                                                     </tr>
                                                 );
                                             })}
 
                                             {/* Blank Rows */}
-                                            {Array.from({ length: Math.max(0, 27 - tableData.length) }).map((_, rowIndex) => (
-                                                <tr key={`blank-${rowIndex}`} style={{ backgroundColor: getcolor, color: fontcolor }}>
+                                            {Array.from({
+                                                length: Math.max(0, 27 - tableData.length),
+                                            }).map((_, rowIndex) => (
+                                                <tr
+                                                    key={`blank-${rowIndex}`}
+                                                    style={{
+                                                        backgroundColor: getcolor,
+                                                        color: fontcolor,
+                                                    }}
+                                                >
                                                     {Array.from({ length: 5 }).map((_, colIndex) => (
-                                                        <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                                                        <td key={`blank-${rowIndex}-${colIndex}`}>
+                                                            &nbsp;
+                                                        </td>
                                                     ))}
                                                 </tr>
                                             ))}
@@ -1776,11 +1879,9 @@ export default function CashFlowReport() {
                                         </>
                                     )}
                                 </tbody>
-
                             </table>
                         </div>
                     </div>
-
 
                     <div
                         style={{
@@ -1789,7 +1890,7 @@ export default function CashFlowReport() {
                             height: "24px",
                             display: "flex",
                             paddingRight: "1.2%",
-                            width: '101.2%'
+                            width: "101.2%",
                         }}
                     >
                         <div
@@ -1814,7 +1915,6 @@ export default function CashFlowReport() {
                             }}
                         >
                             <span className="mobileledger_total">{totalDebit}</span>
-
                         </div>
                         <div
                             style={{
@@ -1824,7 +1924,6 @@ export default function CashFlowReport() {
                             }}
                         >
                             <span className="mobileledger_total">{totalCredit}</span>
-
                         </div>
                         <div
                             style={{
@@ -1834,10 +1933,7 @@ export default function CashFlowReport() {
                             }}
                         >
                             <span className="mobileledger_total">{closingBalance}</span>
-
                         </div>
-
-
                     </div>
                     <div
                         style={{
@@ -1848,7 +1944,6 @@ export default function CashFlowReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1857,7 +1952,6 @@ export default function CashFlowReport() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1866,7 +1960,6 @@ export default function CashFlowReport() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1877,7 +1970,6 @@ export default function CashFlowReport() {
                             text="Select"
                             ref={input3Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

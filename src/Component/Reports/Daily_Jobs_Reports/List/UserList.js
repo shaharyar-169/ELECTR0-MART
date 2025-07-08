@@ -132,7 +132,7 @@ export default function UserList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -160,7 +160,7 @@ export default function UserList() {
       "Log Date",
       "Log Time",
     ];
-    const columnWidths = [15, 50, 15, 15, 25, 45, 22, 20];
+    const columnWidths = [18, 40, 15, 15, 25, 45, 22, 20];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -226,16 +226,16 @@ export default function UserList() {
         }
 
         // Set background color for odd-numbered rows
-        // if (isOddRow) {
-        // 	doc.setFillColor(240); // Light background color
-        // 	doc.rect(
-        // 		startX,
-        // 		startY + (i - startIndex + 2) * rowHeight,
-        // 		tableWidth,
-        // 		rowHeight,
-        // 		"F"
-        // 	);
-        // }
+        if (isOddRow) {
+        	doc.setFillColor(240); // Light background color
+        	doc.rect(
+        		startX,
+        		startY + (i - startIndex + 2) * rowHeight,
+        		tableWidth,
+        		rowHeight,
+        		"F"
+        	);
+        }
 
         // Draw row borders
         doc.setDrawColor(0); // Set color for borders
@@ -320,7 +320,7 @@ export default function UserList() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 47; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -613,7 +613,19 @@ export default function UserList() {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    // Get current date
+   
+
+  // Add a blank row
+    worksheet.addRow([]);
+    // Get current date and time
+    const getCurrentTime = () => {
+      const today = new Date();
+      const hh = String(today.getHours()).padStart(2, "0");
+      const mm = String(today.getMinutes()).padStart(2, "0");
+      const ss = String(today.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    };
+     // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -621,8 +633,39 @@ export default function UserList() {
       const year = today.getFullYear();
       return `${day}-${month}-${year}`;
     };
-
+    const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
+    const userid= user.tusrid;
+
+    // Add date and time row
+    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    // Merge across all columns
+    worksheet.mergeCells(
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+    );
+    worksheet.mergeCells(
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+    );
 
     // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
@@ -799,14 +842,14 @@ export default function UserList() {
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-    ID: "ASC",
-    Name: "ASC",
-    Status: "ASC",
-    Type: "ASC",
-    Mobile: "ASC",
-    Email: "ASC",
-    "Log Date": "ASC",
-    "Log Time": "ASC"
+    ID: "",
+    Name: "",
+    Status: "",
+    Type: "",
+    Mobile: "",
+    Email: "",
+    "Log Date": "",
+    "Log Time": ""
   });
 
   // Transform table data into column-oriented format
@@ -995,15 +1038,14 @@ export default function UserList() {
   );
 };
 
-  const getIconStyle = (colKey) => ({
-    transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: columnSortOrders[colKey]
-      ? columnSortOrders[colKey] === "ASC"
-        ? "white"
-        : "red"
-      : "white", // default to white if no sort
+ const getIconStyle = (colKey) => {
+  const order = columnSortOrders[colKey];
+  return {
+    transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+    color: order === "ASC" || order === "DSC" ? "red" : "white",
     transition: "transform 0.3s ease, color 0.3s ease",
-  });
+  };
+};
 
   return (
     <>
@@ -1082,9 +1124,9 @@ export default function UserList() {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="Active">Active</option>
-                  <option value="Non-Active">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="Active">ACTIVE</option>
+                  <option value="Non-Active">NON-ACTIVE</option>
                 </select>
               </div>
 

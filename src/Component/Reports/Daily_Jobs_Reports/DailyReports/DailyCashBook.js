@@ -83,7 +83,7 @@ export default function DailyCashBook() {
         gettodate,
         getfontstyle,
         getdatafontsize,
-        
+
     } = useTheme();
 
     console.log('select year: ' + getyeardescription)
@@ -294,7 +294,11 @@ export default function DailyCashBook() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
-          
+
+            code: 'MAKKAHCOMP',
+            FLocCod: '001',
+            FYerDsc: '2025-2025',
+
 
 
         }).toString();
@@ -364,7 +368,11 @@ export default function DailyCashBook() {
             FTrnDat: toInputDate,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription
+            FYerDsc: yeardescription || getyeardescription,
+
+            code: 'MAKKAHCOMP',
+            FLocCod: '001',
+            FYerDsc: '2025-2025',
 
 
         }).toString();
@@ -426,6 +434,7 @@ export default function DailyCashBook() {
 
 
 
+
     const exportPDFHandler = () => {
 
         // Create a new jsPDF instance with landscape orientation
@@ -446,14 +455,17 @@ export default function DailyCashBook() {
         });
 
 
-        // Add summary row to the table
+        // // Add summary row to the table
         rows.push([
-            "",
+            "Total",
             String(totalDebit),
             "",
             String(totalCredit),
 
         ]);
+
+
+
 
 
         // Define table column headers and individual column widths
@@ -521,6 +533,7 @@ export default function DailyCashBook() {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
                 const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
+                const isTotalRow = i === rows.length - 1; // Check if this is the total row
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -529,77 +542,153 @@ export default function DailyCashBook() {
                     fontName = boldFont; // Set bold font for red-colored row
                 }
 
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+                // For total row, set bold font and prepare for double border
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, 'bold');
+                }
 
                 // Draw row borders
                 doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
+
+                // For total row, draw double border
+                if (isTotalRow) {
+                    // First line of the double border
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight
+                    );
+
+                    // Second line of the double border (slightly offset)
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX + 0.5,
+                        startY + (i - startIndex + 2) * rowHeight + 0.5,
+                        tableWidth - 1,
+                        rowHeight - 1
+                    );
+                } else {
+                    // Normal border for other rows
+                    doc.setLineWidth(0.2);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight
+                    );
+                }
 
                 row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
+                    // For total row, adjust vertical position to center in the double border
+                    const cellY = isTotalRow
+                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+                        : startY + (i - startIndex + 2) * rowHeight + 3;
+
                     const cellX = startX + 2;
 
                     // Set text color
                     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
+
+                    // For total row, keep bold font
+                    if (!isTotalRow) {
+                        // Set font
+                        doc.setFont(fontName, "normal");
+                    }
 
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
-
-
 
                     if (cellIndex === 1 || cellIndex === 3) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
-                            baseline: "middle",
+                            baseline: "middle", // This centers vertically
                         });
+                    } else {
+                        // For empty cells in total row, add "Total" label centered
+                        if (isTotalRow && cellIndex === 0 && cell === "") {
+                            const totalLabelX = startX + columnWidths[0] / 2;
+                            doc.text("Total", totalLabelX, cellY, {
+                                align: "center",
+                                baseline: "middle"
+                            });
+                        } else {
+                            doc.text(cellValue, cellX, cellY, {
+                                baseline: "middle" // This centers vertically
+                            });
+                        }
                     }
-
-                    else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-                    }
-
-
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
+                        if (isTotalRow) {
+                            // Double border for total row columns
+                            doc.setLineWidth(0.3);
+                            doc.rect(
+                                startX,
+                                startY + (i - startIndex + 2) * rowHeight,
+                                columnWidths[cellIndex],
+                                rowHeight
+                            );
+                            doc.setLineWidth(0.3);
+                            doc.rect(
+                                startX + 0.5,
+                                startY + (i - startIndex + 2) * rowHeight + 0.5,
+                                columnWidths[cellIndex] - 1,
+                                rowHeight - 1
+                            );
+                        } else {
+                            // Normal border for other rows
+                            doc.setLineWidth(0.2);
+                            doc.rect(
+                                startX,
+                                startY + (i - startIndex + 2) * rowHeight,
+                                columnWidths[cellIndex],
+                                rowHeight
+                            );
+                        }
                         startX += columnWidths[cellIndex];
                     }
                 });
 
                 // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
+                if (isTotalRow) {
+                    // Double border for total row last column
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        columnWidths[row.length - 1],
+                        rowHeight
+                    );
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX + 0.5,
+                        startY + (i - startIndex + 2) * rowHeight + 0.5,
+                        columnWidths[row.length - 1] - 1,
+                        rowHeight - 1
+                    );
+                } else {
+                    // Normal border for other rows last column
+                    doc.setLineWidth(0.2);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        columnWidths[row.length - 1],
+                        rowHeight
+                    );
+                }
                 startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+
+                // Reset font after total row
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, "normal");
+                }
             }
 
+            // Rest of your function remains the same...
             // Draw line at the bottom of the page with padding
             const lineWidth = tableWidth; // Match line width with table width
             const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
@@ -615,7 +704,6 @@ export default function DailyCashBook() {
             doc.setTextColor(0); // Reset text color to default
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
-
         // Function to calculate total table width
         const getTotalTableWidth = () => {
             let totalWidth = 0;
@@ -724,7 +812,7 @@ export default function DailyCashBook() {
                 // Positioning for CLOSING BALANCE
                 const closingLabelX = labelsX + 172; // Space after OPENING BAL
                 doc.setFont(getfontstyle, 'bold');
-                doc.text(`CLOSING BAL :`,labelsX + 168 , labelsY + 8.5); // Draw bold label
+                doc.text(`CLOSING BAL :`, labelsX + 168, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal');
 
                 // Draw the value inside the border
@@ -790,6 +878,9 @@ export default function DailyCashBook() {
 
 
     };
+
+
+
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
@@ -824,7 +915,7 @@ export default function DailyCashBook() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(60 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Daily Cash Book Report From ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Daily Cash Book As on ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -834,7 +925,7 @@ export default function DailyCashBook() {
 
         // Add an empty row after the title section
         worksheet.addRow([]);
-       
+
 
         let status = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Opening : null;
         let search = CashBookSummaryData.length > 0 ? CashBookSummaryData[0].Closing : null;
@@ -900,7 +991,7 @@ export default function DailyCashBook() {
         });
 
         const totalRow = worksheet.addRow([
-            "",
+            "Total",
             totalDebit,
             "",
             totalCredit,
@@ -927,6 +1018,17 @@ export default function DailyCashBook() {
         });
 
 
+
+        // Add a blank row
+        worksheet.addRow([]);
+        // Get current date and time
+        const getCurrentTime = () => {
+            const today = new Date();
+            const hh = String(today.getHours()).padStart(2, "0");
+            const mm = String(today.getMinutes()).padStart(2, "0");
+            const ss = String(today.getSeconds()).padStart(2, "0");
+            return `${hh}:${mm}:${ss}`;
+        };
         // Get current date
         const getCurrentDate = () => {
             const today = new Date();
@@ -935,13 +1037,44 @@ export default function DailyCashBook() {
             const year = today.getFullYear();
             return `${day}-${month}-${year}`;
         };
-
+        const currentTime = getCurrentTime();
         const currentdate = getCurrentDate();
+        const userid = user.tusrid;
+
+        // Add date and time row
+        const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+        const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+
+        // Merge across all columns
+        worksheet.mergeCells(
+            `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+        );
+        worksheet.mergeCells(
+            `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+        );
 
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `DailyCashBookReport As on ${toInputDate}.xlsx`);
+        saveAs(blob, `DailyCashBook As on ${toInputDate}.xlsx`);
     };
 
 
@@ -1140,7 +1273,7 @@ export default function DailyCashBook() {
 
                     }}
                 >
-                    <NavComponent textdata="Daily Cash Book Report" />
+                    <NavComponent textdata="Daily Cash Book" />
 
 
                     <div className="row " style={{ height: '20px', marginTop: '8px', marginBottom: "8px" }}>
@@ -1411,9 +1544,9 @@ export default function DailyCashBook() {
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
-                                                          }}
-                                                  
-                                                  >
+                                                        }}
+
+                                                    >
                                                         {/* First Column - From tableData if available */}
                                                         <td className="text-start" style={firstColWidth}>
                                                             {tableItem['Trn#'] ? `${tableItem['Trn#']}- ${tableItem.Description}` : ""}

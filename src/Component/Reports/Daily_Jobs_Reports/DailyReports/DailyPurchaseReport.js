@@ -241,15 +241,20 @@ export default function DailyPurchaseReport() {
     const apiMainUrl = apiLinks + "/DailyPurchaseReport.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+
+      code: 'NASIRTRD',
+      FLocCod: '001',
+      FYerDsc: '2025-2025',
+
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FTrnTyp: transectionType,
       FStrCod: storeType,
       FSchTxt: searchQuery,
-    
+
     }).toString();
 
     axios
@@ -773,10 +778,10 @@ export default function DailyPurchaseReport() {
           transectionType === "A"
             ? "ALL"
             : transectionType === "BIL"
-            ? "PURCHASE"
-            : transectionType === "PRN"
-            ? "PURCHASE RETURN"
-            : "ALL";
+              ? "PURCHASE"
+              : transectionType === "PRN"
+                ? "PURCHASE RETURN"
+                : "ALL";
 
         let typeItem = Companyselectdatavalue.label
           ? Companyselectdatavalue.label
@@ -875,12 +880,12 @@ export default function DailyPurchaseReport() {
   };
 
   const handleDownloadCSV = async () => {
-     const workbook = new ExcelJS.Workbook();
-     const worksheet = workbook.addWorksheet("Sheet1");
- 
-     const numColumns = 9; // Ensure this matches the actual number of columns
- 
-     const columnAlignments = ["left",
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    const numColumns = 9; // Ensure this matches the actual number of columns
+
+    const columnAlignments = ["left",
       "left",
       "center",
       "center",
@@ -889,81 +894,81 @@ export default function DailyPurchaseReport() {
       "right",
       "right",
       "right",];
- 
-     // Define fonts for different sections
-     const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-     const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
-     const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
-     const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
- 
-     // Add an empty row at the start
-     worksheet.addRow([]);
- 
-     // Add company name
-     const companyRow = worksheet.addRow([comapnyname]);
-     companyRow.eachCell((cell) => {
-       cell.font = fontCompanyName;
-       cell.alignment = { horizontal: "center" };
-     });
- 
-     worksheet.getRow(companyRow.number).height = 30;
-     worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
- 
-     // Add Store List row
-     const storeListRow = worksheet.addRow([`Daily Purchase Report From ${fromInputDate} To ${toInputDate}`]);
-     storeListRow.eachCell((cell) => {
-       cell.font = fontStoreList;
-       cell.alignment = { horizontal: "center" };
-     });
- 
-     worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
- 
-     // Add an empty row after the title section
-     worksheet.addRow([]);
- 
-     let typecategory = Companyselectdatavalue.label
+
+    // Define fonts for different sections
+    const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
+    const fontStoreList = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+    const fontHeader = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: true };
+    const fontTableContent = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: false };
+
+    // Add an empty row at the start
+    worksheet.addRow([]);
+
+    // Add company name
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+
+    // Add Store List row
+    const storeListRow = worksheet.addRow([`Daily Purchase Report From ${fromInputDate} To ${toInputDate}`]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+
+    // Add an empty row after the title section
+    worksheet.addRow([]);
+
+    let typecategory = Companyselectdatavalue.label
       ? Companyselectdatavalue.label
       : "ALL";
 
-     let typestatus =
+    let typestatus =
       transectionType === "BIL"
         ? "PURCHASE"
         : transectionType === "PRN"
-        ? "PURCHASE RETURN"
-        : "ALL";
+          ? "PURCHASE RETURN"
+          : "ALL";
     let typesearch = searchQuery ? searchQuery : "";
- 
-   
-        // Add third row with conditional rendering for "SEARCH:"
-        const typeAndStoreRow2 = worksheet.addRow(["STORE :", typecategory]);
-        const typeAndStoreRow3 = worksheet.addRow(
-          searchQuery
-            ? ["TYPE :", typestatus, "", "", "", "SEARCH :", typesearch]
-            : ["TYPE :", typestatus, ""]
-        );
 
- 
-     // Apply styling for the status row
-    
-     typeAndStoreRow2.eachCell((cell, colIndex) => {
-       cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 4].includes(colIndex) };
-       cell.alignment = { horizontal: "left", vertical: "middle" };
-     });
-     typeAndStoreRow3.eachCell((cell, colIndex) => {
-       cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 6].includes(colIndex) };
-       cell.alignment = { horizontal: "left", vertical: "middle" };
-     });
- 
-     // Header style
-     const headerStyle = {
-       font: fontHeader,
-       alignment: { horizontal: "center", vertical: "middle" },
-       fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-       border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
-     };
- 
-     // Add headers
-     const headers = [
+
+    // Add third row with conditional rendering for "SEARCH:"
+    const typeAndStoreRow2 = worksheet.addRow(["STORE :", typecategory]);
+    const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery
+        ? ["TYPE :", typestatus, "", "", "", "SEARCH :", typesearch]
+        : ["TYPE :", typestatus, ""]
+    );
+
+
+    // Apply styling for the status row
+
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
+      cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 4].includes(colIndex) };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = { name: 'CustomFont' || "CustomFont", size: getdatafontsize, bold: [1, 6].includes(colIndex) };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+
+    // Header style
+    const headerStyle = {
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+      border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+    };
+
+    // Add headers
+    const headers = [
       "Date",
       "Trn#",
       "Type",
@@ -973,12 +978,12 @@ export default function DailyPurchaseReport() {
       "Rate",
       "Qnty",
       "Amount",];
-     const headerRow = worksheet.addRow(headers);
-     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
- 
-     // Add data rows
-     tableData.forEach((item) => {
-       const row = worksheet.addRow([
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    // Add data rows
+    tableData.forEach((item) => {
+      const row = worksheet.addRow([
         item.Date,
         item["Trn #"],
         item.Type,
@@ -988,21 +993,21 @@ export default function DailyPurchaseReport() {
         item.Rate,
         item.Qnty,
         item["Pur Amount"],]);
- 
-       row.eachCell((cell, colIndex) => {
-         cell.font = fontTableContent;
-         cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-         cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
-       });
-     });
- 
-     // Set column widths
-     [13, 11, 7, 7, 50, 30, 13, 7, 13].forEach((width, index) => {
-       worksheet.getColumn(index + 1).width = width;
-     });
- 
-     const totalRow = worksheet.addRow([
-     "",
+
+      row.eachCell((cell, colIndex) => {
+        cell.font = fontTableContent;
+        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
+      });
+    });
+
+    // Set column widths
+    [13, 11, 7, 7, 50, 30, 13, 7, 13].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
+    const totalRow = worksheet.addRow([
+      "",
       "",
       "",
       "",
@@ -1026,7 +1031,7 @@ export default function DailyPurchaseReport() {
 
       // Align only the "Total" text to the right
       if (
-     
+
         colNumber === 8 ||
         colNumber === 9
       ) {
@@ -1035,22 +1040,22 @@ export default function DailyPurchaseReport() {
     });
 
 
-     // Get current date
-     const getCurrentDate = () => {
-       const today = new Date();
-       const day = String(today.getDate()).padStart(2, "0");
-       const month = String(today.getMonth() + 1).padStart(2, "0");
-       const year = today.getFullYear();
-       return `${day}-${month}-${year}`;
-     };
- 
-     const curfrentdate = getCurrentDate();
- 
-     // Generate and save the Excel file
-     const buffer = await workbook.xlsx.writeBuffer();
-     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-     saveAs(blob, `DailyPurchaseReport From ${fromInputDate} To ${toInputDate}.xlsx`);
-   };
+    // Get current date
+    const getCurrentDate = () => {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+
+    const curfrentdate = getCurrentDate();
+
+    // Generate and save the Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `DailyPurchaseReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+  };
 
   const dispatch = useDispatch();
 
@@ -1413,7 +1418,7 @@ export default function DailyPurchaseReport() {
               {/* From Date */}
               <div
                 className="d-flex align-items-center"
-                // style={{ marginLeft: "20px" }}
+              // style={{ marginLeft: "20px" }}
               >
                 <div
                   style={{
@@ -1746,7 +1751,7 @@ export default function DailyPurchaseReport() {
               {/* Store Select */}
               <div
                 className="d-flex align-items-center"
-                // style={{ marginRight: "20px" }}
+              // style={{ marginRight: "20px" }}
               >
                 <div
                   style={{
@@ -1823,7 +1828,7 @@ export default function DailyPurchaseReport() {
               {/* Type */}
               <div
                 className="d-flex align-items-center"
-                // style={{ marginLeft: "20px" }}
+              // style={{ marginLeft: "20px" }}
               >
                 <div
                   style={{
