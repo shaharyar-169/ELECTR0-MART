@@ -581,7 +581,7 @@ export default function CashFlowReport() {
                 row.forEach((cell, cellIndex) => {
                     // For total row, adjust vertical position to center in the double border
                     const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2 
+                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
                         : startY + (i - startIndex + 2) * rowHeight + 3;
 
                     const cellX = currentX + 2;
@@ -886,214 +886,404 @@ export default function CashFlowReport() {
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+    //     const handleDownloadCSV = async () => {
+    //         const workbook = new ExcelJS.Workbook();
+    //         const worksheet = workbook.addWorksheet("Sheet1");
+
+    //         const numColumns = 6; // Ensure this matches the actual number of columns
+
+    //         const columnAlignments = ["left", "left", "right", "right", "right"];
+
+    //         // Define fonts for different sections
+    //         const fontCompanyName = {
+    //           name: "CustomFont" || "CustomFont",
+    //           size: 18,
+    //           bold: true,
+    //         };
+    //         const fontStoreList = {
+    //           name: "CustomFont" || "CustomFont",
+    //           size: 10,
+    //           bold: false,
+    //         };
+    //         const fontHeader = {
+    //           name: "CustomFont" || "CustomFont",
+    //           size: 10,
+    //           bold: true,
+    //         };
+    //         const fontTableContent = {
+    //           name: "CustomFont" || "CustomFont",
+    //           size: 10,
+    //           bold: false,
+    //         };
+
+    //         // Add an empty row at the start
+    //         worksheet.addRow([]);
+
+    //         // Add company name
+    //         const companyRow = worksheet.addRow([comapnyname]);
+    //         companyRow.eachCell((cell) => {
+    //           cell.font = fontCompanyName;
+    //           cell.alignment = { horizontal: "center" };
+    //         });
+
+    //         worksheet.getRow(companyRow.number).height = 30;
+    //         worksheet.mergeCells(
+    //           `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+    //           }`
+    //         );
+
+    //         // Add Store List row
+    //         const storeListRow = worksheet.addRow([`Cash Flow From ${fromInputDate} To ${toInputDate}`,
+    // ]);
+    //         storeListRow.eachCell((cell) => {
+    //           cell.font = fontStoreList;
+    //           cell.alignment = { horizontal: "center" };
+    //         });
+
+    //         worksheet.mergeCells(
+    //           `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+    //           }`
+    //         );
+
+    //         // Add an empty row after the title section
+    //         worksheet.addRow([]);
+
+
+
+    //         // Header style
+    //         const headerStyle = {
+    //           font: fontHeader,
+    //           alignment: { horizontal: "center", vertical: "middle" },
+    //           fill: {
+    //             type: "pattern",
+    //             pattern: "solid",
+    //             fgColor: { argb: "FFC6D9F7" },
+    //           },
+    //           border: {
+    //             top: { style: "thin" },
+    //             left: { style: "thin" },
+    //             bottom: { style: "thin" },
+    //             right: { style: "thin" },
+    //           },
+    //         };
+
+    //         // Add headers
+    //         const headers = ["Code", "Description", "Receipt", "Payment", "Balance"];
+    //         const headerRow = worksheet.addRow(headers);
+    //         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    //         // Add Opening Balance Row
+    //         const openingBalanceRow = [
+    //             "-",
+    //             "Opening Balance",
+    //             "-",
+    //             "-",
+    //             openingbalance,
+    //         ];
+
+    //         // Map Receipt Data
+    //         const receipt =
+    //             tableData.length > 0
+    //                 ? [["", "Receipt", "", "", ""]].concat(
+    //                     tableData.map((item) => [
+    //                         item.tacccod || "",
+    //                         item.Description || "",
+    //                         item.Receipts || "",
+    //                         "",
+    //                         "",
+    //                     ])
+    //                 )
+    //                 : [];
+
+    //         // Map Payment Data
+    //         const payment =
+    //             Paymentdata.length > 0
+    //                 ? [["", "Payment", "", "", ""]].concat(
+    //                     Paymentdata.map((item) => [
+    //                         item.tacccod || "",
+    //                         item.Description || "",
+    //                         "",
+    //                         item.Payments || "",
+    //                         "",
+    //                     ])
+    //                 )
+    //                 : [];
+
+    //         const rows = [openingBalanceRow, ...receipt, ...payment];
+
+    //   // Add Data Rows to Worksheet
+    //         rows.forEach((rowData) => {
+    //             const row = worksheet.addRow(rowData);
+
+    //             // Apply styles to each row
+    //             row.eachCell((cell, colIndex) => {
+    //                 cell.font = {
+    //                     family: getfontstyle,
+    //                     size: getdatafontsize,
+    //                     bold: false,
+    //                 };
+
+    //                 cell.border = {
+    //                     top: { style: "thin", color: { argb: "FF000000" } },
+    //                     left: { style: "thin", color: { argb: "FF000000" } },
+    //                     bottom: { style: "thin", color: { argb: "FF000000" } },
+    //                     right: { style: "thin", color: { argb: "FF000000" } },
+    //                 };
+
+    //                 // Align content based on column index
+    //                 if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
+    //                     cell.alignment = { horizontal: "right", vertical: "middle" };
+    //                 } else {
+    //                     cell.alignment = { horizontal: "left", vertical: "middle" };
+    //                 }
+    //             });
+
+    //             // Apply specific styling for "Receipt" and "Payment" header rows
+    //             if (rowData[1] === "Receipt" || rowData[1] === "Payment") {
+    //                 const targetCell = row.getCell(2); // Column index 2 (1-based index in ExcelJS)
+
+    //                 targetCell.font = { bold: true }; // Make text bold
+    //                 targetCell.fill = {
+    //                     type: "pattern",
+    //                     pattern: "solid",
+    //                     fgColor: { argb: "FFC6D9F7" }, // Light Orange Background
+    //                 };
+    //                 targetCell.alignment = { horizontal: "left", vertical: "middle" };
+    //             }
+    //         });
+
+
+    //         // Set column widths
+    //         [10, 40, 10, 12, 10].forEach((width, index) => {
+    //           worksheet.getColumn(index + 1).width = width;
+    //         });
+
+    //         // Add a blank row
+    //         worksheet.addRow([]);
+    //         // Get current date and time
+    //         const getCurrentTime = () => {
+    //           const today = new Date();
+    //           const hh = String(today.getHours()).padStart(2, "0");
+    //           const mm = String(today.getMinutes()).padStart(2, "0");
+    //           const ss = String(today.getSeconds()).padStart(2, "0");
+    //           return `${hh}:${mm}:${ss}`;
+    //         };
+    //          // Get current date
+    //         const getCurrentDate = () => {
+    //           const today = new Date();
+    //           const day = String(today.getDate()).padStart(2, "0");
+    //           const month = String(today.getMonth() + 1).padStart(2, "0");
+    //           const year = today.getFullYear();
+    //           return `${day}-${month}-${year}`;
+    //         };
+    //         const currentTime = getCurrentTime();
+    //         const currentdate = getCurrentDate();
+    //         const userid= user.tusrid;
+
+    //         // Add date and time row
+    //         const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    //         dateTimeRow.eachCell((cell) => {
+    //           cell.font = {
+    //             name: "CustomFont" || "CustomFont",
+    //             size: 10,
+    //             // bold: true
+    //             // italic: true,
+    //           };
+    //           cell.alignment = { horizontal: "left" };
+    //         });
+    //          const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    //         dateTimeRow.eachCell((cell) => {
+    //           cell.font = {
+    //             name: "CustomFont" || "CustomFont",
+    //             size: 10,
+    //             // bold: true
+    //             // italic: true,
+    //           };
+    //           cell.alignment = { horizontal: "left" };
+    //         });
+
+    //         // Merge across all columns
+    //         worksheet.mergeCells(
+    //           `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+    //         );
+    //         worksheet.mergeCells(
+    //           `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+    //         );
+
+
+    //         // Generate and save the Excel file
+    //         const buffer = await workbook.xlsx.writeBuffer();
+    //         const blob = new Blob([buffer], {
+    //           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //         });
+    //         saveAs(blob, `CashFlowReport From  ${fromInputDate} To ${toInputDate}.xlsx`);
+    //       };
+
     const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
+        try {
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = 'Your Application';
+            workbook.lastModifiedBy = user.tusrid;
+            workbook.created = new Date();
+            workbook.modified = new Date();
 
-        const numColumns = 6; // Number of columns
+            const worksheet = workbook.addWorksheet("Cash Flow Report");
+            const numColumns = 5; // Code, Description, Receipt, Payment, Balance
 
-        const columnAlignments = ["left", "left", "right", "right", "right"];
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-        // Add title rows
-
-        [
-            comapnyname,
-            `Cash Flow From ${fromInputDate} To ${toInputDate}`,
-        ].forEach((title, index) => {
-            // Define custom styles for each title
-            let customStyle;
-            let rowHeight = 20; // Default row height
-            if (index === 0) {
-                // Style for company name
-                customStyle = {
-                    font: { family: getfontstyle, size: 18, bold: true },
-                    alignment: { horizontal: "center" },
-                };
-                rowHeight = 30; // Increase row height for company name to avoid overlap
-            } else {
-                // Style for "Item List"
-                customStyle = {
-                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
-                    alignment: { horizontal: "center" },
-                };
-            }
-
-            // Add row with the title
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-            // Adjust the row height for the company name or other titles
-            worksheet.getRow(index + 2).height = rowHeight;
-
-            // Merge the cells for the title
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+            // Clean data first
+            const cleanData = (data) => data.map(row =>
+                row.map(cell => cell === null || cell === undefined ? "" : cell)
             );
-        });
 
-        // Add an empty row after the title section
-        worksheet.addRow([]); // This is where you add the empty row
+            // Add company name (centered, merged)
+            const companyRow = worksheet.addRow([comapnyname]);
+            companyRow.font = { name: getfontstyle, size: 18, bold: true };
+            companyRow.alignment = { horizontal: "center" };
+            companyRow.height = 30;
+            worksheet.mergeCells(`A1:E1`);
 
-        // Header style for center alignment
-        const headerStyle = {
-            font: { bold: true, family: getfontstyle, size: getdatafontsize },
-            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-            fill: {
+            // Add date range
+            const dateRow = worksheet.addRow([`Cash Flow From ${fromInputDate} To ${toInputDate}`]);
+            dateRow.font = { name: getfontstyle, size: 10 };
+            dateRow.alignment = { horizontal: "center" };
+            worksheet.mergeCells(`A2:E2`);
+            worksheet.addRow([]);
+
+            // Add headers
+            const headers = ["Code", "Description", "Receipt", "Payment", "Balance"];
+            const headerRow = worksheet.addRow(headers);
+            headerRow.font = { name: getfontstyle, size: 10, bold: true };
+            headerRow.fill = {
                 type: "pattern",
                 pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
-        };
+                fgColor: { argb: "FFC6D9F7" }
+            };
+            headerRow.eachCell(cell => {
+                cell.border = {
+                    top: { style: "thin" },
+                    left: { style: "thin" },
+                    bottom: { style: "thin" },
+                    right: { style: "thin" }
+                };
+                cell.alignment = { horizontal: "center" };
+            });
 
-        // Add headers
-        const headers = ["Code", "Description", "Receipt", "Payment", "Balance"];
-        const headerRow = worksheet.addRow(headers);
+            // Prepare data
+            const openingBalanceRow = ["", "Opening Balance", "", "", openingbalance];
 
-        // Apply styles and center alignment to the header row
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle };
-        });
-
-        // Add data rows
-
-        // Add Opening Balance Row
-        const openingBalanceRow = [
-            "-",
-            "Opening Balance",
-            "-",
-            "-",
-            openingbalance,
-        ];
-
-        // Map Receipt Data
-        const receipt =
-            tableData.length > 0
-                ? [["", "Receipt", "", "", ""]].concat(
-                    tableData.map((item) => [
+            const receipt = tableData.length > 0 ?
+                [["", "Receipt", "", "", ""]].concat(
+                    tableData.map(item => [
                         item.tacccod || "",
                         item.Description || "",
                         item.Receipts || "",
                         "",
-                        "",
+                        ""
                     ])
-                )
-                : [];
+                ) : [];
 
-        // Map Payment Data
-        const payment =
-            Paymentdata.length > 0
-                ? [["", "Payment", "", "", ""]].concat(
-                    Paymentdata.map((item) => [
+            const payment = Paymentdata.length > 0 ?
+                [["", "Payment", "", "", ""]].concat(
+                    Paymentdata.map(item => [
                         item.tacccod || "",
                         item.Description || "",
                         "",
                         item.Payments || "",
-                        "",
+                        ""
                     ])
-                )
-                : [];
+                ) : [];
 
-        // Combine Rows for Final Data
-        const rows = [openingBalanceRow, ...receipt, ...payment];
+            // Add all rows with proper formatting
+            [...cleanData([openingBalanceRow]), ...cleanData(receipt), ...cleanData(payment)].forEach(row => {
+                const addedRow = worksheet.addRow(row);
 
-        // Add Data Rows to Worksheet
-        rows.forEach((rowData) => {
-            const row = worksheet.addRow(rowData);
+                addedRow.eachCell((cell, colNumber) => {
+                    cell.font = { name: getfontstyle, size: 10 };
+                    cell.border = {
+                        top: { style: "thin" },
+                        left: { style: "thin" },
+                        bottom: { style: "thin" },
+                        right: { style: "thin" }
+                    };
 
-            // Apply styles to each row
-            row.eachCell((cell, colIndex) => {
-                cell.font = {
-                    family: getfontstyle,
-                    size: getdatafontsize,
-                    bold: false,
-                };
+                    // Right-align numeric columns
+                    if ([3, 4, 5].includes(colNumber)) {
+                        cell.alignment = { horizontal: "right" };
+                        if (typeof cell.value === "number") {
+                            cell.numFmt = '#,##0.00';
+                        }
+                    } else {
+                        cell.alignment = { horizontal: "left" };
+                    }
 
+                    // Style section headers
+                    if (cell.value === "Receipt" || cell.value === "Payment") {
+                        cell.font = { bold: true };
+                        cell.fill = {
+                            type: "pattern",
+                            pattern: "solid",
+                            fgColor: { argb: "FFC6D9F7" }
+                        };
+                    }
+                });
+            });
+
+            // Set column widths
+            worksheet.columns = [
+                { width: 12 }, // Code
+                { width: 40 }, // Description
+                { width: 15 }, // Receipt
+                { width: 15 }, // Payment
+                { width: 15 }  // Balance
+            ];
+
+            const totalRow = worksheet.addRow([
+                "",
+                "Total",
+                String(totalDebit),
+                String(totalCredit),
+                String(closingBalance),
+            ]);
+
+            // total row added
+            totalRow.eachCell((cell, colNumber) => {
+                cell.font = { bold: true };
                 cell.border = {
-                    top: { style: "thin", color: { argb: "FF000000" } },
-                    left: { style: "thin", color: { argb: "FF000000" } },
-                    bottom: { style: "thin", color: { argb: "FF000000" } },
-                    right: { style: "thin", color: { argb: "FF000000" } },
+                    top: { style: "thin" },
+                    left: { style: "thin" },
+                    bottom: { style: "thin" },
+                    right: { style: "thin" },
                 };
 
-                // Align content based on column index
-                if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
-                    cell.alignment = { horizontal: "right", vertical: "middle" };
-                } else {
-                    cell.alignment = { horizontal: "left", vertical: "middle" };
+                // Align only the "Total" text to the right
+                if (colNumber === 3 || colNumber === 4 || colNumber === 5) {
+                    cell.alignment = { horizontal: "right" };
                 }
             });
 
-            // Apply specific styling for "Receipt" and "Payment" header rows
-            if (rowData[1] === "Receipt" || rowData[1] === "Payment") {
-                const targetCell = row.getCell(2); // Column index 2 (1-based index in ExcelJS)
+            // Add a blank row
+            worksheet.addRow([]);
 
-                targetCell.font = { bold: true }; // Make text bold
-                targetCell.fill = {
-                    type: "pattern",
-                    pattern: "solid",
-                    fgColor: { argb: "FFC6D9F7" }, // Light Orange Background
-                };
-                targetCell.alignment = { horizontal: "left", vertical: "middle" };
-            }
-        });
+            // Add footer
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
 
-        // Add Total Row
-        const totalRow = worksheet.addRow([
-            "",
-            "Total",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
-        ]);
+            const footerRow1 = worksheet.addRow([`DATE: ${currentDate}  TIME: ${currentTime}`]);
+            const footerRow2 = worksheet.addRow([`USER ID: ${user.tusrid}`]);
 
-        // Apply Styles to Total Row
-        totalRow.eachCell((cell, colNumber) => {
-            cell.font = { bold: true };
-            cell.border = {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            };
+            worksheet.mergeCells(`A${footerRow1.number}:E${footerRow1.number}`);
+            worksheet.mergeCells(`A${footerRow2.number}:E${footerRow2.number}`);
 
-            if (colNumber === 3 || colNumber === 4 || colNumber === 5) {
-                cell.alignment = { horizontal: "right" };
-            }
-        });
-
-        // Set column widths
-
-        [12, 40, 20, 20, 20].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
-        };
-
-        const currentdate = getCurrentDate();
-
-        // Generate Excel file buffer and save
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(
-            blob,
-            `CashFlowReport From ${fromInputDate} To ${toInputDate}.xlsx`
-        );
+            // Generate file
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            });
+            saveAs(blob, `CashFlowReport_${fromInputDate}_to_${toInputDate}.xlsx`);
+        } catch (error) {
+            console.error("Error generating Excel file:", error);
+            // Handle error appropriately
+        }
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
