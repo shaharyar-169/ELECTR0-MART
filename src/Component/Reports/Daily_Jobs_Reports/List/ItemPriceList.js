@@ -503,14 +503,14 @@ export default function ItemPriceList() {
 
         // Set background color for odd-numbered rows
         if (isOddRow) {
-        	doc.setFillColor(240); // Light background color
-        	doc.rect(
-        		startX,
-        		startY + (i - startIndex + 2) * rowHeight,
-        		tableWidth,
-        		rowHeight,
-        		"F"
-        	);
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
         }
 
         // Draw row borders
@@ -534,14 +534,14 @@ export default function ItemPriceList() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 2) {
+          if (cellIndex === 22) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-             cellIndex === 2 ||
+            cellIndex === 2 ||
             cellIndex === 3 ||
             cellIndex === 4 ||
             cellIndex === 5 ||
@@ -825,8 +825,7 @@ export default function ItemPriceList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${
-        companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
       }`
     );
 
@@ -838,8 +837,7 @@ export default function ItemPriceList() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${
-        storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -927,7 +925,7 @@ export default function ItemPriceList() {
     const headers = [
       "Code",
       "Description",
-      "StK",
+      "Stock",
       "Comm",
       "SM Rate",
       "Sale Rate",
@@ -972,8 +970,8 @@ export default function ItemPriceList() {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    
-  // Add a blank row
+
+    // Add a blank row
     worksheet.addRow([]);
     // Get current date and time
     const getCurrentTime = () => {
@@ -983,7 +981,7 @@ export default function ItemPriceList() {
       const ss = String(today.getSeconds()).padStart(2, "0");
       return `${hh}:${mm}:${ss}`;
     };
-     // Get current date
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -993,7 +991,7 @@ export default function ItemPriceList() {
     };
     const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
-    const userid= user.tusrid;
+    const userid = user.tusrid;
 
     // Add date and time row
     const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
@@ -1006,7 +1004,7 @@ export default function ItemPriceList() {
       };
       cell.alignment = { horizontal: "left" };
     });
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1228,40 +1226,63 @@ export default function ItemPriceList() {
   }, [tableData]);
 
   const handleSorting = (col) => {
+    // Always sort in descending order on first click (or toggle if already sorted)
     const currentOrder = columnSortOrders[col];
     const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    const columnData = [...columns[col]];
+    // Create an array of indices [0, 1, 2, ..., n-1]
+    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-    columnData.sort((a, b) => {
-      const aValue = a !== null ? a.toString() : "";
-      const bValue = b !== null ? b.toString() : "";
+    // Sort the indices based on the values in the specified column
+    indices.sort((a, b) => {
+      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-      const numA = parseFloat(aValue.replace(/,/g, ""));
-      const numB = parseFloat(bValue.replace(/,/g, ""));
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
       if (!isNaN(numA) && !isNaN(numB)) {
         return newOrder === "ASC" ? numA - numB : numB - numA;
       } else {
         return newOrder === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
       }
     });
 
-    // Update only the clicked column's data
-    setColumns((prev) => ({
-      ...prev,
-      [col]: columnData,
-    }));
-
-    // Reset all columns' sort order except the current one
-    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
+    // Reorder all columns based on the sorted indices
+    const newColumns = Object.keys(columns).reduce((acc, key) => {
+      acc[key] = indices.map((index) => columns[key][index]);
       return acc;
     }, {});
-    setColumnSortOrders(resetSortOrders);
+
+    setColumns(newColumns);
+
+    // Update the sort order state
+    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+      (acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      },
+      {}
+    );
+    setColumnSortOrders(updatedSortOrders);
   };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      Stk: null,
+      Comm: null,
+      "SM Rate": null,
+      "Sale Rate": null,
+      MRP: null,
+      "Fix Rate": null,
+    });
+  };
+
+
   const renderTableData = () => {
     const rowCount = Math.max(
       columns.Code?.length || 0,
@@ -1486,6 +1507,12 @@ export default function ItemPriceList() {
                         setCompanyselectdatavalue("");
                       }
                     }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
                     components={{ Option: DropdownOption }}
                     // styles={customStyles1}
                     styles={customStyles1(!Companyselectdata)}
@@ -1556,6 +1583,12 @@ export default function ItemPriceList() {
                         setcategoryselectdatavalue("");
                       }
                     }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
                     components={{ Option: DropdownOption }}
                     // styles={customStyles1}
                     styles={customStyles1(!Categoryselectdata)}
@@ -1609,6 +1642,12 @@ export default function ItemPriceList() {
                         setTypeselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                         settypeselectdatavalue("");
                       }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
                     // styles={customStyles1}
@@ -1680,6 +1719,12 @@ export default function ItemPriceList() {
                         setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
                         setcapacityselectdatavalue("");
                       }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
                     // styles={customStyles1}
@@ -1951,7 +1996,11 @@ export default function ItemPriceList() {
               id="searchsubmit"
               text="Select"
               ref={input6Ref}
-              onClick={fetchReceivableReport}
+              // onClick={fetchReceivableReport}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

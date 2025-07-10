@@ -74,6 +74,8 @@ export default function StoreList() {
   };
 
   function fetchReceivableReport() {
+
+
     const apiUrl = apiLinks + "/StoreList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
@@ -369,8 +371,8 @@ export default function StoreList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
+              ? "ACTIVE"
+              : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -587,7 +589,7 @@ export default function StoreList() {
       const ss = String(today.getSeconds()).padStart(2, "0");
       return `${hh}:${mm}:${ss}`;
     };
-     // Get current date
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -597,7 +599,7 @@ export default function StoreList() {
     };
     const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
-    const userid= user.tusrid;
+    const userid = user.tusrid;
 
     // Add date and time row
     const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
@@ -610,7 +612,7 @@ export default function StoreList() {
       };
       cell.alignment = { horizontal: "left" };
     });
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -628,7 +630,7 @@ export default function StoreList() {
     worksheet.mergeCells(
       `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
     );
-   
+
 
 
     // Generate and save the Excel file
@@ -784,6 +786,16 @@ export default function StoreList() {
     }
   }, [selectedIndex]);
 
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      Status: null,
+      Abb: null,
+      Stk: null
+    });
+  };
+
   const [columns, setColumns] = useState({
     Code: [],
     Description: [],
@@ -793,11 +805,11 @@ export default function StoreList() {
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-     Code: "",
-  Description: "",
-  Status: "",
-  Abb: "",
-  Stk: ""
+    Code: "",
+    Description: "",
+    Status: "",
+    Abb: "",
+    Stk: ""
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -850,6 +862,9 @@ export default function StoreList() {
     );
     setColumnSortOrders(updatedSortOrders);
   };
+
+
+  
 
   const renderTableData = () => {
     const rowCount = Math.max(
@@ -962,14 +977,16 @@ export default function StoreList() {
     );
   };
 
- const getIconStyle = (colKey) => {
-  const order = columnSortOrders[colKey];
-  return {
-    transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: order === "ASC" || order === "DSC" ? "red" : "white",
-    transition: "transform 0.3s ease, color 0.3s ease",
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
   };
-};
+
+
 
   return (
     <>
@@ -1327,8 +1344,10 @@ export default function StoreList() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={fetchReceivableReport}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }} onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }

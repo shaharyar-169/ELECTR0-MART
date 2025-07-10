@@ -789,40 +789,57 @@ export default function CategoryList() {
     }
   }, [tableData]);
 
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+ 
+ const handleSorting = (col) => {
+  // Always sort in descending order on first click (or toggle if already sorted)
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    const columnData = [...columns[col]];
+  // Create an array of indices [0, 1, 2, ..., n-1]
+  const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-    columnData.sort((a, b) => {
-      const aValue = a !== null ? a.toString() : "";
-      const bValue = b !== null ? b.toString() : "";
+  // Sort the indices based on the values in the specified column
+  indices.sort((a, b) => {
+    const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+    const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-      const numA = parseFloat(aValue.replace(/,/g, ""));
-      const numB = parseFloat(bValue.replace(/,/g, ""));
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-    });
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+  });
 
-    // Update only the clicked column's data
-    setColumns((prev) => ({
-      ...prev,
-      [col]: columnData,
-    }));
+  // Reorder all columns based on the sorted indices
+  const newColumns = Object.keys(columns).reduce((acc, key) => {
+    acc[key] = indices.map((index) => columns[key][index]);
+    return acc;
+  }, {});
 
-    // Reset all columns' sort order except the current one
-    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+  setColumns(newColumns);
+
+  // Update the sort order state
+  const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+    (acc, key) => {
       acc[key] = key === col ? newOrder : null;
       return acc;
-    }, {});
-    setColumnSortOrders(resetSortOrders);
+    },
+    {}
+  );
+  setColumnSortOrders(updatedSortOrders);
+};
+
+const resetSorting = () => {
+    setColumnSortOrders({
+     Code: null,
+    Description: null,
+    Status: null,
+    });
   };
 
   const renderTableData = () => {
@@ -1249,7 +1266,12 @@ export default function CategoryList() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={fetchReceivableReport}
+              // onClick={fetchReceivableReport}
+             onClick={()=>{
+              fetchReceivableReport();
+              resetSorting();
+             }}
+
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

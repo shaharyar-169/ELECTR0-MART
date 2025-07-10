@@ -11,6 +11,8 @@ import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
+import { components } from "react-select";
+import Select from "react-select";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -27,6 +29,8 @@ export default function EmployeeList() {
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
 
+  const [GetCompany, setGetCompany] = useState([])
+
   const [sortData, setSortData] = useState("ASC");
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,6 +44,9 @@ export default function EmployeeList() {
   const [isAscendingcontect, setisAscendingcontect] = useState(true);
   const [isAscendingadv, setisAscendingadv] = useState(true);
   const [isAscendingdlv, setisAscendingdlv] = useState(true);
+
+  const [Companyselectdata, setCompanyselectdata] = useState("");
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
   const {
     isSidebarVisible,
@@ -80,12 +87,14 @@ export default function EmployeeList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FEmpSts: transectionType,
+      FLocCod: Companyselectdata,
       // code: organisation.code,
       // FLocCod: locationnumber || getLocationNumber,
-
-       code: "NASIRTRD",
+      code: "NASIRTRD",
       FLocCod: '001',
       FSchTxt: searchQuery,
+
+
     }).toString();
 
     axios
@@ -112,10 +121,10 @@ export default function EmployeeList() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (input1Ref && input1Ref.current)) {
-      if (input1Ref && input1Ref.current) {
+    if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+      if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
-          input1Ref.current.focus();
+          saleSelectRef.current.focus();
           // saleSelectRef.current.select();
         }, 0);
       }
@@ -134,7 +143,7 @@ export default function EmployeeList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -143,6 +152,9 @@ export default function EmployeeList() {
       item.Status,
       item.Designation,
       item["COntact #"],
+
+      item.DOB,
+      item["Join Date"],
       item["Adv Code"],
       item["Dlv Code"],
     ]);
@@ -157,10 +169,12 @@ export default function EmployeeList() {
       "Status",
       "Designation",
       "Contact",
+      "DOB",
+      "Joine Date",
       "Adv Code",
       "Dlv Code",
     ];
-    const columnWidths = [12, 50, 15, 50, 30, 23, 23];
+    const columnWidths = [12, 50, 15, 50, 30, 22, 22, 23, 23];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -227,14 +241,14 @@ export default function EmployeeList() {
 
         // Set background color for odd-numbered rows
         if (isOddRow) {
-        	doc.setFillColor(240); // Light background color
-        	doc.rect(
-        		startX,
-        		startY + (i - startIndex + 2) * rowHeight,
-        		tableWidth,
-        		rowHeight,
-        		"F"
-        	);
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
         }
 
         // Draw row borders
@@ -361,7 +375,7 @@ export default function EmployeeList() {
         doc.setFontSize(pageNumberFontSize);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 35,
+          rightX - 15,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
@@ -385,6 +399,11 @@ export default function EmployeeList() {
         doc.setFontSize(12);
         doc.setFont(getfontstyle, "300");
 
+        let typeItem = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";
+
+
         let status =
           transectionType === "N"
             ? "NON-ACTIVE"
@@ -398,9 +417,15 @@ export default function EmployeeList() {
         doc.setFontSize(10); // Font size
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.text(`LOCATIONS :`, labelsX, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
+        doc.text(`${typeItem}`, labelsX + 26, labelsY + 8.5); // Draw the value next to the label
+
+
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`STATUS :`, labelsX, labelsY + 12.5); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${status}`, labelsX + 20, labelsY + 12.5); // Draw the value next to the label
 
         if (searchQuery) {
           doc.setFont(getfontstyle, "bold"); // Set font to bold
@@ -413,9 +438,9 @@ export default function EmployeeList() {
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += 14; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 33);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -476,6 +501,8 @@ export default function EmployeeList() {
       5: "left", // Contact
       6: "left", // Adv Code
       7: "left", // Dlv Code
+      8: "left", // Adv Code
+      9: "left", // Dlv Code
     };
 
     // Define fonts for different sections
@@ -535,6 +562,26 @@ export default function EmployeeList() {
           : "ALL";
     let typesearch = searchQuery || "";
 
+    let typecompany = Companyselectdatavalue.label
+      ? Companyselectdatavalue.label
+      : "ALL";
+
+    const typeAndStoreRow = worksheet.addRow([
+      "LOACATION :",
+      typecompany,
+      "",
+      " ",
+    ]);
+
+    typeAndStoreRow.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
         ? ["STATUS :", typestatus, "SEARCH :", typesearch]
@@ -575,6 +622,8 @@ export default function EmployeeList() {
       "Status",
       "Designation",
       "Contact",
+      "DOB",
+      "Joine Date",
       "Adv Code",
       "Dlv Code",
     ];
@@ -589,6 +638,8 @@ export default function EmployeeList() {
         item.Status,
         item.Designation,
         item["COntact #"],
+        item.DOB,
+        item["Joine Date"],
         item["Adv Code"],
         item["Dlv Code"],
       ]);
@@ -611,11 +662,11 @@ export default function EmployeeList() {
     });
 
     // Set column widths
-    [10, 40, 8, 30, 14, 14, 14].forEach((width, index) => {
+    [12, 40, 8, 30, 14,14,14, 14, 14].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
-  // Add a blank row
+    // Add a blank row
     worksheet.addRow([]);
     // Get current date and time
     const getCurrentTime = () => {
@@ -625,7 +676,7 @@ export default function EmployeeList() {
       const ss = String(today.getSeconds()).padStart(2, "0");
       return `${hh}:${mm}:${ss}`;
     };
-     // Get current date
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -635,7 +686,7 @@ export default function EmployeeList() {
     };
     const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
-    const userid= user.tusrid;
+    const userid = user.tusrid;
 
     // Add date and time row
     const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
@@ -648,7 +699,7 @@ export default function EmployeeList() {
       };
       cell.alignment = { horizontal: "left" };
     });
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -676,6 +727,94 @@ export default function EmployeeList() {
   };
 
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+  const handlecompanyKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = saleSelectRef.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setCompanyselectdata(selectedOption.value);
+      }
+      // const nextInput = document.getElementById(inputId);
+      const nextInput = inputId.current;
+
+      if (nextInput) {
+        nextInput.focus();
+        // nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+
+
+  const DropdownOption = (props) => {
+    return (
+      <components.Option {...props}>
+        <div
+          style={{
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            paddingBottom: "5px",
+            lineHeight: "3px",
+            color: "black",
+            textAlign: "start",
+          }}
+        >
+          {props.data.label}
+        </div>
+      </components.Option>
+    );
+  };
+
+  const customStyles1 = (hasError) => ({
+    control: (base, state) => ({
+      ...base,
+      height: "24px",
+      minHeight: "unset",
+      width: 250,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: getcolor,
+      color: fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      borderRadius: 0,
+      border: `1px solid ${fontcolor}`,
+      transition: "border-color 0.15s ease-in-out",
+      "&:hover": {
+        borderColor: state.isFocused ? base.borderColor : "black",
+      },
+      padding: "0 8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 0,
+      marginTop: "-5px",
+      fontSize: "18px",
+      display: "flex",
+      textAlign: "center",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      textAlign: "left",
+      color: fontcolor,
+    }),
+    input: (base) => ({
+      ...base,
+      color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
+      caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      marginTop: "-5px",
+    }),
+  });
+
+
+
+
 
   const dispatch = useDispatch();
 
@@ -698,25 +837,31 @@ export default function EmployeeList() {
   let totalEntries = 0;
 
   const firstColWidth = {
-    width: "6.5%",
+    width: "5.5%",
   };
   const secondColWidth = {
-    width: "25%",
+    width: "23%",
   };
   const thirdColWidth = {
     width: "8%",
   };
   const forthColWidth = {
-    width: "24%",
+    width: "20%",
   };
   const fifthColWidth = {
-    width: "12%",
+    width: "8%",
   };
   const sixthColWidth = {
-    width: "10%",
+    width: "8%",
   };
   const seventhColWidth = {
-    width: "13%",
+    width: "8%",
+  };
+  const eightthColWidth = {
+    width: "8%",
+  };
+  const ninthColWidth = {
+    width: "8%",
   };
 
   useHotkeys("s", fetchReceivableReport);
@@ -738,7 +883,7 @@ export default function EmployeeList() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+    width: isSidebarVisible ? "calc(70vw - 0%)" : "70vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -753,13 +898,40 @@ export default function EmployeeList() {
     overflowY: "hidden",
     wordBreak: "break-word",
     textAlign: "center",
-    maxWidth: "800px",
+    maxWidth: "70vw",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: "23px",
     fontFamily: '"Poppins", sans-serif',
   };
+
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveLocations.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetCompany(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetCompany([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const options = GetCompany.map((item) => ({
+    value: item.tloccod,
+    label: `${item.tloccod}-${item.tlocdsc.trim()}`,
+  }));
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
@@ -832,6 +1004,8 @@ export default function EmployeeList() {
     Status: [],
     Designation: [],
     "COntact #": [],
+    DOB: [],
+    "Join Date": [],
     "Adv Code": [],
     "Dlv Code": []
   });
@@ -841,6 +1015,8 @@ export default function EmployeeList() {
     Status: "",
     Designation: "",
     "COntact #": "",
+    DOB: "",
+    "Join Date": "",
     "Adv Code": "",
     "Dlv Code": ""
   });
@@ -854,6 +1030,8 @@ export default function EmployeeList() {
         Status: tableData.map(row => row.Status),
         Designation: tableData.map(row => row.Designation),
         "COntact #": tableData.map(row => row["COntact #"]),
+        DOB: tableData.map(row => row.DOB),
+        "Join Date": tableData.map(row => row["Join Date"]),
         "Adv Code": tableData.map(row => row["Adv Code"]),
         "Dlv Code": tableData.map(row => row["Dlv Code"])
       };
@@ -898,139 +1076,171 @@ export default function EmployeeList() {
     setColumnSortOrders(resetSortOrders);
   };
 
- const renderTableData = () => {
-  const rowCount = Math.max(
-    columns.Code.length,
-    columns.Employee.length,
-    columns.Status.length,
-    columns.Designation.length,
-    columns["COntact #"].length,
-    columns["Adv Code"].length,
-    columns["Dlv Code"].length
-  );
 
-  const rows = [];
-  for (let i = 0; i < rowCount; i++) {
-    rows.push({
-      Code: columns.Code[i],
-      Employee: columns.Employee[i],
-      Status: columns.Status[i],
-      Designation: columns.Designation[i],
-      "COntact #": columns["COntact #"][i],
-      "Adv Code": columns["Adv Code"][i],
-      "Dlv Code": columns["Dlv Code"][i]
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Employee: null,
+      Status: null,
+      Designation: null,
+      "COntact #": null,
+      DOB: null,
+      "Join Date": null,
+      "Adv Code": null,
+      "Dlv Code": null
     });
-  }
+  };
 
-  return (
-    <>
-      {isLoading ? (
-        <>
-          <tr style={{ backgroundColor: getcolor }}>
-            <td colSpan="7" className="text-center">
-              <Spinner animation="border" variant="primary" />
-            </td>
-          </tr>
-          {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 7 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+  const renderTableData = () => {
+    const rowCount = Math.max(
+      columns.Code.length,
+      columns.Employee.length,
+      columns.Status.length,
+      columns.Designation.length,
+      columns["COntact #"].length,
+      columns.DOB.length,
+      columns["Join Date"].length,
+      columns["Adv Code"].length,
+      columns["Dlv Code"].length
+    );
+
+    const rows = [];
+    for (let i = 0; i < rowCount; i++) {
+      rows.push({
+        Code: columns.Code[i],
+        Employee: columns.Employee[i],
+        Status: columns.Status[i],
+        Designation: columns.Designation[i],
+        "COntact #": columns["COntact #"][i],
+        DOB: columns.DOB[i],
+        "Join Date": columns["Join Date"][i],
+        "Adv Code": columns["Adv Code"][i],
+        "Dlv Code": columns["Dlv Code"][i]
+      });
+    }
+
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="9" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={seventhColWidth}></td>
-          </tr>
-        </>
-      ) : (
-        <>
-          {rows.map((item, i) => {
-            totalEnteries += 1;
-            return (
+            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
               <tr
-                key={`${i}-${selectedIndex}`}
-                ref={(el) => (rowRefs.current[i] = el)}
-                onClick={() => handleRowClick(i)}
-                className={selectedIndex === i ? "selected-background" : ""}
+                key={`blank-${rowIndex}`}
                 style={{
                   backgroundColor: getcolor,
                   color: fontcolor,
                 }}
               >
-                <td className="text-start" style={firstColWidth}>
-                  {item.Code}
-                </td>
-                <td className="text-start" style={secondColWidth}>
-                  {item.Employee}
-                </td>
-                <td className="text-center" style={thirdColWidth}>
-                  {item.Status}
-                </td>
-                <td className="text-start" style={forthColWidth}>
-                  {item.Designation}
-                </td>
-                <td className="text-start" style={fifthColWidth}>
-                  {item["COntact #"]}
-                </td>
-                <td className="text-start" style={sixthColWidth}>
-                  {item["Adv Code"]}
-                </td>
-                <td className="text-start" style={seventhColWidth}>
-                  {item["Dlv Code"]}
-                </td>
+                {Array.from({ length: 9 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
               </tr>
-            );
-          })}
-          {Array.from({
-            length: Math.max(0, 27 - rows.length),
-          }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 7 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={eightthColWidth}></td>
+              <td style={ninthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={seventhColWidth}></td>
-          </tr>
-        </>
-      )}
-    </>
-  );
-};
+          </>
+        ) : (
+          <>
+            {rows.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: fontcolor,
+                  }}
+                >
+                  <td className="text-start" style={firstColWidth}>
+                    {item.Code}
+                  </td>
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Employee}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item.Status}
+                  </td>
+                  <td className="text-start" style={forthColWidth}>
+                    {item.Designation}
+                  </td>
+                  <td className="text-start" style={fifthColWidth}>
+                    {item["COntact #"]}
+                  </td>
 
-   const getIconStyle = (colKey) => {
-  const order = columnSortOrders[colKey];
-  return {
-    transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: order === "ASC" || order === "DSC" ? "red" : "white",
-    transition: "transform 0.3s ease, color 0.3s ease",
+                  <td className="text-start" style={eightthColWidth}>
+                    {item.DOB}
+                  </td>
+                  <td className="text-start" style={ninthColWidth}>
+                    {item["Join Date"]}
+                  </td>
+
+                  <td className="text-start" style={sixthColWidth}>
+                    {item["Adv Code"]}
+                  </td>
+                  <td className="text-start" style={seventhColWidth}>
+                    {item["Dlv Code"]}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 27 - rows.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 9 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={eightthColWidth}></td>
+              <td style={ninthColWidth}></td>
+
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
   };
-};
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
 
   return (
     <>
@@ -1067,6 +1277,85 @@ export default function EmployeeList() {
                 <div
                   style={{
                     marginLeft: "10px",
+                    width: "70px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Location :
+                    </span>
+                  </label>
+                </div>
+                <div style={{ marginLeft: "5px" }}>
+                  <Select
+                    className="List-select-class "
+                    ref={saleSelectRef}
+                    options={options}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCompanyselectdata(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Set only the 'NGS' part of the label
+                        });
+                      } else {
+                        setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+
+                    components={{ Option: DropdownOption }}
+                    // styles={customStyles1}
+                    styles={customStyles1(!Companyselectdata)}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+
+              </div>
+
+
+            </div>
+          </div>
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "20px",
                     width: "60px",
                     display: "flex",
                     justifyContent: "end",
@@ -1273,6 +1562,31 @@ export default function EmployeeList() {
 
                     <td
                       className="border-dark"
+                      style={eightthColWidth}
+                      onClick={() => handleSorting("DOB")}
+                    >
+                      DOB{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("DOB")}
+                      ></i>
+                    </td>
+
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("Join Date")}
+                    >
+                      Join Date{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Join Date")}
+                      ></i>
+                    </td>
+
+
+                    <td
+                      className="border-dark"
                       style={sixthColWidth}
                       onClick={() => handleSorting("Adv Code")}
                     >
@@ -1421,7 +1735,10 @@ export default function EmployeeList() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={fetchReceivableReport}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

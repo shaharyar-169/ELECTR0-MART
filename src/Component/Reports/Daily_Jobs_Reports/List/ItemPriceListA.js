@@ -539,7 +539,7 @@ export default function ItemPriceListA() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 2) {
+          if (cellIndex === 22) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
@@ -1110,39 +1110,98 @@ export default function ItemPriceListA() {
     }
   }, [tableData]);
 
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  // const handleSorting = (col) => {
+  //   const currentOrder = columnSortOrders[col];
+  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    setColumns(prevColumns => {
-      const columnData = [...prevColumns[col]];
+  //   setColumns(prevColumns => {
+  //     const columnData = [...prevColumns[col]];
 
-      columnData.sort((a, b) => {
-        const aValue = a !== null ? a.toString() : "";
-        const bValue = b !== null ? b.toString() : "";
+  //     columnData.sort((a, b) => {
+  //       const aValue = a !== null ? a.toString() : "";
+  //       const bValue = b !== null ? b.toString() : "";
 
-        const numA = parseFloat(aValue.replace(/,/g, ""));
-        const numB = parseFloat(bValue.replace(/,/g, ""));
+  //       const numA = parseFloat(aValue.replace(/,/g, ""));
+  //       const numB = parseFloat(bValue.replace(/,/g, ""));
 
-        if (!isNaN(numA) && !isNaN(numB)) {
-          return newOrder === "ASC" ? numA - numB : numB - numA;
-        } else {
-          return newOrder === "ASC"
-            ? aValue.localeCompare(bValue)
-            : bValue.localeCompare(aValue);
-        }
-      });
+  //       if (!isNaN(numA) && !isNaN(numB)) {
+  //         return newOrder === "ASC" ? numA - numB : numB - numA;
+  //       } else {
+  //         return newOrder === "ASC"
+  //           ? aValue.localeCompare(bValue)
+  //           : bValue.localeCompare(aValue);
+  //       }
+  //     });
 
-      return {
-        ...prevColumns,
-        [col]: columnData,
-      };
+  //     return {
+  //       ...prevColumns,
+  //       [col]: columnData,
+  //     };
+  //   });
+
+  //   setColumnSortOrders(prev => ({
+  //     ...Object.fromEntries(Object.keys(prev).map(key => [key, null])),
+  //     [col]: newOrder
+  //   }));
+  // };
+
+const handleSorting = (col) => {
+  // Always sort in descending order on first click (or toggle if already sorted)
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  // Create an array of indices [0, 1, 2, ..., n-1]
+  const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+
+  // Sort the indices based on the values in the specified column
+  indices.sort((a, b) => {
+    const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+    const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+  });
+
+  // Reorder all columns based on the sorted indices
+  const newColumns = Object.keys(columns).reduce((acc, key) => {
+    acc[key] = indices.map((index) => columns[key][index]);
+    return acc;
+  }, {});
+
+  setColumns(newColumns);
+
+  // Update the sort order state
+  const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+    (acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    },
+    {}
+  );
+  setColumnSortOrders(updatedSortOrders);
+};
+
+const resetSorting = () => {
+    setColumnSortOrders({
+       Code: null,
+    Description: null,
+    Stk: null,
+    Comm: null,
+    "Act Rate": null,
+    "Pur Rate": null,
+    "SM Rate": null,
+    "Sale Rate": null,
+    MRP: null,
+    "Fix Rate": null,
     });
-
-    setColumnSortOrders(prev => ({
-      ...Object.fromEntries(Object.keys(prev).map(key => [key, null])),
-      [col]: newOrder
-    }));
   };
 
   const renderTableData = () => {
@@ -2012,7 +2071,11 @@ export default function ItemPriceListA() {
               id="searchsubmit"
               text="Select"
               ref={input6Ref}
-              onClick={fetchReceivableReport}
+              // onClick={fetchReceivableReport}
+              onClick={()=>{
+              fetchReceivableReport();
+              resetSorting();
+             }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

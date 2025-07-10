@@ -78,8 +78,8 @@ export default function ChartofAccount() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
 
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
+      code: 'NASIRTRD',
+      FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
@@ -676,6 +676,163 @@ export default function ChartofAccount() {
     }
   }, [tableData]);
 
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  // Copy full rows
+  const fullRows = tableData.slice(); // Don't mutate original
+
+  // Perform full-row sorting by the selected column
+  fullRows.sort((a, b) => {
+    const aValue = a[col] !== null ? a[col].toString() : "";
+    const bValue = b[col] !== null ? b[col].toString() : "";
+
+    const numA = parseFloat(aValue.replace(/,/g, ""));
+    const numB = parseFloat(bValue.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+  });
+
+  // Transform the sorted full rows back into column format
+  const newColumns = {
+    Code: fullRows.map((row) => row.Code),
+    Description: fullRows.map((row) => row.Description),
+    Status: fullRows.map((row) => row.Status),
+  };
+
+  setColumns(newColumns);
+
+  // Set the sort order
+  const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+    acc[key] = key === col ? newOrder : "";
+    return acc;
+  }, {});
+  setColumnSortOrders(resetSortOrders);
+};
+
+ const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+    Description: null,
+    Status: null,
+    });
+  };
+
+
+   const renderTableData = () => {
+    const rowCount = Math.max(
+      columns.Code.length,
+      columns.Description.length,
+      columns.Status.length
+    );
+
+    const rows = [];
+    for (let i = 0; i < rowCount; i++) {
+      rows.push({
+        Code: columns.Code[i],
+        Description: columns.Description[i],
+        Status: columns.Status[i],
+      });
+    }
+
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="3" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
+            </tr>
+            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 3 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+            </tr>
+          </>
+        ) : (
+          <>
+            {rows.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: fontcolor,
+                  }}
+                >
+                  <td className="text-start" style={firstColWidth}>
+                    {item.Code}
+                  </td>
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Description}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item.Status}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 27 - rows.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 3 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
+  };
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+
   // const handleSorting = (col) => {
   //   // Get current sort order for this column
   //   const currentOrder = columnSortOrders[col];
@@ -714,41 +871,7 @@ export default function ChartofAccount() {
   //   }));
   // };
 
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-    const columnData = [...columns[col]];
-
-    columnData.sort((a, b) => {
-      const aValue = a !== null ? a.toString() : "";
-      const bValue = b !== null ? b.toString() : "";
-
-      const numA = parseFloat(aValue.replace(/,/g, ""));
-      const numB = parseFloat(bValue.replace(/,/g, ""));
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-    });
-
-    // Update only the clicked column's data
-    setColumns((prev) => ({
-      ...prev,
-      [col]: columnData,
-    }));
-
-    // Reset all columns' sort order except the current one
-    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {});
-    setColumnSortOrders(resetSortOrders);
-  };
+ 
 
   const firstColWidth = {
     width: "15%",
@@ -867,112 +990,7 @@ export default function ChartofAccount() {
     }
   }, [selectedIndex]);
 
-  const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.Code.length,
-      columns.Description.length,
-      columns.Status.length
-    );
-
-    const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        Code: columns.Code[i],
-        Description: columns.Description[i],
-        Status: columns.Status[i],
-      });
-    }
-
-    return (
-      <>
-        {isLoading ? (
-          <>
-            <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="3" className="text-center">
-                <Spinner animation="border" variant="primary" />
-              </td>
-            </tr>
-            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 3 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-            </tr>
-          </>
-        ) : (
-          <>
-            {rows.map((item, i) => {
-              totalEnteries += 1;
-              return (
-                <tr
-                  key={`${i}-${selectedIndex}`}
-                  ref={(el) => (rowRefs.current[i] = el)}
-                  onClick={() => handleRowClick(i)}
-                  className={selectedIndex === i ? "selected-background" : ""}
-                  style={{
-                    backgroundColor: getcolor,
-                    color: fontcolor,
-                  }}
-                >
-                  <td className="text-start" style={firstColWidth}>
-                    {item.Code}
-                  </td>
-                  <td className="text-start" style={secondColWidth}>
-                    {item.Description}
-                  </td>
-                  <td className="text-center" style={thirdColWidth}>
-                    {item.Status}
-                  </td>
-                </tr>
-              );
-            })}
-            {Array.from({
-              length: Math.max(0, 27 - rows.length),
-            }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 3 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-            </tr>
-          </>
-        )}
-      </>
-    );
-  };
-
-  const getIconStyle = (colKey) => {
-    const order = columnSortOrders[colKey];
-    return {
-      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-      color: order === "ASC" || order === "DSC" ? "red" : "white",
-      transition: "transform 0.3s ease, color 0.3s ease",
-    };
-  };
-
+ 
   return (
     <>
       <div style={contentStyle}>
@@ -1292,7 +1310,10 @@ export default function ChartofAccount() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={fetchReceivableReport}
+             onClick={()=>{
+              fetchReceivableReport();
+              resetSorting();
+             }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

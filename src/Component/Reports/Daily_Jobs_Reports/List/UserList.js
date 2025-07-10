@@ -32,6 +32,8 @@ export default function UserList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
+  console.log('transectionType', transectionType)
+
   const [isAscendingcode, setisAscendingcode] = useState(true);
   const [isAscendingemploye, setisAscendingemploye] = useState(true);
   const [isAscendingsts, setisAscendingsts] = useState(true);
@@ -74,15 +76,19 @@ export default function UserList() {
       }
     }
   };
+ const handleTransactionTypeChange = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType(selectedTransactionType);
+  };
+
 
   function fetchReceivableReport() {
     const apiUrl = apiLinks + "/UserList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FUsrSts: transectionType,
       code: organisation.code,
       FLocCod: getLocationNumber || locationnumber,
-
+      FUsrSts: transectionType,
       FSchTxt: searchQuery,
     }).toString();
 
@@ -121,10 +127,7 @@ export default function UserList() {
     }
   }, []);
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
+ 
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
@@ -227,14 +230,14 @@ export default function UserList() {
 
         // Set background color for odd-numbered rows
         if (isOddRow) {
-        	doc.setFillColor(240); // Light background color
-        	doc.rect(
-        		startX,
-        		startY + (i - startIndex + 2) * rowHeight,
-        		tableWidth,
-        		rowHeight,
-        		"F"
-        	);
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
         }
 
         // Draw row borders
@@ -530,7 +533,7 @@ export default function UserList() {
         ? "Non-Active"
         : transectionType === "A"
           ? "Active"
-          : "All";
+          : "ALL";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
@@ -613,9 +616,9 @@ export default function UserList() {
       worksheet.getColumn(index + 1).width = width;
     });
 
-   
 
-  // Add a blank row
+
+    // Add a blank row
     worksheet.addRow([]);
     // Get current date and time
     const getCurrentTime = () => {
@@ -625,7 +628,7 @@ export default function UserList() {
       const ss = String(today.getSeconds()).padStart(2, "0");
       return `${hh}:${mm}:${ss}`;
     };
-     // Get current date
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -635,7 +638,7 @@ export default function UserList() {
     };
     const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
-    const userid= user.tusrid;
+    const userid = user.tusrid;
 
     // Add date and time row
     const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
@@ -648,7 +651,7 @@ export default function UserList() {
       };
       cell.alignment = { horizontal: "left" };
     });
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -906,146 +909,160 @@ export default function UserList() {
     setColumnSortOrders(resetSortOrders);
   };
 
-  const renderTableData = () => {
-  const rowCount = Math.max(
-    columns.ID?.length || 0,
-    columns.Name?.length || 0,
-    columns.Status?.length || 0,
-    columns.Type?.length || 0,
-    columns.Mobile?.length || 0,
-    columns.Email?.length || 0,
-    columns["Log Date"]?.length || 0,
-    columns["Log Time"]?.length || 0
-  );
 
-  const rows = [];
-  for (let i = 0; i < rowCount; i++) {
-    rows.push({
-      ID: columns.ID[i],
-      Name: columns.Name[i],
-      Status: columns.Status[i],
-      Type: columns.Type[i],
-      Mobile: columns.Mobile[i],
-      Email: columns.Email[i],
-      "Log Date": columns["Log Date"][i],
-      "Log Time": columns["Log Time"][i]
+  const resetSorting = () => {
+    setColumnSortOrders({
+      ID: null,
+      Name: null,
+      Status: null,
+      Type: null,
+      Mobile: null,
+      Email: null,
+      "Log Date": null,
+      "Log Time": null
     });
-  }
+  };
 
-  return (
-    <>
-      {isLoading ? (
-        <>
-          <tr style={{ backgroundColor: getcolor }}>
-            <td colSpan="8" className="text-center">
-              <Spinner animation="border" variant="primary" />
-            </td>
-          </tr>
-          {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 8 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+  const renderTableData = () => {
+    const rowCount = Math.max(
+      columns.ID?.length || 0,
+      columns.Name?.length || 0,
+      columns.Status?.length || 0,
+      columns.Type?.length || 0,
+      columns.Mobile?.length || 0,
+      columns.Email?.length || 0,
+      columns["Log Date"]?.length || 0,
+      columns["Log Time"]?.length || 0
+    );
+
+    const rows = [];
+    for (let i = 0; i < rowCount; i++) {
+      rows.push({
+        ID: columns.ID[i],
+        Name: columns.Name[i],
+        Status: columns.Status[i],
+        Type: columns.Type[i],
+        Mobile: columns.Mobile[i],
+        Email: columns.Email[i],
+        "Log Date": columns["Log Date"][i],
+        "Log Time": columns["Log Time"][i]
+      });
+    }
+
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="8" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={seventhColWidth}></td>
-            <td style={eightColWidth}></td>
-          </tr>
-        </>
-      ) : (
-        <>
-          {rows.map((item, i) => {
-            totalEnteries += 1;
-            return (
+            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
               <tr
-                key={`${i}-${selectedIndex}`}
-                ref={(el) => (rowRefs.current[i] = el)}
-                onClick={() => handleRowClick(i)}
-                className={selectedIndex === i ? "selected-background" : ""}
+                key={`blank-${rowIndex}`}
                 style={{
                   backgroundColor: getcolor,
                   color: fontcolor,
                 }}
               >
-                <td className="text-start" style={firstColWidth}>
-                  {item.ID}
-                </td>
-                <td className="text-start" style={secondColWidth}>
-                  {item.Name}
-                </td>
-                <td className="text-center" style={thirdColWidth}>
-                  {item.Status}
-                </td>
-                <td className="text-center" style={forthColWidth}>
-                  {item.Type}
-                </td>
-                <td className="text-start" style={fifthColWidth}>
-                  {item.Mobile}
-                </td>
-                <td className="text-start" style={sixthColWidth}>
-                  {item.Email}
-                </td>
-                <td className="text-start" style={seventhColWidth}>
-                  {item["Log Date"]}
-                </td>
-                <td className="text-start" style={eightColWidth}>
-                  {item["Log Time"]}
-                </td>
+                {Array.from({ length: 8 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
               </tr>
-            );
-          })}
-          {Array.from({
-            length: Math.max(0, 27 - rows.length),
-          }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 8 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+              <td style={eightColWidth}></td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={seventhColWidth}></td>
-            <td style={eightColWidth}></td>
-          </tr>
-        </>
-      )}
-    </>
-  );
-};
-
- const getIconStyle = (colKey) => {
-  const order = columnSortOrders[colKey];
-  return {
-    transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: order === "ASC" || order === "DSC" ? "red" : "white",
-    transition: "transform 0.3s ease, color 0.3s ease",
+          </>
+        ) : (
+          <>
+            {rows.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: fontcolor,
+                  }}
+                >
+                  <td className="text-start" style={firstColWidth}>
+                    {item.ID}
+                  </td>
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Name}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item.Status}
+                  </td>
+                  <td className="text-center" style={forthColWidth}>
+                    {item.Type}
+                  </td>
+                  <td className="text-start" style={fifthColWidth}>
+                    {item.Mobile}
+                  </td>
+                  <td className="text-start" style={sixthColWidth}>
+                    {item.Email}
+                  </td>
+                  <td className="text-start" style={seventhColWidth}>
+                    {item["Log Date"]}
+                  </td>
+                  <td className="text-start" style={eightColWidth}>
+                    {item["Log Time"]}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 27 - rows.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 8 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+              <td style={eightColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
   };
-};
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
 
   return (
     <>
@@ -1125,8 +1142,8 @@ export default function UserList() {
                   }}
                 >
                   <option value="">ALL</option>
-                  <option value="Active">ACTIVE</option>
-                  <option value="Non-Active">NON-ACTIVE</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 
@@ -1464,8 +1481,10 @@ export default function UserList() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={fetchReceivableReport}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }} onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }
