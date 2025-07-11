@@ -415,7 +415,7 @@ export default function ItemList() {
             fontFamily: getfontstyle,
             paddingBottom: "5px",
             lineHeight: "3px",
-            color: "black",
+            color: fontcolor,
             textAlign: "start",
           }}
         >
@@ -424,6 +424,7 @@ export default function ItemList() {
       </components.Option>
     );
   };
+
 
   const customStyles1 = (hasError) => ({
     control: (base, state) => ({
@@ -440,39 +441,156 @@ export default function ItemList() {
       border: `1px solid ${fontcolor}`,
       transition: "border-color 0.15s ease-in-out",
       "&:hover": {
-        borderColor: state.isFocused ? base.borderColor : "black",
+        borderColor: state.isFocused ? base.borderColor : fontcolor,
       },
       padding: "0 8px",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
+      boxShadow: "none",
+      "&:focus-within": {
+        borderColor: "#2684FF",
+        boxShadow: "0 0 0 1px #2684FF",
+      }
     }),
-    dropdownIndicator: (base) => ({
+
+    menu: (base) => ({
+      ...base,
+      marginTop: "5px",
+      borderRadius: 0,
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      zIndex: 9999,
+    }),
+    menuList: (base) => ({
+      ...base,
+      padding: 0,
+      maxHeight: "200px",
+      // Scrollbar styling for Webkit browsers
+      "&::-webkit-scrollbar": {
+        width: "8px",
+        height: "8px",
+      },
+      "&::-webkit-scrollbar-track": {
+        background: getcolor,
+        borderRadius: "10px",
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: fontcolor,
+        borderRadius: "10px",
+        border: `2px solid ${getcolor}`,
+        "&:hover": {
+          backgroundColor: "#2684FF",
+        }
+      },
+      // Scrollbar styling for Firefox
+      scrollbarWidth: "thin",
+      scrollbarColor: `${fontcolor} ${getcolor}`,
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: state.isSelected
+        ? "#2684FF"
+        : state.isFocused
+          ? "#2684FF"
+          : getcolor,
+      color: state.isSelected
+        ? "white"
+        : fontcolor,
+      "&:hover": {
+        backgroundColor: "#2684FF",
+        color: "white",
+        cursor: "pointer",
+      },
+      "&:active": {
+        backgroundColor: "#1a66cc",
+      },
+      transition: "background-color 0.2s ease, color 0.2s ease",
+    }),
+    dropdownIndicator: (base, state) => ({
       ...base,
       padding: 0,
       marginTop: "-5px",
       fontSize: "18px",
       display: "flex",
       textAlign: "center",
+      color: fontcolor,
+      transition: "transform 0.2s ease",
+      transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+      "&:hover": {
+        color: "#2684FF",
+      }
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
     }),
     singleValue: (base) => ({
       ...base,
       marginTop: "-5px",
       textAlign: "left",
       color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
     }),
     input: (base) => ({
       ...base,
-      color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
-      caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+      color: getcolor === "white" ? "black" : fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      marginTop: "-5px",
     }),
     clearIndicator: (base) => ({
       ...base,
       marginTop: "-5px",
+      padding: "0 4px",
+      color: fontcolor,
+      "&:hover": {
+        color: "#ff4444",
+      }
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: `${fontcolor}80`, // 50% opacity
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      marginTop: "-5px",
+    }),
+    noOptionsMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    loadingMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: `${fontcolor}20`, // Light background for tags
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      "&:hover": {
+        backgroundColor: "#ff4444",
+        color: "white",
+      }
     }),
   });
 
-  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
     const globalfontsize = 12;
     console.log("gobal font data", globalfontsize);
@@ -1583,7 +1701,7 @@ export default function ItemList() {
 
                 <div style={{ marginLeft: "3px" }}>
                   <Select
-                    className="List-select-class "
+                    className="List-select-class"
                     ref={saleSelectRef}
                     options={options}
                     onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
@@ -1594,10 +1712,10 @@ export default function ItemList() {
                         setCompanyselectdata(selectedOption.value);
                         setCompanyselectdatavalue({
                           value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
+                          label: labelPart,
                         });
                       } else {
-                        setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setCompanyselectdata("");
                         setCompanyselectdatavalue("");
                       }
                     }}
@@ -1607,10 +1725,18 @@ export default function ItemList() {
                       }
                       return inputValue;
                     }}
-
                     components={{ Option: DropdownOption }}
-                    // styles={customStyles1}
-                    styles={customStyles1(!Companyselectdata)}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: '-5px'
+                      })
+                    }}
                     isClearable
                     placeholder="ALL"
                   />
@@ -1670,9 +1796,18 @@ export default function ItemList() {
                     }}
 
                     components={{ Option: DropdownOption }}
-                    // styles={customStyles1}
-                    styles={customStyles1(!Typeselectdata)}
-                    isClearable
+
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: '-5px'
+                      })
+                    }} isClearable
                     placeholder="ALL"
                   />
                 </div>
@@ -1747,9 +1882,17 @@ export default function ItemList() {
                     }}
 
                     components={{ Option: DropdownOption }}
-                    // styles={customStyles1}
-                    styles={customStyles1(!Categoryselectdata)}
-                    isClearable
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: '-5px'
+                      })
+                    }} isClearable
                     placeholder="ALL"
                   />
                 </div>
@@ -1802,7 +1945,7 @@ export default function ItemList() {
                     fontSize: getdatafontsize,
                     fontFamily: getfontstyle,
                     color: fontcolor,
-                    paddingLeft: "7px",
+                    paddingLeft: "12px",
                   }}
                 >
                   <option value="">ALL</option>
@@ -1881,8 +2024,17 @@ export default function ItemList() {
                     }}
 
                     components={{ Option: DropdownOption }}
-                    // styles={customStyles1}
-                    styles={customStyles1(!Capacityselectdata)}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: '-5px'
+                      })
+                    }}
                     isClearable
                     placeholder="ALL"
                   />
