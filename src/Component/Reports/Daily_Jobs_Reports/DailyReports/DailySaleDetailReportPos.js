@@ -645,6 +645,22 @@ export default function DailySaleDetailReportPos() {
                 "",  // Empty for item-specific fields
                 "",  // Empty for item-specific fields
             ]);
+              transformedRows.push([
+                "",  // Empty for item row
+                "",  // Empty for item row
+                "",  // Empty for item row
+                item.Mobile,  // Indented item name
+                "",  // Empty PTC for item row
+                "",  // Empty for item row
+                "",  // Empty for item row
+                "",
+                "",  // Empty for item row
+                "",  // Empty for item row
+                "",
+                "",  // Empty for item row
+                "",  // Empty for item row
+
+            ]);
 
             // Add item row
             transformedRows.push([
@@ -662,6 +678,8 @@ export default function DailySaleDetailReportPos() {
                 item.TaxRate,
                 item.NetSaleAmt
             ]);
+            // Add mobile row
+          
         });
 
         // Add summary row (adjusted for new PTC column)
@@ -1007,8 +1025,14 @@ export default function DailySaleDetailReportPos() {
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
 
-                let status = transectionType === "O" ? "Outstanding" : "ALL";
-
+                let status =
+                    transectionType === "B"
+                        ? "BANK"
+                        : transectionType === "C"
+                            ? "CASH"
+                            : transectionType === "R"
+                                ? "CREDIT"
+                                : "ALL";
                 // let categorycodelable = Technicianselectdatavalue.label
                 //     ? Technicianselectdatavalue.label
                 //     : "ALL";
@@ -1095,6 +1119,7 @@ export default function DailySaleDetailReportPos() {
             "left",
             "left",
             "left",
+            "left",
             "right",
             "right",
             "right",
@@ -1164,12 +1189,19 @@ export default function DailySaleDetailReportPos() {
         //     ? Technicianselectdatavalue.label
         //     : "ALL";
 
-        let status = transectionType === "O" ? "Outstanding" : "ALL";
-
+        let status =
+            transectionType === "B"
+                ? "BANK"
+                : transectionType === "C"
+                    ? "CASH"
+                    : transectionType === "R"
+                        ? "CREDIT"
+                        : "ALL";
         // Add first row
         const typeAndStoreRow = worksheet.addRow([
             "TYPE",
             status,
+            "",
             "",
             "",
             "",
@@ -1217,6 +1249,7 @@ export default function DailySaleDetailReportPos() {
             "Trn #",
             "Type",
             "Customer",
+            "Mobile",
             "NTN",
             "Item",
             "PCTCode",
@@ -1239,7 +1272,7 @@ export default function DailySaleDetailReportPos() {
                 item["Trn #"], // instead of item.FBRNo
                 item.Type, // unchanged
                 item.Customer, // instead of item.Date (be sure this makes sense)
-                // instead of item.Customer
+                item.Mobile,
                 item.NTN, // instead of item.SaleType
                 item.Item, // instead of item.Mobile
                 item.PCTCode,
@@ -1269,13 +1302,14 @@ export default function DailySaleDetailReportPos() {
         });
 
         // Set column widths
-        [10, 7, 6, 30, 8, 50, 10, 12, 13, 6, 13, 13, 13, 13, 13].forEach(
+        [10, 7, 6, 30, 12, 10, 50, 10, 12, 13, 6, 13, 13, 13, 13, 13].forEach(
             (width, index) => {
                 worksheet.getColumn(index + 1).width = width;
             }
         );
 
         const totalRow = worksheet.addRow([
+            "",
             "",
             "",
             "",
@@ -2082,8 +2116,10 @@ export default function DailySaleDetailReportPos() {
                                         color: fontcolor,
                                     }}
                                 >
-                                    <option value="">All</option>
-                                    <option value="O">Outstanding </option>
+                                    <option value="">ALL</option>
+                                    <option value="B">BANK </option>
+                                    <option value="C">CASH </option>
+                                    <option value="R">CREDIT </option>
                                 </select>
                             </div>
                         </div>
