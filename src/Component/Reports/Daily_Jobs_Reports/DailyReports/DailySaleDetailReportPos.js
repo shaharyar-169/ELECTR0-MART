@@ -645,7 +645,7 @@ export default function DailySaleDetailReportPos() {
                 "",  // Empty for item-specific fields
                 "",  // Empty for item-specific fields
             ]);
-              transformedRows.push([
+            transformedRows.push([
                 "",  // Empty for item row
                 "",  // Empty for item row
                 "",  // Empty for item row
@@ -669,28 +669,30 @@ export default function DailySaleDetailReportPos() {
                 "",  // Empty for item row
                 item.Item,  // Indented item name
                 "",  // Empty PTC for item row
+                item.Qnty,
                 item["Excl MRP"],
                 item.SaleAmt,
-                item.Qnty,
+                item.TaxRate,
                 item.TaxAmt,
                 item.TotalSale,
                 item.Discount,
-                item.TaxRate,
                 item.NetSaleAmt
             ]);
             // Add mobile row
-          
+
         });
 
         // Add summary row (adjusted for new PTC column)
         transformedRows.push([
-            "", "", "", "Total", "", "",
-            String(TotalSaleAmt),
+            "", "", "", "Total", "",
+
             String(TotalQnty),
+            "",
+            String(TotalSaleAmt),
+            "",
             String(TotalTaxAmt),
             String(TotalTotalSale),
             String(TotalDiscount),
-            "",
             String(TotalNetSaleAmt),
         ]);
 
@@ -700,19 +702,19 @@ export default function DailySaleDetailReportPos() {
             "Trn #",
             "Type",
             "Customer / Item",
-            "PTC",  // New column header
+            "PTC",
+            "Qnty",
             "Ex MRP",
             "SaleAmt",
-            "Qnty",
+            "TaxRate",
             "TaxAmt",
             "TotalSale",
             "Discount",
-            "TaxRate",
             "NSAmt",
         ];
 
         // Adjust column widths (removed NTN column width)
-        const columnWidths = [20, 14, 11, 85, 20, 17, 18, 12, 19, 19, 19, 19, 19];
+        const columnWidths = [20, 14, 11, 85, 20, 12, 18, 19, 18, 19, 19, 19, 19];
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 
@@ -1253,13 +1255,13 @@ export default function DailySaleDetailReportPos() {
             "NTN",
             "Item",
             "PCTCode",
+            "Qnty",
             "Excl MRP",
             "SaleAmt",
-            "Qnty",
+            "TaxRate",
             "TaxAmt",
             "TotalSale",
             "Discount",
-            "TaxRate",
             "NetSaleAmt",
         ];
         const headerRow = worksheet.addRow(headers);
@@ -1276,13 +1278,13 @@ export default function DailySaleDetailReportPos() {
                 item.NTN, // instead of item.SaleType
                 item.Item, // instead of item.Mobile
                 item.PCTCode,
+                item.Qnty,
                 item["Excl MRP"],
                 item.SaleAmt, // instead of item.SaleAmt
-                item.Qnty, // unchanged
+                item.TaxRate,// unchanged
                 item.TaxAmt, // unchanged
                 item.TotalSale, // unchanged
                 item.Discount,
-                item.TaxRate, // unchanged
                 item.NetSaleAmt, // instead of item.SaleAmt - item.Discount
             ]);
 
@@ -1302,7 +1304,7 @@ export default function DailySaleDetailReportPos() {
         });
 
         // Set column widths
-        [10, 7, 6, 30, 12, 10, 50, 10, 12, 13, 6, 13, 13, 13, 13, 13].forEach(
+        [10, 7, 6, 30, 12, 10, 50, 10, 6, 12, 13, , 13, 13, 13, 13, 13].forEach(
             (width, index) => {
                 worksheet.getColumn(index + 1).width = width;
             }
@@ -1317,13 +1319,13 @@ export default function DailySaleDetailReportPos() {
             "",
             "Total",
             "",
+            String(TotalQnty),
             "",
             String(TotalSaleAmt),
-            String(TotalQnty),
+            "",
             String(TotalTaxAmt),
             String(TotalTotalSale),
             String(TotalDiscount),
-            "",
             String(TotalNetSaleAmt),
         ]);
 
@@ -1341,12 +1343,12 @@ export default function DailySaleDetailReportPos() {
             // Align only the "Total" text to the right
             if (
                 colNumber === 9 ||
-                colNumber === 10 ||
                 colNumber === 11 ||
-                colNumber === 12 ||
                 colNumber === 13 ||
                 colNumber === 14 ||
-                colNumber === 15
+                colNumber === 15 ||
+                colNumber === 16 
+               
             ) {
                 cell.alignment = { horizontal: "right" };
             }
@@ -2173,18 +2175,17 @@ export default function DailySaleDetailReportPos() {
                                         <td className="border-dark" style={forthColWidth}>
                                             Customer
                                         </td>
-
-
                                         <td className="border-dark" style={seventhColWidth}>
                                             NTN
                                         </td>
-
                                         <td className="border-dark" style={ninthColWidth}>
                                             Item
                                         </td>
-
                                         <td className="border-dark" style={fifthColWidth}>
                                             PCT
+                                        </td>
+                                        <td className="border-dark" style={tenthColWidth}>
+                                            Qnty
                                         </td>
                                         <td className="border-dark" style={fourteenColWidth}>
                                             Exl MRP
@@ -2195,8 +2196,8 @@ export default function DailySaleDetailReportPos() {
                                         <td className="border-dark" style={eightColWidth}>
                                             SaleAmt
                                         </td>
-                                        <td className="border-dark" style={tenthColWidth}>
-                                            Qnty
+                                        <td className="border-dark" style={fifteenColWidth}>
+                                            TaxRate
                                         </td>
                                         <td className="border-dark" style={elewnthColWidth}>
                                             TaxAmt
@@ -2207,9 +2208,7 @@ export default function DailySaleDetailReportPos() {
                                         <td className="border-dark" style={thirteenColWidth}>
                                             Discount
                                         </td>
-                                        <td className="border-dark" style={fifteenColWidth}>
-                                            TaxRate
-                                        </td>
+
                                         <td className="border-dark" style={sixteenColWidth}>
                                             NetSaleAmt
                                         </td>
@@ -2275,18 +2274,17 @@ export default function DailySaleDetailReportPos() {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
-
                                                 <td style={seventhColWidth}></td>
                                                 <td style={ninthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                                <td style={fourteenColWidth}></td>
-                                                {/* <td style={sixthColWidth}></td> */}
-                                                <td style={eightColWidth}></td>
                                                 <td style={tenthColWidth}></td>
+                                                {/* <td style={sixthColWidth}></td> */}
+                                                <td style={fourteenColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={fifteenColWidth}></td>
                                                 <td style={elewnthColWidth}></td>
                                                 <td style={tweltheColWidth}></td>
                                                 <td style={thirteenColWidth}></td>
-                                                <td style={fifteenColWidth}></td>
                                                 <td style={sixteenColWidth}></td>
                                             </tr>
                                         </>
@@ -2407,6 +2405,18 @@ export default function DailySaleDetailReportPos() {
                                                         </td>
                                                         <td
                                                             className="text-end"
+                                                            title={item.Qnty}
+                                                            style={{
+                                                                ...tenthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.Qnty}
+                                                        </td>
+                                                        <td
+                                                            className="text-end"
                                                             title={item["Excl MRP"]}
                                                             style={{
                                                                 ...fourteenColWidth,
@@ -2441,19 +2451,19 @@ export default function DailySaleDetailReportPos() {
                                                         >
                                                             {item.SaleAmt}
                                                         </td>
-
                                                         <td
                                                             className="text-end"
-                                                            title={item.Qnty}
+                                                            title={item.TaxRate}
                                                             style={{
-                                                                ...tenthColWidth,
+                                                                ...fifteenColWidth,
                                                                 whiteSpace: "nowrap",
                                                                 overflow: "hidden",
                                                                 textOverflow: "ellipsis",
                                                             }}
                                                         >
-                                                            {item.Qnty}
+                                                            {item.TaxRate}
                                                         </td>
+
                                                         <td
                                                             className="text-end"
                                                             title={item.TaxAmt}
@@ -2491,18 +2501,7 @@ export default function DailySaleDetailReportPos() {
                                                         >
                                                             {item.Discount}
                                                         </td>
-                                                        <td
-                                                            className="text-end"
-                                                            title={item.TaxRate}
-                                                            style={{
-                                                                ...fifteenColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.TaxRate}
-                                                        </td>
+
                                                         <td
                                                             className="text-end"
                                                             title={item.NetSaleAmt}
@@ -2540,18 +2539,17 @@ export default function DailySaleDetailReportPos() {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
-
                                                 <td style={seventhColWidth}></td>
                                                 <td style={ninthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-                                                <td style={fourteenColWidth}></td>
-                                                {/* <td style={sixthColWidth}></td> */}
-                                                <td style={eightColWidth}></td>
                                                 <td style={tenthColWidth}></td>
+                                                {/* <td style={sixthColWidth}></td> */}
+                                                <td style={fourteenColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={fifteenColWidth}></td>
                                                 <td style={elewnthColWidth}></td>
                                                 <td style={tweltheColWidth}></td>
                                                 <td style={thirteenColWidth}></td>
-                                                <td style={fifteenColWidth}></td>
                                                 <td style={sixteenColWidth}></td>
                                             </tr>
                                         </>
@@ -2624,11 +2622,14 @@ export default function DailySaleDetailReportPos() {
 
                             <div
                                 style={{
-                                    ...fourteenColWidth,
+                                    ...tenthColWidth,
                                     background: getcolor,
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
-                            ></div>
+                            >
+                                <span className="mobileledger_total">{TotalQnty}</span>
+
+                            </div>
                             {/* <div
                                 style={{
                                     ...sixthColWidth,
@@ -2636,6 +2637,15 @@ export default function DailySaleDetailReportPos() {
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             ></div> */}
+                            <div
+                                style={{
+                                    ...fourteenColWidth,
+                                    background: getcolor,
+                                    borderRight: `1px solid ${fontcolor}`,
+                                }}
+                            >
+                                {/* <span className="mobileledger_total">{TotalSaleAmt}</span> */}
+                            </div>
                             <div
                                 style={{
                                     ...eightColWidth,
@@ -2647,12 +2657,12 @@ export default function DailySaleDetailReportPos() {
                             </div>
                             <div
                                 style={{
-                                    ...tenthColWidth,
+                                    ...fifteenColWidth,
                                     background: getcolor,
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             >
-                                <span className="mobileledger_total">{TotalQnty}</span>
+                                {/* <span className="mobileledger_total">{TotalTaxAmt}</span> */}
                             </div>
                             <div
                                 style={{
@@ -2672,6 +2682,7 @@ export default function DailySaleDetailReportPos() {
                             >
                                 <span className="mobileledger_total">{TotalTotalSale}</span>
                             </div>
+
                             <div
                                 style={{
                                     ...thirteenColWidth,
@@ -2680,16 +2691,6 @@ export default function DailySaleDetailReportPos() {
                                 }}
                             >
                                 <span className="mobileledger_total">{TotalDiscount}</span>
-                            </div>
-
-                            <div
-                                style={{
-                                    ...fifteenColWidth,
-                                    background: getcolor,
-                                    borderRight: `1px solid ${fontcolor}`,
-                                }}
-                            >
-                                {/* <span className="mobileledger_total">{TotalDiscount}</span> */}
                             </div>
 
                             <div

@@ -131,7 +131,7 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
-
+import ItemStockReportPos from "./Component/Reports/Daily_Jobs_Reports/ItemReports/Itemstockreportpos.js";
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
 import MemberRecivableReport from "./Component/Transaction/MemberRecievableReport.js";
@@ -276,6 +276,8 @@ function App() {
 
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
+                <Route exact path="/ItemStockReport" element={<ItemStockReportPos />} />
+
                 {/* <Route exact path="/ItemAgging" element={<ItemAggingReport />} /> */}
 
                 {/* Rountes for item reports */}

@@ -73,7 +73,6 @@ export default function DailyPurchaseDetailReportPos() {
     const [TotalTaxRate, setTotalTaxRate] = useState(0);
     const [TotalNetSaleAmt, setTotalNetSaleAmt] = useState(0);
 
-
     ////////////////////////////////////////////////////////////////
 
     ////////////////// total for fbrdetail //////////////////////////
@@ -422,13 +421,9 @@ export default function DailyPurchaseDetailReportPos() {
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            code: 'UMAIRPOS',
-            FLocCod: '001',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
-
-
         }).toString();
 
         axios
@@ -593,10 +588,7 @@ export default function DailyPurchaseDetailReportPos() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (
-            !hasComponentMountedPreviously ||
-            (fromRef && fromRef.current)
-        ) {
+        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
             if (fromRef && fromRef.current) {
                 setTimeout(() => {
                     fromRef.current.focus();
@@ -636,43 +628,71 @@ export default function DailyPurchaseDetailReportPos() {
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
-        // Define table data (rows)
-        const rows = Profits.map((item) => [
-            item.Date,           // instead of item.SrNo
-            item["Trn #"],       // instead of item.FBRNo
-            item.Type,           // unchanged
-            item.Supplier, 
-            item.WHT,       // instead of item.Date (be sure this makes sense)
-            item.Item,           // instead of item.Mobile
-            item["Excl MRP"],
-            item.PurAmt,   // instead of item.SaleAmt
-            item.Qnty,           // unchanged
-            item.TaxAmt,         // unchanged
-            item.TotalPur,      // unchanged
-            item.Discount,
-            item.TaxRate,     // unchanged
-            item.NetPurAmt      // instead of item.SaleAmt - item.Discount
+        const transformedRows = [];
+        Profits.forEach((item) => {
+            // Add customer row
+            transformedRows.push([
+                item.Date,
+                item["Trn #"],
+                item.Type,
+                item.Supplier,  // Customer name
+                item.PCTCode || "", // New PTC column (use empty string if undefined)
+                "",  // Empty for item-specific fields
+                "",  // Empty for item-specific fields
+                "",  // Empty for item-specific fields
+                "",  // Empty for item-specific fields
+                "",  // Empty for item-specific fields
+                "",  // Empty for item-specific fields
+                "",  // Empty for item-specific fields
+            ]);
+            // transformedRows.push([
+            //     "",  // Empty for item row
+            //     "",  // Empty for item row
+            //     "",  // Empty for item row
+            //     item.Mobile,  // Indented item name
+            //     "",  // Empty PTC for item row
+            //     "",  // Empty for item row
+            //     "",  // Empty for item row
+            //     "",
+            //     "",  // Empty for item row
+            //     "",  // Empty for item row
+            //     "",
+            //     "",  // Empty for item row
+            //     "",  // Empty for item row
 
-        ]);
+            // ]);
 
-        // Add summary row to the table
+            // Add item row
+            transformedRows.push([
+                "",  // Empty for item row
+                "",  // Empty for item row
+                "",  // Empty for item row
+                item.Item,  // Indented item name
+                "",  // Empty PTC for item row
+                item.Qnty,
+                item["Excl MRP"],
+                item.PurAmt,
+                item.TaxRate,
+                item.TaxAmt,
+                item.TotalPur,
+                item.Discount,
+                item.NetPurAmt
+            ]);
+            // Add mobile row
 
-        rows.push([
-            "",
-            "",
-            "",
-            // "",
-            "",
-            "",
-            "",
-            "",
+        });
 
-            String(TotalSaleAmt),
+        // Add summary row (adjusted for new PTC column)
+        transformedRows.push([
+            "", "", "", "Total", "",
+
             String(TotalQnty),
+            "",
+            String(TotalSaleAmt),
+            "",
             String(TotalTaxAmt),
             String(TotalTotalSale),
             String(TotalDiscount),
-            "",
             String(TotalNetSaleAmt),
         ]);
 
@@ -681,21 +701,20 @@ export default function DailyPurchaseDetailReportPos() {
             "Date",
             "Trn #",
             "Type",
-            "Supplier",
-            "WHT",
-            "Item",
-            "Exl MRP",
-            "PurAmt",
+            "Supplier / Item",
+            "PTC",
             "Qnty",
+            "Ex MRP",
+            "PurAmt",
+            "TaxRate",
             "TaxAmt",
             "TotalPur",
             "Discount",
-            "TaxRate",
-            "NetPurAmt"
-
+            "NPAmt",
         ];
-        const columnWidths = [10, 14, 11, 47, 13, 60, 18, 14, 13, 18, 18, 18,17,20];
 
+        // Adjust column widths (removed NTN column width)
+        const columnWidths = [20, 14, 11, 85, 20, 12, 18, 19, 18, 19, 19, 19, 19];
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 
@@ -745,13 +764,13 @@ export default function DailyPurchaseDetailReportPos() {
             const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
 
-            doc.setFontSize(fontSize);
+            doc.setFontSize(10);
 
             for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
+                const row = transformedRows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow =
-                    row[0] && parseInt(row[0]) > 1000000000000000000000000000000; // Check if tctgcod is greater than 100
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
+                const isTotalRow = i === transformedRows.length - 1; // Check if this is the total row
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
 
@@ -760,24 +779,61 @@ export default function DailyPurchaseDetailReportPos() {
                     fontName = boldFont; // Set bold font for red-colored row
                 }
 
+                // For total row, set bold font and prepare for double border
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, 'bold');
+                }
+
                 // Draw row borders
                 doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
+
+                // For total row, draw double border
+                if (isTotalRow) {
+                    // First line of the double border
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight
+                    );
+
+                    // Second line of the double border (slightly offset)
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX + 0.5,
+                        startY + (i - startIndex + 2) * rowHeight + 0.5,
+                        tableWidth - 1,
+                        rowHeight - 1
+                    );
+                } else {
+                    // Normal border for other rows
+                    doc.setLineWidth(0.2);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight
+                    );
+                }
 
                 row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
+                    // For total row, adjust vertical position to center in the double border
+                    const cellY = isTotalRow
+                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+                        : startY + (i - startIndex + 2) * rowHeight + 3;
+
                     const cellX = startX + 2;
 
                     // Set text color
                     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    //   doc.setFont(fontName, "normal");
-                    doc.setFont(getfontstyle, "300");
+
+                    // For total row, keep bold font
+                    if (!isTotalRow) {
+                        // Set font
+                        doc.setFont(fontName, "normal");
+                    }
+
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
@@ -788,13 +844,15 @@ export default function DailyPurchaseDetailReportPos() {
                             baseline: "middle",
                         });
                     } else if (
+                        // cellIndex === 4 ||
+                        cellIndex === 5 ||
+                        cellIndex === 6 ||
                         cellIndex === 7 ||
                         cellIndex === 8 ||
                         cellIndex === 9 ||
                         cellIndex === 10 ||
                         cellIndex === 11 ||
-                        cellIndex === 12 ||
-                        cellIndex === 13
+                        cellIndex === 12
                     ) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
@@ -807,33 +865,79 @@ export default function DailyPurchaseDetailReportPos() {
 
                     // Draw column borders (excluding the last column)
                     if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
+                        if (isTotalRow) {
+                            // Double border for total row columns
+                            doc.setLineWidth(0.3);
+                            doc.rect(
+                                startX,
+                                startY + (i - startIndex + 2) * rowHeight,
+                                columnWidths[cellIndex],
+                                rowHeight
+                            );
+                            doc.setLineWidth(0.3);
+                            doc.rect(
+                                startX + 0.5,
+                                startY + (i - startIndex + 2) * rowHeight + 0.5,
+                                columnWidths[cellIndex] - 1,
+                                rowHeight - 1
+                            );
+                        } else {
+                            // Normal border for other rows
+                            doc.setLineWidth(0.2);
+                            doc.rect(
+                                startX,
+                                startY + (i - startIndex + 2) * rowHeight,
+                                columnWidths[cellIndex],
+                                rowHeight
+                            );
+                        }
                         startX += columnWidths[cellIndex];
                     }
                 });
 
                 // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
+                if (isTotalRow) {
+                    // Double border for total row last column
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        columnWidths[row.length - 1],
+                        rowHeight
+                    );
+                    doc.setLineWidth(0.3);
+                    doc.rect(
+                        startX + 0.5,
+                        startY + (i - startIndex + 2) * rowHeight + 0.5,
+                        columnWidths[row.length - 1] - 1,
+                        rowHeight - 1
+                    );
+                } else {
+                    // Normal border for other rows last column
+                    doc.setLineWidth(0.2);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        columnWidths[row.length - 1],
+                        rowHeight
+                    );
+                }
                 startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+
+                // Reset font after total row
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, "normal");
+                }
             }
 
+            // Rest of your function remains the same...
             // Draw line at the bottom of the page with padding
             const lineWidth = tableWidth; // Match line width with table width
             const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
             const lineY = pageHeight - 15; // Position the line 20 units from the bottom
             doc.setLineWidth(0.3);
             doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+            const headingFontSize = 11; // Adjust as needed
 
             // Add heading "Crystal Solution" aligned left bottom of the line
             const headingX = lineX + 2; // Padding from left
@@ -857,7 +961,7 @@ export default function DailyPurchaseDetailReportPos() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 25; // Adjust this value based on your requirements
+        const rowsPerPage = 28; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -902,7 +1006,7 @@ export default function DailyPurchaseDetailReportPos() {
             let startY = paddingTop; // Initialize startY
             let pageNumber = 1; // Initialize page number
 
-            while (currentPageIndex * rowsPerPage < rows.length) {
+            while (currentPageIndex * rowsPerPage < transformedRows.length) {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
@@ -923,8 +1027,14 @@ export default function DailyPurchaseDetailReportPos() {
                 doc.setFontSize(12);
                 doc.setFont(getfontstyle, "300");
 
-                let status = transectionType === "O" ? "Outstanding" : "ALL";
-
+                let status =
+                    transectionType === "B"
+                        ? "BANK"
+                        : transectionType === "C"
+                            ? "CASH"
+                            : transectionType === "R"
+                                ? "CREDIT"
+                                : "ALL";
                 // let categorycodelable = Technicianselectdatavalue.label
                 //     ? Technicianselectdatavalue.label
                 //     : "ALL";
@@ -940,7 +1050,7 @@ export default function DailyPurchaseDetailReportPos() {
                 // doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 // doc.text(`${categorycodelable}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-                // doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
                 // doc.text(`TYPE :`, labelsX + 240, labelsY + 8.5); // Draw bold label
                 // doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 // doc.text(`${status}`, labelsX + 255, labelsY + 8.5); // Draw the value next to the label
@@ -953,14 +1063,14 @@ export default function DailyPurchaseDetailReportPos() {
 
                 addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+                const endIndex = Math.min(startIndex + rowsPerPage, transformedRows.length);
                 startY = addTableRows(
                     (doc.internal.pageSize.width - totalWidth) / 2,
                     startY,
                     startIndex,
                     endIndex
                 );
-                if (endIndex < rows.length) {
+                if (endIndex < transformedRows.length) {
                     startY = addNewPage(startY); // Add new page and update startY
                     pageNumber++; // Increment page number
                 }
@@ -992,7 +1102,9 @@ export default function DailyPurchaseDetailReportPos() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`DailyPurchaseDetailReportPos Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(
+            `DailyPurchaseDetailReportPos Form ${fromInputDate} To ${toInputDate}.pdf`
+        );
     };
 
     const handleDownloadCSV = async () => {
@@ -1009,6 +1121,8 @@ export default function DailyPurchaseDetailReportPos() {
             "left",
             "left",
             "left",
+            "left",
+            "right",
             "right",
             "right",
             "right",
@@ -1077,23 +1191,31 @@ export default function DailyPurchaseDetailReportPos() {
         //     ? Technicianselectdatavalue.label
         //     : "ALL";
 
-        // let status = transectionType === "O" ? "Outstanding" : "ALL";
-
-        // // Add first row
+        let status =
+            transectionType === "B"
+                ? "BANK"
+                : transectionType === "C"
+                    ? "CASH"
+                    : transectionType === "R"
+                        ? "CREDIT"
+                        : "ALL";
+        // Add first row
         // const typeAndStoreRow = worksheet.addRow([
-        //     "",
-        //     '',
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "",
-        //     "type :",
+        //     "TYPE",
         //     status,
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+        //     "",
+
         // ]);
 
         // Apply styling for the status row
@@ -1101,7 +1223,7 @@ export default function DailyPurchaseDetailReportPos() {
         //     cell.font = {
         //         name: "CustomFont" || "CustomFont",
         //         size: 10,
-        //         bold: [12, 13].includes(colIndex),
+        //         bold: [1].includes(colIndex),
         //     };
         //     cell.alignment = { horizontal: "left", vertical: "middle" };
         // });
@@ -1125,20 +1247,22 @@ export default function DailyPurchaseDetailReportPos() {
 
         // Add headers
         const headers = [
-           "Date",
+            "Date",
             "Trn #",
             "Type",
             "Supplier",
-            "WHT",
+            // "Mobile",
             "Item",
-            "Exl MRP",
-            "PurAmt",
+            "PCTCode",
             "Qnty",
+            "Excl MRP",
+            "PurAmt",
+            "TaxRate",
             "TaxAmt",
             "TotalPur",
             "Discount",
-            "TaxRate",
-            "NetPurAmt"
+            "NetPurAmt",
+            "WHT",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1146,20 +1270,22 @@ export default function DailyPurchaseDetailReportPos() {
         // Add data rows
         Profits.forEach((item) => {
             const row = worksheet.addRow([
-             item.Date,           // instead of item.SrNo
-            item["Trn #"],       // instead of item.FBRNo
-            item.Type,           // unchanged
-            item.Supplier, 
-            item.WHT,       // instead of item.Date (be sure this makes sense)
-            item.Item,           // instead of item.Mobile
-            item["Excl MRP"],
-            item.PurAmt,   // instead of item.SaleAmt
-            item.Qnty,           // unchanged
-            item.TaxAmt,         // unchanged
-            item.TotalPur,      // unchanged
-            item.Discount,
-            item.TaxRate,     // unchanged
-            item.NetPurAmt      // instead of item.SaleAmt - item.Discount
+                item.Date, // instead of item.SrNo
+                item["Trn #"], // instead of item.FBRNo
+                item.Type, // unchanged
+                item.Supplier, // instead of item.Date (be sure this makes sense)
+                // item.Mobile,
+                item.Item, // instead of item.Mobile
+                item.PCTCode,
+                item.Qnty,
+                item["Excl MRP"],
+                item.PurAmt, // instead of item.SaleAmt
+                item.TaxRate,// unchanged
+                item.TaxAmt, // unchanged
+                item.TotalPur, // unchanged
+                item.Discount,
+                item.NetPurAmt,
+                item.WHT, // instead of item.SaleAmt - item.Discount
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -1178,27 +1304,29 @@ export default function DailyPurchaseDetailReportPos() {
         });
 
         // Set column widths
-        [10, 7, 6, 30, 7,30, 10, 10, 7, 15, 15, 15, 15, 15,].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
+        [10, 7, 6, 40, 40, 10, 7, 13, 13, 13, 13, 13, 13, 13, 13, 6].forEach(
+            (width, index) => {
+                worksheet.getColumn(index + 1).width = width;
+            }
+        );
 
         const totalRow = worksheet.addRow([
-           "",
-            "",
-            "",
-            // "",
-            "",
-            "",
-            "",
-            "",
 
-            String(TotalSaleAmt),
+            "",
+            "",
+            "",
+            "",
+            "Total",
+            "",
             String(TotalQnty),
+            "",
+            String(TotalSaleAmt),
+            "",
             String(TotalTaxAmt),
             String(TotalTotalSale),
             String(TotalDiscount),
-            "",
             String(TotalNetSaleAmt),
+            "",
         ]);
 
         // total row added
@@ -1214,19 +1342,28 @@ export default function DailyPurchaseDetailReportPos() {
 
             // Align only the "Total" text to the right
             if (
-                colNumber === 8 ||
                 colNumber === 9 ||
-                colNumber === 10 ||
                 colNumber === 11 ||
-                colNumber === 12 ||
                 colNumber === 13 ||
-                colNumber === 14
+                colNumber === 14 ||
+                colNumber === 15 ||
+                colNumber === 16
 
             ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
 
+        // Add a blank row
+        worksheet.addRow([]);
+        // Get current date and time
+        const getCurrentTime = () => {
+            const today = new Date();
+            const hh = String(today.getHours()).padStart(2, "0");
+            const mm = String(today.getMinutes()).padStart(2, "0");
+            const ss = String(today.getSeconds()).padStart(2, "0");
+            return `${hh}:${mm}:${ss}`;
+        };
         // Get current date
         const getCurrentDate = () => {
             const today = new Date();
@@ -1235,15 +1372,49 @@ export default function DailyPurchaseDetailReportPos() {
             const year = today.getFullYear();
             return `${day}-${month}-${year}`;
         };
-
+        const currentTime = getCurrentTime();
         const currentdate = getCurrentDate();
+        const userid = user.tusrid;
+
+        // Add date and time row
+        const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+        const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+
+        // Merge across all columns
+        worksheet.mergeCells(
+            `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+        );
+        worksheet.mergeCells(
+            `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+        );
 
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `DailyPurchaseDetailReportPos From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(
+            blob,
+            `DailyPurchaseDetailReportPos From ${fromInputDate} To ${toInputDate}.xlsx`
+        );
     };
 
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
@@ -1396,10 +1567,10 @@ export default function DailyPurchaseDetailReportPos() {
         width: "4%",
     };
     const forthColWidth = {
-        width: "12.7%",
+        width: "7.7%",
     };
     const fifthColWidth = {
-        width: "5%",
+        width: "6%",
     };
     const sixthColWidth = {
         width: "5%",
@@ -1426,7 +1597,7 @@ export default function DailyPurchaseDetailReportPos() {
         width: "7%",
     };
     const fourteenColWidth = {
-        width: "7%",
+        width: "6%",
     };
     const fifteenColWidth = {
         width: "7%",
@@ -1631,7 +1802,7 @@ export default function DailyPurchaseDetailReportPos() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Daily Purchase Detail Report Pos" />
+                    <NavComponent textdata="Daily Purchase Report Pos" />
 
                     <div
                         className="row"
@@ -1647,59 +1818,7 @@ export default function DailyPurchaseDetailReportPos() {
                                 justifyContent: "start",
                             }}
                         >
-                            {/* <div
-                className="d-flex align-items-center  "
-                style={{ marginLeft: "18px" }}
-              >
-                <div
-                  style={{
-                    width: "90x",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontFamily: getfontstyle,
-                        fontSize: getdatafontsize,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Shop :
-                    </span>{" "}
-                    <br />
-                  </label>
-                </div>
-                <div style={{ marginLeft: "5px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={saleSelectRef}
-                    options={options}
-                    onKeyDown={(e) => handleSaleKeypress(e, fromRef)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setSaleType(selectedOption.value);
-                        setSelectedLocationCode(selectedOption);
-                        setTechnicianselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setTechnicianselectdatavalue("");
-                      }
-                    }}
-                    components={{ Option: DropdownOption }}
-                    // styles={customStyles1}
-                    styles={customStyles1(!saleType)}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div> */}
+
 
                             <div className="d-flex align-items-center">
                                 <div
@@ -1800,7 +1919,9 @@ export default function DailyPurchaseDetailReportPos() {
                                     />
                                 </div>
                             </div>
-                            <div className="d-flex align-items-center" style={{marginLeft:'200px'}}>
+                            <div className="d-flex align-items-center"
+                                style={{ marginLeft: '250px' }}
+                            >
                                 <div
                                     style={{
                                         width: "60px",
@@ -1947,8 +2068,10 @@ export default function DailyPurchaseDetailReportPos() {
                                         color: fontcolor,
                                     }}
                                 >
-                                    <option value="">All</option>
-                                    <option value="O">Outstanding </option>
+                                    <option value="">ALL</option>
+                                    <option value="B">BANK </option>
+                                    <option value="C">CASH </option>
+                                    <option value="R">CREDIT </option>
                                 </select>
                             </div> */}
                         </div>
@@ -2002,19 +2125,18 @@ export default function DailyPurchaseDetailReportPos() {
                                         <td className="border-dark" style={forthColWidth}>
                                             Supplier
                                         </td>
-                                        {/* <td className="border-dark" style={fifthColWidth}>
-                                            Item
-                                        </td> */}
-
-                                        <td className="border-dark" style={seventhColWidth}>
-                                            WHT
-                                        </td>
 
                                         <td className="border-dark" style={ninthColWidth}>
                                             Item
                                         </td>
+                                        <td className="border-dark" style={fifthColWidth}>
+                                            PCT
+                                        </td>
+                                        <td className="border-dark" style={tenthColWidth}>
+                                            Qnty
+                                        </td>
                                         <td className="border-dark" style={fourteenColWidth}>
-                                            Excel MRP
+                                            Exl MRP
                                         </td>
                                         {/* <td className="border-dark" style={sixthColWidth}>
                                             Mobile
@@ -2022,23 +2144,24 @@ export default function DailyPurchaseDetailReportPos() {
                                         <td className="border-dark" style={eightColWidth}>
                                             PurAmt
                                         </td>
-                                        <td className="border-dark" style={tenthColWidth}>
-                                            Qnty
+                                        <td className="border-dark" style={fifteenColWidth}>
+                                            TaxRate
                                         </td>
                                         <td className="border-dark" style={elewnthColWidth}>
                                             TaxAmt
                                         </td>
                                         <td className="border-dark" style={tweltheColWidth}>
-                                            TotalSale
+                                            TotalPur
                                         </td>
                                         <td className="border-dark" style={thirteenColWidth}>
                                             Discount
                                         </td>
-                                        <td className="border-dark" style={fifteenColWidth}>
-                                            TaxRate
-                                        </td>
+
                                         <td className="border-dark" style={sixteenColWidth}>
-                                            NetSaleAmt
+                                            NetPurAmt
+                                        </td>
+                                        <td className="border-dark" style={seventhColWidth}>
+                                            WHT
                                         </td>
                                     </tr>
                                 </thead>
@@ -2070,13 +2193,12 @@ export default function DailyPurchaseDetailReportPos() {
                                 <tbody id="tablebody">
                                     {isLoading ? (
                                         <>
-
                                             <tr
                                                 style={{
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="14" className="text-center">
+                                                <td colSpan="15" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2090,7 +2212,7 @@ export default function DailyPurchaseDetailReportPos() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 14 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 15 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2103,18 +2225,19 @@ export default function DailyPurchaseDetailReportPos() {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
-                                                {/* <td style={fifthColWidth}></td> */}
-                                                <td style={seventhColWidth}></td>
+
                                                 <td style={ninthColWidth}></td>
-                                                <td style={fourteenColWidth}></td>
-                                                {/* <td style={sixthColWidth}></td> */}
-                                                <td style={eightColWidth}></td>
+                                                <td style={fifthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
+                                                {/* <td style={sixthColWidth}></td> */}
+                                                <td style={fourteenColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={fifteenColWidth}></td>
                                                 <td style={elewnthColWidth}></td>
                                                 <td style={tweltheColWidth}></td>
                                                 <td style={thirteenColWidth}></td>
-                                                <td style={fifteenColWidth}></td>
                                                 <td style={sixteenColWidth}></td>
+                                                <td style={seventhColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -2159,7 +2282,7 @@ export default function DailyPurchaseDetailReportPos() {
                                                         </td>
                                                         <td
                                                             className="text-start"
-                                                            title={item['Trn #']}
+                                                            title={item["Trn #"]}
                                                             style={{
                                                                 ...secondColWidth,
                                                                 whiteSpace: "nowrap",
@@ -2167,7 +2290,7 @@ export default function DailyPurchaseDetailReportPos() {
                                                                 textOverflow: "ellipsis",
                                                             }}
                                                         >
-                                                            {item['Trn #']}
+                                                            {item["Trn #"]}
                                                         </td>
                                                         <td
                                                             className="text-center"
@@ -2193,31 +2316,6 @@ export default function DailyPurchaseDetailReportPos() {
                                                         >
                                                             {item.Supplier}
                                                         </td>
-                                                        {/* <td
-                                                            className="text-center"
-                                                            title={item.NIC}
-                                                            style={{
-                                                                ...fifthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.NIC}
-                                                        </td> */}
-
-                                                        <td
-                                                            className="text-start"
-                                                            title={item.WHT}
-                                                            style={{
-                                                                ...seventhColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.WHT}
-                                                        </td>
 
                                                         <td
                                                             className="text-start"
@@ -2233,7 +2331,31 @@ export default function DailyPurchaseDetailReportPos() {
                                                         </td>
                                                         <td
                                                             className="text-start"
-                                                            title={item['Excl MRP']}
+                                                            title={item.PCTCode}
+                                                            style={{
+                                                                ...fifthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.PCTCode}
+                                                        </td>
+                                                        <td
+                                                            className="text-end"
+                                                            title={item.Qnty}
+                                                            style={{
+                                                                ...tenthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.Qnty}
+                                                        </td>
+                                                        <td
+                                                            className="text-end"
+                                                            title={item["Excl MRP"]}
                                                             style={{
                                                                 ...fourteenColWidth,
                                                                 whiteSpace: "nowrap",
@@ -2241,7 +2363,7 @@ export default function DailyPurchaseDetailReportPos() {
                                                                 textOverflow: "ellipsis",
                                                             }}
                                                         >
-                                                            {item['Excl MRP']}
+                                                            {item["Excl MRP"]}
                                                         </td>
                                                         {/* <td
                                                             className="text-end"
@@ -2267,19 +2389,19 @@ export default function DailyPurchaseDetailReportPos() {
                                                         >
                                                             {item.PurAmt}
                                                         </td>
-
                                                         <td
                                                             className="text-end"
-                                                            title={item.Qnty}
+                                                            title={item.TaxRate}
                                                             style={{
-                                                                ...tenthColWidth,
+                                                                ...fifteenColWidth,
                                                                 whiteSpace: "nowrap",
                                                                 overflow: "hidden",
                                                                 textOverflow: "ellipsis",
                                                             }}
                                                         >
-                                                            {item.Qnty}
+                                                            {item.TaxRate}
                                                         </td>
+
                                                         <td
                                                             className="text-end"
                                                             title={item.TaxAmt}
@@ -2317,18 +2439,7 @@ export default function DailyPurchaseDetailReportPos() {
                                                         >
                                                             {item.Discount}
                                                         </td>
-                                                        <td
-                                                            className="text-end"
-                                                            title={item.TaxRate}
-                                                            style={{
-                                                                ...fifteenColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.TaxRate}
-                                                        </td>
+
                                                         <td
                                                             className="text-end"
                                                             title={item.NetPurAmt}
@@ -2340,6 +2451,18 @@ export default function DailyPurchaseDetailReportPos() {
                                                             }}
                                                         >
                                                             {item.NetPurAmt}
+                                                        </td>
+                                                        <td
+                                                            className="text-end"
+                                                            title={item.WHT}
+                                                            style={{
+                                                                ...seventhColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.WHT}
                                                         </td>
                                                     </tr>
                                                 );
@@ -2354,7 +2477,7 @@ export default function DailyPurchaseDetailReportPos() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 14 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 15 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2366,18 +2489,19 @@ export default function DailyPurchaseDetailReportPos() {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
-                                                {/* <td style={fifthColWidth}></td> */}
-                                                <td style={seventhColWidth}></td>
+
                                                 <td style={ninthColWidth}></td>
-                                                <td style={fourteenColWidth}></td>
-                                                {/* <td style={sixthColWidth}></td> */}
-                                                <td style={eightColWidth}></td>
+                                                <td style={fifthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
+                                                {/* <td style={sixthColWidth}></td> */}
+                                                <td style={fourteenColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={fifteenColWidth}></td>
                                                 <td style={elewnthColWidth}></td>
                                                 <td style={tweltheColWidth}></td>
                                                 <td style={thirteenColWidth}></td>
-                                                <td style={fifteenColWidth}></td>
                                                 <td style={sixteenColWidth}></td>
+                                                <td style={seventhColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -2423,21 +2547,9 @@ export default function DailyPurchaseDetailReportPos() {
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             ></div>
-                            {/* <div
-                                style={{
-                                    ...fifthColWidth,
-                                    background: getcolor,
-                                    borderRight: `1px solid ${fontcolor}`,
-                                }}
-                            ></div> */}
 
-                            <div
-                                style={{
-                                    ...seventhColWidth,
-                                    background: getcolor,
-                                    borderRight: `1px solid ${fontcolor}`,
-                                }}
-                            ></div>
+
+
                             <div
                                 style={{
                                     ...ninthColWidth,
@@ -2445,14 +2557,24 @@ export default function DailyPurchaseDetailReportPos() {
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             ></div>
-
                             <div
                                 style={{
-                                    ...fourteenColWidth,
+                                    ...fifthColWidth,
                                     background: getcolor,
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             ></div>
+
+                            <div
+                                style={{
+                                    ...tenthColWidth,
+                                    background: getcolor,
+                                    borderRight: `1px solid ${fontcolor}`,
+                                }}
+                            >
+                                <span className="mobileledger_total">{TotalQnty}</span>
+
+                            </div>
                             {/* <div
                                 style={{
                                     ...sixthColWidth,
@@ -2460,6 +2582,15 @@ export default function DailyPurchaseDetailReportPos() {
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             ></div> */}
+                            <div
+                                style={{
+                                    ...fourteenColWidth,
+                                    background: getcolor,
+                                    borderRight: `1px solid ${fontcolor}`,
+                                }}
+                            >
+                                {/* <span className="mobileledger_total">{TotalSaleAmt}</span> */}
+                            </div>
                             <div
                                 style={{
                                     ...eightColWidth,
@@ -2471,12 +2602,12 @@ export default function DailyPurchaseDetailReportPos() {
                             </div>
                             <div
                                 style={{
-                                    ...tenthColWidth,
+                                    ...fifteenColWidth,
                                     background: getcolor,
                                     borderRight: `1px solid ${fontcolor}`,
                                 }}
                             >
-                                <span className="mobileledger_total">{TotalQnty}</span>
+                                {/* <span className="mobileledger_total">{TotalTaxAmt}</span> */}
                             </div>
                             <div
                                 style={{
@@ -2496,6 +2627,7 @@ export default function DailyPurchaseDetailReportPos() {
                             >
                                 <span className="mobileledger_total">{TotalTotalSale}</span>
                             </div>
+
                             <div
                                 style={{
                                     ...thirteenColWidth,
@@ -2508,16 +2640,6 @@ export default function DailyPurchaseDetailReportPos() {
 
                             <div
                                 style={{
-                                    ...fifteenColWidth,
-                                    background: getcolor,
-                                    borderRight: `1px solid ${fontcolor}`,
-                                }}
-                            >
-                                {/* <span className="mobileledger_total">{TotalDiscount}</span> */}
-                            </div>
-
-                            <div
-                                style={{
                                     ...sixteenColWidth,
                                     background: getcolor,
                                     borderRight: `1px solid ${fontcolor}`,
@@ -2525,8 +2647,14 @@ export default function DailyPurchaseDetailReportPos() {
                             >
                                 <span className="mobileledger_total">{TotalNetSaleAmt}</span>
                             </div>
+                            <div
+                                style={{
+                                    ...seventhColWidth,
+                                    background: getcolor,
+                                    borderRight: `1px solid ${fontcolor}`,
+                                }}
+                            ></div>
                         </div>
-
                     </div>
 
                     <div
@@ -2628,3 +2756,4 @@ export default function DailyPurchaseDetailReportPos() {
         </>
     );
 }
+
