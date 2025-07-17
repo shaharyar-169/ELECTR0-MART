@@ -1130,6 +1130,7 @@ export default function DailySaleDetailReportPos() {
             "right",
             "right",
             "right",
+            "center"
         ];
 
         // Define fonts for different sections
@@ -1263,6 +1264,7 @@ export default function DailySaleDetailReportPos() {
             "TotalSale",
             "Discount",
             "NetSaleAmt",
+            "TrnType"
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1286,6 +1288,7 @@ export default function DailySaleDetailReportPos() {
                 item.TotalSale, // unchanged
                 item.Discount,
                 item.NetSaleAmt, // instead of item.SaleAmt - item.Discount
+                item.TrnType
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -1304,7 +1307,7 @@ export default function DailySaleDetailReportPos() {
         });
 
         // Set column widths
-        [10, 7, 6, 30, 12, 10, 50, 10, 6, 12, 13, , 13, 13, 13, 13, 13].forEach(
+        [10, 7, 6, 30, 12, 10, 50, 10, 6, 12, 13, , 13, 13, 13, 13, 13,10].forEach(
             (width, index) => {
                 worksheet.getColumn(index + 1).width = width;
             }
@@ -1327,6 +1330,7 @@ export default function DailySaleDetailReportPos() {
             String(TotalTotalSale),
             String(TotalDiscount),
             String(TotalNetSaleAmt),
+             "",
         ]);
 
         // total row added
@@ -1579,32 +1583,36 @@ export default function DailySaleDetailReportPos() {
         width: "5%",
     };
     const eightColWidth = {
-        width: "8%",
+        width: "7%",
     };
     const ninthColWidth = {
         width: "8.8%",
     };
     const tenthColWidth = {
-        width: "5%",
+        width: "4%",
     };
     const elewnthColWidth = {
-        width: "7%",
+        width: "6.5%",
     };
     const tweltheColWidth = {
-        width: "7%",
+        width: "6.5%",
     };
     const thirteenColWidth = {
-        width: "7%",
+        width: "6.5%",
     };
     const fourteenColWidth = {
         width: "6%",
     };
     const fifteenColWidth = {
-        width: "7%",
+        width: "6%",
     };
     const sixteenColWidth = {
-        width: "8.5%",
+        width: "7.5%",
     };
+      const seventeenColWidth = {
+        width: "5.5%",
+    };
+
     //////////////////// COLUMN WIDTH FOR BOTTOM TABLE  /////////////////////////////////
     const bottomfirstColWidth = {
         width: "13%",
@@ -2212,6 +2220,9 @@ export default function DailySaleDetailReportPos() {
                                         <td className="border-dark" style={sixteenColWidth}>
                                             NetSaleAmt
                                         </td>
+                                         <td className="border-dark" style={seventeenColWidth}>
+                                            TrnType
+                                        </td>
                                     </tr>
                                 </thead>
                             </table>
@@ -2247,7 +2258,7 @@ export default function DailySaleDetailReportPos() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="15" className="text-center">
+                                                <td colSpan="16" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2261,7 +2272,7 @@ export default function DailySaleDetailReportPos() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 15 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 16 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2286,6 +2297,7 @@ export default function DailySaleDetailReportPos() {
                                                 <td style={tweltheColWidth}></td>
                                                 <td style={thirteenColWidth}></td>
                                                 <td style={sixteenColWidth}></td>
+                                                <td style={seventeenColWidth}></td>
                                             </tr>
                                         </>
                                     ) : (
@@ -2514,6 +2526,18 @@ export default function DailySaleDetailReportPos() {
                                                         >
                                                             {item.NetSaleAmt}
                                                         </td>
+                                                        <td
+                                                            className="text-center"
+                                                            title={item.TrnType}
+                                                            style={{
+                                                                ...seventeenColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {item.TrnType}
+                                                        </td>
                                                     </tr>
                                                 );
                                             })}
@@ -2527,7 +2551,7 @@ export default function DailySaleDetailReportPos() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 15 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 16 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2551,6 +2575,7 @@ export default function DailySaleDetailReportPos() {
                                                 <td style={tweltheColWidth}></td>
                                                 <td style={thirteenColWidth}></td>
                                                 <td style={sixteenColWidth}></td>
+                                                <td style={seventeenColWidth}></td>
                                             </tr>
                                         </>
                                     )}
@@ -2701,6 +2726,15 @@ export default function DailySaleDetailReportPos() {
                                 }}
                             >
                                 <span className="mobileledger_total">{TotalNetSaleAmt}</span>
+                            </div>
+                             <div
+                                style={{
+                                    ...seventeenColWidth,
+                                    background: getcolor,
+                                    borderRight: `1px solid ${fontcolor}`,
+                                }}
+                            >
+                                {/* <span className="mobileledger_total">{TotalNetSaleAmt}</span> */}
                             </div>
                         </div>
                     </div>
