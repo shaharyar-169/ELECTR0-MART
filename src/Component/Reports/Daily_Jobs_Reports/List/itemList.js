@@ -106,13 +106,14 @@ export default function ItemList() {
       FItmSts: transectionType,
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
+      FSchTxt: searchQuery,
+      FCmpCod: Companyselectdata,
       FTypCod: Typeselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-      FCmpCod: Companyselectdata,
-      FSchTxt: searchQuery,
+
     }).toString();
 
     axios
@@ -415,7 +416,7 @@ export default function ItemList() {
             fontFamily: getfontstyle,
             paddingBottom: "5px",
             lineHeight: "3px",
-            color: fontcolor,
+            // color: fontcolor,
             textAlign: "start",
           }}
         >
@@ -449,8 +450,8 @@ export default function ItemList() {
       justifyContent: "space-between",
       boxShadow: "none",
       "&:focus-within": {
-        borderColor: "#2684FF",
-        boxShadow: "0 0 0 1px #2684FF",
+        borderColor: "#3368B5",
+        boxShadow: "0 0 0 1px #3368B5",
       }
     }),
 
@@ -481,7 +482,7 @@ export default function ItemList() {
         borderRadius: "10px",
         border: `2px solid ${getcolor}`,
         "&:hover": {
-          backgroundColor: "#2684FF",
+          backgroundColor: "#3368B5",
         }
       },
       // Scrollbar styling for Firefox
@@ -493,16 +494,17 @@ export default function ItemList() {
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: state.isSelected
-        ? "#2684FF"
+        ? "#3368B5"
         : state.isFocused
-          ? "#2684FF"
-          : getcolor,
-      color: state.isSelected
+          ? "#3368B5"
+          : getcolor, 
+      color: state.isSelected 
         ? "white"
-        : fontcolor,
+        : fontcolor,      // black color
+
       "&:hover": {
-        backgroundColor: "#2684FF",
-        color: "white",
+        backgroundColor: "#3368B5",
+        color: getcolor,   // white color 
         cursor: "pointer",
       },
       "&:active": {
@@ -521,7 +523,7 @@ export default function ItemList() {
       transition: "transform 0.2s ease",
       transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
       "&:hover": {
-        color: "#2684FF",
+        color: "#3368B5",
       }
     }),
     indicatorSeparator: () => ({
@@ -1242,10 +1244,7 @@ export default function ItemList() {
     width: "7%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1639,6 +1638,15 @@ export default function ItemList() {
       transition: "transform 0.3s ease, color 0.3s ease",
     };
   };
+
+  useHotkeys("alt+s", () => {
+    fetchReceivableReport();
+    resetSorting();
+  }, { preventDefault: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
 
 
   return (
@@ -2349,6 +2357,7 @@ export default function ItemList() {
             <SingleButton
               id="searchsubmit"
               text="Select"
+              highlightFirstLetter={true}
               ref={input6Ref}
               onClick={() => {
                 fetchReceivableReport();

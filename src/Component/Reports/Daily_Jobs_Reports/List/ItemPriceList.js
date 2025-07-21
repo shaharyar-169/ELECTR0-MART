@@ -346,7 +346,7 @@ export default function ItemPriceList() {
             fontFamily: getfontstyle,
             paddingBottom: "5px",
             lineHeight: "3px",
-            color: fontcolor,
+            // color: fontcolor,
             textAlign: "start",
           }}
         >
@@ -355,8 +355,8 @@ export default function ItemPriceList() {
       </components.Option>
     );
   };
- 
-   const customStyles1 = (hasError) => ({
+
+  const customStyles1 = (hasError) => ({
     control: (base, state) => ({
       ...base,
       height: "24px",
@@ -379,8 +379,8 @@ export default function ItemPriceList() {
       justifyContent: "space-between",
       boxShadow: "none",
       "&:focus-within": {
-        borderColor: "#2684FF",
-        boxShadow: "0 0 0 1px #2684FF",
+        borderColor: "#3368B5",
+        boxShadow: "0 0 0 1px #3368B5",
       }
     }),
 
@@ -411,7 +411,7 @@ export default function ItemPriceList() {
         borderRadius: "10px",
         border: `2px solid ${getcolor}`,
         "&:hover": {
-          backgroundColor: "#2684FF",
+          backgroundColor: "#3368B5",
         }
       },
       // Scrollbar styling for Firefox
@@ -423,15 +423,15 @@ export default function ItemPriceList() {
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: state.isSelected
-        ? "#2684FF"
+        ? "#3368B5"
         : state.isFocused
-          ? "#2684FF"
+          ? "#3368B5"
           : getcolor,
       color: state.isSelected
         ? "white"
         : fontcolor,
       "&:hover": {
-        backgroundColor: "#2684FF",
+        backgroundColor: "#3368B5",
         color: "white",
         cursor: "pointer",
       },
@@ -451,7 +451,7 @@ export default function ItemPriceList() {
       transition: "transform 0.2s ease",
       transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
       "&:hover": {
-        color: "#2684FF",
+        color: "#3368B5",
       }
     }),
     indicatorSeparator: () => ({
@@ -1198,10 +1198,7 @@ export default function ItemPriceList() {
     width: "8.5%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1551,6 +1548,15 @@ export default function ItemPriceList() {
     };
   };
 
+   useHotkeys("alt+s", () => {
+  fetchReceivableReport();
+  resetSorting();
+}, { preventDefault: true });
+  
+  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
+
   return (
     <>
       <div style={contentStyle}>
@@ -1633,7 +1639,7 @@ export default function ItemPriceList() {
                       return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
-                  styles={{
+                    styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
@@ -1641,7 +1647,7 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -1726,7 +1732,7 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -1787,7 +1793,7 @@ export default function ItemPriceList() {
                       return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
-                   styles={{
+                    styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
@@ -1795,7 +1801,7 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -1873,7 +1879,7 @@ export default function ItemPriceList() {
                       return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
-                   styles={{
+                    styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
@@ -1881,7 +1887,7 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -2150,6 +2156,7 @@ export default function ItemPriceList() {
             <SingleButton
               id="searchsubmit"
               text="Select"
+              highlightFirstLetter={true}
               ref={input6Ref}
               // onClick={fetchReceivableReport}
               onClick={() => {

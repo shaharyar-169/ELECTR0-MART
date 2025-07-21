@@ -205,14 +205,14 @@ export default function TypeList() {
 
         // Set background color for odd-numbered rows
         if (isOddRow) {
-        	doc.setFillColor(240); // Light background color
-        	doc.rect(
-        		startX,
-        		startY + (i - startIndex + 2) * rowHeight,
-        		tableWidth,
-        		rowHeight,
-        		"F"
-        	);
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
         }
 
         // Draw row borders
@@ -361,8 +361,8 @@ export default function TypeList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
+              ? "ACTIVE"
+              : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -475,8 +475,7 @@ export default function TypeList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
       }`
     );
 
@@ -488,8 +487,7 @@ export default function TypeList() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -500,8 +498,8 @@ export default function TypeList() {
       transectionType === "N"
         ? "Non-Active"
         : transectionType === "A"
-        ? "Active"
-        : "All";
+          ? "Active"
+          : "All";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
@@ -566,9 +564,9 @@ export default function TypeList() {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    
 
-  // Add a blank row
+
+    // Add a blank row
     worksheet.addRow([]);
     // Get current date and time
     const getCurrentTime = () => {
@@ -578,7 +576,7 @@ export default function TypeList() {
       const ss = String(today.getSeconds()).padStart(2, "0");
       return `${hh}:${mm}:${ss}`;
     };
-     // Get current date
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -588,7 +586,7 @@ export default function TypeList() {
     };
     const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
-    const userid= user.tusrid;
+    const userid = user.tusrid;
 
     // Add date and time row
     const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
@@ -601,7 +599,7 @@ export default function TypeList() {
       };
       cell.alignment = { horizontal: "left" };
     });
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -659,10 +657,7 @@ export default function TypeList() {
     width: "15%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -789,51 +784,51 @@ export default function TypeList() {
     }
   }, [tableData]);
 
-   const handleSorting = (col) => {
-  // Always sort in descending order on first click (or toggle if already sorted)
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    // Always sort in descending order on first click (or toggle if already sorted)
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  // Create an array of indices [0, 1, 2, ..., n-1]
-  const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+    // Create an array of indices [0, 1, 2, ..., n-1]
+    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-  // Sort the indices based on the values in the specified column
-  indices.sort((a, b) => {
-    const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-    const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+    // Sort the indices based on the values in the specified column
+    indices.sort((a, b) => {
+      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    } else {
-      return newOrder === "ASC"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-  });
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+    });
 
-  // Reorder all columns based on the sorted indices
-  const newColumns = Object.keys(columns).reduce((acc, key) => {
-    acc[key] = indices.map((index) => columns[key][index]);
-    return acc;
-  }, {});
-
-  setColumns(newColumns);
-
-  // Update the sort order state
-  const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-    (acc, key) => {
-      acc[key] = key === col ? newOrder : null;
+    // Reorder all columns based on the sorted indices
+    const newColumns = Object.keys(columns).reduce((acc, key) => {
+      acc[key] = indices.map((index) => columns[key][index]);
       return acc;
-    },
-    {}
-  );
-  setColumnSortOrders(updatedSortOrders);
-};
+    }, {});
 
-const resetSorting = () => {
+    setColumns(newColumns);
+
+    // Update the sort order state
+    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+      (acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      },
+      {}
+    );
+    setColumnSortOrders(updatedSortOrders);
+  };
+
+  const resetSorting = () => {
     setColumnSortOrders({
       Code: null,
       Description: null,
@@ -940,14 +935,23 @@ const resetSorting = () => {
     );
   };
 
-   const getIconStyle = (colKey) => {
-  const order = columnSortOrders[colKey];
-  return {
-    transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: order === "ASC" || order === "DSC" ? "red" : "white",
-    transition: "transform 0.3s ease, color 0.3s ease",
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
   };
-};
+
+  useHotkeys("alt+s", () => {
+    fetchReceivableReport();
+    resetSorting();
+  }, { preventDefault: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
 
   return (
     <>
@@ -1266,12 +1270,12 @@ const resetSorting = () => {
             <SingleButton
               id="searchsubmit"
               text="Select"
+              highlightFirstLetter={true}
               ref={input3Ref}
-              // onClick={fetchReceivableReport}
-              onClick={()=>{
-              fetchReceivableReport();
-              resetSorting();
-             }}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

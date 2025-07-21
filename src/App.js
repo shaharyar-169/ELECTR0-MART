@@ -119,6 +119,9 @@ import DailyCollectionSummary from "./Component/Reports/Daily_Jobs_Reports/Daily
 import DailySaleReportPosReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySaleReportPos.js";
 import DailySaleDetailReportPos from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySaleDetailReportPos.js";
 import DailyPurchaseDetailReportPos from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyPurchaseDetailReportPos.js";
+import DailyMemberCollectionReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyMemberColletion.js";
+import DailyMemberCollectionSummaryReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyMemberCollectionSummary.js";
+import ExpenseReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/ExpenseReport.js";
 
 //////////////////////////// Installments reports //////////////////////////////
 
@@ -263,6 +266,9 @@ function App() {
                 <Route exact path="/DailySaleReportPOS" element={<DailySaleReportPosReport />} />
                 <Route exact path="/DailySaleDetailReportPos" element={<DailySaleDetailReportPos />} />
                 <Route exact path="/DailyPurchaseDetailReport" element={<DailyPurchaseDetailReportPos />} />
+                <Route exact path="/MemberCollectionReport" element={<DailyMemberCollectionReport />} />
+                <Route exact path="/MemberCollectionSummary" element={<DailyMemberCollectionSummaryReport />} />
+                <Route exact path="/ExpenseReportGYM" element={<ExpenseReport />} />
 
 
                 {/* Rountes for Installments reports */}

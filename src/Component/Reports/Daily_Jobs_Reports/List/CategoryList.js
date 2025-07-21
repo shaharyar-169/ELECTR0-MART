@@ -659,10 +659,7 @@ export default function CategoryList() {
     width: "15%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+  
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -947,6 +944,15 @@ const resetSorting = () => {
     transition: "transform 0.3s ease, color 0.3s ease",
   };
 };
+
+useHotkeys("alt+s", () => {
+  fetchReceivableReport();
+  resetSorting();
+}, { preventDefault: true });
+  
+  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
 
   return (
     <>
@@ -1265,8 +1271,8 @@ const resetSorting = () => {
             <SingleButton
               id="searchsubmit"
               text="Select"
+               highlightFirstLetter={true}
               ref={input3Ref}
-              // onClick={fetchReceivableReport}
              onClick={()=>{
               fetchReceivableReport();
               resetSorting();

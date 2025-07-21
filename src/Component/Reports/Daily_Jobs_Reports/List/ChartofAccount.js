@@ -676,57 +676,57 @@ export default function ChartofAccount() {
     }
   }, [tableData]);
 
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  // Copy full rows
-  const fullRows = tableData.slice(); // Don't mutate original
+    // Copy full rows
+    const fullRows = tableData.slice(); // Don't mutate original
 
-  // Perform full-row sorting by the selected column
-  fullRows.sort((a, b) => {
-    const aValue = a[col] !== null ? a[col].toString() : "";
-    const bValue = b[col] !== null ? b[col].toString() : "";
+    // Perform full-row sorting by the selected column
+    fullRows.sort((a, b) => {
+      const aValue = a[col] !== null ? a[col].toString() : "";
+      const bValue = b[col] !== null ? b[col].toString() : "";
 
-    const numA = parseFloat(aValue.replace(/,/g, ""));
-    const numB = parseFloat(bValue.replace(/,/g, ""));
+      const numA = parseFloat(aValue.replace(/,/g, ""));
+      const numB = parseFloat(bValue.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    } else {
-      return newOrder === "ASC"
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
-  });
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+    });
 
-  // Transform the sorted full rows back into column format
-  const newColumns = {
-    Code: fullRows.map((row) => row.Code),
-    Description: fullRows.map((row) => row.Description),
-    Status: fullRows.map((row) => row.Status),
+    // Transform the sorted full rows back into column format
+    const newColumns = {
+      Code: fullRows.map((row) => row.Code),
+      Description: fullRows.map((row) => row.Description),
+      Status: fullRows.map((row) => row.Status),
+    };
+
+    setColumns(newColumns);
+
+    // Set the sort order
+    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : "";
+      return acc;
+    }, {});
+    setColumnSortOrders(resetSortOrders);
   };
 
-  setColumns(newColumns);
-
-  // Set the sort order
-  const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-    acc[key] = key === col ? newOrder : "";
-    return acc;
-  }, {});
-  setColumnSortOrders(resetSortOrders);
-};
-
- const resetSorting = () => {
+  const resetSorting = () => {
     setColumnSortOrders({
       Code: null,
-    Description: null,
-    Status: null,
+      Description: null,
+      Status: null,
     });
   };
 
 
-   const renderTableData = () => {
+  const renderTableData = () => {
     const rowCount = Math.max(
       columns.Code.length,
       columns.Description.length,
@@ -871,7 +871,15 @@ export default function ChartofAccount() {
   //   }));
   // };
 
- 
+   useHotkeys("alt+s", () => {
+  fetchReceivableReport();
+  resetSorting();
+}, { preventDefault: true });
+  
+  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
+
 
   const firstColWidth = {
     width: "15%",
@@ -883,10 +891,7 @@ export default function ChartofAccount() {
     width: "15%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+ 
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -990,7 +995,7 @@ export default function ChartofAccount() {
     }
   }, [selectedIndex]);
 
- 
+
   return (
     <>
       <div style={contentStyle}>
@@ -1309,11 +1314,12 @@ export default function ChartofAccount() {
             <SingleButton
               id="searchsubmit"
               text="Select"
+               highlightFirstLetter={true}
               ref={input3Ref}
-             onClick={()=>{
-              fetchReceivableReport();
-              resetSorting();
-             }}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

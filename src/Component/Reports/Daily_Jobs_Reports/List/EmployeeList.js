@@ -90,8 +90,8 @@ export default function EmployeeList() {
       FLocCod: Companyselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      // code: "NASIRTRD",
-      // FLocCod: '001',
+      code: "NASIRTRD",
+      FLocCod: '001',
       FSchTxt: searchQuery,
 
 
@@ -981,10 +981,7 @@ export default function EmployeeList() {
     width: "8%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1000,7 +997,7 @@ export default function EmployeeList() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(70vw - 0%)" : "70vw",
+    width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -1015,7 +1012,7 @@ export default function EmployeeList() {
     overflowY: "hidden",
     wordBreak: "break-word",
     textAlign: "center",
-    maxWidth: "70vw",
+    maxWidth: "80vw",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
@@ -1358,6 +1355,15 @@ export default function EmployeeList() {
       transition: "transform 0.3s ease, color 0.3s ease",
     };
   };
+
+  useHotkeys("alt+s", () => {
+    fetchReceivableReport();
+    resetSorting();
+  }, { preventDefault: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
 
   return (
     <>
@@ -1862,6 +1868,7 @@ export default function EmployeeList() {
             <SingleButton
               id="searchsubmit"
               text="Select"
+              highlightFirstLetter={true}
               ref={input3Ref}
               onClick={() => {
                 fetchReceivableReport();

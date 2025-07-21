@@ -626,14 +626,14 @@ export default function ItemPriceListA() {
 
         // Set background color for odd-numbered rows
         if (isOddRow) {
-        	doc.setFillColor(240); // Light background color
-        	doc.rect(
-        		startX,
-        		startY + (i - startIndex + 2) * rowHeight,
-        		tableWidth,
-        		rowHeight,
-        		"F"
-        	);
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
         }
 
         // Draw row borders
@@ -664,7 +664,7 @@ export default function ItemPriceListA() {
               baseline: "middle",
             });
           } else if (
-             cellIndex === 2 ||
+            cellIndex === 2 ||
             cellIndex === 3 ||
             cellIndex === 4 ||
             cellIndex === 5 ||
@@ -1263,62 +1263,62 @@ export default function ItemPriceListA() {
   //   }));
   // };
 
-const handleSorting = (col) => {
-  // Always sort in descending order on first click (or toggle if already sorted)
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    // Always sort in descending order on first click (or toggle if already sorted)
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  // Create an array of indices [0, 1, 2, ..., n-1]
-  const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+    // Create an array of indices [0, 1, 2, ..., n-1]
+    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-  // Sort the indices based on the values in the specified column
-  indices.sort((a, b) => {
-    const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-    const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+    // Sort the indices based on the values in the specified column
+    indices.sort((a, b) => {
+      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    } else {
-      return newOrder === "ASC"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-  });
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+    });
 
-  // Reorder all columns based on the sorted indices
-  const newColumns = Object.keys(columns).reduce((acc, key) => {
-    acc[key] = indices.map((index) => columns[key][index]);
-    return acc;
-  }, {});
-
-  setColumns(newColumns);
-
-  // Update the sort order state
-  const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-    (acc, key) => {
-      acc[key] = key === col ? newOrder : null;
+    // Reorder all columns based on the sorted indices
+    const newColumns = Object.keys(columns).reduce((acc, key) => {
+      acc[key] = indices.map((index) => columns[key][index]);
       return acc;
-    },
-    {}
-  );
-  setColumnSortOrders(updatedSortOrders);
-};
+    }, {});
 
-const resetSorting = () => {
+    setColumns(newColumns);
+
+    // Update the sort order state
+    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+      (acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      },
+      {}
+    );
+    setColumnSortOrders(updatedSortOrders);
+  };
+
+  const resetSorting = () => {
     setColumnSortOrders({
-       Code: null,
-    Description: null,
-    Stk: null,
-    Comm: null,
-    "Act Rate": null,
-    "Pur Rate": null,
-    "SM Rate": null,
-    "Sale Rate": null,
-    MRP: null,
-    "Fix Rate": null,
+      Code: null,
+      Description: null,
+      Stk: null,
+      Comm: null,
+      "Act Rate": null,
+      "Pur Rate": null,
+      "SM Rate": null,
+      "Sale Rate": null,
+      MRP: null,
+      "Fix Rate": null,
     });
   };
 
@@ -1487,6 +1487,14 @@ const resetSorting = () => {
     };
   };
 
+  useHotkeys("alt+s", () => {
+    fetchReceivableReport();
+    resetSorting();
+  }, { preventDefault: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
 
 
   const firstColWidth = {
@@ -1520,10 +1528,7 @@ const resetSorting = () => {
     width: "8.5%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1709,7 +1714,7 @@ const resetSorting = () => {
                       return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
-                     styles={{
+                    styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
@@ -1717,7 +1722,7 @@ const resetSorting = () => {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -1794,7 +1799,7 @@ const resetSorting = () => {
                       return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
-                   styles={{
+                    styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
@@ -1802,7 +1807,7 @@ const resetSorting = () => {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -1863,7 +1868,7 @@ const resetSorting = () => {
                       return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
-                   styles={{
+                    styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
@@ -1871,7 +1876,7 @@ const resetSorting = () => {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -1949,7 +1954,7 @@ const resetSorting = () => {
                       return inputValue;
                     }}
                     components={{ Option: DropdownOption }}
-                     styles={{
+                    styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
@@ -1957,7 +1962,7 @@ const resetSorting = () => {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable
@@ -2224,12 +2229,13 @@ const resetSorting = () => {
             <SingleButton
               id="searchsubmit"
               text="Select"
+              highlightFirstLetter={true}
               ref={input6Ref}
               // onClick={fetchReceivableReport}
-              onClick={()=>{
-              fetchReceivableReport();
-              resetSorting();
-             }}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

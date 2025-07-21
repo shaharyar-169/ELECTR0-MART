@@ -678,11 +678,9 @@ export default function StoreList() {
   const fifthColWidth = {
     width: "10%",
   };
+   
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+  
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -786,15 +784,6 @@ export default function StoreList() {
     }
   }, [selectedIndex]);
 
-  const resetSorting = () => {
-    setColumnSortOrders({
-      Code: null,
-      Description: null,
-      Status: null,
-      Abb: null,
-      Stk: null
-    });
-  };
 
   const [columns, setColumns] = useState({
     Code: [],
@@ -827,13 +816,17 @@ export default function StoreList() {
   }, [tableData]);
 
   const handleSorting = (col) => {
+    // Always sort in descending order on first click (or toggle if already sorted)
     const currentOrder = columnSortOrders[col];
     const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    const columnData = [...columns[col]];
-    columnData.sort((a, b) => {
-      const aVal = a !== null ? a.toString() : "";
-      const bVal = b !== null ? b.toString() : "";
+    // Create an array of indices [0, 1, 2, ..., n-1]
+    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+
+    // Sort the indices based on the values in the specified column
+    indices.sort((a, b) => {
+      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
       const numA = parseFloat(aVal.replace(/,/g, ""));
       const numB = parseFloat(bVal.replace(/,/g, ""));
@@ -847,12 +840,15 @@ export default function StoreList() {
       }
     });
 
-    setColumns((prev) => ({
-      ...prev,
-      [col]: columnData,
-    }));
+    // Reorder all columns based on the sorted indices
+    const newColumns = Object.keys(columns).reduce((acc, key) => {
+      acc[key] = indices.map((index) => columns[key][index]);
+      return acc;
+    }, {});
 
-    // Reset all other columns and set current column's sort
+    setColumns(newColumns);
+
+    // Update the sort order state
     const updatedSortOrders = Object.keys(columnSortOrders).reduce(
       (acc, key) => {
         acc[key] = key === col ? newOrder : null;
@@ -863,8 +859,16 @@ export default function StoreList() {
     setColumnSortOrders(updatedSortOrders);
   };
 
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      Status: null,
+      Abb: null,
+      Stk: null
+    });
+  };
 
-  
 
   const renderTableData = () => {
     const rowCount = Math.max(
@@ -987,6 +991,15 @@ export default function StoreList() {
   };
 
 
+ 
+  useHotkeys("alt+s", () => {
+  fetchReceivableReport();
+  resetSorting();
+}, { preventDefault: true });
+  
+  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+  useHotkeys("esc", () => navigate("/MainPage"));
 
   return (
     <>
@@ -1343,6 +1356,7 @@ export default function StoreList() {
             <SingleButton
               id="searchsubmit"
               text="Select"
+              highlightFirstLetter={true}
               ref={input3Ref}
               onClick={() => {
                 fetchReceivableReport();
