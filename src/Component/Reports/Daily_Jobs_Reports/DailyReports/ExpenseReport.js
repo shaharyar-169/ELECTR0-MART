@@ -440,7 +440,7 @@ export default function ExpenseReport() {
         // Define table data (rows)
         const rows = tableData.map((item) => [
 
-         
+
             item.code,
             item.Description,
             item.Expense,
@@ -583,7 +583,7 @@ export default function ExpenseReport() {
                         });
                     }
 
-                    else if (cellIndex === 2 ) {
+                    else if (cellIndex === 2) {
                         const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -937,7 +937,7 @@ export default function ExpenseReport() {
         };
 
         // Add headers
-        const headers = [ "code", "Description", "Expense"];
+        const headers = ["code", "Description", "Expense"];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
@@ -1105,9 +1105,12 @@ export default function ExpenseReport() {
         width: "25%",
     };
 
-    useHotkeys("alt+p", fetchReceivableReport, { preventDefault: true });
-    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);

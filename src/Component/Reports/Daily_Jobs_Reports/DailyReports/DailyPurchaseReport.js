@@ -359,7 +359,7 @@ export default function DailyPurchaseReport() {
             fontFamily: getfontstyle,
             paddingBottom: "5px",
             lineHeight: "3px",
-            color: fontcolor,
+            // color: fontcolor,
             textAlign: "start",
           }}
         >
@@ -370,7 +370,7 @@ export default function DailyPurchaseReport() {
   };
 
   // ------------ store style customization
- const customStyles1 = (hasError) => ({
+  const customStyles1 = (hasError) => ({
     control: (base, state) => ({
       ...base,
       height: "24px",
@@ -988,7 +988,7 @@ export default function DailyPurchaseReport() {
       "left",
       "left",
       "left",
-     
+
       "right",
       "right",
       "right",];
@@ -1146,7 +1146,7 @@ export default function DailyPurchaseReport() {
     });
 
     // Set column widths
-    [12, 7, 5, 8, 45, 30,12,8,13].forEach((width, index) => {
+    [12, 7, 5, 8, 45, 30, 12, 8, 13].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1988,7 +1988,7 @@ export default function DailyPurchaseReport() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop:'-5px'
+                        marginTop: '-5px'
                       })
                     }}
                     isClearable

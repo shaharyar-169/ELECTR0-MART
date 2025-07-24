@@ -1108,10 +1108,13 @@ export default function DailyMemberCollectionSummaryReport() {
         width: "25%",
     };
 
-    useHotkeys("alt+p", fetchReceivableReport, { preventDefault: true });
-    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-    useHotkeys("esc", () => navigate("/MainPage"));
+     useHotkeys("alt+s", () => {
+            fetchReceivableReport();
+        }, { preventDefault: true });
+    
+        useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+        useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+        useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 

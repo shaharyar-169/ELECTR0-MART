@@ -1110,10 +1110,7 @@ export default function DailyMemberCollectionReport() {
         width: "17%",
     };
 
-    useHotkeys("alt+p", fetchReceivableReport,  { preventDefault: true });
-    useHotkeys("alt+p", exportPDFHandler,  { preventDefault: true });
-    useHotkeys("alt+e", handleDownloadCSV,  { preventDefault: true });
-    useHotkeys("esc", () => navigate("/MainPage"));
+  
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1258,6 +1255,15 @@ export default function DailyMemberCollectionReport() {
             }
         }
     };
+
+ useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+       }, { preventDefault: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+    useHotkeys("esc", () => navigate("/MainPage"));
+
 
     return (
         <>
