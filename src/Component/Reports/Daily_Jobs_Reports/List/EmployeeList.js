@@ -151,7 +151,7 @@ export default function EmployeeList() {
       item.Employee,
       item.Status,
       item.Designation,
-      item["COntact #"],
+      item.Mobile,
       item.DOB,
       item["Join Date"],
       item["Adv Code"],
@@ -167,7 +167,7 @@ export default function EmployeeList() {
       "Employee",
       "Status",
       "Designation",
-      "Contact",
+      "Mobile",
       "DOB",
       "Joine Date",
       "Adv Code",
@@ -620,7 +620,7 @@ export default function EmployeeList() {
       "Employee",
       "Status",
       "Designation",
-      "Contact",
+      "Mobile",
       "DOB",
       "Joine Date",
       "Adv Code",
@@ -636,7 +636,7 @@ export default function EmployeeList() {
         item.Employee,
         item.Status,
         item.Designation,
-        item["COntact #"],
+        item.Mobile,
         item.DOB,
         item["Joine Date"],
         item["Adv Code"],
@@ -754,7 +754,7 @@ export default function EmployeeList() {
             fontFamily: getfontstyle,
             paddingBottom: "5px",
             lineHeight: "3px",
-            color: fontcolor,
+            // color: fontcolor,
             textAlign: "start",
           }}
         >
@@ -787,8 +787,8 @@ export default function EmployeeList() {
       justifyContent: "space-between",
       boxShadow: "none",
       "&:focus-within": {
-        borderColor: "#2684FF",
-        boxShadow: "0 0 0 1px #2684FF",
+        borderColor: "#3368B5",
+        boxShadow: "0 0 0 1px #3368B5",
       }
     }),
 
@@ -819,7 +819,7 @@ export default function EmployeeList() {
         borderRadius: "10px",
         border: `2px solid ${getcolor}`,
         "&:hover": {
-          backgroundColor: "#2684FF",
+          backgroundColor: "#3368B5",
         }
       },
       // Scrollbar styling for Firefox
@@ -831,15 +831,15 @@ export default function EmployeeList() {
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: state.isSelected
-        ? "#2684FF"
+        ? "#3368B5"
         : state.isFocused
-          ? "#2684FF"
+          ? "#3368B5"
           : getcolor,
       color: state.isSelected
         ? "white"
         : fontcolor,
       "&:hover": {
-        backgroundColor: "#2684FF",
+        backgroundColor: "#3368B5",
         color: "white",
         cursor: "pointer",
       },
@@ -859,7 +859,7 @@ export default function EmployeeList() {
       transition: "transform 0.2s ease",
       transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
       "&:hover": {
-        color: "#2684FF",
+        color: "#3368B5",
       }
     }),
     indicatorSeparator: () => ({
@@ -928,9 +928,6 @@ export default function EmployeeList() {
       }
     }),
   });
-
-
-
 
 
   const dispatch = useDispatch();
@@ -1117,7 +1114,7 @@ export default function EmployeeList() {
     Employee: [],
     Status: [],
     Designation: [],
-    "COntact #": [],
+    Mobile: [],
     DOB: [],
     "Join Date": [],
     "Adv Code": [],
@@ -1128,7 +1125,7 @@ export default function EmployeeList() {
     Employee: "",
     Status: "",
     Designation: "",
-    "COntact #": "",
+    Mobile: "",
     DOB: "",
     "Join Date": "",
     "Adv Code": "",
@@ -1143,7 +1140,7 @@ export default function EmployeeList() {
         Employee: tableData.map(row => row.Employee),
         Status: tableData.map(row => row.Status),
         Designation: tableData.map(row => row.Designation),
-        "COntact #": tableData.map(row => row["COntact #"]),
+        Mobile: tableData.map(row => row.Mobile),
         DOB: tableData.map(row => row.DOB),
         "Join Date": tableData.map(row => row["Join Date"]),
         "Adv Code": tableData.map(row => row["Adv Code"]),
@@ -1154,42 +1151,85 @@ export default function EmployeeList() {
   }, [tableData]);
 
 
+  // const handleSorting = (col) => {
+  //   const currentOrder = columnSortOrders[col];
+  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  //   const columnData = [...columns[col]];
+
+  //   columnData.sort((a, b) => {
+  //     const aValue = a !== null ? a.toString() : "";
+  //     const bValue = b !== null ? b.toString() : "";
+
+  //     const numA = parseFloat(aValue.replace(/,/g, ""));
+  //     const numB = parseFloat(bValue.replace(/,/g, ""));
+
+  //     if (!isNaN(numA) && !isNaN(numB)) {
+  //       return newOrder === "ASC" ? numA - numB : numB - numA;
+  //     } else {
+  //       return newOrder === "ASC"
+  //         ? aValue.localeCompare(bValue)
+  //         : bValue.localeCompare(aValue);
+  //     }
+  //   });
+
+  //   // Update only the clicked column's data
+  //   setColumns((prev) => ({
+  //     ...prev,
+  //     [col]: columnData,
+  //   }));
+
+  //   // Reset all columns' sort order except the current one
+  //   const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+  //     acc[key] = key === col ? newOrder : null;
+  //     return acc;
+  //   }, {});
+  //   setColumnSortOrders(resetSortOrders);
+  // };
+
   const handleSorting = (col) => {
+    // Always sort in descending order on first click (or toggle if already sorted)
     const currentOrder = columnSortOrders[col];
     const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    const columnData = [...columns[col]];
+    // Create an array of indices [0, 1, 2, ..., n-1]
+    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-    columnData.sort((a, b) => {
-      const aValue = a !== null ? a.toString() : "";
-      const bValue = b !== null ? b.toString() : "";
+    // Sort the indices based on the values in the specified column
+    indices.sort((a, b) => {
+      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-      const numA = parseFloat(aValue.replace(/,/g, ""));
-      const numB = parseFloat(bValue.replace(/,/g, ""));
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
       if (!isNaN(numA) && !isNaN(numB)) {
         return newOrder === "ASC" ? numA - numB : numB - numA;
       } else {
         return newOrder === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
       }
     });
 
-    // Update only the clicked column's data
-    setColumns((prev) => ({
-      ...prev,
-      [col]: columnData,
-    }));
-
-    // Reset all columns' sort order except the current one
-    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
+    // Reorder all columns based on the sorted indices
+    const newColumns = Object.keys(columns).reduce((acc, key) => {
+      acc[key] = indices.map((index) => columns[key][index]);
       return acc;
     }, {});
-    setColumnSortOrders(resetSortOrders);
-  };
 
+    setColumns(newColumns);
+
+    // Update the sort order state
+    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+      (acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      },
+      {}
+    );
+    setColumnSortOrders(updatedSortOrders);
+  };
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -1211,7 +1251,7 @@ export default function EmployeeList() {
       columns.Employee.length,
       columns.Status.length,
       columns.Designation.length,
-      columns["COntact #"].length,
+      columns.Mobile.length,
       columns.DOB.length,
       columns["Join Date"].length,
       columns["Adv Code"].length,
@@ -1225,7 +1265,7 @@ export default function EmployeeList() {
         Employee: columns.Employee[i],
         Status: columns.Status[i],
         Designation: columns.Designation[i],
-        "COntact #": columns["COntact #"][i],
+        Mobile: columns.Mobile[i],
         DOB: columns.DOB[i],
         "Join Date": columns["Join Date"][i],
         "Adv Code": columns["Adv Code"][i],
@@ -1295,7 +1335,7 @@ export default function EmployeeList() {
                     {item.Designation}
                   </td>
                   <td className="text-start" style={fifthColWidth}>
-                    {item["COntact #"]}
+                    {item.Mobile}
                   </td>
 
                   <td className="text-start" style={eightthColWidth}>
@@ -1687,7 +1727,7 @@ export default function EmployeeList() {
                       style={fifthColWidth}
                       onClick={() => handleSorting("COntact #")}
                     >
-                      Contact{" "}
+                      Mobile{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("COntact #")}

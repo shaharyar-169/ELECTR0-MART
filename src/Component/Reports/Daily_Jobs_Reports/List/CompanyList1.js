@@ -32,7 +32,7 @@ export default function CompanyList() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
-
+  console.log('transectionTypedta', transectionType)
   const [isAscendingcode, setisAscendingcode] = useState(true);
   const [isAscendingdec, setisAscendingdec] = useState(true);
   const [isAscendingsts, setisAscendingsts] = useState(true);
@@ -71,11 +71,16 @@ export default function CompanyList() {
     }
   };
 
+  const handleTransactionTypeChange = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType(selectedTransactionType);
+  };
+
   function fetchReceivableReport() {
     const apiUrl = apiLinks + "/CompanyList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FCmpSts: transectionType,
+      FCmpSts: transectionType || "",
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
@@ -101,7 +106,27 @@ export default function CompanyList() {
         console.error("Error:", error);
         setIsLoading(false);
       });
+
+    // axios.post(apiUrl, formData)
+    //   .then((response) => {
+    //     setIsLoading(false);
+    //     if (response.data && Array.isArray(response.data)) {
+    //       setTableData(response.data);
+    //       // Transform API data into columns format
+    //       const newColumns = {
+    //         Code: response.data.map(item => item.Code),
+    //         Description: response.data.map(item => item.Description),
+    //         Status: response.data.map(item => item.Status),
+    //       };
+    //       setColumns(newColumns); // Assuming you have a `setColumns` state
+    //     } else {
+    //       setTableData([]);
+    //       setColumns({ Code: [], Description: [], Status: [] }); // Reset columns
+    //     }
+    //   })
   }
+
+ 
 
   useEffect(() => {
     const hasComponentMountedPreviously =
@@ -117,10 +142,7 @@ export default function CompanyList() {
     }
   }, []);
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
+
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
@@ -887,7 +909,7 @@ export default function CompanyList() {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {rows.length > 0 && rows.map((item, i) => {
               totalEnteries += 1;
               return (
                 <tr
@@ -937,6 +959,112 @@ export default function CompanyList() {
       </>
     );
   };
+
+
+
+  // const renderTableData = () => {
+  //   // Define the total number of rows you want to maintain (27 in your case)
+  //   const totalRowsToMaintain = 27;
+
+  //   if (isLoading) {
+  //     return (
+  //       <>
+  //         <tr style={{ backgroundColor: getcolor }}>
+  //           <td colSpan="3" className="text-center">
+  //             <Spinner animation="border" variant="primary" />
+  //           </td>
+  //         </tr>
+  //         {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+  //           <tr
+  //             key={`blank-${rowIndex}`}
+  //             style={{
+  //               backgroundColor: getcolor,
+  //               color: fontcolor,
+  //             }}
+  //           >
+  //             {Array.from({ length: 3 }).map((_, colIndex) => (
+  //               <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+  //             ))}
+  //           </tr>
+  //         ))}
+  //         <tr>
+  //           <td style={firstColWidth}></td>
+  //           <td style={secondColWidth}></td>
+  //           <td style={thirdColWidth}></td>
+  //         </tr>
+  //       </>
+  //     );
+  //   }
+
+  //   if (tableData.length === 0) {
+  //     return (
+  //       <>
+
+  //         {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+  //           <tr
+  //             key={`blank-${rowIndex}`}
+  //             style={{
+  //               backgroundColor: getcolor,
+  //               color: fontcolor,
+  //             }}
+  //           >
+  //             {Array.from({ length: 3 }).map((_, colIndex) => (
+  //               <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+  //             ))}
+  //           </tr>
+  //         ))}
+  //         <tr>
+  //           <td style={firstColWidth}></td>
+  //           <td style={secondColWidth}></td>
+  //           <td style={thirdColWidth}></td>
+  //         </tr>
+  //       </>
+  //     );
+  //   }
+
+  //   return (
+  //     <>
+  //       {tableData.map((item, i) => (
+  //         <tr
+  //           key={`${i}-${selectedIndex}`}
+  //           ref={(el) => (rowRefs.current[i] = el)}
+  //           onClick={() => handleRowClick(i)}
+  //           className={selectedIndex === i ? "selected-background" : ""}
+  //           style={{ backgroundColor: getcolor, color: fontcolor }}
+  //         >
+  //           <td className="text-start" style={firstColWidth}>
+  //             {item.Code}
+  //           </td>
+  //           <td className="text-start" style={secondColWidth}>
+  //             {item.Description}
+  //           </td>
+  //           <td className="text-center" style={thirdColWidth}>
+  //             {item.Status}
+  //           </td>
+  //         </tr>
+  //       ))}
+  //       {/* Blank rows for spacing */}
+  //       {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+  //         <tr
+  //           key={`blank-${rowIndex}`}
+  //           style={{
+  //             backgroundColor: getcolor,
+  //             color: fontcolor,
+  //           }}
+  //         >
+  //           {Array.from({ length: 3 }).map((_, colIndex) => (
+  //             <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+  //           ))}
+  //         </tr>
+  //       ))}
+  //       <tr>
+  //         <td style={firstColWidth}></td>
+  //         <td style={secondColWidth}></td>
+  //         <td style={thirdColWidth}></td>
+  //       </tr>
+  //     </>
+  //   );
+  // };
 
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];

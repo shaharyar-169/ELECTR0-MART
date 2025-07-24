@@ -14,6 +14,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { useHotkeys } from "react-hotkeys-hook";
 import 'react-calendar/dist/Calendar.css';
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
@@ -295,9 +296,9 @@ export default function DailyCashBook() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-            code: 'MAKKAHCOMP',
+            code: 'NASIRTRD',
             FLocCod: '001',
-            FYerDsc: '2025-2025',
+            FYerDsc: '2024-2024',
 
 
 
@@ -332,9 +333,9 @@ export default function DailyCashBook() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-            code: 'MAKKAHCOMP',
+            code: 'NASIRTRD',
             FLocCod: '001',
-            FYerDsc: '2025-2025',
+            FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -370,9 +371,9 @@ export default function DailyCashBook() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-            code: 'MAKKAHCOMP',
+            code: 'NASIRTRD',
             FLocCod: '001',
-            FYerDsc: '2025-2025',
+            FYerDsc: '2024-2024',
 
 
         }).toString();
@@ -433,8 +434,6 @@ export default function DailyCashBook() {
     }, []);
 
 
-
-
     const exportPDFHandler = () => {
 
         // Create a new jsPDF instance with landscape orientation
@@ -457,7 +456,7 @@ export default function DailyCashBook() {
 
         // // Add summary row to the table
         rows.push([
-            "Total",
+            "",
             String(totalDebit),
             "",
             String(totalCredit),
@@ -520,55 +519,237 @@ export default function DailyCashBook() {
             doc.setFontSize(11);
         };
 
+        // const addTableRows = (startX, startY, startIndex, endIndex) => {
+        //     const rowHeight = 5; // Adjust this value to decrease row height
+        //     const fontSize = 10; // Adjust this value to decrease font size
+        //     const boldFont = 400; // Bold font
+        //     const normalFont = getfontstyle; // Default font
+        //     const tableWidth = getTotalTableWidth(); // Calculate total table width
+
+        //     doc.setFontSize(11);
+
+        //     for (let i = startIndex; i < endIndex; i++) {
+        //         const row = rows[i];
+        //         const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        //         const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
+        //         const isTotalRow = i === rows.length - 1; // Check if this is the total row
+        //         let textColor = [0, 0, 0]; // Default text color
+        //         let fontName = normalFont; // Default font
+
+        //         if (isRedRow) {
+        //             textColor = [255, 0, 0]; // Red color
+        //             fontName = boldFont; // Set bold font for red-colored row
+        //         }
+
+        //         // For total row, set bold font and prepare for double border
+        //         if (isTotalRow) {
+        //             doc.setFont(getfontstyle, 'bold');
+        //         }
+
+        //         // Draw row borders
+        //         doc.setDrawColor(0); // Set color for borders
+
+        //         // For total row, draw double border
+        //         if (isTotalRow) {
+        //             // First line of the double border
+        //             doc.setLineWidth(0.3);
+        //             doc.rect(
+        //                 startX,
+        //                 startY + (i - startIndex + 2) * rowHeight,
+        //                 tableWidth,
+        //                 rowHeight
+        //             );
+
+        //             // Second line of the double border (slightly offset)
+        //             doc.setLineWidth(0.3);
+        //             doc.rect(
+        //                 startX + 0.5,
+        //                 startY + (i - startIndex + 2) * rowHeight + 0.5,
+        //                 tableWidth - 1,
+        //                 rowHeight - 1
+        //             );
+        //         } else {
+        //             // Normal border for other rows
+        //             doc.setLineWidth(0.2);
+        //             doc.rect(
+        //                 startX,
+        //                 startY + (i - startIndex + 2) * rowHeight,
+        //                 tableWidth,
+        //                 rowHeight
+        //             );
+        //         }
+
+        //         row.forEach((cell, cellIndex) => {
+        //             // For total row, adjust vertical position to center in the double border
+        //             const cellY = isTotalRow
+        //                 ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+        //                 : startY + (i - startIndex + 2) * rowHeight + 3;
+
+        //             const cellX = startX + 2;
+
+        //             // Set text color
+        //             doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+
+        //             // For total row, keep bold font
+        //             if (!isTotalRow) {
+        //                 // Set font
+        //                 doc.setFont(fontName, "normal");
+        //             }
+
+        //             // Ensure the cell value is a string
+        //             const cellValue = String(cell);
+
+        //             if (cellIndex === 1 || cellIndex === 3) {
+        //                 const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+        //                 doc.text(cellValue, rightAlignX, cellY, {
+        //                     align: "right",
+        //                     baseline: "middle", // This centers vertically
+        //                 });
+        //             } else {
+        //                 // For empty cells in total row, add "Total" label centered
+        //                 if (isTotalRow && cellIndex === 0 && cell === "") {
+        //                     const totalLabelX = startX + columnWidths[0] / 2;
+        //                     doc.text("", totalLabelX, cellY, {
+        //                         align: "center",
+        //                         baseline: "middle"
+        //                     });
+        //                 } else {
+        //                     doc.text(cellValue, cellX, cellY, {
+        //                         baseline: "middle" // This centers vertically
+        //                     });
+        //                 }
+        //             }
+
+        //             // Draw column borders (excluding the last column)
+        //             if (cellIndex < row.length - 1) {
+        //                 if (isTotalRow) {
+        //                     // Double border for total row columns
+        //                     doc.setLineWidth(0.3);
+        //                     doc.rect(
+        //                         startX,
+        //                         startY + (i - startIndex + 2) * rowHeight,
+        //                         columnWidths[cellIndex],
+        //                         rowHeight
+        //                     );
+        //                     doc.setLineWidth(0.3);
+        //                     doc.rect(
+        //                         startX + 0.5,
+        //                         startY + (i - startIndex + 2) * rowHeight + 0.5,
+        //                         columnWidths[cellIndex] - 1,
+        //                         rowHeight - 1
+        //                     );
+        //                 } else {
+        //                     // Normal border for other rows
+        //                     doc.setLineWidth(0.2);
+        //                     doc.rect(
+        //                         startX,
+        //                         startY + (i - startIndex + 2) * rowHeight,
+        //                         columnWidths[cellIndex],
+        //                         rowHeight
+        //                     );
+        //                 }
+        //                 startX += columnWidths[cellIndex];
+        //             }
+        //         });
+
+        //         // Draw border for the last column
+        //         if (isTotalRow) {
+        //             // Double border for total row last column
+        //             doc.setLineWidth(0.3);
+        //             doc.rect(
+        //                 startX,
+        //                 startY + (i - startIndex + 2) * rowHeight,
+        //                 columnWidths[row.length - 1],
+        //                 rowHeight
+        //             );
+        //             doc.setLineWidth(0.3);
+        //             doc.rect(
+        //                 startX + 0.5,
+        //                 startY + (i - startIndex + 2) * rowHeight + 0.5,
+        //                 columnWidths[row.length - 1] - 1,
+        //                 rowHeight - 1
+        //             );
+        //         } else {
+        //             // Normal border for other rows last column
+        //             doc.setLineWidth(0.2);
+        //             doc.rect(
+        //                 startX,
+        //                 startY + (i - startIndex + 2) * rowHeight,
+        //                 columnWidths[row.length - 1],
+        //                 rowHeight
+        //             );
+        //         }
+        //         startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+
+        //         // Reset font after total row
+        //         if (isTotalRow) {
+        //             doc.setFont(getfontstyle, "normal");
+        //         }
+        //     }
+
+        //     // Rest of your function remains the same...
+        //     // Draw line at the bottom of the page with padding
+        //     const lineWidth = tableWidth; // Match line width with table width
+        //     const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
+        //     const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+        //     doc.setLineWidth(0.3);
+        //     doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
+        //     const headingFontSize = 11; // Adjust as needed
+
+        //     // Add heading "Crystal Solution" aligned left bottom of the line
+        //     const headingX = lineX + 2; // Padding from left
+        //     const headingY = lineY + 5; // Padding from bottom
+        //     doc.setFontSize(headingFontSize); // Set the font size for the heading
+        //     doc.setTextColor(0); // Reset text color to default
+        //     doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+        // };
+        // Function to calculate total table width
+
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+            const rowHeight = 5;
+            const fontSize = 10;
+            const boldFont = 400;
+            const normalFont = getfontstyle;
+            const tableWidth = getTotalTableWidth();
 
             doc.setFontSize(11);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+                const isTotalRow = i === rows.length - 1;
+                let textColor = [0, 0, 0];
+                let fontName = normalFont;
 
                 if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
+                    textColor = [255, 0, 0];
+                    fontName = boldFont;
                 }
 
-                // For total row, set bold font and prepare for double border
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, 'bold');
                 }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
+                doc.setDrawColor(0);
 
-                // For total row, draw double border
+                // For total row - special border handling
                 if (isTotalRow) {
-                    // First line of the double border
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
+                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+                    const rowBottomY = rowTopY + rowHeight;
 
-                    // Second line of the double border (slightly offset)
+                    // Draw double top border
                     doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        tableWidth - 1,
-                        rowHeight - 1
-                    );
+                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+                    // Draw double bottom border
+                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
+
+                    // Draw single vertical borders
+                    doc.setLineWidth(0.2);
+                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
                 } else {
                     // Normal border for other rows
                     doc.setLineWidth(0.2);
@@ -581,130 +762,74 @@ export default function DailyCashBook() {
                 }
 
                 row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
                     const cellY = isTotalRow
                         ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
                         : startY + (i - startIndex + 2) * rowHeight + 3;
 
                     const cellX = startX + 2;
 
-                    // Set text color
                     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    // For total row, keep bold font
                     if (!isTotalRow) {
-                        // Set font
                         doc.setFont(fontName, "normal");
                     }
 
-                    // Ensure the cell value is a string
                     const cellValue = String(cell);
 
                     if (cellIndex === 1 || cellIndex === 3) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                        const rightAlignX = startX + columnWidths[cellIndex] - 2;
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
-                            baseline: "middle", // This centers vertically
+                            baseline: "middle",
                         });
                     } else {
-                        // For empty cells in total row, add "Total" label centered
                         if (isTotalRow && cellIndex === 0 && cell === "") {
                             const totalLabelX = startX + columnWidths[0] / 2;
-                            doc.text("Total", totalLabelX, cellY, {
+                            doc.text("", totalLabelX, cellY, {
                                 align: "center",
                                 baseline: "middle"
                             });
                         } else {
                             doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle" // This centers vertically
+                                baseline: "middle"
                             });
                         }
                     }
 
-                    // Draw column borders (excluding the last column)
+                    // Draw column borders
                     if (cellIndex < row.length - 1) {
-                        if (isTotalRow) {
-                            // Double border for total row columns
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX + 0.5,
-                                startY + (i - startIndex + 2) * rowHeight + 0.5,
-                                columnWidths[cellIndex] - 1,
-                                rowHeight - 1
-                            );
-                        } else {
-                            // Normal border for other rows
-                            doc.setLineWidth(0.2);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                        }
+                        doc.setLineWidth(0.2);
+                        doc.line(
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 2) * rowHeight,
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 3) * rowHeight
+                        );
                         startX += columnWidths[cellIndex];
                     }
                 });
 
-                // Draw border for the last column
-                if (isTotalRow) {
-                    // Double border for total row last column
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        columnWidths[row.length - 1] - 1,
-                        rowHeight - 1
-                    );
-                } else {
-                    // Normal border for other rows last column
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                }
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+                startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
-                // Reset font after total row
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, "normal");
                 }
             }
 
-            // Rest of your function remains the same...
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+            // Footer section
+            const lineWidth = tableWidth;
+            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+            const lineY = pageHeight - 15;
             doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 11; // Adjust as needed
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
+            doc.line(lineX, lineY, lineX + lineWidth, lineY);
+            const headingFontSize = 11;
+            const headingX = lineX + 2;
+            const headingY = lineY + 5;
+            doc.setFontSize(headingFontSize);
+            doc.setTextColor(0);
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
-        // Function to calculate total table width
+
         const getTotalTableWidth = () => {
             let totalWidth = 0;
             columnWidths.forEach((width) => (totalWidth += width));
@@ -770,7 +895,7 @@ export default function DailyCashBook() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Daily Cash Book Report From: ${fromInputDate} `, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Daily Cash Book As on ${fromInputDate} `, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -874,12 +999,10 @@ export default function DailyCashBook() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`DailyCashBookReport As on ${date}.pdf`);
+        doc.save(`DailyCashBook As on ${date}.pdf`);
 
 
     };
-
-
 
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -991,7 +1114,7 @@ export default function DailyCashBook() {
         });
 
         const totalRow = worksheet.addRow([
-            "Total",
+            "",
             totalDebit,
             "",
             totalCredit,
@@ -1143,6 +1266,13 @@ export default function DailyCashBook() {
     };
 
 
+    useHotkeys("alt+s", () => {
+        fetchGeneralLedger();
+    }, { preventDefault: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+    // useHotkeys("esc", () => navigate("/MainPage"));
 
     // Adjust the content width based on sidebar state
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);

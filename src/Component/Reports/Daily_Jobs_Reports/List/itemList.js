@@ -99,11 +99,50 @@ export default function ItemList() {
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
 
+  // function fetchReceivableReport() {
+  //   const apiUrl = apiLinks + "/ItemList.php";
+  //   setIsLoading(true);
+  //   const formData = new URLSearchParams({
+  //     FItmSts: transectionType,
+  //     FCtgCod: Categoryselectdata,
+  //     FCapCod: Capacityselectdata,
+  //     FSchTxt: searchQuery,
+  //     FCmpCod: Companyselectdata,
+  //     FTypCod: Typeselectdata,
+  //     code: organisation.code,
+  //     FLocCod: locationnumber || getLocationNumber,
+  //     FYerDsc: yeardescription || getyeardescription,
+
+
+  //   }).toString();
+
+  //   axios
+  //     .post(apiUrl, formData)
+  //     .then((response) => {
+  //       setIsLoading(false);
+
+  //       if (response.data && Array.isArray(response.data)) {
+  //         setTableData(response.data);
+  //       } else {
+  //         // console.warn(
+  //         //   "Response data structure is not as expected:",
+  //         //   response.data
+  //         // );
+  //         setTableData([]);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       setIsLoading(false);
+  //     });
+  // }
+
   function fetchReceivableReport() {
     const apiUrl = apiLinks + "/ItemList.php";
     setIsLoading(true);
+
     const formData = new URLSearchParams({
-      FItmSts: transectionType,
+      FItmSts: transectionType === "Non-Active" ? "N" : transectionType === "Active" ? "A" : "",
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
@@ -112,23 +151,50 @@ export default function ItemList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-
-
     }).toString();
 
-    axios
-      .post(apiUrl, formData)
+    axios.post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
 
         if (response.data && Array.isArray(response.data)) {
-          setTableData(response.data);
+          // Transform API data to match your table structure
+          const transformedData = response.data.map(item => ({
+            Code: item.Code,
+            Description: item.Description,
+            Company: item.Company,
+            Category: item.Category,
+            Capacity: item.Capacity,
+            Type: item.Type,
+            Status: item.Status === "N" ? "N" :
+              item.Status === "A" ? "A" :
+                item.Status // fallback
+          }));
+
+          setTableData(transformedData);
+
+          // If you still need columns structure for some reason
+          const newColumns = {
+            Code: transformedData.map(item => item.Code),
+            Description: transformedData.map(item => item.Description),
+            Company: transformedData.map(item => item.Company),
+            Category: transformedData.map(item => item.Category),
+            Capacity: transformedData.map(item => item.Capacity),
+            Type: transformedData.map(item => item.Type),
+            Status: transformedData.map(item => item.Status)
+          };
+          setColumns(newColumns);
         } else {
-          // console.warn(
-          //   "Response data structure is not as expected:",
-          //   response.data
-          // );
           setTableData([]);
+          setColumns({
+            Code: [],
+            Description: [],
+            Company: [],
+            Category: [],
+            Capacity: [],
+            Type: [],
+            Status: []
+          });
         }
       })
       .catch((error) => {
@@ -497,8 +563,8 @@ export default function ItemList() {
         ? "#3368B5"
         : state.isFocused
           ? "#3368B5"
-          : getcolor, 
-      color: state.isSelected 
+          : getcolor,
+      color: state.isSelected
         ? "white"
         : fontcolor,      // black color
 
@@ -857,7 +923,14 @@ export default function ItemList() {
         let typename = typeselectdatavalue.label
           ? typeselectdatavalue.label
           : "ALL";
-        let status = transectionType ? transectionType : "ALL";
+
+        // let status = transectionType ? transectionType : "ALL";
+        let status =
+          transectionType === "N"
+            ? "NON-ACTIVE"
+            : transectionType === "A"
+              ? "ACTIVE"
+              : "All";
 
         let search = searchQuery ? searchQuery : "";
 
@@ -1023,7 +1096,16 @@ export default function ItemList() {
     let typetype = typeselectdatavalue.label
       ? typeselectdatavalue.label
       : "ALL ";
-    let typestatus = transectionType ? transectionType : "ALL";
+
+    // let typestatus = transectionType ? transectionType : "ALL";
+
+     let typestatus =
+          transectionType === "N"
+            ? "NON-ACTIVE"
+            : transectionType === "A"
+              ? "ACTIVE"
+              : "All";
+
     let typesearch = searchQuery ? searchQuery : "";
 
     // Add first row
@@ -1630,6 +1712,8 @@ export default function ItemList() {
     );
   };
 
+
+
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
@@ -1957,8 +2041,8 @@ export default function ItemList() {
                   }}
                 >
                   <option value="">ALL</option>
-                  <option value="Active">ACTIVE</option>
-                  <option value="Non-Active">NON-ACTIVE</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
             </div>
@@ -2357,7 +2441,7 @@ export default function ItemList() {
             <SingleButton
               id="searchsubmit"
               text="Select"
-              highlightFirstLetter={true}
+              // highlightFirstLetter={true}
               ref={input6Ref}
               onClick={() => {
                 fetchReceivableReport();

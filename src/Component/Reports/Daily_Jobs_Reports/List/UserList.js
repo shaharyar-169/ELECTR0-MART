@@ -113,6 +113,7 @@ export default function UserList() {
       });
   }
 
+
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
@@ -870,42 +871,71 @@ export default function UserList() {
   }, [tableData]);
 
 
+  // const handleSorting = (col) => {
+  //   const currentOrder = columnSortOrders[col];
+  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  //   const columnData = [...columns[col]];
+
+  //   columnData.sort((a, b) => {
+  //     const aValue = a !== null ? a.toString() : "";
+  //     const bValue = b !== null ? b.toString() : "";
+
+  //     const numA = parseFloat(aValue.replace(/,/g, ""));
+  //     const numB = parseFloat(bValue.replace(/,/g, ""));
+
+  //     if (!isNaN(numA) && !isNaN(numB)) {
+  //       return newOrder === "ASC" ? numA - numB : numB - numA;
+  //     } else {
+  //       return newOrder === "ASC"
+  //         ? aValue.localeCompare(bValue)
+  //         : bValue.localeCompare(aValue);
+  //     }
+  //   });
+
+  //   // Update only the clicked column's data
+  //   setColumns((prev) => ({
+  //     ...prev,
+  //     [col]: columnData,
+  //   }));
+
+  //   // Reset all columns' sort order except the current one
+  //   const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+  //     acc[key] = key === col ? newOrder : null;
+  //     return acc;
+  //   }, {});
+  //   setColumnSortOrders(resetSortOrders);
+  // };
+
   const handleSorting = (col) => {
     const currentOrder = columnSortOrders[col];
     const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    const columnData = [...columns[col]];
+    setTableData(prevData => {
+      const sorted = [...prevData].sort((a, b) => {
+        const aValue = a[col] !== null ? a[col].toString() : "";
+        const bValue = b[col] !== null ? b[col].toString() : "";
 
-    columnData.sort((a, b) => {
-      const aValue = a !== null ? a.toString() : "";
-      const bValue = b !== null ? b.toString() : "";
+        const numA = parseFloat(aValue.replace(/,/g, ""));
+        const numB = parseFloat(bValue.replace(/,/g, ""));
 
-      const numA = parseFloat(aValue.replace(/,/g, ""));
-      const numB = parseFloat(bValue.replace(/,/g, ""));
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return newOrder === "ASC" ? numA - numB : numB - numA;
+        } else {
+          return newOrder === "ASC"
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        }
+      });
+      return sorted;
     });
 
-    // Update only the clicked column's data
-    setColumns((prev) => ({
-      ...prev,
-      [col]: columnData,
+    // Update sort order state
+    setColumnSortOrders(prev => ({
+      ...Object.fromEntries(Object.keys(prev).map(key => [key, null])),
+      [col]: newOrder
     }));
-
-    // Reset all columns' sort order except the current one
-    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {});
-    setColumnSortOrders(resetSortOrders);
   };
-
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -920,32 +950,139 @@ export default function UserList() {
     });
   };
 
+  // const renderTableData = () => {
+  //   const rowCount = Math.max(
+  //     columns.ID?.length || 0,
+  //     columns.Name?.length || 0,
+  //     columns.Status?.length || 0,
+  //     columns.Type?.length || 0,
+  //     columns.Mobile?.length || 0,
+  //     columns.Email?.length || 0,
+  //     columns["Log Date"]?.length || 0,
+  //     columns["Log Time"]?.length || 0
+  //   );
+
+  //   const rows = [];
+  //   for (let i = 0; i < rowCount; i++) {
+  //     rows.push({
+  //       ID: columns.ID[i],
+  //       Name: columns.Name[i],
+  //       Status: columns.Status[i],
+  //       Type: columns.Type[i],
+  //       Mobile: columns.Mobile[i],
+  //       Email: columns.Email[i],
+  //       "Log Date": columns["Log Date"][i],
+  //       "Log Time": columns["Log Time"][i]
+  //     });
+  //   }
+
+  //   return (
+  //     <>
+  //       {isLoading ? (
+  //         <>
+  //           <tr style={{ backgroundColor: getcolor }}>
+  //             <td colSpan="8" className="text-center">
+  //               <Spinner animation="border" variant="primary" />
+  //             </td>
+  //           </tr>
+  //           {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+  //             <tr
+  //               key={`blank-${rowIndex}`}
+  //               style={{
+  //                 backgroundColor: getcolor,
+  //                 color: fontcolor,
+  //               }}
+  //             >
+  //               {Array.from({ length: 8 }).map((_, colIndex) => (
+  //                 <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+  //               ))}
+  //             </tr>
+  //           ))}
+  //           <tr>
+  //             <td style={firstColWidth}></td>
+  //             <td style={secondColWidth}></td>
+  //             <td style={thirdColWidth}></td>
+  //             <td style={forthColWidth}></td>
+  //             <td style={fifthColWidth}></td>
+  //             <td style={sixthColWidth}></td>
+  //             <td style={seventhColWidth}></td>
+  //             <td style={eightColWidth}></td>
+  //           </tr>
+  //         </>
+  //       ) : (
+  //         <>
+  //           {rows.map((item, i) => {
+  //             totalEnteries += 1;
+  //             return (
+  //               <tr
+  //                 key={`${i}-${selectedIndex}`}
+  //                 ref={(el) => (rowRefs.current[i] = el)}
+  //                 onClick={() => handleRowClick(i)}
+  //                 className={selectedIndex === i ? "selected-background" : ""}
+  //                 style={{
+  //                   backgroundColor: getcolor,
+  //                   color: fontcolor,
+  //                 }}
+  //               >
+  //                 <td className="text-start" style={firstColWidth}>
+  //                   {item.ID}
+  //                 </td>
+  //                 <td className="text-start" style={secondColWidth}>
+  //                   {item.Name}
+  //                 </td>
+  //                 <td className="text-center" style={thirdColWidth}>
+  //                   {item.Status}
+  //                 </td>
+  //                 <td className="text-center" style={forthColWidth}>
+  //                   {item.Type}
+  //                 </td>
+  //                 <td className="text-start" style={fifthColWidth}>
+  //                   {item.Mobile}
+  //                 </td>
+  //                 <td className="text-start" style={sixthColWidth}>
+  //                   {item.Email}
+  //                 </td>
+  //                 <td className="text-start" style={seventhColWidth}>
+  //                   {item["Log Date"]}
+  //                 </td>
+  //                 <td className="text-start" style={eightColWidth}>
+  //                   {item["Log Time"]}
+  //                 </td>
+  //               </tr>
+  //             );
+  //           })}
+  //           {Array.from({
+  //             length: Math.max(0, 27 - rows.length),
+  //           }).map((_, rowIndex) => (
+  //             <tr
+  //               key={`blank-${rowIndex}`}
+  //               style={{
+  //                 backgroundColor: getcolor,
+  //                 color: fontcolor,
+  //               }}
+  //             >
+  //               {Array.from({ length: 8 }).map((_, colIndex) => (
+  //                 <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+  //               ))}
+  //             </tr>
+  //           ))}
+  //           <tr>
+  //             <td style={firstColWidth}></td>
+  //             <td style={secondColWidth}></td>
+  //             <td style={thirdColWidth}></td>
+  //             <td style={forthColWidth}></td>
+  //             <td style={fifthColWidth}></td>
+  //             <td style={sixthColWidth}></td>
+  //             <td style={seventhColWidth}></td>
+  //             <td style={eightColWidth}></td>
+  //           </tr>
+  //         </>
+  //       )}
+  //     </>
+  //   );
+  // };
+
   const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.ID?.length || 0,
-      columns.Name?.length || 0,
-      columns.Status?.length || 0,
-      columns.Type?.length || 0,
-      columns.Mobile?.length || 0,
-      columns.Email?.length || 0,
-      columns["Log Date"]?.length || 0,
-      columns["Log Time"]?.length || 0
-    );
-
-    const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        ID: columns.ID[i],
-        Name: columns.Name[i],
-        Status: columns.Status[i],
-        Type: columns.Type[i],
-        Mobile: columns.Mobile[i],
-        Email: columns.Email[i],
-        "Log Date": columns["Log Date"][i],
-        "Log Time": columns["Log Time"][i]
-      });
-    }
-
     return (
       <>
         {isLoading ? (
@@ -981,7 +1118,7 @@ export default function UserList() {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {tableData.map((item, i) => {
               totalEnteries += 1;
               return (
                 <tr
@@ -1022,7 +1159,7 @@ export default function UserList() {
               );
             })}
             {Array.from({
-              length: Math.max(0, 27 - rows.length),
+              length: Math.max(0, 27 - tableData.length),
             }).map((_, rowIndex) => (
               <tr
                 key={`blank-${rowIndex}`}
@@ -1051,6 +1188,7 @@ export default function UserList() {
       </>
     );
   };
+
 
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
