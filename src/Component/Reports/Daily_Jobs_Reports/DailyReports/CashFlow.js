@@ -573,7 +573,7 @@ export default function CashFlowReport() {
                 let fontName = normalFont; // Default font
                 let currentX = startX; // Track current column position
 
-                // For total row, set bold font and prepare for double border
+                // For total row, set bold font
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, 'bold');
                 }
@@ -647,22 +647,58 @@ export default function CashFlowReport() {
                         }
                     }
 
-                    // Draw column borders
+                    // Draw borders
                     if (isTotalRow) {
-                        // Double border for total row columns
+                        // For total row - draw double horizontal borders and single vertical borders
+                        const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+                        const rowBottomY = rowTopY + rowHeight;
+
+                        // Draw double top border
                         doc.setLineWidth(0.3);
-                        doc.rect(
+                        doc.line(
                             currentX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
+                            rowTopY,
+                            currentX + columnWidths[cellIndex],
+                            rowTopY
                         );
-                        doc.setLineWidth(0.3);
-                        doc.rect(
-                            currentX + 0.5,
-                            startY + (i - startIndex + 2) * rowHeight + 0.5,
-                            columnWidths[cellIndex] - 1,
-                            rowHeight - 1
+                        doc.line(
+                            currentX,
+                            rowTopY + 0.5,
+                            currentX + columnWidths[cellIndex],
+                            rowTopY + 0.5
+                        );
+
+                        // Draw double bottom border
+                        doc.line(
+                            currentX,
+                            rowBottomY,
+                            currentX + columnWidths[cellIndex],
+                            rowBottomY
+                        );
+                        doc.line(
+                            currentX,
+                            rowBottomY - 0.5,
+                            currentX + columnWidths[cellIndex],
+                            rowBottomY - 0.5
+                        );
+
+                        // Draw single vertical borders
+                        doc.setLineWidth(0.2);
+                        // Left border (only for first column)
+                        if (cellIndex === 0) {
+                            doc.line(
+                                currentX,
+                                rowTopY,
+                                currentX,
+                                rowBottomY
+                            );
+                        }
+                        // Right border
+                        doc.line(
+                            currentX + columnWidths[cellIndex],
+                            rowTopY,
+                            currentX + columnWidths[cellIndex],
+                            rowBottomY
                         );
                     } else {
                         // Normal border for other rows
@@ -700,6 +736,9 @@ export default function CashFlowReport() {
             doc.setTextColor(0);
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
+
+
+
 
         const getTotalTableWidth = () => {
             let totalWidth = 0;
@@ -740,7 +779,7 @@ export default function CashFlowReport() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 50,
+                    rightX - 15,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -884,240 +923,7 @@ export default function CashFlowReport() {
         // Save the PDF files
         doc.save(`CashFlowReport From ${fromInputDate} To ${toInputDate}.pdf`);
     };
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-    //     const handleDownloadCSV = async () => {
-    //         const workbook = new ExcelJS.Workbook();
-    //         const worksheet = workbook.addWorksheet("Sheet1");
-
-    //         const numColumns = 6; // Ensure this matches the actual number of columns
-
-    //         const columnAlignments = ["left", "left", "right", "right", "right"];
-
-    //         // Define fonts for different sections
-    //         const fontCompanyName = {
-    //           name: "CustomFont" || "CustomFont",
-    //           size: 18,
-    //           bold: true,
-    //         };
-    //         const fontStoreList = {
-    //           name: "CustomFont" || "CustomFont",
-    //           size: 10,
-    //           bold: false,
-    //         };
-    //         const fontHeader = {
-    //           name: "CustomFont" || "CustomFont",
-    //           size: 10,
-    //           bold: true,
-    //         };
-    //         const fontTableContent = {
-    //           name: "CustomFont" || "CustomFont",
-    //           size: 10,
-    //           bold: false,
-    //         };
-
-    //         // Add an empty row at the start
-    //         worksheet.addRow([]);
-
-    //         // Add company name
-    //         const companyRow = worksheet.addRow([comapnyname]);
-    //         companyRow.eachCell((cell) => {
-    //           cell.font = fontCompanyName;
-    //           cell.alignment = { horizontal: "center" };
-    //         });
-
-    //         worksheet.getRow(companyRow.number).height = 30;
-    //         worksheet.mergeCells(
-    //           `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
-    //           }`
-    //         );
-
-    //         // Add Store List row
-    //         const storeListRow = worksheet.addRow([`Cash Flow From ${fromInputDate} To ${toInputDate}`,
-    // ]);
-    //         storeListRow.eachCell((cell) => {
-    //           cell.font = fontStoreList;
-    //           cell.alignment = { horizontal: "center" };
-    //         });
-
-    //         worksheet.mergeCells(
-    //           `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
-    //           }`
-    //         );
-
-    //         // Add an empty row after the title section
-    //         worksheet.addRow([]);
-
-
-
-    //         // Header style
-    //         const headerStyle = {
-    //           font: fontHeader,
-    //           alignment: { horizontal: "center", vertical: "middle" },
-    //           fill: {
-    //             type: "pattern",
-    //             pattern: "solid",
-    //             fgColor: { argb: "FFC6D9F7" },
-    //           },
-    //           border: {
-    //             top: { style: "thin" },
-    //             left: { style: "thin" },
-    //             bottom: { style: "thin" },
-    //             right: { style: "thin" },
-    //           },
-    //         };
-
-    //         // Add headers
-    //         const headers = ["Code", "Description", "Receipt", "Payment", "Balance"];
-    //         const headerRow = worksheet.addRow(headers);
-    //         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    //         // Add Opening Balance Row
-    //         const openingBalanceRow = [
-    //             "-",
-    //             "Opening Balance",
-    //             "-",
-    //             "-",
-    //             openingbalance,
-    //         ];
-
-    //         // Map Receipt Data
-    //         const receipt =
-    //             tableData.length > 0
-    //                 ? [["", "Receipt", "", "", ""]].concat(
-    //                     tableData.map((item) => [
-    //                         item.tacccod || "",
-    //                         item.Description || "",
-    //                         item.Receipts || "",
-    //                         "",
-    //                         "",
-    //                     ])
-    //                 )
-    //                 : [];
-
-    //         // Map Payment Data
-    //         const payment =
-    //             Paymentdata.length > 0
-    //                 ? [["", "Payment", "", "", ""]].concat(
-    //                     Paymentdata.map((item) => [
-    //                         item.tacccod || "",
-    //                         item.Description || "",
-    //                         "",
-    //                         item.Payments || "",
-    //                         "",
-    //                     ])
-    //                 )
-    //                 : [];
-
-    //         const rows = [openingBalanceRow, ...receipt, ...payment];
-
-    //   // Add Data Rows to Worksheet
-    //         rows.forEach((rowData) => {
-    //             const row = worksheet.addRow(rowData);
-
-    //             // Apply styles to each row
-    //             row.eachCell((cell, colIndex) => {
-    //                 cell.font = {
-    //                     family: getfontstyle,
-    //                     size: getdatafontsize,
-    //                     bold: false,
-    //                 };
-
-    //                 cell.border = {
-    //                     top: { style: "thin", color: { argb: "FF000000" } },
-    //                     left: { style: "thin", color: { argb: "FF000000" } },
-    //                     bottom: { style: "thin", color: { argb: "FF000000" } },
-    //                     right: { style: "thin", color: { argb: "FF000000" } },
-    //                 };
-
-    //                 // Align content based on column index
-    //                 if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
-    //                     cell.alignment = { horizontal: "right", vertical: "middle" };
-    //                 } else {
-    //                     cell.alignment = { horizontal: "left", vertical: "middle" };
-    //                 }
-    //             });
-
-    //             // Apply specific styling for "Receipt" and "Payment" header rows
-    //             if (rowData[1] === "Receipt" || rowData[1] === "Payment") {
-    //                 const targetCell = row.getCell(2); // Column index 2 (1-based index in ExcelJS)
-
-    //                 targetCell.font = { bold: true }; // Make text bold
-    //                 targetCell.fill = {
-    //                     type: "pattern",
-    //                     pattern: "solid",
-    //                     fgColor: { argb: "FFC6D9F7" }, // Light Orange Background
-    //                 };
-    //                 targetCell.alignment = { horizontal: "left", vertical: "middle" };
-    //             }
-    //         });
-
-
-    //         // Set column widths
-    //         [10, 40, 10, 12, 10].forEach((width, index) => {
-    //           worksheet.getColumn(index + 1).width = width;
-    //         });
-
-    //         // Add a blank row
-    //         worksheet.addRow([]);
-    //         // Get current date and time
-    //         const getCurrentTime = () => {
-    //           const today = new Date();
-    //           const hh = String(today.getHours()).padStart(2, "0");
-    //           const mm = String(today.getMinutes()).padStart(2, "0");
-    //           const ss = String(today.getSeconds()).padStart(2, "0");
-    //           return `${hh}:${mm}:${ss}`;
-    //         };
-    //          // Get current date
-    //         const getCurrentDate = () => {
-    //           const today = new Date();
-    //           const day = String(today.getDate()).padStart(2, "0");
-    //           const month = String(today.getMonth() + 1).padStart(2, "0");
-    //           const year = today.getFullYear();
-    //           return `${day}-${month}-${year}`;
-    //         };
-    //         const currentTime = getCurrentTime();
-    //         const currentdate = getCurrentDate();
-    //         const userid= user.tusrid;
-
-    //         // Add date and time row
-    //         const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
-    //         dateTimeRow.eachCell((cell) => {
-    //           cell.font = {
-    //             name: "CustomFont" || "CustomFont",
-    //             size: 10,
-    //             // bold: true
-    //             // italic: true,
-    //           };
-    //           cell.alignment = { horizontal: "left" };
-    //         });
-    //          const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    //         dateTimeRow.eachCell((cell) => {
-    //           cell.font = {
-    //             name: "CustomFont" || "CustomFont",
-    //             size: 10,
-    //             // bold: true
-    //             // italic: true,
-    //           };
-    //           cell.alignment = { horizontal: "left" };
-    //         });
-
-    //         // Merge across all columns
-    //         worksheet.mergeCells(
-    //           `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
-    //         );
-    //         worksheet.mergeCells(
-    //           `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
-    //         );
-
-
-    //         // Generate and save the Excel file
-    //         const buffer = await workbook.xlsx.writeBuffer();
-    //         const blob = new Blob([buffer], {
-    //           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    //         });
-    //         saveAs(blob, `CashFlowReport From  ${fromInputDate} To ${toInputDate}.xlsx`);
-    //       };
 
     const handleDownloadCSV = async () => {
         try {
@@ -1128,14 +934,13 @@ export default function CashFlowReport() {
             workbook.modified = new Date();
 
             const worksheet = workbook.addWorksheet("Cash Flow Report");
-            const numColumns = 5; // Code, Description, Receipt, Payment, Balance
 
             // Clean data first
             const cleanData = (data) => data.map(row =>
                 row.map(cell => cell === null || cell === undefined ? "" : cell)
             );
 
-            // Add company name (centered, merged)
+            // Add company name
             const companyRow = worksheet.addRow([comapnyname]);
             companyRow.font = { name: getfontstyle, size: 18, bold: true };
             companyRow.alignment = { horizontal: "center" };
@@ -1149,23 +954,28 @@ export default function CashFlowReport() {
             worksheet.mergeCells(`A2:E2`);
             worksheet.addRow([]);
 
-            // Add headers
-            const headers = ["Code", "Description", "Receipt", "Payment", "Balance"];
-            const headerRow = worksheet.addRow(headers);
-            headerRow.font = { name: getfontstyle, size: 10, bold: true };
-            headerRow.fill = {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" }
-            };
-            headerRow.eachCell(cell => {
-                cell.border = {
+            // Define header style
+            const headerStyle = {
+                fill: {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FFC6D9F7" }
+                },
+                font: { name: getfontstyle, size: 10, bold: true },
+                border: {
                     top: { style: "thin" },
                     left: { style: "thin" },
                     bottom: { style: "thin" },
                     right: { style: "thin" }
-                };
-                cell.alignment = { horizontal: "center" };
+                },
+                alignment: { horizontal: "center" }
+            };
+
+            // Add column headers
+            const headers = ["Code", "Description", "Receipt", "Payment", "Balance"];
+            const headerRow = worksheet.addRow(headers);
+            headerRow.eachCell(cell => {
+                Object.assign(cell, headerStyle);
             });
 
             // Prepare data
@@ -1216,14 +1026,9 @@ export default function CashFlowReport() {
                         cell.alignment = { horizontal: "left" };
                     }
 
-                    // Style section headers
+                    // Apply header style to section headers
                     if (cell.value === "Receipt" || cell.value === "Payment") {
-                        cell.font = { bold: true };
-                        cell.fill = {
-                            type: "pattern",
-                            pattern: "solid",
-                            fgColor: { argb: "FFC6D9F7" }
-                        };
+                        Object.assign(cell, headerStyle);
                     }
                 });
             });
@@ -1237,6 +1042,7 @@ export default function CashFlowReport() {
                 { width: 15 }  // Balance
             ];
 
+            // Add total row
             const totalRow = worksheet.addRow([
                 "",
                 "Total",
@@ -1245,26 +1051,22 @@ export default function CashFlowReport() {
                 String(closingBalance),
             ]);
 
-            // total row added
             totalRow.eachCell((cell, colNumber) => {
                 cell.font = { bold: true };
                 cell.border = {
-                    top: { style: "thin" },
+                    top: { style: "double" },
                     left: { style: "thin" },
-                    bottom: { style: "thin" },
+                    bottom: { style: "double" },
                     right: { style: "thin" },
                 };
 
-                // Align only the "Total" text to the right
                 if (colNumber === 3 || colNumber === 4 || colNumber === 5) {
                     cell.alignment = { horizontal: "right" };
                 }
             });
 
-            // Add a blank row
-            worksheet.addRow([]);
-
             // Add footer
+            worksheet.addRow([]);
             const currentDate = new Date().toLocaleDateString();
             const currentTime = new Date().toLocaleTimeString();
 
@@ -1282,7 +1084,6 @@ export default function CashFlowReport() {
             saveAs(blob, `CashFlowReport_${fromInputDate}_to_${toInputDate}.xlsx`);
         } catch (error) {
             console.error("Error generating Excel file:", error);
-            // Handle error appropriately
         }
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
@@ -1333,9 +1134,13 @@ export default function CashFlowReport() {
         width: "15%",
     };
 
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1864,8 +1669,11 @@ export default function CashFlowReport() {
                                     position: "relative",
                                 }}
                             >
+
+
                                 <tbody id="tablebody">
                                     {isLoading ? (
+                                        // Loading state remains the same
                                         <>
                                             <tr style={{ backgroundColor: getcolor }}>
                                                 <td colSpan="5" className="text-center">
@@ -1899,11 +1707,110 @@ export default function CashFlowReport() {
                                         </>
                                     ) : (
                                         <>
+                                            {/* Custom Opening Balance Row - always shown */}
+                                            <tr
+                                                key="opening-balance-row"
+                                                style={{
+                                                    backgroundColor: getcolor,
+                                                    color: fontcolor,
+                                                }}
+                                            >
+                                                <td
+                                                    style={{
+                                                        ...firstColWidth,
+                                                        textAlign: "center",
+                                                        backgroundColor: "transparent",
+                                                    }}
+                                                >
+                                                    -
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        ...secondColWidth,
+                                                        textAlign: "start",
+                                                        fontWeight: "normal",
+                                                        backgroundColor: "transparent",
+                                                    }}
+                                                >
+                                                    Opening Balance
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        ...thirdColWidth,
+                                                        textAlign: "end",
+                                                    }}
+                                                >
+                                                    -
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        ...forthColWidth,
+                                                        textAlign: "end",
+                                                    }}
+                                                >
+                                                    -
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        ...fifthColWidth,
+                                                        textAlign: "end",
+                                                    }}
+                                                >
+                                                    {openingbalance}
+                                                </td>
+                                            </tr>
+
                                             {mergedData.map((item, i) => {
-                                                // Handle Payment Heading Row
-                                                const hasPaymentData = mergedData.some(
-                                                    (data) => data.type === "payment"
-                                                );
+                                                // Handle Receipt Heading Row - only show if there's receipt data
+                                                const hasReceiptData = tableData.length > 0;
+                                                if (item.type === "receipt-heading" && hasReceiptData) {
+                                                    return (
+                                                        <tr
+                                                            key={`receipt-heading-${i}`}
+                                                            style={{
+                                                                backgroundColor: getcolor,
+                                                                color: fontcolor,
+                                                            }}
+                                                        >
+                                                            <td
+                                                                style={{
+                                                                    ...firstColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
+                                                            <td
+                                                                style={{
+                                                                    textAlign: "start",
+                                                                    fontWeight: "bold",
+                                                                    color: fontcolor,
+                                                                }}
+                                                            >
+                                                                Receipt
+                                                            </td>
+                                                            <td
+                                                                style={{
+                                                                    ...thirdColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
+                                                            <td
+                                                                style={{
+                                                                    ...forthColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
+                                                            <td
+                                                                style={{
+                                                                    ...fifthColWidth,
+                                                                    backgroundColor: getcolor,
+                                                                }}
+                                                            ></td>
+                                                        </tr>
+                                                    );
+                                                }
+
+                                                // Handle Payment Heading Row - only show if there's payment data
+                                                const hasPaymentData = Paymentdata.length > 0;
                                                 if (item.type === "payment-heading" && hasPaymentData) {
                                                     return (
                                                         <tr
@@ -1923,8 +1830,7 @@ export default function CashFlowReport() {
                                                                 style={{
                                                                     textAlign: "start",
                                                                     fontWeight: "bold",
-                                                                    backgroundColor: "#3368B5",
-                                                                    color: "white",
+                                                                    color: fontcolor,
                                                                 }}
                                                             >
                                                                 Payment
@@ -1952,97 +1858,70 @@ export default function CashFlowReport() {
                                                 }
 
                                                 // Normal & Payment Rows
-                                                return (
-                                                    <tr
-                                                        key={`row-${i}`}
-                                                        ref={(el) => (rowRefs.current[i] = el)}
-                                                        onClick={() => handleRowClick(i)}
-                                                        className={
-                                                            selectedIndex === i ? "selected-background" : ""
-                                                        }
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        {/* First Column */}
-                                                        <td
-                                                            className="text-start"
+                                                if (item.type === "receipt" || item.type === "payment") {
+                                                    return (
+                                                        <tr
+                                                            key={`row-${i}`}
+                                                            ref={(el) => (rowRefs.current[i] = el)}
+                                                            onClick={() => handleRowClick(i)}
+                                                            className={
+                                                                selectedIndex === i ? "selected-background" : ""
+                                                            }
                                                             style={{
-                                                                ...firstColWidth,
-                                                                textAlign: "center",
-                                                                fontWeight: "normal",
-                                                                backgroundColor: "transparent",
+                                                                backgroundColor: getcolor,
+                                                                color: fontcolor,
                                                             }}
                                                         >
-                                                            {item.type === "receipt"
-                                                                ? item.index === 0
-                                                                    ? "-"
-                                                                    : item.index === 1
-                                                                        ? ""
-                                                                        : item.tacccod
-                                                                : item.tacccod}
-                                                        </td>
+                                                            {/* First Column */}
+                                                            <td
+                                                                className="text-start"
+                                                                style={{
+                                                                    ...firstColWidth,
+                                                                    textAlign: "center",
+                                                                    fontWeight: "normal",
+                                                                    backgroundColor: "transparent",
+                                                                }}
+                                                            >
+                                                                {item.tacccod || "-"}
+                                                            </td>
 
-                                                        {/* Second Column (Description) */}
-                                                        <td
-                                                            className={`text-start ${item.index === 1 ? "heading-cell" : ""
-                                                                }`}
-                                                            style={{
-                                                                ...secondColWidth,
-                                                                textAlign: "center",
-                                                                fontWeight:
-                                                                    item.index === 1 ? "bold" : "normal",
-                                                                backgroundColor:
-                                                                    item.index === 1 ? "#3368B5" : "transparent",
-                                                                // color: fontcolor,
-                                                                color: item.index === 1 ? "white" : "",
-                                                            }}
-                                                        >
-                                                            {item.type === "receipt"
-                                                                ? item.index === 0
-                                                                    ? "Opening Balance"
-                                                                    : item.index === 1
-                                                                        ? "Receipt"
-                                                                        : item.Description
-                                                                : item.Description}
-                                                        </td>
+                                                            {/* Second Column (Description) */}
+                                                            <td
+                                                                className="text-start"
+                                                                style={{
+                                                                    ...secondColWidth,
+                                                                    textAlign: "center",
+                                                                    fontWeight: "normal",
+                                                                    backgroundColor: "transparent",
+                                                                }}
+                                                            >
+                                                                {item.Description}
+                                                            </td>
 
-                                                        {/* Third Column */}
-                                                        <td className="text-end" style={thirdColWidth}>
-                                                            {item.type === "receipt"
-                                                                ? item.index === 0
-                                                                    ? "-"
-                                                                    : item.index === 1
-                                                                        ? ""
-                                                                        : item.Receipts
-                                                                : ""}
-                                                        </td>
+                                                            {/* Third Column (Receipts) */}
+                                                            <td className="text-end" style={thirdColWidth}>
+                                                                {item.type === "receipt" ? item.Receipts : ""}
+                                                            </td>
 
-                                                        {/* Fourth Column (Payment) */}
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {item.type === "receipt"
-                                                                ? item.index === 0
-                                                                    ? "-"
-                                                                    : item.Payment
-                                                                : item.Payments}
-                                                        </td>
+                                                            {/* Fourth Column (Payments) */}
+                                                            <td className="text-end" style={forthColWidth}>
+                                                                {item.type === "receipt" ? item.Payment : item.Payments}
+                                                            </td>
 
-                                                        {/* Fifth Column (Opening Balance) */}
-                                                        <td className="text-end" style={fifthColWidth}>
-                                                            {item.type === "receipt"
-                                                                ? item.index === 0
-                                                                    ? openingbalance
-                                                                    : ""
-                                                                : ""}
-                                                        </td>
-                                                    </tr>
-                                                );
+                                                            {/* Fifth Column (Empty for data rows) */}
+                                                            <td className="text-end" style={fifthColWidth}>
+                                                                {""}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                }
+
+                                                return null;
                                             })}
 
                                             {/* Blank Rows */}
                                             {Array.from({
-                                                length: Math.max(0, 27 - tableData.length),
+                                                length: Math.max(0, 26 - mergedData.length), // Reduced by 1 to account for the opening balance row
                                             }).map((_, rowIndex) => (
                                                 <tr
                                                     key={`blank-${rowIndex}`}

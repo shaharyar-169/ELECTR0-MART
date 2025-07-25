@@ -237,9 +237,9 @@ export default function DailyMemberCollectionReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input2Ref.current) {
+                if (input3Ref.current) {
                     e.preventDefault();
-                    input2Ref.current.focus();
+                    input3Ref.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -495,55 +495,67 @@ export default function DailyMemberCollectionReport() {
             doc.setFontSize(12);
         };
 
+
+
+
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+            const rowHeight = 5;
+            const fontSize = 10;
+            const boldFont = 400;
+            const normalFont = getfontstyle;
+            const tableWidth = getTotalTableWidth();
 
             doc.setFontSize(11);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+                const isTotalRow = i === rows.length - 1;
+                let textColor = [0, 0, 0];
+                let fontName = normalFont;
 
                 if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
+                    textColor = [255, 0, 0];
+                    fontName = boldFont;
                 }
 
-                // For total row, set bold font and prepare for double border
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, 'bold');
                 }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-
-                // For total row, draw double border
-                if (isTotalRow) {
-                    // First line of the double border
-                    doc.setLineWidth(0.3);
+                // Set background color for odd-numbered rows
+                if (isOddRow) {
+                    doc.setFillColor(240); // Light background color
                     doc.rect(
                         startX,
                         startY + (i - startIndex + 2) * rowHeight,
                         tableWidth,
-                        rowHeight
+                        rowHeight,
+                        "F"
                     );
+                }
 
-                    // Second line of the double border (slightly offset)
+                doc.setDrawColor(0);
+
+                // For total row - special border handling
+                if (isTotalRow) {
+                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+                    const rowBottomY = rowTopY + rowHeight;
+
+                    // Draw double top border
                     doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        tableWidth - 1,
-                        rowHeight - 1
-                    );
+                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+                    // Draw double bottom border
+                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
+
+                    // Draw single vertical borders
+                    doc.setLineWidth(0.2);
+                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
                 } else {
                     // Normal border for other rows
                     doc.setLineWidth(0.2);
@@ -556,26 +568,21 @@ export default function DailyMemberCollectionReport() {
                 }
 
                 row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
                     const cellY = isTotalRow
                         ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
                         : startY + (i - startIndex + 2) * rowHeight + 3;
 
                     const cellX = startX + 2;
 
-                    // Set text color
                     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    // For total row, keep bold font
                     if (!isTotalRow) {
-                        // Set font
                         doc.setFont(fontName, "normal");
                     }
 
-                    // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 2) {
+                    if (cellIndex === 2 || cellIndex === 3) {
                         const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "center",
@@ -605,87 +612,37 @@ export default function DailyMemberCollectionReport() {
 
                     }
 
-                    // Draw column borders (excluding the last column)
+                    // Draw column borders
                     if (cellIndex < row.length - 1) {
-                        if (isTotalRow) {
-                            // Double border for total row columns
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX + 0.5,
-                                startY + (i - startIndex + 2) * rowHeight + 0.5,
-                                columnWidths[cellIndex] - 1,
-                                rowHeight - 1
-                            );
-                        } else {
-                            // Normal border for other rows
-                            doc.setLineWidth(0.2);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                        }
+                        doc.setLineWidth(0.2);
+                        doc.line(
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 2) * rowHeight,
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 3) * rowHeight
+                        );
                         startX += columnWidths[cellIndex];
                     }
                 });
 
-                // Draw border for the last column
-                if (isTotalRow) {
-                    // Double border for total row last column
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        columnWidths[row.length - 1] - 1,
-                        rowHeight - 1
-                    );
-                } else {
-                    // Normal border for other rows last column
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                }
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+                startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
-                // Reset font after total row
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, "normal");
                 }
             }
 
-            // Rest of your function remains the same...
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+            // Footer section
+            const lineWidth = tableWidth;
+            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+            const lineY = pageHeight - 15;
             doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 11; // Adjust as needed
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
+            doc.line(lineX, lineY, lineX + lineWidth, lineY);
+            const headingFontSize = 11;
+            const headingX = lineX + 2;
+            const headingY = lineY + 5;
+            doc.setFontSize(headingFontSize);
+            doc.setTextColor(0);
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
@@ -1092,25 +1049,25 @@ export default function DailyMemberCollectionReport() {
     };
 
     const firstColWidth = {
-        width: "12%",
+        width: "10%",
     };
     const secondColWidth = {
         width: "15%",
     };
     const thirdColWidth = {
-        width: "12%",
+        width: "10%",
     };
     const forthColWidth = {
-        width: "12%",
+        width: "8%",
     };
     const fifthColWidth = {
-        width: "30%",
+        width: "38%",
     };
     const sixthColWidth = {
         width: "17%",
     };
 
-  
+
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1126,7 +1083,7 @@ export default function DailyMemberCollectionReport() {
 
     const contentStyle = {
         backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(50vw - 0%)" : "50vw",
+        width: isSidebarVisible ? "calc(40vw - 0%)" : "40vw",
         position: "relative",
         top: "40%",
         left: isSidebarVisible ? "50%" : "50%",
@@ -1256,9 +1213,10 @@ export default function DailyMemberCollectionReport() {
         }
     };
 
- useHotkeys("alt+s", () => {
+    useHotkeys("alt+s", () => {
         fetchReceivableReport();
-       }, { preventDefault: true });
+        // resetSorting();
+    }, { preventDefault: true });
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
@@ -1421,7 +1379,7 @@ export default function DailyMemberCollectionReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                justifyContent: "start",
                             }}
                         >
                             <div className="d-flex align-items-center">
@@ -1626,7 +1584,7 @@ export default function DailyMemberCollectionReport() {
                                 </div>
                             </div>
 
-                            <div id="lastDiv" style={{ marginRight: "5px" }}>
+                            {/* <div id="lastDiv" style={{ marginLeft: "12px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
                                     <span
                                         style={{
@@ -1688,7 +1646,7 @@ export default function DailyMemberCollectionReport() {
                                         </span>
                                     )}
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
@@ -1705,7 +1663,7 @@ export default function DailyMemberCollectionReport() {
                                 style={{
                                     fontSize: getdatafontsize,
                                     fontFamily: getfontstyle,
-                                    width: "100%",
+                                    width: "99%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
@@ -1835,7 +1793,7 @@ export default function DailyMemberCollectionReport() {
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
+                                                        <td className="text-center" style={forthColWidth}>
                                                             {item.Code}
                                                         </td>
                                                         <td className="text-start" style={fifthColWidth}>

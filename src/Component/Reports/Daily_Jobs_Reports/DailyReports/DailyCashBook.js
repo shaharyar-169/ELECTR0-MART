@@ -475,7 +475,7 @@ export default function DailyCashBook() {
             "Amount",
 
         ];
-        const columnWidths = [90, 20, 90, 20];
+        const columnWidths = [110, 20, 110, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -705,6 +705,8 @@ export default function DailyCashBook() {
         // };
         // Function to calculate total table width
 
+
+
         const addTableRows = (startX, startY, startIndex, endIndex) => {
             const rowHeight = 5;
             const fontSize = 10;
@@ -921,7 +923,7 @@ export default function DailyCashBook() {
                 const rightPadding = 3; // Padding from the right side
 
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`OPENING BAL :`, labelsX + 58, labelsY + 8.5); // Draw bold label
+                doc.text(`OPENING BAL :`, labelsX + 78, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
 
                 // Draw the value inside the border
@@ -929,15 +931,15 @@ export default function DailyCashBook() {
                 const statusX = labelsX + 92 + fixedWidth - textWidthStatus - rightPadding; // Right-align with padding
                 const statusY = labelsY + 8.5;
 
-                doc.text(`${status}`, statusX, statusY); // Draw the text
+                doc.text(`${status}`, statusX + 20, statusY); // Draw the text
 
                 // Draw a rectangle with fixed width and height
-                doc.rect(labelsX + 90, statusY - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
+                doc.rect(labelsX + 110, statusY - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
 
                 // Positioning for CLOSING BALANCE
                 const closingLabelX = labelsX + 172; // Space after OPENING BAL
                 doc.setFont(getfontstyle, 'bold');
-                doc.text(`CLOSING BAL :`, labelsX + 168, labelsY + 8.5); // Draw bold label
+                doc.text(`CLOSING BAL :`, labelsX + 207, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, 'normal');
 
                 // Draw the value inside the border
@@ -945,11 +947,9 @@ export default function DailyCashBook() {
                 const statusX1 = closingLabelX + 30 + fixedWidth - textWidthSearch - rightPadding; // Right-align with padding
                 const statusY1 = labelsY + 8.5;
 
-                doc.text(`${search}`, statusX1, statusY1); // Draw the text
-
+                doc.text(`${search}`, statusX1 + 40, statusY1); // Draw the text
                 // Draw a rectangle with fixed width and height
-                doc.rect(closingLabelX + 28, statusY1 - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
-
+                doc.rect(closingLabelX + 68, statusY1 - 3.5, fixedWidth, fixedHeight); // Keep the rectangle in place
 
 
                 // // Reset font weight to normal if necessary for subsequent text
@@ -1125,9 +1125,9 @@ export default function DailyCashBook() {
         totalRow.eachCell((cell, colNumber) => {
             cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
             cell.border = {
-                top: { style: "thin" },
+                top: { style: "double" },
                 left: { style: "thin" },
-                bottom: { style: "thin" },
+                bottom: { style: "double" },
                 right: { style: "thin" },
             };
 
@@ -1268,10 +1268,10 @@ export default function DailyCashBook() {
 
     useHotkeys("alt+s", () => {
         fetchGeneralLedger();
-    }, { preventDefault: true });
+    }, { preventDefault: true, enableOnFormTags: true });
 
-    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     // useHotkeys("esc", () => navigate("/MainPage"));
 
     // Adjust the content width based on sidebar state

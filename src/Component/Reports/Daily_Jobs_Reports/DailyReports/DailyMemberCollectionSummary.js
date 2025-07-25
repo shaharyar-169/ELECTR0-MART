@@ -237,9 +237,9 @@ export default function DailyMemberCollectionSummaryReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input2Ref.current) {
+                if (input3Ref.current) {
                     e.preventDefault();
-                    input2Ref.current.focus();
+                    input3Ref.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -447,7 +447,7 @@ export default function DailyMemberCollectionSummaryReport() {
         ]);
 
         // Add summary row to the table
-        rows.push(["", "", "Total", String(totalDebit)]);
+        rows.push(["", "", "", String(totalDebit)]);
 
         // Define table column headers and individual column widths
         const headers = ["Date", "Day", "Member", "Collection"];
@@ -495,55 +495,66 @@ export default function DailyMemberCollectionSummaryReport() {
             doc.setFontSize(12);
         };
 
+
+
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+            const rowHeight = 5;
+            const fontSize = 10;
+            const boldFont = 400;
+            const normalFont = getfontstyle;
+            const tableWidth = getTotalTableWidth();
 
             doc.setFontSize(11);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+                const isTotalRow = i === rows.length - 1;
+                let textColor = [0, 0, 0];
+                let fontName = normalFont;
 
                 if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
+                    textColor = [255, 0, 0];
+                    fontName = boldFont;
                 }
 
-                // For total row, set bold font and prepare for double border
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, 'bold');
                 }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-
-                // For total row, draw double border
-                if (isTotalRow) {
-                    // First line of the double border
-                    doc.setLineWidth(0.3);
+                // Set background color for odd-numbered rows
+                if (isOddRow) {
+                    doc.setFillColor(240); // Light background color
                     doc.rect(
                         startX,
                         startY + (i - startIndex + 2) * rowHeight,
                         tableWidth,
-                        rowHeight
+                        rowHeight,
+                        "F"
                     );
+                }
 
-                    // Second line of the double border (slightly offset)
+                doc.setDrawColor(0);
+
+                // For total row - special border handling
+                if (isTotalRow) {
+                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+                    const rowBottomY = rowTopY + rowHeight;
+
+                    // Draw double top border
                     doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        tableWidth - 1,
-                        rowHeight - 1
-                    );
+                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+                    // Draw double bottom border
+                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
+
+                    // Draw single vertical borders
+                    doc.setLineWidth(0.2);
+                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
                 } else {
                     // Normal border for other rows
                     doc.setLineWidth(0.2);
@@ -556,23 +567,18 @@ export default function DailyMemberCollectionSummaryReport() {
                 }
 
                 row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
                     const cellY = isTotalRow
                         ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
                         : startY + (i - startIndex + 2) * rowHeight + 3;
 
                     const cellX = startX + 2;
 
-                    // Set text color
                     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    // For total row, keep bold font
                     if (!isTotalRow) {
-                        // Set font
                         doc.setFont(fontName, "normal");
                     }
 
-                    // Ensure the cell value is a string
                     const cellValue = String(cell);
 
                     if (cellIndex === 12) {
@@ -605,87 +611,37 @@ export default function DailyMemberCollectionSummaryReport() {
 
                     }
 
-                    // Draw column borders (excluding the last column)
+                    // Draw column borders
                     if (cellIndex < row.length - 1) {
-                        if (isTotalRow) {
-                            // Double border for total row columns
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX + 0.5,
-                                startY + (i - startIndex + 2) * rowHeight + 0.5,
-                                columnWidths[cellIndex] - 1,
-                                rowHeight - 1
-                            );
-                        } else {
-                            // Normal border for other rows
-                            doc.setLineWidth(0.2);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                        }
+                        doc.setLineWidth(0.2);
+                        doc.line(
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 2) * rowHeight,
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 3) * rowHeight
+                        );
                         startX += columnWidths[cellIndex];
                     }
                 });
 
-                // Draw border for the last column
-                if (isTotalRow) {
-                    // Double border for total row last column
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        columnWidths[row.length - 1] - 1,
-                        rowHeight - 1
-                    );
-                } else {
-                    // Normal border for other rows last column
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                }
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+                startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
-                // Reset font after total row
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, "normal");
                 }
             }
 
-            // Rest of your function remains the same...
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+            // Footer section
+            const lineWidth = tableWidth;
+            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+            const lineY = pageHeight - 15;
             doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 11; // Adjust as needed
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
+            doc.line(lineX, lineY, lineX + lineWidth, lineY);
+            const headingFontSize = 11;
+            const headingX = lineX + 2;
+            const headingY = lineY + 5;
+            doc.setFontSize(headingFontSize);
+            doc.setTextColor(0);
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
@@ -834,12 +790,232 @@ export default function DailyMemberCollectionSummaryReport() {
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+    // const handleDownloadCSV = async () => {
+    //     const workbook = new ExcelJS.Workbook();
+    //     const worksheet = workbook.addWorksheet("Sheet1");
+
+    //     const numColumns = 6; // Ensure this matches the actual number of columns
+
+    //     const columnAlignments = ["left", "left", "right", "right"];
+
+    //     // Define fonts for different sections
+    //     const fontCompanyName = {
+    //         name: "CustomFont" || "CustomFont",
+    //         size: 18,
+    //         bold: true,
+    //     };
+    //     const fontStoreList = {
+    //         name: "CustomFont" || "CustomFont",
+    //         size: 10,
+    //         bold: false,
+    //     };
+    //     const fontHeader = {
+    //         name: "CustomFont" || "CustomFont",
+    //         size: 10,
+    //         bold: true,
+    //     };
+    //     const fontTableContent = {
+    //         name: "CustomFont" || "CustomFont",
+    //         size: 10,
+    //         bold: false,
+    //     };
+
+    //     // Add an empty row at the start
+    //     worksheet.addRow([]);
+
+    //     // Add company name
+    //     const companyRow = worksheet.addRow([comapnyname]);
+    //     companyRow.eachCell((cell) => {
+    //         cell.font = fontCompanyName;
+    //         cell.alignment = { horizontal: "center" };
+    //     });
+
+    //     worksheet.getRow(companyRow.number).height = 30;
+    //     worksheet.mergeCells(
+    //         `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+    //         }`
+    //     );
+
+    //     // Add Store List row
+    //     const storeListRow = worksheet.addRow([`Member Collection Summary Report From ${fromInputDate} To ${toInputDate}`]);
+    //     storeListRow.eachCell((cell) => {
+    //         cell.font = fontStoreList;
+    //         cell.alignment = { horizontal: "center" };
+    //     });
+
+    //     worksheet.mergeCells(
+    //         `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+    //         }`
+    //     );
+
+    //     // Add an empty row after the title section
+    //     worksheet.addRow([]);
+
+    //     //  let typestatus =
+    //     //    transectionType === "N"
+    //     //      ? "Non-Active"
+    //     //      : transectionType === "A"
+    //     //        ? "Active"
+    //     //        : "All";
+    //     //  let typesearch = searchQuery || "";
+
+    //     //  const typeAndStoreRow3 = worksheet.addRow(
+    //     //    searchQuery
+    //     //      ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+    //     //      : ["STATUS :", typestatus, ""]
+    //     //  );
+
+    //     // Apply styling for the status row
+    //     //  typeAndStoreRow3.eachCell((cell, colIndex) => {
+    //     //    cell.font = {
+    //     //      name: "CustomFont" || "CustomFont",
+    //     //      size: 10,
+    //     //      bold: [1, 3].includes(colIndex),
+    //     //    };
+    //     //    cell.alignment = { horizontal: "left", vertical: "middle" };
+    //     //  });
+
+    //     // Header style
+    //     const headerStyle = {
+    //         font: fontHeader,
+    //         alignment: { horizontal: "center", vertical: "middle" },
+    //         fill: {
+    //             type: "pattern",
+    //             pattern: "solid",
+    //             fgColor: { argb: "FFC6D9F7" },
+    //         },
+    //         border: {
+    //             top: { style: "thin" },
+    //             left: { style: "thin" },
+    //             bottom: { style: "thin" },
+    //             right: { style: "thin" },
+    //         },
+    //     };
+
+    //     // Add headers
+    //     const headers = ["Date", "Day", "Member", "Collection"];
+    //     const headerRow = worksheet.addRow(headers);
+    //     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    //     // Add data rows
+    //     tableData.forEach((item) => {
+    //         const row = worksheet.addRow([
+
+    //             item.Date,
+    //             item.Day,
+    //             item.Members,
+    //             item.Collection,
+    //         ]);
+
+    //         row.eachCell((cell, colIndex) => {
+    //             cell.font = fontTableContent;
+    //             cell.border = {
+    //                 top: { style: "thin" },
+    //                 left: { style: "thin" },
+    //                 bottom: { style: "thin" },
+    //                 right: { style: "thin" },
+    //             };
+    //             cell.alignment = {
+    //                 horizontal: columnAlignments[colIndex - 1] || "left",
+    //                 vertical: "middle",
+    //             };
+    //         });
+    //     });
+
+    //     // Set column widths
+    //     [12, 15, 14, 15].forEach((width, index) => {
+    //         worksheet.getColumn(index + 1).width = width;
+    //     });
+
+    //     const totalRow = worksheet.addRow([
+
+    //         "",
+    //         "",
+    //         "Total",
+    //         totalDebit,
+    //     ]);
+
+    //     // total row added
+
+    //     totalRow.eachCell((cell, colNumber) => {
+    //         cell.font = { bold: true };
+    //         cell.border = {
+    //             top: { style: "thin" },
+    //             left: { style: "thin" },
+    //             bottom: { style: "thin" },
+    //             right: { style: "thin" },
+    //         };
+
+    //         // Align only the "Total" text to the right
+    //         if (colNumber === 4) {
+    //             cell.alignment = { horizontal: "right" };
+    //         }
+    //     });
+
+    //     // Add a blank row
+    //     worksheet.addRow([]);
+    //     // Get current date and time
+    //     const getCurrentTime = () => {
+    //         const today = new Date();
+    //         const hh = String(today.getHours()).padStart(2, "0");
+    //         const mm = String(today.getMinutes()).padStart(2, "0");
+    //         const ss = String(today.getSeconds()).padStart(2, "0");
+    //         return `${hh}:${mm}:${ss}`;
+    //     };
+    //     // Get current date
+    //     const getCurrentDate = () => {
+    //         const today = new Date();
+    //         const day = String(today.getDate()).padStart(2, "0");
+    //         const month = String(today.getMonth() + 1).padStart(2, "0");
+    //         const year = today.getFullYear();
+    //         return `${day}-${month}-${year}`;
+    //     };
+    //     const currentTime = getCurrentTime();
+    //     const currentdate = getCurrentDate();
+    //     const userid = user.tusrid;
+
+    //     // Add date and time row
+    //     const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    //     dateTimeRow.eachCell((cell) => {
+    //         cell.font = {
+    //             name: "CustomFont" || "CustomFont",
+    //             size: 10,
+    //             // bold: true
+    //             // italic: true,
+    //         };
+    //         cell.alignment = { horizontal: "left" };
+    //     });
+    //     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    //     dateTimeRow.eachCell((cell) => {
+    //         cell.font = {
+    //             name: "CustomFont" || "CustomFont",
+    //             size: 10,
+    //             // bold: true
+    //             // italic: true,
+    //         };
+    //         cell.alignment = { horizontal: "left" };
+    //     });
+
+    //     // Merge across all columns
+    //     worksheet.mergeCells(
+    //         `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+    //     );
+    //     worksheet.mergeCells(
+    //         `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+    //     );
+
+    //     // Generate and save the Excel file
+    //     const buffer = await workbook.xlsx.writeBuffer();
+    //     const blob = new Blob([buffer], {
+    //         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //     });
+    //     saveAs(blob, `Member Collection Summary Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+    // };
+
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
-
         const numColumns = 6; // Ensure this matches the actual number of columns
-
         const columnAlignments = ["left", "left", "right", "right"];
 
         // Define fonts for different sections
@@ -876,8 +1052,7 @@ export default function DailyMemberCollectionSummaryReport() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
-            }`
+            `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`
         );
 
         // Add Store List row
@@ -888,36 +1063,11 @@ export default function DailyMemberCollectionSummaryReport() {
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
-            }`
+            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`
         );
 
         // Add an empty row after the title section
         worksheet.addRow([]);
-
-        //  let typestatus =
-        //    transectionType === "N"
-        //      ? "Non-Active"
-        //      : transectionType === "A"
-        //        ? "Active"
-        //        : "All";
-        //  let typesearch = searchQuery || "";
-
-        //  const typeAndStoreRow3 = worksheet.addRow(
-        //    searchQuery
-        //      ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-        //      : ["STATUS :", typestatus, ""]
-        //  );
-
-        // Apply styling for the status row
-        //  typeAndStoreRow3.eachCell((cell, colIndex) => {
-        //    cell.font = {
-        //      name: "CustomFont" || "CustomFont",
-        //      size: 10,
-        //      bold: [1, 3].includes(colIndex),
-        //    };
-        //    cell.alignment = { horizontal: "left", vertical: "middle" };
-        //  });
 
         // Header style
         const headerStyle = {
@@ -944,7 +1094,6 @@ export default function DailyMemberCollectionSummaryReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-
                 item.Date,
                 item.Day,
                 item.Members,
@@ -971,33 +1120,36 @@ export default function DailyMemberCollectionSummaryReport() {
             worksheet.getColumn(index + 1).width = width;
         });
 
+        // Add total row with double horizontal borders
         const totalRow = worksheet.addRow([
-
             "",
             "",
             "Total",
             totalDebit,
         ]);
 
-        // total row added
-
         totalRow.eachCell((cell, colNumber) => {
             cell.font = { bold: true };
+
+            // Double horizontal borders (top and bottom) with single vertical borders
             cell.border = {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
+                top: { style: "double"},    // Double line for top border
+                left: { style: "thin" },    // Single line for left border
+                bottom: { style: "double" }, // Double line for bottom border
+                right: { style: "thin" },   // Single line for right border
             };
 
             // Align only the "Total" text to the right
             if (colNumber === 4) {
                 cell.alignment = { horizontal: "right" };
+            } else {
+                cell.alignment = { horizontal: columnAlignments[colNumber - 1] || "left" };
             }
         });
 
         // Add a blank row
         worksheet.addRow([]);
+
         // Get current date and time
         const getCurrentTime = () => {
             const today = new Date();
@@ -1006,6 +1158,7 @@ export default function DailyMemberCollectionSummaryReport() {
             const ss = String(today.getSeconds()).padStart(2, "0");
             return `${hh}:${mm}:${ss}`;
         };
+
         // Get current date
         const getCurrentDate = () => {
             const today = new Date();
@@ -1014,6 +1167,7 @@ export default function DailyMemberCollectionSummaryReport() {
             const year = today.getFullYear();
             return `${day}-${month}-${year}`;
         };
+
         const currentTime = getCurrentTime();
         const currentdate = getCurrentDate();
         const userid = user.tusrid;
@@ -1024,18 +1178,15 @@ export default function DailyMemberCollectionSummaryReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                // bold: true
-                // italic: true,
             };
             cell.alignment = { horizontal: "left" };
         });
+
         const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-        dateTimeRow.eachCell((cell) => {
+        dateTimeRow1.eachCell((cell) => {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                // bold: true
-                // italic: true,
             };
             cell.alignment = { horizontal: "left" };
         });
@@ -1108,13 +1259,14 @@ export default function DailyMemberCollectionSummaryReport() {
         width: "25%",
     };
 
-     useHotkeys("alt+s", () => {
-            fetchReceivableReport();
-        }, { preventDefault: true });
-    
-        useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-        useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-        useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        //  resetSorting();
+    }, { preventDefault: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
+    useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1278,8 +1430,8 @@ export default function DailyMemberCollectionSummaryReport() {
                     <div
                         className="row"
                         style={{
-                            height: "47px",
-                            marginTop: "8px",
+                            height: "20px",
+                            marginTop: "5px",
                             marginBottom: "8px",
                             display: "flex",
                         }}
@@ -1293,7 +1445,7 @@ export default function DailyMemberCollectionSummaryReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                justifyContent: "start",
                             }}
                         >
                             <div className="d-flex align-items-center">
@@ -1397,7 +1549,7 @@ export default function DailyMemberCollectionSummaryReport() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginRight: "40px" }}
+                                style={{ marginLeft: "40px" }}
                             >
                                 <div
                                     style={{
@@ -1500,7 +1652,7 @@ export default function DailyMemberCollectionSummaryReport() {
 
 
                         </div>
-                        <div
+                        {/* <div
                             style={{
                                 width: "100%",
                                 display: "flex",
@@ -1577,7 +1729,7 @@ export default function DailyMemberCollectionSummaryReport() {
                                     )}
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div>
@@ -1593,7 +1745,7 @@ export default function DailyMemberCollectionSummaryReport() {
                                 style={{
                                     fontSize: getdatafontsize,
                                     fontFamily: getfontstyle,
-                                    width: "100%",
+                                    width: "99%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}

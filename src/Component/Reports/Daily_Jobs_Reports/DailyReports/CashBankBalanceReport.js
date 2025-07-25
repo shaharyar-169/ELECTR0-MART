@@ -392,9 +392,9 @@ export default function DailyCashBankBalance() {
       FFnlDat: toInputDate,
       FSchTxt: searchQuery,
       FRepTyp: transectionType,
-      code: 'MAKKAHCOMP',
+      code: 'NASIRTRD',
       FLocCod: '001',
-      FYerDsc: '2025-2025',
+      FYerDsc: '2024-2024',
 
 
     }).toString();
@@ -597,184 +597,156 @@ export default function DailyCashBankBalance() {
       doc.setFontSize(12);
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust this value to decrease row height
-      const fontSize = 10; // Adjust this value to decrease font size
-      const boldFont = 400; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
+    
 
-      doc.setFontSize(11);
 
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-        const isTotalRow = i === rows.length - 1; // Check if this is the total row
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
+     const addTableRows = (startX, startY, startIndex, endIndex) => {
+            const rowHeight = 5;
+            const fontSize = 10;
+            const boldFont = 400;
+            const normalFont = getfontstyle;
+            const tableWidth = getTotalTableWidth();
 
-        if (isRedRow) {
-          textColor = [255, 0, 0]; // Red color
-          fontName = boldFont; // Set bold font for red-colored row
-        }
+            doc.setFontSize(11);
 
-        // For total row, set bold font and prepare for double border
-        if (isTotalRow) {
-          doc.setFont(getfontstyle, 'bold');
-        }
+            for (let i = startIndex; i < endIndex; i++) {
+                const row = rows[i];
+                const isOddRow = i % 2 !== 0; // Check if the row index is odd
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+                const isTotalRow = i === rows.length - 1;
+                let textColor = [0, 0, 0];
+                let fontName = normalFont;
 
-        // Draw row borders
-        doc.setDrawColor(0); // Set color for borders
+                if (isRedRow) {
+                    textColor = [255, 0, 0];
+                    fontName = boldFont;
+                }
 
-        // For total row, draw double border
-        if (isTotalRow) {
-          // First line of the double border
-          doc.setLineWidth(0.3);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight
-          );
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, 'bold');
+                }
 
-          // Second line of the double border (slightly offset)
-          doc.setLineWidth(0.3);
-          doc.rect(
-            startX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            tableWidth - 1,
-            rowHeight - 1
-          );
-        } else {
-          // Normal border for other rows
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight
-          );
-        }
+                // Set background color for odd-numbered rows
+                if (isOddRow) {
+                    doc.setFillColor(240); // Light background color
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight,
+                        "F"
+                    );
+                }
 
-        row.forEach((cell, cellIndex) => {
-          // For total row, adjust vertical position to center in the double border
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+                doc.setDrawColor(0);
 
-          const cellX = startX + 2;
+                // For total row - special border handling
+                if (isTotalRow) {
+                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+                    const rowBottomY = rowTopY + rowHeight;
 
-          // Set text color
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+                    // Draw double top border
+                    doc.setLineWidth(0.3);
+                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-          // For total row, keep bold font
-          if (!isTotalRow) {
-            // Set font
-            doc.setFont(fontName, "normal");
-          }
+                    // Draw double bottom border
+                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
 
-          // Ensure the cell value is a string
-          const cellValue = String(cell);
+                    // Draw single vertical borders
+                    doc.setLineWidth(0.2);
+                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
+                } else {
+                    // Normal border for other rows
+                    doc.setLineWidth(0.2);
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight
+                    );
+                }
 
-          if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
-            cellIndex === 4 ||
-            cellIndex === 5
-          ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-          }
+                row.forEach((cell, cellIndex) => {
+                    const cellY = isTotalRow
+                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+                        : startY + (i - startIndex + 2) * rowHeight + 3;
 
-          // Draw column borders (excluding the last column)
-          if (cellIndex < row.length - 1) {
-            if (isTotalRow) {
-              // Double border for total row columns
-              doc.setLineWidth(0.3);
-              doc.rect(
-                startX,
-                startY + (i - startIndex + 2) * rowHeight,
-                columnWidths[cellIndex],
-                rowHeight
-              );
-              doc.setLineWidth(0.3);
-              doc.rect(
-                startX + 0.5,
-                startY + (i - startIndex + 2) * rowHeight + 0.5,
-                columnWidths[cellIndex] - 1,
-                rowHeight - 1
-              );
-            } else {
-              // Normal border for other rows
-              doc.setLineWidth(0.2);
-              doc.rect(
-                startX,
-                startY + (i - startIndex + 2) * rowHeight,
-                columnWidths[cellIndex],
-                rowHeight
-              );
+                    const cellX = startX + 2;
+
+                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+
+                    if (!isTotalRow) {
+                        doc.setFont(fontName, "normal");
+                    }
+
+                    const cellValue = String(cell);
+
+                    if (cellIndex === 20 ) {
+                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+                        doc.text(cellValue, rightAlignX, cellY, {
+                            align: "center",
+                            baseline: "middle",
+                        });
+                    }
+
+                    else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5) {
+                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+                        doc.text(cellValue, rightAlignX, cellY, {
+                            align: "right",
+                            baseline: "middle", // This centers vertically
+                        });
+                    } else {
+                        // For empty cells in total row, add "Total" label centered
+                        if (isTotalRow && cellIndex === 0 && cell === "") {
+                            const totalLabelX = startX + columnWidths[0] / 2;
+                            doc.text("", totalLabelX, cellY, {
+                                align: "center",
+                                baseline: "middle"
+                            });
+                        } else {
+                            doc.text(cellValue, cellX, cellY, {
+                                baseline: "middle" // This centers vertically
+                            });
+                        }
+
+                    }
+
+                    // Draw column borders
+                    if (cellIndex < row.length - 1) {
+                        doc.setLineWidth(0.2);
+                        doc.line(
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 2) * rowHeight,
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 3) * rowHeight
+                        );
+                        startX += columnWidths[cellIndex];
+                    }
+                });
+
+                startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, "normal");
+                }
             }
-            startX += columnWidths[cellIndex];
-          }
-        });
 
-        // Draw border for the last column
-        if (isTotalRow) {
-          // Double border for total row last column
-          doc.setLineWidth(0.3);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            columnWidths[row.length - 1],
-            rowHeight
-          );
-          doc.setLineWidth(0.3);
-          doc.rect(
-            startX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            columnWidths[row.length - 1] - 1,
-            rowHeight - 1
-          );
-        } else {
-          // Normal border for other rows last column
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            columnWidths[row.length - 1],
-            rowHeight
-          );
-        }
-        startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
-
-        // Reset font after total row
-        if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
-        }
-      }
-
-      // Rest of your function remains the same...
-      // Draw line at the bottom of the page with padding
-      const lineWidth = tableWidth; // Match line width with table width
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-      const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-      const headingFontSize = 11; // Adjust as needed
-
-      // Add heading "Crystal Solution" aligned left bottom of the line
-      const headingX = lineX + 2; // Padding from left
-      const headingY = lineY + 5; // Padding from bottom
-      doc.setFontSize(headingFontSize); // Set the font size for the heading
-      doc.setTextColor(0); // Reset text color to default
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-    };
+            // Footer section
+            const lineWidth = tableWidth;
+            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+            const lineY = pageHeight - 15;
+            doc.setLineWidth(0.3);
+            doc.line(lineX, lineY, lineX + lineWidth, lineY);
+            const headingFontSize = 11;
+            const headingX = lineX + 2;
+            const headingY = lineY + 5;
+            doc.setFontSize(headingFontSize);
+            doc.setTextColor(0);
+            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+        };
 
 
     // Function to calculate total table width
@@ -928,250 +900,247 @@ export default function DailyCashBankBalance() {
     );
   };
 
- 
+
 
   const handleDownloadCSV = async () => {
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Sheet1");
-  
-      const numColumns = 3; // Ensure this matches the actual number of columns
-  
-      const columnAlignments = [
-        "center",
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    const numColumns = 6; // Ensure this matches the actual number of columns
+
+    const columnAlignments = [
+      "center",
       "left",
       "right",
       "right",
       "right",
       "right",
-      ];
-  
-      // Define fonts for different sections
-      const fontCompanyName = {
-        name: "CustomFont" || "CustomFont",
-        size: 18,
-        bold: true,
-      };
-      const fontStoreList = {
+    ];
+
+    // Define fonts for different sections
+    const fontCompanyName = {
+      name: "CustomFont" || "CustomFont",
+      size: 18,
+      bold: true,
+    };
+    const fontStoreList = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+    const fontHeader = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: true,
+    };
+    const fontTableContent = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+
+    // Add an empty row at the start
+    worksheet.addRow([]);
+
+    // Add company name
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+      }`
+    );
+
+    // Add Store List row
+    const storeListRow = worksheet.addRow([`Cash & Bank Balance Report From ${fromInputDate} To ${toInputDate}`]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.mergeCells(
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+      }`
+    );
+
+    // Add an empty row after the title section
+    worksheet.addRow([]);
+
+    let typestatus =
+      transectionType === "C"
+        ? "CASH"
+        : transectionType === "B"
+          ? "BANK"
+          : "ALL";
+    let typesearch = searchQuery || "";
+
+    const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery
+        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+        : ["STATUS :", typestatus, ""]
+    );
+
+    // Apply styling for the status row
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: false,
+        bold: [1, 3].includes(colIndex),
       };
-      const fontHeader = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: true,
-      };
-      const fontTableContent = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: false,
-      };
-  
-      // Add an empty row at the start
-      worksheet.addRow([]);
-  
-      // Add company name
-      const companyRow = worksheet.addRow([comapnyname]);
-      companyRow.eachCell((cell) => {
-        cell.font = fontCompanyName;
-        cell.alignment = { horizontal: "center" };
-      });
-  
-      worksheet.getRow(companyRow.number).height = 30;
-      worksheet.mergeCells(
-        `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
-        }`
-      );
-  
-      // Add Store List row
-      const storeListRow = worksheet.addRow(["Cash & Bank Balance Re"]);
-      storeListRow.eachCell((cell) => {
-        cell.font = fontStoreList;
-        cell.alignment = { horizontal: "center" };
-      });
-  
-      worksheet.mergeCells(
-        `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
-        }`
-      );
-  
-      // Add an empty row after the title section
-      worksheet.addRow([]);
-  
-      let typestatus =
-        transectionType === "C"
-          ? "CASH"
-          : transectionType === "B"
-            ? "BANK"
-            : "ALL";
-      let typesearch = searchQuery || "";
-  
-      const typeAndStoreRow3 = worksheet.addRow(
-        searchQuery
-          ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-          : ["STATUS :", typestatus, ""]
-      );
-  
-      // Apply styling for the status row
-      typeAndStoreRow3.eachCell((cell, colIndex) => {
-        cell.font = {
-          name: "CustomFont" || "CustomFont",
-          size: 10,
-          bold: [1, 3].includes(colIndex),
-        };
-        cell.alignment = { horizontal: "left", vertical: "middle" };
-      });
-  
-      // Header style
-      const headerStyle = {
-        font: fontHeader,
-        alignment: { horizontal: "center", vertical: "middle" },
-        fill: {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFC6D9F7" },
-        },
-        border: {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        },
-      };
-  
-      // Add headers
-      const headers = [
-        "Code",
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+
+    // Header style
+    const headerStyle = {
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC6D9F7" },
+      },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    // Add headers
+    const headers = [
+      "Code",
       "Description",
       "Opening",
       "Debit",
       "Credit",
       "Balance",
-      ];
-      const headerRow = worksheet.addRow(headers);
-      headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-  
-      // Add data rows
-      tableData.forEach((item) => {
-        const row = worksheet.addRow([
-           item.Code,
+    ];
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    // Add data rows
+    tableData.forEach((item) => {
+      const row = worksheet.addRow([
+        item.Code,
         item.Description,
         item.Opening,
         item.Debit,
         item.Credit,
         item.Balance,
-        ]);
-  
-        row.eachCell((cell, colIndex) => {
-          cell.font = fontTableContent;
-          cell.border = {
-            top: { style: "thin" },
-            left: { style: "thin" },
-            bottom: { style: "thin" },
-            right: { style: "thin" },
-          };
-          cell.alignment = {
-            horizontal: columnAlignments[colIndex - 1] || "left",
-            vertical: "middle",
-          };
-        });
+      ]);
+
+      row.eachCell((cell, colIndex) => {
+        cell.font = fontTableContent;
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = {
+          horizontal: columnAlignments[colIndex - 1] || "left",
+          vertical: "middle",
+        };
       });
+    });
 
-       const totalRow = worksheet.addRow([
-            "",
-            "Total",
-            totalOpening,
-            totalDebit,
-            totalCredit,
-            closingBalance
-            
-        ]);
+    const totalRow = worksheet.addRow([
+      "",
+      "Total",
+      totalOpening,
+      totalDebit,
+      totalCredit,
+      closingBalance
 
-        // total row added
+    ]);
 
-        totalRow.eachCell((cell, colNumber) => {
-            cell.font = { bold: true };
-            cell.border = {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            };
+    // total row added
 
-            // Align only the "Total" text to the right
-            if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6)  {
-                cell.alignment = { horizontal: "right" };
-            }
-        });
-  
-      // Set column widths
-      [10, 40, 10, 10, 15, 25, 13, 12].forEach((width, index) => {
-        worksheet.getColumn(index + 1).width = width;
-      });
+    totalRow.eachCell((cell, colNumber) => {
+      cell.font = { bold: true };
+      cell.border = {
+        top: { style: "double" },
+        left: { style: "thin" },
+        bottom: { style: "double" },
+        right: { style: "thin" },
+      };
 
-      
-  
-     
-  
+      // Align only the "Total" text to the right
+      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
+        cell.alignment = { horizontal: "right" };
+      }
+    });
+
+    // Set column widths
+    [10, 40, 15, 15, 15,15 ].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
+
     // Add a blank row
-      worksheet.addRow([]);
-      // Get current date and time
-      const getCurrentTime = () => {
-        const today = new Date();
-        const hh = String(today.getHours()).padStart(2, "0");
-        const mm = String(today.getMinutes()).padStart(2, "0");
-        const ss = String(today.getSeconds()).padStart(2, "0");
-        return `${hh}:${mm}:${ss}`;
-      };
-       // Get current date
-      const getCurrentDate = () => {
-        const today = new Date();
-        const day = String(today.getDate()).padStart(2, "0");
-        const month = String(today.getMonth() + 1).padStart(2, "0");
-        const year = today.getFullYear();
-        return `${day}-${month}-${year}`;
-      };
-      const currentTime = getCurrentTime();
-      const currentdate = getCurrentDate();
-      const userid= user.tusrid;
-  
-      // Add date and time row
-      const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
-      dateTimeRow.eachCell((cell) => {
-        cell.font = {
-          name: "CustomFont" || "CustomFont",
-          size: 10,
-          // bold: true
-          // italic: true,
-        };
-        cell.alignment = { horizontal: "left" };
-      });
-       const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-      dateTimeRow.eachCell((cell) => {
-        cell.font = {
-          name: "CustomFont" || "CustomFont",
-          size: 10,
-          // bold: true
-          // italic: true,
-        };
-        cell.alignment = { horizontal: "left" };
-      });
-  
-      // Merge across all columns
-      worksheet.mergeCells(
-        `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
-      );
-      worksheet.mergeCells(
-        `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
-      );
-  
-      // Generate and save the Excel file
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(blob, `Cash&BankBalance Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+    worksheet.addRow([]);
+    // Get current date and time
+    const getCurrentTime = () => {
+      const today = new Date();
+      const hh = String(today.getHours()).padStart(2, "0");
+      const mm = String(today.getMinutes()).padStart(2, "0");
+      const ss = String(today.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
     };
+    // Get current date
+    const getCurrentDate = () => {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+    const currentTime = getCurrentTime();
+    const currentdate = getCurrentDate();
+    const userid = user.tusrid;
+
+    // Add date and time row
+    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    // Merge across all columns
+    worksheet.mergeCells(
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+    );
+    worksheet.mergeCells(
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+    );
+
+    // Generate and save the Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `Cash&BankBalance Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+  };
 
 
 
@@ -1226,10 +1195,130 @@ export default function DailyCashBankBalance() {
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
-  useHotkeys("s", fetchDailyCashBankBalance);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+
+
+  const [columns, setColumns] = useState({
+    Code: [],
+    Description: [],
+    Opening: [],
+    Debit: [],
+    Credit: [],
+    Balance: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Code: "",
+    Description: "",
+    Opening: "",
+    Debit: "",
+    Credit: "",
+    Balance: "",
+  });
+
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Code: tableData.map((row) => row.Code),
+        Description: tableData.map((row) => row.Description),
+        Opening: tableData.map((row) => row.Opening),
+        Debit: tableData.map((row) => row.Debit),
+        Credit: tableData.map((row) => row.Credit),
+        Balance: tableData.map((row) => row.Balance),
+
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+
+  const handleSorting = (col) => {
+    // Determine the new sort order
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    // Create a copy of the table data to sort
+    const sortedData = [...tableData];
+
+    // Sort the data based on the column and order
+    sortedData.sort((a, b) => {
+      // Get the values to compare
+      const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+      // Special handling for code column
+      if (col === "Code" && aVal.includes("-") && bVal.includes("-")) {
+        // Split the codes into parts
+        const aParts = aVal.split("-");
+        const bParts = bVal.split("-");
+
+        // Compare each part numerically
+        for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+          const aPart = parseInt(aParts[i] || "0", 10);
+          const bPart = parseInt(bParts[i] || "0", 10);
+
+          if (aPart !== bPart) {
+            return newOrder === "ASC" ? aPart - bPart : bPart - aPart;
+          }
+        }
+        return 0;
+      }
+
+      // Try to compare as numbers first
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // Fall back to string comparison
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    // Update the table data with the sorted data
+    setTableData(sortedData);
+
+    // Reset all sort orders and set the new one for the clicked column
+    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {});
+
+    setColumnSortOrders(resetSortOrders);
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      Opening: null,
+      Debit: null,
+      Credit: null,
+      Balance: null
+
+    });
+  };
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+
+ useHotkeys("alt+s", () => {
+         fetchDailyCashBankBalance();
+            resetSorting();
+     }, { preventDefault: true, enableOnFormTags: true });
+ 
+     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+     useHotkeys("esc", () => navigate("/MainPage"));
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1806,7 +1895,7 @@ export default function DailyCashBankBalance() {
                 >
                   <option value="">ALL</option>
                   <option value="C">CASH</option>
-                  <option value="B">BNAK</option>
+                  <option value="B">BANK</option>
                 </select>
               </div>
 
@@ -1850,25 +1939,76 @@ export default function DailyCashBankBalance() {
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      Code
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("Code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Description
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Description")}
+                    >
+                      Description{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Opening
+                    <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Opening")}
+                    >
+                      Opening{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Opening")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Debit
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Debit")}
+                    >
+                      Debit{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Debit")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={fifthColWidth}>
-                      Credit
+                    <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                      onClick={() => handleSorting("Credit")}
+                    >
+                      Credit{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Credit")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={sixthColWidth}>
-                      Balance
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Balance")}
+                    >
+                      Balance{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i>
                     </td>
+
                   </tr>
+
+
                 </thead>
               </table>
             </div>
@@ -2094,7 +2234,11 @@ export default function DailyCashBankBalance() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={fetchDailyCashBankBalance}
+              // onClick={fetchDailyCashBankBalance}
+              onClick={() => {
+                fetchDailyCashBankBalance();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

@@ -495,55 +495,66 @@ export default function ExpenseReport() {
             doc.setFontSize(12);
         };
 
+
+
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+            const rowHeight = 5;
+            const fontSize = 10;
+            const boldFont = 400;
+            const normalFont = getfontstyle;
+            const tableWidth = getTotalTableWidth();
 
             doc.setFontSize(11);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
+                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+                const isTotalRow = i === rows.length - 1;
+                let textColor = [0, 0, 0];
+                let fontName = normalFont;
 
                 if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
+                    textColor = [255, 0, 0];
+                    fontName = boldFont;
                 }
 
-                // For total row, set bold font and prepare for double border
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, 'bold');
                 }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-
-                // For total row, draw double border
-                if (isTotalRow) {
-                    // First line of the double border
-                    doc.setLineWidth(0.3);
+                // Set background color for odd-numbered rows
+                if (isOddRow) {
+                    doc.setFillColor(240); // Light background color
                     doc.rect(
                         startX,
                         startY + (i - startIndex + 2) * rowHeight,
                         tableWidth,
-                        rowHeight
+                        rowHeight,
+                        "F"
                     );
+                }
 
-                    // Second line of the double border (slightly offset)
+                doc.setDrawColor(0);
+
+                // For total row - special border handling
+                if (isTotalRow) {
+                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+                    const rowBottomY = rowTopY + rowHeight;
+
+                    // Draw double top border
                     doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        tableWidth - 1,
-                        rowHeight - 1
-                    );
+                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+                    // Draw double bottom border
+                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
+
+                    // Draw single vertical borders
+                    doc.setLineWidth(0.2);
+                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
                 } else {
                     // Normal border for other rows
                     doc.setLineWidth(0.2);
@@ -556,23 +567,18 @@ export default function ExpenseReport() {
                 }
 
                 row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
                     const cellY = isTotalRow
                         ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
                         : startY + (i - startIndex + 2) * rowHeight + 3;
 
                     const cellX = startX + 2;
 
-                    // Set text color
                     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    // For total row, keep bold font
                     if (!isTotalRow) {
-                        // Set font
                         doc.setFont(fontName, "normal");
                     }
 
-                    // Ensure the cell value is a string
                     const cellValue = String(cell);
 
                     if (cellIndex === 12) {
@@ -605,87 +611,37 @@ export default function ExpenseReport() {
 
                     }
 
-                    // Draw column borders (excluding the last column)
+                    // Draw column borders
                     if (cellIndex < row.length - 1) {
-                        if (isTotalRow) {
-                            // Double border for total row columns
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                            doc.setLineWidth(0.3);
-                            doc.rect(
-                                startX + 0.5,
-                                startY + (i - startIndex + 2) * rowHeight + 0.5,
-                                columnWidths[cellIndex] - 1,
-                                rowHeight - 1
-                            );
-                        } else {
-                            // Normal border for other rows
-                            doc.setLineWidth(0.2);
-                            doc.rect(
-                                startX,
-                                startY + (i - startIndex + 2) * rowHeight,
-                                columnWidths[cellIndex],
-                                rowHeight
-                            );
-                        }
+                        doc.setLineWidth(0.2);
+                        doc.line(
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 2) * rowHeight,
+                            startX + columnWidths[cellIndex],
+                            startY + (i - startIndex + 3) * rowHeight
+                        );
                         startX += columnWidths[cellIndex];
                     }
                 });
 
-                // Draw border for the last column
-                if (isTotalRow) {
-                    // Double border for total row last column
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        startX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        columnWidths[row.length - 1] - 1,
-                        rowHeight - 1
-                    );
-                } else {
-                    // Normal border for other rows last column
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        columnWidths[row.length - 1],
-                        rowHeight
-                    );
-                }
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+                startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
-                // Reset font after total row
                 if (isTotalRow) {
                     doc.setFont(getfontstyle, "normal");
                 }
             }
 
-            // Rest of your function remains the same...
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+            // Footer section
+            const lineWidth = tableWidth;
+            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+            const lineY = pageHeight - 15;
             doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 11; // Adjust as needed
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
+            doc.line(lineX, lineY, lineX + lineWidth, lineY);
+            const headingFontSize = 11;
+            const headingX = lineX + 2;
+            const headingY = lineY + 5;
+            doc.setFontSize(headingFontSize);
+            doc.setTextColor(0);
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
@@ -981,9 +937,9 @@ export default function ExpenseReport() {
         totalRow.eachCell((cell, colNumber) => {
             cell.font = { bold: true };
             cell.border = {
-                top: { style: "thin" },
+                top: { style: "double" },
                 left: { style: "thin" },
-                bottom: { style: "thin" },
+                bottom: { style: "double" },
                 right: { style: "thin" },
             };
 
@@ -1086,6 +1042,109 @@ export default function ExpenseReport() {
         return filteredData;
     };
 
+    const [columns, setColumns] = useState({
+        code: [],
+        Description: [],
+        Expense: [],
+
+    });
+    const [columnSortOrders, setColumnSortOrders] = useState({
+        code: "",
+        Description: "",
+        Expense: "",
+
+    });
+
+    useEffect(() => {
+        if (tableData.length > 0) {
+            const newColumns = {
+                code: tableData.map((row) => row.code),
+                Description: tableData.map((row) => row.Description),
+                Expense: tableData.map((row) => row.Expense),
+
+            };
+            setColumns(newColumns);
+        }
+    }, [tableData]);
+
+    const handleSorting = (col) => {
+        // Determine the new sort order
+        const currentOrder = columnSortOrders[col];
+        const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+        // Create a copy of the table data to sort
+        const sortedData = [...tableData];
+
+        // Sort the data based on the column and order
+        sortedData.sort((a, b) => {
+            // Get the values to compare
+            const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+            const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+            // Special handling for code column
+            if (col === "code" && aVal.includes("-") && bVal.includes("-")) {
+                // Split the codes into parts
+                const aParts = aVal.split("-");
+                const bParts = bVal.split("-");
+
+                // Compare each part numerically
+                for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+                    const aPart = parseInt(aParts[i] || "0", 10);
+                    const bPart = parseInt(bParts[i] || "0", 10);
+
+                    if (aPart !== bPart) {
+                        return newOrder === "ASC" ? aPart - bPart : bPart - aPart;
+                    }
+                }
+                return 0;
+            }
+
+            // Try to compare as numbers first
+            const numA = parseFloat(aVal.replace(/,/g, ""));
+            const numB = parseFloat(bVal.replace(/,/g, ""));
+
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return newOrder === "ASC" ? numA - numB : numB - numA;
+            }
+
+            // Fall back to string comparison
+            return newOrder === "ASC"
+                ? aVal.localeCompare(bVal)
+                : bVal.localeCompare(aVal);
+        });
+
+        // Update the table data with the sorted data
+        setTableData(sortedData);
+
+        // Reset all sort orders and set the new one for the clicked column
+        const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
+            acc[key] = key === col ? newOrder : null;
+            return acc;
+        }, {});
+
+        setColumnSortOrders(resetSortOrders);
+    };
+
+    const resetSorting = () => {
+        setColumnSortOrders({
+            code: null,
+            Description: null,
+            Expense: null,
+
+
+        });
+    };
+
+    const getIconStyle = (colKey) => {
+        const order = columnSortOrders[colKey];
+        return {
+            transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+            color: order === "ASC" || order === "DSC" ? "red" : "white",
+            transition: "transform 0.3s ease, color 0.3s ease",
+        };
+    };
+
+
     // const firstColWidth = {
     //     width: "12%",
     // };
@@ -1107,6 +1166,7 @@ export default function ExpenseReport() {
 
     useHotkeys("alt+s", () => {
         fetchReceivableReport();
+        resetSorting();
     }, { preventDefault: true, enableOnFormTags: true });
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
@@ -1613,24 +1673,41 @@ export default function ExpenseReport() {
                                             color: "white",
                                         }}
                                     >
-                                        {/* <td className="border-dark" style={firstColWidth}>
-                                            Trn#
+                                        <td
+                                            className="border-dark"
+                                            style={forthColWidth}
+                                            onClick={() => handleSorting("code")}
+                                        >
+                                            Code{" "}
+                                            <i
+                                                className="fa-solid fa-caret-down caretIconStyle"
+                                                style={getIconStyle("code")}
+                                            ></i>
                                         </td>
-                                        <td className="border-dark" style={secondColWidth}>
-                                            Date
-                                        </td> */}
-                                        {/* <td className="border-dark" style={thirdColWidth}>
-                                            Code
-                                        </td> */}
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Code
+                                        <td
+                                            className="border-dark"
+                                            style={fifthColWidth}
+                                            onClick={() => handleSorting("Description")}
+                                        >
+                                            Description{" "}
+                                            <i
+                                                className="fa-solid fa-caret-down caretIconStyle"
+                                                style={getIconStyle("Description")}
+                                            ></i>
                                         </td>
-                                        <td className="border-dark" style={fifthColWidth}>
-                                            Description
+                                        <td
+                                            className="border-dark"
+                                            style={sixthColWidth}
+                                            onClick={() => handleSorting("Expense")}
+                                        >
+                                            Expense{" "}
+                                            <i
+                                                className="fa-solid fa-caret-down caretIconStyle"
+                                                style={getIconStyle("Expense")}
+                                            ></i>
                                         </td>
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Expense
-                                        </td>
+
+
                                     </tr>
                                 </thead>
                             </table>
@@ -1857,7 +1934,11 @@ export default function ExpenseReport() {
                             id="searchsubmit"
                             text="Select"
                             ref={input3Ref}
-                            onClick={fetchReceivableReport}
+                            // onClick={fetchReceivableReport}
+                            onClick={() => {
+                                fetchReceivableReport();
+                                resetSorting();
+                            }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
