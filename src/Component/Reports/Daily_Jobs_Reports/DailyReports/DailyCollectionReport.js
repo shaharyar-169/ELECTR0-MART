@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription  } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -71,7 +71,7 @@ export default function DailyCollectionReport() {
     } = useTheme();
 
     const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber()
+    const locationnumber = getLocationnumber()
 
     const comapnyname = organisation.description;
 
@@ -380,9 +380,12 @@ export default function DailyCollectionReport() {
         const apiUrl = apiLinks + "/DailyCollectionReport.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription,
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
@@ -477,7 +480,7 @@ export default function DailyCollectionReport() {
             "Description",
             "Amount",
         ];
-        const columnWidths = [22, 16, 12, 65, 80, 22];
+        const columnWidths = [22, 16, 12, 70, 90, 22];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -522,8 +525,8 @@ export default function DailyCollectionReport() {
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
+            const rowHeight = 5; // Adjust row height
+            const fontSize = 10; // Adjust font size
             const boldFont = 400; // Bold font
             const normalFont = getfontstyle; // Default font
             const tableWidth = getTotalTableWidth(); // Calculate total table width
@@ -532,97 +535,133 @@ export default function DailyCollectionReport() {
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
+                const isTotalRow = i === rows.length - 1; // Check if this is the total row
                 const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
                 let textColor = [0, 0, 0]; // Default text color
                 let fontName = normalFont; // Default font
+                let currentX = startX; // Track current column position
 
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
+                // Check if Qnty (column index 6) is negative
+                if (parseFloat(row[7]) < 0) {
+                    textColor = [255, 0, 0]; // Set red color for negative Qnty
                 }
 
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+                // For total row, set bold font
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, 'bold');
+                }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
+                if (isOddRow) {
+                    doc.setFillColor(240); // Light background color
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight,
+                        "F"
+                    );
+                }
 
                 row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
+                    // For total row, adjust vertical position to center in the double border
+                    const cellY = isTotalRow
+                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+                        : startY + (i - startIndex + 2) * rowHeight + 3;
+
+                    const cellX = currentX + 2;
 
                     // Set text color
                     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
+
+                    // For total row, keep bold font
+                    if (!isTotalRow) {
+                        doc.setFont(fontName, "normal");
+                    }
 
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-
-                    if (cellIndex === 1 || cellIndex === 5) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2;
+                    if (cellIndex === 5 ) {
+                        const rightAlignX = currentX + columnWidths[cellIndex] - 2;
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
                             baseline: "middle",
                         });
                     } else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
+                        // For empty cells in total row, add "Total" label centered
+                        if (isTotalRow && cellIndex === 0 && cell === "") {
+                            const totalLabelX = currentX + columnWidths[0] / 2;
+                            doc.text("", totalLabelX, cellY, {
+                                align: "center",
+                                baseline: "middle"
+                            });
+                        } else {
+                            doc.text(cellValue, cellX, cellY, {
+                                baseline: "middle"
+                            });
+                        }
                     }
 
+                    // Draw borders
+                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+                    const rowBottomY = rowTopY + rowHeight;
 
+                    if (isTotalRow) {
+                        // Double horizontal borders for total row
+                        doc.setDrawColor(0);
 
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
+                        // Top border - double line
+                        doc.setLineWidth(0.3);
+                        doc.line(currentX, rowTopY, currentX + columnWidths[cellIndex], rowTopY);
+                        doc.line(currentX, rowTopY + 0.5, currentX + columnWidths[cellIndex], rowTopY + 0.5);
+
+                        // Bottom border - double line
+                        doc.line(currentX, rowBottomY, currentX + columnWidths[cellIndex], rowBottomY);
+                        doc.line(currentX, rowBottomY - 0.5, currentX + columnWidths[cellIndex], rowBottomY - 0.5);
+
+                        // Single vertical borders
+                        doc.setLineWidth(0.2);
+                        // Left border (only for first column)
+                        if (cellIndex === 0) {
+                            doc.line(currentX, rowTopY, currentX, rowBottomY);
+                        }
+                        // Right border
+                        doc.line(currentX + columnWidths[cellIndex], rowTopY, currentX + columnWidths[cellIndex], rowBottomY);
+                    } else {
+                        // Normal border for other rows
+                        doc.setDrawColor(0);
+                        doc.setLineWidth(0.2);
                         doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
+                            currentX,
+                            rowTopY,
                             columnWidths[cellIndex],
                             rowHeight
                         );
-                        startX += columnWidths[cellIndex];
                     }
+
+                    // Move to next column
+                    currentX += columnWidths[cellIndex];
                 });
 
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+                // Reset font after total row
+                if (isTotalRow) {
+                    doc.setFont(getfontstyle, "normal");
+                }
             }
 
             // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+            const lineWidth = tableWidth;
+            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+            const lineY = pageHeight - 15;
             doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+            doc.line(lineX, lineY, lineX + lineWidth, lineY);
+            const headingFontSize = 12;
 
             // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
+            const headingX = lineX + 2;
+            const headingY = lineY + 5;
+            doc.setFontSize(headingFontSize);
+            doc.setTextColor(0);
             doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
         };
 
@@ -791,68 +830,74 @@ export default function DailyCollectionReport() {
     };
 
     const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-
-        const numColumns = 6; // Number of columns
-
-        const columnAlignments = [
+       const workbook = new ExcelJS.Workbook();
+       const worksheet = workbook.addWorksheet("Sheet1");
+   
+       const numColumns = 6; // Ensure this matches the actual number of columns
+   
+       const columnAlignments = [
+        "left",
             "left",
-            "right",
             "center",
             "left",
             "left",
             "right",
-
         ];
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-        // Add title rows
-
-
-
-
-
-        [comapnyname, `Daily Collection Report From ${fromInputDate} To ${toInputDate}`].forEach((title, index) => {
-            // Define custom styles for each title
-            let customStyle;
-            let rowHeight = 20;  // Default row height
-            if (index === 0) {
-                // Style for company name
-                customStyle = {
-                    font: { family: getfontstyle, size: 18, bold: true },
-                    alignment: { horizontal: "center" },
-                };
-                rowHeight = 30; // Increase row height for company name to avoid overlap
-            } else {
-                // Style for "Item List"
-                customStyle = {
-                    font: { family: getfontstyle, size: getdatafontsize, bold: false },
-                    alignment: { horizontal: "center" },
-                };
-            }
-
-            // Add row with the title
-            worksheet.addRow([title]).eachCell((cell) => (cell.style = customStyle));
-
-            // Adjust the row height for the company name or other titles
-            worksheet.getRow(index + 2).height = rowHeight;
-
-            // Merge the cells for the title
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
-        });
-
-
-
-        // Add an empty row after the title section
-        worksheet.addRow([]);  // This is where you add the empty row
-
-
-        let typestatus = "";
+   
+       // Define fonts for different sections
+       const fontCompanyName = {
+         name: "CustomFont" || "CustomFont",
+         size: 18,
+         bold: true,
+       };
+       const fontStoreList = {
+         name: "CustomFont" || "CustomFont",
+         size: 10,
+         bold: false,
+       };
+       const fontHeader = {
+         name: "CustomFont" || "CustomFont",
+         size: 10,
+         bold: true,
+       };
+       const fontTableContent = {
+         name: "CustomFont" || "CustomFont",
+         size: 10,
+         bold: false,
+       };
+   
+       // Add an empty row at the start
+       worksheet.addRow([]);
+   
+       // Add company name
+       const companyRow = worksheet.addRow([comapnyname]);
+       companyRow.eachCell((cell) => {
+         cell.font = fontCompanyName;
+         cell.alignment = { horizontal: "center" };
+       });
+   
+       worksheet.getRow(companyRow.number).height = 30;
+       worksheet.mergeCells(
+         `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+         }`
+       );
+   
+       // Add Store List row
+       const storeListRow = worksheet.addRow([`Daily Collection Report From ${fromInputDate} To ${toInputDate}`,]);
+       storeListRow.eachCell((cell) => {
+         cell.font = fontStoreList;
+         cell.alignment = { horizontal: "center" };
+       });
+   
+       worksheet.mergeCells(
+         `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+         }`
+       );
+   
+       // Add an empty row after the title section
+       worksheet.addRow([]);
+   
+       let typestatus = "";
 
         if (transectionType === "A") {
             typestatus = "ALL";
@@ -865,165 +910,181 @@ export default function DailyCollectionReport() {
             typestatus = "ALL"; // Default value
         }
 
-
-        let typesearch = searchQuery ? searchQuery : "";
-
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["TYPE :", typestatus, "", "", "SEARCH :", typesearch]
-                : ["TYPE :", typestatus, ""]
-        );
-
-        const applyStatusRowStyle = (row, boldColumns = []) => {
-            row.eachCell((cell, colIndex) => {
-                // Check if the current cell is in the boldColumns array
-                const isBold = boldColumns.includes(colIndex);
-
-                cell.font = {
-                    family: getfontstyle, // Your desired font family
-                    size: getdatafontsize, // Your desired font size
-                    bold: isBold, // Bold only for specific columns
-                };
-
-                cell.alignment = {
-                    horizontal: "left", // Align text to the left
-                    vertical: "middle", // Vertically align to the middle
-                };
-
-                cell.border = null; // Remove borders
-            });
-        };
-
-        // Bold specific columns (labels)
-
-        applyStatusRowStyle(typeAndStoreRow3, [1, 5]); // Column 1 for "COMPANY:", Column 4 for "CAPACITY:"
-
-
-
-        // Header style for center alignment
-        const headerStyle = {
-            font: { bold: true, family: getfontstyle, size: getdatafontsize },
-            alignment: { horizontal: "center", vertical: "middle" }, // Center-align horizontally and vertically
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
-        };
-
-        // Add headers
-        const headers = [
-            "Date",
+       let typesearch = searchQuery ? searchQuery : "";
+   
+    //    const typeAndStoreRow2 = worksheet.addRow(["STORE :", typecategory]);
+       const typeAndStoreRow3 = worksheet.addRow(
+         searchQuery
+           ? ["TYPE :", typestatus, "",  "", "SEARCH :", typesearch]
+           : ["TYPE :", typestatus, ""]
+       );
+   
+   
+     
+       typeAndStoreRow3.eachCell((cell, colIndex) => {
+         cell.font = {
+           name: "CustomFont" || "CustomFont",
+           size: 10,
+           bold: [1, 4].includes(colIndex),
+         };
+         cell.alignment = { horizontal: "left", vertical: "middle" };
+       });
+   
+       // Header style
+       const headerStyle = {
+         font: fontHeader,
+         alignment: { horizontal: "center", vertical: "middle" },
+         fill: {
+           type: "pattern",
+           pattern: "solid",
+           fgColor: { argb: "FFC6D9F7" },
+         },
+         border: {
+           top: { style: "thin" },
+           left: { style: "thin" },
+           bottom: { style: "thin" },
+           right: { style: "thin" },
+         },
+       };
+   
+       // Add headers
+       const headers = [
+        "Date",
             "Trn#",
             "Type",
             "A/C Description",
             "Description",
             "Amount",
-        ];
-        const headerRow = worksheet.addRow(headers);
-
-        // Apply styles and center alignment to the header row
-        headerRow.eachCell((cell) => {
-            cell.style = { ...headerStyle };
-        });
-
-        // Add data rows
-
-        // Add data rows
-        tableData.forEach((item) => {
-            const row = worksheet.addRow([
-                item.Date,
+       ];
+       const headerRow = worksheet.addRow(headers);
+       headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+   
+       // Add data rows
+       tableData.forEach((item) => {
+         const row = worksheet.addRow([
+          item.Date,
                 item["Trn#"],
                 item.Type,
                 item["A/C Description"],
                 item.Description,
                 item.Amount,
-
-            ]);
-
-
-            // Apply custom styles to each cell in the row
-            row.eachCell((cell, colIndex) => {
-                cell.font = {
-                    family: getfontstyle, // Set your desired font family
-                    size: getdatafontsize, // Set the font size
-                    bold: false, // Make the font bold
-                };
-
-                cell.border = {
-                    top: { style: "thin", color: { argb: "FF000000" } }, // Top border (black)
-                    left: { style: "thin", color: { argb: "FF000000" } }, // Left border (black)
-                    bottom: { style: "thin", color: { argb: "FF000000" } }, // Bottom border (black)
-                    right: { style: "thin", color: { argb: "FF000000" } }, // Right border (black)
-                };
-
-                // Align cell content based on columnAlignments array
-                const alignment = columnAlignments[colIndex - 1] || "left"; // Default to 'left' if not defined
-                cell.alignment = {
-                    horizontal: alignment,
-                    vertical: "middle", // Vertically align to the middle
-                };
-            });
-        });
-
-        // Set column widths
-
-        const totalRow = worksheet.addRow([
-            "",
+         ]);
+   
+         // Check if quantity is negative (parse as float)
+         const isNegativeQty = parseFloat(item.Qnty) < 0;
+   
+         row.eachCell((cell, colIndex) => {
+           // Apply red font to ALL cells if Qnty is negative
+           cell.font = {
+             ...fontTableContent,
+             color: isNegativeQty ? { argb: 'FFFF0000' } : fontTableContent.color,
+           };
+   
+           cell.border = {
+             top: { style: "thin" },
+             left: { style: "thin" },
+             bottom: { style: "thin" },
+             right: { style: "thin" },
+           };
+   
+           cell.alignment = {
+             horizontal: columnAlignments[colIndex - 1] || "left",
+             vertical: "middle",
+           };
+         });
+       });
+   
+       // Set column widths
+       [12, 10, 8, 40, 45, 12].forEach((width, index) => {
+         worksheet.getColumn(index + 1).width = width;
+       });
+   
+       const totalRow = worksheet.addRow([
+         "",
             "",
             "",
             "Total",
             "",
             totalAmount,
-            ,
-        ]);
-
-        // total row added
-
-        totalRow.eachCell((cell, colNumber) => {
-            cell.font = { bold: true };
-            cell.border = {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            };
-
-            // Align only the "Total" text to the right
-            if (colNumber === 5) {
-                cell.alignment = { horizontal: "right" };
-            }
-        });
-
-
-        [12, 10, 8, 40, 45, 12].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
-        };
-
-        const currentdate = getCurrentDate();
-
-        // Generate Excel file buffer and save
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, `DailyCollectionReport From ${fromInputDate} To ${toInputDate}.xlsx`);
-    };
+       ]);
+   
+       // total row added
+   
+       totalRow.eachCell((cell, colNumber) => {
+         cell.font = { bold: true };
+         cell.border = {
+           top: { style: "double" },
+           left: { style: "thin" },
+           bottom: { style: "double" },
+           right: { style: "thin" },
+         };
+   
+         // Align only the "Total" text to the right
+         if (colNumber === 6 ) {
+           cell.alignment = { horizontal: "right" };
+         }
+       });
+   
+   
+       // Add a blank row
+       worksheet.addRow([]);
+       // Get current date and time
+       const getCurrentTime = () => {
+         const today = new Date();
+         const hh = String(today.getHours()).padStart(2, "0");
+         const mm = String(today.getMinutes()).padStart(2, "0");
+         const ss = String(today.getSeconds()).padStart(2, "0");
+         return `${hh}:${mm}:${ss}`;
+       };
+       // Get current date
+       const getCurrentDate = () => {
+         const today = new Date();
+         const day = String(today.getDate()).padStart(2, "0");
+         const month = String(today.getMonth() + 1).padStart(2, "0");
+         const year = today.getFullYear();
+         return `${day}-${month}-${year}`;
+       };
+       const currentTime = getCurrentTime();
+       const currentdate = getCurrentDate();
+       const userid = user.tusrid;
+   
+       // Add date and time row
+       const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+       dateTimeRow.eachCell((cell) => {
+         cell.font = {
+           name: "CustomFont" || "CustomFont",
+           size: 10,
+           // bold: true
+           // italic: true,
+         };
+         cell.alignment = { horizontal: "left" };
+       });
+       const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+       dateTimeRow.eachCell((cell) => {
+         cell.font = {
+           name: "CustomFont" || "CustomFont",
+           size: 10,
+           // bold: true
+           // italic: true,
+         };
+         cell.alignment = { horizontal: "left" };
+       });
+   
+       // Merge across all columns
+       worksheet.mergeCells(
+         `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+       );
+       worksheet.mergeCells(
+         `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+       );
+   
+       // Generate and save the Excel file
+       const buffer = await workbook.xlsx.writeBuffer();
+       const blob = new Blob([buffer], {
+         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+       });
+       saveAs(blob, `DailyCollectionReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+     };
 
     const dispatch = useDispatch();
 
@@ -1059,7 +1120,7 @@ export default function DailyCollectionReport() {
         width: "9%",
     };
     const secondColWidth = {
-        width: "7%",
+        width: "6%",
     };
     const thirdColWidth = {
         width: "5%",
@@ -1071,12 +1132,16 @@ export default function DailyCollectionReport() {
         width: "34.5%",
     };
     const sixthColWidth = {
-        width: "10%",
+        width: "11%",
     };
 
-    useHotkeys("s", fetchDailyCollectionReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("alt+s", () => {
+        fetchDailyCollectionReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1594,36 +1659,66 @@ export default function DailyCollectionReport() {
                             </div>
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                    <span
+                                        style={{
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
                                         Search :
                                     </span>{" "}
                                 </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
-                                    autoComplete="off"
-                                    style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
-
+                                <div style={{ position: "relative", display: "inline-block" }}>
+                                    <input
+                                        ref={input2Ref}
+                                        onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                        type="text"
+                                        id="searchsubmit"
+                                        placeholder="Item description"
+                                        value={searchQuery}
+                                        autoComplete="off"
+                                        style={{
+                                            marginRight: "20px",
+                                            width: "200px",
+                                            height: "24px",
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            color: fontcolor,
+                                            backgroundColor: getcolor,
+                                            border: `1px solid ${fontcolor}`,
+                                            outline: "none",
+                                            paddingLeft: "10px",
+                                            paddingRight: "25px", // space for the clear icon
+                                        }}
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.border = "2px solid red")
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                        }
+                                        onChange={(e) =>
+                                            setSearchQuery((e.target.value || "").toUpperCase())
+                                        }
+                                    />
+                                    {searchQuery && (
+                                        <span
+                                            onClick={() => setSearchQuery("")}
+                                            style={{
+                                                position: "absolute",
+                                                right: "30px",
+                                                top: "50%",
+                                                transform: "translateY(-50%)",
+                                                cursor: "pointer",
+                                                fontSize: "20px",
+                                                color: fontcolor,
+                                                userSelect: "none",
+                                            }}
+                                        >
+                                            ×
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1758,7 +1853,7 @@ export default function DailyCollectionReport() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-end" style={secondColWidth}>
+                                                        <td className="text-start" style={secondColWidth}>
                                                             {item["Trn#"]}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>

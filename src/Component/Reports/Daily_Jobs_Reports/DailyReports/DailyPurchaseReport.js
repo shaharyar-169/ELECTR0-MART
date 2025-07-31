@@ -265,8 +265,9 @@ export default function DailyPurchaseReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
       // code: 'USMANCOPOS',
-      // FLocCod: '001',
-      // FYerDsc: '2021-2025',
+      code: 'NASIRTRD',
+      FLocCod: '001',
+      FYerDsc: '2024-2024',
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FTrnTyp: transectionType,
@@ -566,8 +567,8 @@ export default function DailyPurchaseReport() {
       "",
       "",
       "",
-      "Total",
       "",
+      "Total",
       "",
       "",
       String(totalQnty),
@@ -580,7 +581,7 @@ export default function DailyPurchaseReport() {
       "Date",
       "Trn#",
       "Type",
-      "Store",
+      "Str",
       "Description",
       "Customer",
       // "Mobile",
@@ -588,7 +589,7 @@ export default function DailyPurchaseReport() {
       "Qnty",
       "Amount",
     ];
-    const columnWidths = [22, 13, 10, 12, 90, 50, 20, 12, 20];
+    const columnWidths = [22, 13, 10, 10, 90, 60, 20, 17, 20];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -632,6 +633,7 @@ export default function DailyPurchaseReport() {
       doc.setFontSize(12);
     };
 
+
     const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5; // Adjust row height
       const fontSize = 10; // Adjust font size
@@ -644,50 +646,29 @@ export default function DailyPurchaseReport() {
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
         const isTotalRow = i === rows.length - 1; // Check if this is the total row
+        const isOddRow = i % 2 !== 0; // Check if the row index is odd
         let textColor = [0, 0, 0]; // Default text color
         let fontName = normalFont; // Default font
         let currentX = startX; // Track current column position
 
         // Check if Qnty (column index 6) is negative
-        if (parseFloat(row[8]) < 0) {
+        if (parseFloat(row[7]) < 0) {
           textColor = [255, 0, 0]; // Set red color for negative Qnty
         }
 
-        // For total row, set bold font and prepare for double border
+        // For total row, set bold font
         if (isTotalRow) {
           doc.setFont(getfontstyle, 'bold');
         }
 
-        // Draw row borders
-        doc.setDrawColor(0);
-
-        // For total row, draw double border
-        if (isTotalRow) {
-          // First line of the double border
-          doc.setLineWidth(0.3);
+        if (isOddRow) {
+          doc.setFillColor(240); // Light background color
           doc.rect(
-            currentX,
+            startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
-          );
-
-          // Second line of the double border (slightly offset)
-          doc.setLineWidth(0.3);
-          doc.rect(
-            currentX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            tableWidth - 1,
-            rowHeight - 1
-          );
-        } else {
-          // Normal border for other rows
-          doc.setLineWidth(0.2);
-          doc.rect(
-            currentX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight
+            rowHeight,
+            "F"
           );
         }
 
@@ -704,7 +685,6 @@ export default function DailyPurchaseReport() {
 
           // For total row, keep bold font
           if (!isTotalRow) {
-            // Set font
             doc.setFont(fontName, "normal");
           }
 
@@ -732,29 +712,38 @@ export default function DailyPurchaseReport() {
             }
           }
 
-          // Draw column borders
+          // Draw borders
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+
           if (isTotalRow) {
-            // Double border for total row columns
+            // Double horizontal borders for total row
+            doc.setDrawColor(0);
+
+            // Top border - double line
             doc.setLineWidth(0.3);
-            doc.rect(
-              currentX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
-            );
-            doc.setLineWidth(0.3);
-            doc.rect(
-              currentX + 0.5,
-              startY + (i - startIndex + 2) * rowHeight + 0.5,
-              columnWidths[cellIndex] - 1,
-              rowHeight - 1
-            );
+            doc.line(currentX, rowTopY, currentX + columnWidths[cellIndex], rowTopY);
+            doc.line(currentX, rowTopY + 0.5, currentX + columnWidths[cellIndex], rowTopY + 0.5);
+
+            // Bottom border - double line
+            doc.line(currentX, rowBottomY, currentX + columnWidths[cellIndex], rowBottomY);
+            doc.line(currentX, rowBottomY - 0.5, currentX + columnWidths[cellIndex], rowBottomY - 0.5);
+
+            // Single vertical borders
+            doc.setLineWidth(0.2);
+            // Left border (only for first column)
+            if (cellIndex === 0) {
+              doc.line(currentX, rowTopY, currentX, rowBottomY);
+            }
+            // Right border
+            doc.line(currentX + columnWidths[cellIndex], rowTopY, currentX + columnWidths[cellIndex], rowBottomY);
           } else {
             // Normal border for other rows
+            doc.setDrawColor(0);
             doc.setLineWidth(0.2);
             doc.rect(
               currentX,
-              startY + (i - startIndex + 2) * rowHeight,
+              rowTopY,
               columnWidths[cellIndex],
               rowHeight
             );
@@ -835,7 +824,7 @@ export default function DailyPurchaseReport() {
         doc.setFontSize(pageNumberFontSize);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 5,
+          rightX - 10,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
@@ -1032,7 +1021,7 @@ export default function DailyPurchaseReport() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow([`Sale Report From ${fromInputDate} To ${toInputDate}`,]);
+    const storeListRow = worksheet.addRow([`Purchase Report From ${fromInputDate} To ${toInputDate}`,]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -1130,14 +1119,23 @@ export default function DailyPurchaseReport() {
         item["Pur Amount"],
       ]);
 
+      // Check if quantity is negative (parse as float)
+      const isNegativeQty = parseFloat(item.Qnty) < 0;
+
       row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
+        // Apply red font to ALL cells if Qnty is negative
+        cell.font = {
+          ...fontTableContent,
+          color: isNegativeQty ? { argb: 'FFFF0000' } : fontTableContent.color,
+        };
+
         cell.border = {
           top: { style: "thin" },
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" },
         };
+
         cell.alignment = {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
@@ -1302,9 +1300,13 @@ export default function DailyPurchaseReport() {
     width: "9%",
   };
 
-  useHotkeys("s", fetchDailySaleReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
+  useHotkeys("alt+s", () => {
+    fetchDailySaleReport();
+    //    resetSorting();
+  }, { preventDefault: true, enableOnFormTags: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -2057,7 +2059,7 @@ export default function DailyPurchaseReport() {
                   value={transectionType}
                   onChange={handleTransactionTypeChange}
                   style={{
-                    width: "275px",
+                    width: "250px",
                     height: "24px",
                     // marginLeft: "15px",
                     backgroundColor: getcolor,
@@ -2295,7 +2297,7 @@ export default function DailyPurchaseReport() {
                             style={{
                               backgroundColor: getcolor,
                               color:
-                                item["Sale Amount"]?.[0] === "-"
+                                item.Qnty?.[0] === "-"
                                   ? "red"
                                   : fontcolor,
                             }}

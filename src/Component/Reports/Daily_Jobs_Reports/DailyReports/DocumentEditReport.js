@@ -1004,10 +1004,10 @@ export default function DocumentEditReport() {
                 doc.setFont(getfontstyle, 'normal'); // Reset font to normal
                 doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`LOCATION :`, labelsX, labelsY + 12.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typeItem}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
+                // doc.setFont(getfontstyle, "bold"); // Set font to bold
+                // doc.text(`LOCATION :`, labelsX, labelsY + 12.5); // Draw bold label
+                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                // doc.text(`${typeItem}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
                 if (searchQuery) {
                     doc.setFont(getfontstyle, 'bold'); // Set font to bold
@@ -1021,9 +1021,9 @@ export default function DocumentEditReport() {
                 doc.setFont(getfontstyle, 'bold'); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 14; // Adjust vertical position for the labels
+                startY += 10; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 33);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -1121,7 +1121,7 @@ export default function DocumentEditReport() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(68 + numColumns - 1)}${companyRow.number
+            `A${companyRow.number}:${String.fromCharCode(67 + numColumns - 1)}${companyRow.number
             }`
         );
 
@@ -1133,7 +1133,7 @@ export default function DocumentEditReport() {
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(68 + numColumns - 1)}${storeListRow.number
+            `A${storeListRow.number}:${String.fromCharCode(67 + numColumns - 1)}${storeListRow.number
             }`
         );
 
@@ -1178,12 +1178,12 @@ export default function DocumentEditReport() {
 
         let typesearch = searchQuery ? searchQuery : "";
 
-        const typeAndStoreRow = worksheet.addRow([
-            "LOACATION :",
-            typeItem,
-            "",
-            " ",
-        ]);
+        // const typeAndStoreRow = worksheet.addRow([
+        //     "LOACATION :",
+        //     typeItem,
+        //     "",
+        //     " ",
+        // ]);
 
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
@@ -1191,14 +1191,14 @@ export default function DocumentEditReport() {
                 : ["TYPE :", typestatus, ""]
         );
 
-        typeAndStoreRow.eachCell((cell, colIndex) => {
-            cell.font = {
-                name: "CustomFont" || "CustomFont",
-                size: 10,
-                bold: [1].includes(colIndex),
-            };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
+        // typeAndStoreRow.eachCell((cell, colIndex) => {
+        //     cell.font = {
+        //         name: "CustomFont" || "CustomFont",
+        //         size: 10,
+        //         bold: [1].includes(colIndex),
+        //     };
+        //     cell.alignment = { horizontal: "left", vertical: "middle" };
+        // });
 
 
         typeAndStoreRow3.eachCell((cell, colIndex) => {
@@ -1397,9 +1397,13 @@ export default function DocumentEditReport() {
         width: "11%",
     };
 
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1656,7 +1660,62 @@ export default function DocumentEditReport() {
 
                             </div>
 
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "30px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
 
+                                <select
+                                    ref={input1Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType}
+                                    onChange={handleTransactionTypeChange}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                        color: fontcolor,
+                                    }}
+                                >
+                                    <option value="">All</option>
+                                    <option value="CRV">Cash Receive Vorcher</option>
+                                    <option value="CPV">Cash Payment Vorcher</option>
+                                    <option value="BRV">Bank Receive Vorcher</option>
+                                    <option value="BPV">Bank Payment Vorcher</option>
+                                    <option value="JVR">Journal Vorcher</option>
+                                    <option value="INV">Item Sale</option>
+                                    <option value="SRN">Sale Return</option>
+                                    <option value="BIL">Purchase</option>
+                                    <option value="PRN">Purchase Return</option>
+                                    <option value="ISS">Issue</option>
+                                    <option value="REC">Received</option>
+                                    <option value="SLY">Salary</option>
+                                </select>
+                            </div>
 
                         </div>
 
@@ -1862,144 +1921,7 @@ export default function DocumentEditReport() {
                                 </div>
                             </div>
 
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "30px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">All</option>
-                                    <option value="CRV">Cash Receive Vorcher</option>
-                                    <option value="CPV">Cash Payment Vorcher</option>
-                                    <option value="BRV">Bank Receive Vorcher</option>
-                                    <option value="BPV">Bank Payment Vorcher</option>
-                                    <option value="JVR">Journal Vorcher</option>
-                                    <option value="INV">Item Sale</option>
-                                    <option value="SRN">Sale Return</option>
-                                    <option value="BIL">Purchase</option>
-                                    <option value="PRN">Purchase Return</option>
-                                    <option value="ISS">Issue</option>
-                                    <option value="REC">Received</option>
-                                    <option value="SLY">Salary</option>
-                                </select>
-                            </div>
-
-
-
-
-
-                        </div>
-                    </div>
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", marginLeft: '12px' }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-
-                            <div
-                                className="d-flex align-items-center"
-                            // style={{ marginRight: "20px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Location :&nbsp;
-                                        </span>{" "}
-                                        <br />
-                                    </label>
-                                </div>
-                                <div>
-                                    <Select
-                                        className="List-select-class "
-                                        ref={storeRef}
-                                        options={optionStore}
-                                        onKeyDown={handleStoreEnter}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split('-')[1];
-                                                setStoreType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart,  // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue('')
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        styles={{
-                                            ...customStyles1(!Companyselectdata),
-                                            placeholder: (base) => ({
-                                                ...base,
-                                                textAlign: "left",
-                                                marginLeft: "0",
-                                                justifyContent: "flex-start",
-                                                color: fontcolor,
-                                                marginTop: '-5px'
-                                            })
-                                        }}
-                                        isClearable
-                                        placeholder="ALL"
-                                        menuIsOpen={menuStoreIsOpen}
-                                        onMenuOpen={() => setMenuStoreIsOpen(true)}
-                                        onMenuClose={() => setMenuStoreIsOpen(false)}
-                                    />
-                                </div>
-                            </div>
 
 
                             <div id="lastDiv" style={{ marginRight: "10px" }}>
@@ -2066,8 +1988,92 @@ export default function DocumentEditReport() {
                                 </div>
                             </div>
 
+
+
+
                         </div>
                     </div>
+
+                    {/* <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", marginLeft: '12px' }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "end",
+                            }}
+                        >
+
+                            <div
+                                className="d-flex align-items-center"
+                            // style={{ marginRight: "20px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                            Location :&nbsp;
+                                        </span>{" "}
+                                        <br />
+                                    </label>
+                                </div>
+                                <div>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={storeRef}
+                                        options={optionStore}
+                                        onKeyDown={handleStoreEnter}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split('-')[1];
+                                                setStoreType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart,  // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue('')
+                                            }
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        styles={{
+                                            ...customStyles1(!Companyselectdata),
+                                            placeholder: (base) => ({
+                                                ...base,
+                                                textAlign: "left",
+                                                marginLeft: "0",
+                                                justifyContent: "flex-start",
+                                                color: fontcolor,
+                                                marginTop: '-5px'
+                                            })
+                                        }}
+                                        isClearable
+                                        placeholder="ALL"
+                                        menuIsOpen={menuStoreIsOpen}
+                                        onMenuOpen={() => setMenuStoreIsOpen(true)}
+                                        onMenuClose={() => setMenuStoreIsOpen(false)}
+                                    />
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+                    </div> */}
 
 
 
@@ -2141,7 +2147,7 @@ export default function DocumentEditReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "50vh",
+                                maxHeight: "55vh",
                                 width: "100%",
                                 wordBreak: "break-word",
                             }}

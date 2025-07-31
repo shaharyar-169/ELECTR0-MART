@@ -363,9 +363,9 @@ export default function JournalReport() {
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
 
       code: "NASIRTRD",
       FLocCod: '001',
@@ -439,17 +439,18 @@ export default function JournalReport() {
     const rows = tableData.map((item) => [
       item["Jvr#"],
       item.Date,
+      item.Code,
       item.Description,
       item.Debit,
       item.Credit,
     ]);
 
     // Add summary row to the table
-    rows.push(["", "", "Total", String(totalDebit), String(totalCredit)]);
+    rows.push(["", "", "", "Total", String(totalDebit), String(totalCredit)]);
 
     // Define table column headers and individual column widths
-    const headers = ["Jvr#", "Date", "Description", "Debit", "Credit"];
-    const columnWidths = [18, 22, 100, 25, 25];
+    const headers = ["Jvr#", "Date", "Code", "Description", "Debit", "Credit"];
+    const columnWidths = [15, 20, 20, 100, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -494,62 +495,36 @@ export default function JournalReport() {
     };
 
     const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust this value to decrease row height
-      const fontSize = 10; // Adjust this value to decrease font size
-      const boldFont = 400; // Bold font
+      const rowHeight = 5; // Adjust row height
+      const fontSize = 10; // Adjust font size for regular text
+      const boldFont = "bold"; // Bold font
       const normalFont = getfontstyle; // Default font
       const tableWidth = getTotalTableWidth(); // Calculate total table width
 
-      doc.setFontSize(11);
+      doc.setFontSize(fontSize);
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
         const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
         const isTotalRow = i === rows.length - 1; // Check if this is the total row
         let textColor = [0, 0, 0]; // Default text color
         let fontName = normalFont; // Default font
+        let currentX = startX; // Track current column position
 
-        if (isRedRow) {
-          textColor = [255, 0, 0]; // Red color
-          fontName = boldFont; // Set bold font for red-colored row
-        }
-
-        // For total row, set bold font and prepare for double border
+        // For total row, set bold font
         if (isTotalRow) {
           doc.setFont(getfontstyle, 'bold');
         }
 
-        // Draw row borders
-        doc.setDrawColor(0); // Set color for borders
-
-        // For total row, draw double border
-        if (isTotalRow) {
-          // First line of the double border
-          doc.setLineWidth(0.3);
+        // Set background color for odd-numbered rows
+        if (isOddRow) {
+          doc.setFillColor(240); // Light background color
           doc.rect(
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
-          );
-
-          // Second line of the double border (slightly offset)
-          doc.setLineWidth(0.3);
-          doc.rect(
-            startX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            tableWidth - 1,
-            rowHeight - 1
-          );
-        } else {
-          // Normal border for other rows
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight
+            rowHeight,
+            "F"
           );
         }
 
@@ -559,101 +534,136 @@ export default function JournalReport() {
             ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
             : startY + (i - startIndex + 2) * rowHeight + 3;
 
-          const cellX = startX + 2;
+          const cellX = currentX + 2;
 
-          // Set text color
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+          // Reset default colors for each cell
+          let backgroundColor = null;
+
+          // Apply styling only for "Receipt" or "Payment" in column index 1
+          if (cellIndex === 1) {
+            if (cell === "Receipt") {
+              backgroundColor = [169, 169, 169]; // Light grey background
+              textColor = [0, 0, 0]; // White text
+              fontName = boldFont;
+            } else if (cell === "Payment") {
+              backgroundColor = [169, 169, 169]; // Light grey background
+              textColor = [0, 0, 0]; // White text
+              fontName = boldFont;
+            }
+          }
+
+          // Draw cell background if applicable
+          if (backgroundColor) {
+            doc.setFillColor(...backgroundColor);
+            doc.rect(
+              currentX,
+              startY + (i - startIndex + 2) * rowHeight,
+              columnWidths[cellIndex],
+              rowHeight,
+              "F"
+            );
+          }
+
+          // Set text color and font
+          doc.setTextColor(...textColor);
 
           // For total row, keep bold font
           if (!isTotalRow) {
-            // Set font
             doc.setFont(fontName, "normal");
           }
 
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 3 || cellIndex === 4) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+          // Right-align specific columns (like Balance column)
+          if (cellIndex === 4 || cellIndex === 5) {
+            const rightAlignX = currentX + columnWidths[cellIndex] - 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
-              baseline: "middle", // This centers vertically
+              baseline: "middle",
             });
           } else {
             // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = startX + columnWidths[0] / 2;
+              const totalLabelX = currentX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
                 align: "center",
                 baseline: "middle"
               });
             } else {
               doc.text(cellValue, cellX, cellY, {
-                baseline: "middle" // This centers vertically
+                baseline: "middle"
               });
             }
           }
 
-          // Draw column borders (excluding the last column)
-          if (cellIndex < row.length - 1) {
-            if (isTotalRow) {
-              // Double border for total row columns
-              doc.setLineWidth(0.3);
-              doc.rect(
-                startX,
-                startY + (i - startIndex + 2) * rowHeight,
-                columnWidths[cellIndex],
-                rowHeight
-              );
-              doc.setLineWidth(0.3);
-              doc.rect(
-                startX + 0.5,
-                startY + (i - startIndex + 2) * rowHeight + 0.5,
-                columnWidths[cellIndex] - 1,
-                rowHeight - 1
-              );
-            } else {
-              // Normal border for other rows
-              doc.setLineWidth(0.2);
-              doc.rect(
-                startX,
-                startY + (i - startIndex + 2) * rowHeight,
-                columnWidths[cellIndex],
-                rowHeight
+          // Draw borders
+          if (isTotalRow) {
+            // For total row - draw double horizontal borders and single vertical borders
+            const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+            const rowBottomY = rowTopY + rowHeight;
+
+            // Draw double top border
+            doc.setLineWidth(0.3);
+            doc.line(
+              currentX,
+              rowTopY,
+              currentX + columnWidths[cellIndex],
+              rowTopY
+            );
+            doc.line(
+              currentX,
+              rowTopY + 0.5,
+              currentX + columnWidths[cellIndex],
+              rowTopY + 0.5
+            );
+
+            // Draw double bottom border
+            doc.line(
+              currentX,
+              rowBottomY,
+              currentX + columnWidths[cellIndex],
+              rowBottomY
+            );
+            doc.line(
+              currentX,
+              rowBottomY - 0.5,
+              currentX + columnWidths[cellIndex],
+              rowBottomY - 0.5
+            );
+
+            // Draw single vertical borders
+            doc.setLineWidth(0.2);
+            // Left border (only for first column)
+            if (cellIndex === 0) {
+              doc.line(
+                currentX,
+                rowTopY,
+                currentX,
+                rowBottomY
               );
             }
-            startX += columnWidths[cellIndex];
+            // Right border
+            doc.line(
+              currentX + columnWidths[cellIndex],
+              rowTopY,
+              currentX + columnWidths[cellIndex],
+              rowBottomY
+            );
+          } else {
+            // Normal border for other rows
+            doc.setLineWidth(0.2);
+            doc.rect(
+              currentX,
+              startY + (i - startIndex + 2) * rowHeight,
+              columnWidths[cellIndex],
+              rowHeight
+            );
           }
-        });
 
-        // Draw border for the last column
-        if (isTotalRow) {
-          // Double border for total row last column
-          doc.setLineWidth(0.3);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            columnWidths[row.length - 1],
-            rowHeight
-          );
-          doc.setLineWidth(0.3);
-          doc.rect(
-            startX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            columnWidths[row.length - 1] - 1,
-            rowHeight - 1
-          );
-        } else {
-          // Normal border for other rows last column
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            columnWidths[row.length - 1],
-            rowHeight
-          );
-        }
-        startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+          // Move to next column
+          currentX += columnWidths[cellIndex];
+        });
 
         // Reset font after total row
         if (isTotalRow) {
@@ -661,20 +671,19 @@ export default function JournalReport() {
         }
       }
 
-      // Rest of your function remains the same...
       // Draw line at the bottom of the page with padding
-      const lineWidth = tableWidth; // Match line width with table width
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-      const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
       doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-      const headingFontSize = 11; // Adjust as needed
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 12;
 
       // Add heading "Crystal Solution" aligned left bottom of the line
-      const headingX = lineX + 2; // Padding from left
-      const headingY = lineY + 5; // Padding from bottom
-      doc.setFontSize(headingFontSize); // Set the font size for the heading
-      doc.setTextColor(0); // Reset text color to default
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFontSize(headingFontSize);
+      doc.setTextColor(0);
       doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
     };
 
@@ -829,7 +838,7 @@ export default function JournalReport() {
 
     const numColumns = 6; // Ensure this matches the actual number of columns
 
-    const columnAlignments = ["left", "left", "left", "right", "right"];
+    const columnAlignments = ["left", "left", "left", "left", "right", "right"];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -926,7 +935,7 @@ export default function JournalReport() {
     };
 
     // Add headers
-    const headers = ["Jvr#", "Date", "Description", "Debit", "Credit"];
+    const headers = ["Jvr#", "Date", "Code", "Description", "Debit", "Credit"];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
@@ -935,6 +944,7 @@ export default function JournalReport() {
       const row = worksheet.addRow([
         item["Jvr#"],
         item.Date,
+        item.Code,
         item.Description,
         item.Debit,
         item.Credit,
@@ -943,9 +953,9 @@ export default function JournalReport() {
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
         cell.border = {
-          top: { style: "thin" },
+          top: { style: "double" },
           left: { style: "thin" },
-          bottom: { style: "thin" },
+          bottom: { style: "double" },
           right: { style: "thin" },
         };
         cell.alignment = {
@@ -956,11 +966,12 @@ export default function JournalReport() {
     });
 
     // Set column widths
-    [9, 12, 50, 15, 15].forEach((width, index) => {
+    [9, 12, 12, 50, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
+      "",
       "",
       "",
       "Total",
@@ -980,7 +991,7 @@ export default function JournalReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 5) {
+      if (colNumber === 5 || colNumber === 6) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1081,13 +1092,13 @@ export default function JournalReport() {
   };
 
   const firstColWidth = {
-    width: "9%",
+    width: "7%",
   };
   const secondColWidth = {
-    width: "12%",
+    width: "10%",
   };
   const thirdColWidth = {
-    width: "53.5%",
+    width: "47.5%",
   };
   const forthColWidth = {
     width: "12%",
@@ -1095,10 +1106,17 @@ export default function JournalReport() {
   const fifthColWidth = {
     width: "12%",
   };
+  const sixthColWidth = {
+    width: "10%",
+  };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
+  useHotkeys("alt+s", () => {
+    fetchReceivableReport();
+    //    resetSorting();
+  }, { preventDefault: true, enableOnFormTags: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1685,6 +1703,9 @@ export default function JournalReport() {
                     <td className="border-dark" style={secondColWidth}>
                       Date
                     </td>
+                    <td className="border-dark" style={sixthColWidth}>
+                      Code
+                    </td>
                     <td className="border-dark" style={thirdColWidth}>
                       Description
                     </td>
@@ -1709,7 +1730,7 @@ export default function JournalReport() {
                 wordBreak: "break-word",
               }}
             >
-              <table
+              {/* <table
                 className="myTable"
                 id="tableBody"
                 style={{
@@ -1727,7 +1748,7 @@ export default function JournalReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="6" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -1740,7 +1761,7 @@ export default function JournalReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 5 }).map((_, colIndex) => (
+                            {Array.from({ length: 6 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -1751,6 +1772,7 @@ export default function JournalReport() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
+                        <td style={sixthColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
@@ -1779,6 +1801,9 @@ export default function JournalReport() {
                             <td className="text-start" style={secondColWidth}>
                               {item.Date}
                             </td>
+                            <td className="text-start" style={sixthColWidth}>
+                              {item.Code}
+                            </td>
                             <td className="text-start" style={thirdColWidth}>
                               {item.Description}
                             </td>
@@ -1801,7 +1826,7 @@ export default function JournalReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 5 }).map((_, colIndex) => (
+                          {Array.from({ length: 6 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -1811,6 +1836,132 @@ export default function JournalReport() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table> */}
+
+              <table
+                className="myTable"
+                id="tableBody"
+                style={{
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  width: "100%",
+                  position: "relative",
+                  borderCollapse: "collapse", // Ensure borders work properly
+                }}
+              >
+                <tbody id="tablebody">
+                  {isLoading ? (
+                    <>
+                      <tr
+                        style={{
+                          backgroundColor: getcolor,
+                        }}
+                      >
+                        <td colSpan="6" className="text-center">
+                          <Spinner animation="border" variant="primary" />
+                        </td>
+                      </tr>
+                      {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
+                        <tr
+                          key={`blank-${rowIndex}`}
+                          style={{
+                            backgroundColor: getcolor,
+                            color: fontcolor,
+                          }}
+                        >
+                          {Array.from({ length: 6 }).map((_, colIndex) => (
+                            <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                      </tr>
+                    </>
+                  ) : (
+                    <>
+                      {tableData.map((item, i) => {
+                        totalEnteries += 1;
+                        // Check if current Jvr# is different from next one
+                        const isLastInGroup =
+                          i === tableData.length - 1 ||
+                          item["Jvr#"] !== tableData[i + 1]["Jvr#"];
+
+                        return (
+                          <tr
+                            key={`${i}-${selectedIndex}`}
+                            ref={(el) => (rowRefs.current[i] = el)}
+                            onClick={() => handleRowClick(i)}
+                            className={selectedIndex === i ? "selected-background" : ""}
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                              ...(isLastInGroup && { borderBottom: "2px solid #333" }), // Dark bottom border
+                            }}
+                          >
+                            {/* <td className="text-start" style={firstColWidth}>
+                              {item["Jvr#"]}
+                            </td> */}
+
+                            <td
+                              className="text-start"
+                              style={{
+                                ...firstColWidth,
+                                ...(isLastInGroup && { borderBottom: "2px solid #333" }),
+                              }}
+                            >
+                              {item["Jvr#"]}
+                            </td>
+                            <td className="text-start" style={secondColWidth}>
+                              {item.Date}
+                            </td>
+                            <td className="text-start" style={sixthColWidth}>
+                              {item.Code}
+                            </td>
+                            <td className="text-start" style={thirdColWidth}>
+                              {item.Description}
+                            </td>
+                            <td className="text-end" style={forthColWidth}>
+                              {item.Debit}
+                            </td>
+                            <td className="text-end" style={fifthColWidth}>
+                              {item.Credit}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {Array.from({ length: Math.max(0, 27 - tableData.length) }).map(
+                        (_, rowIndex) => (
+                          <tr
+                            key={`blank-${rowIndex}`}
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            {Array.from({ length: 6 }).map((_, colIndex) => (
+                              <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                            ))}
+                          </tr>
+                        )
+                      )}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={sixthColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
@@ -1842,6 +1993,13 @@ export default function JournalReport() {
             <div
               style={{
                 ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...sixthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
