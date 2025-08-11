@@ -64,6 +64,10 @@ import FacilityList from "./Component/Reports/Daily_Jobs_Reports/List/FacilityLi
 import SlotList from "./Component/Reports/Daily_Jobs_Reports/List/SlotList.js";
 import MembersList from "./Component/Reports/Daily_Jobs_Reports/List/MmembersList.js";
 import TrainerList from "./Component/Reports/Daily_Jobs_Reports/List/TrainerList.js";
+import MemberTypeList from "./Component/Reports/Daily_Jobs_Reports/List/MemberTypeList.js";
+import GoalList from "./Component/Reports/Daily_Jobs_Reports/List/GoalList.js";
+import CollectorList from "./Component/Reports/Daily_Jobs_Reports/List/CollectorList.js";
+import MembersList1 from "./Component/Reports/Daily_Jobs_Reports/List/MemberList1.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -208,6 +212,10 @@ function App() {
                 <Route exact path="/SlotList" element={<SlotList />} />
                 <Route exact path="/MemberList" element={<MembersList />} />
                 <Route exact path="/TrainerList" element={<TrainerList />} />
+                <Route exact path="/MemberTypeList" element={<MemberTypeList />} />
+                <Route exact path="/GoalList" element={<GoalList />} />
+                <Route exact path="/CollectorList" element={<CollectorList />} />
+                <Route exact path="/MemberListCable" element={<MembersList1 />} />
 
 
                 {/* Rountes for ledgers reports */}

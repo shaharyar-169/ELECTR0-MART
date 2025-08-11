@@ -407,9 +407,13 @@ export default function GeneralLedger() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription,
+
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024'
 
 
         }).toString();
@@ -501,7 +505,7 @@ export default function GeneralLedger() {
                         fontFamily: getfontstyle,
                         paddingBottom: "5px",
                         lineHeight: "3px",
-                        color: "black",
+                        // color: fontcolor,
                         textAlign: "start",
                     }}
                 >
@@ -511,52 +515,174 @@ export default function GeneralLedger() {
         );
     };
 
+
     const customStyles1 = (hasError) => ({
         control: (base, state) => ({
             ...base,
             height: "24px",
             minHeight: "unset",
-            width: 250,
+            width: 360,
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             backgroundColor: getcolor,
             color: fontcolor,
-            caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
+            caretColor: getcolor === "white" ? "black" : "white",
             borderRadius: 0,
-            border: `1px solid ${fontcolor}`, // Fixed Template Literal
+            border: `1px solid ${fontcolor}`,
             transition: "border-color 0.15s ease-in-out",
             "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
+                borderColor: state.isFocused ? base.borderColor : fontcolor,
             },
             padding: "0 8px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            boxShadow: "none",
+            "&:focus-within": {
+                borderColor: "#3368B5",
+                boxShadow: "0 0 0 1px #3368B5",
+            }
         }),
-        dropdownIndicator: (base) => ({
+
+        menu: (base) => ({
+            ...base,
+            marginTop: "5px",
+            borderRadius: 0,
+            backgroundColor: getcolor,
+            border: `1px solid ${fontcolor}`,
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            zIndex: 9999,
+        }),
+        menuList: (base) => ({
+            ...base,
+            padding: 0,
+            maxHeight: "200px",
+            // Scrollbar styling for Webkit browsers
+            "&::-webkit-scrollbar": {
+                width: "8px",
+                height: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+                background: getcolor,
+                borderRadius: "10px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+                backgroundColor: fontcolor,
+                borderRadius: "10px",
+                border: `2px solid ${getcolor}`,
+                "&:hover": {
+                    backgroundColor: "#3368B5",
+                }
+            },
+            // Scrollbar styling for Firefox
+            scrollbarWidth: "thin",
+            scrollbarColor: `${fontcolor} ${getcolor}`,
+        }),
+        option: (base, state) => ({
+            ...base,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            backgroundColor: state.isSelected
+                ? "#3368B5"
+                : state.isFocused
+                    ? "#3368B5"
+                    : getcolor,
+            color: state.isSelected
+                ? "white"
+                : fontcolor,      // black color
+
+            "&:hover": {
+                backgroundColor: "#3368B5",
+                color: getcolor,   // white color 
+                cursor: "pointer",
+            },
+            "&:active": {
+                backgroundColor: "#1a66cc",
+            },
+            transition: "background-color 0.2s ease, color 0.2s ease",
+        }),
+        dropdownIndicator: (base, state) => ({
             ...base,
             padding: 0,
             marginTop: "-5px",
             fontSize: "18px",
             display: "flex",
             textAlign: "center",
+            color: fontcolor,
+            transition: "transform 0.2s ease",
+            transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+            "&:hover": {
+                color: "#3368B5",
+            }
+        }),
+        indicatorSeparator: () => ({
+            display: "none",
         }),
         singleValue: (base) => ({
             ...base,
             marginTop: "-5px",
             textAlign: "left",
             color: fontcolor,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
         }),
         input: (base) => ({
             ...base,
-            color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
-            caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+            color: getcolor === "white" ? "black" : fontcolor,
+            caretColor: getcolor === "white" ? "black" : "white",
+            marginTop: "-5px",
         }),
         clearIndicator: (base) => ({
             ...base,
             marginTop: "-5px",
+            padding: "0 4px",
+            color: fontcolor,
+            "&:hover": {
+                color: "#ff4444",
+            }
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: `${fontcolor}80`, // 50% opacity
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            marginTop: "-5px",
+        }),
+        noOptionsMessage: (base) => ({
+            ...base,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            color: fontcolor,
+            backgroundColor: getcolor,
+        }),
+        loadingMessage: (base) => ({
+            ...base,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            color: fontcolor,
+            backgroundColor: getcolor,
+        }),
+        multiValue: (base) => ({
+            ...base,
+            backgroundColor: `${fontcolor}20`, // Light background for tags
+        }),
+        multiValueLabel: (base) => ({
+            ...base,
+            color: fontcolor,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+        }),
+        multiValueRemove: (base) => ({
+            ...base,
+            color: `${fontcolor}80`,
+            "&:hover": {
+                backgroundColor: "#ff4444",
+                color: "white",
+            }
         }),
     });
+
+
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -1249,21 +1375,25 @@ export default function GeneralLedger() {
         width: "4%",
     };
     const forthColWidth = {
-        width: "32.7%",
+        width: "41.7%",
     };
     const fifthColWidth = {
-        width: "15%",
+        width: "12%",
     };
     const sixthColWidth = {
-        width: "15%",
+        width: "12%",
     };
     const seventhColWidth = {
-        width: "15%",
+        width: "12%",
     };
 
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1573,9 +1703,24 @@ export default function GeneralLedger() {
                                                 setCompanyselectdatavalue('')
                                             }
                                         }}
+                                        onInputChange={(inputValue, { action }) => {
+                                            if (action === "input-change") {
+                                                return inputValue.toUpperCase();
+                                            }
+                                            return inputValue;
+                                        }}
                                         components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
+                                        styles={{
+                                            ...customStyles1(!saleType),
+                                            placeholder: (base) => ({
+                                                ...base,
+                                                textAlign: "left",
+                                                marginLeft: "0",
+                                                justifyContent: "flex-start",
+                                                color: fontcolor,
+                                                marginTop: '-5px'
+                                            })
+                                        }}
                                         isClearable
                                         placeholder="ALL"
                                     />
@@ -1623,19 +1768,19 @@ export default function GeneralLedger() {
                                         color: fontcolor,
                                     }}
                                 >
-                                    <option value="">All</option>
-                                    <option value="CRV">Cash Receive Vorcher</option>
-                                    <option value="CPV">Cash Payment Vorcher</option>
-                                    <option value="BRV">Bank Receive Vorcher</option>
-                                    <option value="BPV">Bank Payment Vorcher</option>
-                                    <option value="JRV">Journal Vorcher</option>
-                                    <option value="INV">Item Sale</option>
-                                    <option value="SRN">Sale Return</option>
-                                    <option value="BIL">Purchase</option>
-                                    <option value="PRN">Purchase Return</option>
-                                    <option value="ISS">Issue</option>
-                                    <option value="REC">Received</option>
-                                    <option value="SLY">Salary</option>
+                                    <option value="">ALL</option>
+                                    <option value="CRV">CASH RECEIVE VORCHER</option>
+                                    <option value="CPV">Cash PAYMENT VORCHER</option>
+                                    <option value="BRV">Bank RECEIVE VORCHER</option>
+                                    <option value="BPV">BANK PAYMENT VORCHER</option>
+                                    <option value="JRV">JOURNAL VORCHER</option>
+                                    <option value="INV">ITEM SALE</option>
+                                    <option value="SRN">SALE RETURN</option>
+                                    <option value="BIL">PURCHASE</option>
+                                    <option value="PRN">PURCHASE RETURN</option>
+                                    <option value="ISS">ISSUE</option>
+                                    <option value="REC">RECEIVED</option>
+                                    <option value="SLY">SALARY</option>
                                 </select>
                             </div>
                         </div>
@@ -1840,38 +1985,66 @@ export default function GeneralLedger() {
                             </div>
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                    <span
+                                        style={{
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
                                         Search :
                                     </span>{" "}
                                 </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
-                                    autoComplete="off"
-                                    style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    onChange={(e) =>
-                                        setSearchQuery((e.target.value || "").toUpperCase())
-                                    
-                                    } />
+                                <div style={{ position: "relative", display: "inline-block" }}>
+                                    <input
+                                        ref={input2Ref}
+                                        onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                        type="text"
+                                        id="searchsubmit"
+                                        placeholder="Item description"
+                                        value={searchQuery}
+                                        autoComplete="off"
+                                        style={{
+                                            marginRight: "20px",
+                                            width: "200px",
+                                            height: "24px",
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            color: fontcolor,
+                                            backgroundColor: getcolor,
+                                            border: `1px solid ${fontcolor}`,
+                                            outline: "none",
+                                            paddingLeft: "10px",
+                                            paddingRight: "25px", // space for the clear icon
+                                        }}
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.border = "2px solid red")
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                        }
+                                        onChange={(e) =>
+                                            setSearchQuery((e.target.value || "").toUpperCase())
+                                        }
+                                    />
+                                    {searchQuery && (
+                                        <span
+                                            onClick={() => setSearchQuery("")}
+                                            style={{
+                                                position: "absolute",
+                                                right: "30px",
+                                                top: "50%",
+                                                transform: "translateY(-50%)",
+                                                cursor: "pointer",
+                                                fontSize: "20px",
+                                                color: fontcolor,
+                                                userSelect: "none",
+                                            }}
+                                        >
+                                            ×
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

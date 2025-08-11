@@ -239,11 +239,15 @@ background: transparent !important;
   background-color: #021A33 !important;
 } */
 
-.selected-background {
+/* .selected-background{
   background-color: #3368B5 !important;
   color: white !important;
-  /* font-weight: bold !important; */
-}
+} */
+
+/* .selected-background {
+  background-color: var(--selected-bg-color) !important;
+  color: white !important;
+} */
 
 
 /* /////////////////////// CUSTOME SCROLL BAR STYLING ///////////////////////////// */
@@ -356,6 +360,6 @@ h2.react-datepicker__current-month {
 /* style for all select for ALL */
 
 
-.css-1mndiq5-menu{
+/* .css-1mndiq5-menu{
   background-color: red !important;
-}
+} */

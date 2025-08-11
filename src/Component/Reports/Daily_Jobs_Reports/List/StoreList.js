@@ -16,6 +16,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 import '../../../../index.css';
+import './list.css'
 
 export default function StoreList() {
   const navigate = useNavigate();
@@ -52,11 +53,21 @@ export default function StoreList() {
     gettodate,
     getfontstyle,
     getdatafontsize,
+    getnavbarbackgroundcolor
+
   } = useTheme();
+
+  console.log('backgroundcolor', getnavbarbackgroundcolor)
 
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
+
+   useEffect(() => {
+    document.documentElement.style.setProperty("--navbar-bg-color", getnavbarbackgroundcolor);
+  }, [getnavbarbackgroundcolor]);
+
+  
 
   const comapnyname = organisation.description;
 
@@ -214,16 +225,16 @@ export default function StoreList() {
         }
 
         // Set background color for odd-numbered rows
-        // if (isOddRow) {
-        // 	doc.setFillColor(240); // Light background color
-        // 	doc.rect(
-        // 		startX,
-        // 		startY + (i - startIndex + 2) * rowHeight,
-        // 		tableWidth,
-        // 		rowHeight,
-        // 		"F"
-        // 	);
-        // }
+        if (isOddRow) {
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
         // Draw row borders
         doc.setDrawColor(0); // Set color for borders
@@ -678,9 +689,9 @@ export default function StoreList() {
   const fifthColWidth = {
     width: "10%",
   };
-   
 
-  
+
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -929,11 +940,19 @@ export default function StoreList() {
                   key={`${i}-${selectedIndex}`}
                   ref={(el) => (rowRefs.current[i] = el)}
                   onClick={() => handleRowClick(i)}
-                  className={selectedIndex === i ? "selected-background" : ""}
+
+                  className={selectedIndex === i ? 'selected-background' : ""}
                   style={{
                     backgroundColor: getcolor,
                     color: fontcolor,
                   }}
+
+                  // style={{
+                  //   backgroundColor: selectedIndex === i
+                  //     ? 'var(--selected-bg-color)'
+                  //     : getcolor, color: fontcolor,
+                  // }}
+
                 >
                   <td className="text-start" style={firstColWidth}>
                     {item.Code}
@@ -991,13 +1010,13 @@ export default function StoreList() {
   };
 
 
- 
+
   useHotkeys("alt+s", () => {
-  fetchReceivableReport();
-  resetSorting();
-}, { preventDefault: true });
-  
-  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+    fetchReceivableReport();
+    resetSorting();
+  }, { preventDefault: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
@@ -1083,6 +1102,8 @@ export default function StoreList() {
                   <option value="N">Non-Active</option>
                 </select>
               </div>
+
+
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
@@ -1252,6 +1273,7 @@ export default function StoreList() {
               className="table-scroll"
               style={{
                 backgroundColor: textColor,
+                // '--selected-bg-color': getnavbarbackgroundcolor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "60vh",
