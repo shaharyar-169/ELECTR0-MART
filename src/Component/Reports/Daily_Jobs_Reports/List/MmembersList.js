@@ -153,12 +153,13 @@ export default function MembersList() {
             item.Mobile,
             item.Status,
             item.NIC,
-            item.Email,
+            // item.Email,
             item.DOB,
             item["Join Date"],
             item.Monthly,
             item.Trainer,
             item.Slot,
+             item.User,
         ]);
 
         // Add summary row to the table
@@ -171,14 +172,15 @@ export default function MembersList() {
             "Mobile",
             "Status",
             "NIC",
-            "Email",
+            // "Email",
             "DOB",
             "Join Date",
             "Monthly",
             "Trainer",
             "Slot",
+             "User",
         ];
-        const columnWidths = [15, 40, 23, 15, 30, 45, 22, 20, 18, 40, 25];
+        const columnWidths = [15, 40, 23, 15, 30, 22, 20, 18, 40, 25,45];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -619,12 +621,13 @@ export default function MembersList() {
             "Mobile",
             "Status",
             "NIC",
-            "Email",
+            // "Email",
             "DOB",
             "Join Date",
             "Monthly",
             "Trainer",
             "Slot",
+              "User",
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -637,12 +640,13 @@ export default function MembersList() {
                 item.Mobile,
                 item.Status,
                 item.NIC,
-                item.Email,
+                // item.Email,
                 item.DOB,
                 item["Join Date"],
                 item.Monthly,
                 item.Trainer,
                 item.Slot,
+                item.User,
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -661,7 +665,7 @@ export default function MembersList() {
         });
 
         // Set column widths
-        [10, 30, 12, 10, 15, 25, 13, 12, 12, 20, 16].forEach((width, index) => {
+        [10, 30, 12, 10, 15, 13, 12, 12, 20, 16,25].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -761,9 +765,9 @@ export default function MembersList() {
     const fifthColWidth = {
         width: "8%",
     };
-    const sixthColWidth = {
-        width: "15.5%",
-    };
+    // const sixthColWidth = {
+    //     width: "15.5%",
+    // };
     const seventhColWidth = {
         width: "7%",
     };
@@ -777,13 +781,21 @@ export default function MembersList() {
         width: "13%",
     };
     const elewnthColWidth = {
-        width: "8.5%",
+        width: "12%",
     };
 
-    useHotkeys("alt+s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    const tweltheColWidth = {
+        width: "12%",
+    };
+
+   useHotkeys("alt+s", () => {
+            fetchReceivableReport();
+               resetSorting();
+        }, { preventDefault: true, enableOnFormTags: true });
+    
+        useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+        useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+        useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -893,12 +905,13 @@ export default function MembersList() {
         Status: [],
         NIC: [],
         Mobile: [],
-        Email: [],
+        // Email: [],
         DOB: [],
         "Join Date": [],
         Monthly: [],
         Trainer: [],
         Slot: [],
+        User: [],
     });
 
     const [columnSortOrders, setColumnSortOrders] = useState({
@@ -907,12 +920,13 @@ export default function MembersList() {
         Status: "",
         NIC: "",
         Mobile: "",
-        Email: "",
+        // Email: "",
         DOB: "",
         "Join Date": "",
         Monthly: "",
         Trainer: "",
         Slot: "",
+        User: "",
     });
 
     // Transform table data into column-oriented format
@@ -924,60 +938,62 @@ export default function MembersList() {
                 Status: tableData.map((row) => row.Status),
                 NIC: tableData.map((row) => row.NIC),
                 Mobile: tableData.map((row) => row.Mobile),
-                Email: tableData.map((row) => row.Email),
+                // Email: tableData.map((row) => row.Email),
                 DOB: tableData.map((row) => row.DOB),
                 "Join Date": tableData.map((row) => row["Join Date"]),
                 Monthly: tableData.map((row) => row.Monthly),
                 Trainer: tableData.map((row) => row.Trainer),
                 Slot: tableData.map((row) => row.Slot),
+                User: tableData.map((row) => row.User),
+
             };
             setColumns(newColumns);
         }
     }, [tableData]);
 
-   const handleSorting = (col) => {
-    // Always sort in descending order on first click (or toggle if already sorted)
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+    const handleSorting = (col) => {
+        // Always sort in descending order on first click (or toggle if already sorted)
+        const currentOrder = columnSortOrders[col];
+        const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    // Create an array of indices [0, 1, 2, ..., n-1]
-    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+        // Create an array of indices [0, 1, 2, ..., n-1]
+        const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-    // Sort the indices based on the values in the specified column
-    indices.sort((a, b) => {
-      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+        // Sort the indices based on the values in the specified column
+        indices.sort((a, b) => {
+            const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+            const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
+            const numA = parseFloat(aVal.replace(/,/g, ""));
+            const numB = parseFloat(bVal.replace(/,/g, ""));
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-    });
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return newOrder === "ASC" ? numA - numB : numB - numA;
+            } else {
+                return newOrder === "ASC"
+                    ? aVal.localeCompare(bVal)
+                    : bVal.localeCompare(aVal);
+            }
+        });
 
-    // Reorder all columns based on the sorted indices
-    const newColumns = Object.keys(columns).reduce((acc, key) => {
-      acc[key] = indices.map((index) => columns[key][index]);
-      return acc;
-    }, {});
+        // Reorder all columns based on the sorted indices
+        const newColumns = Object.keys(columns).reduce((acc, key) => {
+            acc[key] = indices.map((index) => columns[key][index]);
+            return acc;
+        }, {});
 
-    setColumns(newColumns);
+        setColumns(newColumns);
 
-    // Update the sort order state
-    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-      (acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      },
-      {}
-    );
-    setColumnSortOrders(updatedSortOrders);
-  };
+        // Update the sort order state
+        const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+            (acc, key) => {
+                acc[key] = key === col ? newOrder : null;
+                return acc;
+            },
+            {}
+        );
+        setColumnSortOrders(updatedSortOrders);
+    };
 
     const resetSorting = () => {
         setColumnSortOrders({
@@ -986,12 +1002,13 @@ export default function MembersList() {
             Status: null,
             NIC: null,
             Mobile: null,
-            Email: null,
+            // Email: null,
             DOB: null,
             "Join Date": null,
             Monthly: null,
             Trainer: null,
             Slot: null,
+            User: null,
         });
     };
 
@@ -1011,12 +1028,13 @@ export default function MembersList() {
             columns.Mobile?.length || 0,
             columns.Status?.length || 0,
             columns.NIC?.length || 0,
-            columns.Email?.length || 0,
+            // columns.Email?.length || 0,
             columns.DOB?.length || 0,
             columns["Join Date"]?.length || 0,
             columns.Monthly?.length || 0,
             columns.Trainer?.length || 0,
             columns.Slot?.length || 0,
+            columns.User?.length || 0,
         );
 
         const rows = [];
@@ -1027,12 +1045,13 @@ export default function MembersList() {
                 Mobile: columns.Mobile[i],
                 Status: columns.Status[i],
                 NIC: columns.NIC[i],
-                Email: columns.Email[i],
+                // Email: columns.Email[i],
                 DOB: columns.DOB[i],
                 "Join Date": columns["Join Date"][i],
                 Monthly: columns.Monthly[i],
                 Trainer: columns.Trainer[i],
                 Slot: columns.Slot[i],
+                User: columns.User[i],
             });
         }
 
@@ -1064,12 +1083,12 @@ export default function MembersList() {
                             <td style={fifthColWidth}></td>
                             <td style={thirdColWidth}></td>
                             <td style={forthColWidth}></td>
-                            <td style={sixthColWidth}></td>
                             <td style={seventhColWidth}></td>
                             <td style={eightColWidth}></td>
                             <td style={ninthColWidth}></td>
                             <td style={tenthColWidth}></td>
                             <td style={elewnthColWidth}></td>
+                            <td style={tweltheColWidth}></td>
                         </tr>
                     </>
                 ) : (
@@ -1103,9 +1122,7 @@ export default function MembersList() {
                                         {item.NIC}
                                     </td>
 
-                                    <td className="text-start" style={sixthColWidth}>
-                                        {item.Email}
-                                    </td>
+
                                     <td className="text-start" style={seventhColWidth}>
                                         {item.DOB}
                                     </td>
@@ -1120,6 +1137,9 @@ export default function MembersList() {
                                     </td>
                                     <td className="text-start" style={elewnthColWidth}>
                                         {item.Slot}
+                                    </td>
+                                    <td className="text-start" style={tweltheColWidth}>
+                                        {item.User}
                                     </td>
                                 </tr>
                             );
@@ -1145,12 +1165,13 @@ export default function MembersList() {
                             <td style={fifthColWidth}></td>
                             <td style={thirdColWidth}></td>
                             <td style={forthColWidth}></td>
-                            <td style={sixthColWidth}></td>
+
                             <td style={seventhColWidth}></td>
                             <td style={eightColWidth}></td>
                             <td style={ninthColWidth}></td>
                             <td style={tenthColWidth}></td>
                             <td style={elewnthColWidth}></td>
+                            <td style={tweltheColWidth}></td>
                         </tr>
                     </>
                 )}
@@ -1461,17 +1482,7 @@ export default function MembersList() {
                                             ></i>
                                         </td>
 
-                                        <td
-                                            className="border-dark"
-                                            style={sixthColWidth}
-                                            onClick={() => handleSorting("Email")}
-                                        >
-                                            Email{" "}
-                                            <i
-                                                className="fa-solid fa-caret-down caretIconStyle"
-                                                style={getIconStyle("Email")}
-                                            ></i>
-                                        </td>
+
 
                                         {/* DOB Column */}
                                         <td
@@ -1534,6 +1545,17 @@ export default function MembersList() {
                                                 style={getIconStyle("Slot")}
                                             ></i>
                                         </td>
+                                        <td
+                                            className="border-dark"
+                                            style={tweltheColWidth}
+                                            onClick={() => handleSorting("User")}
+                                        >
+                                            User{" "}
+                                            <i
+                                                className="fa-solid fa-caret-down caretIconStyle"
+                                                style={getIconStyle("User")}
+                                            ></i>
+                                        </td>
                                     </tr>
                                 </thead>
                             </table>
@@ -1564,7 +1586,7 @@ export default function MembersList() {
                         </div>
                     </div>
 
-                    {/* <div
+                    <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
                             borderTop: `1px solid ${fontcolor}`,
@@ -1609,13 +1631,7 @@ export default function MembersList() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
-                        <div
-                            style={{
-                                ...sixthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
+
                         <div
                             style={{
                                 ...seventhColWidth,
@@ -1651,7 +1667,15 @@ export default function MembersList() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
-                    </div> */}
+
+                        <div
+                            style={{
+                                ...tweltheColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        ></div>
+                    </div>
 
                     <div
                         style={{
