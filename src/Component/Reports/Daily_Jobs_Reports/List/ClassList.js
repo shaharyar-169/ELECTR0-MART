@@ -80,8 +80,10 @@ export default function ClassList() {
     setIsLoading(true);
     const formData = new URLSearchParams({
       FStrSts: transectionType,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      code: 'NASIRTRD',
+      FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
@@ -675,9 +677,13 @@ export default function ClassList() {
     width: "13%",
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
+  useHotkeys("alt+s", () => {
+    fetchReceivableReport();
+    resetSorting();
+  }, { preventDefault: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -809,7 +815,7 @@ export default function ClassList() {
         Description: tableData.map(row => row.Description),
         Status: tableData.map(row => row.Status),
         Trainer: tableData.map(row => row.Trainer),
-        From : tableData.map(row => row.From ),
+        From: tableData.map(row => row.From),
         To: tableData.map(row => row.To),
         Days: tableData.map(row => row.Days)
       };
@@ -854,130 +860,143 @@ export default function ClassList() {
     setColumnSortOrders(resetSortOrders);
   };
 
- const renderTableData = () => {
-  const rowCount = Math.max(
-    columns.Code.length,
-    columns.Description.length,
-    columns.Status.length,
-    columns.Trainer.length,
-    columns.From.length,
-    columns.To.length,
-    columns.Days.length
-  );
 
-  const rows = [];
-  for (let i = 0; i < rowCount; i++) {
-    rows.push({
-      Code:columns.Code[i],
-      Description:columns.Description[i],
-      Status:columns.Status[i],
-      Trainer:columns.Trainer[i],
-      From:columns.From [i],
-      To:columns.To[i],
-      Days:columns.Days[i]
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      Status: null,
+      Trainer: null,
+      From: null,
+      To: null,
+      Days: null,
+
     });
-  }
+  };
+  const renderTableData = () => {
+    const rowCount = Math.max(
+      columns.Code.length,
+      columns.Description.length,
+      columns.Status.length,
+      columns.Trainer.length,
+      columns.From.length,
+      columns.To.length,
+      columns.Days.length
+    );
 
-  return (
-    <>
-      {isLoading ? (
-        <>
-          <tr style={{ backgroundColor: getcolor }}>
-            <td colSpan="7" className="text-center">
-              <Spinner animation="border" variant="primary" />
-            </td>
-          </tr>
-          {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 7 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+    const rows = [];
+    for (let i = 0; i < rowCount; i++) {
+      rows.push({
+        Code: columns.Code[i],
+        Description: columns.Description[i],
+        Status: columns.Status[i],
+        Trainer: columns.Trainer[i],
+        From: columns.From[i],
+        To: columns.To[i],
+        Days: columns.Days[i]
+      });
+    }
+
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="7" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={seventhColWidth}></td>
-          </tr>
-        </>
-      ) : (
-        <>
-          {rows.map((item, i) => {
-            totalEnteries += 1;
-            return (
+            {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
               <tr
-                key={`${i}-${selectedIndex}`}
-                ref={(el) => (rowRefs.current[i] = el)}
-                onClick={() => handleRowClick(i)}
-                className={selectedIndex === i ? "selected-background" : ""}
+                key={`blank-${rowIndex}`}
                 style={{
                   backgroundColor: getcolor,
                   color: fontcolor,
                 }}
               >
-                <td className="text-start" style={firstColWidth}>
-                  {item.Code}
-                </td>
-                <td className="text-start" style={secondColWidth}>
-                  {item.Description}
-                </td>
-                <td className="text-center" style={thirdColWidth}>
-                  {item.Status}
-                </td>
-                <td className="text-start" style={forthColWidth}>
-                  {item.Trainer}
-                </td>
-                <td className="text-start" style={fifthColWidth}>
-                  {item.From}
-                </td>
-                <td className="text-start" style={sixthColWidth}>
-                  {item.To}
-                </td>
-                <td className="text-start" style={seventhColWidth}>
-                  {item.Days}
-                </td>
+                {Array.from({ length: 7 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
               </tr>
-            );
-          })}
-          {Array.from({
-            length: Math.max(0, 27 - rows.length),
-          }).map((_, rowIndex) => (
-            <tr
-              key={`blank-${rowIndex}`}
-              style={{
-                backgroundColor: getcolor,
-                color: fontcolor,
-              }}
-            >
-              {Array.from({ length: 7 }).map((_, colIndex) => (
-                <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-              ))}
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
             </tr>
-          ))}
-          <tr>
-            <td style={firstColWidth}></td>
-            <td style={secondColWidth}></td>
-            <td style={thirdColWidth}></td>
-            <td style={forthColWidth}></td>
-            <td style={fifthColWidth}></td>
-            <td style={sixthColWidth}></td>
-            <td style={seventhColWidth}></td>
-          </tr>
-        </>
-      )}
-    </>
-  );
-};
+          </>
+        ) : (
+          <>
+            {rows.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: fontcolor,
+                  }}
+                >
+                  <td className="text-start" style={firstColWidth}>
+                    {item.Code}
+                  </td>
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Description}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item.Status}
+                  </td>
+                  <td className="text-start" style={forthColWidth}>
+                    {item.Trainer}
+                  </td>
+                  <td className="text-start" style={fifthColWidth}>
+                    {item.From}
+                  </td>
+                  <td className="text-start" style={sixthColWidth}>
+                    {item.To}
+                  </td>
+                  <td className="text-start" style={seventhColWidth}>
+                    {item.Days}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 27 - rows.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 7 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
+  };
 
   const getIconStyle = (colKey) => ({
     transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
@@ -1066,9 +1085,9 @@ export default function ClassList() {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 
@@ -1378,7 +1397,14 @@ export default function ClassList() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={fetchReceivableReport}
+              // onClick={fetchReceivableReport}
+              onClick={
+                () => {
+                  fetchReceivableReport();
+                  resetSorting();
+                }
+              }
+
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

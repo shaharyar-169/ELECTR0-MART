@@ -180,7 +180,7 @@ export default function MembersList() {
             "Slot",
              "User",
         ];
-        const columnWidths = [15, 40, 23, 15, 30, 22, 20, 18, 40, 25,45];
+        const columnWidths = [15, 55, 22, 14, 29, 22, 20, 18, 38, 38,20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -565,10 +565,10 @@ export default function MembersList() {
 
         let typestatus =
             transectionType === "N"
-                ? "Non-Active"
+                ? "NON-ACTIVE"
                 : transectionType === "A"
-                    ? "Active"
-                    : "All";
+                    ? "ACTIVE"
+                    : "ALL";
 
         let type =
             transectionType === "MN"
@@ -1258,9 +1258,9 @@ export default function MembersList() {
                                         color: fontcolor,
                                     }}
                                 >
-                                    <option value="">All</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Non-Active">Non-Active</option>
+                                    <option value="">ALL</option>
+                                    <option value="Active">ACTIVE</option>
+                                    <option value="Non-Active">NON-ACTIVE</option>
                                 </select>
                             </div>
                             <div

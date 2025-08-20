@@ -515,7 +515,7 @@ export default function TrainerList() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
+            `A${companyRow.number}:${String.fromCharCode(72 + numColumns - 1)}${companyRow.number
             }`
         );
 
@@ -527,7 +527,7 @@ export default function TrainerList() {
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
+            `A${storeListRow.number}:${String.fromCharCode(72 + numColumns - 1)}${storeListRow.number
             }`
         );
 
@@ -624,10 +624,20 @@ export default function TrainerList() {
         });
 
         // Set column widths
-        [10, 20, 10, 25, 35, 25, 13, 21,12,12].forEach((width, index) => {
+        [10, 20, 10, 25, 35, 25, 13, 21, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
+        // Add a blank row
+        worksheet.addRow([]);
+        // Get current date and time
+        const getCurrentTime = () => {
+            const today = new Date();
+            const hh = String(today.getHours()).padStart(2, "0");
+            const mm = String(today.getMinutes()).padStart(2, "0");
+            const ss = String(today.getSeconds()).padStart(2, "0");
+            return `${hh}:${mm}:${ss}`;
+        };
         // Get current date
         const getCurrentDate = () => {
             const today = new Date();
@@ -636,8 +646,39 @@ export default function TrainerList() {
             const year = today.getFullYear();
             return `${day}-${month}-${year}`;
         };
-
+        const currentTime = getCurrentTime();
         const currentdate = getCurrentDate();
+        const userid = user.tusrid;
+
+        // Add date and time row
+        const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+        const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+
+        // Merge across all columns
+        worksheet.mergeCells(
+            `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+        );
+        worksheet.mergeCells(
+            `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+        );
 
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
@@ -701,9 +742,13 @@ export default function TrainerList() {
         width: "8%",
     };
 
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        resetSorting();
+    }, { preventDefault: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -823,16 +868,16 @@ export default function TrainerList() {
 
 
     const [columnSortOrders, setColumnSortOrders] = useState({
-        Code: "ASC",
-        Trainer: "ASC",
-        Status: "ASC",
-        Father: "ASC",
-        "Add 1.": "ASC",
-        "Add 2.": "ASC",
-        Mobile: "ASC",
-        Email: "ASC",
-        DOB: "ASC",
-        "Join Date": "ASC"
+        Code: "null",
+        Trainer: "null",
+        Status: "null",
+        Father: "null",
+        "Add 1.": "null",
+        "Add 2.": "null",
+        Mobile: "null",
+        Email: "null",
+        DOB: "null",
+        "Join Date": "null"
     });
 
 
@@ -856,41 +901,65 @@ export default function TrainerList() {
         }
     }, [tableData]);
 
+    const resetSorting = () => {
+        setColumnSortOrders({
+            Code: null,
+            Trainer: null,
+            Status: null,
+            Father: null,
+            "Add 1.": null,
+            "Add 2.": null,
+            Mobile: null,
+            Email: null,
+            DOB: null,
+            "Join Date": null,
+
+        });
+    };
+
 
     const handleSorting = (col) => {
+        // Always sort in descending order on first click (or toggle if already sorted)
         const currentOrder = columnSortOrders[col];
         const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-        const columnData = [...columns[col]];
+        // Create an array of indices [0, 1, 2, ..., n-1]
+        const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-        columnData.sort((a, b) => {
-            const aValue = a !== null ? a.toString() : "";
-            const bValue = b !== null ? b.toString() : "";
+        // Sort the indices based on the values in the specified column
+        indices.sort((a, b) => {
+            const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+            const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-            const numA = parseFloat(aValue.replace(/,/g, ""));
-            const numB = parseFloat(bValue.replace(/,/g, ""));
+            const numA = parseFloat(aVal.replace(/,/g, ""));
+            const numB = parseFloat(bVal.replace(/,/g, ""));
 
             if (!isNaN(numA) && !isNaN(numB)) {
                 return newOrder === "ASC" ? numA - numB : numB - numA;
             } else {
                 return newOrder === "ASC"
-                    ? aValue.localeCompare(bValue)
-                    : bValue.localeCompare(aValue);
+                    ? aVal.localeCompare(bVal)
+                    : bVal.localeCompare(aVal);
             }
         });
 
-        // Update only the clicked column's data
-        setColumns((prev) => ({
-            ...prev,
-            [col]: columnData,
-        }));
-
-        // Reset all columns' sort order except the current one
-        const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-            acc[key] = key === col ? newOrder : null;
+        // Reorder all columns based on the sorted indices
+        const newColumns = Object.keys(columns).reduce((acc, key) => {
+            acc[key] = indices.map((index) => columns[key][index]);
             return acc;
         }, {});
-        setColumnSortOrders(resetSortOrders);
+
+        setColumns(newColumns);
+
+        // Update the sort order state
+        const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+            (acc, key) => {
+                acc[key] = key === col ? newOrder : null;
+                return acc;
+            },
+            {}
+        );
+        setColumnSortOrders(updatedSortOrders);
     };
 
     const renderTableData = () => {
@@ -1074,15 +1143,14 @@ export default function TrainerList() {
         );
     };
 
-    const getIconStyle = (colKey) => ({
-        transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-        color: columnSortOrders[colKey]
-            ? columnSortOrders[colKey] === "ASC"
-                ? "white"
-                : "red"
-            : "white", // default to white if no sort
-        transition: "transform 0.3s ease, color 0.3s ease",
-    });
+   const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
 
     return (
         <>
@@ -1161,9 +1229,9 @@ export default function TrainerList() {
                                         color: fontcolor,
                                     }}
                                 >
-                                    <option value="">All</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Non-Active">Non-Active</option>
+                                    <option value="">ALL</option>
+                                    <option value="Active">ACTIVE</option>
+                                    <option value="Non-Active">NON-ACTIVE</option>
                                 </select>
                             </div>
 
@@ -1473,7 +1541,13 @@ export default function TrainerList() {
                             id="searchsubmit"
                             text="Select"
                             ref={input3Ref}
-                            onClick={fetchReceivableReport}
+                            // onClick={fetchReceivableReport}
+                            onClick={
+                                () => {
+                                    fetchReceivableReport();
+                                    resetSorting();
+                                }
+                            }
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

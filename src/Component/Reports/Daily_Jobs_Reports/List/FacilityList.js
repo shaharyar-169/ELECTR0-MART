@@ -80,8 +80,8 @@ export default function FacilityList() {
         setIsLoading(true);
         const formData = new URLSearchParams({
             FStrSts: transectionType,
-            //   code: organisation.code,
-            //   FLocCod: locationnumber || getLocationNumber,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
             code: 'CRYSTALGYM',
             FLocCod: '001',
             FSchTxt: searchQuery,
@@ -225,16 +225,16 @@ export default function FacilityList() {
                 }
 
                 // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+                if (isOddRow) {
+                    doc.setFillColor(240); // Light background color
+                    doc.rect(
+                        startX,
+                        startY + (i - startIndex + 2) * rowHeight,
+                        tableWidth,
+                        rowHeight,
+                        "F"
+                    );
+                }
 
                 // Draw row borders
                 doc.setDrawColor(0); // Set color for borders
@@ -464,89 +464,51 @@ export default function FacilityList() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 7; // Ensure this matches the actual number of columns
+        const numColumns = 3; // Ensure this matches the actual number of columns
+        const columnAlignments = ["left", "left", "center", "left", "left", "left", "left"];
 
-        // Define alignment for each column separately
-        const columnAlignments = {
-            1: "left", // Code
-            2: "left", // Employee
-            3: "center", // Status
-            4: "left", // Designation
-            5: "left", // Contact
-            6: "left", // Adv Code
-            7: "left", // Dlv Code
-        };
-
-        // Define fonts for different sections
+        // Define fonts
         const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
-        const fontStoreList = {
-            name: "CustomFont",
-            size: getdatafontsize,
-            bold: false,
-        };
-        const fontHeader = {
-            name: "CustomFont",
-            size: getdatafontsize,
-            bold: true,
-        };
-        const fontTableContent = {
-            name: "CustomFont",
-            size: getdatafontsize,
-            bold: false,
-        };
+        const fontStoreList = { name: "CustomFont", size: 10, bold: false };
+        const fontHeader = { name: "CustomFont", size: 10, bold: true };
+        const fontTableContent = { name: "CustomFont", size: 10, bold: false };
 
         // Add an empty row at the start
         worksheet.addRow([]);
 
-        // Add company name
-        const companyRow = worksheet.addRow([comapnyname]);
+        // Add company name (fixed typo)
+        const companyRow = worksheet.addRow([comapnyname]); // Fixed variable name
         companyRow.eachCell((cell) => {
             cell.font = fontCompanyName;
             cell.alignment = { horizontal: "center" };
         });
 
         worksheet.getRow(companyRow.number).height = 30;
-        worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
-            }`
-        );
+        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(69 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow(["Facility List"]);
+        const storeListRow = worksheet.addRow(["Slot List"]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
         });
+        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(69 + numColumns - 1)}${storeListRow.number}`);
 
-        worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
-            }`
-        );
-
-        // Add an empty row after the title section
+        // Add an empty row
         worksheet.addRow([]);
 
-        let typestatus =
-            transectionType === "N"
-                ? "Non-Active"
-                : transectionType === "A"
-                    ? "Active"
-                    : "All";
+        let typestatus = transectionType === "N" ? "NON-ACTIVE" : transectionType === "A" ? "ACTIVE" : "ALL";
         let typesearch = searchQuery || "";
 
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-                : ["STATUS :", typestatus, ""]
-        );
+        // Modified status row to respect numColumns
+        const statusRowValues = searchQuery
+            ? ["STATUS:", typestatus, `SEARCH: ${typesearch}`]
+            : ["STATUS:", typestatus, ""];
 
-        // Apply styling for the status row
+        const typeAndStoreRow3 = worksheet.addRow(statusRowValues.slice(0, numColumns));
+
         typeAndStoreRow3.eachCell((cell, colIndex) => {
-            cell.font = {
-                name: "CustomFont",
-                size: getdatafontsize,
-                bold: [1, 3].includes(colIndex),
-            };
+            cell.font = { name: "CustomFont", size: 10, bold: colIndex === 1 };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
 
@@ -554,66 +516,68 @@ export default function FacilityList() {
         const headerStyle = {
             font: fontHeader,
             alignment: { horizontal: "center", vertical: "middle" },
-            fill: {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "FFC6D9F7" },
-            },
-            border: {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            },
+            fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+            border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
         };
 
         // Add headers
-        const headers = [
-            "Code",
-            "Description",
-            "Status",
-            "Ins ID",
-            "Ins Date",
-            "Upd ID",
-            "Upd Date",
-        ];
+        const headers = ["Code", "Description", "Status", 'Ins ID', "Ins date", "Upd ID", "Upd Date"];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
-        // Add data rows
-        tableData.forEach((item) => {
-            const row = worksheet.addRow([
-                item.Code,
-                item.Description,
-                item.Status,
-                item["Ins ID"],
-                item["Ins Date"],
-                item["Upd ID"],
-                item["Upd Date"],
-            ]);
+        // Add data rows - ensure tableData has the correct structure
+        if (tableData && tableData.length > 0) {
+            tableData.forEach((item) => {
+                // Make sure item has Code, Description, and Status properties
+                const rowData = [
+                    item.Code || '',
+                    item.Description || '',
+                    item.Status || '',
+                    item['Ins ID'] || '',
+                    item['Ins Date'] || '',
+                    item['Upd ID'] || '',
+                    item['Upd Date'] || ''
 
-            row.eachCell((cell, colIndex) => {
-                cell.font = fontTableContent;
-                cell.border = {
-                    top: { style: "thin" },
-                    left: { style: "thin" },
-                    bottom: { style: "thin" },
-                    right: { style: "thin" },
-                };
+                ];
+                const row = worksheet.addRow(rowData);
 
-                // Apply individual alignment for each column
-                cell.alignment = {
-                    horizontal: columnAlignments[colIndex] || "left",
-                    vertical: "middle",
-                };
+                row.eachCell((cell, colIndex) => {
+                    cell.font = fontTableContent;
+                    cell.border = {
+                        top: { style: "thin" },
+                        left: { style: "thin" },
+                        bottom: { style: "thin" },
+                        right: { style: "thin" },
+                    };
+                    cell.alignment = {
+                        horizontal: columnAlignments[colIndex - 1] || "left",
+                        vertical: "middle",
+                    };
+                });
             });
-        });
+        } else {
+            console.warn("No tableData available or tableData is empty");
+            worksheet.addRow(["No data available"]).eachCell((cell) => {
+                cell.alignment = { horizontal: "center" };
+            });
+            worksheet.mergeCells(`A${worksheet.lastRow.number}:C${worksheet.lastRow.number}`);
+        }
 
         // Set column widths
-        [10, 40, 8, 30, 14, 14, 14].forEach((width, index) => {
+        [10, 30, 10,30, 12,12,12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
+        // Add a blank row
+        worksheet.addRow([]);
+        // Get current date and time
+        const getCurrentTime = () => {
+            const today = new Date();
+            const hh = String(today.getHours()).padStart(2, "0");
+            const mm = String(today.getMinutes()).padStart(2, "0");
+            const ss = String(today.getSeconds()).padStart(2, "0");
+            return `${hh}:${mm}:${ss}`;
+        };
         // Get current date
         const getCurrentDate = () => {
             const today = new Date();
@@ -622,15 +586,46 @@ export default function FacilityList() {
             const year = today.getFullYear();
             return `${day}-${month}-${year}`;
         };
-
+        const currentTime = getCurrentTime();
         const currentdate = getCurrentDate();
+        const userid = user.tusrid;
+
+        // Add date and time row
+        const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+        const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+
+        // Merge across all columns
+        worksheet.mergeCells(
+            `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+        );
+        worksheet.mergeCells(
+            `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+        );
 
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `FacilityList As On ${currentdate}.xlsx`);
+        saveAs(blob, `SlotList As On ${currentdate}.xlsx`);
     };
 
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
@@ -677,9 +672,13 @@ export default function FacilityList() {
         width: "13%",
     };
 
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        resetSorting();
+    }, { preventDefault: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
     useHotkeys("esc", () => navigate("/MainPage"));
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -794,13 +793,13 @@ export default function FacilityList() {
         "Upd Date": []
     });
     const [columnSortOrders, setColumnSortOrders] = useState({
-        Code: "ASC",
-        Description: "ASC",
-        Status: "ASC",
-        "Ins ID": "ASC",
-        "Ins Date": "ASC",
-        "Upd ID": "ASC",
-        "Upd Date": "ASC"
+        Code: "null",
+        Description: "null",
+        Status: "null",
+        "Ins ID": "null",
+        "Ins Date": "null",
+        "Upd ID": "null",
+        "Upd Date": "null"
     });
 
     // When you receive your initial table data, transform it into column-oriented format
@@ -821,39 +820,59 @@ export default function FacilityList() {
 
 
     const handleSorting = (col) => {
+        // Always sort in descending order on first click (or toggle if already sorted)
         const currentOrder = columnSortOrders[col];
         const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-        const columnData = [...columns[col]];
+        // Create an array of indices [0, 1, 2, ..., n-1]
+        const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-        columnData.sort((a, b) => {
-            const aValue = a !== null ? a.toString() : "";
-            const bValue = b !== null ? b.toString() : "";
+        // Sort the indices based on the values in the specified column
+        indices.sort((a, b) => {
+            const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+            const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-            const numA = parseFloat(aValue.replace(/,/g, ""));
-            const numB = parseFloat(bValue.replace(/,/g, ""));
+            const numA = parseFloat(aVal.replace(/,/g, ""));
+            const numB = parseFloat(bVal.replace(/,/g, ""));
 
             if (!isNaN(numA) && !isNaN(numB)) {
                 return newOrder === "ASC" ? numA - numB : numB - numA;
             } else {
                 return newOrder === "ASC"
-                    ? aValue.localeCompare(bValue)
-                    : bValue.localeCompare(aValue);
+                    ? aVal.localeCompare(bVal)
+                    : bVal.localeCompare(aVal);
             }
         });
 
-        // Update only the clicked column's data
-        setColumns((prev) => ({
-            ...prev,
-            [col]: columnData,
-        }));
-
-        // Reset all columns' sort order except the current one
-        const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-            acc[key] = key === col ? newOrder : null;
+        // Reorder all columns based on the sorted indices
+        const newColumns = Object.keys(columns).reduce((acc, key) => {
+            acc[key] = indices.map((index) => columns[key][index]);
             return acc;
         }, {});
-        setColumnSortOrders(resetSortOrders);
+
+        setColumns(newColumns);
+
+        // Update the sort order state
+        const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+            (acc, key) => {
+                acc[key] = key === col ? newOrder : null;
+                return acc;
+            },
+            {}
+        );
+        setColumnSortOrders(updatedSortOrders);
+    };
+
+    const resetSorting = () => {
+        setColumnSortOrders({
+            Code: null,
+            Description: null,
+            Status: null,
+            "Ins ID": null,
+            "Ins Date": null,
+            "Upd ID": null,
+            "Upd Date": null
+        });
     };
 
     const renderTableData = () => {
@@ -981,15 +1000,14 @@ export default function FacilityList() {
         );
     };
 
-    const getIconStyle = (colKey) => ({
-        transform: columnSortOrders[colKey] === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-        color: columnSortOrders[colKey]
-            ? columnSortOrders[colKey] === "ASC"
-                ? "white"
-                : "red"
-            : "white", // default to white if no sort
-        transition: "transform 0.3s ease, color 0.3s ease",
-    });
+    const getIconStyle = (colKey) => {
+        const order = columnSortOrders[colKey];
+        return {
+            transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+            color: order === "ASC" || order === "DSC" ? "red" : "white",
+            transition: "transform 0.3s ease, color 0.3s ease",
+        };
+    };
 
     return (
         <>
@@ -1068,9 +1086,9 @@ export default function FacilityList() {
                                         color: fontcolor,
                                     }}
                                 >
-                                    <option value="">All</option>
-                                    <option value="A">Active</option>
-                                    <option value="N">Non-Active</option>
+                                    <option value="">ALL</option>
+                                    <option value="A">ACTIVE</option>
+                                    <option value="N">NON-ACTIVE</option>
                                 </select>
                             </div>
 
@@ -1380,7 +1398,12 @@ export default function FacilityList() {
                             id="searchsubmit"
                             text="Select"
                             ref={input3Ref}
-                            onClick={fetchReceivableReport}
+                            // onClick={fetchReceivableReport}
+                            onClick={() => {
+                                fetchReceivableReport();
+                                resetSorting();
+
+                            }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

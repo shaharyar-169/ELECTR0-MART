@@ -77,7 +77,7 @@ export default function GoalList() {
             FAccSts: transectionType,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
-
+            FGolSts: transectionType,
             code: 'CRYSTALGYM',
             FLocCod: '001',
             FSchTxt: searchQuery,

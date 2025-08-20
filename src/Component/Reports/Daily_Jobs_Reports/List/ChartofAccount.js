@@ -503,10 +503,10 @@ export default function ChartofAccount() {
 
     let typestatus =
       transectionType === "N"
-        ? "Non-Active"
+        ? "NON-ACTIVE"
         : transectionType === "A"
-          ? "Active"
-          : "All";
+          ? "ACTIVE"
+          : "ALL";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
@@ -1073,9 +1073,9 @@ export default function ChartofAccount() {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 

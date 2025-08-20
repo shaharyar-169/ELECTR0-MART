@@ -77,7 +77,7 @@ export default function MemberTypeList() {
             FAccSts: transectionType,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
-
+            FTypSts: transectionType, 
             code: 'CRYSTALGYM',
             FLocCod: '001',
             FSchTxt: searchQuery,
