@@ -79,6 +79,7 @@ export default function SupplierProgressLedger() {
     gettodate,
     getfontstyle,
     getdatafontsize,
+    getnavbarbackgroundcolor
   } = useTheme();
 
   console.log("select year: " + getyeardescription);
@@ -1812,12 +1813,12 @@ export default function SupplierProgressLedger() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >

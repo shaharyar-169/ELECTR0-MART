@@ -80,7 +80,8 @@ export default function CustomerProgressLedger() {
         getfromdate,
         gettodate,
         getfontstyle,
-        getdatafontsize
+        getdatafontsize,
+        getnavbarbackgroundcolor
     } = useTheme();
 
     console.log("select year: " + getyeardescription);
@@ -1068,235 +1069,235 @@ export default function CustomerProgressLedger() {
 
 
     const handleDownloadCSV = async () => {
-       const workbook = new ExcelJS.Workbook();
-       const worksheet = workbook.addWorksheet("Sheet1");
-   
-       const numColumns = 6; // Ensure this matches the actual number of columns
-   
-       const columnAlignments = [
-         "left", "left", "right", "right", "right"
-   
-       ];
-   
-       // Define fonts for different sections
-       const fontCompanyName = {
-         name: "CustomFont" || "CustomFont",
-         size: 18,
-         bold: true,
-       };
-       const fontStoreList = {
-         name: "CustomFont" || "CustomFont",
-         size: 10,
-         bold: false,
-       };
-       const fontHeader = {
-         name: "CustomFont" || "CustomFont",
-         size: 10,
-         bold: true,
-       };
-       const fontTableContent = {
-         name: "CustomFont" || "CustomFont",
-         size: 10,
-         bold: false,
-       };
-   
-       // Add an empty row at the start
-       worksheet.addRow([]);
-   
-       // Add company name
-       const companyRow = worksheet.addRow([comapnyname]);
-       companyRow.eachCell((cell) => {
-         cell.font = fontCompanyName;
-         cell.alignment = { horizontal: "center" };
-       });
-   
-       worksheet.getRow(companyRow.number).height = 30;
-       worksheet.mergeCells(
-         `A${companyRow.number}:${String.fromCharCode(64 + numColumns - 1)}${companyRow.number
-         }`
-       );
-   
-       // Add Store List row
-       const storeListRow = worksheet.addRow([`Customer Progress Report As On ${toInputDate}`]);
-       storeListRow.eachCell((cell) => {
-         cell.font = fontStoreList;
-         cell.alignment = { horizontal: "center" };
-       });
-   
-       worksheet.mergeCells(
-         `A${storeListRow.number}:${String.fromCharCode(64 + numColumns - 1)}${storeListRow.number
-         }`
-       );
-   
-       // Add an empty row after the title section
-       worksheet.addRow([]);
-   
-   
-       let Accountselect = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-       let status = transectionType ? transectionType : "ALL";
-       let typesearch = searchQuery || "";
-   
-       // Apply styling for the status row
-       const typeAndStoreRow2 = worksheet.addRow(
-         ["ACCOUNT :", Accountselect, "", "YEAR :", status]
-       );
-   
-       // Merge cells for Accountselect (columns B to D)
-       worksheet.mergeCells(`B${typeAndStoreRow2.number}:C${typeAndStoreRow2.number}`);
-   
-       // Apply styling for the status row
-       typeAndStoreRow2.eachCell((cell, colIndex) => {
-         cell.font = {
-           name: "CustomFont" || "CustomFont",
-           size: 10,
-           bold: [1, 4].includes(colIndex),
-         };
-         cell.alignment = {
-           horizontal: colIndex === 2 ? "left" : "left", // Left align the account name
-           vertical: "middle"
-         };
-       });
-   
-   
-       // Header style
-       const headerStyle = {
-         font: fontHeader,
-         alignment: { horizontal: "center", vertical: "middle" },
-         fill: {
-           type: "pattern",
-           pattern: "solid",
-           fgColor: { argb: "FFC6D9F7" },
-         },
-         border: {
-           top: { style: "thin" },
-           left: { style: "thin" },
-           bottom: { style: "thin" },
-           right: { style: "thin" },
-         },
-       };
-   
-       // Add headers
-       const headers = [
-         "Sr#", "Month", "Debit", "Credit", "Balance"
-       ];
-       const headerRow = worksheet.addRow(headers);
-       headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-   
-       // Add data rows
-       tableData.forEach((item) => {
-         const row = worksheet.addRow([
-           item["Sr#"],
-           item.Month,
-           item.Debit,
-           item.Credit,
-           item.Balance,
-         ]);
-   
-         row.eachCell((cell, colIndex) => {
-           cell.font = fontTableContent;
-           cell.border = {
-             top: { style: "thin" },
-             left: { style: "thin" },
-             bottom: { style: "thin" },
-             right: { style: "thin" },
-           };
-           cell.alignment = {
-             horizontal: columnAlignments[colIndex - 1] || "left",
-             vertical: "middle",
-           };
-         });
-       });
-   
-       const totalRow = worksheet.addRow([
-         totalDebit,
-         `${totalde} | ${closingBalance}`, // Add spacing
-         amt4,
-         amt5,
-         amt6,
-   
-       ]);
-   
-       // total row added
-   
-       totalRow.eachCell((cell, colNumber) => {
-         cell.font = { bold: true };
-         cell.border = {
-           top: { style: "double" },
-           left: { style: "thin" },
-           bottom: { style: "double" },
-           right: { style: "thin" },
-         };
-   
-         // Align only the "Total" text to the right
-         if (colNumber === 1 || colNumber === 2 || colNumber === 3 || colNumber === 4 || colNumber === 5) {
-           cell.alignment = { horizontal: "right" };
-         }
-       });
-   
-       // Set column widths
-       [11, 25, 15, 15, 15].forEach((width, index) => {
-         worksheet.getColumn(index + 1).width = width;
-       });
-   
-       // Add a blank row
-       worksheet.addRow([]);
-       // Get current date and time
-       const getCurrentTime = () => {
-         const today = new Date();
-         const hh = String(today.getHours()).padStart(2, "0");
-         const mm = String(today.getMinutes()).padStart(2, "0");
-         const ss = String(today.getSeconds()).padStart(2, "0");
-         return `${hh}:${mm}:${ss}`;
-       };
-       // Get current date
-       const getCurrentDate = () => {
-         const today = new Date();
-         const day = String(today.getDate()).padStart(2, "0");
-         const month = String(today.getMonth() + 1).padStart(2, "0");
-         const year = today.getFullYear();
-         return `${day}-${month}-${year}`;
-       };
-       const currentTime = getCurrentTime();
-       const currentdate = getCurrentDate();
-       const userid = user.tusrid;
-   
-       // Add date and time row
-       const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
-       dateTimeRow.eachCell((cell) => {
-         cell.font = {
-           name: "CustomFont" || "CustomFont",
-           size: 10,
-           // bold: true
-           // italic: true,
-         };
-         cell.alignment = { horizontal: "left" };
-       });
-       const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-       dateTimeRow.eachCell((cell) => {
-         cell.font = {
-           name: "CustomFont" || "CustomFont",
-           size: 10,
-           // bold: true
-           // italic: true,
-         };
-         cell.alignment = { horizontal: "left" };
-       });
-   
-       // Merge across all columns
-       worksheet.mergeCells(
-         `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
-       );
-       worksheet.mergeCells(
-         `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
-       );
-   
-       // Generate and save the Excel file
-       const buffer = await workbook.xlsx.writeBuffer();
-       const blob = new Blob([buffer], {
-         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-       });
-       saveAs(blob, `Customer Progress Report As On ${toInputDate}.xlsx`);
-     };
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Sheet1");
+
+        const numColumns = 6; // Ensure this matches the actual number of columns
+
+        const columnAlignments = [
+            "left", "left", "right", "right", "right"
+
+        ];
+
+        // Define fonts for different sections
+        const fontCompanyName = {
+            name: "CustomFont" || "CustomFont",
+            size: 18,
+            bold: true,
+        };
+        const fontStoreList = {
+            name: "CustomFont" || "CustomFont",
+            size: 10,
+            bold: false,
+        };
+        const fontHeader = {
+            name: "CustomFont" || "CustomFont",
+            size: 10,
+            bold: true,
+        };
+        const fontTableContent = {
+            name: "CustomFont" || "CustomFont",
+            size: 10,
+            bold: false,
+        };
+
+        // Add an empty row at the start
+        worksheet.addRow([]);
+
+        // Add company name
+        const companyRow = worksheet.addRow([comapnyname]);
+        companyRow.eachCell((cell) => {
+            cell.font = fontCompanyName;
+            cell.alignment = { horizontal: "center" };
+        });
+
+        worksheet.getRow(companyRow.number).height = 30;
+        worksheet.mergeCells(
+            `A${companyRow.number}:${String.fromCharCode(64 + numColumns - 1)}${companyRow.number
+            }`
+        );
+
+        // Add Store List row
+        const storeListRow = worksheet.addRow([`Customer Progress Report As On ${toInputDate}`]);
+        storeListRow.eachCell((cell) => {
+            cell.font = fontStoreList;
+            cell.alignment = { horizontal: "center" };
+        });
+
+        worksheet.mergeCells(
+            `A${storeListRow.number}:${String.fromCharCode(64 + numColumns - 1)}${storeListRow.number
+            }`
+        );
+
+        // Add an empty row after the title section
+        worksheet.addRow([]);
+
+
+        let Accountselect = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+        let status = transectionType ? transectionType : "ALL";
+        let typesearch = searchQuery || "";
+
+        // Apply styling for the status row
+        const typeAndStoreRow2 = worksheet.addRow(
+            ["ACCOUNT :", Accountselect, "", "YEAR :", status]
+        );
+
+        // Merge cells for Accountselect (columns B to D)
+        worksheet.mergeCells(`B${typeAndStoreRow2.number}:C${typeAndStoreRow2.number}`);
+
+        // Apply styling for the status row
+        typeAndStoreRow2.eachCell((cell, colIndex) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                bold: [1, 4].includes(colIndex),
+            };
+            cell.alignment = {
+                horizontal: colIndex === 2 ? "left" : "left", // Left align the account name
+                vertical: "middle"
+            };
+        });
+
+
+        // Header style
+        const headerStyle = {
+            font: fontHeader,
+            alignment: { horizontal: "center", vertical: "middle" },
+            fill: {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFC6D9F7" },
+            },
+            border: {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            },
+        };
+
+        // Add headers
+        const headers = [
+            "Sr#", "Month", "Debit", "Credit", "Balance"
+        ];
+        const headerRow = worksheet.addRow(headers);
+        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+        // Add data rows
+        tableData.forEach((item) => {
+            const row = worksheet.addRow([
+                item["Sr#"],
+                item.Month,
+                item.Debit,
+                item.Credit,
+                item.Balance,
+            ]);
+
+            row.eachCell((cell, colIndex) => {
+                cell.font = fontTableContent;
+                cell.border = {
+                    top: { style: "thin" },
+                    left: { style: "thin" },
+                    bottom: { style: "thin" },
+                    right: { style: "thin" },
+                };
+                cell.alignment = {
+                    horizontal: columnAlignments[colIndex - 1] || "left",
+                    vertical: "middle",
+                };
+            });
+        });
+
+        const totalRow = worksheet.addRow([
+            totalDebit,
+            `${totalde} | ${closingBalance}`, // Add spacing
+            amt4,
+            amt5,
+            amt6,
+
+        ]);
+
+        // total row added
+
+        totalRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true };
+            cell.border = {
+                top: { style: "double" },
+                left: { style: "thin" },
+                bottom: { style: "double" },
+                right: { style: "thin" },
+            };
+
+            // Align only the "Total" text to the right
+            if (colNumber === 1 || colNumber === 2 || colNumber === 3 || colNumber === 4 || colNumber === 5) {
+                cell.alignment = { horizontal: "right" };
+            }
+        });
+
+        // Set column widths
+        [11, 25, 15, 15, 15].forEach((width, index) => {
+            worksheet.getColumn(index + 1).width = width;
+        });
+
+        // Add a blank row
+        worksheet.addRow([]);
+        // Get current date and time
+        const getCurrentTime = () => {
+            const today = new Date();
+            const hh = String(today.getHours()).padStart(2, "0");
+            const mm = String(today.getMinutes()).padStart(2, "0");
+            const ss = String(today.getSeconds()).padStart(2, "0");
+            return `${hh}:${mm}:${ss}`;
+        };
+        // Get current date
+        const getCurrentDate = () => {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, "0");
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const year = today.getFullYear();
+            return `${day}-${month}-${year}`;
+        };
+        const currentTime = getCurrentTime();
+        const currentdate = getCurrentDate();
+        const userid = user.tusrid;
+
+        // Add date and time row
+        const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+        const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+        dateTimeRow.eachCell((cell) => {
+            cell.font = {
+                name: "CustomFont" || "CustomFont",
+                size: 10,
+                // bold: true
+                // italic: true,
+            };
+            cell.alignment = { horizontal: "left" };
+        });
+
+        // Merge across all columns
+        worksheet.mergeCells(
+            `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+        );
+        worksheet.mergeCells(
+            `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+        );
+
+        // Generate and save the Excel file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        saveAs(blob, `Customer Progress Report As On ${toInputDate}.xlsx`);
+    };
     ///////////////////////////////////////////////////////////////////////////
 
     const dispatch = useDispatch();
@@ -1351,13 +1352,13 @@ export default function CustomerProgressLedger() {
     };
 
     useHotkeys("alt+s", () => {
-    fetchGeneralLedger();
-    //    resetSorting();
-  }, { preventDefault: true, enableOnFormTags: true });
+        fetchGeneralLedger();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-  // useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    // useHotkeys("esc", () => navigate("/MainPage"));
 
     // Adjust the content width based on sidebar state
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1781,12 +1782,12 @@ export default function CustomerProgressLedger() {
                                         position: "sticky",
                                         top: 0,
                                         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                        backgroundColor: tableHeadColor,
+                                        backgroundColor: getnavbarbackgroundcolor,
                                     }}
                                 >
                                     <tr
                                         style={{
-                                            backgroundColor: tableHeadColor,
+                                            backgroundColor: getnavbarbackgroundcolor,
                                             color: "white",
                                         }}
                                     >

@@ -98,6 +98,7 @@ export default function ItemAggingReport() {
     gettodate,
     getfontstyle,
     getdatafontsize,
+    getnavbarbackgroundcolor
   } = useTheme();
 
   useEffect(() => {
@@ -1499,12 +1500,12 @@ export default function ItemAggingReport() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
