@@ -911,7 +911,7 @@ export default function MembersList() {
     Status: [],
     Blood: [],
     Mobile: [],
-    Email: [],
+    Profession: [],
     DOB: [],
     "Join Date": [],
     Monthly: [],
@@ -925,7 +925,7 @@ export default function MembersList() {
     Status: "",
     Blood: "",
     Mobile: "",
-    Email: "",
+    Profession: "",
     DOB: "",
     "Join Date": "",
     Monthly: "",
@@ -942,7 +942,7 @@ export default function MembersList() {
         Status: tableData.map((row) => row.Status),
         Blood: tableData.map((row) => row.Blood),
         Mobile: tableData.map((row) => row.Mobile),
-        Email: tableData.map((row) => row.Email),
+        Profession: tableData.map((row) => row.Profession),
         DOB: tableData.map((row) => row.DOB),
         "Join Date": tableData.map((row) => row["Join Date"]),
         Monthly: tableData.map((row) => row.Monthly),
@@ -1004,7 +1004,7 @@ export default function MembersList() {
       Status: null,
       Blood: null,
       Mobile: null,
-      Email: null,
+      Profession: null,
       DOB: null,
       "Join Date": null,
       Monthly: null,
@@ -1029,7 +1029,7 @@ export default function MembersList() {
       columns.Mobile?.length || 0,
       columns.Status?.length || 0,
       columns.Blood?.length || 0,
-      columns.Email?.length || 0,
+      columns.Profession?.length || 0,
       columns.DOB?.length || 0,
       columns["Join Date"]?.length || 0,
       columns.Monthly?.length || 0,
@@ -1045,7 +1045,7 @@ export default function MembersList() {
         Mobile: columns.Mobile[i],
         Status: columns.Status[i],
         Blood: columns.Blood[i],
-        Email: columns.Email[i],
+        Profession: columns.Profession[i],
         DOB: columns.DOB[i],
         "Join Date": columns["Join Date"][i],
         Monthly: columns.Monthly[i],
@@ -1122,7 +1122,7 @@ export default function MembersList() {
                   </td>
 
                   <td className="text-start" style={sixthColWidth}>
-                    {item.Email}
+                    {item.Profession}
                   </td>
                   <td className="text-start" style={seventhColWidth}>
                     {item.DOB}
@@ -1480,12 +1480,12 @@ export default function MembersList() {
                     <td
                       className="border-dark"
                       style={sixthColWidth}
-                      onClick={() => handleSorting("Email")}
+                      onClick={() => handleSorting("Profession")}
                     >
-                      Email{" "}
+                      Profession{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Email")}
+                        style={getIconStyle("Profession")}
                       ></i>
                     </td>
 
