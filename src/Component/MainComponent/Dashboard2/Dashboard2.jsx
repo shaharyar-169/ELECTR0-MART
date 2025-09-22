@@ -214,7 +214,7 @@ export default function DashboardAdminDealer() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+    width: isSidebarVisible ? "calc(90vw - 0%)" : "90vw",
     position: "relative",
     top: "42%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -229,7 +229,7 @@ export default function DashboardAdminDealer() {
     overflowY: "hidden",
     wordBreak: "break-word",
     textAlign: "center",
-    // maxWidth: "1000px",
+    maxWidth: "90vw",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",

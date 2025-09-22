@@ -31,6 +31,8 @@ import MenuAdmin from "./Component/MainComponent/Header/Admin/MenuAdmin/MenuAdmi
 import Dashboard from "./Component/MainComponent/Dashboard/Dashboard.jsx";
 //////////////////////////// DASHBOARD //////////////////////////////
 import DashboardAdminDealer from "./Component/MainComponent/Dashboard2/Dashboard2.jsx";
+//////////////////////////// RESTURENT DASHBOARD //////////////////////////////
+import ResturentDashboard from "./Component/MainComponent/ResturentDashboard/Resturentdashboad.jsx";  
 
 
 //////////////////////////// List reports //////////////////////////////
@@ -307,6 +309,7 @@ function App() {
                 {/* Rountes for Dashboard */}
                 <Route exact path="/salesdashboad" element={<Dashboard />} />
                 <Route exact path="/AdminDealer" element={<DashboardAdminDealer />} />
+                <Route exact path="/ResturentDashboard" element={<ResturentDashboard />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
