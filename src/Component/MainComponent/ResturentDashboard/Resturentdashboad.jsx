@@ -27,6 +27,7 @@ export default function ResturentDashboard() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [showSale, setShowSale] = useState(false);
+  const [showSalemonthly, setshowSalemonthly] = useState(false);
 
   const [CompanySaleComparison, setCompanySaleComparison] = useState([]);
 
@@ -340,14 +341,9 @@ export default function ResturentDashboard() {
     setChartData(data);
   }, []);
 
-  // Find the maximum value for scaling
-  // const maxValue = Math.max(...chartData.map(item => item.value));
 
 
-
-  // const data = Resturentdata?.ToDayCatgSaleQntyWise || [];
-
-  // pick dataset based on toggle
+  // ------- MAIN BAR CHART DATA ----------
   // const rawData = showSale
   //   ? Resturentdata?.ToDayCatgSaleAmountWise
   //   : Resturentdata?.ToDayCatgSaleQntyWise;
@@ -355,122 +351,32 @@ export default function ResturentDashboard() {
   // const data =
   //   rawData?.map((item) => ({
   //     ...item,
-  //     Qnty: Number(item.Qnty ?? 0), // parse Qnty if exists
-  //     Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")), // parse Sale
+  //     Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")), // ✅ strip commas
+  //     Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")), // ✅ strip commas
   //   })) || [];
 
-  // // calculate max based on active dataset
   // const maxValue = showSale
   //   ? Math.max(...data.map((item) => item.Sale), 0)
   //   : Math.max(...data.map((item) => item.Qnty), 0);
 
-  //   const Donutchart = (props) => {
-  //     const options = {
-  //       chart: {
-  //         type: "donut",
-  //         // width: "100px", // Increase chart width
-  //         // height: "100px", // Increase chart height
-  //       },
-  //       title: {
-  //         text: props.title, // Add your desired heading
-  //         align: 'center', // Align the heading to the top-left
-  //         style: {
-  //           fontSize: '14px',
-  //           fontWeight: 'bold',
-  //           color: 'black',
+  // // ------- DONUT CHART DATA (CURRENT MONTH) ----------
+  // const donutRawData = showSale
+  //   ? Resturentdata?.ToDayCatgSaleAmountWise
+  //   : Resturentdata?.ToDayCatgSaleAmountWise;
 
-  //         }
-  //        },
-  //         labels: ["Motor", "Fire", "Helth", "Marine", "Group"], // Labels for the series
+  // const donutData =
+  //   donutRawData?.map((item) => ({
+  //     Category: item.Category || "N/A",
+  //     Value: showSale
+  //       ? Number((item.Sale ?? "0").toString().replace(/,/g, "")) // ✅ Sale parsing
+  //       : Number((item.Qnty ?? "0").toString().replace(/,/g, "")), // ✅ Qnty parsing
+  //   })) || [];
 
-  //       legend: {
-  //         show: false, // Disable the legend
-  //       },
-  //       tooltip: {
-  //         enabled: Tune, // Disable the tooltip
-  //       },
-  //       dataLabels: {
-  //         enabled: false, // Disable data labels inside the chart
-  //       },
-
-  //       dataLabels: {
-  //         enabled: true, // Enable data labels inside the chart
-  //         style: {
-  //           colors: ["black", "black", "black", "black", "black"], // Colors for each label
-  //           fontSize: "14px",
-  //           fontWeight: "300",
-  //         },
-  //         formatter: function (val, opts) {
-  //           return opts.w.globals.labels[opts.seriesIndex]; // Show the label for each slice
-  //         },
-  //       },
-
-  //       plotOptions: {
-  //         pie: {
-  //           donut: {
-  //             size: "50%", // Adjust this value to increase or decrease the donut radius
-  //           },
-  //         },
-  //       },
-
-  //       responsive: [
-  //         {
-  //           breakpoint: 480,
-  //           options: {
-  //             chart: {
-  //               width: 300, // Adjust for smaller screens
-  //               height: 300,
-  //             },
-  //           },
-  //         },
-  //       ],
-  //     };
-
-  //     const series = [44, 55, 41, 17, 15]; // Data for the chart
-
-  //     return (
-  //       <div id="chart">
-  //         <Chart options={options} series={series} type="donut" width={200} />
-  //       </div>
-  //     );
-  //   };
+  // const donutSeries = donutData.map((item) => item.Value);
+  // const donutLabels = donutData.map((item) => item.Category);
 
 
-  // ------- MAIN BAR CHART DATA ----------
-  const rawData = showSale
-    ? Resturentdata?.ToDayCatgSaleAmountWise
-    : Resturentdata?.ToDayCatgSaleQntyWise;
-
-  const data =
-    rawData?.map((item) => ({
-      ...item,
-      Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")), // ✅ strip commas
-      Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")), // ✅ strip commas
-    })) || [];
-
-  const maxValue = showSale
-    ? Math.max(...data.map((item) => item.Sale), 0)
-    : Math.max(...data.map((item) => item.Qnty), 0);
-
-  // ------- DONUT CHART DATA (CURRENT MONTH) ----------
-  const donutRawData = showSale
-    ? Resturentdata?.CurrentMonthCatgSaleAmountWise
-    : Resturentdata?.CurrentMonthCatgSaleQntyWise;
-
-  const donutData =
-    donutRawData?.map((item) => ({
-      Category: item.Category || "N/A",
-      Value: showSale
-        ? Number((item.Sale ?? "0").toString().replace(/,/g, "")) // ✅ Sale parsing
-        : Number((item.Qnty ?? "0").toString().replace(/,/g, "")), // ✅ Qnty parsing
-    })) || [];
-
-  const donutSeries = donutData.map((item) => item.Value);
-  const donutLabels = donutData.map((item) => item.Category);
-
-
-  // ------- DONUT CHART COMPONENT ----------
-  // const Donutchart = ({ series, title }) => {
+  // const Donutchart = ({ series, labels, title }) => {
   //   // ✅ Guard: if no data, show "No Data Available"
   //   if (!series || series.length === 0 || series.every((val) => val === 0)) {
   //     return (
@@ -493,22 +399,27 @@ export default function ResturentDashboard() {
   //         color: "black",
   //       },
   //     },
-  //     // ❌ Removed labels
-  //     labels: [],
+  //     // ✅ keep labels so tooltip shows Category names
+  //     labels: labels,
 
   //     legend: {
-  //       show: false, // hide legend also if you don’t want labels outside
+  //       show: false, // keep false if you don’t want labels outside the donut
   //     },
   //     tooltip: {
   //       enabled: true,
+  //       y: {
+  //         formatter: function (val) {
+  //           return val.toLocaleString(); // format values with commas
+  //         },
+  //       },
   //     },
   //     dataLabels: {
-  //       enabled: false, // ❌ remove text inside slices
+  //       enabled: false, // ❌ no text inside slices
   //     },
   //     plotOptions: {
   //       pie: {
   //         donut: {
-  //           size: "60%",
+  //           size: "0%",
   //         },
   //       },
   //     },
@@ -521,8 +432,174 @@ export default function ResturentDashboard() {
   //   );
   // };
 
-  const Donutchart = ({ series, labels, title }) => {
-    // ✅ Guard: if no data, show "No Data Available"
+
+  // ------- MAIN BAR CHART DATA ----------
+  // ------- COLOR PALETTE (consistent across charts) ----------
+  // const colorPalette = [
+  //   "#FF4560", // red
+  //   "#008FFB", // blue
+  //   "#00E396", // green
+  //   "#FEB019", // orange
+  //   "#775DD0", // purple
+  //   "#546E7A", // gray
+  //   "#26A69A", // teal
+  //   "#D10CE8", // pink
+  // ];
+
+  // // ------- MAIN BAR CHART DATA ----------
+  // const barRawData = showSale
+  //   ? Resturentdata?.ToDayCatgSaleAmountWise
+  //   : Resturentdata?.ToDayCatgSaleQntyWise;
+
+  // const barData =
+  //   barRawData?.map((item) => ({
+  //     ...item,
+  //     Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
+  //     Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
+  //   })) || [];
+
+  // const maxValue = showSale
+  //   ? Math.max(...barData.map((item) => item.Sale), 0)
+  //   : Math.max(...barData.map((item) => item.Qnty), 0);
+
+  // // ------- DONUT CHART DATA (opposite of bar) ----------
+  // const donutRawData = showSale
+  //   ? Resturentdata?.ToDayCatgSaleQntyWise
+  //   : Resturentdata?.ToDayCatgSaleAmountWise;
+
+  // const donutData =
+  //   donutRawData?.map((item, index) => ({
+  //     Category: item.Category || "N/A",
+  //     Value: showSale
+  //       ? Number((item.Qnty ?? "0").toString().replace(/,/g, ""))
+  //       : Number((item.Sale ?? "0").toString().replace(/,/g, "")),
+  //     Color: colorPalette[index % colorPalette.length], // assign consistent color
+  //   })) || [];
+
+  // const donutSeries = donutData.map((item) => item.Value);
+  // const donutLabels = donutData.map((item) => item.Category);
+  // const donutColors = donutData.map((item) => item.Color);
+
+  // // ------- DONUT COMPONENT ----------
+  // const Donutchart = ({ series, labels, colors, title }) => {
+  //   if (!series || series.length === 0 || series.every((val) => val === 0)) {
+  //     return (
+  //       <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>
+  //         No Data Available
+  //       </div>
+  //     );
+  //   }
+
+  //   const options = {
+  //     chart: { type: "donut" },
+  //     title: {
+  //       text: title,
+  //       align: "center",
+  //       style: { fontSize: "14px", fontWeight: "bold", color: "black" },
+  //     },
+  //     labels: labels,
+  //     colors: colors, // ✅ use same colors for donut
+  //     legend: { show: false },
+  //     tooltip: {
+  //       enabled: true,
+  //       y: {
+  //         formatter: (val, { seriesIndex }) =>
+  //           `${labels[seriesIndex]}: ${val.toLocaleString()}`,
+  //       },
+  //     },
+  //     dataLabels: { enabled: false },
+  //     plotOptions: { pie: { donut: { size: "0%" } } },
+  //   };
+
+  //   return (
+  //     <div id="donut-chart">
+  //       <Chart options={options} series={series} type="donut" width={220} />
+  //     </div>
+  //   );
+  // };
+
+
+  // ------- COLOR PALETTE (consistent mapping per category) ----------
+  // const categoryColors = {
+  //   PIZZA: "#FF4560",      // red
+  //   BURGERS: "#008FFB",    // blue
+  //   WRAPS: "#00E396",      // green
+  //   DEALS: "#FEB019",      // orange
+  //   "FRIED ITEMS": "#775DD0", // purple
+  //   BEVERAGES: "#546E7A",  // gray
+  //   "SIDE ORDERS": "#26A69A", // teal
+  //   'N/ A': "#D10CE8",        // pink (for null Category)
+  // };
+
+  // ------- MAIN BAR CHART DATA ----------
+  // ✅ Color palette (extendable)
+  const palette = [
+    "#FF4560", "#008FFB", "#00E396", "#FEB019",
+    "#775DD0", "#546E7A", "#26A69A", "#D10CE8",
+    "#9C27B0", "#FF9800", "#4CAF50", "#3F51B5"
+  ];
+
+  // ✅ Store category → color mapping
+  const categoryColors = {};
+
+  // ✅ Function to assign consistent colors
+  const getCategoryColor = (category) => {
+    const key = (category || "N/A").toUpperCase().trim();
+    if (!categoryColors[key]) {
+      const index = Object.keys(categoryColors).length % palette.length;
+      categoryColors[key] = palette[index];
+    }
+    return categoryColors[key];
+  };
+
+  // ---------------- BAR DATA ----------------
+  // ✅ Single dataset source depending on showSale
+  const barRawData = showSale
+    ? Resturentdata?.ToDayCatgSaleAmountWise
+    : Resturentdata?.ToDayCatgSaleQntyWise;
+
+  const barData =
+    barRawData?.map((item) => ({
+      ...item,
+      Category: item.Category || "N/A",
+      Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
+      Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
+      Color: getCategoryColor(item.Category), // 👈 assign color here
+    })) || [];
+
+  const maxValue = showSale
+    ? Math.max(...barData.map((item) => item.Sale), 0)
+    : Math.max(...barData.map((item) => item.Qnty), 0);
+
+  // ---------------- DONUT DATA (same as BAR DATA) ----------------
+  // ✅ Use the SAME dataset (no swapping)
+  const donutData =
+    barData?.map((item) => ({
+      Category: item.Category || "N/A",
+      Value: showSale ? item.Sale : item.Qnty, // 👈 match Bar chart
+      Color: getCategoryColor(item.Category),
+    })) || [];
+
+  // ✅ Ensure same categories across both datasets
+  const allCategories = [
+    ...new Set([...barData.map((b) => b.Category), ...donutData.map((d) => d.Category)]),
+  ];
+
+  const alignedDonutData = allCategories.map((cat) => {
+    const found = donutData.find((d) => d.Category === cat);
+    return {
+      Category: cat,
+      Value: found ? found.Value : 0,
+      Color: getCategoryColor(cat), // ✅ same color as bar
+    };
+  });
+
+  const donutSeries = alignedDonutData.map((item) => item.Value);
+  const donutLabels = alignedDonutData.map((item) => item.Category);
+  const donutColors = alignedDonutData.map((item) => item.Color); // 👈 pass to chart
+
+  // ------- DONUT COMPONENT ----------
+  const Donutchart = ({ series, labels, colors, title }) => {
     if (!series || series.length === 0 || series.every((val) => val === 0)) {
       return (
         <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>
@@ -532,42 +609,24 @@ export default function ResturentDashboard() {
     }
 
     const options = {
-      chart: {
-        type: "donut",
-      },
+      chart: { type: "donut" },
       title: {
         text: title,
         align: "center",
-        style: {
-          fontSize: "14px",
-          fontWeight: "bold",
-          color: "black",
-        },
+        style: { fontSize: "14px", fontWeight: "bold", color: "black" },
       },
-      // ✅ keep labels so tooltip shows Category names
       labels: labels,
-
-      legend: {
-        show: false, // keep false if you don’t want labels outside the donut
-      },
+      colors: colors, // ✅ consistent mapping
+      legend: { show: false },
       tooltip: {
         enabled: true,
         y: {
-          formatter: function (val) {
-            return val.toLocaleString(); // format values with commas
-          },
+          formatter: (val, { seriesIndex }) =>
+            `${labels[seriesIndex]}: ${val.toLocaleString()}`,
         },
       },
-      dataLabels: {
-        enabled: false, // ❌ no text inside slices
-      },
-      plotOptions: {
-        pie: {
-          donut: {
-            size: "55%",
-          },
-        },
-      },
+      dataLabels: { enabled: false },
+      plotOptions: { pie: { donut: { size: "0%" } } },
     };
 
     return (
@@ -579,6 +638,121 @@ export default function ResturentDashboard() {
 
 
 
+  ////////////////////////// CODE FOR MONTHLY WISE DATA SET //////////////////////////////////
+  // ------- CURRENT MONTH DONUT CHART DATA ----------
+
+  // ✅ Different Color Palette for Current Month
+  const palette2 = [
+    "#FF6F61", "#6B5B95", "#88B04B", "#F7CAC9",
+    "#92A8D1", "#955251", "#B565A7", "#009B77",
+    "#DD4124", "#45B8AC", "#EFC050", "#5B5EA6"
+  ];
+
+  // ✅ Store category → color mapping for Current Month
+  const categoryColors2 = {};
+
+  // ✅ Function to assign consistent colors for Current Month
+  const getCategoryColor2 = (category) => {
+    const key = (category || "N/A").toUpperCase().trim();
+    if (!categoryColors2[key]) {
+      const index = Object.keys(categoryColors2).length % palette2.length;
+      categoryColors2[key] = palette2[index];
+    }
+    return categoryColors2[key];
+  };
+
+  // ---------------- CURRENT MONTH DONUT DATA ----------------
+  const currentDonutRawData = showSalemonthly
+    ? Resturentdata?.CurrentMonthCatgSaleQntyWise
+    : Resturentdata?.CurrentMonthCatgSaleAmountWise;
+
+  const currentDonutData =
+    currentDonutRawData?.map((item) => ({
+      Category: item.Category || "N/A",
+      Value: showSalemonthly
+        ? Number((item.Qnty ?? "0").toString().replace(/,/g, ""))
+        : Number((item.Sale ?? "0").toString().replace(/,/g, "")),
+    })) || [];
+
+  // ✅ Ensure same categories (align for consistency)
+  const allCurrentCategories = [
+    ...new Set(currentDonutData.map((d) => d.Category)),
+  ];
+
+  const alignedCurrentDonutData = allCurrentCategories.map((cat) => {
+    const found = currentDonutData.find((d) => d.Category === cat);
+    return {
+      Category: cat,
+      Value: found ? found.Value : 0,
+      Color: getCategoryColor2(cat), // ✅ consistent mapping
+    };
+  });
+
+  const currentDonutSeries = alignedCurrentDonutData.map((item) => item.Value);
+  const currentDonutLabels = alignedCurrentDonutData.map((item) => item.Category);
+  const currentDonutColors = alignedCurrentDonutData.map((item) => item.Color);
+
+
+  // ---------------- CURRENT MONTH BAR DATA ----------------
+  const currentBarRawData = showSalemonthly
+    ? Resturentdata?.CurrentMonthCatgSaleAmountWise
+    : Resturentdata?.CurrentMonthCatgSaleQntyWise;
+
+  const currentBarData =
+    currentBarRawData?.map((item) => ({
+      ...item,
+      Category: item.Category || "N/A",
+      Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
+      Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
+      Color: getCategoryColor2(item.Category), // ✅ consistent color
+    })) || [];
+
+  const currentMaxValue = showSalemonthly
+    ? Math.max(...currentBarData.map((item) => item.Sale), 0)
+    : Math.max(...currentBarData.map((item) => item.Qnty), 0);
+
+    
+
+
+  // ------- DONUT COMPONENT 2 ----------
+  const Donutchart2 = ({ series, labels, colors, title }) => {
+    if (!series || series.length === 0 || series.every((val) => val === 0)) {
+      return (
+        <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>
+          No Data Available
+        </div>
+      );
+    }
+
+    const options = {
+      chart: { type: "donut" },
+      title: {
+        text: title,
+        align: "center",
+        style: { fontSize: "14px", fontWeight: "bold", color: "black" },
+      },
+      labels: labels,
+      colors: colors,
+      legend: { show: false },
+      tooltip: {
+        enabled: true,
+        y: {
+          formatter: (val, { seriesIndex }) =>
+            `${labels[seriesIndex]}: ${val.toLocaleString()}`,
+        },
+      },
+      dataLabels: { enabled: false },
+      plotOptions: { pie: { donut: { size: "0%" } } },
+    };
+
+    return (
+      <div id="donut-chart2">
+        <Chart options={options} series={series} type="donut" width={220} />
+      </div>
+    );
+  };
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
 
   const [showModal, setShowModal] = useState(false);
 
@@ -776,9 +950,10 @@ export default function ResturentDashboard() {
                     </div>
                   </div>
 
-                  {data.map((item, index) => {
+                  {barData.map((item, index) => {
                     const value = showSale ? item.Sale : item.Qnty;
                     const percentage = maxValue ? (value / maxValue) * 100 : 0;
+                    const barColor = categoryColors[item.Category?.toUpperCase().trim()] || "#999999"; // ✅ category-based color
 
                     return (
                       <div key={index} className="row cardrow">
@@ -795,14 +970,7 @@ export default function ResturentDashboard() {
                         >
                           {item.Category || "N/A"}
 
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                          >
-                            {/* Bar container */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                             <div
                               style={{
                                 width: "190px",
@@ -816,13 +984,12 @@ export default function ResturentDashboard() {
                                 style={{
                                   width: `${percentage}%`,
                                   height: "100%",
-                                  background: showSale ? "#5F93CF" : "#5F93CF",
+                                  background: barColor, // ✅ match donut color
                                   transition: "width 0.3s ease",
                                 }}
                               ></div>
                             </div>
 
-                            {/* Value label */}
                             <span
                               style={{
                                 minWidth: "60px",
@@ -838,6 +1005,7 @@ export default function ResturentDashboard() {
                       </div>
                     );
                   })}
+
                 </div>
 
                 <div
@@ -846,10 +1014,115 @@ export default function ResturentDashboard() {
                 >
                   <Donutchart
                     series={donutSeries}
-                    labels={donutLabels}  // pass Category names
-                  // title={showSale ? "Current Month Sale" : "Current Month Quantity"}
+                    labels={donutLabels}
+                    colors={donutColors} // ✅ pass matching colors
+                  // title={showSale ? "Current Month Quantity" : "Current Month Sale"}
                   />
+                </div>
+              </div>
+            </div>;
+          </div>
 
+
+          <div className="left_inner_section3 ">
+            <div className="lastrow_firstchart">
+              <div className="row">
+                <div className="col-md-8 ">
+                  <div
+                    className="top_span"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      className="first_span_secondcard"
+                      style={{ paddingBottom: "5px" }}
+                    >
+                      Monthly Category
+                    </span>
+
+                    <div style={{ paddingTop: "5px" }}>
+                      <label className="toggle">
+                        <input
+                          type="checkbox"
+                          checked={showSalemonthly}
+                          onChange={() => setshowSalemonthly(!showSalemonthly)} // toggle state
+                        />
+                        <span className="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {currentBarData.map((item, index) => {
+                    const value = showSalemonthly ? item.Sale : item.Qnty;
+                    const percentage = currentMaxValue ? (value / currentMaxValue) * 100 : 0;
+                    const barColor = categoryColors2[item.Category?.toUpperCase().trim()] || "#999999"; // ✅ category-based color
+
+                    return (
+                      <div key={index} className="row cardrow">
+                        <div
+                          className="columnsetting"
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            paddingLeft: "2px",
+                            width: "100%",
+                            textAlign: "start",
+                          }}
+                        >
+                          {item.Category || "N/A"}
+
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <div
+                              style={{
+                                width: "190px",
+                                height: "15px",
+                                background: "#eee",
+                                overflow: "hidden",
+                                borderRadius: "6px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: `${percentage}%`,
+                                  height: "100%",
+                                  background: barColor, // ✅ match donut color
+                                  transition: "width 0.3s ease",
+                                }}
+                              ></div>
+                            </div>
+
+                            <span
+                              style={{
+                                minWidth: "60px",
+                                textAlign: "right",
+                                fontSize: "13px",
+                                fontWeight: "500",
+                              }}
+                            >
+                              {showSalemonthly ? value.toLocaleString() : value}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                </div>
+
+                <div
+                  className="col-md-4"
+                  style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+                >
+                  <Donutchart2
+                    series={currentDonutSeries}
+                    labels={currentDonutLabels}
+                    colors={currentDonutColors} // ✅ pass matching colors
+                  // title={showSale ? "Current Month Quantity" : "Current Month Sale"}
+                  />
                 </div>
               </div>
             </div>;

@@ -461,7 +461,7 @@
 }
 
 .lastrow_firstchart{
-   width: 80% !important;
+   width: 85% !important;
   /* height: 150px !important; */
   border-radius: 5px;
   background-color: white;
@@ -471,7 +471,16 @@
   padding-bottom: 5px;
 }
 
-
+.lastrow_seconchart{
+   width: 30% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  padding-left: 15px;
+  padding-right:15px;
+  padding-bottom: 5px;
+}
 
 .top_inner_cards_fist {
   width: 30% !important;
@@ -516,8 +525,6 @@
   /* font-weight: 300 !important; */
 }
 
-
-
 .first_span_secondcard {
   font-size: 17px;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -526,9 +533,6 @@
   /* padding-bottom: 10px; */
 
 }
-
-
-
 .sep_heading {
   display: flex;
   flex-direction: column;
