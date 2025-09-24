@@ -532,19 +532,99 @@ export default function ResturentDashboard() {
   // };
 
   // ------- MAIN BAR CHART DATA ----------
+
+
+
+
+
   // ✅ Color palette (extendable)
+  // const palette = [
+  //   "#FF4560", "#008FFB", "#00E396", "#FEB019",
+  //   "#775DD0", "#546E7A", "#26A69A", "#D10CE8",
+  //   "#9C27B0", "#FF9800", "#4CAF50", "#3F51B5"
+  // ];
+
+  // // ✅ Store category → color mapping
+  // const categoryColors = {};
+
+
+
+  // // ✅ Function to assign consistent colors
+  // const getCategoryColor = (category) => {
+  //   const key = (category || "N/A").toUpperCase().trim();
+  //   if (!categoryColors[key]) {
+  //     const index = Object.keys(categoryColors).length % palette.length;
+  //     categoryColors[key] = palette[index];
+  //   }
+  //   return categoryColors[key];
+  // };
+
+  // // ---------------- BAR DATA ----------------
+  // // ✅ Single dataset source depending on showSale
+  // const barRawData = showSale
+  //   ? Resturentdata?.ToDayCatgSaleAmountWise
+  //   : Resturentdata?.ToDayCatgSaleQntyWise;
+
+  // const barData =
+  //   barRawData?.map((item) => ({
+  //     ...item,
+  //     Category: item.Category || "N/A",
+  //     Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
+  //     Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
+  //     Color: getCategoryColor(item.Category), // 👈 assign color here
+  //   })) || [];
+
+  // const maxValue = showSale
+  //   ? Math.max(...barData.map((item) => item.Sale), 0)
+  //   : Math.max(...barData.map((item) => item.Qnty), 0);
+
+  // // ---------------- DONUT DATA (same as BAR DATA) ----------------
+  // // ✅ Use the SAME dataset (no swapping)
+  // const donutData =
+  //   barData?.map((item) => ({
+  //     Category: item.Category || "N/A",
+  //     Value: showSale ? item.Sale : item.Qnty, // 👈 match Bar chart
+  //     Color: getCategoryColor(item.Category),
+  //   })) || [];
+
+  // // ✅ Ensure same categories across both datasets
+  // const allCategories = [
+  //   ...new Set([...barData.map((b) => b.Category), ...donutData.map((d) => d.Category)]),
+  // ];
+
+  // const alignedDonutData = allCategories.map((cat) => {
+  //   const found = donutData.find((d) => d.Category === cat);
+  //   return {
+  //     Category: cat,
+  //     Value: found ? found.Value : 0,
+  //     Color: getCategoryColor(cat), // ✅ same color as bar
+  //   };
+  // });
+
+  // const donutSeries = alignedDonutData.map((item) => item.Value);
+  // const donutLabels = alignedDonutData.map((item) => item.Category);
+  // const donutColors = alignedDonutData.map((item) => item.Color); // 👈 pass to chart
+
+
   const palette = [
     "#FF4560", "#008FFB", "#00E396", "#FEB019",
     "#775DD0", "#546E7A", "#26A69A", "#D10CE8",
     "#9C27B0", "#FF9800", "#4CAF50", "#3F51B5"
   ];
 
+  // ✅ Function to capitalize first letter and make others lowercase
+  const formatCategoryName2 = (category) => {
+    if (!category || category === "N/A") return "N/A";
+    return category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+  };
+
   // ✅ Store category → color mapping
   const categoryColors = {};
 
   // ✅ Function to assign consistent colors
   const getCategoryColor = (category) => {
-    const key = (category || "N/A").toUpperCase().trim();
+    const formattedCategory = ( formatCategoryName2(category));
+    const key = (formattedCategory || "N/A").toUpperCase().trim();
     if (!categoryColors[key]) {
       const index = Object.keys(categoryColors).length % palette.length;
       categoryColors[key] = palette[index];
@@ -561,7 +641,7 @@ export default function ResturentDashboard() {
   const barData =
     barRawData?.map((item) => ({
       ...item,
-      Category: item.Category || "N/A",
+      Category: formatCategoryName2(item.Category), // ✅ Format category name
       Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
       Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
       Color: getCategoryColor(item.Category), // 👈 assign color here
@@ -575,7 +655,7 @@ export default function ResturentDashboard() {
   // ✅ Use the SAME dataset (no swapping)
   const donutData =
     barData?.map((item) => ({
-      Category: item.Category || "N/A",
+      Category: formatCategoryName2(item.Category), // ✅ Format category name
       Value: showSale ? item.Sale : item.Qnty, // 👈 match Bar chart
       Color: getCategoryColor(item.Category),
     })) || [];
@@ -641,19 +721,28 @@ export default function ResturentDashboard() {
   ////////////////////////// CODE FOR MONTHLY WISE DATA SET //////////////////////////////////
   // ------- CURRENT MONTH DONUT CHART DATA ----------
 
-  // ✅ Different Color Palette for Current Month
-  const palette2 = [
-    "#FF6F61", "#6B5B95", "#88B04B", "#F7CAC9",
-    "#92A8D1", "#955251", "#B565A7", "#009B77",
-    "#DD4124", "#45B8AC", "#EFC050", "#5B5EA6"
-  ];
+ 
+
+
+ const palette2 = [
+    "#2563EB", "#DC2626", "#059669", "#7C3AED",
+    "#EA580C", "#65A30D", "#DB2777", "#0891B2",
+    "#CA8A04", "#9333EA", "#16A34A", "#E11D48"
+];
+
+  // // ✅ Function to capitalize first letter and make others lowercase
+  const formatCategoryName = (category) => {
+    if (!category || category === "N/A") return "N/A";
+    return category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+  };
 
   // ✅ Store category → color mapping for Current Month
   const categoryColors2 = {};
 
   // ✅ Function to assign consistent colors for Current Month
   const getCategoryColor2 = (category) => {
-    const key = (category || "N/A").toUpperCase().trim();
+    const formattedCategory = formatCategoryName(category);
+    const key = (formattedCategory || "N/A").toUpperCase().trim();
     if (!categoryColors2[key]) {
       const index = Object.keys(categoryColors2).length % palette2.length;
       categoryColors2[key] = palette2[index];
@@ -661,14 +750,15 @@ export default function ResturentDashboard() {
     return categoryColors2[key];
   };
 
-  // ---------------- CURRENT MONTH DONUT DATA ----------------
-  const currentDonutRawData = showSalemonthly
-    ? Resturentdata?.CurrentMonthCatgSaleQntyWise
-    : Resturentdata?.CurrentMonthCatgSaleAmountWise;
+  // ---------------- CURRENT MONTH DATA (SAME DATASET FOR BOTH CHARTS) ----------------
+  const currentRawData = showSalemonthly
+    ? Resturentdata?.CurrentMonthCatgSaleQntyWise  // When showSalemonthly is true, show Qnty data
+    : Resturentdata?.CurrentMonthCatgSaleAmountWise; // When false, show Sale data
 
+  // ---------------- DONUT CHART DATA ----------------
   const currentDonutData =
-    currentDonutRawData?.map((item) => ({
-      Category: item.Category || "N/A",
+    currentRawData?.map((item) => ({
+      Category: formatCategoryName(item.Category), // ✅ Format category name
       Value: showSalemonthly
         ? Number((item.Qnty ?? "0").toString().replace(/,/g, ""))
         : Number((item.Sale ?? "0").toString().replace(/,/g, "")),
@@ -692,27 +782,19 @@ export default function ResturentDashboard() {
   const currentDonutLabels = alignedCurrentDonutData.map((item) => item.Category);
   const currentDonutColors = alignedCurrentDonutData.map((item) => item.Color);
 
-
-  // ---------------- CURRENT MONTH BAR DATA ----------------
-  const currentBarRawData = showSalemonthly
-    ? Resturentdata?.CurrentMonthCatgSaleAmountWise
-    : Resturentdata?.CurrentMonthCatgSaleQntyWise;
-
+  // ---------------- BAR CHART DATA (USING SAME DATASET) ----------------
   const currentBarData =
-    currentBarRawData?.map((item) => ({
+    currentRawData?.map((item) => ({
       ...item,
-      Category: item.Category || "N/A",
+      Category: formatCategoryName(item.Category), // ✅ Format category name
       Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
       Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
       Color: getCategoryColor2(item.Category), // ✅ consistent color
     })) || [];
 
   const currentMaxValue = showSalemonthly
-    ? Math.max(...currentBarData.map((item) => item.Sale), 0)
-    : Math.max(...currentBarData.map((item) => item.Qnty), 0);
-
-    
-
+    ? Math.max(...currentBarData.map((item) => item.Qnty), 0)
+    : Math.max(...currentBarData.map((item) => item.Sale), 0);
 
   // ------- DONUT COMPONENT 2 ----------
   const Donutchart2 = ({ series, labels, colors, title }) => {
@@ -751,7 +833,6 @@ export default function ResturentDashboard() {
       </div>
     );
   };
-
   ///////////////////////////////////////////////////////////////////////////////////////////
 
   const [showModal, setShowModal] = useState(false);
@@ -922,7 +1003,7 @@ export default function ResturentDashboard() {
           <div className="left_inner_section3 ">
             <div className="lastrow_firstchart">
               <div className="row">
-                <div className="col-md-8 ">
+                <div className="col-md-12 ">
                   <div
                     className="top_span"
                     style={{
@@ -1008,26 +1089,29 @@ export default function ResturentDashboard() {
 
                 </div>
 
-                <div
-                  className="col-md-4"
-                  style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
-                >
-                  <Donutchart
-                    series={donutSeries}
-                    labels={donutLabels}
-                    colors={donutColors} // ✅ pass matching colors
-                  // title={showSale ? "Current Month Quantity" : "Current Month Sale"}
-                  />
-                </div>
               </div>
-            </div>;
+            </div>
+
+            <div className="lastrow_secondchat">
+              <div
+                className="col-md-12"
+                style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+              >
+                <Donutchart
+                  series={donutSeries}
+                  labels={donutLabels}
+                  colors={donutColors} // ✅ pass matching colors
+                // title={showSale ? "Current Month Quantity" : "Current Month Sale"}
+                />
+              </div>
+            </div>
           </div>
 
 
           <div className="left_inner_section3 ">
             <div className="lastrow_firstchart">
               <div className="row">
-                <div className="col-md-8 ">
+                <div className="col-md-12 ">
                   <div
                     className="top_span"
                     style={{
@@ -1056,7 +1140,7 @@ export default function ResturentDashboard() {
                   </div>
 
                   {currentBarData.map((item, index) => {
-                    const value = showSalemonthly ? item.Sale : item.Qnty;
+                    const value = showSalemonthly ? item.Qnty : item.Sale; // Fixed: Now both use same data type
                     const percentage = currentMaxValue ? (value / currentMaxValue) * 100 : 0;
                     const barColor = categoryColors2[item.Category?.toUpperCase().trim()] || "#999999"; // ✅ category-based color
 
@@ -1097,13 +1181,13 @@ export default function ResturentDashboard() {
 
                             <span
                               style={{
-                                minWidth: "60px",
+                                minWidth: "70px",
                                 textAlign: "right",
                                 fontSize: "13px",
                                 fontWeight: "500",
                               }}
                             >
-                              {showSalemonthly ? value.toLocaleString() : value}
+                              {value.toLocaleString()}
                             </span>
                           </div>
                         </div>
@@ -1113,19 +1197,23 @@ export default function ResturentDashboard() {
 
                 </div>
 
-                <div
-                  className="col-md-4"
-                  style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
-                >
-                  <Donutchart2
-                    series={currentDonutSeries}
-                    labels={currentDonutLabels}
-                    colors={currentDonutColors} // ✅ pass matching colors
-                  // title={showSale ? "Current Month Quantity" : "Current Month Sale"}
-                  />
-                </div>
+
               </div>
-            </div>;
+            </div>
+
+            <div className="lastrow_secondchat">
+              <div
+                className="col-md-12"
+                style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+              >
+                <Donutchart2
+                  series={currentDonutSeries}
+                  labels={currentDonutLabels}
+                  colors={currentDonutColors} // ✅ pass matching colors
+                // title={showSalemonthly ? "Current Month Quantity" : "Current Month Sale"}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

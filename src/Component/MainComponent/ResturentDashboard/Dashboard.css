@@ -461,7 +461,7 @@
 }
 
 .lastrow_firstchart{
-   width: 85% !important;
+   width: 55% !important;
   /* height: 150px !important; */
   border-radius: 5px;
   background-color: white;
@@ -471,9 +471,11 @@
   padding-bottom: 5px;
 }
 
-.lastrow_seconchart{
+.lastrow_secondchat{
    width: 30% !important;
-  /* height: 150px !important; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 5px;
   background-color: white;
   /* padding-top: px; */
@@ -526,7 +528,7 @@
 }
 
 .first_span_secondcard {
-  font-size: 17px;
+  font-size: 14px;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   color: black;
   /* font-weight: bold; */
