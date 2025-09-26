@@ -1,7 +1,88 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import ReactApexChart from 'react-apexcharts';
-
+import { getOrganisationData, getUserData, getYearDescription, getLocationnumber } from "../../../Auth";
+import { useTheme } from "../../../../ThemeContext";
+import axios from "axios";
 const BarChart = () => {
+
+
+  const [RestourentDaydata, setRestourentDaydata] = useState([])
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    isSidebarVisible,
+    getcolor,
+    fontcolor,
+    apiLinks,
+    getLocationNumber,
+    getyeardescription,
+    getfontstyle,
+    getdatafontsize,
+  } = useTheme();
+
+
+  useEffect(() => {
+    const apiUrl = apiLinks + "/ResDashboard.php";
+    setIsLoading(true);
+
+    const formData = new URLSearchParams({
+      code: 'FDEEK',
+      FYerDsc: '2025-2025',
+      FLocCod: '001'
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        // Check if response.data exists and has the expected structure
+        if (response.data && typeof response.data === 'object') {
+          setRestourentDaydata(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setRestourentDaydata({}); // Set empty object instead of array
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setRestourentDaydata({}); // Set empty object on error too
+      })
+      .finally(() => {
+        setIsLoading(false); // Make sure to set loading to false
+      });
+  }, []);
+
+
+  // ✅ Extract API safely
+  const dayWise = RestourentDaydata?.DayWiseGraph || [];
+
+  // ✅ Convert API data to a lookup object by day
+  const dayLookup = {};
+  dayWise.forEach((item) => {
+    const day = parseInt(item.Day, 10);
+    dayLookup[day] = {
+      invoices: parseInt(item.Invoices?.replace(/,/g, "")) || 0,
+      sale: parseFloat(item.Sale?.replace(/,/g, "")) || 0,
+    };
+  });
+
+  // ✅ Build categories (1 → 31)
+  const categories = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+
+  // ✅ Fill series with either API value or 0
+  const series = [
+    {
+      name: "Invoices",
+      data: categories.map((d) => dayLookup[d]?.invoices || 0),
+    },
+    {
+      name: "Sale",
+      data: categories.map((d) => dayLookup[d]?.sale || 0),
+    },
+  ];
+
   const options = {
     chart: {
       type: 'bar',
@@ -33,11 +114,11 @@ const BarChart = () => {
       }
     },
     title: {
-      text: 'Monthly Performance Overview',
+      text: 'Daily Performance Overview',
       align: 'left',
-      offsetY: 0, // Reduced offset
+      offsetY: 0,
       style: {
-        fontSize: '16px', // Slightly smaller font
+        fontSize: '16px',
         fontWeight: '700',
         color: '#2c3e50',
         fontFamily: "'Inter', 'Segoe UI', sans-serif"
@@ -46,7 +127,7 @@ const BarChart = () => {
     plotOptions: {
       bar: {
         horizontal: false,
-        columnWidth: '45%', // Increased column width for thicker bars
+        columnWidth: '70%',
         borderRadius: 4,
         borderRadiusApplication: 'end',
         dataLabels: {
@@ -62,29 +143,24 @@ const BarChart = () => {
       width: 1.5,
       colors: ['transparent']
     },
+    // ✅ Change x-axis to 1 → 31
     xaxis: {
-      categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+      categories: categories, // 👈 Only real days from API
       labels: {
         style: {
-          colors: '#718096',
-          fontSize: '11px', // Slightly smaller font
-          fontWeight: '500',
+          fontSize: "13px",
+          fontWeight: "600",
+          colors: "#718096",
           fontFamily: "'Inter', 'Segoe UI', sans-serif"
         }
-      },
-      axisTicks: {
-        show: false
-      },
-      axisBorder: {
-        show: false
       }
     },
     yaxis: {
       title: {
-        text: 'Values',
+        // text: 'Values',
         style: {
           color: '#718096',
-          fontSize: '11px', // Slightly smaller font
+          fontSize: '14px',
           fontWeight: '500',
           fontFamily: "'Inter', 'Segoe UI', sans-serif"
         }
@@ -92,7 +168,7 @@ const BarChart = () => {
       labels: {
         style: {
           colors: '#718096',
-          fontSize: '11px', // Slightly smaller font
+          fontSize: '11px',
           fontWeight: '500',
           fontFamily: "'Inter', 'Segoe UI', sans-serif"
         }
@@ -105,7 +181,6 @@ const BarChart = () => {
         shade: 'light',
         type: 'vertical',
         shadeIntensity: 0.2,
-        gradientToColors: undefined,
         inverseColors: false,
         opacityFrom: 0.9,
         opacityTo: 0.9,
@@ -116,18 +191,10 @@ const BarChart = () => {
     grid: {
       borderColor: '#f1f3f9',
       strokeDashArray: 2,
-      xaxis: {
-        lines: {
-          show: false
-        }
-      },
-      yaxis: {
-        lines: {
-          show: true
-        }
-      },
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
       padding: {
-        top: -20, // Reduced padding to increase bar height
+        top: -20,
         right: 0,
         bottom: -10,
         left: 0
@@ -136,17 +203,10 @@ const BarChart = () => {
     legend: {
       position: 'top',
       horizontalAlign: 'right',
-      offsetY: -5, // Moved legend closer to title
-      fontSize: '12px', // Slightly smaller font
-      itemMargin: {
-        horizontal: 10,
-        vertical: 5
-      },
-      markers: {
-        width: 10,
-        height: 10,
-        radius: 5
-      },
+      offsetY: -5,
+      fontSize: '12px',
+      itemMargin: { horizontal: 10, vertical: 5 },
+      markers: { width: 10, height: 10, radius: 5 },
       labels: {
         colors: '#2c3e50',
         useSeriesColors: false
@@ -159,7 +219,7 @@ const BarChart = () => {
         fontFamily: "'Inter', 'Segoe UI', sans-serif"
       },
       y: {
-        formatter: function(val) {
+        formatter: function (val) {
           return val
         }
       }
@@ -168,9 +228,7 @@ const BarChart = () => {
       breakpoint: 768,
       options: {
         plotOptions: {
-          bar: {
-            columnWidth: '50%'
-          }
+          bar: { columnWidth: '50%' }
         },
         legend: {
           position: 'bottom',
@@ -181,40 +239,20 @@ const BarChart = () => {
     }]
   };
 
-  const series = [
-    {
-      name: 'Current Year',
-      data: [44, 55, 57, 56, 61, 58, 63, 60, 66],
-    },
-    {
-      name: 'Last Year',
-      data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
-    },
-    {
-      name: 'Collection',
-      data: [35, 41, 36, 26, 45, 48, 52, 53, 41],
-    },
-    {
-      name: 'Expense',
-      data: [35, 41, 36, 26, 45, 48, 52, 53, 41],
-    },
-  ];
+
 
   return (
     <div style={{
-      backgroundColor: 'white',
       borderRadius: '12px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-      padding: '20px', // Reduced padding
       width: '100%',
       maxWidth: '1000px',
       margin: '0 auto'
     }}>
-      <ReactApexChart 
-        options={options} 
-        series={series} 
-        type="bar" 
-        height={200} 
+      <ReactApexChart
+        options={options}
+        series={series}
+        type="bar"
+        height={200}
       />
     </div>
   );

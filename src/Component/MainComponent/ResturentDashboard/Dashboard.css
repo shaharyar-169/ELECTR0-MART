@@ -411,7 +411,7 @@
 }
 
 .main_left_section {
-  width: 70%;
+  width: 75%;
   height: 100%;
   /* background: red; */
   display: flex;
@@ -431,10 +431,9 @@
   flex-wrap: nowrap;
   padding: 10px;
   width: 100% !important;
-  height: 23% !important;
-  /* background: yellow !important; */
+  /* height: 23% !important; */
   column-gap: 10px;
-  /* background-color: red; */
+
 }
 
 .left_inner_section2 {
@@ -442,10 +441,8 @@
   flex-wrap: nowrap;
   padding: 10px;
   width: 100% !important;
-  /* height: 45% !important; */
-  /* background: yellow !important; */
   column-gap: 10px;
-  /* background-color: green; */
+
 }
 
 .left_inner_section3 {
@@ -453,26 +450,34 @@
   flex-wrap: nowrap;
   padding: 10px;
   width: 100% !important;
-  /* height: 45% !important; */
-  /* background: yellow !important; */
   column-gap: 10px;
-  /* margin-top: 40px; */
-  /* background-color: yellow; */
+
 }
 
-.lastrow_firstchart{
-   width: 55% !important;
+.lastrow_firstchart {
+  width: 55% !important;
   /* height: 150px !important; */
   border-radius: 5px;
   background-color: white;
   /* padding-top: px; */
   padding-left: 15px;
-  padding-right:15px;
+  padding-right: 15px;
   padding-bottom: 5px;
 }
 
-.lastrow_secondchat{
-   width: 30% !important;
+.daywise_graph {
+  width: 100% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+.lastrow_secondchat {
+  width: 30% !important;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -480,7 +485,7 @@
   background-color: white;
   /* padding-top: px; */
   padding-left: 15px;
-  padding-right:15px;
+  padding-right: 15px;
   padding-bottom: 5px;
 }
 
@@ -535,6 +540,7 @@
   /* padding-bottom: 10px; */
 
 }
+
 .sep_heading {
   display: flex;
   flex-direction: column;
@@ -585,16 +591,29 @@
   padding-right: 20px;
 }
 
-.cardrow{
+.todatsalecars_desgin {
+  width: 60% !important;
+  /* height: 118% !important; */
+  border-radius: 5px;
+  background-color: #FFFFFF;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 5px;
+}
+
+.cardrow {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
- font-size: 14px;
- color: grey;
+  font-size: 14px;
+  color: grey;
 
 }
-.columnsetting{
+
+.columnsetting {
   padding-left: 10px;
 }
-.second_card{
+
+.second_card {
   width: 40% !important;
   /* height: 118% !important; */
   border-radius: 5px;
@@ -606,7 +625,7 @@
 }
 
 .monthwise_graph {
-  width: 35% !important;
+  width: 100% !important;
   height: 100% !important;
   border-radius: 5px;
   background-color: #FFFFFF;
@@ -615,55 +634,59 @@
 /* ////////////////// css for toggle switch button //////////////////////// */
 
 
- .toggle {
-      position: relative;
-      display: inline-block;
-      width: 40px;   /* mini width */
-      height: 16px;  /* reduced height */
-    }
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  /* mini width */
+  height: 16px;
+  /* reduced height */
+}
 
-    /* Hide the default checkbox */
-    .toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+/* Hide the default checkbox */
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
 
-    /* Slider background */
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: 0.3s;
-      border-radius: 20px;
-    }
+/* Slider background */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 20px;
+}
 
-    /* Slider knob */
-    .slider::before {
-      position: absolute;
-      content: "";
-      height: 12px;   /* smaller knob */
-      width: 12px;
-      left: 2px;
-      bottom: 2px;
-      background-color: white;
-      transition: 0.3s;
-      border-radius: 50%;
-      box-shadow: 0 0 2px rgba(0,0,0,0.3);
-    }
+/* Slider knob */
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  /* smaller knob */
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
 
-    /* Checked state */
-    input:checked + .slider {
-      background-color: #74cbeb;
-    }
+/* Checked state */
+input:checked+.slider {
+  background-color: #74cbeb;
+}
 
-    input:checked + .slider::before {
-      transform: translateX(24px); /* adjust for slimmer design */
-    }
+input:checked+.slider::before {
+  transform: translateX(24px);
+  /* adjust for slimmer design */
+}
 
 /* //////////////////////////////////////////////////////////////// */
 
@@ -841,7 +864,7 @@
 }
 
 
-.barline{
+.barline {
 
   width: 190px;
   height: 12px;
@@ -850,3 +873,99 @@
   border-radius: 20px;
 }
 
+
+
+
+/* //////////////////// RIGHT CARD SECTION CSS //////////////////////////// */
+.firstright_card {
+  width: 100% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+/* /////////////////////// CSS FOR TODAY SALE CARD SECTION /////////////////////////    */
+
+.todaysale_datacar {
+  width: 100% !important;
+  border-radius: 5px;
+  background-color: white;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+.todaysale_card {
+  width: 55%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.card_header {
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+  color: white;
+  padding-top: 0px;
+  padding-left: 20px;
+  padding-bottom: 5px;
+  font-weight: bold;
+  font-size: 30px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  text-align: start;
+  margin: 0px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+
+.card_row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 2px 5px;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+  /* transition: background 0.2s ease; */
+   transition: background 0.25s ease, transform 0.1s ease;
+}
+
+.card_row:last-child {
+  border-bottom: none;
+}
+
+.card_row:hover {
+  background: #f9f9f9;
+    
+}
+
+.col_desc {
+  flex: 2;
+  text-align: left;
+  font-size: 14px;
+  color: grey;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.col_qty {
+  flex: 0.5;
+  text-align: center;
+  font-size: 14px;
+  color: grey;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.col_amount {
+  flex: 0.8;
+  text-align: right;
+  font-size: 14px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: grey;
+}

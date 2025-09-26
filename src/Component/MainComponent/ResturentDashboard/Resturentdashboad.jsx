@@ -9,7 +9,7 @@ import { Spinner } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { BsCalendar } from "react-icons/bs";
 import Chart from "react-apexcharts";
-import { Tune } from "@mui/icons-material";
+import { TodayOutlined, Tune } from "@mui/icons-material";
 import { getOrganisationData, getUserData, getYearDescription, getLocationnumber } from "../../Auth";
 import { useTheme } from "../../../ThemeContext";
 import { Sparklines, SparklinesBars, SparklinesLine } from "react-sparklines";
@@ -22,56 +22,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 export default function ResturentDashboard() {
-  const [saleData, setsaleData] = useState([]);
-  const [purchaseData, setpurchaseData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [Resturentdata, setResturentdata] = useState([]);
+  const [TodaySaledata, setTodaySaledata] = useState([]);
+  const [MonthSaledata, setMonthSaledata] = useState([]);
   const [showSale, setShowSale] = useState(false);
   const [showSalemonthly, setshowSalemonthly] = useState(false);
 
-  const [CompanySaleComparison, setCompanySaleComparison] = useState([]);
 
-  const [DailyDashboard, setDailyDashboard] = useState([]);
-  const [DailyDashboardSale, setDailyDashboardSale] = useState([]);
-
-  const [selectedfromDate, setSelectedfromDate] = useState(null);
-  const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
-  const [fromInputDate, setfromInputDate] = useState("");
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-
-  const formatDate = (date) => {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
-  //  SALE API DATA
-  const purchasetoday = purchaseData.length > 0 ? purchaseData[0].today : null;
-  const purchasemonth = purchaseData.length > 0 ? purchaseData[0].month : null;
-  const purchaseyear = purchaseData.length > 0 ? purchaseData[0].year : null;
-
-  //  PURCHASE API DATA
-  const saletoday = saleData.length > 0 ? saleData[0].today : null;
-  const salemonth = saleData.length > 0 ? saleData[0].month : null;
-  const saleyear = saleData.length > 0 ? saleData[0].year : null;
-
-  const [currentDate, setCurrentDate] = useState("");
-  const [currentMonth, setCurrentMonth] = useState("");
-  const [currentYear, setCurrentYear] = useState("");
 
   const organisation = getOrganisationData();
   const user = getUserData();
-  const LocationNumner = user.tempcod;
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
   const {
@@ -84,215 +45,6 @@ export default function ResturentDashboard() {
     getfontstyle,
     getdatafontsize,
   } = useTheme();
-
-  useEffect(() => {
-    const currentDate = new Date();
-    setSelectedfromDate(currentDate);
-    setfromInputDate(formatDate(currentDate));
-  }, []);
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/DashboardSale.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setsaleData(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setsaleData([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/DashboardPurchase.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setpurchaseData(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setpurchaseData([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/DashboardDaily.php";
-    const formData = new URLSearchParams({
-      FRepDat: fromInputDate,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setDailyDashboard(response.data);
-      })
-
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, [fromInputDate]);
-
-  function fetchReceivableReport() {
-    const apiUrl = apiLinks + "/CompanySaleComparison.php";
-    setIsLoading(true);
-    const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: fromInputDate,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setIsLoading(false);
-
-        if (response.data && Array.isArray(response.data.Detail)) {
-          setCompanySaleComparison(response.data.Detail);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setCompanySaleComparison([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setIsLoading(false);
-      });
-  }
-
-  useEffect(() => {
-    fetchReceivableReport();
-  }, []);
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/DashboardDailySale.php";
-    const formData = new URLSearchParams({
-      FRepDat: fromInputDate,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setDailyDashboardSale(response.data);
-      })
-
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, [fromInputDate]);
-
-  const contentStyle = {
-    backgroundColor: '#efeff0ff',
-    width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
-    position: "relative",
-    top: "42%",
-    left: isSidebarVisible ? "50%" : "50%",
-    transform: "translate(-50%, -50%)",
-    transition: isSidebarVisible
-      ? "left 3s ease-in-out, width 2s ease-in-out"
-      : "left 3s ease-in-out, width 2s ease-in-out",
-    display: "flex",
-    justifyContent: "start",
-    alignItems: "start",
-    overflowX: "hidden",
-    overflowY: "scroll",
-    wordBreak: "break-word",
-    textAlign: "center",
-    maxWidth: "80vw",
-    fontSize: "15px",
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "23px",
-    fontFamily: '"Poppins", sans-serif',
-    padding: "0px",
-    Margin: "0px",
-  };
-
-  const tableHeadColor = "#3368b5";
-  const textColor = "white";
-
-  // const firstColWidth = {
-  //   width: "26%",
-  // };
-  // const secondColWidth = {
-  //   width: "12%",
-  // };
-  // const thirdColWidth = {
-  //   width: "22%",
-  // };
-  // const forthColWidth = {
-  //   width: "18%",
-  // };
-
-  const getDayName = (dateString) => {
-    const dateParts = dateString.split("-").map(Number); // Split date string into parts (day, month, year)
-    const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // Create Date object
-    return date.toLocaleDateString("en-US", { weekday: "long" }); // Get day name
-  };
-
-
-
-  const [isOn, setIsOn] = useState(false);
-
-
-  const [isOn2, setIsOn2] = useState(false);
-
-
-  const [amountData, setAmountData] = useState({});
-  console.log("amountData", amountData);
-
-
-
-  const [Resturentdata, setResturentdata] = useState([]);
-  console.log('Resturentdata', Resturentdata)
-
-
-
-  const [CashBankBalancetotal, setCashBankBalancetotal] = useState([]);
-  const [TotalReceivable, setTotalReceivable] = useState([]);
-  const [TotalReceivabletotal, setTotalReceivabletotal] = useState([]);
-  const [TotalPayable, setTotalPayable] = useState([]);
-  const [TotalPayabletotal, setTotalPayabletotal] = useState([]);
-  const [ItemStock, setItemStock] = useState([]);
-  const [ItemStocktotal, setItemStocktotal] = useState([]);
 
 
   useEffect(() => {
@@ -328,6 +80,164 @@ export default function ResturentDashboard() {
       });
   }, []);
 
+  useEffect(() => {
+    const apiUrl = apiLinks + "/ItemSale.php";
+    setIsLoading(true);
+
+    const formData = new URLSearchParams({
+      code: 'FDEEK',
+      FYerDsc: '2025-2025',
+      FLocCod: '001',
+      FIntDat: '25-09-2025',
+      FFnlDat: '25-09-2025'
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        // Check if response.data exists and has the expected structure
+        if (response.data && typeof response.data === 'object') {
+          setTodaySaledata(response.data.Report);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setTodaySaledata({}); // Set empty object instead of array
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setTodaySaledata({}); // Set empty object on error too
+      })
+      .finally(() => {
+        setIsLoading(false); // Make sure to set loading to false
+      });
+  }, []);
+
+   useEffect(() => {
+    const apiUrl = apiLinks + "/ItemSale.php";
+    setIsLoading(true);
+
+    const formData = new URLSearchParams({
+      code: 'FDEEK',
+      FYerDsc: '2025-2025',
+      FLocCod: '001',
+      FIntDat: '01-09-2025',
+      FFnlDat: '25-09-2025'
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        // Check if response.data exists and has the expected structure
+        if (response.data && typeof response.data === 'object') {
+          setMonthSaledata(response.data.Report);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setMonthSaledata({}); // Set empty object instead of array
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setMonthSaledata({}); // Set empty object on error too
+      })
+      .finally(() => {
+        setIsLoading(false); // Make sure to set loading to false
+      });
+  }, []);
+
+
+  const contentStyle = {
+    backgroundColor: '#efeff0ff',
+    width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+    position: "relative",
+    top: "42%",
+    left: isSidebarVisible ? "50%" : "50%",
+    transform: "translate(-50%, -50%)",
+    transition: isSidebarVisible
+      ? "left 3s ease-in-out, width 2s ease-in-out"
+      : "left 3s ease-in-out, width 2s ease-in-out",
+    display: "flex",
+    justifyContent: "start",
+    alignItems: "start",
+    overflowX: "hidden",
+    overflowY: "scroll",
+    wordBreak: "break-word",
+    textAlign: "center",
+    maxWidth: "80vw",
+    fontSize: "15px",
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: "23px",
+    fontFamily: '"Poppins", sans-serif',
+    padding: "0px",
+    Margin: "0px",
+  };
+
+
+  // const firstColWidth = {
+  //   width: "26%",
+  // };
+  // const secondColWidth = {
+  //   width: "12%",
+  // };
+  // const thirdColWidth = {
+  //   width: "22%",
+  // };
+  // const forthColWidth = {
+  //   width: "18%",
+  // };
+
+
+
+  // ✅ helper to convert month num → short name
+  const getMonthName = (num) => {
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    return months[parseInt(num) - 1] || num;
+  };
+
+  // ✅ Step 1: Define all 12 months
+  const allMonths = [
+    { month: "Jan", value: 0 },
+    { month: "Feb", value: 0 },
+    { month: "Mar", value: 0 },
+    { month: "Apr", value: 0 },
+    { month: "May", value: 0 },
+    { month: "Jun", value: 0 },
+    { month: "Jul", value: 0 },
+    { month: "Aug", value: 0 },
+    { month: "Sep", value: 0 },
+    { month: "Oct", value: 0 },
+    { month: "Nov", value: 0 },
+    { month: "Dec", value: 0 },
+  ];
+
+  // ✅ Step 2: Transform API data
+  const apiData = (Resturentdata.MonthWiseGraph || []).map((item) => ({
+    month: getMonthName(item.Month),
+    value: parseFloat(item.Sale),
+  }));
+
+  // ✅ Step 3: Merge API data with all 12 months
+  const barchartData = allMonths.map((m) => {
+    const found = apiData.find((d) => d.month === m.month);
+    return found ? found : m;
+  });
+
+  // ✅ max value for scaling bars
+  const monthwisemaxValue = Math.max(...barchartData.map((item) => item.value), 1);
+
+
+
+
+  /////////////////////////////////////////////////////
   const [chartData, setChartData] = useState([]);
   const [activeBar, setActiveBar] = useState(null);
 
@@ -341,269 +251,6 @@ export default function ResturentDashboard() {
     setChartData(data);
   }, []);
 
-
-
-  // ------- MAIN BAR CHART DATA ----------
-  // const rawData = showSale
-  //   ? Resturentdata?.ToDayCatgSaleAmountWise
-  //   : Resturentdata?.ToDayCatgSaleQntyWise;
-
-  // const data =
-  //   rawData?.map((item) => ({
-  //     ...item,
-  //     Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")), // ✅ strip commas
-  //     Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")), // ✅ strip commas
-  //   })) || [];
-
-  // const maxValue = showSale
-  //   ? Math.max(...data.map((item) => item.Sale), 0)
-  //   : Math.max(...data.map((item) => item.Qnty), 0);
-
-  // // ------- DONUT CHART DATA (CURRENT MONTH) ----------
-  // const donutRawData = showSale
-  //   ? Resturentdata?.ToDayCatgSaleAmountWise
-  //   : Resturentdata?.ToDayCatgSaleAmountWise;
-
-  // const donutData =
-  //   donutRawData?.map((item) => ({
-  //     Category: item.Category || "N/A",
-  //     Value: showSale
-  //       ? Number((item.Sale ?? "0").toString().replace(/,/g, "")) // ✅ Sale parsing
-  //       : Number((item.Qnty ?? "0").toString().replace(/,/g, "")), // ✅ Qnty parsing
-  //   })) || [];
-
-  // const donutSeries = donutData.map((item) => item.Value);
-  // const donutLabels = donutData.map((item) => item.Category);
-
-
-  // const Donutchart = ({ series, labels, title }) => {
-  //   // ✅ Guard: if no data, show "No Data Available"
-  //   if (!series || series.length === 0 || series.every((val) => val === 0)) {
-  //     return (
-  //       <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>
-  //         No Data Available
-  //       </div>
-  //     );
-  //   }
-
-  //   const options = {
-  //     chart: {
-  //       type: "donut",
-  //     },
-  //     title: {
-  //       text: title,
-  //       align: "center",
-  //       style: {
-  //         fontSize: "14px",
-  //         fontWeight: "bold",
-  //         color: "black",
-  //       },
-  //     },
-  //     // ✅ keep labels so tooltip shows Category names
-  //     labels: labels,
-
-  //     legend: {
-  //       show: false, // keep false if you don’t want labels outside the donut
-  //     },
-  //     tooltip: {
-  //       enabled: true,
-  //       y: {
-  //         formatter: function (val) {
-  //           return val.toLocaleString(); // format values with commas
-  //         },
-  //       },
-  //     },
-  //     dataLabels: {
-  //       enabled: false, // ❌ no text inside slices
-  //     },
-  //     plotOptions: {
-  //       pie: {
-  //         donut: {
-  //           size: "0%",
-  //         },
-  //       },
-  //     },
-  //   };
-
-  //   return (
-  //     <div id="donut-chart">
-  //       <Chart options={options} series={series} type="donut" width={220} />
-  //     </div>
-  //   );
-  // };
-
-
-  // ------- MAIN BAR CHART DATA ----------
-  // ------- COLOR PALETTE (consistent across charts) ----------
-  // const colorPalette = [
-  //   "#FF4560", // red
-  //   "#008FFB", // blue
-  //   "#00E396", // green
-  //   "#FEB019", // orange
-  //   "#775DD0", // purple
-  //   "#546E7A", // gray
-  //   "#26A69A", // teal
-  //   "#D10CE8", // pink
-  // ];
-
-  // // ------- MAIN BAR CHART DATA ----------
-  // const barRawData = showSale
-  //   ? Resturentdata?.ToDayCatgSaleAmountWise
-  //   : Resturentdata?.ToDayCatgSaleQntyWise;
-
-  // const barData =
-  //   barRawData?.map((item) => ({
-  //     ...item,
-  //     Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
-  //     Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
-  //   })) || [];
-
-  // const maxValue = showSale
-  //   ? Math.max(...barData.map((item) => item.Sale), 0)
-  //   : Math.max(...barData.map((item) => item.Qnty), 0);
-
-  // // ------- DONUT CHART DATA (opposite of bar) ----------
-  // const donutRawData = showSale
-  //   ? Resturentdata?.ToDayCatgSaleQntyWise
-  //   : Resturentdata?.ToDayCatgSaleAmountWise;
-
-  // const donutData =
-  //   donutRawData?.map((item, index) => ({
-  //     Category: item.Category || "N/A",
-  //     Value: showSale
-  //       ? Number((item.Qnty ?? "0").toString().replace(/,/g, ""))
-  //       : Number((item.Sale ?? "0").toString().replace(/,/g, "")),
-  //     Color: colorPalette[index % colorPalette.length], // assign consistent color
-  //   })) || [];
-
-  // const donutSeries = donutData.map((item) => item.Value);
-  // const donutLabels = donutData.map((item) => item.Category);
-  // const donutColors = donutData.map((item) => item.Color);
-
-  // // ------- DONUT COMPONENT ----------
-  // const Donutchart = ({ series, labels, colors, title }) => {
-  //   if (!series || series.length === 0 || series.every((val) => val === 0)) {
-  //     return (
-  //       <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>
-  //         No Data Available
-  //       </div>
-  //     );
-  //   }
-
-  //   const options = {
-  //     chart: { type: "donut" },
-  //     title: {
-  //       text: title,
-  //       align: "center",
-  //       style: { fontSize: "14px", fontWeight: "bold", color: "black" },
-  //     },
-  //     labels: labels,
-  //     colors: colors, // ✅ use same colors for donut
-  //     legend: { show: false },
-  //     tooltip: {
-  //       enabled: true,
-  //       y: {
-  //         formatter: (val, { seriesIndex }) =>
-  //           `${labels[seriesIndex]}: ${val.toLocaleString()}`,
-  //       },
-  //     },
-  //     dataLabels: { enabled: false },
-  //     plotOptions: { pie: { donut: { size: "0%" } } },
-  //   };
-
-  //   return (
-  //     <div id="donut-chart">
-  //       <Chart options={options} series={series} type="donut" width={220} />
-  //     </div>
-  //   );
-  // };
-
-
-  // ------- COLOR PALETTE (consistent mapping per category) ----------
-  // const categoryColors = {
-  //   PIZZA: "#FF4560",      // red
-  //   BURGERS: "#008FFB",    // blue
-  //   WRAPS: "#00E396",      // green
-  //   DEALS: "#FEB019",      // orange
-  //   "FRIED ITEMS": "#775DD0", // purple
-  //   BEVERAGES: "#546E7A",  // gray
-  //   "SIDE ORDERS": "#26A69A", // teal
-  //   'N/ A': "#D10CE8",        // pink (for null Category)
-  // };
-
-  // ------- MAIN BAR CHART DATA ----------
-
-
-
-
-
-  // ✅ Color palette (extendable)
-  // const palette = [
-  //   "#FF4560", "#008FFB", "#00E396", "#FEB019",
-  //   "#775DD0", "#546E7A", "#26A69A", "#D10CE8",
-  //   "#9C27B0", "#FF9800", "#4CAF50", "#3F51B5"
-  // ];
-
-  // // ✅ Store category → color mapping
-  // const categoryColors = {};
-
-
-
-  // // ✅ Function to assign consistent colors
-  // const getCategoryColor = (category) => {
-  //   const key = (category || "N/A").toUpperCase().trim();
-  //   if (!categoryColors[key]) {
-  //     const index = Object.keys(categoryColors).length % palette.length;
-  //     categoryColors[key] = palette[index];
-  //   }
-  //   return categoryColors[key];
-  // };
-
-  // // ---------------- BAR DATA ----------------
-  // // ✅ Single dataset source depending on showSale
-  // const barRawData = showSale
-  //   ? Resturentdata?.ToDayCatgSaleAmountWise
-  //   : Resturentdata?.ToDayCatgSaleQntyWise;
-
-  // const barData =
-  //   barRawData?.map((item) => ({
-  //     ...item,
-  //     Category: item.Category || "N/A",
-  //     Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
-  //     Sale: Number((item.Sale ?? "0").toString().replace(/,/g, "")),
-  //     Color: getCategoryColor(item.Category), // 👈 assign color here
-  //   })) || [];
-
-  // const maxValue = showSale
-  //   ? Math.max(...barData.map((item) => item.Sale), 0)
-  //   : Math.max(...barData.map((item) => item.Qnty), 0);
-
-  // // ---------------- DONUT DATA (same as BAR DATA) ----------------
-  // // ✅ Use the SAME dataset (no swapping)
-  // const donutData =
-  //   barData?.map((item) => ({
-  //     Category: item.Category || "N/A",
-  //     Value: showSale ? item.Sale : item.Qnty, // 👈 match Bar chart
-  //     Color: getCategoryColor(item.Category),
-  //   })) || [];
-
-  // // ✅ Ensure same categories across both datasets
-  // const allCategories = [
-  //   ...new Set([...barData.map((b) => b.Category), ...donutData.map((d) => d.Category)]),
-  // ];
-
-  // const alignedDonutData = allCategories.map((cat) => {
-  //   const found = donutData.find((d) => d.Category === cat);
-  //   return {
-  //     Category: cat,
-  //     Value: found ? found.Value : 0,
-  //     Color: getCategoryColor(cat), // ✅ same color as bar
-  //   };
-  // });
-
-  // const donutSeries = alignedDonutData.map((item) => item.Value);
-  // const donutLabels = alignedDonutData.map((item) => item.Category);
-  // const donutColors = alignedDonutData.map((item) => item.Color); // 👈 pass to chart
 
 
   const palette = [
@@ -623,7 +270,7 @@ export default function ResturentDashboard() {
 
   // ✅ Function to assign consistent colors
   const getCategoryColor = (category) => {
-    const formattedCategory = ( formatCategoryName2(category));
+    const formattedCategory = (formatCategoryName2(category));
     const key = (formattedCategory || "N/A").toUpperCase().trim();
     if (!categoryColors[key]) {
       const index = Object.keys(categoryColors).length % palette.length;
@@ -705,7 +352,16 @@ export default function ResturentDashboard() {
             `${labels[seriesIndex]}: ${val.toLocaleString()}`,
         },
       },
-      dataLabels: { enabled: false },
+      // ✅ Show percentage in white
+      dataLabels: {
+        enabled: true,
+        formatter: (val) => `${val.toFixed(1)}%`,
+        style: {
+          colors: ["#FFFFFF"], // white text
+          fontSize: "12px",
+          fontWeight: "400",
+        },
+      },
       plotOptions: { pie: { donut: { size: "0%" } } },
     };
 
@@ -718,17 +374,18 @@ export default function ResturentDashboard() {
 
 
 
+
   ////////////////////////// CODE FOR MONTHLY WISE DATA SET //////////////////////////////////
   // ------- CURRENT MONTH DONUT CHART DATA ----------
 
- 
 
 
- const palette2 = [
+
+  const palette2 = [
     "#2563EB", "#DC2626", "#059669", "#7C3AED",
     "#EA580C", "#65A30D", "#DB2777", "#0891B2",
     "#CA8A04", "#9333EA", "#16A34A", "#E11D48"
-];
+  ];
 
   // // ✅ Function to capitalize first letter and make others lowercase
   const formatCategoryName = (category) => {
@@ -824,6 +481,15 @@ export default function ResturentDashboard() {
         },
       },
       dataLabels: { enabled: false },
+      dataLabels: {
+        enabled: true,
+        formatter: (val) => `${val.toFixed(1)}%`,  // show percentage
+        style: {
+          colors: ["#FFFFFF"], // make text white
+          fontSize: "12px",
+          fontWeight: "400",
+        },
+      },
       plotOptions: { pie: { donut: { size: "0%" } } },
     };
 
@@ -835,17 +501,6 @@ export default function ResturentDashboard() {
   };
   ///////////////////////////////////////////////////////////////////////////////////////////
 
-  const [showModal, setShowModal] = useState(false);
-
-  const firstColWidth = {
-    width: "16%",
-  };
-  const secondColWidth = {
-    width: "60%",
-  };
-  const thirdColWidth = {
-    width: "20%",
-  };
 
   return (
     <>
@@ -855,17 +510,7 @@ export default function ResturentDashboard() {
         <div className="main_left_section">
           {/* first left inner main 3 section */}
           <div className="left_inner_section1">
-            {/* top inner card section */}
-            {/* <div className="top_inner_cards_fist">
-              <div className="sep_heading">
-                <span className="first_span">September</span>
-                <span className="first_span2" >{Resturentdata.MonthAmount || "0"} <span className="first_span2" style={{ marginLeft: '20px' }}>{Resturentdata.MonthInvoices || "0"}</span>  </span>
-              </div>
-              <div className="sep_heading">
-                <span className="first_span">Today</span>
-                <span className="first_span2">{Resturentdata.DayAmount || "0"}  <span className="first_span2" style={{ marginLeft: '20px' }}>{Resturentdata.DayInvoices || "0"}</span></span>
-              </div>
-            </div> */}
+
 
             <div className="top_inner_cards">
               <div className="sep_heading">
@@ -997,9 +642,7 @@ export default function ResturentDashboard() {
               </div>
             </div>
           </div>
-
           {/* Last left main row */}
-
           <div className="left_inner_section3 ">
             <div className="lastrow_firstchart">
               <div className="row">
@@ -1106,7 +749,6 @@ export default function ResturentDashboard() {
               </div>
             </div>
           </div>
-
 
           <div className="left_inner_section3 ">
             <div className="lastrow_firstchart">
@@ -1215,10 +857,274 @@ export default function ResturentDashboard() {
               </div>
             </div>
           </div>
+
+          <div className="left_inner_section3">
+            <div className="lastrow_firstchart">
+              <div className="row">
+                <div className="col-md-12">
+                  <div className="monthwise_graph" >
+                    <div
+                      style={{
+                        width: "100%",
+                        // background: "white",
+                        borderRadius: "12px",
+                        padding: "10px 0px",
+                        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                        display: "flex",
+                        flexDirection: "column",
+                        paddingRight: '0px'
+                      }}
+                    >
+                      {/* Header */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "18px",
+                        }}
+                      >
+                        <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#2d3436" }}>
+                          Monthly Graph
+                        </h3>
+                        <div style={{ display: "flex" }}>
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              fontSize: "10px",
+                              color: "#636e72",
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: "8px",
+                                height: "8px",
+                                borderRadius: "50%",
+                                marginRight: "6px",
+                                background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
+                              }}
+                            ></span>
+                            Revenue
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Chart */}
+                      <div style={{ height: "200px", display: "flex" }}>
+                        {/* Y-Axis with Labels */}
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                            marginRight: "8px",
+                            fontSize: "10px",
+                            color: "#65696aff",
+                            fontWeight: 500,
+                            fontSize: '12px'
+                          }}
+                        >
+                          {[4, 3, 2, 1, 0].map((step) => (
+                            <div key={step} style={{ textAlign: "right" }}>
+                              {Math.round((monthwisemaxValue / 4) * step).toLocaleString()}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Bars + X Axis */}
+                        <div
+                          style={{
+                            flex: 1,
+                            display: "flex",
+                            alignItems: "flex-end",
+                            position: "relative",
+                          }}
+                        >
+                          {/* Y-axis line */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: 0,
+                              top: 0,
+                              bottom: 20, // stops above x-axis
+                              width: "1px",
+                              backgroundColor: "#dfe6e9",
+                            }}
+                          ></div>
+
+                          {/* X-axis line */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: 0,
+                              right: 0,
+                              bottom: "20px",
+                              height: "1px",
+                              backgroundColor: "#dfe6e9",
+                            }}
+                          ></div>
+
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              width: "100%",
+                              height: "100%",
+                              padding: "0 4px",
+                            }}
+                          >
+                            {barchartData.map((item, index) => (
+                              <div
+                                key={index}
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  height: "100%",
+                                  flex: 1,
+                                  position: "relative",
+                                }}
+                                onMouseEnter={() => setActiveBar(index)}
+                                onMouseLeave={() => setActiveBar(null)}
+                              >
+                                {/* Bar */}
+                                <div
+                                  style={{
+                                    width: "12px",
+                                    background:
+                                      activeBar === index
+                                        ? "linear-gradient(to top, #2575fc 0%, #009efd 100%)"
+                                        : "linear-gradient(to top, #6a11cb 0%, #2575fc 100%)",
+                                    borderRadius: "4px 4px 0 0",
+                                    transition: "all 0.3s ease",
+                                    position: "relative",
+                                    marginTop: "auto",
+                                    height: `${(item.value / monthwisemaxValue) * 100}%`,
+                                    boxShadow:
+                                      activeBar === index
+                                        ? "0 0 10px rgba(37, 117, 252, 0.4)"
+                                        : "none",
+                                  }}
+                                >
+                                  {/* Tooltip */}
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: "-32px",
+                                      left: "50%",
+                                      transform: "translateX(-50%)",
+                                      backgroundColor: "#2d3436",
+                                      color: "white",
+                                      padding: "4px 8px",
+                                      borderRadius: "6px",
+                                      fontSize: "11px",
+                                      fontWeight: 500,
+                                      whiteSpace: "nowrap",
+                                      opacity: activeBar === index ? 1 : 0,
+                                      transition: "opacity 0.3s ease",
+                                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                                      zIndex: 10,
+                                    }}
+                                  >
+                                    {item.value.toLocaleString()}
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        bottom: "-5px",
+                                        left: "50%",
+                                        transform: "translateX(-50%)",
+                                        width: "0",
+                                        height: "0",
+                                        borderLeft: "5px solid transparent",
+                                        borderRight: "5px solid transparent",
+                                        borderTop: "5px solid #2d3436",
+                                      }}
+                                    ></div>
+                                  </div>
+                                </div>
+
+                                {/* Month Label */}
+                                <div
+                                  style={{
+                                    marginTop: "8px",
+                                    fontSize: "10px",
+                                    color: "#636e72",
+                                    fontWeight: 500,
+                                    fontSize: '12px'
+                                  }}
+                                >
+                                  {item.month}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div className="left_inner_section3">
+            <div className="daywise_graph" >
+              <BarChart />
+            </div>
+          </div>
+
+          <div className="left_inner_section3">
+            <div className="todaysale_card">
+              <div className="card_header">
+                <span>Today Sale </span>
+              </div>
+
+              {/* Data rows */}
+              {TodaySaledata && TodaySaledata.slice(0, 10).map((item, index) => (
+                <div
+                  key={index}
+                  className="card_row"
+                >
+                  <div className="col_desc">{item.Description}</div>
+                  <div className="col_qty">{item.Qnty}</div>
+                  <div className="col_amount">{item.Amount}</div>
+                </div>
+              ))}
+            </div>
+            <div className="todaysale_card">
+              <div className="card_header" style={{background:'linear-gradient(135deg, #ff7e5f, #feb47b)'}}>
+                <span>Monthly Sale </span>
+              </div>
+
+              {/* Data rows */}
+              {MonthSaledata && MonthSaledata.slice(0, 10).map((item, index) => (
+                <div
+                  key={index}
+                  className="card_row"
+                >
+                  <div className="col_desc">{item.Description}</div>
+                  <div className="col_qty">{item.Qnty}</div>
+                  <div className="col_amount">{item.Amount}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+
+
+
         </div>
 
+
+
         {/* first right  section */}
-        <div className="main_right_section"></div>
+        <div className="main_right_section " style={{ padding: "0px", marginTop: "10px", marginRight: '10px' }}>
+
+        </div>
 
 
 
