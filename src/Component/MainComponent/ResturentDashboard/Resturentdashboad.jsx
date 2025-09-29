@@ -4,6 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Dounut from "./Chart/DountChart";
 import BarChart from "./Chart/Barchart";
+import MonthwiseChart from "./Chart/MonthwiseGrapgh";
 import Dount from "./Chart/DountChart";
 import { Spinner } from "react-bootstrap";
 import DatePicker from "react-datepicker";
@@ -27,6 +28,18 @@ export default function ResturentDashboard() {
   const [TodaySaledata, setTodaySaledata] = useState([]);
   const [MonthSaledata, setMonthSaledata] = useState([]);
   const [showSale, setShowSale] = useState(false);
+  const [switchgraph, setswitchgraph] = useState(false);
+  const [switchgraph2, setswitchgraph2] = useState(false);
+  const [monthlysale, setmonthlysale] = useState(false);
+  const [MonthlysaleGraph, setMonthlysaleGraph] = useState(false);
+  const [DaymonthGraph, setDaymonthGraph] = useState(false);
+
+  const [showTodayCategory, setShowTodayCategory] = useState(false)
+  const [showMonthlyCategory, setShowMonthlyCategory] = useState(true); // true = Monthly Category, false = Monthly Sale
+
+  const [todaysaleQnty, settodaysaleQnty] = useState(false);
+  const [todaysaleQntyGraph, settodaysaleQntyGraph] = useState(false);
+  const [saletodaygrph, setsaletodaygrph] = useState(false);
   const [showSalemonthly, setshowSalemonthly] = useState(false);
 
 
@@ -88,8 +101,8 @@ export default function ResturentDashboard() {
       code: 'FDEEK',
       FYerDsc: '2025-2025',
       FLocCod: '001',
-      FIntDat: '25-09-2025',
-      FFnlDat: '25-09-2025'
+      FIntDat: '29-09-2025',
+      FFnlDat: '29-09-2025'
     }).toString();
 
     axios
@@ -115,7 +128,7 @@ export default function ResturentDashboard() {
       });
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const apiUrl = apiLinks + "/ItemSale.php";
     setIsLoading(true);
 
@@ -124,7 +137,7 @@ export default function ResturentDashboard() {
       FYerDsc: '2025-2025',
       FLocCod: '001',
       FIntDat: '01-09-2025',
-      FFnlDat: '25-09-2025'
+      FFnlDat: '29-09-2025'
     }).toString();
 
     axios
@@ -153,7 +166,7 @@ export default function ResturentDashboard() {
 
   const contentStyle = {
     backgroundColor: '#efeff0ff',
-    width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+    width: isSidebarVisible ? "calc(90vw - 0%)" : "90vw",
     position: "relative",
     top: "42%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -168,7 +181,7 @@ export default function ResturentDashboard() {
     overflowY: "scroll",
     wordBreak: "break-word",
     textAlign: "center",
-    maxWidth: "80vw",
+    maxWidth: "90vw",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
@@ -502,6 +515,235 @@ export default function ResturentDashboard() {
   ///////////////////////////////////////////////////////////////////////////////////////////
 
 
+  /////////////////////// CODE FOR MONTHLY SALE ///////////////////////////////////////////
+
+
+  // 🎨 Color Palette
+  const palette3 = [
+    "#2563EB", "#DC2626", "#059669", "#7C3AED",
+    "#EA580C", "#65A30D", "#DB2777", "#0891B2",
+    "#CA8A04", "#9333EA", "#16A34A", "#E11D48"
+  ];
+
+  // ✅ Format Category Names
+  const formatCategoryName3 = (category) => {
+    if (!category || category === "N/A") return "N/A";
+    const cleaned = category.replace(/\(.*?\)/g, "").trim(); // remove () content
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+  };
+
+  // ✅ Store category → color mapping
+  const categoryColors3 = {};
+  const GetCategoryColor2 = (category) => {
+    const formattedCategory = formatCategoryName3(category);
+    const key = (formattedCategory || "N/A").toUpperCase().trim();
+    if (!categoryColors3[key]) {
+      const index = Object.keys(categoryColors3).length % palette3.length;
+      categoryColors3[key] = palette3[index];
+    }
+    return categoryColors3[key];
+  };
+
+  // ✅ Raw Data from API
+  const currentRawData3 = MonthSaledata || [];
+
+  // ✅ Bar Chart Data
+  let monthlysaledata =
+    currentRawData3?.map((item) => ({
+      ...item,
+      Category: formatCategoryName3(item.Description),
+      Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
+      Sale: Number((item.Amount ?? "0").toString().replace(/,/g, "")),
+      Color: GetCategoryColor2(item.Description),
+    })) || [];
+
+  // ✅ Sort by Qnty or Sale & take TOP 10
+  monthlysaledata = monthlysaledata
+    .sort((a, b) =>
+      monthlysale ? b.Qnty - a.Qnty : b.Sale - a.Sale
+    )
+    .slice(0, 10);
+
+  // ✅ Donut Chart Data
+  const currentDonutData3 =
+    monthlysaledata?.map((item) => ({
+      Category: item.Category,
+      Value: monthlysale ? item.Qnty : item.Sale,
+      Color: GetCategoryColor2(item.Description),
+    })) || [];
+
+  const currentDonutSeries3 = currentDonutData3.map((item) => item.Value);
+  const currentDonutLabels3 = currentDonutData3.map((item) => item.Category);
+  const currentDonutColors3 = currentDonutData3.map((item) => item.Color);
+
+  // ✅ Find max value for bar %
+  const currentMaxValue3 = monthlysale
+    ? Math.max(...monthlysaledata.map((item) => item.Qnty), 0)
+    : Math.max(...monthlysaledata.map((item) => item.Sale), 0);
+
+  // ✅ Donut Chart Component
+  const Donutchart3 = ({ series, labels, colors, title }) => {
+    if (!series || series.length === 0 || series.every((val) => val === 0)) {
+      return (
+        <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>
+          No Data Available
+        </div>
+      );
+    }
+
+    const options = {
+      chart: { type: "donut" },
+      title: {
+        text: title,
+        align: "center",
+        style: { fontSize: "14px", fontWeight: "bold", color: "black" },
+      },
+      labels: labels,
+      colors: colors,
+      legend: { show: false },
+      tooltip: {
+        enabled: true,
+        y: {
+          formatter: (val, { seriesIndex }) =>
+            `${labels[seriesIndex]}: ${val.toLocaleString()}`,
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val) => `${val.toFixed(1)}%`,
+        style: {
+          colors: ["#FFFFFF"],
+          fontSize: "12px",
+          fontWeight: "400",
+        },
+      },
+      plotOptions: { pie: { donut: { size: "0%" } } },
+    };
+
+    return (
+      <div id="donut-chart2">
+        <Chart options={options} series={series} type="donut" width={250} />
+      </div>
+    );
+  };
+
+
+  ///////////////////////////////// TODAY SALE DATA //////////////////////////////////////
+
+  // 🎨 Color Palette
+  const palette4 = [
+    "#2563EB", "#DC2626", "#059669", "#7C3AED",
+    "#EA580C", "#65A30D", "#DB2777", "#0891B2",
+    "#CA8A04", "#9333EA", "#16A34A", "#E11D48"
+  ];
+
+  // ✅ Format Category Names
+  const formatCategoryName4 = (category) => {
+    if (!category || category === "N/A") return "N/A";
+    const cleaned = category.replace(/\(.*?\)/g, "").trim(); // remove () content
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+  };
+
+  // ✅ Store category → color mapping
+  const categoryColors4 = {};
+  const GetCategoryColor4 = (category) => {
+    const formattedCategory = formatCategoryName4(category);
+    const key = (formattedCategory || "N/A").toUpperCase().trim();
+    if (!categoryColors4[key]) {
+      const index = Object.keys(categoryColors4).length % palette4.length;
+      categoryColors4[key] = palette4[index];
+    }
+    return categoryColors4[key];
+  };
+
+  // ✅ Raw Data from API
+  const currentRawData4 = TodaySaledata || [];
+
+  // ✅ Processed Data
+  let Todaysaledata =
+    currentRawData4?.map((item) => ({
+      ...item,
+      Category: formatCategoryName4(item.Description),
+      Qnty: Number((item.Qnty ?? "0").toString().replace(/,/g, "")),
+      Sale: Number((item.Amount ?? "0").toString().replace(/,/g, "")),
+      Color: GetCategoryColor4(item.Description),
+    })) || [];
+
+  // ✅ Sort by Qnty or Sale & take TOP 10
+  Todaysaledata = Todaysaledata
+    .sort((a, b) =>
+      todaysaleQnty ? b.Qnty - a.Qnty : b.Sale - a.Sale
+    )
+    .slice(0, 10);
+
+  // ✅ Donut Chart Data
+  const currentDonutData4 =
+    Todaysaledata?.map((item) => ({
+      Category: item.Category,
+      Value: todaysaleQnty ? item.Qnty : item.Sale,
+      Color: GetCategoryColor4(item.Description),
+    })) || [];
+
+  const currentDonutSeries4 = currentDonutData4.map((item) => item.Value);
+  const currentDonutLabels4 = currentDonutData4.map((item) => item.Category);
+  const currentDonutColors4 = currentDonutData4.map((item) => item.Color);
+
+  // ✅ Find max value for bar %
+  const currentMaxValue4 = todaysaleQnty
+    ? Math.max(...Todaysaledata.map((item) => item.Qnty), 0)
+    : Math.max(...Todaysaledata.map((item) => item.Sale), 0);
+
+  // ✅ Donut Chart Component
+  const Donutchart4 = ({ series, labels, colors, title }) => {
+    if (!series || series.length === 0 || series.every((val) => val === 0)) {
+      return (
+        <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>
+          No Data Available
+        </div>
+      );
+    }
+
+    const options = {
+      chart: { type: "donut" },
+      title: {
+        text: title,
+        align: "center",
+        style: { fontSize: "14px", fontWeight: "bold", color: "black" },
+      },
+      labels: labels,
+      colors: colors,
+      legend: { show: false },
+      tooltip: {
+        enabled: true,
+        y: {
+          formatter: (val, { seriesIndex }) =>
+            `${labels[seriesIndex]}: ${val.toLocaleString()}`,
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val) => `${val.toFixed(1)}%`,
+        style: {
+          colors: ["#FFFFFF"],
+          fontSize: "12px",
+          fontWeight: "400",
+        },
+      },
+      plotOptions: { pie: { donut: { size: "0%" } } },
+    };
+
+    return (
+      <div id="donut-chart4">
+        <Chart options={options} series={series} type="donut" width={250} />
+      </div>
+    );
+  };
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////////////////////
+
   return (
     <>
       <div className="row Countair_styling" style={contentStyle}>
@@ -512,7 +754,7 @@ export default function ResturentDashboard() {
           <div className="left_inner_section1">
 
 
-            <div className="top_inner_cards">
+            <div className="top_inner_cards1">
               <div className="sep_heading">
                 <div className="top_span">
                   <span className="first_span">September</span>
@@ -564,7 +806,7 @@ export default function ResturentDashboard() {
             <div className="top_inner_cards">
               <div className="sep_heading">
                 <div className="top_span">
-                  <span className="first_span_secondcard">Last 3 Days Summary</span>
+                  <span className="first_span_secondcard1" >Last 3 Days Summary</span>
                 </div>
 
                 {Resturentdata.Last3Days && Resturentdata.Last3Days.map((dayData, index) => (
@@ -580,61 +822,83 @@ export default function ResturentDashboard() {
             </div>
 
             <div className="top_inner_cards3">
-
+              <div className="split_section"></div>
+              <div className="split_section"></div>
             </div>
 
 
+            <div className="top_inner_cards4" style={{ margin: '0px' }}>
+              <div className="counter_sale">
+                Counter Sale
+              </div>
+              {/* Data rows */}
+              <div className="countersale_map" style={{ paddingLeft: '5px', paddingRight: '5px' }}>
+                {Resturentdata.AccountCodeSale && Resturentdata.AccountCodeSale.map((item, index) => (
+                  <div key={index} className="row  counter_saledata" style={{ lineHeight: '1.5', borderBottom: '1px solid grey', borderRight: '1px solid grey', borderTop: '1px solid grey' }}>
+                    <div className="col-md-7 columnsetting" style={{ textAlign: 'start', borderRight: '1px solid grey', borderLeft: '1px solid grey', paddingLeft: '2px' }}>
+                      {item.Desc || 'N/A'}
+                    </div>
+                    <div className="col-md-2 " style={{ textAlign: 'center', padding: '0px', borderRight: '1px solid grey' }}>
+                      {item.Invoices}
+                    </div>
+                    <div className="col-md-3 " style={{ textAlign: 'end', padding: '0px', borderRight: '1px solid grey' }}>
+                      {item.Sale}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-
-
+            </div>
 
 
             {/* Last 3 days cards */}
 
           </div>
 
-          <div className="left_inner_section2">
-            {/* first card */}
-            <div className="first_card" style={{ margin: '0px' }}>
-              <div className="top_span">
-                <span className="first_span_secondcard" style={{ paddingBottom: '10px' }}>Counter Sale</span>
+
+          <div className="left_inner_section3">
+             <div className="daywise_graph" >
+              <div className="month_day_graph" style={{ paddingLeft: '20px' }}>
+                {DaymonthGraph ? 'Monthly Performance Overview' : 'Daily Performance Overview'}
+                <div style={{ display: 'flex', alignItems: 'center', marginLeft: '100px', marginTop: '3px' }}>
+                  <label className="toggle" title="Switch Graph">
+                    <input
+                      type="checkbox"
+                      checked={DaymonthGraph}
+                      onChange={() => setDaymonthGraph(!DaymonthGraph)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+
+                </div>
               </div>
 
-              {/* Data rows */}
-              {Resturentdata.AccountCodeSale && Resturentdata.AccountCodeSale.map((item, index) => (
-                <div key={index} className="row  cardrow" style={{ borderBottom: '1px solid grey', borderRight: '1px solid grey', borderTop: '1px solid grey' }}>
-                  <div className="col-md-7 columnsetting" style={{ textAlign: 'start', borderRight: '1px solid grey', borderLeft: '1px solid grey', paddingLeft: '2px' }}>
-                    {item.Desc || 'N/A'}
-                  </div>
-                  <div className="col-md-2 " style={{ textAlign: 'center', padding: '0px', borderRight: '1px solid grey' }}>
-                    {item.Invoices}
-                  </div>
-                  <div className="col-md-3 " style={{ textAlign: 'end', padding: '0px', borderRight: '1px solid grey' }}>
-                    {item.Sale}
-                  </div>
-                </div>
-              ))}
+              {/* Conditionally render charts based on toggle state */}
+              {DaymonthGraph ? <MonthwiseChart /> : <BarChart />}
             </div>
 
-            <div className="second_card">
-              <div className="" style={{ margin: '0px' }}>
-                <div className="top_span">
-                  <span className="first_span_secondcard" style={{ paddingBottom: '5px' }}>Last 10 Sales</span>
-                </div>
+            <div className="info" >
 
-                {/* Data rows */}
+            </div>
+
+            <div className="info2" >
+              <div className="counter_sale">
+                Last 10 Sale
+              </div>
+
+              <div className="countersale_map" style={{ paddingLeft: '5px', paddingRight: '5px' }}>
                 {Resturentdata.Last10Sales && Resturentdata.Last10Sales.map((item, index) => (
-                  <div key={index} className="row  cardrow" style={{ borderBottom: '1px solid grey', borderRight: '1px solid grey', borderTop: '1px solid grey' }} >
-                    <div className=" columnsetting" style={{ paddingLeft: '2px', width: '26%', textAlign: 'start', borderRight: '1px solid grey', borderLeft: '1px solid grey' }}>
+                  <div key={index} className="row  counter_saledata" style={{ lineHeight: '1.5', borderBottom: '1px solid grey', borderRight: '1px solid grey', borderTop: '1px solid grey' }}>
+                    <div className="columnsetting" style={{ width: '30%', textAlign: 'start', borderRight: '1px solid grey', borderLeft: '1px solid grey', paddingLeft: '2px' }}>
                       {item.ttrnnum || 'N/A'}
                     </div>
-                    <div style={{ width: '28%', textAlign: 'start', padding: '0px', borderRight: '1px solid grey', }}>
+                    <div style={{ width: '30%', textAlign: 'start', padding: '0px', borderRight: '1px solid grey' }}>
                       {item.ttrntim}
                     </div>
-                    <div style={{ width: '19%', textAlign: 'center', padding: '0px', borderRight: '1px solid grey', }}>
+                    <div style={{ width: '15%', textAlign: 'end', paddingRight: '2px', padding: '0px', borderRight: '1px solid grey' }}>
                       {item.Qnty}
                     </div>
-                    <div style={{ width: '26%', textAlign: 'end', padding: '0px' }}>
+                    <div style={{ width: '25%', textAlign: 'end', paddingRight: '2px', padding: '0px', borderRight: '1px solid grey' }}>
                       {item.Sale}
                     </div>
                   </div>
@@ -642,10 +906,12 @@ export default function ResturentDashboard() {
               </div>
             </div>
           </div>
+
           {/* Last left main row */}
-          <div className="left_inner_section3 ">
+          <div className="left_inner_section3 " >
+
             <div className="lastrow_firstchart">
-              <div className="row">
+              <div className="row" style={{ height: '220px' }}>
                 <div className="col-md-12 ">
                   <div
                     className="top_span"
@@ -653,482 +919,384 @@ export default function ResturentDashboard() {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      borderTopLeftRadius: '5px',
+                      borderTopRightRadius: '5px',
+                      background: showTodayCategory ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%));' : 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
                     }}
                   >
                     <span
                       className="first_span_secondcard"
-                      style={{ paddingBottom: "5px" }}
+                      style={{ paddingBottom: "5px", paddingTop: '5px', paddingLeft: '20px', fontWeight: 'bold' }}
                     >
-                      ToDay Category
+                      {showTodayCategory ? "TODAY " : "TODAY "}
                     </span>
 
-                    <div style={{ paddingTop: "5px" }}>
-                      <label className="toggle">
+                    {/* Main Toggle - Switch between Today Category and Today Sale */}
+                    <div style={{ paddingTop: "5px", marginRight: '150px' }}>
+                      <label className="toggle" title="Switch between Category and Sale">
                         <input
                           type="checkbox"
-                          checked={showSale}
-                          onChange={() => setShowSale(!showSale)} // toggle state
+                          checked={!showTodayCategory}
+                          onChange={() => setShowTodayCategory(!showTodayCategory)}
                         />
                         <span className="slider"></span>
                       </label>
+                      <span style={{ marginLeft: '10px', fontSize: '14px', color: 'white', }}>
+                        {showTodayCategory ? 'Category' : 'Item'}
+                      </span>
                     </div>
-                  </div>
 
-                  {barData.map((item, index) => {
-                    const value = showSale ? item.Sale : item.Qnty;
-                    const percentage = maxValue ? (value / maxValue) * 100 : 0;
-                    const barColor = categoryColors[item.Category?.toUpperCase().trim()] || "#999999"; // ✅ category-based color
-
-                    return (
-                      <div key={index} className="row cardrow">
-                        <div
-                          className="columnsetting"
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            paddingLeft: "2px",
-                            width: "100%",
-                            textAlign: "start",
-                          }}
-                        >
-                          {item.Category || "N/A"}
-
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <div
-                              style={{
-                                width: "190px",
-                                height: "15px",
-                                background: "#eee",
-                                overflow: "hidden",
-                                borderRadius: "6px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: `${percentage}%`,
-                                  height: "100%",
-                                  background: barColor, // ✅ match donut color
-                                  transition: "width 0.3s ease",
-                                }}
-                              ></div>
-                            </div>
-
-                            <span
-                              style={{
-                                minWidth: "60px",
-                                textAlign: "right",
-                                fontSize: "13px",
-                                fontWeight: "500",
-                              }}
-                            >
-                              {showSale ? value.toLocaleString() : value}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                </div>
-
-              </div>
-            </div>
-
-            <div className="lastrow_secondchat">
-              <div
-                className="col-md-12"
-                style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
-              >
-                <Donutchart
-                  series={donutSeries}
-                  labels={donutLabels}
-                  colors={donutColors} // ✅ pass matching colors
-                // title={showSale ? "Current Month Quantity" : "Current Month Sale"}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="left_inner_section3 ">
-            <div className="lastrow_firstchart">
-              <div className="row">
-                <div className="col-md-12 ">
-                  <div
-                    className="top_span"
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      className="first_span_secondcard"
-                      style={{ paddingBottom: "5px" }}
-                    >
-                      Monthly Category
-                    </span>
-
+                    {/* Graph Type Toggle */}
                     <div style={{ paddingTop: "5px" }}>
-                      <label className="toggle">
+                      <label className="toggle" title="Switch to Pie Chart">
                         <input
                           type="checkbox"
-                          checked={showSalemonthly}
-                          onChange={() => setshowSalemonthly(!showSalemonthly)} // toggle state
+                          checked={showTodayCategory ? switchgraph2 : todaysaleQntyGraph}
+                          onChange={() => showTodayCategory ? setswitchgraph2(!switchgraph2) : settodaysaleQntyGraph(!todaysaleQntyGraph)}
                         />
                         <span className="slider"></span>
                       </label>
+                      {/* <span style={{ marginLeft: '10px', fontSize: '12px', color: 'white' }}>
+                        {showTodayCategory ? (switchgraph2 ? 'Donut' : 'Bar') : (todaysaleQntyGraph ? 'Donut' : 'Bar')}
+                      </span> */}
+                    </div>
+
+                    {/* Data Type Toggle */}
+                    <div style={{ paddingTop: "5px", paddingRight: '20px' }}>
+                      <label className="toggle" >
+                        <input
+                          type="checkbox"
+                          checked={showTodayCategory ? showSale : todaysaleQnty}
+                          onChange={() => showTodayCategory ? setShowSale(!showSale) : settodaysaleQnty(!todaysaleQnty)}
+                        />
+                        <span className="slider"></span>
+                      </label>
+                      {/* <span style={{ marginLeft: '10px', fontSize: '12px', color: 'white' }}>
+                        {showTodayCategory ? (showSale ? 'Sale' : 'Qnty') : (todaysaleQnty ? 'Qnty' : 'Sale')}
+                      </span> */}
                     </div>
                   </div>
 
-                  {currentBarData.map((item, index) => {
-                    const value = showSalemonthly ? item.Qnty : item.Sale; // Fixed: Now both use same data type
-                    const percentage = currentMaxValue ? (value / currentMaxValue) * 100 : 0;
-                    const barColor = categoryColors2[item.Category?.toUpperCase().trim()] || "#999999"; // ✅ category-based color
-
-                    return (
-                      <div key={index} className="row cardrow">
-                        <div
-                          className="columnsetting"
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            paddingLeft: "2px",
-                            width: "100%",
-                            textAlign: "start",
-                          }}
-                        >
+                  <div className="row" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                    {/* ✅ Category Column */}
+                    <div className={showTodayCategory ? "col-md-3" : "col-md-4"}>
+                      {(showTodayCategory ? barData : Todaysaledata).map((item, index) => (
+                        <div key={index} className="cardrow" style={{ textAlign: "start" }}>
                           {item.Category || "N/A"}
-
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <div
-                              style={{
-                                width: "190px",
-                                height: "15px",
-                                background: "#eee",
-                                overflow: "hidden",
-                                borderRadius: "6px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: `${percentage}%`,
-                                  height: "100%",
-                                  background: barColor, // ✅ match donut color
-                                  transition: "width 0.3s ease",
-                                }}
-                              ></div>
-                            </div>
-
-                            <span
-                              style={{
-                                minWidth: "70px",
-                                textAlign: "right",
-                                fontSize: "13px",
-                                fontWeight: "500",
-                              }}
-                            >
-                              {value.toLocaleString()}
-                            </span>
-                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      ))}
+                    </div>
 
-                </div>
+                    {/* ✅ Middle Column (Bars OR Donut) */}
+                    <div className={showTodayCategory ? "col-md-6" : "col-md-5"}>
+                      {showTodayCategory ? (
+                        // TODAY CATEGORY CONTENT
+                        !switchgraph2 ? (
+                          // 🔹 Bars for Today Category
+                          barData.map((item, index) => {
+                            const value = showSale ? item.Sale : item.Qnty;
+                            const percentage = maxValue ? (value / maxValue) * 100 : 0;
+                            const barColor =
+                              categoryColors[item.Category?.toUpperCase().trim()] || "#999999";
 
-
-              </div>
-            </div>
-
-            <div className="lastrow_secondchat">
-              <div
-                className="col-md-12"
-                style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
-              >
-                <Donutchart2
-                  series={currentDonutSeries}
-                  labels={currentDonutLabels}
-                  colors={currentDonutColors} // ✅ pass matching colors
-                // title={showSalemonthly ? "Current Month Quantity" : "Current Month Sale"}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="left_inner_section3">
-            <div className="lastrow_firstchart">
-              <div className="row">
-                <div className="col-md-12">
-                  <div className="monthwise_graph" >
-                    <div
-                      style={{
-                        width: "100%",
-                        // background: "white",
-                        borderRadius: "12px",
-                        padding: "10px 0px",
-                        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                        display: "flex",
-                        flexDirection: "column",
-                        paddingRight: '0px'
-                      }}
-                    >
-                      {/* Header */}
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: "18px",
-                        }}
-                      >
-                        <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#2d3436" }}>
-                          Monthly Graph
-                        </h3>
-                        <div style={{ display: "flex" }}>
-                          <span
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              fontSize: "10px",
-                              color: "#636e72",
-                            }}
-                          >
-                            <span
-                              style={{
-                                width: "8px",
-                                height: "8px",
-                                borderRadius: "50%",
-                                marginRight: "6px",
-                                background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
-                              }}
-                            ></span>
-                            Revenue
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Chart */}
-                      <div style={{ height: "200px", display: "flex" }}>
-                        {/* Y-Axis with Labels */}
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "space-between",
-                            marginRight: "8px",
-                            fontSize: "10px",
-                            color: "#65696aff",
-                            fontWeight: 500,
-                            fontSize: '12px'
-                          }}
-                        >
-                          {[4, 3, 2, 1, 0].map((step) => (
-                            <div key={step} style={{ textAlign: "right" }}>
-                              {Math.round((monthwisemaxValue / 4) * step).toLocaleString()}
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Bars + X Axis */}
-                        <div
-                          style={{
-                            flex: 1,
-                            display: "flex",
-                            alignItems: "flex-end",
-                            position: "relative",
-                          }}
-                        >
-                          {/* Y-axis line */}
-                          <div
-                            style={{
-                              position: "absolute",
-                              left: 0,
-                              top: 0,
-                              bottom: 20, // stops above x-axis
-                              width: "1px",
-                              backgroundColor: "#dfe6e9",
-                            }}
-                          ></div>
-
-                          {/* X-axis line */}
-                          <div
-                            style={{
-                              position: "absolute",
-                              left: 0,
-                              right: 0,
-                              bottom: "20px",
-                              height: "1px",
-                              backgroundColor: "#dfe6e9",
-                            }}
-                          ></div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              width: "100%",
-                              height: "100%",
-                              padding: "0 4px",
-                            }}
-                          >
-                            {barchartData.map((item, index) => (
+                            return (
                               <div
                                 key={index}
+                                className="cardrow"
                                 style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  height: "100%",
-                                  flex: 1,
-                                  position: "relative",
+                                  width: "100%",
+                                  height: "15px",
+                                  background: "#eee",
+                                  borderRadius: "6px",
+                                  overflow: "hidden",
+                                  margin: "7px 0",
+                                  marginLeft: "20px",
                                 }}
-                                onMouseEnter={() => setActiveBar(index)}
-                                onMouseLeave={() => setActiveBar(null)}
                               >
-                                {/* Bar */}
                                 <div
                                   style={{
-                                    width: "12px",
-                                    background:
-                                      activeBar === index
-                                        ? "linear-gradient(to top, #2575fc 0%, #009efd 100%)"
-                                        : "linear-gradient(to top, #6a11cb 0%, #2575fc 100%)",
-                                    borderRadius: "4px 4px 0 0",
-                                    transition: "all 0.3s ease",
-                                    position: "relative",
-                                    marginTop: "auto",
-                                    height: `${(item.value / monthwisemaxValue) * 100}%`,
-                                    boxShadow:
-                                      activeBar === index
-                                        ? "0 0 10px rgba(37, 117, 252, 0.4)"
-                                        : "none",
+                                    width: `${percentage}%`,
+                                    height: "100%",
+                                    background: barColor,
+                                    transition: "width 0.3s ease",
                                   }}
-                                >
-                                  {/* Tooltip */}
-                                  <div
-                                    style={{
-                                      position: "absolute",
-                                      top: "-32px",
-                                      left: "50%",
-                                      transform: "translateX(-50%)",
-                                      backgroundColor: "#2d3436",
-                                      color: "white",
-                                      padding: "4px 8px",
-                                      borderRadius: "6px",
-                                      fontSize: "11px",
-                                      fontWeight: 500,
-                                      whiteSpace: "nowrap",
-                                      opacity: activeBar === index ? 1 : 0,
-                                      transition: "opacity 0.3s ease",
-                                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                      zIndex: 10,
-                                    }}
-                                  >
-                                    {item.value.toLocaleString()}
-                                    <div
-                                      style={{
-                                        position: "absolute",
-                                        bottom: "-5px",
-                                        left: "50%",
-                                        transform: "translateX(-50%)",
-                                        width: "0",
-                                        height: "0",
-                                        borderLeft: "5px solid transparent",
-                                        borderRight: "5px solid transparent",
-                                        borderTop: "5px solid #2d3436",
-                                      }}
-                                    ></div>
-                                  </div>
-                                </div>
-
-                                {/* Month Label */}
-                                <div
-                                  style={{
-                                    marginTop: "8px",
-                                    fontSize: "10px",
-                                    color: "#636e72",
-                                    fontWeight: 500,
-                                    fontSize: '12px'
-                                  }}
-                                >
-                                  {item.month}
-                                </div>
+                                ></div>
                               </div>
-                            ))}
+                            );
+                          })
+                        ) : (
+                          // 🔹 Donut chart for Today Category
+                          <div style={{ display: "flex", justifyContent: "center" }}>
+                            <Donutchart
+                              series={donutSeries}
+                              labels={donutLabels}
+                              colors={donutColors}
+                            />
                           </div>
-                        </div>
-                      </div>
+                        )
+                      ) : (
+                        // TODAY SALE CONTENT
+                        !todaysaleQntyGraph ? (
+                          // Bars for Today Sale
+                          Todaysaledata.map((item, index) => {
+                            const value = todaysaleQnty ? item.Qnty : item.Sale;
+                            const percentage = currentMaxValue4
+                              ? (value / currentMaxValue4) * 100
+                              : 0;
+                            return (
+                              <div
+                                key={index}
+                                className="cardrow"
+                                style={{
+                                  width: "130%",
+                                  height: "15px",
+                                  background: "#eee",
+                                  borderRadius: "6px",
+                                  overflow: "hidden",
+                                  margin: "8px 0",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: `${percentage}%`,
+                                    height: "100%",
+                                    background: item.Color,
+                                    transition: "width 0.3s ease",
+                                  }}
+                                ></div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          // Donut for Today Sale
+                          <div style={{ display: "flex", justifyContent: "center", alignItems: 'center', marginTop: '10px' }}>
+                            <Donutchart4
+                              series={currentDonutSeries4}
+                              labels={currentDonutLabels4}
+                              colors={currentDonutColors4}
+                            />
+                          </div>
+                        )
+                      )}
+                    </div>
+
+                    {/* ✅ Value Column */}
+                    <div className={showTodayCategory ? "col-md-3" : "col-md-3"}>
+                      {(showTodayCategory ? barData : Todaysaledata).map((item, index) => {
+                        const value = showTodayCategory
+                          ? (showSale ? item.Sale : item.Qnty)
+                          : (todaysaleQnty ? item.Qnty : item.Sale);
+                        return (
+                          <div
+                            key={index}
+                            className="cardrow"
+                            style={{ textAlign: "right", fontSize: "13px", fontWeight: "500" }}
+                          >
+                            {value.toLocaleString()}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lastrow_firstchart">
+              <div className="row" style={{ height: '220px' }}>
+                <div className="col-md-12 ">
+                  <div
+                    className="top_span"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      borderTopLeftRadius: '5px',
+                      borderTopRightRadius: '5px',
+                      background: showMonthlyCategory ? ' linear-gradient(135deg, #a465bdff 0%, #ba91caff 100%)' : ' linear-gradient(135deg, #a465bdff 0%, #ba91caff 100%)'
+                    }}
+                  >
+                    <span
+                      className="first_span_secondcard"
+                      style={{ paddingBottom: "5px", paddingTop: '5px', paddingLeft: '20px', fontWeight: 'bold' }}
+                    >
+                      {showMonthlyCategory ? "MONTHLY " : "MONTHLY "}
+                    </span>
+
+                    {/* Main Toggle - Switch between Monthly Category and Monthly Sale */}
+                    <div style={{ paddingTop: "5px", marginRight: '150px' }}>
+                      <label className="toggle" title="Switch between Category and Sale">
+                        <input
+                          type="checkbox"
+                          checked={!showMonthlyCategory}
+                          onChange={() => setShowMonthlyCategory(!showMonthlyCategory)}
+                        />
+                        <span className="slider"></span>
+                      </label>
+                      {/* <span style={{ marginLeft: '10px', fontSize: '12px', color: 'white' }}>
+                        {showMonthlyCategory ? 'Category' : 'Sale'}
+                      </span> */}
+                    </div>
+
+                    {/* Graph Type Toggle */}
+                    <div style={{ paddingTop: "5px" }}>
+                      <label className="toggle" title="Switch to Pie Chart">
+                        <input
+                          type="checkbox"
+                          checked={showMonthlyCategory ? switchgraph : MonthlysaleGraph}
+                          onChange={() => showMonthlyCategory ? setswitchgraph(!switchgraph) : setMonthlysaleGraph(!MonthlysaleGraph)}
+                        />
+                        <span className="slider"></span>
+                      </label>
+                      {/* <span style={{ marginLeft: '10px', fontSize: '12px', color: 'white' }}>
+                        {showMonthlyCategory ? (switchgraph ? 'Donut' : 'Bar') : (MonthlysaleGraph ? 'Donut' : 'Bar')}
+                      </span> */}
+                    </div>
+
+                    {/* Data Type Toggle */}
+                    <div style={{ paddingTop: "5px", paddingRight: '20px' }}>
+                      <label className="toggle">
+                        <input
+                          type="checkbox"
+                          checked={showMonthlyCategory ? showSalemonthly : monthlysale}
+                          onChange={() => showMonthlyCategory ? setshowSalemonthly(!showSalemonthly) : setmonthlysale(!monthlysale)}
+                        />
+                        <span className="slider"></span>
+                      </label>
+                      {/* <span style={{ marginLeft: '10px', fontSize: '12px', color: 'white' }}>
+                        {showMonthlyCategory ? (showSalemonthly ? 'Qnty' : 'Sale') : (monthlysale ? 'Qnty' : 'Sale')}
+                      </span> */}
                     </div>
                   </div>
 
+                  <div className="row" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                    {/* ✅ Category Column */}
+                    <div className={showMonthlyCategory ? "col-md-3" : "col-md-4"}>
+                      {(showMonthlyCategory ? currentBarData : monthlysaledata).map((item, index) => (
+                        <div key={index} className="cardrow" style={{ textAlign: "start" }}>
+                          {item.Category || "N/A"}
+                        </div>
+                      ))}
+                    </div>
 
+                    {/* ✅ Middle Column (Bars OR Donut) */}
+                    <div className={showMonthlyCategory ? "col-md-6" : "col-md-5"}>
+                      {showMonthlyCategory ? (
+                        // MONTHLY CATEGORY CONTENT
+                        !switchgraph ? (
+                          // 🔹 Bars for Monthly Category
+                          currentBarData.map((item, index) => {
+                            const value = showSalemonthly ? item.Qnty : item.Sale;
+                            const percentage = currentMaxValue ? (value / currentMaxValue) * 100 : 0;
+                            const barColor =
+                              categoryColors2[item.Category?.toUpperCase().trim()] || "#999999";
+
+                            return (
+                              <div
+                                key={index}
+                                className="cardrow"
+                                style={{
+                                  width: "100%",
+                                  height: "15px",
+                                  background: "#eee",
+                                  borderRadius: "6px",
+                                  overflow: "hidden",
+                                  margin: "7px 0",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: `${percentage}%`,
+                                    height: "100%",
+                                    background: barColor,
+                                    transition: "width 0.3s ease",
+                                  }}
+                                ></div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          // 🔹 Donut chart for Monthly Category
+                          <div style={{ display: "flex", justifyContent: "center" }}>
+                            <Donutchart2
+                              series={currentDonutSeries}
+                              labels={currentDonutLabels}
+                              colors={currentDonutColors}
+                            />
+                          </div>
+                        )
+                      ) : (
+                        // MONTHLY SALE CONTENT
+                        !MonthlysaleGraph ? (
+                          // Bars for Monthly Sale
+                          monthlysaledata.map((item, index) => {
+                            const value = monthlysale ? item.Qnty : item.Sale;
+                            const percentage = currentMaxValue3
+                              ? (value / currentMaxValue3) * 100
+                              : 0;
+                            return (
+                              <div
+                                key={index}
+                                className="cardrow"
+                                style={{
+                                  width: "120%",
+                                  height: "15px",
+                                  background: "#eee",
+                                  borderRadius: "6px",
+                                  overflow: "hidden",
+                                  margin: "8px 0",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: `${percentage}%`,
+                                    height: "100%",
+                                    background: item.Color,
+                                    transition: "width 0.3s ease",
+                                  }}
+                                ></div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          // Donut for Monthly Sale
+                          <div style={{ display: "flex", justifyContent: "center", alignItems: 'center', marginTop: '10px' }}>
+                            <Donutchart3
+                              series={currentDonutSeries3}
+                              labels={currentDonutLabels3}
+                              colors={currentDonutColors3}
+                            />
+                          </div>
+                        )
+                      )}
+                    </div>
+
+                    {/* ✅ Values Column */}
+                    <div className={showMonthlyCategory ? "col-md-3" : "col-md-3"}>
+                      {(showMonthlyCategory ? currentBarData : monthlysaledata).map((item, index) => {
+                        const value = showMonthlyCategory
+                          ? (showSalemonthly ? item.Qnty : item.Sale)
+                          : (monthlysale ? item.Qnty : item.Sale);
+                        return (
+                          <div
+                            key={index}
+                            className="cardrow"
+                            style={{ textAlign: "right", fontSize: "13px", fontWeight: "500" }}
+                          >
+                            {value.toLocaleString()}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <div className="last_info"></div>
+
           </div>
-
-
-          <div className="left_inner_section3">
-            <div className="daywise_graph" >
-              <BarChart />
-            </div>
-          </div>
-
-          <div className="left_inner_section3">
-            <div className="todaysale_card">
-              <div className="card_header">
-                <span>Today Sale </span>
-              </div>
-
-              {/* Data rows */}
-              {TodaySaledata && TodaySaledata.slice(0, 10).map((item, index) => (
-                <div
-                  key={index}
-                  className="card_row"
-                >
-                  <div className="col_desc">{item.Description}</div>
-                  <div className="col_qty">{item.Qnty}</div>
-                  <div className="col_amount">{item.Amount}</div>
-                </div>
-              ))}
-            </div>
-            <div className="todaysale_card">
-              <div className="card_header" style={{background:'linear-gradient(135deg, #ff7e5f, #feb47b)'}}>
-                <span>Monthly Sale </span>
-              </div>
-
-              {/* Data rows */}
-              {MonthSaledata && MonthSaledata.slice(0, 10).map((item, index) => (
-                <div
-                  key={index}
-                  className="card_row"
-                >
-                  <div className="col_desc">{item.Description}</div>
-                  <div className="col_qty">{item.Qnty}</div>
-                  <div className="col_amount">{item.Amount}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-
-
-
         </div>
-
-
-
-        {/* first right  section */}
-        <div className="main_right_section " style={{ padding: "0px", marginTop: "10px", marginRight: '10px' }}>
-
-        </div>
-
-
-
-
 
       </div >
     </>

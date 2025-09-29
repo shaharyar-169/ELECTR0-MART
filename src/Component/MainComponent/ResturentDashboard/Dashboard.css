@@ -411,7 +411,7 @@
 }
 
 .main_left_section {
-  width: 75%;
+  width: 100%;
   height: 100%;
   /* background: red; */
   display: flex;
@@ -455,18 +455,19 @@
 }
 
 .lastrow_firstchart {
-  width: 55% !important;
-  /* height: 150px !important; */
+  width: 37% !important;
+  height: 270px !important;
   border-radius: 5px;
   background-color: white;
   /* padding-top: px; */
-  padding-left: 15px;
-  padding-right: 15px;
-  padding-bottom: 5px;
+  /* padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 7px; */
+
 }
 
-.daywise_graph {
-  width: 100% !important;
+.last_info{
+  width: 24% !important;
   /* height: 150px !important; */
   border-radius: 5px;
   background-color: white;
@@ -474,6 +475,63 @@
   /* padding-left: 15px; */
   padding-right: 15px;
   padding-bottom: 5px;
+
+}
+
+.lastrow_firstchart_fromonth {
+  width: 35% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 7px;
+
+}
+
+.daywise_graph {
+  width: 51% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+.info {
+  width: 23% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+
+.info2 {
+  width: 24%;
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  /* padding-right: 5px; */
+  padding-bottom: 5px;
+}
+
+.month_day_graph{
+  text-align: start;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  color: black;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  
 }
 
 .lastrow_secondchat {
@@ -497,21 +555,55 @@
 }
 
 .top_inner_cards3 {
-  width: 10% !important;
+  width: 24% !important;
+  /* background-color: #FFFFFF; */
+  border-radius: 5px;
+  height: 120px;
+  display: flex;
+  row-gap: 10px;
+  flex-direction: column;
+}
+
+.split_section {
+  width: 100%;
+  background-color: #FFFFFF;
+  height: 50%;
+  border-radius: 5px;
+
+}
+
+.counter_sale {
+  font-size: 14px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: black;
+  text-align: start;
+  padding: 5px;
+  margin: 0px;
+}
+
+.top_inner_cards4 {
+  width: 24% !important;
   background-color: #FFFFFF;
   border-radius: 5px;
   height: 120px;
 }
 
 .top_inner_cards {
-  width: 45% !important;
+  width: 25% !important;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  height: 120px;
+}
+
+.top_inner_cards1 {
+  width: 25% !important;
   background-color: #FFFFFF;
   border-radius: 5px;
   height: 120px;
 }
 
 .first_span {
-  font-size: 18px;
+  font-size: 14px;
   /* font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; */
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   color: black;
@@ -533,6 +625,15 @@
 }
 
 .first_span_secondcard {
+  font-size: 12px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: white;
+  /* font-weight: bold; */
+  /* padding-bottom: 10px; */
+
+}
+
+.first_span_secondcard1 {
   font-size: 14px;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   color: black;
@@ -548,7 +649,7 @@
   width: 100%;
   text-align: start !important;
   padding-top: 5px;
-  padding-left: 20px;
+  padding-left: 10px;
   padding-right: 10px;
 }
 
@@ -573,7 +674,7 @@
   text-align: center !important;
   /* border-radius: 30px; */
   font-weight: 400;
-  width: 140px;
+  width: 100px;
   height: 20px;
   /* height: 30px; */
   background-color: rgb(95, 147, 207);
@@ -607,6 +708,21 @@
   font-size: 14px;
   color: grey;
 
+}
+
+.counter_saledata {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  color: grey;
+  width: 100%;
+  margin: 0px;
+
+
+}
+
+.countersale_map {
+  width: 100%;
+  margin: 0px;
 }
 
 .columnsetting {
@@ -680,7 +796,7 @@
 
 /* Checked state */
 input:checked+.slider {
-  background-color: #74cbeb;
+  background-color: #55edcf;
 }
 
 input:checked+.slider::before {
@@ -900,12 +1016,13 @@ input:checked+.slider::before {
 }
 
 .todaysale_card {
-  width: 55%;
+  width: 50%;
+  height: 320px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 .card_header {
@@ -934,7 +1051,7 @@ font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: 14px;
   border-bottom: 1px solid #f0f0f0;
   /* transition: background 0.2s ease; */
-   transition: background 0.25s ease, transform 0.1s ease;
+  transition: background 0.25s ease, transform 0.1s ease;
 }
 
 .card_row:last-child {
@@ -943,7 +1060,7 @@ font-family: Verdana, Geneva, Tahoma, sans-serif;
 
 .card_row:hover {
   background: #f9f9f9;
-    
+
 }
 
 .col_desc {

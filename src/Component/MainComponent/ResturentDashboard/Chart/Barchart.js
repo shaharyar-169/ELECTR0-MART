@@ -83,9 +83,25 @@ const BarChart = () => {
     },
   ];
 
+  // ✅ Extract series values
+  const allInvoices = series[0]?.data || [];
+  const allSales = series[1]?.data || [];
+
+  // ✅ Calculate averages
+  const avgInvoices =
+    allInvoices.length > 0
+      ? allInvoices.reduce((a, b) => a + b, 0) / allInvoices.length
+      : 0;
+
+  const avgSale =
+    allSales.length > 0
+      ? allSales.reduce((a, b) => a + b, 0) / allSales.length
+      : 0;
+
   const options = {
     chart: {
       type: 'bar',
+      width: 'auto',
       height: 200,
       fontFamily: "'Inter', 'Segoe UI', sans-serif",
       toolbar: {
@@ -113,17 +129,17 @@ const BarChart = () => {
         opacity: 0.1
       }
     },
-    title: {
-      text: 'Daily Performance Overview',
-      align: 'left',
-      offsetY: 0,
-      style: {
-        fontSize: '16px',
-        fontWeight: '700',
-        color: '#2c3e50',
-        fontFamily: "'Inter', 'Segoe UI', sans-serif"
-      }
-    },
+    // title: {
+    //   text: 'Daily Performance Overview',
+    //   align: 'left',
+    //   offsetY: 0,
+    //   style: {
+    //     fontSize: '16px',
+    //     fontWeight: '700',
+    //     color: '#2c3e50',
+    //     fontFamily: "'Inter', 'Segoe UI', sans-serif"
+    //   }
+    // },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -143,9 +159,8 @@ const BarChart = () => {
       width: 1.5,
       colors: ['transparent']
     },
-    // ✅ Change x-axis to 1 → 31
     xaxis: {
-      categories: categories, // 👈 Only real days from API
+      categories: categories,
       labels: {
         style: {
           fontSize: "13px",
@@ -156,15 +171,6 @@ const BarChart = () => {
       }
     },
     yaxis: {
-      title: {
-        // text: 'Values',
-        style: {
-          color: '#718096',
-          fontSize: '14px',
-          fontWeight: '500',
-          fontFamily: "'Inter', 'Segoe UI', sans-serif"
-        }
-      },
       labels: {
         style: {
           colors: '#718096',
@@ -187,7 +193,7 @@ const BarChart = () => {
         stops: [0, 100]
       }
     },
-    colors: ['#6a38b9', '#8e44ad', '#2e86de', '#00bd9d'],
+    colors: ['#6a38b9', '#10B981'],
     grid: {
       borderColor: '#f1f3f9',
       strokeDashArray: 2,
@@ -205,7 +211,7 @@ const BarChart = () => {
       horizontalAlign: 'right',
       offsetY: -5,
       fontSize: '12px',
-      itemMargin: { horizontal: 10, vertical: 5 },
+      itemMargin: { horizontal: 25, vertical: 8 },
       markers: { width: 10, height: 10, radius: 5 },
       labels: {
         colors: '#2c3e50',
@@ -236,8 +242,45 @@ const BarChart = () => {
           offsetY: 0
         }
       }
-    }]
+    }],
+
+    // ✅ Add average lines for both Sale & Invoices
+    annotations: {
+      yaxis: [
+        {
+          y: avgInvoices,
+          borderColor: "#008FFB",
+          strokeDashArray: 4,
+          label: {
+            borderColor: "#008FFB",
+            style: {
+              color: "#fff",
+              background: "#008FFB",
+              fontSize: "11px",
+              fontWeight: "600"
+            },
+            // text: `Avg Invoices: ${avgInvoices.toFixed(0)}`
+          }
+        },
+        {
+          y: avgSale,
+          borderColor: "#FF4560",
+          strokeDashArray: 4,
+          label: {
+            borderColor: "#FF4560",
+            style: {
+              color: "#fff",
+              background: "#FF4560",
+              fontSize: "11px",
+              fontWeight: "600"
+            },
+            // text: `Avg Sale: ${avgSale.toFixed(0)}`
+          }
+        }
+      ]
+    }
   };
+
 
 
 
@@ -245,7 +288,7 @@ const BarChart = () => {
     <div style={{
       borderRadius: '12px',
       width: '100%',
-      maxWidth: '1000px',
+      // maxWidth: '1000px',
       margin: '0 auto'
     }}>
       <ReactApexChart
@@ -253,6 +296,7 @@ const BarChart = () => {
         series={series}
         type="bar"
         height={200}
+
       />
     </div>
   );
