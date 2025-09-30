@@ -295,7 +295,7 @@ const BarChart = () => {
         options={options}
         series={series}
         type="bar"
-        height={200}
+        height={230}
 
       />
     </div>

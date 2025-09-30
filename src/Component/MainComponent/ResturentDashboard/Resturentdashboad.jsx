@@ -932,7 +932,7 @@ export default function ResturentDashboard() {
                     </span>
 
                     {/* Main Toggle - Switch between Today Category and Today Sale */}
-                    <div style={{ paddingTop: "5px", marginRight: '150px' }}>
+                    <div style={{ paddingTop: "5px", width:'200px', textAlign:'start' }}>
                       <label className="toggle" title="Switch between Category and Sale">
                         <input
                           type="checkbox"
@@ -941,8 +941,8 @@ export default function ResturentDashboard() {
                         />
                         <span className="slider"></span>
                       </label>
-                      <span style={{ marginLeft: '10px', fontSize: '14px', color: 'white', }}>
-                        {showTodayCategory ? 'Category' : 'Item'}
+                      <span style={{position:'relative', bottom:'3px', fontWeight:'bold',fontSize:'12px',marginLeft:"10px",color:'white'}} >
+                        {showTodayCategory ? 'CATEGORY' : 'ITEM'}
                       </span>
                     </div>
 
@@ -1118,13 +1118,13 @@ export default function ResturentDashboard() {
                   >
                     <span
                       className="first_span_secondcard"
-                      style={{ paddingBottom: "5px", paddingTop: '5px', paddingLeft: '20px', fontWeight: 'bold' }}
+                      style={{ paddingBottom: "5px", paddingTop: '5px',paddingRight:'5px', paddingLeft: '20px', fontWeight: 'bold' }}
                     >
                       {showMonthlyCategory ? "MONTHLY " : "MONTHLY "}
                     </span>
 
                     {/* Main Toggle - Switch between Monthly Category and Monthly Sale */}
-                    <div style={{ paddingTop: "5px", marginRight: '150px' }}>
+                    <div style={{ paddingTop: "5px", width:'200px' , textAlign:'start'}}>
                       <label className="toggle" title="Switch between Category and Sale">
                         <input
                           type="checkbox"
@@ -1133,9 +1133,9 @@ export default function ResturentDashboard() {
                         />
                         <span className="slider"></span>
                       </label>
-                      {/* <span style={{ marginLeft: '10px', fontSize: '12px', color: 'white' }}>
-                        {showMonthlyCategory ? 'Category' : 'Sale'}
-                      </span> */}
+                      <span style={{position:'relative', bottom:'3px',fontWeight:'700', paddingLeft:'10px',fontSize:'12px',color:'white'}}>
+                        {showMonthlyCategory ? 'CATEGORY' : 'ITEM'}
+                      </span>
                     </div>
 
                     {/* Graph Type Toggle */}

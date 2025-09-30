@@ -114,7 +114,7 @@ const MonthwiseChart = () => {
         chart: {
             type: 'bar',
             width: 'auto',
-            height: 300,
+            height: 230,
             fontFamily: "'Inter', 'Segoe UI', sans-serif",
             toolbar: {
                 show: true,
@@ -320,7 +320,7 @@ const MonthwiseChart = () => {
                 options={options}
                 series={series}
                 type="bar"
-                height={300}
+                height={230}
             />
         </div>
     );
