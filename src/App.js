@@ -33,7 +33,8 @@ import Dashboard from "./Component/MainComponent/Dashboard/Dashboard.jsx";
 import DashboardAdminDealer from "./Component/MainComponent/Dashboard2/Dashboard2.jsx";
 //////////////////////////// RESTURENT DASHBOARD //////////////////////////////
 import ResturentDashboard from "./Component/MainComponent/ResturentDashboard/Resturentdashboad.jsx";  
-
+//////////////////////////// GYM DASHBOARD //////////////////////////////
+import GYMDashboard from "./Component/MainComponent/GYMDashboard/Gym.jsx";
 
 //////////////////////////// List reports //////////////////////////////
 import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList1.js";
@@ -70,6 +71,7 @@ import MemberTypeList from "./Component/Reports/Daily_Jobs_Reports/List/MemberTy
 import GoalList from "./Component/Reports/Daily_Jobs_Reports/List/GoalList.js";
 import CollectorList from "./Component/Reports/Daily_Jobs_Reports/List/CollectorList.js";
 import MembersList1 from "./Component/Reports/Daily_Jobs_Reports/List/MemberList1.js";
+import MemberListCable from "./Component/Reports/Daily_Jobs_Reports/List/memberListone.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -217,7 +219,7 @@ function App() {
                 <Route exact path="/MemberTypeList" element={<MemberTypeList />} />
                 <Route exact path="/GoalList" element={<GoalList />} />
                 <Route exact path="/CollectorList" element={<CollectorList />} />
-                <Route exact path="/MemberListCable" element={<MembersList1 />} />
+                <Route exact path="/MemberList" element={< MembersList1/>} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -310,6 +312,7 @@ function App() {
                 <Route exact path="/salesdashboad" element={<Dashboard />} />
                 <Route exact path="/AdminDealer" element={<DashboardAdminDealer />} />
                 <Route exact path="/ResturentDashboard" element={<ResturentDashboard />} />
+              L  <Route exact path="/GymDashboard" element={<GYMDashboard />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />

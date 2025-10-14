@@ -15,7 +15,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
-import { Train } from "@mui/icons-material";
+import { Email, Train } from "@mui/icons-material";
 
 export default function MembersList() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export default function MembersList() {
     apiLinks,
     getLocationNumber,
     getyeardescription,
-    getfromdate,getnavbarbackgroundcolor,
+    getfromdate, getnavbarbackgroundcolor,
     gettodate,
     getfontstyle,
     getdatafontsize,
@@ -79,7 +79,7 @@ export default function MembersList() {
   };
 
   function fetchReceivableReport() {
-    const apiUrl = apiLinks + "/MembersList.php";
+    const apiUrl = apiLinks + "/MembersList1.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FMemSts: transectionType,
@@ -87,8 +87,8 @@ export default function MembersList() {
       //   FLocCod: locationnumber || getLocationNumber,
       //   code: organisation.code,
 
-      FLocCod: locationnumber || getLocationNumber,
-      code: organisation.code,
+      FLocCod: '001',
+      code: 'CRYSTALSOFT',
 
       FSchTxt: searchQuery,
     }).toString();
@@ -152,13 +152,10 @@ export default function MembersList() {
       item.Member,
       item.Mobile,
       item.Status,
-      item.Blood,
       item.Email,
-      item.DOB,
       item["Join Date"],
       item.Monthly,
-      item.Trainer,
-      item.Slot,
+      item.Collector,
     ]);
 
     // Add summary row to the table
@@ -170,15 +167,12 @@ export default function MembersList() {
       "Member",
       "Mobile",
       "Status",
-      "Blood Grp",
       "Email",
-      "DOB",
       "Join Date",
       "Monthly",
-      "Trainer",
-      "Slot",
+      "Collector",
     ];
-    const columnWidths = [15, 40, 23, 15, 30, 45, 22, 20, 18, 40, 25];
+    const columnWidths = [15, 70, 23, 15, 35, 30, 22, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -401,17 +395,17 @@ export default function MembersList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
+              ? "ACTIVE"
+              : "ALL";
 
         let type =
           transectionType2 === "M"
             ? "MALE"
             : transectionType2 === "C"
-            ? "CHILD"
-            : transectionType2 === "F"
-            ? "FEMALE"
-            : "ALL";
+              ? "CHILD"
+              : transectionType2 === "F"
+                ? "FEMALE"
+                : "ALL";
 
         let search = searchQuery ? searchQuery : "";
 
@@ -499,13 +493,12 @@ export default function MembersList() {
       "left",
       "left",
       "center",
-      "center",
+
       "left",
       "left",
       "left",
       "left",
-      "left",
-      "left",
+
     ];
 
     // Define fonts for different sections
@@ -542,8 +535,7 @@ export default function MembersList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(73 + numColumns - 1)}${
-        companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
       }`
     );
 
@@ -555,8 +547,7 @@ export default function MembersList() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(73 + numColumns - 1)}${
-        storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -565,35 +556,35 @@ export default function MembersList() {
 
     let typestatus =
       transectionType === "N"
-        ? "Non-Active"
+        ? "NON-ACTIVE"
         : transectionType === "A"
-        ? "Active"
-        : "All";
+          ? "ACTIVE"
+          : "ALL";
 
     let type =
       transectionType === "MN"
         ? "MALE"
         : transectionType === "C"
-        ? "CHILD"
-        : transectionType === "F"
-        ? "FEMALE"
-        : "All";
+          ? "CHILD"
+          : transectionType === "F"
+            ? "FEMALE"
+            : "ALL";
 
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
         ? [
-            "STATUS :",
-            typestatus,
-            "",
-            "",
-            "TYPE",
-            type,
-            "",
-            "SEARCH :",
-            typesearch,
-          ]
+          "STATUS :",
+          typestatus,
+          "",
+          "",
+          "TYPE",
+          type,
+          "",
+          "SEARCH :",
+          typesearch,
+        ]
         : ["STATUS :", typestatus, "", "TYPE", type]
     );
 
@@ -630,13 +621,10 @@ export default function MembersList() {
       "Member",
       "Mobile",
       "Status",
-      "Blood Grp",
       "Email",
-      "DOB",
       "Join Date",
       "Monthly",
-      "Trainer",
-      "Slot",
+      "Collector",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -648,13 +636,11 @@ export default function MembersList() {
         item.Member,
         item.Mobile,
         item.Status,
-        item.Blood,
         item.Email,
-        item.DOB,
         item["Join Date"],
         item.Monthly,
-        item.Trainer,
-        item.Slot,
+        item.Collector,
+
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -673,7 +659,7 @@ export default function MembersList() {
     });
 
     // Set column widths
-    [10, 30, 12, 10, 15, 25, 13, 12, 12, 20, 16].forEach((width, index) => {
+    [10, 40, 13, 10, 18, 15, 13, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -725,13 +711,11 @@ export default function MembersList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
       }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
       }`
     );
 
@@ -765,38 +749,38 @@ export default function MembersList() {
   let totalEntries = 0;
 
   const firstColWidth = {
-    width: "5%",
-  };
-  const secondColWidth = {
-    width: "12%",
-  };
-  const thirdColWidth = {
     width: "6%",
   };
-  const forthColWidth = {
-    width: "10%",
+  const secondColWidth = {
+    width: "28%",
   };
-  const fifthColWidth = {
+  const thirdColWidth = {
     width: "8%",
   };
-  const sixthColWidth = {
-    width: "12.5%",
+  const forthColWidth = {
+    width: "15%",
   };
-  const seventhColWidth = {
-    width: "7%",
+  const fifthColWidth = {
+    width: "10%",
   };
+  // const sixthColWidth = {
+  //   width: "12.5%",
+  // };
+  // const seventhColWidth = {
+  //   width: "7%",
+  // };
   const eightColWidth = {
-    width: "7%",
+    width: "10%",
   };
   const ninthColWidth = {
-    width: "7%",
+    width: "9%",
   };
   const tenthColWidth = {
     width: "12%",
   };
-  const elewnthColWidth = {
-    width: "13.5%",
-  };
+  // const elewnthColWidth = {
+  //   width: "13.5%",
+  // };
 
   useHotkeys("alt+s", fetchReceivableReport);
   useHotkeys("alt+p", exportPDFHandler);
@@ -817,7 +801,7 @@ export default function MembersList() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(85vw - 0%)" : "85vw",
+    width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -908,29 +892,25 @@ export default function MembersList() {
   const [columns, setColumns] = useState({
     Code: [],
     Member: [],
-    Status: [],
-    Blood: [],
     Mobile: [],
-    Profession: [],
-    DOB: [],
+    Status: [],
+    Email: [],
     "Join Date": [],
     Monthly: [],
-    Trainer: [],
-    Slot: [],
+    Collector: [],
+
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
     Code: "",
     Member: "",
-    Status: "",
-    Blood: "",
     Mobile: "",
-    Profession: "",
-    DOB: "",
+    Status: "",
+    Email: "",
     "Join Date": "",
     Monthly: "",
-    Trainer: "",
-    Slot: "",
+    Collector: "",
+
   });
 
   // Transform table data into column-oriented format
@@ -939,15 +919,12 @@ export default function MembersList() {
       const newColumns = {
         Code: tableData.map((row) => row.Code),
         Member: tableData.map((row) => row.Member),
-        Status: tableData.map((row) => row.Status),
-        Blood: tableData.map((row) => row.Blood),
         Mobile: tableData.map((row) => row.Mobile),
-        Profession: tableData.map((row) => row.Profession),
-        DOB: tableData.map((row) => row.DOB),
+        Status: tableData.map((row) => row.Status),
+        Email: tableData.map((row) => row.Email),
         "Join Date": tableData.map((row) => row["Join Date"]),
         Monthly: tableData.map((row) => row.Monthly),
-        Trainer: tableData.map((row) => row.Trainer),
-        Slot: tableData.map((row) => row.Slot),
+        Collector: tableData.map((row) => row.Collector),
       };
       setColumns(newColumns);
     }
@@ -1001,15 +978,13 @@ export default function MembersList() {
     setColumnSortOrders({
       Code: null,
       Member: null,
-      Status: null,
-      Blood: null,
       Mobile: null,
-      Profession: null,
-      DOB: null,
+      Status: null,
+      Email: null,
       "Join Date": null,
       Monthly: null,
-      Trainer: null,
-      Slot: null,
+      Collector: null,
+
     });
   };
 
@@ -1028,13 +1003,10 @@ export default function MembersList() {
       columns.Member?.length || 0,
       columns.Mobile?.length || 0,
       columns.Status?.length || 0,
-      columns.Blood?.length || 0,
-      columns.Profession?.length || 0,
-      columns.DOB?.length || 0,
+      columns.Email?.length || 0,
       columns["Join Date"]?.length || 0,
       columns.Monthly?.length || 0,
-      columns.Trainer?.length || 0,
-      columns.Slot?.length || 0
+      columns.Collector?.length || 0
     );
 
     const rows = [];
@@ -1044,13 +1016,10 @@ export default function MembersList() {
         Member: columns.Member[i],
         Mobile: columns.Mobile[i],
         Status: columns.Status[i],
-        Blood: columns.Blood[i],
-        Profession: columns.Profession[i],
-        DOB: columns.DOB[i],
+        Email: columns.Email[i],
         "Join Date": columns["Join Date"][i],
         Monthly: columns.Monthly[i],
-        Trainer: columns.Trainer[i],
-        Slot: columns.Slot[i],
+        Collector: columns.Collector[i],
       });
     }
 
@@ -1059,7 +1028,7 @@ export default function MembersList() {
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="11" className="text-center">
+              <td colSpan="8" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -1071,7 +1040,7 @@ export default function MembersList() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 11 }).map((_, colIndex) => (
+                {Array.from({ length: 8 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1082,12 +1051,12 @@ export default function MembersList() {
               <td style={fifthColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
-              <td style={sixthColWidth}></td>
-              <td style={seventhColWidth}></td>
+              {/* <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td> */}
               <td style={eightColWidth}></td>
               <td style={ninthColWidth}></td>
               <td style={tenthColWidth}></td>
-              <td style={elewnthColWidth}></td>
+              {/* <td style={elewnthColWidth}></td> */}
             </tr>
           </>
         ) : (
@@ -1118,15 +1087,14 @@ export default function MembersList() {
                     {item.Status}
                   </td>
                   <td className="text-start" style={forthColWidth}>
-                    {item.Blood}
+                    {item.Email}
                   </td>
-
-                  <td className="text-start" style={sixthColWidth}>
+                  {/* <td className="text-start" style={sixthColWidth}>
                     {item.Profession}
                   </td>
                   <td className="text-start" style={seventhColWidth}>
                     {item.DOB}
-                  </td>
+                  </td> */}
                   <td className="text-start" style={eightColWidth}>
                     {item["Join Date"]}
                   </td>
@@ -1134,11 +1102,11 @@ export default function MembersList() {
                     {item.Monthly}
                   </td>
                   <td className="text-start" style={tenthColWidth}>
-                    {item.Trainer}
+                    {item.Collector}
                   </td>
-                  <td className="text-start" style={elewnthColWidth}>
+                  {/* <td className="text-start" style={elewnthColWidth}>
                     {item.Slot}
-                  </td>
+                  </td> */}
                 </tr>
               );
             })}
@@ -1152,7 +1120,7 @@ export default function MembersList() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 11 }).map((_, colIndex) => (
+                {Array.from({ length: 8 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1163,12 +1131,12 @@ export default function MembersList() {
               <td style={fifthColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
-              <td style={sixthColWidth}></td>
-              <td style={seventhColWidth}></td>
+              {/* <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td> */}
               <td style={eightColWidth}></td>
               <td style={ninthColWidth}></td>
               <td style={tenthColWidth}></td>
-              <td style={elewnthColWidth}></td>
+              {/* <td style={elewnthColWidth}></td> */}
             </tr>
           </>
         )}
@@ -1468,16 +1436,16 @@ export default function MembersList() {
                     <td
                       className="border-dark"
                       style={forthColWidth}
-                      onClick={() => handleSorting("Blood")}
+                      onClick={() => handleSorting("Email")}
                     >
-                      Blood{" "}
+                      Email{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Blood")}
+                        style={getIconStyle("Email")}
                       ></i>
                     </td>
 
-                    <td
+                    {/* <td
                       className="border-dark"
                       style={sixthColWidth}
                       onClick={() => handleSorting("Profession")}
@@ -1487,10 +1455,10 @@ export default function MembersList() {
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Profession")}
                       ></i>
-                    </td>
+                    </td> */}
 
                     {/* DOB Column */}
-                    <td
+                    {/* <td
                       className="border-dark"
                       style={seventhColWidth}
                       onClick={() => handleSorting("DOB")}
@@ -1500,7 +1468,7 @@ export default function MembersList() {
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("DOB")}
                       ></i>
-                    </td>
+                    </td> */}
 
                     {/* Join Date Column */}
                     <td
@@ -1530,16 +1498,16 @@ export default function MembersList() {
                     <td
                       className="border-dark"
                       style={tenthColWidth}
-                      onClick={() => handleSorting("Trainer")}
+                      onClick={() => handleSorting("Collector")}
                     >
-                      Trainer{" "}
+                      Collector{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Trainer")}
+                        style={getIconStyle("Collector")}
                       ></i>
                     </td>
 
-                    <td
+                    {/* <td
                       className="border-dark"
                       style={elewnthColWidth}
                       onClick={() => handleSorting("Slot")}
@@ -1549,7 +1517,7 @@ export default function MembersList() {
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Slot")}
                       ></i>
-                    </td>
+                    </td> */}
                   </tr>
                 </thead>
               </table>

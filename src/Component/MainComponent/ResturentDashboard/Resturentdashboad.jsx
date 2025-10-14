@@ -101,8 +101,8 @@ export default function ResturentDashboard() {
       code: 'FDEEK',
       FYerDsc: '2025-2025',
       FLocCod: '001',
-      FIntDat: '29-09-2025',
-      FFnlDat: '29-09-2025'
+      FIntDat: '30-09-2025',
+      FFnlDat: '30-09-2025'
     }).toString();
 
     axios
@@ -137,7 +137,7 @@ export default function ResturentDashboard() {
       FYerDsc: '2025-2025',
       FLocCod: '001',
       FIntDat: '01-09-2025',
-      FFnlDat: '29-09-2025'
+      FFnlDat: '30-09-2025'
     }).toString();
 
     axios
