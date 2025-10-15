@@ -440,88 +440,250 @@ export default function ChartofAccount() {
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+  // const handleDownloadCSV = async () => {
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet("Sheet1");
+
+  //   const numColumns = 3; // Ensure this matches the actual number of columns
+
+  //   const columnAlignments = ["left", "left", "center"];
+
+  //   // Define fonts for different sections
+  //   const fontCompanyName = {
+  //     name: "CustomFont" || "CustomFont",
+  //     size: 18,
+  //     bold: true,
+  //   };
+  //   const fontStoreList = {
+  //     name: "CustomFont" || "CustomFont",
+  //     size: 10,
+  //     bold: false,
+  //   };
+  //   const fontHeader = {
+  //     name: "CustomFont" || "CustomFont",
+  //     size: 10,
+  //     bold: true,
+  //   };
+  //   const fontTableContent = {
+  //     name: "CustomFont" || "CustomFont",
+  //     size: 10,
+  //     bold: false,
+  //   };
+
+  //   // Add an empty row at the start
+  //   worksheet.addRow([]);
+
+  //   // Add company name
+  //   const companyRow = worksheet.addRow([comapnyname]);
+  //   companyRow.eachCell((cell) => {
+  //     cell.font = fontCompanyName;
+  //     cell.alignment = { horizontal: "center" };
+  //   });
+
+  //   worksheet.getRow(companyRow.number).height = 30;
+  //   worksheet.mergeCells(
+  //     `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+  //     }`
+  //   );
+
+  //   // Add Store List row
+  //   const storeListRow = worksheet.addRow(["ChartOfAccountList"]);
+  //   storeListRow.eachCell((cell) => {
+  //     cell.font = fontStoreList;
+  //     cell.alignment = { horizontal: "center" };
+  //   });
+
+  //   worksheet.mergeCells(
+  //     `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+  //     }`
+  //   );
+
+  //   // Add an empty row after the title section
+  //   worksheet.addRow([]);
+
+  //   let typestatus =
+  //     transectionType === "N"
+  //       ? "NON-ACTIVE"
+  //       : transectionType === "A"
+  //         ? "ACTIVE"
+  //         : "ALL";
+  //   let typesearch = searchQuery || "";
+
+  //   const typeAndStoreRow3 = worksheet.addRow(
+  //     searchQuery
+  //       ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+  //       : ["STATUS :", typestatus, ""]
+  //   );
+
+  //   // Apply styling for the status row
+  //   typeAndStoreRow3.eachCell((cell, colIndex) => {
+  //     cell.font = {
+  //       name: "CustomFont" || "CustomFont",
+  //       size: 10,
+  //       bold: [1, 3].includes(colIndex),
+  //     };
+  //     cell.alignment = { horizontal: "left", vertical: "middle" };
+  //   });
+
+  //   // Header style
+  //   const headerStyle = {
+  //     font: fontHeader,
+  //     alignment: { horizontal: "center", vertical: "middle" },
+  //     fill: {
+  //       type: "pattern",
+  //       pattern: "solid",
+  //       fgColor: { argb: "FFC6D9F7" },
+  //     },
+  //     border: {
+  //       top: { style: "thin" },
+  //       left: { style: "thin" },
+  //       bottom: { style: "thin" },
+  //       right: { style: "thin" },
+  //     },
+  //   };
+
+  //   // Add headers
+  //   const headers = ["Code", "Description", "Status"];
+  //   const headerRow = worksheet.addRow(headers);
+  //   headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+  //   // Add data rows
+  //   tableData.forEach((item) => {
+  //     const row = worksheet.addRow([item.Code, item.Description, item.Status]);
+
+  //     row.eachCell((cell, colIndex) => {
+  //       cell.font = fontTableContent;
+  //       cell.border = {
+  //         top: { style: "thin" },
+  //         left: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         right: { style: "thin" },
+  //       };
+  //       cell.alignment = {
+  //         horizontal: columnAlignments[colIndex - 1] || "left",
+  //         vertical: "middle",
+  //       };
+
+
+  //     });
+
+
+  //   });
+
+  //   // Set column widths
+  //   [11, 50, 13].forEach((width, index) => {
+  //     worksheet.getColumn(index + 1).width = width;
+  //   });
+
+  //   // Add a blank row
+  //   worksheet.addRow([]);
+  //   // Get current date and time
+  //   const getCurrentTime = () => {
+  //     const today = new Date();
+  //     const hh = String(today.getHours()).padStart(2, "0");
+  //     const mm = String(today.getMinutes()).padStart(2, "0");
+  //     const ss = String(today.getSeconds()).padStart(2, "0");
+  //     return `${hh}:${mm}:${ss}`;
+  //   };
+  //   // Get current date
+  //   const getCurrentDate = () => {
+  //     const today = new Date();
+  //     const day = String(today.getDate()).padStart(2, "0");
+  //     const month = String(today.getMonth() + 1).padStart(2, "0");
+  //     const year = today.getFullYear();
+  //     return `${day}-${month}-${year}`;
+  //   };
+  //   const currentTime = getCurrentTime();
+  //   const currentdate = getCurrentDate();
+  //   const userid = user.tusrid;
+
+  //   // Add date and time row
+  //   const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+  //   dateTimeRow.eachCell((cell) => {
+  //     cell.font = {
+  //       name: "CustomFont" || "CustomFont",
+  //       size: 10,
+  //       // bold: true
+  //       // italic: true,
+  //     };
+  //     cell.alignment = { horizontal: "left" };
+  //   });
+  //   const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  //   dateTimeRow.eachCell((cell) => {
+  //     cell.font = {
+  //       name: "CustomFont" || "CustomFont",
+  //       size: 10,
+  //       // bold: true
+  //       // italic: true,
+  //     };
+  //     cell.alignment = { horizontal: "left" };
+  //   });
+
+  //   // Merge across all columns
+  //   worksheet.mergeCells(
+  //     `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+  //   );
+  //   worksheet.mergeCells(
+  //     `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+  //   );
+
+
+  //   // Generate and save the Excel file
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   const blob = new Blob([buffer], {
+  //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //   });
+  //   saveAs(blob, `ChartOfAccountList As On ${currentdate}.xlsx`);
+  // };
+
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
     const numColumns = 3; // Ensure this matches the actual number of columns
-
     const columnAlignments = ["left", "left", "center"];
 
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
+    // Define fonts
+    const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
+    const fontStoreList = { name: "CustomFont", size: 10, bold: false };
+    const fontHeader = { name: "CustomFont", size: 10, bold: true };
+    const fontTableContent = { name: "CustomFont", size: 10, bold: false };
 
-    // Add an empty row at the start
+    // Empty row
     worksheet.addRow([]);
 
-    // Add company name
+    // Company name
     const companyRow = worksheet.addRow([comapnyname]);
     companyRow.eachCell((cell) => {
       cell.font = fontCompanyName;
       cell.alignment = { horizontal: "center" };
     });
-
     worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
-      }`
-    );
+    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
 
-    // Add Store List row
-    const storeListRow = worksheet.addRow(["Chart Of Account List"]);
+    // Store List
+    const storeListRow = worksheet.addRow(["ChartOfAccountList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
+    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
 
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
-      }`
-    );
-
-    // Add an empty row after the title section
+    // Empty row
     worksheet.addRow([]);
 
+    // Filter data
     let typestatus =
-      transectionType === "N"
-        ? "NON-ACTIVE"
-        : transectionType === "A"
-          ? "ACTIVE"
-          : "ALL";
+      transectionType === "N" ? "NON-ACTIVE" :
+        transectionType === "A" ? "ACTIVE" : "ALL";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-        : ["STATUS :", typestatus, ""]
+      searchQuery ? ["STATUS :", typestatus, "SEARCH :", typesearch] : ["STATUS :", typestatus, ""]
     );
 
-    // Apply styling for the status row
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 3].includes(colIndex),
-      };
+      cell.font = { name: "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
@@ -529,11 +691,7 @@ export default function ChartofAccount() {
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
+      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
       border: {
         top: { style: "thin" },
         left: { style: "thin" },
@@ -542,13 +700,13 @@ export default function ChartofAccount() {
       },
     };
 
-    // Add headers
+    // Headers
     const headers = ["Code", "Description", "Status"];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
-    // Add data rows
-    tableData.forEach((item) => {
+    // ✅ Add data rows with alternating light grey background
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([item.Code, item.Description, item.Status]);
 
       row.eachCell((cell, colIndex) => {
@@ -563,74 +721,56 @@ export default function ChartofAccount() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply very light grey background to odd rows
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFEFEFEF" }, // Very light grey
+          };
+        }
       });
     });
 
-    // Set column widths
+    // Column widths
     [11, 50, 13].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    // Add a blank row
+    // Blank row
     worksheet.addRow([]);
-    // Get current date and time
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
-    };
-    // Get current date
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-    const currentTime = getCurrentTime();
-    const currentdate = getCurrentDate();
+
+    // Date and Time
+    const today = new Date();
+    const currentTime = today.toLocaleTimeString("en-GB");
+    const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
     const userid = user.tusrid;
 
-    // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
     dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
+      cell.font = { name: "CustomFont", size: 10 };
       cell.alignment = { horizontal: "left" };
     });
+
     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
+    dateTimeRow1.eachCell((cell) => {
+      cell.font = { name: "CustomFont", size: 10 };
       cell.alignment = { horizontal: "left" };
     });
 
-    // Merge across all columns
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
-    );
+    // Merge cells
+    worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+    worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
 
-
-    // Generate and save the Excel file
+    // Save Excel
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ChartOfAccountList As On ${currentdate}.xlsx`);
+    saveAs(blob, `ChartOfAccountList As On ${currentDate}.xlsx`);
   };
+
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -871,12 +1011,12 @@ export default function ChartofAccount() {
   //   }));
   // };
 
-   useHotkeys("alt+s", () => {
-  fetchReceivableReport();
-  resetSorting();
-}, { preventDefault: true });
-  
-  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+  useHotkeys("alt+s", () => {
+    fetchReceivableReport();
+    resetSorting();
+  }, { preventDefault: true });
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
@@ -891,7 +1031,7 @@ export default function ChartofAccount() {
     width: "15%",
   };
 
- 
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1245,41 +1385,44 @@ export default function ChartofAccount() {
             </div>
           </div>
 
-          {/* <div
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
               style={{
-                borderBottom: `1px solid ${fontcolor}`,
-                borderTop: `1px solid ${fontcolor}`,
-                height: "24px",
-                display: "flex",
-                paddingRight: "1.2%",
-                width: "101.2%",
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <div
-                style={{
-                  ...firstColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...secondColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...thirdColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-                        
-             
-             
-            </div> */}
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+
+
+
+          </div>
 
           <div
             style={{
@@ -1314,7 +1457,7 @@ export default function ChartofAccount() {
             <SingleButton
               id="searchsubmit"
               text="Select"
-               highlightFirstLetter={true}
+              highlightFirstLetter={true}
               ref={input3Ref}
               onClick={() => {
                 fetchReceivableReport();

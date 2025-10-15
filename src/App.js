@@ -71,7 +71,8 @@ import MemberTypeList from "./Component/Reports/Daily_Jobs_Reports/List/MemberTy
 import GoalList from "./Component/Reports/Daily_Jobs_Reports/List/GoalList.js";
 import CollectorList from "./Component/Reports/Daily_Jobs_Reports/List/CollectorList.js";
 import MembersList1 from "./Component/Reports/Daily_Jobs_Reports/List/MemberList1.js";
-import MemberListCable from "./Component/Reports/Daily_Jobs_Reports/List/memberListone.js";
+import PriceListPurSale from "./Component/Reports/Daily_Jobs_Reports/List/PriceListPurSale.js";
+import PriceListAPurSale from "./Component/Reports/Daily_Jobs_Reports/List/PriceListAPurSal.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -220,6 +221,8 @@ function App() {
                 <Route exact path="/GoalList" element={<GoalList />} />
                 <Route exact path="/CollectorList" element={<CollectorList />} />
                 <Route exact path="/MemberList" element={< MembersList1/>} />
+                <Route exact path="/PriceListPurSale" element={< PriceListPurSale/>} />
+                <Route exact path="/PriceListAPurSal" element={< PriceListAPurSale/>} />
 
 
                 {/* Rountes for ledgers reports */}
