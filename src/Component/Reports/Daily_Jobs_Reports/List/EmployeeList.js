@@ -29,7 +29,7 @@ export default function EmployeeList() {
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
 
-  const [GetCompany, setGetCompany] = useState([])
+  const [GetCompany, setGetCompany] = useState([]);
 
   const [sortData, setSortData] = useState("ASC");
 
@@ -55,7 +55,7 @@ export default function EmployeeList() {
     fontcolor,
     toggleChangeColor,
     apiLinks,
-    getLocationNumber,
+    getLocationNumber, getnavbarbackgroundcolor,
     getyeardescription,
     getfromdate,
     gettodate,
@@ -91,11 +91,10 @@ export default function EmployeeList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       code: "NASIRTRD",
-      FLocCod: '001',
+      FLocCod: "001",
       FSchTxt: searchQuery,
-
-
     }).toString();
+
 
     axios
       .post(apiUrl, formData)
@@ -121,7 +120,10 @@ export default function EmployeeList() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+    if (
+      !hasComponentMountedPreviously ||
+      (saleSelectRef && saleSelectRef.current)
+    ) {
       if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
           saleSelectRef.current.focus();
@@ -402,7 +404,6 @@ export default function EmployeeList() {
           ? Companyselectdatavalue.label
           : "ALL";
 
-
         let status =
           transectionType === "N"
             ? "NON-ACTIVE"
@@ -419,7 +420,6 @@ export default function EmployeeList() {
         doc.text(`LOCATIONS :`, labelsX, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${typeItem}`, labelsX + 26, labelsY + 8.5); // Draw the value next to the label
-
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.text(`STATUS :`, labelsX, labelsY + 12.5); // Draw bold label
@@ -539,7 +539,7 @@ export default function EmployeeList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Employee List"]);
+    const storeListRow = worksheet.addRow(["EmployeeList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -630,7 +630,7 @@ export default function EmployeeList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([
         item.Code,
         item.Employee,
@@ -657,6 +657,15 @@ export default function EmployeeList() {
           horizontal: columnAlignments[colIndex] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply background color for odd rows
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF5F5F5" }, // Light grey for odd rows
+          };
+        }
       });
     });
 
@@ -688,7 +697,9 @@ export default function EmployeeList() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -711,10 +722,12 @@ export default function EmployeeList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -743,7 +756,6 @@ export default function EmployeeList() {
       }
     }
   };
-
 
   const DropdownOption = (props) => {
     return (
@@ -789,7 +801,7 @@ export default function EmployeeList() {
       "&:focus-within": {
         borderColor: "#3368B5",
         boxShadow: "0 0 0 1px #3368B5",
-      }
+      },
     }),
 
     menu: (base) => ({
@@ -820,7 +832,7 @@ export default function EmployeeList() {
         border: `2px solid ${getcolor}`,
         "&:hover": {
           backgroundColor: "#3368B5",
-        }
+        },
       },
       // Scrollbar styling for Firefox
       scrollbarWidth: "thin",
@@ -835,9 +847,7 @@ export default function EmployeeList() {
         : state.isFocused
           ? "#3368B5"
           : getcolor,
-      color: state.isSelected
-        ? "white"
-        : fontcolor,
+      color: state.isSelected ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -857,10 +867,12 @@ export default function EmployeeList() {
       textAlign: "center",
       color: fontcolor,
       transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
       "&:hover": {
         color: "#3368B5",
-      }
+      },
     }),
     indicatorSeparator: () => ({
       display: "none",
@@ -886,7 +898,7 @@ export default function EmployeeList() {
       color: fontcolor,
       "&:hover": {
         color: "#ff4444",
-      }
+      },
     }),
     placeholder: (base) => ({
       ...base,
@@ -925,10 +937,9 @@ export default function EmployeeList() {
       "&:hover": {
         backgroundColor: "#ff4444",
         color: "white",
-      }
+      },
     }),
   });
-
 
   const dispatch = useDispatch();
 
@@ -954,7 +965,7 @@ export default function EmployeeList() {
     width: "5.5%",
   };
   const secondColWidth = {
-    width: "23%",
+    width: "23.3%",
   };
   const thirdColWidth = {
     width: "8%",
@@ -963,7 +974,7 @@ export default function EmployeeList() {
     width: "20%",
   };
   const fifthColWidth = {
-    width: "8%",
+    width: "10%",
   };
   const sixthColWidth = {
     width: "8%",
@@ -977,8 +988,6 @@ export default function EmployeeList() {
   const ninthColWidth = {
     width: "8%",
   };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1118,7 +1127,7 @@ export default function EmployeeList() {
     DOB: [],
     "Join Date": [],
     "Adv Code": [],
-    "Dlv Code": []
+    "Dlv Code": [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
     Code: "",
@@ -1129,27 +1138,26 @@ export default function EmployeeList() {
     DOB: "",
     "Join Date": "",
     "Adv Code": "",
-    "Dlv Code": ""
+    "Dlv Code": "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        Code: tableData.map(row => row.Code),
-        Employee: tableData.map(row => row.Employee),
-        Status: tableData.map(row => row.Status),
-        Designation: tableData.map(row => row.Designation),
-        Mobile: tableData.map(row => row.Mobile),
-        DOB: tableData.map(row => row.DOB),
-        "Join Date": tableData.map(row => row["Join Date"]),
-        "Adv Code": tableData.map(row => row["Adv Code"]),
-        "Dlv Code": tableData.map(row => row["Dlv Code"])
+        Code: tableData.map((row) => row.Code),
+        Employee: tableData.map((row) => row.Employee),
+        Status: tableData.map((row) => row.Status),
+        Designation: tableData.map((row) => row.Designation),
+        Mobile: tableData.map((row) => row.Mobile),
+        DOB: tableData.map((row) => row.DOB),
+        "Join Date": tableData.map((row) => row["Join Date"]),
+        "Adv Code": tableData.map((row) => row["Adv Code"]),
+        "Dlv Code": tableData.map((row) => row["Dlv Code"]),
       };
       setColumns(newColumns);
     }
   }, [tableData]);
-
 
   // const handleSorting = (col) => {
   //   const currentOrder = columnSortOrders[col];
@@ -1241,7 +1249,7 @@ export default function EmployeeList() {
       DOB: null,
       "Join Date": null,
       "Adv Code": null,
-      "Dlv Code": null
+      "Dlv Code": null,
     });
   };
 
@@ -1269,7 +1277,7 @@ export default function EmployeeList() {
         DOB: columns.DOB[i],
         "Join Date": columns["Join Date"][i],
         "Adv Code": columns["Adv Code"][i],
-        "Dlv Code": columns["Dlv Code"][i]
+        "Dlv Code": columns["Dlv Code"][i],
       });
     }
 
@@ -1396,10 +1404,14 @@ export default function EmployeeList() {
     };
   };
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
 
   useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
@@ -1483,7 +1495,6 @@ export default function EmployeeList() {
                       }
                       return inputValue;
                     }}
-
                     components={{ Option: DropdownOption }}
                     styles={{
                       ...customStyles1(!Companyselectdata),
@@ -1493,19 +1504,14 @@ export default function EmployeeList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
-
-
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
                   />
                 </div>
-
               </div>
-
-
             </div>
           </div>
 
@@ -1670,10 +1676,12 @@ export default function EmployeeList() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
-                  <tr style={{ backgroundColor: tableHeadColor, color: "white" }}>
+                  <tr
+                    style={{ backgroundColor: getnavbarbackgroundcolor, color: "white" }}
+                  >
                     <td
                       className="border-dark"
                       style={firstColWidth}
@@ -1758,7 +1766,6 @@ export default function EmployeeList() {
                       ></i>
                     </td>
 
-
                     <td
                       className="border-dark"
                       style={sixthColWidth}
@@ -1792,7 +1799,7 @@ export default function EmployeeList() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "60vh",
+                maxHeight: "55vh",
                 width: "100%",
                 wordBreak: "break-word",
               }}
@@ -1807,73 +1814,88 @@ export default function EmployeeList() {
                   position: "relative",
                 }}
               >
-                <tbody id="tablebody">
-                  {renderTableData()}
-                </tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
           </div>
 
-          {/* <div
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
               style={{
-                borderBottom: `1px solid ${fontcolor}`,
-                borderTop: `1px solid ${fontcolor}`,
-                height: "24px",
-                display: "flex",
-                paddingRight: "1.2%",
-                width: "101.2%",
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <div
-                style={{
-                  ...firstColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...secondColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...thirdColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...forthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...fifthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...sixthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...seventhColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-            </div> */}
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...eightthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...ninthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+          </div>
 
           <div
             style={{

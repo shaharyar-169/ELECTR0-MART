@@ -45,7 +45,7 @@ export default function CapacityList() {
     toggleChangeColor,
     apiLinks,
     getLocationNumber,
-    getyeardescription,
+    getyeardescription, getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
@@ -482,7 +482,7 @@ export default function CapacityList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Capacity List"]);
+    const storeListRow = worksheet.addRow(["CapacityList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -543,7 +543,7 @@ export default function CapacityList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([item.Code, item.Description, item.Status]);
 
       row.eachCell((cell, colIndex) => {
@@ -558,6 +558,13 @@ export default function CapacityList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Alternate row background (grey-white)
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: index % 2 === 0 ? "FFF5F5F5" : "FFFFFFFF" },
+        };
       });
     });
 
@@ -565,7 +572,6 @@ export default function CapacityList() {
     [10, 40, 10].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
 
     // Add a blank row
     worksheet.addRow([]);
@@ -590,7 +596,9 @@ export default function CapacityList() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -613,10 +621,12 @@ export default function CapacityList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -648,8 +658,6 @@ export default function CapacityList() {
 
   let totalEntries = 0;
 
-
-
   const firstColWidth = {
     width: "15%",
   };
@@ -659,8 +667,6 @@ export default function CapacityList() {
   const thirdColWidth = {
     width: "15%",
   };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -767,21 +773,21 @@ export default function CapacityList() {
   const [columns, setColumns] = useState({
     Code: [],
     Description: [],
-    Status: []
+    Status: [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
     Code: "",
     Description: "",
-    Status: ""
+    Status: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        Code: tableData.map(row => row.Code),
-        Description: tableData.map(row => row.Description),
-        Status: tableData.map(row => row.Status)
+        Code: tableData.map((row) => row.Code),
+        Description: tableData.map((row) => row.Description),
+        Status: tableData.map((row) => row.Status),
       };
       setColumns(newColumns);
     }
@@ -873,7 +879,7 @@ export default function CapacityList() {
       Description: null,
       Status: null,
       Abb: null,
-      Stk: null
+      Stk: null,
     });
   };
 
@@ -889,7 +895,7 @@ export default function CapacityList() {
       rows.push({
         Code: columns.Code[i],
         Description: columns.Description[i],
-        Status: columns.Status[i]
+        Status: columns.Status[i],
       });
     }
 
@@ -983,10 +989,14 @@ export default function CapacityList() {
     };
   };
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
 
   useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
@@ -1131,7 +1141,8 @@ export default function CapacityList() {
                         fontSize: "20px",
                         color: fontcolor,
                         userSelect: "none",
-                      }} s
+                      }}
+                      s
                     >
                       ×
                     </span>
@@ -1167,23 +1178,25 @@ export default function CapacityList() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
-
                     <td
                       className="border-dark"
                       style={firstColWidth}
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle" style={getIconStyle("Code")}></i>
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
                     </td>
 
                     <td
@@ -1192,7 +1205,10 @@ export default function CapacityList() {
                       onClick={() => handleSorting("Description")}
                     >
                       Description{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle" style={getIconStyle("Description")}></i>
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
                     </td>
 
                     <td
@@ -1201,7 +1217,10 @@ export default function CapacityList() {
                       onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle" style={getIconStyle("Status")}></i>
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Status")}
+                      ></i>
                     </td>
                   </tr>
                 </thead>
@@ -1228,9 +1247,7 @@ export default function CapacityList() {
                   position: "relative",
                 }}
               >
-                <tbody id="tablebody">
-                  {renderTableData()}
-                </tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
           </div>
@@ -1251,7 +1268,10 @@ export default function CapacityList() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
             <div
               style={{
                 ...secondColWidth,

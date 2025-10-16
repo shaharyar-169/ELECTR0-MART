@@ -32,7 +32,7 @@ export default function UserList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
-  console.log('transectionType', transectionType)
+  console.log("transectionType", transectionType);
 
   const [isAscendingcode, setisAscendingcode] = useState(true);
   const [isAscendingemploye, setisAscendingemploye] = useState(true);
@@ -51,7 +51,7 @@ export default function UserList() {
     toggleChangeColor,
     apiLinks,
     getLocationNumber,
-    getyeardescription,
+    getyeardescription, getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
@@ -80,7 +80,6 @@ export default function UserList() {
     const selectedTransactionType = event.target.value;
     settransectionType(selectedTransactionType);
   };
-
 
   function fetchReceivableReport() {
     const apiUrl = apiLinks + "/UserList.php";
@@ -113,7 +112,6 @@ export default function UserList() {
       });
   }
 
-
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
@@ -127,8 +125,6 @@ export default function UserList() {
       sessionStorage.setItem("componentMounted", "true");
     }
   }, []);
-
-
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
@@ -515,7 +511,7 @@ export default function UserList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["User List"]);
+    const storeListRow = worksheet.addRow(["UserList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -585,7 +581,7 @@ export default function UserList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([
         item.ID,
         item.Name,
@@ -609,15 +605,23 @@ export default function UserList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply light grey background for odd-numbered rows
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF5F5F5" }, // Light grey background
+          };
+        }
       });
     });
+
 
     // Set column widths
     [10, 40, 10, 10, 15, 25, 13, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
-
 
     // Add a blank row
     worksheet.addRow([]);
@@ -642,7 +646,9 @@ export default function UserList() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -665,10 +671,12 @@ export default function UserList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -700,8 +708,6 @@ export default function UserList() {
 
   let totalEntries = 0;
 
-
-
   const firstColWidth = {
     width: "10%",
   };
@@ -712,13 +718,13 @@ export default function UserList() {
     width: "8.2%",
   };
   const forthColWidth = {
-    width: "10%",
+    width: "8%",
   };
   const fifthColWidth = {
     width: "11%",
   };
   const sixthColWidth = {
-    width: "19.5%",
+    width: "21.5%",
   };
   const seventhColWidth = {
     width: "10%",
@@ -726,8 +732,6 @@ export default function UserList() {
   const eightColWidth = {
     width: "10%",
   };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -839,7 +843,7 @@ export default function UserList() {
     Mobile: [],
     Email: [],
     "Log Date": [],
-    "Log Time": []
+    "Log Time": [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
@@ -850,26 +854,25 @@ export default function UserList() {
     Mobile: "",
     Email: "",
     "Log Date": "",
-    "Log Time": ""
+    "Log Time": "",
   });
 
   // Transform table data into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        ID: tableData.map(row => row.ID),
-        Name: tableData.map(row => row.Name),
-        Status: tableData.map(row => row.Status),
-        Type: tableData.map(row => row.Type),
-        Mobile: tableData.map(row => row.Mobile),
-        Email: tableData.map(row => row.Email),
-        "Log Date": tableData.map(row => row["Log Date"]),
-        "Log Time": tableData.map(row => row["Log Time"])
+        ID: tableData.map((row) => row.ID),
+        Name: tableData.map((row) => row.Name),
+        Status: tableData.map((row) => row.Status),
+        Type: tableData.map((row) => row.Type),
+        Mobile: tableData.map((row) => row.Mobile),
+        Email: tableData.map((row) => row.Email),
+        "Log Date": tableData.map((row) => row["Log Date"]),
+        "Log Time": tableData.map((row) => row["Log Time"]),
       };
       setColumns(newColumns);
     }
   }, [tableData]);
-
 
   // const handleSorting = (col) => {
   //   const currentOrder = columnSortOrders[col];
@@ -911,7 +914,7 @@ export default function UserList() {
     const currentOrder = columnSortOrders[col];
     const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    setTableData(prevData => {
+    setTableData((prevData) => {
       const sorted = [...prevData].sort((a, b) => {
         const aValue = a[col] !== null ? a[col].toString() : "";
         const bValue = b[col] !== null ? b[col].toString() : "";
@@ -931,9 +934,9 @@ export default function UserList() {
     });
 
     // Update sort order state
-    setColumnSortOrders(prev => ({
-      ...Object.fromEntries(Object.keys(prev).map(key => [key, null])),
-      [col]: newOrder
+    setColumnSortOrders((prev) => ({
+      ...Object.fromEntries(Object.keys(prev).map((key) => [key, null])),
+      [col]: newOrder,
     }));
   };
 
@@ -946,7 +949,7 @@ export default function UserList() {
       Mobile: null,
       Email: null,
       "Log Date": null,
-      "Log Time": null
+      "Log Time": null,
     });
   };
 
@@ -1189,7 +1192,6 @@ export default function UserList() {
     );
   };
 
-
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
@@ -1199,10 +1201,14 @@ export default function UserList() {
     };
   };
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
 
   useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
@@ -1384,10 +1390,12 @@ export default function UserList() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
-                  <tr style={{ backgroundColor: tableHeadColor, color: "white" }}>
+                  <tr
+                    style={{ backgroundColor: getnavbarbackgroundcolor, color: "white" }}
+                  >
                     {/* ID Column */}
                     <td
                       className="border-dark"
@@ -1516,80 +1524,81 @@ export default function UserList() {
                   position: "relative",
                 }}
               >
-                <tbody id="tablebody">
-                  {renderTableData()}
-                </tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
           </div>
 
-          {/* <div
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
               style={{
-                borderBottom: `1px solid ${fontcolor}`,
-                borderTop: `1px solid ${fontcolor}`,
-                height: "24px",
-                display: "flex",
-                paddingRight: "1.2%",
-                width: "101.2%",
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <div
-                style={{
-                  ...firstColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...secondColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...thirdColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...forthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...fifthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...sixthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...seventhColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...eightColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-            </div> */}
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+          </div>
 
           <div
             style={{
@@ -1629,7 +1638,8 @@ export default function UserList() {
               onClick={() => {
                 fetchReceivableReport();
                 resetSorting();
-              }} onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              }}
+              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }

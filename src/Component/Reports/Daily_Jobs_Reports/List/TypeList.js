@@ -41,7 +41,7 @@ export default function TypeList() {
     getcolor,
     fontcolor,
     toggleChangeColor,
-    apiLinks,
+    apiLinks, getnavbarbackgroundcolor,
     getLocationNumber,
     getyeardescription,
     getfromdate,
@@ -480,7 +480,7 @@ export default function TypeList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Type List"]);
+    const storeListRow = worksheet.addRow(["TypeList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -541,7 +541,7 @@ export default function TypeList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([item.Code, item.Description, item.Status]);
 
       row.eachCell((cell, colIndex) => {
@@ -556,15 +556,23 @@ export default function TypeList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply light grey background to odd-numbered rows only
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFEFEFEF" }, // very light grey
+          };
+        }
       });
     });
+
 
     // Set column widths
     [10, 40, 10].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
-
 
     // Add a blank row
     worksheet.addRow([]);
@@ -589,7 +597,9 @@ export default function TypeList() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -612,10 +622,12 @@ export default function TypeList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -656,8 +668,6 @@ export default function TypeList() {
   const thirdColWidth = {
     width: "15%",
   };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -834,7 +844,7 @@ export default function TypeList() {
       Description: null,
       Status: null,
       Abb: null,
-      Stk: null
+      Stk: null,
     });
   };
 
@@ -944,10 +954,14 @@ export default function TypeList() {
     };
   };
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
 
   useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
@@ -1030,9 +1044,9 @@ export default function TypeList() {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 
@@ -1128,12 +1142,12 @@ export default function TypeList() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
@@ -1202,40 +1216,43 @@ export default function TypeList() {
             </div>
           </div>
 
-          {/* <div
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
               style={{
-                borderBottom: `1px solid ${fontcolor}`,
-                borderTop: `1px solid ${fontcolor}`,
-                height: "24px",
-                display: "flex",
-                paddingRight: "1.2%",
-                width: "101.2%",
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <div
-                style={{
-                  ...firstColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...secondColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...thirdColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-            
-            
-            </div> */}
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+
+
+          </div>
 
           <div
             style={{
@@ -1287,3 +1304,4 @@ export default function TypeList() {
     </>
   );
 }
+

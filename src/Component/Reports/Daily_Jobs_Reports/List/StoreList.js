@@ -63,11 +63,11 @@ export default function StoreList() {
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
 
-   useEffect(() => {
+  useEffect(() => {
     document.documentElement.style.setProperty("--navbar-bg-color", getnavbarbackgroundcolor);
   }, [getnavbarbackgroundcolor]);
 
-  
+
 
   const comapnyname = organisation.description;
 
@@ -495,19 +495,19 @@ export default function StoreList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(64 + numColumns - 1)}${companyRow.number
       }`
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Store List"]);
+    const storeListRow = worksheet.addRow(["StoreList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(64 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -561,7 +561,7 @@ export default function StoreList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([
         item.Code,
         item.Description,
@@ -570,6 +570,7 @@ export default function StoreList() {
         item.Stk,
       ]);
 
+      // ✅ Apply style for each cell
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
         cell.border = {
@@ -582,8 +583,24 @@ export default function StoreList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Add background fill (alternate grey rows)
+        if (index % 2 === 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF5F5F5" }, // light grey background
+          };
+        } else {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFFFFF" }, // white background
+          };
+        }
       });
     });
+
 
     // Set column widths
     [10, 40, 10, 12, 10].forEach((width, index) => {
@@ -947,11 +964,11 @@ export default function StoreList() {
                     color: fontcolor,
                   }}
 
-                  // style={{
-                  //   backgroundColor: selectedIndex === i
-                  //     ? 'var(--selected-bg-color)'
-                  //     : getcolor, color: fontcolor,
-                  // }}
+                // style={{
+                //   backgroundColor: selectedIndex === i
+                //     ? 'var(--selected-bg-color)'
+                //     : getcolor, color: fontcolor,
+                // }}
 
                 >
                   <td className="text-start" style={firstColWidth}>
@@ -1097,9 +1114,9 @@ export default function StoreList() {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 
@@ -1296,54 +1313,57 @@ export default function StoreList() {
             </div>
           </div>
 
-          {/* <div
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
               style={{
-                borderBottom: `1px solid ${fontcolor}`,
-                borderTop: `1px solid ${fontcolor}`,
-                height: "24px",
-                display: "flex",
-                paddingRight: "1.2%",
-                width: "101.2%",
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <div
-                style={{
-                  ...firstColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...secondColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...thirdColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...forthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...fifthColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              
-            
-            </div> */}
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+
+
+          </div>
 
           <div
             style={{

@@ -77,7 +77,7 @@ export default function ItemPriceList() {
     apiLinks,
     getLocationNumber,
     getyeardescription,
-    getfromdate,
+    getfromdate, getnavbarbackgroundcolor,
     gettodate,
     getfontstyle,
     getdatafontsize,
@@ -100,6 +100,9 @@ export default function ItemPriceList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
+
+      code: 'UMAIRPOS',
+      FLocCod: '001',
 
       FCtgCod: Companyselectdata,
       FCapCod: Capacityselectdata,
@@ -381,7 +384,7 @@ export default function ItemPriceList() {
       "&:focus-within": {
         borderColor: "#3368B5",
         boxShadow: "0 0 0 1px #3368B5",
-      }
+      },
     }),
 
     menu: (base) => ({
@@ -412,7 +415,7 @@ export default function ItemPriceList() {
         border: `2px solid ${getcolor}`,
         "&:hover": {
           backgroundColor: "#3368B5",
-        }
+        },
       },
       // Scrollbar styling for Firefox
       scrollbarWidth: "thin",
@@ -427,9 +430,7 @@ export default function ItemPriceList() {
         : state.isFocused
           ? "#3368B5"
           : getcolor,
-      color: state.isSelected
-        ? "white"
-        : fontcolor,
+      color: state.isSelected ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -449,10 +450,12 @@ export default function ItemPriceList() {
       textAlign: "center",
       color: fontcolor,
       transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
       "&:hover": {
         color: "#3368B5",
-      }
+      },
     }),
     indicatorSeparator: () => ({
       display: "none",
@@ -478,7 +481,7 @@ export default function ItemPriceList() {
       color: fontcolor,
       "&:hover": {
         color: "#ff4444",
-      }
+      },
     }),
     placeholder: (base) => ({
       ...base,
@@ -517,7 +520,7 @@ export default function ItemPriceList() {
       "&:hover": {
         backgroundColor: "#ff4444",
         color: "white",
-      }
+      },
     }),
   });
 
@@ -949,7 +952,7 @@ export default function ItemPriceList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Price List "]);
+    const storeListRow = worksheet.addRow(["PriceList "]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -1056,7 +1059,7 @@ export default function ItemPriceList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([
         item.Code,
         item.Description,
@@ -1066,7 +1069,6 @@ export default function ItemPriceList() {
         item["Sale Rate"],
         item.MRP,
         item["Fix Rate"],
-        ,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1081,14 +1083,23 @@ export default function ItemPriceList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply light grey background for odd-numbered rows
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF5F5F5" }, // Light grey background for odd rows
+          };
+        }
       });
     });
+
 
     // Set column widths
     [22, 50, 6, 14, 14, 14, 14, 14].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
 
     // Add a blank row
     worksheet.addRow([]);
@@ -1113,7 +1124,9 @@ export default function ItemPriceList() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1136,13 +1149,13 @@ export default function ItemPriceList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
-
-
 
     // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
@@ -1177,7 +1190,7 @@ export default function ItemPriceList() {
     width: "12.3%",
   };
   const secondColWidth = {
-    width: "24.5%",
+    width: "25.5%",
   };
   const thirdColWidth = {
     width: "4%",
@@ -1199,6 +1212,30 @@ export default function ItemPriceList() {
   };
 
 
+  const firstColWidth1 = {
+    width: "15%",
+  };
+  const secondColWidth1 = {
+    width: "30.7%",
+  };
+  const thirdColWidth1 = {
+    width: "4.8%",
+  };
+  const forthColWidth1 = {
+    width: "8.4%",
+  };
+  const fifthColWidth1 = {
+    width: "10.3%",
+  };
+  const sixthColWidth1 = {
+    width: "10.2%",
+  };
+  const eightColWidth1 = {
+    width: "10.3%",
+  };
+  const ninthColWidth1 = {
+    width: "10.2%",
+  };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1398,7 +1435,6 @@ export default function ItemPriceList() {
     });
   };
 
-
   const renderTableData = () => {
     const rowCount = Math.max(
       columns.Code?.length || 0,
@@ -1548,12 +1584,16 @@ export default function ItemPriceList() {
     };
   };
 
-   useHotkeys("alt+s", () => {
-  fetchReceivableReport();
-  resetSorting();
-}, { preventDefault: true });
-  
-  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
@@ -1647,8 +1687,8 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1732,8 +1772,8 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1801,8 +1841,8 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1887,8 +1927,8 @@ export default function ItemPriceList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1990,11 +2030,11 @@ export default function ItemPriceList() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
-                    style={{ backgroundColor: tableHeadColor, color: "white" }}
+                    style={{ backgroundColor: getnavbarbackgroundcolor, color: "white" }}
                   >
                     <td
                       className="border-dark"
@@ -2117,10 +2157,80 @@ export default function ItemPriceList() {
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
-                <tbody id="tablebody">
-                  {renderTableData()}</tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
+          </div>
+
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                ...firstColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...forthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...fifthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...sixthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...eightColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...ninthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
           </div>
 
           <div

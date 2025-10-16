@@ -80,7 +80,7 @@ export default function ItemList() {
     fontcolor,
     toggleChangeColor,
     apiLinks,
-    getLocationNumber,
+    getLocationNumber, getnavbarbackgroundcolor,
     getyeardescription,
     getfromdate,
     gettodate,
@@ -113,7 +113,6 @@ export default function ItemList() {
   //     FLocCod: locationnumber || getLocationNumber,
   //     FYerDsc: yeardescription || getyeardescription,
 
-
   //   }).toString();
 
   //   axios
@@ -142,7 +141,12 @@ export default function ItemList() {
     setIsLoading(true);
 
     const formData = new URLSearchParams({
-      FItmSts: transectionType === "Non-Active" ? "N" : transectionType === "Active" ? "A" : "",
+      FItmSts:
+        transectionType === "Non-Active"
+          ? "N"
+          : transectionType === "Active"
+            ? "A"
+            : "",
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
@@ -153,35 +157,39 @@ export default function ItemList() {
       FYerDsc: yeardescription || getyeardescription,
     }).toString();
 
-    axios.post(apiUrl, formData)
+    axios
+      .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
 
         if (response.data && Array.isArray(response.data)) {
           // Transform API data to match your table structure
-          const transformedData = response.data.map(item => ({
+          const transformedData = response.data.map((item) => ({
             Code: item.Code,
             Description: item.Description,
             Company: item.Company,
             Category: item.Category,
             Capacity: item.Capacity,
             Type: item.Type,
-            Status: item.Status === "N" ? "N" :
-              item.Status === "A" ? "A" :
-                item.Status // fallback
+            Status:
+              item.Status === "N"
+                ? "N"
+                : item.Status === "A"
+                  ? "A"
+                  : item.Status, // fallback
           }));
 
           setTableData(transformedData);
 
           // If you still need columns structure for some reason
           const newColumns = {
-            Code: transformedData.map(item => item.Code),
-            Description: transformedData.map(item => item.Description),
-            Company: transformedData.map(item => item.Company),
-            Category: transformedData.map(item => item.Category),
-            Capacity: transformedData.map(item => item.Capacity),
-            Type: transformedData.map(item => item.Type),
-            Status: transformedData.map(item => item.Status)
+            Code: transformedData.map((item) => item.Code),
+            Description: transformedData.map((item) => item.Description),
+            Company: transformedData.map((item) => item.Company),
+            Category: transformedData.map((item) => item.Category),
+            Capacity: transformedData.map((item) => item.Capacity),
+            Type: transformedData.map((item) => item.Type),
+            Status: transformedData.map((item) => item.Status),
           };
           setColumns(newColumns);
         } else {
@@ -193,7 +201,7 @@ export default function ItemList() {
             Category: [],
             Capacity: [],
             Type: [],
-            Status: []
+            Status: [],
           });
         }
       })
@@ -492,7 +500,6 @@ export default function ItemList() {
     );
   };
 
-
   const customStyles1 = (hasError) => ({
     control: (base, state) => ({
       ...base,
@@ -518,7 +525,7 @@ export default function ItemList() {
       "&:focus-within": {
         borderColor: "#3368B5",
         boxShadow: "0 0 0 1px #3368B5",
-      }
+      },
     }),
 
     menu: (base) => ({
@@ -549,7 +556,7 @@ export default function ItemList() {
         border: `2px solid ${getcolor}`,
         "&:hover": {
           backgroundColor: "#3368B5",
-        }
+        },
       },
       // Scrollbar styling for Firefox
       scrollbarWidth: "thin",
@@ -564,13 +571,11 @@ export default function ItemList() {
         : state.isFocused
           ? "#3368B5"
           : getcolor,
-      color: state.isSelected
-        ? "white"
-        : fontcolor,      // black color
+      color: state.isSelected ? "white" : fontcolor, // black color
 
       "&:hover": {
         backgroundColor: "#3368B5",
-        color: getcolor,   // white color 
+        color: getcolor, // white color
         cursor: "pointer",
       },
       "&:active": {
@@ -587,10 +592,12 @@ export default function ItemList() {
       textAlign: "center",
       color: fontcolor,
       transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
       "&:hover": {
         color: "#3368B5",
-      }
+      },
     }),
     indicatorSeparator: () => ({
       display: "none",
@@ -616,7 +623,7 @@ export default function ItemList() {
       color: fontcolor,
       "&:hover": {
         color: "#ff4444",
-      }
+      },
     }),
     placeholder: (base) => ({
       ...base,
@@ -655,7 +662,7 @@ export default function ItemList() {
       "&:hover": {
         backgroundColor: "#ff4444",
         color: "white",
-      }
+      },
     }),
   });
 
@@ -797,8 +804,6 @@ export default function ItemList() {
           } else {
             doc.text(cellValue, cellX, cellY, { baseline: "middle" });
           }
-
-
 
           // Draw column borders (excluding the last column)
           if (cellIndex < row.length - 1) {
@@ -1029,7 +1034,15 @@ export default function ItemList() {
 
     const numColumns = 6; // Ensure this matches the actual number of columns
 
-    const columnAlignments = ["left", "left", "left", "left", "left", "left", "center"];
+    const columnAlignments = [
+      "left",
+      "left",
+      "left",
+      "left",
+      "left",
+      "left",
+      "center",
+    ];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -1070,7 +1083,7 @@ export default function ItemList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Item List"]);
+    const storeListRow = worksheet.addRow(["ItemList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -1099,12 +1112,12 @@ export default function ItemList() {
 
     // let typestatus = transectionType ? transectionType : "ALL";
 
-     let typestatus =
-          transectionType === "N"
-            ? "NON-ACTIVE"
-            : transectionType === "A"
-              ? "ACTIVE"
-              : "All";
+    let typestatus =
+      transectionType === "N"
+        ? "NON-ACTIVE"
+        : transectionType === "A"
+          ? "ACTIVE"
+          : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
@@ -1190,7 +1203,7 @@ export default function ItemList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([
         item.Code,
         item.Description,
@@ -1213,14 +1226,23 @@ export default function ItemList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply light grey background for odd-numbered rows
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF5F5F5" }, // Light grey background
+          };
+        }
       });
     });
+
 
     // Set column widths
     [22, 50, 15, 15, 15, 22, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
 
     // Add a blank row
     worksheet.addRow([]);
@@ -1245,7 +1267,9 @@ export default function ItemList() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1268,10 +1292,12 @@ export default function ItemList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -1325,8 +1351,6 @@ export default function ItemList() {
   const seventhColWidth = {
     width: "7%",
   };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1519,7 +1543,6 @@ export default function ItemList() {
       Capacity: null,
       Type: null,
       Status: null,
-
     });
   };
 
@@ -1712,8 +1735,6 @@ export default function ItemList() {
     );
   };
 
-
-
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
@@ -1723,15 +1744,18 @@ export default function ItemList() {
     };
   };
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
 
   useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
   useHotkeys("esc", () => navigate("/MainPage"));
-
 
   return (
     <>
@@ -1826,8 +1850,8 @@ export default function ItemList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1886,9 +1910,7 @@ export default function ItemList() {
                       }
                       return inputValue;
                     }}
-
                     components={{ Option: DropdownOption }}
-
                     styles={{
                       ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
@@ -1897,9 +1919,10 @@ export default function ItemList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
-                    }} isClearable
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
                     placeholder="ALL"
                   />
                 </div>
@@ -1972,7 +1995,6 @@ export default function ItemList() {
                       }
                       return inputValue;
                     }}
-
                     components={{ Option: DropdownOption }}
                     styles={{
                       ...customStyles1(!Companyselectdata),
@@ -1982,9 +2004,10 @@ export default function ItemList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
-                    }} isClearable
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
                     placeholder="ALL"
                   />
                 </div>
@@ -2114,7 +2137,6 @@ export default function ItemList() {
                       }
                       return inputValue;
                     }}
-
                     components={{ Option: DropdownOption }}
                     styles={{
                       ...customStyles1(!Companyselectdata),
@@ -2124,8 +2146,8 @@ export default function ItemList() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -2227,11 +2249,11 @@ export default function ItemList() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
-                    style={{ backgroundColor: tableHeadColor, color: "white" }}
+                    style={{ backgroundColor: getnavbarbackgroundcolor, color: "white" }}
                   >
                     <td
                       className="border-dark"
@@ -2363,7 +2385,10 @@ export default function ItemList() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
             <div
               style={{
                 ...secondColWidth,

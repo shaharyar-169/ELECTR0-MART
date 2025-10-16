@@ -77,7 +77,7 @@ export default function ItemPriceListA() {
     fontcolor,
     toggleChangeColor,
     apiLinks,
-    getLocationNumber,
+    getLocationNumber, getnavbarbackgroundcolor,
     getyeardescription,
     getfromdate,
     gettodate,
@@ -101,6 +101,8 @@ export default function ItemPriceListA() {
     const formData = new URLSearchParams({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
+      code: 'UMAIRPOS',
+      FLocCod: '001',
       FYerDsc: yeardescription || getYearDescription,
       FCtgCod: Companyselectdata,
       FCapCod: Capacityselectdata,
@@ -382,7 +384,7 @@ export default function ItemPriceListA() {
       "&:focus-within": {
         borderColor: "#3368B5",
         boxShadow: "0 0 0 1px #3368B5",
-      }
+      },
     }),
 
     menu: (base) => ({
@@ -413,7 +415,7 @@ export default function ItemPriceListA() {
         border: `2px solid ${getcolor}`,
         "&:hover": {
           backgroundColor: "#3368B5",
-        }
+        },
       },
       // Scrollbar styling for Firefox
       scrollbarWidth: "thin",
@@ -428,9 +430,7 @@ export default function ItemPriceListA() {
         : state.isFocused
           ? "#3368B5"
           : getcolor,
-      color: state.isSelected
-        ? "white"
-        : fontcolor,
+      color: state.isSelected ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -450,10 +450,12 @@ export default function ItemPriceListA() {
       textAlign: "center",
       color: fontcolor,
       transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
       "&:hover": {
         color: "#3368B5",
-      }
+      },
     }),
     indicatorSeparator: () => ({
       display: "none",
@@ -479,7 +481,7 @@ export default function ItemPriceListA() {
       color: fontcolor,
       "&:hover": {
         color: "#ff4444",
-      }
+      },
     }),
     placeholder: (base) => ({
       ...base,
@@ -518,7 +520,7 @@ export default function ItemPriceListA() {
       "&:hover": {
         backgroundColor: "#ff4444",
         color: "white",
-      }
+      },
     }),
   });
 
@@ -953,19 +955,19 @@ export default function ItemPriceListA() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(70 + numColumns - 1)}${companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(72 + numColumns - 1)}${companyRow.number
       }`
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Price List A"]);
+    const storeListRow = worksheet.addRow(["PriceListA"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(70 + numColumns - 1)}${storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(72 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -1066,7 +1068,7 @@ export default function ItemPriceListA() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([
         item.Code,
         item.Description,
@@ -1092,6 +1094,15 @@ export default function ItemPriceListA() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply light grey background for odd-numbered rows
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF5F5F5" }, // Light grey
+          };
+        }
       });
     });
 
@@ -1099,9 +1110,6 @@ export default function ItemPriceListA() {
     [22, 50, 6, 14, 14, 14, 14, 14, 14, 14].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
-
-
 
     // Add a blank row
     worksheet.addRow([]);
@@ -1126,7 +1134,9 @@ export default function ItemPriceListA() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1149,10 +1159,12 @@ export default function ItemPriceListA() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -1207,7 +1219,7 @@ export default function ItemPriceListA() {
     "SM Rate": "",
     "Sale Rate": "",
     MRP: "",
-    "Fix Rate": ""
+    "Fix Rate": "",
   });
 
   // Transform table data into column-oriented format
@@ -1488,18 +1500,21 @@ export default function ItemPriceListA() {
     };
   };
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
 
   useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
-
   const firstColWidth = {
-    width: "12.3%",
+    width: "12.5%",
   };
   const secondColWidth = {
     width: "24.5%",
@@ -1528,8 +1543,6 @@ export default function ItemPriceListA() {
   const elewenthColWidth = {
     width: "8.5%",
   };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1723,8 +1736,8 @@ export default function ItemPriceListA() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1808,8 +1821,8 @@ export default function ItemPriceListA() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1877,8 +1890,8 @@ export default function ItemPriceListA() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -1963,8 +1976,8 @@ export default function ItemPriceListA() {
                         marginLeft: "0",
                         justifyContent: "flex-start",
                         color: fontcolor,
-                        marginTop: '-5px'
-                      })
+                        marginTop: "-5px",
+                      }),
                     }}
                     isClearable
                     placeholder="ALL"
@@ -2045,12 +2058,12 @@ export default function ItemPriceListA() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
@@ -2190,11 +2203,94 @@ export default function ItemPriceListA() {
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
-                <tbody id="tablebody">
-                  {renderTableData()}
-                </tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
+          </div>
+
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
+              style={{
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...ninthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...elewenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
           </div>
 
           <div

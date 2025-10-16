@@ -43,7 +43,7 @@ export default function CategoryList() {
     toggleChangeColor,
     apiLinks,
     getLocationNumber,
-    getyeardescription,
+    getyeardescription, getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
@@ -205,14 +205,14 @@ export default function CategoryList() {
 
         // Set background color for odd-numbered rows
         if (isOddRow) {
-        	doc.setFillColor(240); // Light background color
-        	doc.rect(
-        		startX,
-        		startY + (i - startIndex + 2) * rowHeight,
-        		tableWidth,
-        		rowHeight,
-        		"F"
-        	);
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
         }
 
         // Draw row borders
@@ -361,8 +361,8 @@ export default function CategoryList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
+              ? "ACTIVE"
+              : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -475,21 +475,19 @@ export default function CategoryList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
       }`
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Category List"]);
+    const storeListRow = worksheet.addRow(["CategoryList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -500,8 +498,8 @@ export default function CategoryList() {
       transectionType === "N"
         ? "Non-Active"
         : transectionType === "A"
-        ? "Active"
-        : "All";
+          ? "Active"
+          : "All";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
@@ -543,7 +541,7 @@ export default function CategoryList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([item.Code, item.Description, item.Status]);
 
       row.eachCell((cell, colIndex) => {
@@ -558,17 +556,23 @@ export default function CategoryList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Alternate row colors
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: index % 2 === 0 ? "FFF5F5F5" : "FFFFFFFF" },
+        };
       });
     });
+
 
     // Set column widths
     [10, 40, 10].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
-   
-
-  // Add a blank row
+    // Add a blank row
     worksheet.addRow([]);
     // Get current date and time
     const getCurrentTime = () => {
@@ -578,7 +582,7 @@ export default function CategoryList() {
       const ss = String(today.getSeconds()).padStart(2, "0");
       return `${hh}:${mm}:${ss}`;
     };
-     // Get current date
+    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -588,10 +592,12 @@ export default function CategoryList() {
     };
     const currentTime = getCurrentTime();
     const currentdate = getCurrentDate();
-    const userid= user.tusrid;
+    const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -601,7 +607,7 @@ export default function CategoryList() {
       };
       cell.alignment = { horizontal: "left" };
     });
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -614,10 +620,12 @@ export default function CategoryList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -658,8 +666,6 @@ export default function CategoryList() {
   const thirdColWidth = {
     width: "15%",
   };
-
-  
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -786,56 +792,55 @@ export default function CategoryList() {
     }
   }, [tableData]);
 
- 
- const handleSorting = (col) => {
-  // Always sort in descending order on first click (or toggle if already sorted)
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    // Always sort in descending order on first click (or toggle if already sorted)
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  // Create an array of indices [0, 1, 2, ..., n-1]
-  const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+    // Create an array of indices [0, 1, 2, ..., n-1]
+    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-  // Sort the indices based on the values in the specified column
-  indices.sort((a, b) => {
-    const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-    const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+    // Sort the indices based on the values in the specified column
+    indices.sort((a, b) => {
+      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    } else {
-      return newOrder === "ASC"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-  });
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+    });
 
-  // Reorder all columns based on the sorted indices
-  const newColumns = Object.keys(columns).reduce((acc, key) => {
-    acc[key] = indices.map((index) => columns[key][index]);
-    return acc;
-  }, {});
-
-  setColumns(newColumns);
-
-  // Update the sort order state
-  const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-    (acc, key) => {
-      acc[key] = key === col ? newOrder : null;
+    // Reorder all columns based on the sorted indices
+    const newColumns = Object.keys(columns).reduce((acc, key) => {
+      acc[key] = indices.map((index) => columns[key][index]);
       return acc;
-    },
-    {}
-  );
-  setColumnSortOrders(updatedSortOrders);
-};
+    }, {});
 
-const resetSorting = () => {
+    setColumns(newColumns);
+
+    // Update the sort order state
+    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+      (acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      },
+      {}
+    );
+    setColumnSortOrders(updatedSortOrders);
+  };
+
+  const resetSorting = () => {
     setColumnSortOrders({
-     Code: null,
-    Description: null,
-    Status: null,
+      Code: null,
+      Description: null,
+      Status: null,
     });
   };
 
@@ -936,21 +941,25 @@ const resetSorting = () => {
     );
   };
 
- const getIconStyle = (colKey) => {
-  const order = columnSortOrders[colKey];
-  return {
-    transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-    color: order === "ASC" || order === "DSC" ? "red" : "white",
-    transition: "transform 0.3s ease, color 0.3s ease",
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
   };
-};
 
-useHotkeys("alt+s", () => {
-  fetchReceivableReport();
-  resetSorting();
-}, { preventDefault: true });
-  
-  useHotkeys("alt+p", exportPDFHandler,   { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
+
+  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
   useHotkeys("esc", () => navigate("/MainPage"));
 
@@ -1031,9 +1040,9 @@ useHotkeys("alt+s", () => {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 
@@ -1129,12 +1138,12 @@ useHotkeys("alt+s", () => {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
@@ -1203,40 +1212,43 @@ useHotkeys("alt+s", () => {
             </div>
           </div>
 
-          {/* <div
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "1.2%",
+              width: "101.2%",
+            }}
+          >
+            <div
               style={{
-                borderBottom: `1px solid ${fontcolor}`,
-                borderTop: `1px solid ${fontcolor}`,
-                height: "24px",
-                display: "flex",
-                paddingRight: "1.2%",
-                width: "101.2%",
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <div
-                style={{
-                  ...firstColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...secondColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-              <div
-                style={{
-                  ...thirdColWidth,
-                  background: getcolor,
-                  borderRight: `1px solid ${fontcolor}`,
-                }}
-              ></div>
-            
-              
-            </div> */}
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+
+
+          </div>
 
           <div
             style={{
@@ -1271,13 +1283,12 @@ useHotkeys("alt+s", () => {
             <SingleButton
               id="searchsubmit"
               text="Select"
-               highlightFirstLetter={true}
+              highlightFirstLetter={true}
               ref={input3Ref}
-             onClick={()=>{
-              fetchReceivableReport();
-              resetSorting();
-             }}
-
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

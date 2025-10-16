@@ -32,7 +32,7 @@ export default function CompanyList() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
-  console.log('transectionTypedta', transectionType)
+  console.log("transectionTypedta", transectionType);
   const [isAscendingcode, setisAscendingcode] = useState(true);
   const [isAscendingdec, setisAscendingdec] = useState(true);
   const [isAscendingsts, setisAscendingsts] = useState(true);
@@ -45,7 +45,7 @@ export default function CompanyList() {
     toggleChangeColor,
     apiLinks,
     getLocationNumber,
-    getyeardescription,
+    getyeardescription, getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
@@ -107,26 +107,23 @@ export default function CompanyList() {
     //     setIsLoading(false);
     //   });
 
-    axios.post(apiUrl, formData)
-      .then((response) => {
-        setIsLoading(false);
-        if (response.data && Array.isArray(response.data)) {
-          setTableData(response.data);
-          // Transform API data into columns format
-          const newColumns = {
-            Code: response.data.map(item => item.Code),
-            Description: response.data.map(item => item.Description),
-            Status: response.data.map(item => item.Status),
-          };
-          setColumns(newColumns); // Assuming you have a `setColumns` state
-        } else {
-          setTableData([]);
-          setColumns({ Code: [], Description: [], Status: [] }); // Reset columns
-        }
-      })
+    axios.post(apiUrl, formData).then((response) => {
+      setIsLoading(false);
+      if (response.data && Array.isArray(response.data)) {
+        setTableData(response.data);
+        // Transform API data into columns format
+        const newColumns = {
+          Code: response.data.map((item) => item.Code),
+          Description: response.data.map((item) => item.Description),
+          Status: response.data.map((item) => item.Status),
+        };
+        setColumns(newColumns); // Assuming you have a `setColumns` state
+      } else {
+        setTableData([]);
+        setColumns({ Code: [], Description: [], Status: [] }); // Reset columns
+      }
+    });
   }
-
-
 
   useEffect(() => {
     const hasComponentMountedPreviously =
@@ -141,8 +138,6 @@ export default function CompanyList() {
       sessionStorage.setItem("componentMounted", "true");
     }
   }, []);
-
-
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
@@ -506,7 +501,7 @@ export default function CompanyList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["Company List"]);
+    const storeListRow = worksheet.addRow(["CompanyList"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -567,7 +562,7 @@ export default function CompanyList() {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item, index) => {
       const row = worksheet.addRow([item.Code, item.Description, item.Status]);
 
       row.eachCell((cell, colIndex) => {
@@ -582,8 +577,18 @@ export default function CompanyList() {
           horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
+
+        // ✅ Apply very light grey background for odd-numbered rows
+        if ((index + 1) % 2 == 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFEFEFEF" }, // light grey background
+          };
+        }
       });
     });
+
 
     // Set column widths
     [10, 40, 10].forEach((width, index) => {
@@ -613,7 +618,9 @@ export default function CompanyList() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -636,10 +643,12 @@ export default function CompanyList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -680,8 +689,6 @@ export default function CompanyList() {
   const thirdColWidth = {
     width: "15%",
   };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -808,7 +815,6 @@ export default function CompanyList() {
     }
   }, [tableData]);
 
-
   const handleSorting = (col) => {
     // Always sort in descending order on first click (or toggle if already sorted)
     const currentOrder = columnSortOrders[col];
@@ -859,7 +865,7 @@ export default function CompanyList() {
       Description: null,
       Status: null,
       Abb: null,
-      Stk: null
+      Stk: null,
     });
   };
 
@@ -945,7 +951,6 @@ export default function CompanyList() {
     );
   };
 
-
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
@@ -955,10 +960,14 @@ export default function CompanyList() {
     };
   };
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true }
+  );
 
   useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
   useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
@@ -1041,9 +1050,9 @@ export default function CompanyList() {
                     color: fontcolor,
                   }}
                 >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
                 </select>
               </div>
 
@@ -1139,12 +1148,12 @@ export default function CompanyList() {
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
@@ -1229,7 +1238,10 @@ export default function CompanyList() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+              <span className="mobileledger_total2">{tableData.length}</span>
+
+            </div>
             <div
               style={{
                 ...secondColWidth,
