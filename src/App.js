@@ -73,6 +73,8 @@ import CollectorList from "./Component/Reports/Daily_Jobs_Reports/List/Collector
 import MembersList1 from "./Component/Reports/Daily_Jobs_Reports/List/MemberList1.js";
 import PriceListPurSale from "./Component/Reports/Daily_Jobs_Reports/List/PriceListPurSale.js";
 import PriceListAPurSale from "./Component/Reports/Daily_Jobs_Reports/List/PriceListAPurSal.js";
+import SparePartsList from "./Component/Reports/Daily_Jobs_Reports/List/SparePartsList.js";
+
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -187,7 +189,7 @@ function App() {
                 <Route exact path="/UserManagement" element={<UserMaintenance />} />
 
                 {/* Rountes for List reports */}
-                <Route exact path="/CompanyList" element={<CompanyList />} />
+                {/* <Route exact path="/CompanyList" element={<CompanyList />} /> */}
                 <Route exact path="/CategoryList" element={<CategoryList />} />
                 <Route exact path="/CharofAccount" element={<ChartofAccount />} />
                 <Route exact path="/StoreList" element={<StoreList />} />
@@ -223,6 +225,7 @@ function App() {
                 <Route exact path="/MemberList" element={< MembersList1/>} />
                 <Route exact path="/PriceListPurSale" element={< PriceListPurSale/>} />
                 <Route exact path="/PriceListAPurSal" element={< PriceListAPurSale/>} />
+                <Route exact path="/CompanyList" element={< SparePartsList/>} />
 
 
                 {/* Rountes for ledgers reports */}
