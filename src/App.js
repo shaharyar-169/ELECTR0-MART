@@ -32,7 +32,7 @@ import Dashboard from "./Component/MainComponent/Dashboard/Dashboard.jsx";
 //////////////////////////// DASHBOARD //////////////////////////////
 import DashboardAdminDealer from "./Component/MainComponent/Dashboard2/Dashboard2.jsx";
 //////////////////////////// RESTURENT DASHBOARD //////////////////////////////
-import ResturentDashboard from "./Component/MainComponent/ResturentDashboard/Resturentdashboad.jsx";  
+import ResturentDashboard from "./Component/MainComponent/ResturentDashboard/Resturentdashboad.jsx";
 //////////////////////////// GYM DASHBOARD //////////////////////////////
 import GYMDashboard from "./Component/MainComponent/GYMDashboard/Gym.jsx";
 
@@ -146,6 +146,8 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
 import ItemStockReportPos from "./Component/Reports/Daily_Jobs_Reports/ItemReports/Itemstockreportpos.js";
+import ItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/itemStockReport.js";
+
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
 import MemberRecivableReport from "./Component/Transaction/MemberRecievableReport.js";
@@ -222,10 +224,10 @@ function App() {
                 <Route exact path="/MemberTypeList" element={<MemberTypeList />} />
                 <Route exact path="/GoalList" element={<GoalList />} />
                 <Route exact path="/CollectorList" element={<CollectorList />} />
-                <Route exact path="/MemberList" element={< MembersList1/>} />
-                <Route exact path="/PriceListPurSale" element={< PriceListPurSale/>} />
-                <Route exact path="/PriceListAPurSal" element={< PriceListAPurSale/>} />
-                <Route exact path="/CompanyList" element={< SparePartsList/>} />
+                <Route exact path="/MemberList" element={< MembersList1 />} />
+                <Route exact path="/PriceListPurSale" element={< PriceListPurSale />} />
+                <Route exact path="/PriceListAPurSal" element={< PriceListAPurSale />} />
+                <Route exact path="/CompanyList" element={< SparePartsList />} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -299,8 +301,9 @@ function App() {
 
 
                 {/* Rountes for item reports */}
-                <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
+                {/* <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} /> */}
                 <Route exact path="/ItemStockReport" element={<ItemStockReportPos />} />
+                <Route exact path="/ItemPurchaseSummary" element={<ItemStockReport />} />
 
                 {/* <Route exact path="/ItemAgging" element={<ItemAggingReport />} /> */}
 
@@ -318,7 +321,7 @@ function App() {
                 <Route exact path="/salesdashboad" element={<Dashboard />} />
                 <Route exact path="/AdminDealer" element={<DashboardAdminDealer />} />
                 <Route exact path="/ResturentDashboard" element={<ResturentDashboard />} />
-              L  <Route exact path="/GymDashboard" element={<GYMDashboard />} />
+                L  <Route exact path="/GymDashboard" element={<GYMDashboard />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
