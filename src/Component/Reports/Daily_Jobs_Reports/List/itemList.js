@@ -679,8 +679,8 @@ export default function ItemList() {
       item.Description,
       item.Company,
       item.Category,
-      item.Capacity,
-      item.Type,
+      // item.Capacity,
+      // item.Type,
       item.Status,
     ]);
 
@@ -693,11 +693,11 @@ export default function ItemList() {
       "Description",
       "Company",
       "Category",
-      "Capacity",
-      "Type",
+      // "Capacity",
+      // "Type",
       "Status",
     ];
-    const columnWidths = [35, 90, 25, 37, 22, 45, 13];
+    const columnWidths = [35, 90, 30, 55, 18];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -795,7 +795,7 @@ export default function ItemList() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 6) {
+          if (cellIndex === 4) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
@@ -857,7 +857,7 @@ export default function ItemList() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 28; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -892,7 +892,7 @@ export default function ItemList() {
         doc.setFontSize(pageNumberFontSize);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 10,
+          rightX - 25,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
@@ -935,7 +935,7 @@ export default function ItemList() {
             ? "NON-ACTIVE"
             : transectionType === "A"
               ? "ACTIVE"
-              : "All";
+              : "ALL";
 
         let search = searchQuery ? searchQuery : "";
 
@@ -948,40 +948,42 @@ export default function ItemList() {
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
+        // doc.setFont(getfontstyle, "bold"); // Set font to bold
+        // doc.text(`TYPE :`, labelsX + 180, labelsY); // Draw bold label
+        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 180, labelsY); // Draw bold label
+        doc.text(`STATUS :`, labelsX + 180, labelsY ); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+        doc.text(`${status}`, labelsX + 205, labelsY); // Draw the value next to the label
+
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${status}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+        // doc.setFont(getfontstyle, "bold"); // Set font to bold
+        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
           doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+          doc.text(`SEARCH :`, labelsX + 180, labelsY + 4.3); // Draw bold label
           doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+          doc.text(`${search}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
         }
 
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += 6; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 35);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1039,8 +1041,8 @@ export default function ItemList() {
       "left",
       "left",
       "left",
-      "left",
-      "left",
+      // "left",
+      // "left",
       "center",
     ];
 
@@ -1078,7 +1080,7 @@ export default function ItemList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(64 + numColumns - 1)}${companyRow.number
       }`
     );
 
@@ -1090,7 +1092,7 @@ export default function ItemList() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(64 + numColumns - 1)}${storeListRow.number
       }`
     );
 
@@ -1126,24 +1128,16 @@ export default function ItemList() {
       "COMPANY :",
       typecompany,
       "",
-      "TYPE :",
-      typetype,
-    ]);
-
-    // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "CATEGORY :",
-      typecategory,
-      "",
       "STATUS :",
       typestatus,
     ]);
 
+   
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
-        ? ["CAPACITY :", typecapacity, "", "SEARCH :", typesearch]
-        : ["CAPACITY :", typecapacity, ""]
+        ? ["CATEGORY :", typecategory, "", "SEARCH :", typesearch]
+        : ["CATEGORY :", typecategory, ""]
     );
 
     // Apply styling for the status row
@@ -1155,14 +1149,7 @@ export default function ItemList() {
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+   
     typeAndStoreRow3.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1195,8 +1182,8 @@ export default function ItemList() {
       "Description",
       "Company",
       "Category",
-      "Capacity",
-      "Type",
+      // "Capacity",
+      // "Type",
       "Status",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1209,8 +1196,8 @@ export default function ItemList() {
         item.Description,
         item.Company,
         item.Category,
-        item.Capacity,
-        item.Type,
+        // item.Capacity,
+        // item.Type,
         item.Status,
       ]);
 
@@ -1240,7 +1227,7 @@ export default function ItemList() {
 
 
     // Set column widths
-    [22, 50, 15, 15, 15, 22, 12].forEach((width, index) => {
+    [22, 50, 15, 18,  12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1331,25 +1318,25 @@ export default function ItemList() {
   let totalEntries = 0;
 
   const firstColWidth = {
-    width: "14%",
+    width: "15%",
   };
   const secondColWidth = {
-    width: "33.2%",
+    width: "40%",
   };
   const thirdColWidth = {
-    width: "9.5%",
+    width: "15.4%",
   };
   const forthColWidth = {
-    width: "11%",
+    width: "18%",
   };
   const fifthColWidth = {
     width: "10%",
   };
   const sixthColWidth = {
-    width: "14%",
+    width: "20%",
   };
   const seventhColWidth = {
-    width: "7%",
+    width: "10%",
   };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1366,7 +1353,7 @@ export default function ItemList() {
 
   const contentStyle = {
     backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(70vw - 0%)" : "70vw",
+    width: isSidebarVisible ? "calc(55vw - 0%)" : "55vw",
     position: "relative",
     top: "40%",
     left: isSidebarVisible ? "50%" : "50%",
@@ -1459,8 +1446,8 @@ export default function ItemList() {
     Description: [],
     Company: [],
     Category: [],
-    Capacity: [],
-    Type: [],
+    // Capacity: [],
+    // Type: [],
     Status: [],
   });
 
@@ -1469,8 +1456,8 @@ export default function ItemList() {
     Description: "",
     Company: "",
     Category: "",
-    Capacity: "",
-    Type: "",
+    // Capacity: "",
+    // Type: "",
     Status: "",
   });
 
@@ -1482,8 +1469,8 @@ export default function ItemList() {
         Description: tableData.map((row) => row.Description),
         Company: tableData.map((row) => row.Company),
         Category: tableData.map((row) => row.Category),
-        Capacity: tableData.map((row) => row.Capacity),
-        Type: tableData.map((row) => row.Type),
+        // Capacity: tableData.map((row) => row.Capacity),
+        // Type: tableData.map((row) => row.Type),
         Status: tableData.map((row) => row.Status),
       };
       setColumns(newColumns);
@@ -1540,8 +1527,8 @@ export default function ItemList() {
       Description: null,
       Company: null,
       Category: null,
-      Capacity: null,
-      Type: null,
+      // Capacity: null,
+      // Type: null,
       Status: null,
     });
   };
@@ -1552,8 +1539,8 @@ export default function ItemList() {
       columns.Description?.length || 0,
       columns.Company?.length || 0,
       columns.Category?.length || 0,
-      columns.Capacity?.length || 0,
-      columns.Type?.length || 0,
+      // columns.Capacity?.length || 0,
+      // columns.Type?.length || 0,
       columns.Status?.length || 0
     );
 
@@ -1564,8 +1551,8 @@ export default function ItemList() {
         Description: columns.Description[i],
         Company: columns.Company[i],
         Category: columns.Category[i],
-        Capacity: columns.Capacity[i],
-        Type: columns.Type[i],
+        // Capacity: columns.Capacity[i],
+        // Type: columns.Type[i],
         Status: columns.Status[i],
       });
     }
@@ -1575,7 +1562,7 @@ export default function ItemList() {
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="7" className="text-center">
+              <td colSpan="5" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -1587,7 +1574,7 @@ export default function ItemList() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 7 }).map((_, colIndex) => (
+                {Array.from({ length: 5 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1597,8 +1584,8 @@ export default function ItemList() {
               <td style={secondColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
+              {/* <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td> */}
               <td style={seventhColWidth}></td>
             </tr>
           </>
@@ -1665,7 +1652,7 @@ export default function ItemList() {
                   >
                     {item.Category}
                   </td>
-                  <td
+                  {/* <td
                     className="text-start"
                     title={item.Capacity}
                     style={{
@@ -1688,7 +1675,7 @@ export default function ItemList() {
                     }}
                   >
                     {item.Type}
-                  </td>
+                  </td> */}
 
                   <td
                     className="text-center"
@@ -1715,7 +1702,7 @@ export default function ItemList() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 7 }).map((_, colIndex) => (
+                {Array.from({ length: 5 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1725,8 +1712,8 @@ export default function ItemList() {
               <td style={secondColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
+              {/* <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td> */}
               <td style={seventhColWidth}></td>
             </tr>
           </>
@@ -1859,7 +1846,7 @@ export default function ItemList() {
                 </div>
               </div>
 
-              <div
+              {/* <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
               >
@@ -1926,92 +1913,8 @@ export default function ItemList() {
                     placeholder="ALL"
                   />
                 </div>
-              </div>
-            </div>
-          </div>
-          {/* //////////////// SECOND ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Category :
-                    </span>
-                  </label>
-                </div>
+              </div> */}
 
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input1Ref}
-                    options={categoryoptions}
-                    onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCategoryselectdata(selectedOption.value);
-                        setcategoryselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcategoryselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
 
               <div
                 className="d-flex align-items-center"
@@ -2070,9 +1973,213 @@ export default function ItemList() {
               </div>
             </div>
           </div>
+          {/* //////////////// SECOND ROW ///////////////////////// */}
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Category :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class "
+                    ref={input1Ref}
+                    options={categoryoptions}
+                    onKeyDown={(e) => handlecategoryKeypress(e, input4Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCategoryselectdata(selectedOption.value);
+                        setcategoryselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Set only the 'NGS' part of the label
+                        });
+                      } else {
+                        setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setcategoryselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+              {/* 
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Status :
+                    </span>
+                  </label>
+                </div>
+
+                <select
+                  ref={input4Ref}
+                  onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                  id="submitButton"
+                  name="type"
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "4px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                  value={transectionType}
+                  onChange={handleTransactionTypeChange}
+                  style={{
+                    width: "250px",
+                    height: "24px",
+                    marginLeft: "3px",
+                    backgroundColor: getcolor,
+                    border: `1px solid ${fontcolor}`,
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
+                    color: fontcolor,
+                    paddingLeft: "12px",
+                  }}
+                >
+                  <option value="">ALL</option>
+                  <option value="A">ACTIVE</option>
+                  <option value="N">NON-ACTIVE</option>
+                </select>
+              </div> */}
+              <div id="lastDiv" style={{ marginRight: "1px" }}>
+                <label for="searchInput" style={{ marginRight: "3px" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input5Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input6Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "250px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
-          <div
+          {/* <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
           >
@@ -2219,7 +2326,7 @@ export default function ItemList() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* //////////////// TABLE HEADER SECTION ///////////////////////// */}
           <div>
@@ -2303,7 +2410,7 @@ export default function ItemList() {
                       ></i>
                     </td>
 
-                    <td
+                    {/* <td
                       className="border-dark"
                       style={fifthColWidth}
                       onClick={() => handleSorting("Capacity")}
@@ -2325,7 +2432,7 @@ export default function ItemList() {
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Type")}
                       ></i>
-                    </td>
+                    </td> */}
 
                     <td
                       className="border-dark"
@@ -2410,7 +2517,7 @@ export default function ItemList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-            <div
+            {/* <div
               style={{
                 ...fifthColWidth,
                 background: getcolor,
@@ -2423,7 +2530,7 @@ export default function ItemList() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            ></div> */}
             <div
               style={{
                 ...seventhColWidth,
