@@ -1,0 +1,1097 @@
+.Row_styling {
+  width: 80%;
+  margin: 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  /* column-gap: 5px !important; */
+  flex-wrap: nowrap;
+
+}
+
+.Card_styling {
+  height: 100%;
+  /* border-left: 10px solid #3368B5; */
+  padding: 0px 5px !important;
+  border-radius: 5px;
+  width: 100%;
+  background-color: white;
+  text-align: left !important;
+}
+
+.Card_styling_new {
+  height: 110px;
+  border-left: 5px solid #3368B5;
+  border-radius: 5px;
+  /* width: 18%; */
+  background-color: #f4f4f4;
+  text-align: left !important;
+  padding-left: 5px !important;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  background: rgb(248, 248, 248);
+}
+
+.card_heading {
+  /* border-bottom: 2px solid #009dff; */
+  padding-bottom: 0px !important;
+  padding-bottom: 8px;
+  color: #3368B5;
+  font-size: 20px;
+  font-weight: 600;
+  margin-left: 3px;
+
+}
+
+.card_row_data {
+  margin: 0px !important;
+}
+
+.second_container_card1 {
+  width: 29%;
+  height: 200px;
+  padding: 0px !important;
+  border-left: 5px solid #3368B5;
+  border-radius: 5px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  background-color: #f4f4f4;
+
+
+}
+
+.second_container_card2 {
+  width: 46%;
+  height: 220px;
+  border-radius: 5px;
+  padding: 0px !important;
+  border-left: 5px solid #3368B5;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  background-color: #f4f4f4;
+  margin-top: 3px;
+}
+
+.second_container_card1 {
+  width: 11%;
+  height: 200px;
+  border-radius: 5px;
+  padding: 0px !important;
+  border-left: 5px solid #3368B5;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  background-color: #f4f4f4;
+
+}
+
+
+.dunut_chart {
+  height: 200px;
+  /* width: 30%; */
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  border-left: 10px solid #3368B5;
+
+}
+
+.table_container {
+  height: 100%;
+  width: 32%;
+  height: 220px;
+  margin-top: 15px;
+  /* background-color: white; */
+  display: flex;
+  border-radius: 5px;
+}
+
+.table_heading {
+  padding-bottom: 8px;
+  color: blackwhite;
+  font-size: 16px;
+  font-weight: 500;
+  margin-left: 12px;
+}
+
+/* ////////// css for daily dashboard card /////////////// */
+.Card_styling1 {
+  height: 110px;
+  /* border-left: 10px solid #3368B5; */
+  border-radius: 5px;
+  width: 32.5%;
+  background-color: white;
+  padding-top: 0px !important;
+  padding-left: 0px;
+  padding-right: 0px;
+  text-align: left !important;
+}
+
+.Card_Heading_div {
+  width: 100%;
+  text-align: center;
+  top: 0 !important;
+  position: sticky !important;
+}
+
+.Span_Heading {
+  font-size: 18px;
+  color: red;
+}
+
+.Card_body_Styling {
+  margin: 0px;
+  height: 70px;
+  overflow-y: scroll !important;
+  scrollbar-width: thin;
+  /* Firefox: sets scrollbar width */
+  scrollbar-color: #3368B5 #f1f1f1;
+  /* Firefox: scrollbar thumb and track colors */
+
+}
+
+.Callender_styling {
+  font-size: 14px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+/* /////////////// TABLE SECTION //////////////////// */
+
+.Column_first_Table_section {
+  width: 100% !important;
+  padding: 0px !important;
+  margin: 0px !important;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.first_column_table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.first_column_table th,
+.first_column_table td {
+  border: 1px solid black !important;
+  text-align: center;
+  /* height: 15px !important; */
+  font-family: Verdana !important;
+  font-size: 13px !important;
+  color: black !important;
+}
+
+.first_column_table tr:nth-child(even) td {
+  background-color: white !important;
+  /* Background color for even rows */
+}
+
+.first_column_table tr:nth-child(odd) td {
+  background-color: white !important;
+  /* Background color for odd rows */
+}
+
+.col1 {
+  width: 50%;
+  /* 30% of the table's width */
+  text-align: start !important;
+}
+
+.col2 {
+  width: 15%;
+  /* 40% of the table's width */
+  text-align: center !important;
+}
+
+.col3 {
+  width: 35%;
+  /* 30% of the table's width */
+  text-align: end !important;
+}
+
+/* ///////////////// DOOUNT CHART SECTION ////////////////////////// */
+
+.second_section_first_column {
+  width: 100% !important;
+  padding: 0px !important;
+  height: 100% !important;
+  display: flex;
+  /* background: red; */
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  margin-top: 5px;
+  background-color: white;
+  border-radius: 5px;
+  margin: 0px;
+
+}
+
+.inner_section_first_column {
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inner_section_first_column1 {
+  height: 100%;
+  padding: 10px;
+  margin: 0px;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.leable_row_styling {
+  width: 100% !important;
+  margin: 0px !important;
+  height: 40px !important;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+}
+
+.lable_left_section {
+  height: 100%;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px !important;
+  color: white !important;
+}
+
+.lable_right_section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+/* //////////////////// DAIMOND SECTION CSS ///////////////////////////// */
+.Diamond_section {
+  width: 100%;
+  height: 100px;
+  box-shadow: none !important;
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.first_diamond {
+  width: 50%;
+  height: 50px;
+  margin: 0px;
+
+}
+
+.Diamond_sale {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  font-size: 12px;
+  background-color: white;
+}
+
+/* ////////////////////////////////////// */
+
+.last_table_section {
+  width: 100% !important;
+  padding: 0px !important;
+  margin: 0px !important;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+}
+
+.second_col1 {
+  width: 60%;
+  text-align: start !important;
+  font-size: 10px !important;
+  height: 24px !important;
+}
+
+.second_col2 {
+  width: 10%;
+  text-align: center !important;
+  font-size: 10px !important;
+  height: 24px !important;
+}
+
+.second_col3 {
+  width: 30%;
+  text-align: end !important;
+  font-size: 10px !important;
+  height: 24px !important;
+
+}
+
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.switch.on {
+  background-color: #3368B5;
+}
+
+.switch.off {
+  background-color: #3368B5;
+}
+
+.switch-toggle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.switch.on .switch-toggle {
+  transform: translateX(30px);
+}
+
+.switch.off .switch-toggle {
+  transform: translateX(0);
+}
+
+
+/* ///////////// modal styling //////////// */
+.modal_container {
+  background-color: #021A33 !important;
+  padding-bottom: 10px !important;
+}
+
+.modalhearder_styling {
+  padding: 0px 5px 0px 0px !important;
+
+}
+
+.closemodal_button {
+  font-size: 30px !important;
+  color: white !important;
+  font-weight: 300 !important;
+}
+
+.modal-body {
+  padding: 0px !important;
+}
+
+
+
+
+
+/* ////////////////////////// RESTURENT DASHBOARD STYLING CSS BLOW //////////////////////////// */
+
+.Countair_styling {
+  /* border: 1px solid white !important; */
+  padding: 0 px !important;
+  height: 86vh !important;
+  display: flex;
+  align-items: start;
+  margin-left: 0px;
+  display: flex;
+  flex-direction: column;
+  column-gap: 10px
+}
+
+.main_left_section {
+  width: 100%;
+  height: 100%;
+  /* background: red; */
+  display: flex;
+  flex-direction: column;
+  /* row-gap: 10px; */
+  padding: 0px;
+}
+
+.main_right_section {
+  height: 100%;
+  /* background: green; */
+}
+
+
+.left_inner_section1 {
+  display: flex;
+  flex-wrap: nowrap;
+  padding: 10px;
+  width: 100% !important;
+  /* height: 23% !important; */
+  column-gap: 10px;
+
+}
+
+.left_inner_section2 {
+  display: flex;
+  flex-wrap: nowrap;
+  padding: 10px;
+  width: 100% !important;
+  column-gap: 10px;
+
+}
+
+.left_inner_section3 {
+  display: flex;
+  flex-wrap: nowrap;
+  padding: 10px;
+  width: 100% !important;
+  column-gap: 10px;
+
+}
+
+.lastrow_firstchart {
+  width: 37% !important;
+  height: 270px !important;
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 7px; */
+
+}
+
+.last_info {
+  width: 24% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  padding-right: 15px;
+  padding-bottom: 5px;
+
+}
+
+.lastrow_firstchart_fromonth {
+  width: 35% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 7px;
+
+}
+
+.daywise_graph {
+  width: 51% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+.info {
+  width: 23% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+.salecard {
+  position: relative !important;
+  bottom: 3px !important;
+  color: white;
+  font-size: 12px;
+  margin-left: 10px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+
+.info2 {
+  width: 24%;
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  /* padding-left: 15px; */
+  /* padding-right: 5px; */
+  padding-bottom: 5px;
+}
+
+.month_day_graph {
+  text-align: start;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  color: black;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+
+}
+
+.lastrow_secondchat {
+  width: 30% !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+.top_inner_cards_fist {
+  width: 30% !important;
+  height: 120px;
+  border-radius: 5px;
+  background-color: #FFFFFF;
+}
+
+.top_inner_cards3 {
+  width: 24% !important;
+  /* background-color: #FFFFFF; */
+  border-radius: 5px;
+  height: 120px;
+  display: flex;
+  row-gap: 10px;
+  flex-direction: column;
+}
+
+.split_section {
+  width: 100%;
+  background-color: #FFFFFF;
+  height: 50%;
+  border-radius: 5px;
+
+}
+
+.counter_sale {
+  font-size: 14px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: black;
+  text-align: start;
+  padding: 5px;
+  margin: 0px;
+}
+
+.top_inner_cards4 {
+  width: 24% !important;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  height: 120px;
+}
+
+.top_inner_cards {
+  width: 25% !important;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  height: 120px;
+}
+
+.top_inner_cards1 {
+  width: 25% !important;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  height: 120px;
+}
+
+.first_span {
+  font-size: 14px;
+  /* font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; */
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: black;
+  /* font-weight: bold; */
+  width: 35%;
+  /* background: red; */
+}
+
+.first_span2 {
+  font-size: 14px;
+  /* font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; */
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: grey;
+  text-align: right !important;
+  /* background: #009efd; */
+  /* width: 120px; */
+  /* width: 45%; */
+  /* font-weight: 300 !important; */
+}
+
+.first_span_secondcard {
+  font-size: 12px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: white;
+  /* font-weight: bold; */
+  /* padding-bottom: 10px; */
+
+}
+
+.first_span_secondcard1 {
+  font-size: 14px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: black;
+  /* font-weight: bold; */
+  /* padding-bottom: 10px; */
+
+}
+
+.sep_heading {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+  width: 100%;
+  text-align: start !important;
+  padding-top: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.top_span {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.monthmax_date {
+  font-size: 12px;
+  color: rgb(171, 170, 170);
+
+}
+
+.first_day_span2 {
+
+  font-size: 14px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  /* color: rgb(36, 220, 36); */
+  color: white;
+  text-align: center !important;
+  /* border-radius: 30px; */
+  font-weight: 400;
+  width: 100px;
+  height: 20px;
+  /* height: 30px; */
+  background-color: rgb(95, 147, 207);
+}
+
+
+
+.first_card {
+  width: 37% !important;
+  /* height: 118% !important; */
+  border-radius: 5px;
+  background-color: #FFFFFF;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.todatsalecars_desgin {
+  width: 60% !important;
+  /* height: 118% !important; */
+  border-radius: 5px;
+  background-color: #FFFFFF;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 5px;
+}
+
+.cardrow {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  color: grey;
+
+}
+
+.counter_saledata {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  color: grey;
+  width: 100%;
+  margin: 0px;
+
+
+}
+
+.countersale_map {
+  width: 100%;
+  margin: 0px;
+}
+
+.columnsetting {
+  padding-left: 10px;
+}
+
+.second_card {
+  width: 40% !important;
+  /* height: 118% !important; */
+  border-radius: 5px;
+  background-color: #FFFFFF;
+  padding-left: 20px;
+  padding-top: 10px;
+  padding-right: 20px;
+  padding-bottom: 5px;
+}
+
+.monthwise_graph {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 5px;
+  background-color: #FFFFFF;
+}
+
+/* ////////////////// css for toggle switch button //////////////////////// */
+
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  /* mini width */
+  height: 16px;
+  /* reduced height */
+}
+
+/* Hide the default checkbox */
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider background */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 20px;
+}
+
+/* Slider knob */
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  /* smaller knob */
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Checked state */
+input:checked+.slider {
+  background-color: #55edcf;
+}
+
+input:checked+.slider::before {
+  transform: translateX(24px);
+  /* adjust for slimmer design */
+}
+
+/* //////////////////////////////////////////////////////////////// */
+
+
+
+/* ////////////////// month wise grapg design css //////////////////////// */
+
+
+
+/* MiniBarChart.css */
+.mini-bar-chart {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.chart-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.chart-legend {
+  display: flex;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #636e72;
+  margin-left: 12px;
+}
+
+.color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.color-dot.primary {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+}
+
+.chart-container {
+  height: 180px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: 0 4px;
+}
+
+.bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  flex: 1;
+  position: relative;
+}
+
+.bar {
+  width: 16px;
+  background: linear-gradient(to top, #6a11cb 0%, #2575fc 100%);
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+  margin-top: auto;
+}
+
+.bar:hover {
+  transform: scaleY(1.05);
+  opacity: 0.9;
+}
+
+.bar.active {
+  background: linear-gradient(to top, #2575fc 0%, #009efd 100%);
+  box-shadow: 0 0 10px rgba(37, 117, 252, 0.4);
+}
+
+.bar-value {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #2d3436;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bar-wrapper:hover .bar-value {
+  opacity: 1;
+}
+
+.bar-label {
+  margin-top: 8px;
+  font-size: 10px;
+  color: #636e72;
+  font-weight: 500;
+}
+
+.chart-footer {
+  margin-top: 16px;
+  border-top: 1px solid #eaecef;
+  padding-top: 12px;
+}
+
+.chart-stats {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 11px;
+  color: #636e72;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3436;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .mini-bar-chart {
+    padding: 12px;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chart-legend {
+    margin-top: 8px;
+  }
+
+  .bar {
+    width: 12px;
+  }
+
+  .bar-label {
+    font-size: 9px;
+  }
+}
+
+
+.barline {
+
+  width: 190px;
+  height: 12px;
+  background: #5F93CF;
+  margin-left: 20px;
+  border-radius: 20px;
+}
+
+
+
+
+/* //////////////////// RIGHT CARD SECTION CSS //////////////////////////// */
+.firstright_card {
+  width: 100% !important;
+  /* height: 150px !important; */
+  border-radius: 5px;
+  background-color: white;
+  /* padding-top: px; */
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+/* /////////////////////// CSS FOR TODAY SALE CARD SECTION /////////////////////////    */
+
+.todaysale_datacar {
+  width: 100% !important;
+  border-radius: 5px;
+  background-color: white;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 5px;
+}
+
+.todaysale_card {
+  width: 50%;
+  height: 320px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.card_header {
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+  color: white;
+  padding-top: 0px;
+  padding-left: 20px;
+  padding-bottom: 5px;
+  font-weight: bold;
+  font-size: 30px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  text-align: start;
+  margin: 0px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+
+.card_row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 2px 5px;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+  /* transition: background 0.2s ease; */
+  transition: background 0.25s ease, transform 0.1s ease;
+}
+
+.card_row:last-child {
+  border-bottom: none;
+}
+
+.card_row:hover {
+  background: #f9f9f9;
+
+}
+
+.col_desc {
+  flex: 2;
+  text-align: left;
+  font-size: 14px;
+  color: grey;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.col_qty {
+  flex: 0.5;
+  text-align: center;
+  font-size: 14px;
+  color: grey;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.col_amount {
+  flex: 0.8;
+  text-align: right;
+  font-size: 14px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: grey;
+}

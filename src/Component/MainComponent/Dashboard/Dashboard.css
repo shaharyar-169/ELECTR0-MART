@@ -1,0 +1,311 @@
+.Countair_styling {
+  /* border: 1px solid white !important; */
+  padding: 5px !important;
+  height: 86vh !important;
+  display: flex;
+  align-items: start;
+  margin-left: 5px;
+  display: flex;
+  flex-direction: column;
+  column-gap: 10px
+}
+
+.Row_styling {
+  width: 100%;
+  margin: 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  /* column-gap: 5px !important; */
+  flex-wrap: nowrap;
+}
+
+.Card_styling {
+  height: 100%;
+  /* border-left: 10px solid #3368B5; */
+  padding: 0px 5px !important;
+  border-radius: 5px;
+  width: 100%;
+  background-color: white;
+  text-align: left !important;
+}
+
+.Card_styling_new {
+  height: 110px;
+  border-left: 10px solid #3368B5;
+  border-radius: 5px;
+  width: 32.5%;
+  background-color: white;
+  text-align: left !important;
+  padding: 0px !important;
+}
+
+.card_heading {
+  /* border-bottom: 2px solid #009dff; */
+  padding-bottom: 0px !important;
+  padding-bottom: 8px;
+  color: #009dff;
+  font-size: 20px;
+  font-weight: 600;
+  margin-left: 3px;
+
+}
+.card_row_data{
+  margin: 0px !important;
+}
+
+.second_container_card1 {
+  width: 32.5%;
+  height: 200px;
+
+
+}
+
+.second_container_card2 {
+  width: 66%;
+  height: 200px;
+  border-radius: 5px;
+  padding: 0px !important;
+  border-left: 10px solid #3368B5;
+}
+
+
+.dunut_chart {
+  height: 200px;
+  /* width: 30%; */
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  border-left: 10px solid #3368B5;
+
+}
+
+.table_container {
+  height: 100%;
+  width: 32%;
+  height: 220px;
+  margin-top: 15px;
+  /* background-color: white; */
+  display: flex;
+  border-radius: 5px;
+}
+
+.table_heading {
+  padding-bottom: 8px;
+  color: blackwhite;
+  font-size: 16px;
+  font-weight: 500;
+  margin-left: 12px;
+}
+
+/* ////////// css for daily dashboard card /////////////// */
+.Card_styling1 {
+  height: 110px;
+  /* border-left: 10px solid #3368B5; */
+  border-radius: 5px;
+  width: 32.5%;
+  background-color: white;
+  padding-top: 0px !important;
+  padding-left: 0px;
+  padding-right: 0px;
+  text-align: left !important;
+}
+
+.Card_Heading_div {
+  width: 100%;
+  text-align: center;
+  top: 0 !important;
+  position: sticky !important;
+}
+
+.Span_Heading {
+  font-size: 18px;
+  color: red;
+}
+
+.Card_body_Styling {
+  margin: 0px;
+  height: 70px;
+  overflow-y: scroll !important;
+  scrollbar-width: thin;
+  /* Firefox: sets scrollbar width */
+  scrollbar-color: #3368B5 #f1f1f1;
+  /* Firefox: scrollbar thumb and track colors */
+
+}
+
+.Callender_styling {
+  font-size: 14px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+/* /////////////// TABLE SECTION //////////////////// */
+
+.Column_first_Table_section {
+  width: 100% !important;
+  padding: 0px !important;
+  margin: 0px !important;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.first_column_table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.first_column_table th,
+.first_column_table td {
+  border: 1px solid black !important;
+  text-align: center;
+  /* height: 15px !important; */
+  font-family: Verdana !important;
+  font-size: 13px !important;
+  color: black !important;
+}
+
+.first_column_table tr:nth-child(even) td {
+  background-color: white !important;
+  /* Background color for even rows */
+}
+
+.first_column_table tr:nth-child(odd) td {
+  background-color: white !important;
+  /* Background color for odd rows */
+}
+
+.col1 {
+  width: 50%;
+  /* 30% of the table's width */
+  text-align: start !important;
+}
+
+.col2 {
+  width: 15%;
+  /* 40% of the table's width */
+  text-align: center !important;
+}
+
+.col3 {
+  width: 35%;
+  /* 30% of the table's width */
+  text-align: end !important;
+}
+
+/* ///////////////// DOOUNT CHART SECTION ////////////////////////// */
+
+.second_section_first_column {
+  width: 100% !important;
+  padding: 0px !important;
+  height: 130px !important;
+  display: flex;
+  /* background: red; */
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  margin-top: 5px;
+}
+
+.inner_section_first_column {
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inner_section_first_column1 {
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.leable_row_styling {
+  width: 100% !important;
+  margin: 0px !important;
+  height: 25px !important;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+}
+.lable_left_section{
+  height: 100%;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px !important;
+  color: white !important;
+}
+.lable_right_section{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 12px ;
+}
+
+/* //////////////////// DAIMOND SECTION CSS ///////////////////////////// */
+.Diamond_section{
+  width: 100%;
+  height: 100px ;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.first_diamond{
+  width: 50%;
+  height: 50px;
+  margin: 0px;
+  
+}
+.Diamond_sale{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* ////////////////////////////////////// */
+
+.last_table_section{
+  width: 100% !important;
+  padding: 0px !important;
+  margin: 0px !important;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+}
+.second_col1{
+  width: 60%;
+  text-align: start !important;
+  font-size: 10px !important;
+  height: 24px !important;
+}
+.second_col2{
+  width: 10%;
+  text-align: center !important;
+  font-size: 10px !important;
+  height: 24px !important;
+}
+.second_col3{
+  width: 30%;
+  text-align: end !important;
+  font-size: 10px !important;
+  height: 24px !important;
+
+}
+

@@ -1,0 +1,225 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+.Countair_styling {
+    /* border: 1px solid white !important; */
+    padding: 0 px !important;
+    height: 86vh !important;
+    align-items: start;
+    margin-left: 0px;
+    display: flex;
+    flex-direction: column;
+    column-gap: 10px
+}
+
+.main_section1 {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    /* padding: 10px; */
+}
+
+.main_inner_section1 {
+    display: flex;
+    width: 100% !important;
+    /* column-gap: 40px; */
+    flex-direction: row;
+    margin: 0px;
+    padding: 5px;
+
+}
+
+
+.main_inner_section2 {
+    display: flex;
+    width: 100% !important;
+    /* column-gap: 40px; */
+    flex-direction: row;
+    margin: 0px;
+    padding: 5px;
+
+}
+
+.inner_section_card {
+    background: white;
+    border-radius: 5px;
+    width: 17%;
+}
+
+.heading_styling {
+    font-size: 14px;
+    color: grey;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: start;
+}
+
+.inner_section_split_card {
+    border-radius: 5px;
+    width: 12%;
+    /* background: white; */
+    display: flex;
+    flex-direction: row;
+    row-gap: 10px;
+}
+
+.verticle_split {
+    background: white;
+    border-radius: 5px;
+    text-align: center;
+    width: 100%;
+
+
+}
+
+.total_slot {
+    font-size: 14px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: rgb(63, 176, 236);
+}
+
+.numer {
+    font-size: 14px;
+    color: grey;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.attendence_card {
+    width: 30%;
+    background-color: white;
+    border-radius: 5px;
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.attendance_heading {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dijit {
+    margin-left: 2px;
+    padding: 3px 6px;
+    color: white;
+    background-color: red;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.atten {
+    font-size: 16px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 600;
+}
+
+.absent {
+    font-size: 16px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 600;
+    /* color: orange; */
+}
+
+.date {
+    font-size: 14px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: red;
+}
+
+.car_container {
+    width: 100%;
+    column-gap: 5px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+}
+
+.card {
+    width: 25%;
+    padding: 5px;
+    background-color: rgb(247, 246, 246);
+
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.card2 {
+    width: 25%;
+    padding: 15px 5px;
+    /* background-color: rgb(253, 230, 161); */
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+    /* border-color: orange; */
+}
+
+.inner_span {
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.inner_span2 {
+    font-size: 14px;
+    border-radius: 10px;
+    background-color: rgb(63, 176, 236);
+    color: white;
+    padding: 4px 10px;
+}
+
+.inner_span1 {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.inner_span3 {
+    font-size: 14px;
+    border-radius: 10px;
+    /* background-color: orange; */
+    color: white;
+    padding: 4px 10px;
+}
+
+.expenes_card_section {
+    width: 30%;
+    display: flex;
+    column-gap: 5px
+}
+
+.inner_expense_card {
+    width: 33%;
+    border-radius: 10px;
+    border: 1px solid lightgreen;
+    background-color: white;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-bottom: 10px;
+    text-align: start;
+    display: flex;
+    flex-direction: column;
+}
+
+.icon_styling {
+    font-size: 18px;
+    color: green;
+}
+
+.icon_heading {
+    font-size: 14px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: grey;
+    padding-top: 10px;
+
+}
+
+.icon_number {
+    font-size: 14px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: green;
+    text-align: center;
+    padding-top: 5px;
+}

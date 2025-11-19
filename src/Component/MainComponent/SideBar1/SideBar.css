@@ -1,0 +1,48 @@
+/* .css-10hburv-MuiTypography-root {
+  font-size: 14px !important;
+} */
+
+
+/* .custom-sidebar-file {
+  display: block;
+  max-height: 76vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.custom-sidebar-file::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.custom-sidebar-file::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important;
+  border-radius: 8px;
+}
+
+.custom-sidebar-file::-webkit-scrollbar-track {
+  background: var(--background-color) !important;
+} */
+
+
+.custom-sidebar-file {
+  display: block;
+  max-height: 76vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 12px; 
+}
+
+.custom-sidebar-file::-webkit-scrollbar {
+  width: 6px; 
+}
+
+.custom-sidebar-file::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important; 
+  border-radius: 6px; 
+  border: 2px solid transparent; 
+  background-clip: padding-box; 
+}
+
+.custom-sidebar-file::-webkit-scrollbar-track {
+  background: transparent !important;
+}

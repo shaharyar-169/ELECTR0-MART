@@ -1,0 +1,11 @@
+.css-1h51icj-MuiAutocomplete-root .MuiAutocomplete-inputRoot {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+.css-wb57ya-MuiFormControl-root-MuiTextField-root {
+  position: static !important;
+  color: #e7e7e7;
+}
+.css-18nc3u2 .MuiAutocomplete-inputRoot .MuiAutocomplete-input {
+  margin-top: -10px !important;
+}

@@ -1,0 +1,155 @@
+:root {
+  --primary-color: #333333;
+  --secondary-color: #999999;
+  /* --accent-color: #1f2670; */
+  --accent-color: #f58634;
+  /* --background-color: #edf2ff; */
+  --background-color: white;
+  /* Add more custom color variables as needed */
+}
+
+body {
+  padding: 0 !important;
+  font-family: Verdana !important;
+  background-color: #f5f5f5 !important;
+}
+
+/* ============================menu=========================== */
+
+
+.dropdown-toggle {
+  font-size: 14px !important;
+  font-family: Verdana !important;
+ 
+}
+
+
+.custom-dropdown-button {
+  border: 0 !important;
+  border-radius: 5px;
+  
+}
+
+.sub-dropdown-toggle {
+  color: white !important;
+  width: 100%;
+  text-align: left !important;
+  font-size: 14px !important;
+  font-family: Verdana !important;
+  transition: none !important;
+  padding: 2px 10px !important;
+  border-radius: 5px !important;
+  text-transform: capitalize !important;
+  box-shadow: none !important;
+ 
+}
+.sub-dropdown-item {
+  background-color: var(--accent-color) !important;
+  border: 0 !important;
+  color: white !important;
+  font-family: Verdana !important;
+  font-size: 14px;
+  padding: 2px 10px !important;
+
+}
+
+
+
+.custom-dropdown-item {
+  background-color: var(--accent-color) !important;
+  border: 0 !important;
+  color: white !important;
+  font-size: 14px;
+  font-family: Verdana !important;
+  padding: 2px 10px !important;
+  border-radius: 5px !important;
+}
+
+.dropdown-menu {
+  padding: 0 !important;
+  border-radius: 5px !important;
+   
+}
+
+
+.dropdown-toggle {
+  color: var(--background-color) !important;
+}
+
+.custom-dropdown-button:hover {
+  background-color: #33333310 !important;
+  color: var(--background-color);
+}
+
+.custom-dropdown-button:after {
+  border: 0 !important;
+  color: white !important;
+}
+
+
+.custom-dropdown-item:hover {
+  background-color: var(--secondary-color) !important;
+  color: var(--background-color) !important;
+}
+
+.sub-dropdown-toggle:hover {
+  background-color: var(--secondary-color) !important;
+}
+
+.dropdown-menu {
+  background-color: var(--accent-color) !important;
+  font-size: 12px !important;
+}
+
+.sub-dropdown-menu {
+  background-color: var(--accent-color) !important;
+}
+
+.disabled {
+  color: rgb(209, 209, 209) !important;
+}
+
+.back-ground-color{
+  background-color: var(--accent-color) !important;
+}
+
+.hide-first-item {
+  display: none !important;
+}
+
+/* ============================ End menu =========================== */
+
+
+.navbackground{
+  background-color: blue !important;
+
+}
+
+
+
+#sidebar-menu {
+  width: 200px;
+  position: absolute;
+}
+
+.navbar-sidebar {
+  height: calc(100vh - 56px);
+  align-items: start !important;
+  background-color: #1f2670 !important;
+  margin-top: 1px !important;
+}
+
+.navbar-collapse {
+  align-items: start !important;
+}
+
+.navbarstyling{
+  background-color: #1f2670 !important;
+  height: 40px !important;
+}
+.navbar-toggle-style{
+  color: #f5f5f5 !important;
+  cursor: pointer !important;
+}
+
+

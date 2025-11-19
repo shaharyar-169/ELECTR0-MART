@@ -1,0 +1,22 @@
+#ContainerStylingDailyJobReport {
+  width: 75%;
+}
+
+@media (max-width: 1260px) {
+  #ContainerStylingDailyJobReport {
+    width: 55% !important;
+    margin: 5% auto !important;
+  }
+}
+@media (max-width: 1060px) {
+  #ContainerStylingDailyJobReport {
+    width: 85% !important;
+    margin: 5% auto !important;
+  }
+}
+@media (max-width: 700px) {
+  #ContainerStylingDailyJobReport {
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+}

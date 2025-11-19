@@ -1,0 +1,22 @@
+.backbtn:hover {
+	cursor: pointer;
+	color: #002ead;
+}
+
+.crossBtn {
+	margin: 10px 5px 0 0;
+}
+
+.crossBtn:hover {
+	cursor: pointer;
+	color: red;
+}
+
+.topBtn {
+	margin: 10px 0 0 5px;
+}
+
+.topBtn:hover {
+	cursor: pointer;
+	color: red;
+}

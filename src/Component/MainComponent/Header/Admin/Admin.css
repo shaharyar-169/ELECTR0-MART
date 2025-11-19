@@ -1,0 +1,55 @@
+.my-modal {
+  width: 40vw;
+  max-width: 40vw;
+}
+.form-control-customer {
+  font-family: "Poppins", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--font-color) !important;
+  font-size: 15px;
+  line-height: 23px;
+  background-color: var(--backgroundcolor-color) !important;
+  height: 24px !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
+  margin-bottom: 4px !important;
+  margin-left: -10px !important;
+}
+input[name="AccountCodeform"]::placeholder {
+  color: var(--font-color);
+}
+
+input[name="Descriptionform"]::placeholder {
+  color: var(--font-color);
+}
+input[name="inputform4"]::placeholder {
+  color: var(--font-color);
+}
+input[name="inputform5"]::placeholder {
+  color: var(--font-color);
+}
+input[name="inputform6"]::placeholder {
+  color: var(--font-color);
+}
+input[name="inputform7"]::placeholder {
+  color: var(--font-color);
+}
+input[name="inputform8"]::placeholder {
+  color: var(--font-color);
+}
+input[name="inputform9"]::placeholder {
+  color: var(--font-color);
+}
+.label-customer {
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 23px;
+  /* color: rgb(230, 233, 236); */
+  display: flex;
+  align-items: start;
+  justify-content: flex-end;
+}

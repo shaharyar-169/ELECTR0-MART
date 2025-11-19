@@ -1,0 +1,72 @@
+.Logo {
+  height: 77px;
+  width: 77px;
+  padding-left: 11px;
+}
+.logout-menu {
+  min-width: 100px;
+}
+.ancher-class {
+  text-align: center;
+  font-size: 12px;
+  padding: 0px !important;
+}
+
+/* .dropdown-toggle::after {
+  content: none !important;
+} */
+.circle-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-box {
+  font-size: 1.25rem;
+}
+
+.bg-light-primary {
+  background-color: #e2e8f0;
+}
+
+.bg-light-danger {
+  background-color: #f8d7da;
+}
+
+.bg-light-success {
+  background-color: #d1e7dd;
+}
+
+.bg-light-info {
+  background-color: #cff4fc;
+}
+
+.bg-light-warning {
+  background-color: #fff3cd;
+}
+
+.bg-hover-primary:hover {
+  background-color: #e2e8f0;
+}
+
+
+/* //////////////// CSS FOR YEARS LIMITATIONS ////////////////// */
+
+.yearslimitation{
+  margin-right: 5px !important;
+  font-size: 12px  !important;
+  color: white !important;
+  background-color: #021A33 !important;
+}
+
+.yearslimitation{
+  background-color: #021A33 !important;
+}
+
+.branlist{
+  margin-right: 5px !important;
+  font-size: 12px  !important;
+}
