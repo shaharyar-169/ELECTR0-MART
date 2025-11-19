@@ -1412,32 +1412,7 @@ export default function DailyProfitReport() {
         };
     }, []);
 
-    // const contentStyle = {
-    //     backgroundColor: getcolor,
-    //     width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
-    //     Height: '55vh',
-    //     position: "relative",
-    //     top: "40%",
-    //     left: isSidebarVisible ? "50%" : "50%",
-    //     transform: "translate(-50%, -50%)",
-    //     transition: isSidebarVisible
-    //         ? "left 3s ease-in-out, width 2s ease-in-out"
-    //         : "left 3s ease-in-out, width 2s ease-in-out",
-    //     display: "flex",
-    //     justifyContent: "center",
-    //     alignItems: "start",
-    //     overflowX: "hidden",
-    //     overflowY: "hidden",
-    //     wordBreak: "break-word",
-    //     textAlign: "center",
-    //     // maxWidth: "1000px",
-    //     maxWidth: "80vw",
-    //     fontSize: "15px",
-    //     fontStyle: "normal",
-    //     fontWeight: "400",
-    //     lineHeight: "23px",
-    //     fontFamily: '"Poppins", sans-serif',
-    // };
+   
 
 
     const contentStyle = {
