@@ -1557,13 +1557,13 @@ export default function ItemPriceListA() {
     width: "100px",
   };
   const secondColWidth = {
-    width: "300px",
+    width: "270px",
   };
   const thirdColWidth = {
-    width: "80px",
+    width: "50px",
   };
   const forthColWidth = {
-    width: "80px",
+    width: "50px",
   };
   const fifthColWidth = {
     width: "80px",
@@ -1602,7 +1602,7 @@ export default function ItemPriceListA() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1050px",
+    maxWidth: "1000px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2148,7 +2148,7 @@ export default function ItemPriceListA() {
                       style={forthColWidth}
                       onClick={() => handleSorting("Comm")}
                     >
-                      Comm{" "}
+                      Com{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Comm")}
