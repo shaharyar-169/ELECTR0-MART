@@ -2192,7 +2192,7 @@ export default function ItemPriceListA() {
                       style={sixthColWidth}
                       onClick={() => handleSorting("Sale Rate")}
                     >
-                      Sale Rate{" "}
+                      Sal Rate{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Sale Rate")}
