@@ -22,7 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
-export default function ItemStockReport() {
+export default function ItemPurchaseReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -85,6 +85,9 @@ export default function ItemStockReport() {
     const [totalexcel, settotalexcel] = useState(0);
     const [totaltax, settotaltax] = useState(0);
     const [totalincl, settotalincl] = useState(0);
+
+     const [totaldebit, settotaldebit] = useState(0);
+     const [totalcredit, settotalcredit] = useState(0);
 
 
     // state for from DatePicker
@@ -164,120 +167,306 @@ export default function ItemStockReport() {
         settoInputDate(e.target.value);
     };
 
-    function fetchDailyStatusReport() {
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+     const handlefromInputChange = (e) => {
+        setfromInputDate(e.target.value);
+    };
 
-        let errorType = "";
-
-        switch (true) {
-            case !toInputDate:
-                errorType = "toDate";
-                break;
-            default:
-                break;
-        }
-
-        if (!dateRegex.test(toInputDate)) {
-            errorType = "toDateInvalid";
-        } else {
-            const formattedToInput = toInputDate.replace(
+ const handlefromKeyPress = (e, inputId) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const fromDateElement = document.getElementById("fromdatevalidation");
+            const formattedInput = fromInputDate.replace(
                 /^(\d{2})(\d{2})(\d{4})$/,
                 "$1-$2-$3"
             );
-            const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-            const enteredToDate = new Date(toYear, toMonth - 1, toDay);
+            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
-            if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = "toDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = "toDateBeforeGlobal";
+            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+                const [day, month, year] = formattedInput.split("-").map(Number);
+
+                if (month > 12 || month === 0) {
+                    toast.error("Please enter a valid month (MM) between 01 and 12");
+                    return;
+                }
+
+                const daysInMonth = new Date(year, month, 0).getDate();
+                if (day > daysInMonth || day === 0) {
+                    toast.error(`Please enter a valid day (DD) for month ${month}`);
+                    return;
+                }
+
+                const currentDate = new Date();
+                const enteredDate = new Date(year, month - 1, day);
+
+                if (GlobalfromDate && enteredDate < GlobalfromDate) {
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
+                    return;
+                }
+                if (GlobalfromDate && enteredDate > GlobaltoDate) {
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
+                    return;
+                }
+
+                fromDateElement.style.border = `1px solid ${fontcolor}`;
+                setfromInputDate(formattedInput);
+
+                const nextInput = document.getElementById(inputId);
+                if (nextInput) {
+                    nextInput.focus();
+                    nextInput.select();
+                } else {
+                    document.getElementById("submitButton").click();
+                }
+            } else {
+                toast.error("Date must be in the format dd-mm-yyyy");
             }
         }
+    };
 
-        switch (errorType) {
-            case "toDate":
-                toast.error("Rep Date is required");
-                return;
+ const handlefromDateChange = (date) => {
+        setSelectedfromDate(date);
+        setfromInputDate(date ? formatDate(date) : "");
+        setfromCalendarOpen(false);
+    };
 
-            case "toDateInvalid":
-                toast.error("Rep Date must be in the format dd-mm-yyyy");
-                return;
+ const toggleFromCalendar = () => {
+        setfromCalendarOpen((prevOpen) => !prevOpen);
+    };
 
-            case "toDateAfterGlobal":
-                toast.error(`Rep Date must be before ${GlobaltoDate1}`);
-                return;
-            case "toDateBeforeGlobal":
-                toast.error(`Rep Date must be after ${GlobalfromDate1}`);
-                return;
+ const handleToKeyPress = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const toDateElement = document.getElementById("todatevalidation");
+            const formattedInput = toInputDate.replace(
+                /^(\d{2})(\d{2})(\d{4})$/,
+                "$1-$2-$3"
+            );
+            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
-            default:
-                break;
+            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+                const [day, month, year] = formattedInput.split("-").map(Number);
+
+                if (month > 12 || month === 0) {
+                    toast.error("Please enter a valid month (MM) between 01 and 12");
+                    return;
+                }
+
+                const daysInMonth = new Date(year, month, 0).getDate();
+                if (day > daysInMonth || day === 0) {
+                    toast.error(`Please enter a valid day (DD) for month ${month}`);
+                    return;
+                }
+
+                const currentDate = new Date();
+                const enteredDate = new Date(year, month - 1, day);
+
+                if (GlobaltoDate && enteredDate > GlobaltoDate) {
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
+                    return;
+                }
+
+                if (GlobaltoDate && enteredDate < GlobalfromDate) {
+                    toast.error(
+                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                    );
+                    return;
+                }
+
+                if (fromInputDate) {
+                    const fromDate = new Date(
+                        fromInputDate.split("-").reverse().join("-")
+                    );
+                    if (enteredDate <= fromDate) {
+                        toast.error("To date must be after from date");
+                        return;
+                    }
+                }
+
+                toDateElement.style.border = `1px solid ${fontcolor}`;
+                settoInputDate(formattedInput);
+
+                if (saleSelectRef.current) {
+                    e.preventDefault();
+                    saleSelectRef.current.focus();
+                }
+            } else {
+                toast.error("Date must be in the format dd-mm-yyyy");
+            }
         }
+    };
 
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
+    function fetchDailyStatusReport() {
+           const fromDateElement = document.getElementById("fromdatevalidation");
+           const toDateElement = document.getElementById("todatevalidation");
+   
+           const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+   
+           let hasError = false;
+           let errorType = "";
+   
+           switch (true) {
+            //    case !saleType:
+            //        errorType = "saleType";
+            //        break;
+               case !fromInputDate:
+                   errorType = "fromDate";
+                   break;
+               case !toInputDate:
+                   errorType = "toDate";
+                   break;
+               default:
+                   hasError = false;
+                   break;
+           }
+   
+           if (!dateRegex.test(fromInputDate)) {
+               errorType = "fromDateInvalid";
+           } else if (!dateRegex.test(toInputDate)) {
+               errorType = "toDateInvalid";
+           } else {
+               const formattedFromInput = fromInputDate.replace(
+                   /^(\d{2})(\d{2})(\d{4})$/,
+                   "$1-$2-$3"
+               );
+               const [fromDay, fromMonth, fromYear] = formattedFromInput
+                   .split("-")
+                   .map(Number);
+               const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+   
+               const formattedToInput = toInputDate.replace(
+                   /^(\d{2})(\d{2})(\d{4})$/,
+                   "$1-$2-$3"
+               );
+               const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
+               const enteredToDate = new Date(toYear, toMonth - 1, toDay);
+   
+               if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
+                   errorType = "fromDateBeforeGlobal";
+               } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
+                   errorType = "fromDateAfterGlobal";
+               } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+                   errorType = "toDateAfterGlobal";
+               } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
+                   errorType = "toDateBeforeGlobal";
+               } else if (enteredToDate < enteredFromDate) {
+                   errorType = "toDateBeforeFromDate";
+               }
+           }
+   
+           switch (errorType) {
+               case "saleType":
+                   toast.error("Please select a Account Code");
+                   return;
+   
+               case "fromDate":
+                   toast.error("From date is required");
+                   return;
+               case "toDate":
+                   toast.error("To date is required");
+                   return;
+               case "fromDateInvalid":
+                   toast.error("From date must be in the format dd-mm-yyyy");
+                   return;
+               case "toDateInvalid":
+                   toast.error("To date must be in the format dd-mm-yyyy");
+                   return;
+               case "fromDateBeforeGlobal":
+                   toast.error(
+                       `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                   );
+                   return;
+               case "fromDateAfterGlobal":
+                   toast.error(
+                       `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                   );
+                   return;
+               case "toDateAfterGlobal":
+                   toast.error(
+                       `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                   );
+                   return;
+               case "toDateBeforeGlobal":
+                   toast.error(
+                       `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+                   );
+                   return;
+               case "toDateBeforeFromDate":
+                   toast.error("To date must be after from date");
+                   return;
+   
+               default:
+                   break;
+           }
+   
+           // console.log(data);
+           document.getElementById(
+               "fromdatevalidation"
+           ).style.border = `1px solid ${fontcolor}`;
+           document.getElementById(
+               "todatevalidation"
+           ).style.border = `1px solid ${fontcolor}`;
+   
+           const apiUrl = apiLinks + "/ItemPurchaseReport.php";
+           setIsLoading(true);
+           const formData = new URLSearchParams({
+               FIntDat: fromInputDate,
+               FFnlDat: toInputDate,
 
-        if (fromDateElement) {
-            fromDateElement.style.border = `1px solid ${fontcolor}`;
-        }
-        if (toDateElement) {
-            toDateElement.style.border = `1px solid ${fontcolor}`;
-        }
-
-        const apiMainUrl = apiLinks + "/ItemStockReport.php";
-        setIsLoading(true);
-        const formMainData = new URLSearchParams({
-            FRepDat: toInputDate,
-            // FRepRat: transectionType,
             FCtgCod: Categoryselectdata,
             FCapCod: Capacityselectdata,
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
             FStrdCod: Typeselectdata,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
-            FRepStk: transectionType2,
-
-            // code: 'ZOHAELEC',
-            // FLocCod: '001',
-            // FYerDsc: '2025-2025',
-
-        }).toString();
-
-        axios
-            .post(apiMainUrl, formMainData)
-            .then((response) => {
-                setIsLoading(false);
-                settotalqnty(response.data["Total Qnty"]);
-                settotalexcel(response.data["Total Rate"]);
-                settotaltax(response.data["Total Amount"]);
-                // settotalincl(response.data["Total Incl"]);
-
-                if (response.data && Array.isArray(response.data.Detail)) {
-                    setTableData(response.data.Detail);
-                } else {
-                    console.warn(
-                        "Response data structure is not as expected:",
-                        response.data.Detail
-                    );
-                    setTableData([]);
-                }
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                setIsLoading(false);
-            });
-    }
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription,
+            FRepTyp: transectionType,
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
+   
+   
+           }).toString();
+   
+           axios
+               .post(apiUrl, formData)
+               .then((response) => {
+                   setIsLoading(false);
+   
+                   settotaldebit(response.data["Total Qnty"]);
+                   settotalcredit(response.data["Total Amount"]);
+                //    setClosingBalance(response.data["Closing Bal "]);
+   
+                   if (response.data && Array.isArray(response.data.Detail)) {
+                       setTableData(response.data.Detail);
+                   } else {
+                       console.warn(
+                           "Response data structure is not as expected:",
+                           response.data.Detail
+                       );
+                       setTableData([]);
+                   }
+               })
+               .catch((error) => {
+                   console.error("Error:", error);
+                   setIsLoading(false);
+               });
+       }
 
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
-            if (toRef && toRef.current) {
+        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+            if (fromRef && fromRef.current) {
                 setTimeout(() => {
-                    toRef.current.focus();
-                    toRef.current.select();
+                    fromRef.current.focus();
+                    fromRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -602,29 +791,33 @@ export default function ItemStockReport() {
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item.Code,
+            item.Date,
+            item['Trn#'],
+            item.Type,
             item.Description,
-            item['Last Date'],
-            item['Pur Rate'],
+            item.code,
             item.Qnty,
-            item.Amount,
+            item.Rate,
+             item['Pur Amount'],
         ]);
 
         // Add summary row to the table
-        rows.push(["", "Total", "", "", String(totalqnty), String(totaltax)]);
+        rows.push(["", "", "","Total",  "", String(totaldebit), "",String(totalcredit)]);
 
 
         // Define table column headers and individual column widths
 
         const headers = [
-            "Code",
+            "Date",
+            "Trn#",
+            "Type",
             "Description",
-            "Last Date",
-            "Rate",
+            "Code",
             "Qnty",
+            "Rate",
             "Amount",
         ];
-        const columnWidths = [35,110, 25, 25, 25,25];
+        const columnWidths = [20,15,12,110,35,15,25,25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -747,7 +940,7 @@ export default function ItemStockReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 3 || cellIndex === 4 || cellIndex === 5 ) {
+                    if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7 ) {
                         const rightAlignX = currentX + columnWidths[cellIndex] - 2;
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -886,7 +1079,7 @@ export default function ItemStockReport() {
                 startY += 5; // Adjust vertical position for the company title
 
                 addTitle(
-                    `Item Stock Report As on ${toInputDate}`,
+                    `Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -917,13 +1110,12 @@ export default function ItemStockReport() {
 
 
                          let transectionsts =
-                    transectionType === "P"
-                        ? "POSITIVE"
-                        :transectionType =="N"
-                         ? "NEGATIVE"
-                         :transectionType =="Z"
-                         ? "ZERO"
-                         : "ALL";
+                   transectionType === "BIL"
+                        ? "PURCHASE"
+                        :transectionType =="SRN"
+                         ? "PURCHASE RETURN"
+                        
+                         : "PRN";
 
 
                 let typeText = capacityselectdatavalue.label
@@ -951,10 +1143,10 @@ export default function ItemStockReport() {
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+                // doc.setFont(getfontstyle, "bold"); // Set font to bold
+                // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
+                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -962,9 +1154,9 @@ export default function ItemStockReport() {
                 doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`RATE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${RATE}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+                doc.text(`${transectionsts}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
                 // doc.setFont(getfontstyle, "bold"); // Set font to bold
                 // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
@@ -977,28 +1169,27 @@ export default function ItemStockReport() {
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-
-               
-                    doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-                    doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                    doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+             
+                    // doc.setFont(getfontstyle, "bold"); // Set font to bold
+                    // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+                    // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                    // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
                 
 
                 if (searchQuery) {
                     doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 12.5); // Draw bold label
+                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
                     doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 205, labelsY + 12.5); // Draw the value next to the label
+                    doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
                 }
 
                 // // Reset font weight to normal if necessary for subsequent text
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.setFontSize(10);
 
-                startY += 15; // Adjust vertical position for the labels
+                startY += 10; // Adjust vertical position for the labels
 
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 44);
+                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
                 const startIndex = currentPageIndex * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
                 startY = addTableRows(
@@ -1039,7 +1230,7 @@ export default function ItemStockReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`ItemStockReportPos As On ${toInputDate}.pdf`);
+        doc.save(`ItemPurchaseReportPos As On ${date}.pdf`);
     };
 
     const handleDownloadCSV = async () => {
@@ -1048,7 +1239,7 @@ export default function ItemStockReport() {
 
         const numColumns = 6; // Ensure this matches the actual number of columns
 
-        const columnAlignments = ["left", "left", "left", "right", "right", "right"];
+        const columnAlignments = ["left", "left", "center", "left","left","right", "right", "right"];
 
         // Define fonts for different sections
         const fontCompanyName = {
@@ -1084,19 +1275,19 @@ export default function ItemStockReport() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+            `A${companyRow.number}:${String.fromCharCode(67 + numColumns - 1)}${companyRow.number
             }`
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Item Stock Report As On ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Item Purchase Report From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+            `A${storeListRow.number}:${String.fromCharCode(67 + numColumns - 1)}${storeListRow.number
             }`
         );
 
@@ -1132,13 +1323,12 @@ export default function ItemStockReport() {
 
 
                          let transectionsts =
-                    transectionType === "P"
-                        ? "POSITIVE"
-                        :transectionType =="N"
-                         ? "NEGATIVE"
-                         :transectionType =="Z"
-                         ? "ZERO"
-                         : "ALL";
+                    transectionType === "BIL"
+                        ? "PURCHASE"
+                        :transectionType =="SRN"
+                         ? "PURCHASE RETURN"
+                        
+                         : "PRN";
 
 
 
@@ -1149,8 +1339,7 @@ export default function ItemStockReport() {
             "COMPANY :",
             typecompany,
             "",
-            "STORE :",
-            typetype,
+          
         ]);
 
         // Add second row
@@ -1158,23 +1347,29 @@ export default function ItemStockReport() {
             "CATEGORY :",
             typecategory,
             "",
-            "RATE :",
-            RATE,
-        ]);
-
-        const typeAndStoreRow3 = worksheet.addRow([
-            "CAPACITY :",
-            typecapacity,
-            "",
-            "STATUS :",
+             "",
+              "",
+               "",
+                            "TYPE :",
             transectionsts,
         ]);
+
+        // const typeAndStoreRow3 = worksheet.addRow([
+        //     "CAPACITY :",
+        //     typecapacity,
+        //    "",
+        //      "",
+        //       "",
+        //        "",
+        //     "STATUS :",
+        //     transectionsts,
+        // ]);
 
         // Add third row with conditional rendering for "SEARCH:"
         const typeAndStoreRow4 = worksheet.addRow(
             searchQuery
-                ? ["", "","", "SEARCH :", typesearch]
-                : [""]
+                ? [  "CAPACITY :", typecapacity, "","", "","", "SEARCH :", typesearch]
+                : ["CAPACITY :", typecapacity,]
         );
 
         // Apply styling for the status row
@@ -1182,7 +1377,7 @@ export default function ItemStockReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1190,24 +1385,24 @@ export default function ItemStockReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
 
-          typeAndStoreRow3.eachCell((cell, colIndex) => {
-            cell.font = {
-                name: "CustomFont" || "CustomFont",
-                size: 10,
-                bold: [1, 4].includes(colIndex),
-            };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
+        //   typeAndStoreRow3.eachCell((cell, colIndex) => {
+        //     cell.font = {
+        //         name: "CustomFont" || "CustomFont",
+        //         size: 10,
+        //         bold: [1, 7].includes(colIndex),
+        //     };
+        //     cell.alignment = { horizontal: "left", vertical: "middle" };
+        // });
         typeAndStoreRow4.eachCell((cell, colIndex) => {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1231,11 +1426,13 @@ export default function ItemStockReport() {
 
         // Add headers
         const headers = [
-            "Code",
+            "Date",
+            "Trn#",
+            "Type",
             "Description",
-            "Last Date",
-            "Rate",
+            "Code",
             "Qnty",
+            "Rate",
             "Amount",
            
         ];
@@ -1245,12 +1442,14 @@ export default function ItemStockReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                item.Code,
-                item.Description,
-                item['Last Date'],
-                 item['Pur Rate'],
-                item.Qnty,
-                item.Amount,
+                item.Date,
+            item['Trn#'],
+            item.Type,
+            item.Description,
+            item.code,
+            item.Qnty,
+            item.Rate,
+             item['Sale Amount'],
              
             ]);
 
@@ -1270,12 +1469,12 @@ export default function ItemStockReport() {
         });
 
         // Set column widths
-        [20,45, 10, 12, 12, 12].forEach((width, index) => {
+        [10,8, 6, 45,18, 8, 15, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
-            "", "Total", "", "",String(totalqnty), String(totaltax)
+          "", "", "","Total",  "", String(totaldebit), "",String(totalcredit)
 
         ]);
 
@@ -1291,7 +1490,7 @@ export default function ItemStockReport() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 5 || colNumber === 6) {
+            if (colNumber === 6 || colNumber === 8) {
                 cell.alignment = { horizontal: "right" };
             }
         });
@@ -1353,7 +1552,7 @@ export default function ItemStockReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `ItemStockReport As On ${currentdate}.xlsx`);
+        saveAs(blob, `ItemPurchaseReport As On ${currentdate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1479,24 +1678,29 @@ export default function ItemStockReport() {
     // };
 
 
-        const firstColWidth = {
-        width: "135px",
+     const firstColWidth = {
+        width: "80px",
     };
     const secondColWidth = {
-        width: "360px",
+        width: "60px",
     };
     const thirdColWidth = {
-        width: "90px",
+        width: "35px",
     };
     const forthColWidth = {
-        width: "90px",
-    };
-   
+        width: "360px",
+    };   
     const sixthColWidth = {
-        width: "90px",
+        width: "135px",
     };
     const seventhColWidth = {
-        width: "90px",
+        width: "60px",
+    };
+        const eightColWidth = {
+        width: "100px",
+    };
+    const ninthColWidth = {
+        width: "100px",
     };
 
      const sixthcol = {
@@ -1694,7 +1898,7 @@ export default function ItemStockReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Item Stock Report" />
+                    <NavComponent textdata="Item Purchase Report" />
 
                     {/* ------------1st row */}
                     <div
@@ -1702,180 +1906,202 @@ export default function ItemStockReport() {
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
                     >
                         <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            {/* To Date */}
-                            <div className="d-flex align-items-center">
-                                <div
-                                    style={{
-                                        width: "100px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Rep Date :&nbsp;
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="todatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        ref={toRef}
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        value={toInputDate}
-                                        onChange={handleToInputChange}
-                                        onKeyDown={handleToDateEnter}
-                                        id="toDatePicker"
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="To Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedToDate}
-                                        onChange={handleToDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={toCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleToCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
-
-                             <div
-                                className="d-flex align-items-center"
-                                style={{ marginLeft: "7px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                fontSize: getdatafontsize,
-                                                fontFamily: getfontstyle,
-                                                fontWeight: "bold",
-                                                marginRight:'3px'
-                                            }}
-                                        >
-                                            Store :
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <div style={{ marginRight: "21px" }}>
-                                    <Select
-                                        className="List-select-class"
-                                        ref={typeRef}
-                                        options={typeoptions}
-                                        onKeyDown={(e) => handlecompanyKeypress(e, input4Refrate)}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setTypeselectdata(selectedOption.value);
-                                                settypeselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart,
-                                                });
-                                            } else {
-                                                setTypeselectdata("");
-                                                settypeselectdatavalue("");
-                                            }
-                                        }}
-                                        onInputChange={(inputValue, { action }) => {
-                                            if (action === "input-change") {
-                                                return inputValue.toUpperCase();
-                                            }
-                                            return inputValue;
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        styles={{
-                                            ...customStyles1(!Companyselectdata),
-                                            placeholder: (base) => ({
-                                                ...base,
-                                                textAlign: "left",
-                                                marginLeft: "0",
-                                                justifyContent: "flex-start",
-                                                color: fontcolor,
-                                                marginTop: '-5px'
-                                            })
-                                        }}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-                                </div>
-                            </div>
-
-                           
-                        </div>
+                                                  style={{
+                                                      width: "100%",
+                                                      display: "flex",
+                                                      alignItems: "center",
+                                                      margin: "0px",
+                                                      padding: "0px",
+                                                      justifyContent: "start",
+                                                  }}
+                                              >
+                                                  <div className="d-flex align-items-center" style={{marginLeft:'15px'}}>
+                                                      <div
+                                                          style={{
+                                                              width: "80px",
+                                                              display: "flex",
+                                                              justifyContent: "end",
+                                                          }}
+                                                      >
+                                                          <label htmlFor="fromDatePicker">
+                                                              <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                                                  From :
+                                                              </span>
+                                                          </label>
+                                                      </div>
+                                                      <div
+                                                          id="fromdatevalidation"
+                                                          style={{
+                                                              width: "135px",
+                                                              border: `1px solid ${fontcolor}`,
+                                                              display: "flex",
+                                                              alignItems: "center",
+                                                              height: "24px",
+                                                              justifyContent: "center",
+                                                              marginLeft: "5px",
+                                                              background: getcolor,
+                                                          }}
+                                                          onFocus={(e) =>
+                                                              (e.currentTarget.style.border = "2px solid red")
+                                                          }
+                                                          onBlur={(e) =>
+                                                              (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                          }
+                                                      >
+                                                          <input
+                                                              style={{
+                                                                  height: "20px",
+                                                                  width: "90px",
+                                                                  paddingLeft: "5px",
+                                                                  outline: "none",
+                                                                  border: "none",
+                                                                  fontSize: "12px",
+                                                                  backgroundColor: getcolor,
+                                                                  color: fontcolor,
+                                                                  opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                  pointerEvents:
+                                                                      selectedRadio === "custom" ? "auto" : "none",
+                                                              }}
+                                                              id="frominputid"
+                                                              value={fromInputDate}
+                                                              ref={fromRef}
+                                                              onChange={handlefromInputChange}
+                                                              onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                                                              autoComplete="off"
+                                                              placeholder="dd-mm-yyyy"
+                                                              aria-label="Date Input"
+                                                              disabled={selectedRadio !== "custom"}
+                                                          />
+                                                          <DatePicker
+                                                              selected={selectedfromDate}
+                                                              onChange={handlefromDateChange}
+                                                              dateFormat="dd-MM-yyyy"
+                                                              popperPlacement="bottom"
+                                                              showPopperArrow={false}
+                                                              open={fromCalendarOpen}
+                                                              dropdownMode="select"
+                                                              customInput={
+                                                                  <div>
+                                                                      <BsCalendar
+                                                                          onClick={
+                                                                              selectedRadio === "custom"
+                                                                                  ? toggleFromCalendar
+                                                                                  : undefined
+                                                                          }
+                                                                          style={{
+                                                                              cursor:
+                                                                                  selectedRadio === "custom"
+                                                                                      ? "pointer"
+                                                                                      : "default",
+                                                                              marginLeft: "18px",
+                                                                              fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                                                              opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                          }}
+                                                                          disabled={selectedRadio !== "custom"}
+                                                                      />
+                                                                  </div>
+                                                              }
+                                                              disabled={selectedRadio !== "custom"}
+                                                          />
+                                                      </div>
+                                                  </div>
+                                                  <div
+                                                      className="d-flex align-items-center"
+                                                      style={{ marginLeft: "50px" }}
+                                                  >
+                                                      <div
+                                                          style={{
+                                                              width: "60px",
+                                                              display: "flex",
+                                                              justifyContent: "end",
+                                                          }}
+                                                      >
+                                                          <label htmlFor="toDatePicker">
+                                                              <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                                                  To :
+                                                              </span>
+                                                          </label>
+                                                      </div>
+                                                      <div
+                                                          id="todatevalidation"
+                                                          style={{
+                                                              width: "135px",
+                                                              border: `1px solid ${fontcolor}`,
+                                                              display: "flex",
+                                                              alignItems: "center",
+                                                              height: "24px",
+                                                              justifyContent: "center",
+                                                              marginLeft: "5px",
+                                                              background: getcolor,
+                                                          }}
+                                                          onFocus={(e) =>
+                                                              (e.currentTarget.style.border = "2px solid red")
+                                                          }
+                                                          onBlur={(e) =>
+                                                              (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                          }
+                                                      >
+                                                          <input
+                                                              ref={toRef}
+                                                              style={{
+                                                                  height: "20px",
+                                                                  width: "90px",
+                                                                  paddingLeft: "5px",
+                                                                  outline: "none",
+                                                                  border: "none",
+                                                                  fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                                                  backgroundColor: getcolor,
+                                                                  color: fontcolor,
+                                                                  opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                  pointerEvents:
+                                                                      selectedRadio === "custom" ? "auto" : "none",
+                                                              }}
+                                                              value={toInputDate}
+                                                              onChange={handleToInputChange}
+                                                              onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                                                              id="toDatePicker"
+                                                              autoComplete="off"
+                                                              placeholder="dd-mm-yyyy"
+                                                              aria-label="To Date Input"
+                                                              disabled={selectedRadio !== "custom"}
+                                                          />
+                                                          <DatePicker
+                                                              selected={selectedToDate}
+                                                              onChange={handleToDateChange}
+                                                              dateFormat="dd-MM-yyyy"
+                                                              popperPlacement="bottom"
+                                                              showPopperArrow={false}
+                                                              open={toCalendarOpen}
+                                                              dropdownMode="select"
+                                                              customInput={
+                                                                  <div>
+                                                                      <BsCalendar
+                                                                          onClick={
+                                                                              selectedRadio === "custom"
+                                                                                  ? toggleToCalendar
+                                                                                  : undefined
+                                                                          }
+                                                                          style={{
+                                                                              cursor:
+                                                                                  selectedRadio === "custom"
+                                                                                      ? "pointer"
+                                                                                      : "default",
+                                                                              marginLeft: "18px",
+                                                                              fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                                                              opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                          }}
+                                                                          disabled={selectedRadio !== "custom"}
+                                                                      />
+                                                                  </div>
+                                                              }
+                                                              disabled={selectedRadio !== "custom"}
+                                                          />
+                                                      </div>
+                                                  </div>
+                      
+                                                  
+                                                
+                                              </div>
                     </div>
 
 
@@ -1892,7 +2118,7 @@ export default function ItemStockReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                justifyContent: "start",
                             }}
                         >
                             <div
@@ -1967,7 +2193,7 @@ export default function ItemStockReport() {
                                 </div>
                             </div>
 
-                            <div
+                            {/* <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "21px" }}
                             >
@@ -2023,7 +2249,7 @@ export default function ItemStockReport() {
                                       <option value="W">WEIGHTED AVERAGE</option>
                                     <option value="F">FIFO</option>
                                 </select>
-                            </div>
+                            </div> */}
 
                            
 
@@ -2135,7 +2361,7 @@ export default function ItemStockReport() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Status :
+                                            Type :
                                         </span>
                                     </label>
                                 </div>
@@ -2166,9 +2392,8 @@ export default function ItemStockReport() {
                                     }}
                                 >
                                       <option value="">ALL</option>
-                                    <option value="P">POSITIVE</option>
-                                    <option value="N">NEGATIVE</option>
-                                      <option value="Z">ZERO</option>
+                                    <option value="BIL">PURCHASE</option>
+                                    <option value="PRN">PURCHASE RETURN</option>
                                 </select>
                             </div>
 
@@ -2221,7 +2446,7 @@ export default function ItemStockReport() {
                                         className="List-select-class "
                                         ref={input2Ref}
                                         options={capacityoptions}
-                                        onKeyDown={(e) => handlecapacityKeypress(e, typeRef)}
+                                        onKeyDown={(e) => handlecapacityKeypress(e, input4Ref)}
                                         id="selectedsale2"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -2339,7 +2564,8 @@ export default function ItemStockReport() {
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, 
+                                    // width: "100%",
                                     position: "relative",
                                 }}
                             >
@@ -2361,22 +2587,28 @@ export default function ItemStockReport() {
                                         }}
                                     >
                                         <td className="border-dark" style={firstColWidth}>
-                                            Code
+                                            Date
                                         </td>
                                         <td className="border-dark" style={secondColWidth}>
-                                            Description
+                                            Trn#
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Last Date
+                                            Type
                                         </td>
                                         <td className="border-dark" style={forthColWidth}>
-                                            Rate
+                                            Description
                                         </td>
                                      
                                         <td className="border-dark" style={sixthColWidth}>
-                                            Qnty
+                                            Code
                                         </td>
                                         <td className="border-dark" style={seventhColWidth}>
+                                           Qnty
+                                        </td>
+                                        <td className="border-dark" style={eightColWidth}>
+                                           Rate
+                                        </td>
+                                        <td className="border-dark" style={ninthColWidth}>
                                            Amount
                                         </td>
                                         <td className="border-dark" style={sixthcol}>
@@ -2430,7 +2662,7 @@ export default function ItemStockReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 6 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 8 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2445,6 +2677,8 @@ export default function ItemStockReport() {
                                                 <td style={forthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                  <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
                                                
                                             </tr>
                                         </>
@@ -2466,23 +2700,28 @@ export default function ItemStockReport() {
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
-                                                            {item.Code}
+                                                            {item.Date}
                                                         </td>
                                                         <td className="text-start" style={secondColWidth}>
+                                                            {item["Trn#"]}
+                                                        </td>
+                                                        <td className="text-center" style={thirdColWidth}>
+                                                            {item.Type}
+                                                        </td>
+                                                        <td className="text-start" style={forthColWidth}>
                                                             {item.Description}
                                                         </td>
-                                                        <td className="text-start" style={thirdColWidth}>
-                                                            {item["Last Date"]}
-                                                        </td>
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {item["Pur Rate"]}
-                                                        </td>
-                                                       
-                                                        <td className="text-end" style={sixthColWidth}>
-                                                            {item.Qnty}
+                                                                                                               <td className="text-start" style={sixthColWidth}>
+                                                            {item.code}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Amount}
+                                                            {item.Qnty}
+                                                        </td>
+                                                         <td className="text-end" style={eightColWidth}>
+                                                            {item.Rate}
+                                                        </td>
+                                                         <td className="text-end" style={ninthColWidth}>
+                                                            {item["Pur Amount"]}
                                                         </td>
                                                         
                                                     </tr>
@@ -2498,7 +2737,7 @@ export default function ItemStockReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 6 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 8 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2512,6 +2751,8 @@ export default function ItemStockReport() {
                                                 <td style={forthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                 <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
                                               
                                             </tr>
                                         </>
@@ -2527,7 +2768,7 @@ export default function ItemStockReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "10px"
+                            // paddingRight: "13px"
                         }}
                     >
                         <div
@@ -2571,7 +2812,7 @@ export default function ItemStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalqnty}</span>
+                            {/* <span className="mobileledger_total">{totalqnty}</span> */}
                         </div>
                         <div
                             style={{
@@ -2580,7 +2821,25 @@ export default function ItemStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totaltax}</span>
+                            <span className="mobileledger_total">{totaldebit}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...eightColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            {/* <span className="mobileledger_total">{totaltax}</span> */}
+                        </div>
+                        <div
+                            style={{
+                                ...ninthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalcredit}</span>
                         </div>
                      
                       
@@ -2596,7 +2855,6 @@ export default function ItemStockReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

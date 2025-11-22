@@ -22,7 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
-export default function ItemStockReport() {
+export default function ItemStoreStockReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -86,6 +86,11 @@ export default function ItemStockReport() {
     const [totaltax, settotaltax] = useState(0);
     const [totalincl, settotalincl] = useState(0);
 
+     const [Qnty1, setQnty1] = useState(0);
+      const [Qnty2, setQnty2] = useState(0);
+       const [Qnty3, setQnty3] = useState(0);
+        const [Qnty4, setQnty4] = useState(0);
+         const [Qnty5, setQnty5] = useState(0);
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -224,7 +229,7 @@ export default function ItemStockReport() {
             toDateElement.style.border = `1px solid ${fontcolor}`;
         }
 
-        const apiMainUrl = apiLinks + "/ItemStockReport.php";
+        const apiMainUrl = apiLinks + "/StoreStockReport.php";
         setIsLoading(true);
         const formMainData = new URLSearchParams({
             FRepDat: toInputDate,
@@ -234,14 +239,14 @@ export default function ItemStockReport() {
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
             FStrdCod: Typeselectdata,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription,
             FRepStk: transectionType2,
 
-            // code: 'ZOHAELEC',
-            // FLocCod: '001',
-            // FYerDsc: '2025-2025',
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -250,8 +255,12 @@ export default function ItemStockReport() {
             .then((response) => {
                 setIsLoading(false);
                 settotalqnty(response.data["Total Qnty"]);
-                settotalexcel(response.data["Total Rate"]);
                 settotaltax(response.data["Total Amount"]);
+                  setQnty1(response.data["Total001"]);
+                   setQnty2(response.data["Total002"]);
+                    setQnty3(response.data["Total003"]);
+                     setQnty4(response.data["Total004"]);
+                      setQnty5(response.data["Total005"]);
                 // settotalincl(response.data["Total Incl"]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
@@ -604,14 +613,29 @@ export default function ItemStockReport() {
         const rows = tableData.map((item) => [
             item.Code,
             item.Description,
-            item['Last Date'],
             item['Pur Rate'],
             item.Qnty,
             item.Amount,
+             item.Qnt001,
+              item.Qnt002,
+               item.Qnt003,
+                item.Qnt004,
+                 item.Qnt005,
         ]);
 
         // Add summary row to the table
-        rows.push(["", "Total", "", "", String(totalqnty), String(totaltax)]);
+        rows.push([
+            "", 
+            "Total", 
+            "", 
+            String(totalqnty),
+             String(totaltax),
+             String(Qnty1),
+             String(Qnty2),
+             String(Qnty3),
+             String(Qnty4),
+             String(Qnty5),
+        ]);
 
 
         // Define table column headers and individual column widths
@@ -619,12 +643,17 @@ export default function ItemStockReport() {
         const headers = [
             "Code",
             "Description",
-            "Last Date",
             "Rate",
-            "Qnty",
+              "Qnty",
             "Amount",
+            "GD-1",
+              "GD-2",
+                "GD-3",
+                  "GD-4",
+                    "GD-5",
+          
         ];
-        const columnWidths = [35,110, 25, 25, 25,25];
+        const columnWidths = [35,110,25,15,25,15,15,15,15,15];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -747,7 +776,11 @@ export default function ItemStockReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 3 || cellIndex === 4 || cellIndex === 5 ) {
+                    if (
+                        cellIndex === 2 || cellIndex === 3 || cellIndex === 4
+                        || cellIndex === 5 || cellIndex === 6 || cellIndex === 7
+                        || cellIndex === 8 || cellIndex === 9
+                     ) {
                         const rightAlignX = currentX + columnWidths[cellIndex] - 2;
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -886,7 +919,7 @@ export default function ItemStockReport() {
                 startY += 5; // Adjust vertical position for the company title
 
                 addTitle(
-                    `Item Stock Report As on ${toInputDate}`,
+                    `Item Store Stock Report As on ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -951,10 +984,10 @@ export default function ItemStockReport() {
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+                // doc.setFont(getfontstyle, "bold"); // Set font to bold
+                // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
+                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -1039,7 +1072,7 @@ export default function ItemStockReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`ItemStockReportPos As On ${toInputDate}.pdf`);
+        doc.save(`ItemStoreStockReportPos As On ${toInputDate}.pdf`);
     };
 
     const handleDownloadCSV = async () => {
@@ -1048,7 +1081,7 @@ export default function ItemStockReport() {
 
         const numColumns = 6; // Ensure this matches the actual number of columns
 
-        const columnAlignments = ["left", "left", "left", "right", "right", "right"];
+        const columnAlignments = ["left", "left","right", "right", "right","right","right", "right", "right","right"];
 
         // Define fonts for different sections
         const fontCompanyName = {
@@ -1084,19 +1117,19 @@ export default function ItemStockReport() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+            `A${companyRow.number}:${String.fromCharCode(69 + numColumns - 1)}${companyRow.number
             }`
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Item Stock Report As On ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Item Store Stock Report As On ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+            `A${storeListRow.number}:${String.fromCharCode(69 + numColumns - 1)}${storeListRow.number
             }`
         );
 
@@ -1149,8 +1182,8 @@ export default function ItemStockReport() {
             "COMPANY :",
             typecompany,
             "",
-            "STORE :",
-            typetype,
+            // "STORE :",
+            // typetype,
         ]);
 
         // Add second row
@@ -1158,6 +1191,9 @@ export default function ItemStockReport() {
             "CATEGORY :",
             typecategory,
             "",
+             "",
+              "",
+               "",
             "RATE :",
             RATE,
         ]);
@@ -1166,6 +1202,9 @@ export default function ItemStockReport() {
             "CAPACITY :",
             typecapacity,
             "",
+             "",
+              "",
+               "",
             "STATUS :",
             transectionsts,
         ]);
@@ -1173,7 +1212,7 @@ export default function ItemStockReport() {
         // Add third row with conditional rendering for "SEARCH:"
         const typeAndStoreRow4 = worksheet.addRow(
             searchQuery
-                ? ["", "","", "SEARCH :", typesearch]
+                ? ["", "","","", "","", "SEARCH :", typesearch]
                 : [""]
         );
 
@@ -1182,7 +1221,7 @@ export default function ItemStockReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1190,7 +1229,7 @@ export default function ItemStockReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1199,7 +1238,7 @@ export default function ItemStockReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1207,7 +1246,7 @@ export default function ItemStockReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1231,12 +1270,16 @@ export default function ItemStockReport() {
 
         // Add headers
         const headers = [
-            "Code",
+          "Code",
             "Description",
-            "Last Date",
             "Rate",
-            "Qnty",
+              "Qnty",
             "Amount",
+            "GD-1",
+              "GD-2",
+                "GD-3",
+                  "GD-4",
+                    "GD-5",
            
         ];
         const headerRow = worksheet.addRow(headers);
@@ -1245,12 +1288,16 @@ export default function ItemStockReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                item.Code,
-                item.Description,
-                item['Last Date'],
-                 item['Pur Rate'],
-                item.Qnty,
-                item.Amount,
+               item.Code,
+            item.Description,
+            item['Pur Rate'],
+            item.Qnty,
+            item.Amount,
+             item.Qnt001,
+              item.Qnt002,
+               item.Qnt003,
+                item.Qnt004,
+                 item.Qnt005,
              
             ]);
 
@@ -1270,12 +1317,21 @@ export default function ItemStockReport() {
         });
 
         // Set column widths
-        [20,45, 10, 12, 12, 12].forEach((width, index) => {
+        [20,45, 12, 10, 12, 10, 10,10,10,10].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
-            "", "Total", "", "",String(totalqnty), String(totaltax)
+          "", 
+            "Total", 
+            "", 
+            String(totalqnty),
+             String(totaltax),
+             String(Qnty1),
+             String(Qnty2),
+             String(Qnty3),
+             String(Qnty4),
+             String(Qnty5),
 
         ]);
 
@@ -1291,7 +1347,13 @@ export default function ItemStockReport() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 5 || colNumber === 6) {
+            if (
+                colNumber === 4 || colNumber === 5
+                ||colNumber === 6 || colNumber === 7
+                ||colNumber === 8 || colNumber === 9
+                ||colNumber === 10
+
+            ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
@@ -1353,7 +1415,7 @@ export default function ItemStockReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `ItemStockReport As On ${currentdate}.xlsx`);
+        saveAs(blob, `ItemStoreStockReport As On ${currentdate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1479,27 +1541,38 @@ export default function ItemStockReport() {
     // };
 
 
-        const firstColWidth = {
+    const firstColWidth = {
         width: "135px",
     };
     const secondColWidth = {
         width: "360px",
     };
     const thirdColWidth = {
-        width: "90px",
+        width: "80px",
     };
     const forthColWidth = {
-        width: "90px",
+        width: "53px",
     };
-   
     const sixthColWidth = {
-        width: "90px",
+        width: "53px",
     };
     const seventhColWidth = {
-        width: "90px",
+        width: "53px",
     };
 
-     const sixthcol = {
+ const eightColWidth = {
+        width: "53px",
+    };
+    const ninthColWidth = {
+        width: "53px",
+    };
+    const tenthColWidth = {
+        width: "53px",
+    };
+    const elewenthColWidth = {
+        width: "80px",
+    };
+       const sixthcol = {
         width: "13px",
     };
 
@@ -1694,7 +1767,7 @@ export default function ItemStockReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Item Stock Report" />
+                    <NavComponent textdata="Item Store Stock Report" />
 
                     {/* ------------1st row */}
                     <div
@@ -1801,7 +1874,7 @@ export default function ItemStockReport() {
                                 </div>
                             </div>
 
-                             <div
+                             {/* <div
                                 className="d-flex align-items-center"
                                 style={{ marginLeft: "7px" }}
                             >
@@ -1872,7 +1945,7 @@ export default function ItemStockReport() {
                                         placeholder="ALL"
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                            
                         </div>
@@ -2221,7 +2294,7 @@ export default function ItemStockReport() {
                                         className="List-select-class "
                                         ref={input2Ref}
                                         options={capacityoptions}
-                                        onKeyDown={(e) => handlecapacityKeypress(e, typeRef)}
+                                        onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
                                         id="selectedsale2"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -2367,21 +2440,37 @@ export default function ItemStockReport() {
                                             Description
                                         </td>
                                         <td className="border-dark" style={thirdColWidth}>
-                                            Last Date
-                                        </td>
-                                        <td className="border-dark" style={forthColWidth}>
                                             Rate
                                         </td>
-                                     
-                                        <td className="border-dark" style={sixthColWidth}>
+
+                                         <td className="border-dark" style={tenthColWidth}>
                                             Qnty
                                         </td>
-                                        <td className="border-dark" style={seventhColWidth}>
+                                        <td className="border-dark" style={elewenthColWidth}>
                                            Amount
                                         </td>
-                                        <td className="border-dark" style={sixthcol}>
+                                       
+                                        <td className="border-dark" style={forthColWidth}>
+                                            GD-1
+                                        </td>
+                                        <td className="border-dark" style={sixthColWidth}>
+                                            GD-2
+                                        </td>
+                                        <td className="border-dark" style={seventhColWidth}>
+                                            GD-3
+                                        </td>
+                                        <td className="border-dark" style={eightColWidth}>
+                                            GD-4
+                                        </td>
+                                        <td className="border-dark" style={ninthColWidth}>
+                                            GD-5
+                                        </td>
+
+                                         <td className="border-dark" style={sixthcol}>
                                            
                                         </td>
+                                    
+                                       
                                       
                                     </tr>
                                 </thead>
@@ -2395,7 +2484,7 @@ export default function ItemStockReport() {
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
                                 maxHeight: "43vh",
-                                // width: "100%",
+                                width: "100%",
                                 position: "relative",
                                     ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                              
@@ -2417,7 +2506,7 @@ export default function ItemStockReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="6" className="text-center">
+                                                <td colSpan="10" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2430,7 +2519,7 @@ export default function ItemStockReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 6 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2442,9 +2531,15 @@ export default function ItemStockReport() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
+                                                 <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+                                                <td style={forthColWidth}></td> 
+                                               
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                              
                                                
                                             </tr>
                                         </>
@@ -2471,19 +2566,32 @@ export default function ItemStockReport() {
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item.Description}
                                                         </td>
-                                                        <td className="text-start" style={thirdColWidth}>
-                                                            {item["Last Date"]}
-                                                        </td>
-                                                        <td className="text-end" style={forthColWidth}>
+                                                        <td className="text-end" style={thirdColWidth}>
                                                             {item["Pur Rate"]}
                                                         </td>
-                                                       
-                                                        <td className="text-end" style={sixthColWidth}>
+                                                         <td className="text-end" style={tenthColWidth}>
                                                             {item.Qnty}
                                                         </td>
-                                                        <td className="text-end" style={seventhColWidth}>
+                                                        <td className="text-end" style={elewenthColWidth}>
                                                             {item.Amount}
                                                         </td>
+                                                        <td className="text-end" style={forthColWidth}>
+                                                            {item.Qnt001}
+                                                        </td>
+                                                         <td className="text-end" style={sixthColWidth}>
+                                                            {item.Qnt002}
+                                                        </td>
+                                                         <td className="text-end" style={seventhColWidth}>
+                                                            {item.Qnt003}
+                                                        </td>
+                                                         <td className="text-end" style={eightColWidth}>
+                                                            {item.Qnt004}
+                                                        </td>
+                                                         <td className="text-end" style={ninthColWidth}>
+                                                            {item.Qnt005}
+                                                        </td>
+                                                                                                            
+                                                       
                                                         
                                                     </tr>
                                                 );
@@ -2498,7 +2606,7 @@ export default function ItemStockReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 6 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2509,9 +2617,14 @@ export default function ItemStockReport() {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
+                                                 <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
                                                 <td style={forthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                
                                               
                                             </tr>
                                         </>
@@ -2527,7 +2640,7 @@ export default function ItemStockReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "10px"
+                            paddingRight: "13px"
                         }}
                     >
                         <div
@@ -2554,6 +2667,24 @@ export default function ItemStockReport() {
                         >
                             {/* <span className="mobileledger_total">{totalexcel}</span> */}
                         </div>
+                          <div
+                            style={{
+                                ...tenthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totalqnty}</span>
+                        </div>
+                           <div
+                            style={{
+                                ...elewenthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{totaltax}</span>
+                        </div>
                         <div
                             style={{
                                 ...forthColWidth,
@@ -2561,8 +2692,9 @@ export default function ItemStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            {/* <span className="mobileledger_total">{totalexcel}</span> */}
+                            <span className="mobileledger_total">{Qnty1}</span>
                         </div>
+                      
                        
                         <div
                             style={{
@@ -2571,7 +2703,7 @@ export default function ItemStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalqnty}</span>
+                            <span className="mobileledger_total">{Qnty2}</span>
                         </div>
                         <div
                             style={{
@@ -2580,8 +2712,27 @@ export default function ItemStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totaltax}</span>
+                            <span className="mobileledger_total">{Qnty3}</span>
                         </div>
+                           <div
+                            style={{
+                                ...eightColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{Qnty4}</span>
+                        </div>
+                           <div
+                            style={{
+                                ...ninthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{Qnty5}</span>
+                        </div>
+                          
                      
                       
                        

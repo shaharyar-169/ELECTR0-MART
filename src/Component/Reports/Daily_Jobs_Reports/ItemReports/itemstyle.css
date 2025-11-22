@@ -1,3 +1,19 @@
 .css-6qwxvl-placeholder {
     text-align: start !important;
 }
+
+
+.qnt-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.qnt-scroll table {
+  border-collapse: collapse;
+}
+
+.qnt-scroll td {
+  white-space: nowrap;
+}

@@ -410,7 +410,7 @@ export default function SupplierLedger1() {
             // code: organisation.code,
             // FLocCod: locationnumber || getLocationNumber,
             // FYerDsc: yeardescription || getyeardescription,
-            code: 'NASIRTRD',
+            code: 'ZOHAELEC',
             FLocCod: '001',
             FYerDsc: '2024-2024',
         }).toString();
@@ -475,8 +475,11 @@ export default function SupplierLedger1() {
             // FLocCod: locationnumber || getLocationNumber,
             // code: organisation.code,
 
+            // FLocCod: '001',
+            // code: 'NASIRTRD',
+
+              code: 'ZOHAELEC',
             FLocCod: '001',
-            code: 'NASIRTRD',
         }).toString();
         axios
             .post(apiUrl, formData)

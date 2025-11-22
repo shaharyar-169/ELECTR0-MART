@@ -147,7 +147,9 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
 import ItemStockReportPos from "./Component/Reports/Daily_Jobs_Reports/ItemReports/Itemstockreportpos.js";
 import ItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/itemStockReport.js";
-
+import ItemStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemstorestockRrport.js";
+import ItemSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleReport.js";
+import ItemPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItempurchaseReport.js";
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
 import MemberRecivableReport from "./Component/Transaction/MemberRecievableReport.js";
@@ -305,9 +307,15 @@ function App() {
 
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
-                <Route exact path="/ItemStockReport" element={<ItemStockReportPos />} />
-                <Route exact path="/StoreStockReport" element={<ItemStockReport />} />
+                <Route exact path="/ItemStatusReport" element={<ItemStockReportPos />} />
+                <Route exact path="/ItemStockReport" element={<ItemStockReport />} />
                 <Route exact path="/ItemAggingReport" element={<ItemAggingReport />} />
+                <Route exact path="/StoreStockReport" element={<ItemStoreStockReport />} />
+                <Route exact path="/ItemSaleReport" element={<ItemSaleReport />} />
+                <Route exact path="/ItemPurchaseReport" element={<ItemPurchaseReport />} />
+
+
+
 
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />

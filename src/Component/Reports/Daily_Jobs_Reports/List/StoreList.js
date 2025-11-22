@@ -1338,10 +1338,10 @@ const contentStyle = {
             </div>
           </div>
           <div>
-            {/* <div
+            <div
               style={{
                 overflowY: "auto",
-                width: "98.2%",
+                // width: "98.2%",
               }}
             >
               <table
@@ -1350,7 +1350,7 @@ const contentStyle = {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  // width: "100%",
                   position: "relative",
                   paddingRight: "2%",
                 }}
@@ -1365,6 +1365,7 @@ const contentStyle = {
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                     backgroundColor: tableHeadColor,
+                    tableLayout:'fixed'
                   }}
                 >
                   <tr
@@ -1432,13 +1433,21 @@ const contentStyle = {
                         style={getIconStyle("Stk")}
                       ></i>
                     </td>
+
+                     <td
+                      className="border-dark"
+                      style={sixthcol}
+                    >
+                     
+                     
+                    </td>
                   </tr>
                 </thead>
               </table>
-            </div> */}
+            </div>
 
 
-            <div style={{ overflowY: "auto" }}>
+            {/* <div style={{ overflowY: "auto" }}>
               <table
                 className="myTable"
                 id="table"
@@ -1490,7 +1499,7 @@ const contentStyle = {
                   </tr>
                 </thead>
               </table>
-            </div>
+            </div> */}
 
 
 

@@ -904,7 +904,7 @@ export default function ItemPurchaseSummary() {
         ]);
         rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
         const headers = ["Code", "Description", "Rate", "Qty", "Amount"];
-        const columnWidths = [40, 103, 18, 15, 25];
+        const columnWidths = [35, 100, 25, 15, 25];
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
         const pageHeight = doc.internal.pageSize.height;
         const paddingTop = 15;
@@ -1207,23 +1207,53 @@ export default function ItemPurchaseSummary() {
 
         const columnAlignments = ["left", "left", "right", "right", "right"];
         worksheet.addRow([]);
-        [
-            comapnyname,
-            `Item Purchase Summary Report From: ${fromInputDate} to ${toInputDate}`,
-        ].forEach((title, index) => {
-            worksheet.addRow([title]).eachCell((cell) => {
-                cell.style = {
-                    font: {
-                        bold: index === 0 ? true : false,
-                        size: index === 0 ? 18 : parseInt(getdatafontsize),
-                    },
-                    alignment: { horizontal: "center" },
-                };
-            });
-            worksheet.mergeCells(
-                `A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-            );
+    
+        const fontCompanyName = {
+            name: "CustomFont" || "CustomFont",
+            size: 18,
+            bold: true,
+        };
+        const fontStoreList = {
+            name: "CustomFont" || "CustomFont",
+            size: 10,
+            bold: false,
+        };
+        const fontHeader = {
+            name: "CustomFont" || "CustomFont",
+            size: 10,
+            bold: true,
+        };
+        const fontTableContent = {
+            name: "CustomFont" || "CustomFont",
+            size: 10,
+            bold: false,
+        };
+    
+         // Add company name
+        const companyRow = worksheet.addRow([comapnyname]);
+companyRow.eachCell((cell) => {
+    cell.font = fontCompanyName;
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+});
+
+worksheet.getRow(companyRow.number).height = 80;
+
+worksheet.mergeCells(
+    `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`
+);
+
+
+        // Add Store List row
+        const storeListRow = worksheet.addRow([`Item Purchase Summary Report From${fromInputDate} To ${toInputDate}`]);
+        storeListRow.eachCell((cell) => {
+            cell.font = fontStoreList;
+            cell.alignment = { horizontal: "center" };
         });
+
+        worksheet.mergeCells(
+            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+            }`
+        );
         worksheet.addRow([]);
         worksheet
             .addRow([
@@ -1301,7 +1331,7 @@ export default function ItemPurchaseSummary() {
                     };
                 }
             });
-        // worksheet.addRow([]);
+        worksheet.addRow([]);
         const headerStyle = {
             font: { bold: true },
             alignment: { horizontal: "center" },
@@ -1406,20 +1436,26 @@ export default function ItemPurchaseSummary() {
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
 
+   
+
     const firstColWidth = {
-        width: "20%",
+        width: "135px",
     };
     const secondColWidth = {
-        width: "49%",
+        width: "360px",
     };
     const thirdColWidth = {
-        width: "12%",
+        width: "90px",
     };
     const forthColWidth = {
-        width: "7%",
+        width: "60px",
     };
     const fifthColWidth = {
-        width: "12%",
+        width: "90px",
+    };
+
+     const sixthCol = {
+        width: "13px",
     };
 
     useHotkeys("s", fetchItemPurchaseReport);
@@ -1439,29 +1475,28 @@ export default function ItemPurchaseSummary() {
         };
     }, []);
 
-    const contentStyle = {
-        backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(60vw - 0%)" : "60vw",
-        position: "relative",
-        top: "40%",
-        left: isSidebarVisible ? "50%" : "50%",
-        transform: "translate(-50%, -50%)",
-        transition: isSidebarVisible
-            ? "left 3s ease-in-out, width 2s ease-in-out"
-            : "left 3s ease-in-out, width 2s ease-in-out",
+     const contentStyle = {
+        width: "100%", // 100vw ki jagah 100%
+        maxWidth: "1000px",
+        height: "calc(100vh - 100px)",
+        position: "absolute",
+        top: "70px",
+        left: isSidebarVisible ? "60vw" : "50vw",
+        transform: "translateX(-50%)",
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
-        alignItems: "start",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        wordBreak: "break-word",
+        alignItems: "center",
+        overflow: "hidden",
         textAlign: "center",
-        maxWidth: "800px",
-        fontSize: parseInt(getdatafontsize),
+        fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
         lineHeight: "23px",
-        fontFamily: getfontstyle,
+        fontFamily: '"Poppins", sans-serif',
+        zIndex: 1,
+        padding: "0 20px", // Side padding for small screens
+        boxSizing: "border-box", // Padding ko width mein include kare
     };
 
     const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1729,7 +1764,7 @@ export default function ItemPurchaseSummary() {
                     style={{
                         backgroundColor: getcolor,
                         color: fontcolor,
-                        width: "100%",
+                        // width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
                     }}
@@ -1748,7 +1783,7 @@ export default function ItemPurchaseSummary() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                justifyContent: "start",
                             }}
                         >
                             {/* From Date */}
@@ -1852,7 +1887,7 @@ export default function ItemPurchaseSummary() {
                             </div>
 
                             {/* To Date */}
-                            <div className="d-flex align-items-center">
+                            <div className="d-flex align-items-center" style={{marginLeft:'50px'}}>
                                 <div
                                     style={{
                                         width: "60px",
@@ -1948,107 +1983,7 @@ export default function ItemPurchaseSummary() {
                                 </div>
                             </div>
 
-                            {/* radio checks */}
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "15px" }}
-                            >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "evenly",
-                                    }}
-                                >
-                                    <div className="d-flex align-items-center mx-2">
-                                        <input
-                                            type="radio"
-                                            name="dateRange"
-                                            id="custom"
-                                            checked={selectedRadio === "custom"}
-                                            onChange={() => handleRadioChange(0)}
-                                            onFocus={(e) =>
-                                                (e.currentTarget.style.border = "2px solid red")
-                                            }
-                                            onBlur={(e) =>
-                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                            }
-                                        />
-                                        &nbsp;
-                                        <label
-                                            htmlFor="custom"
-                                            style={{ fontSize: parseInt(getdatafontsize) }}
-                                        >
-                                            Custom
-                                        </label>
-                                    </div>
-                                    <div className="d-flex align-items-center mx-2">
-                                        <input
-                                            type="radio"
-                                            name="dateRange"
-                                            id="30"
-                                            checked={selectedRadio === "30days"}
-                                            onChange={() => handleRadioChange(30)}
-                                            onFocus={(e) =>
-                                                (e.currentTarget.style.border = "2px solid red")
-                                            }
-                                            onBlur={(e) =>
-                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                            }
-                                        />
-                                        &nbsp;
-                                        <label
-                                            htmlFor="30"
-                                            style={{ fontSize: parseInt(getdatafontsize) }}
-                                        >
-                                            30 Days
-                                        </label>
-                                    </div>
-                                    <div className="d-flex align-items-center mx-2">
-                                        <input
-                                            type="radio"
-                                            name="dateRange"
-                                            id="60"
-                                            checked={selectedRadio === "60days"}
-                                            onChange={() => handleRadioChange(60)}
-                                            onFocus={(e) =>
-                                                (e.currentTarget.style.border = "2px solid red")
-                                            }
-                                            onBlur={(e) =>
-                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                            }
-                                        />
-                                        &nbsp;
-                                        <label
-                                            htmlFor="60"
-                                            style={{ fontSize: parseInt(getdatafontsize) }}
-                                        >
-                                            60 Days
-                                        </label>
-                                    </div>
-                                    <div className="d-flex align-items-center mx-2">
-                                        <input
-                                            type="radio"
-                                            name="dateRange"
-                                            id="90"
-                                            checked={selectedRadio === "90days"}
-                                            onChange={() => handleRadioChange(90)}
-                                            onFocus={(e) =>
-                                                (e.currentTarget.style.border = "2px solid red")
-                                            }
-                                            onBlur={(e) =>
-                                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                            }
-                                        />
-                                        &nbsp;
-                                        <label
-                                            htmlFor="90"
-                                            style={{ fontSize: parseInt(getdatafontsize) }}
-                                        >
-                                            90 Days
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
 
@@ -2449,7 +2384,7 @@ export default function ItemPurchaseSummary() {
                         <div
                             style={{
                                 overflowY: "auto",
-                                width: "98.8%",
+                                // width: "98.8%",
                             }}
                         >
                             <table
@@ -2457,7 +2392,7 @@ export default function ItemPurchaseSummary() {
                                 id="table"
                                 style={{
                                     fontSize: parseInt(getdatafontsize),
-                                    width: "100%",
+                                    // width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
@@ -2493,6 +2428,9 @@ export default function ItemPurchaseSummary() {
                                         <td className="border-dark" style={fifthColWidth}>
                                             Amount
                                         </td>
+                                         <td className="border-dark" style={sixthCol}>
+                                            
+                                        </td>
                                     </tr>
                                 </thead>
                             </table>
@@ -2504,8 +2442,8 @@ export default function ItemPurchaseSummary() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "44vh",
-                                width: "100%",
+                                maxHeight: "42vh",
+                                // width: "100%",
                                 wordBreak: "break-word",
                             }}
                         >
@@ -2514,8 +2452,9 @@ export default function ItemPurchaseSummary() {
                                 id="tableBody"
                                 style={{
                                     fontSize: parseInt(getdatafontsize),
-                                    width: "100%",
-                                    position: "relative",
+                                    // width: "100%",
+                                     position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                                 }}
                             >
                                 <tbody id="tablebody">
