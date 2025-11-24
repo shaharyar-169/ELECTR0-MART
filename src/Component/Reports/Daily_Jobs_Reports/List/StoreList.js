@@ -91,7 +91,6 @@ export default function StoreList() {
       FStrSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-
       FSchTxt: searchQuery,
     }).toString();
 
@@ -711,7 +710,7 @@ export default function StoreList() {
   const thirdColWidth = { width: "60px" };
   const forthColWidth = { width: "90px" };
   const fifthColWidth = { width: "40px" };
-   const sixthcol = { width: "13px" };
+   const sixthcol = { width: "8px" };
 
 
 
@@ -889,196 +888,81 @@ const contentStyle = {
     }
   }, [tableData]);
 
-  const handleSorting = (col) => {
-    // Always sort in descending order on first click (or toggle if already sorted)
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  // const handleSorting = (col) => {
+  //   // Always sort in descending order on first click (or toggle if already sorted)
+  //   const currentOrder = columnSortOrders[col];
+  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    // Create an array of indices [0, 1, 2, ..., n-1]
-    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+  //   // Create an array of indices [0, 1, 2, ..., n-1]
+  //   const indices = Array.from({ length: columns[col].length }, (_, i) => i);
 
-    // Sort the indices based on the values in the specified column
-    indices.sort((a, b) => {
-      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+  //   // Sort the indices based on the values in the specified column
+  //   indices.sort((a, b) => {
+  //     const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
+  //     const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
 
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
+  //     const numA = parseFloat(aVal.replace(/,/g, ""));
+  //     const numB = parseFloat(bVal.replace(/,/g, ""));
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-    });
+  //     if (!isNaN(numA) && !isNaN(numB)) {
+  //       return newOrder === "ASC" ? numA - numB : numB - numA;
+  //     } else {
+  //       return newOrder === "ASC"
+  //         ? aVal.localeCompare(bVal)
+  //         : bVal.localeCompare(aVal);
+  //     }
+  //   });
 
-    // Reorder all columns based on the sorted indices
-    const newColumns = Object.keys(columns).reduce((acc, key) => {
-      acc[key] = indices.map((index) => columns[key][index]);
-      return acc;
-    }, {});
+  //   // Reorder all columns based on the sorted indices
+  //   const newColumns = Object.keys(columns).reduce((acc, key) => {
+  //     acc[key] = indices.map((index) => columns[key][index]);
+  //     return acc;
+  //   }, {});
 
-    setColumns(newColumns);
+  //   setColumns(newColumns);
 
-    // Update the sort order state
-    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-      (acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      },
-      {}
-    );
-    setColumnSortOrders(updatedSortOrders);
-  };
-
-  const resetSorting = () => {
-    setColumnSortOrders({
-      Code: null,
-      Description: null,
-      Status: null,
-      Abb: null,
-      Stk: null
-    });
-  };
-
-
-  // const renderTableData = () => {
-  //   const rowCount = Math.max(
-  //     columns.Code.length,
-  //     columns.Description.length,
-  //     columns.Status.length,
-  //     columns.Abb.length,
-  //     columns.Stk.length
+  //   // Update the sort order state
+  //   const updatedSortOrders = Object.keys(columnSortOrders).reduce(
+  //     (acc, key) => {
+  //       acc[key] = key === col ? newOrder : null;
+  //       return acc;
+  //     },
+  //     {}
   //   );
-
-  //   const rows = [];
-  //   for (let i = 0; i < rowCount; i++) {
-  //     rows.push({
-  //       Code: columns.Code[i],
-  //       Description: columns.Description[i],
-  //       Status: columns.Status[i],
-  //       Abb: columns.Abb[i],
-  //       Stk: columns.Stk[i],
-  //     });
-  //   }
-
-  //   return (
-  //     <>
-  //       {isLoading ? (
-  //         <>
-  //           <tr style={{ backgroundColor: getcolor }}>
-  //             <td colSpan="5" className="text-center">
-  //               <Spinner animation="border" variant="primary" />
-  //             </td>
-  //           </tr>
-  //           {Array.from({ length: Math.max(0, 7 - 5) }).map((_, rowIndex) => (
-  //             <tr
-  //               key={`blank-${rowIndex}`}
-  //               style={{
-  //                 backgroundColor: getcolor,
-  //                 color: fontcolor,
-  //               }}
-  //             >
-  //               {Array.from({ length: 5 }).map((_, colIndex) => (
-  //                 <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-  //               ))}
-  //             </tr>
-  //           ))}
-  //           <tr>
-  //             <td style={firstColWidth}></td>
-  //             <td style={secondColWidth}></td>
-  //             <td style={thirdColWidth}></td>
-  //             <td style={forthColWidth}></td>
-  //             <td style={fifthColWidth}></td>
-  //           </tr>
-  //         </>
-  //       ) : (
-  //         <>
-  //           {rows.map((item, i) => {
-  //             totalEnteries += 1;
-  //             return (
-  //               <tr
-  //                 key={`${i}-${selectedIndex}`}
-  //                 ref={(el) => (rowRefs.current[i] = el)}
-  //                 onClick={() => handleRowClick(i)}
-
-  //                 className={selectedIndex === i ? 'selected-background' : ""}
-  //                 style={{
-  //                   backgroundColor: getcolor,
-  //                   color: fontcolor,
-  //                 }}
-
-  //               >
-  //                 <td className="text-center" style={firstColWidth}>
-  //                   {item.Code}
-  //                 </td>
-  //                 <td className="text-start" style={secondColWidth}>
-  //                   {item.Description}
-  //                 </td>
-  //                 <td className="text-center" style={thirdColWidth}>
-  //                   {item.Status}
-  //                 </td>
-  //                 <td className="text-center" style={forthColWidth}>
-  //                   {item.Abb}
-  //                 </td>
-  //                 <td className="text-center" style={fifthColWidth}>
-  //                   {item.Stk}
-  //                 </td>
-  //               </tr>
-  //             );
-  //           })}
-  //           {Array.from({
-  //             length: Math.max(0, 7 - rows.length),
-  //           }).map((_, rowIndex) => (
-  //             <tr
-  //               key={`blank-${rowIndex}`}
-  //               style={{
-  //                 backgroundColor: getcolor,
-  //                 color: fontcolor,
-  //               }}
-  //             >
-  //               {Array.from({ length: 5 }).map((_, colIndex) => (
-  //                 <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-  //               ))}
-  //             </tr>
-  //           ))}
-  //           <tr>
-  //             <td style={firstColWidth}></td>
-  //             <td style={secondColWidth}></td>
-  //             <td style={thirdColWidth}></td>
-  //             <td style={forthColWidth}></td>
-  //             <td style={fifthColWidth}></td>
-  //           </tr>
-  //         </>
-  //       )}
-  //     </>
-  //   );
+  //   setColumnSortOrders(updatedSortOrders);
   // };
 
+  const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+  });
+
+  setTableData(sortedData);
+
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
 
 
   const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.Code.length,
-      columns.Description.length,
-      columns.Status.length,
-      columns.Abb.length,
-      columns.Stk.length
-    );
-
-    const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        Code: columns.Code[i],
-        Description: columns.Description[i],
-        Status: columns.Status[i],
-        Abb: columns.Abb[i],
-        Stk: columns.Stk[i],
-      });
-    }
-
+    
     return (
       <>
         {isLoading ? (
@@ -1110,7 +994,7 @@ const contentStyle = {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {tableData.map((item, i) => {
               return (
                 <tr
                   key={`${i}-${selectedIndex}`}
@@ -1141,7 +1025,7 @@ const contentStyle = {
               );
             })}
 
-            {Array.from({ length: Math.max(0, 7 - rows.length) }).map(
+            {Array.from({ length: Math.max(0, 7 - tableData.length) }).map(
               (_, rowIndex) => (
                 <tr
                   key={`blank-${rowIndex}`}
@@ -1166,7 +1050,16 @@ const contentStyle = {
       </>
     );
   };
-
+  
+const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      Status: null,
+      Abb: null,
+      Stk: null
+    });
+  };
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
@@ -1178,14 +1071,14 @@ const contentStyle = {
 
 
 
-  useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
-
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
+ useHotkeys("alt+s", () => {
+         fetchReceivableReport();
+            resetSorting();
+     }, { preventDefault: true, enableOnFormTags: true });
+ 
+     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+     useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
   return (
     <>
@@ -1240,7 +1133,7 @@ const contentStyle = {
                   </label>
                 </div>
 
-                <select
+                {/* <select
                   ref={input1Ref}
                   onKeyDown={(e) => handleKeyPress(e, input2Ref)}
                   id="submitButton"
@@ -1267,7 +1160,61 @@ const contentStyle = {
                   <option value="">ALL</option>
                   <option value="A">ACTIVE</option>
                   <option value="N">NON-ACTIVE</option>
-                </select>
+                </select> */}
+                
+       <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "150px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+    <option value="">ALL</option>
+    <option value="A">ACTIVE</option>
+    <option value="N">NON-ACTIVE</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
+
+
+
               </div>
 
 
@@ -1438,8 +1385,7 @@ const contentStyle = {
                       className="border-dark"
                       style={sixthcol}
                     >
-                     
-                     
+                                          
                     </td>
                   </tr>
                 </thead>
@@ -1565,7 +1511,7 @@ const contentStyle = {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
 
             </div>
             <div

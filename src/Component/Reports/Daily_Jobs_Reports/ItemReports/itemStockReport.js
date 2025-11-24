@@ -78,6 +78,8 @@ export default function ItemStockReport() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("A");
+
+    console.log('transectionType', transectionType)
         const [transectionType2, settransectionType2] = useState("");
 
 
@@ -233,15 +235,16 @@ export default function ItemStockReport() {
             FCapCod: Capacityselectdata,
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
-            FStrdCod: Typeselectdata,
+            FStrCod: Typeselectdata,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
             FRepStk: transectionType2,
+            FRepRat: transectionType,
 
-            // code: 'ZOHAELEC',
+            // code: 'NASIRTRD',
             // FLocCod: '001',
-            // FYerDsc: '2025-2025',
+            // FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -1039,7 +1042,7 @@ export default function ItemStockReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`ItemStockReportPos As On ${toInputDate}.pdf`);
+        doc.save(`ItemStockReport As On ${toInputDate}.pdf`);
     };
 
     const handleDownloadCSV = async () => {
@@ -1500,15 +1503,235 @@ export default function ItemStockReport() {
     };
 
      const sixthcol = {
-        width: "13px",
+        width: "8px",
     };
 
-    
 
-    useHotkeys("s", fetchDailyStatusReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+   const [columns, setColumns] = useState({
+  Code: [],
+  Description: [],
+  ['Last Date']: [],
+  ['Pur Rate']: [],     // ✔ Corrected key
+  Qnty: [],
+  Amount: [],
+});
+
+const [columnSortOrders, setColumnSortOrders] = useState({
+  Code: "",
+  Description: "",
+  ['Last Date']: "",
+  ['Pur Rate']: "",  // ✔ Corrected key
+  Qnty: "",
+  Amount: "",
+});
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+  if (tableData.length > 0) {
+    const newColumns = {
+      Code: tableData.map(row => row.Code),
+      Description: tableData.map(row => row.Description),
+      ['Last Date']: tableData.map(row => row['Last Date']),
+      ['Pur Rate']: tableData.map(row => row['Pur Rate']),
+      Qnty: tableData.map(row => row.Qnty),
+      Amount: tableData.map(row => row.Amount),
+    };
+    setColumns(newColumns);
+  }
+}, [tableData]);
+
+ const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+      const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      ['Last Date']: null,
+      ['Pur Rate']: null,
+      Qnty: null,
+      Amount: null,
+    });
+  };
+
+// const handleSorting = (col) => {
+//   const currentOrder = columnSortOrders[col];
+//   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+//   const sortedData = [...tableData].sort((a, b) => {
+//     const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+//     const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+//     const numA = parseFloat(aVal.replace(/,/g, ""));
+//     const numB = parseFloat(bVal.replace(/,/g, ""));
+
+//     if (!isNaN(numA) && !isNaN(numB)) {
+//       return newOrder === "ASC" ? numA - numB : numB - numA;
+//     } else {
+//       return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+//     }
+//   });
+
+//   setTableData(sortedData);
+
+//   setColumnSortOrders((prev) => ({
+//     ...Object.keys(prev).reduce((acc, key) => {
+//       acc[key] = key === col ? newOrder : null;
+//       return acc;
+//     }, {}),
+//   }));
+// };
+
+
+const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+    // ⭐ SPECIAL CASE: Sort "Last Date" by YEAR
+    if (col === "Last Date") {
+      const aYear = parseInt(aVal.split("-")[2]) || 0; // Extract YYYY
+      const bYear = parseInt(bVal.split("-")[2]) || 0;
+
+      return newOrder === "ASC" ? aYear - bYear : bYear - aYear;
+    }
+
+    // ⭐ NORMAL NUMBER SORT
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    }
+
+    // ⭐ NORMAL STRING SORT
+    return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  });
+
+  setTableData(sortedData);
+
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
+
+  const renderTableData = () => {
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="6" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
+            </tr>
+            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 6 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        ) : (
+          <>
+            {tableData.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: fontcolor,
+                  }}
+                >
+                  <td className="text-start" style={firstColWidth}>
+                    {item.Code}
+                  </td>
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Description}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item['Last Date']}
+                  </td>
+                    <td className="text-end" style={forthColWidth}>
+                    {item['Pur Rate']}
+                  </td>
+                   <td className="text-end" style={sixthColWidth}>
+                    {item.Qnty}
+                  </td>
+                   <td className="text-end" style={seventhColWidth}>
+                    {item.Amount}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 25 - tableData.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 6 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
+  };
+
+   useHotkeys("alt+s", () => {
+        fetchDailyStatusReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1992,37 +2215,59 @@ export default function ItemStockReport() {
                                     </label>
                                 </div>
 
-                                <select
-                                    ref={input4Refrate}
-                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="A">AVERAGE RATE</option>
+                              
+                                <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input4Refrate}
+    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "250px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+       paddingLeft: "12px",
+    }}
+  >
+     <option value="A">AVERAGE RATE</option>
                                     <option value="P">PURCHASE RATE</option>
                                     <option value="M">LAST SM RATE</option>
                                       <option value="W">WEIGHTED AVERAGE</option>
                                     <option value="F">FIFO</option>
-                                </select>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
 
                            
@@ -2135,12 +2380,12 @@ export default function ItemStockReport() {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            Status :
+                                            Stock :
                                         </span>
                                     </label>
                                 </div>
 
-                                <select
+                                {/* <select
                                     ref={input4Ref}
                                     onKeyDown={(e) => handleKeyPress(e, input5Ref)}
                                     id="submitButton"
@@ -2169,7 +2414,62 @@ export default function ItemStockReport() {
                                     <option value="P">POSITIVE</option>
                                     <option value="N">NEGATIVE</option>
                                       <option value="Z">ZERO</option>
-                                </select>
+                                </select> */}
+
+
+                                <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input4Ref}
+    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "250px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingLeft: "13px",
+    }}
+  >
+      <option value="">ALL</option>
+                                    <option value="P">POSITIVE</option>
+                                    <option value="N">NEGATIVE</option>
+                                      <option value="Z">ZERO</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
+
+
                             </div>
 
                            
@@ -2360,25 +2660,80 @@ export default function ItemStockReport() {
                                             color: "white",
                                         }}
                                     >
-                                        <td className="border-dark" style={firstColWidth}>
-                                            Code
-                                        </td>
-                                        <td className="border-dark" style={secondColWidth}>
-                                            Description
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
-                                            Last Date
-                                        </td>
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Rate
-                                        </td>
+                                       
+                                         <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("Code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
+                    </td>
+
+                     <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Description")}
+                    >
+                      Description{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
+                    </td>
+
+                    <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Last Date")}
+                    >
+                      Last Date{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Last Date")}
+                      ></i>
+                    </td>
+
+                                 <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Pur Rate")}
+                    >
+                      Rate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Pur Rate")}
+                      ></i>
+                    </td>       
+                                        
+                                      
+                                      <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Qnty")}
+                    >
+                      Qnty{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnty")}
+                      ></i>
+                    </td>
                                      
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Qnty
-                                        </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                           Amount
-                                        </td>
+                                       <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Amount")}
+                    >
+                      Amount{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Amount")}
+                      ></i>
+                    </td>
+                                      
                                         <td className="border-dark" style={sixthcol}>
                                            
                                         </td>
@@ -2405,11 +2760,12 @@ export default function ItemStockReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
-                                    position: "relative",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                     width: "100%",
+                                    // position: "relative",
                                 }}
                             >
-                                <tbody id="tablebody">
+                                {/* <tbody id="tablebody">
                                     {isLoading ? (
                                         <>
                                             <tr
@@ -2516,8 +2872,10 @@ export default function ItemStockReport() {
                                             </tr>
                                         </>
                                     )}
-                                </tbody>
-                            </table>
+                                </tbody> */}
+
+                 <tbody id="tablebody" >{renderTableData()}</tbody>
+               </table>
                         </div>
                     </div>
                     {/* Table Footer */}
@@ -2527,7 +2885,7 @@ export default function ItemStockReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "10px"
+                            paddingRight: "8px"
                         }}
                     >
                         <div
@@ -2537,7 +2895,10 @@ export default function ItemStockReport() {
                                 marginLeft: "2px",
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+                                          <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2596,7 +2957,6 @@ export default function ItemStockReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2622,8 +2982,10 @@ export default function ItemStockReport() {
                             id="searchsubmit"
                             text="Select"
                             ref={selectButtonRef}
-                            onClick={fetchDailyStatusReport}
-                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+ onClick={() => {
+                fetchDailyStatusReport();
+                resetSorting();
+              }}                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                             }

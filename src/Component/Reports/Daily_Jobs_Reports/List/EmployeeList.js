@@ -90,8 +90,8 @@ export default function EmployeeList() {
       FLocCod: Companyselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      code: "NASIRTRD",
-      FLocCod: "001",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
       FSchTxt: searchQuery,
     }).toString();
 
@@ -122,11 +122,11 @@ export default function EmployeeList() {
       sessionStorage.getItem("componentMounted");
     if (
       !hasComponentMountedPreviously ||
-      (saleSelectRef && saleSelectRef.current)
+      (input1Ref && input1Ref.current)
     ) {
-      if (saleSelectRef && saleSelectRef.current) {
+      if (input1Ref && input1Ref.current) {
         setTimeout(() => {
-          saleSelectRef.current.focus();
+          input1Ref.current.focus();
           // saleSelectRef.current.select();
         }, 0);
       }
@@ -996,41 +996,12 @@ export default function EmployeeList() {
 
   let totalEntries = 0;
 
-  // const firstColWidth = {
-  //   width: "5.4%",
-  // };
-  // const secondColWidth = {
-  //   width: "20.3%",
-  // };
-  // const thirdColWidth = {
-  //   width: "8%",
-  // };
-  // const forthColWidth = {
-  //   width: "20%",
-  // };
-  // const fifthColWidth = {
-  //   width: "10%",
-  // };
-  // const sixthColWidth = {
-  //   width: "9%",
-  // };
-  // const seventhColWidth = {
-  //   width: "9%",
-  // };
-  // const eightthColWidth = {
-  //   width: "8%",
-  // };
-  // const ninthColWidth = {
-  //   width: "9%",
-  // };
-
-
-
+  
   const firstColWidth = {
     width: "50px",
   };
   const secondColWidth = {
-    width: "230px",
+    width: "235px",
   };
   const thirdColWidth = {
     width: "50px",
@@ -1054,7 +1025,7 @@ export default function EmployeeList() {
     width: "70px",
   };
   const sixthcol = {
-    width: "13px",
+    width: "8px",
   };
 
 
@@ -1229,85 +1200,34 @@ export default function EmployeeList() {
     }
   }, [tableData]);
 
-  // const handleSorting = (col) => {
-  //   const currentOrder = columnSortOrders[col];
-  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  //   const columnData = [...columns[col]];
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-  //   columnData.sort((a, b) => {
-  //     const aValue = a !== null ? a.toString() : "";
-  //     const bValue = b !== null ? b.toString() : "";
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
 
-  //     const numA = parseFloat(aValue.replace(/,/g, ""));
-  //     const numB = parseFloat(bValue.replace(/,/g, ""));
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+  });
 
-  //     if (!isNaN(numA) && !isNaN(numB)) {
-  //       return newOrder === "ASC" ? numA - numB : numB - numA;
-  //     } else {
-  //       return newOrder === "ASC"
-  //         ? aValue.localeCompare(bValue)
-  //         : bValue.localeCompare(aValue);
-  //     }
-  //   });
+  setTableData(sortedData);
 
-  //   // Update only the clicked column's data
-  //   setColumns((prev) => ({
-  //     ...prev,
-  //     [col]: columnData,
-  //   }));
-
-  //   // Reset all columns' sort order except the current one
-  //   const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-  //     acc[key] = key === col ? newOrder : null;
-  //     return acc;
-  //   }, {});
-  //   setColumnSortOrders(resetSortOrders);
-  // };
-
-  const handleSorting = (col) => {
-    // Always sort in descending order on first click (or toggle if already sorted)
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-    // Create an array of indices [0, 1, 2, ..., n-1]
-    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
-
-    // Sort the indices based on the values in the specified column
-    indices.sort((a, b) => {
-      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
-
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-    });
-
-    // Reorder all columns based on the sorted indices
-    const newColumns = Object.keys(columns).reduce((acc, key) => {
-      acc[key] = indices.map((index) => columns[key][index]);
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
       return acc;
-    }, {});
+    }, {}),
+  }));
+};
 
-    setColumns(newColumns);
-
-    // Update the sort order state
-    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-      (acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      },
-      {}
-    );
-    setColumnSortOrders(updatedSortOrders);
-  };
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -1324,34 +1244,7 @@ export default function EmployeeList() {
   };
 
   const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.Code.length,
-      columns.Employee.length,
-      columns.Status.length,
-      columns.Designation.length,
-      columns.Mobile.length,
-      columns.DOB.length,
-      columns["Join Date"].length,
-      columns["Adv Code"].length,
-      columns["Dlv Code"].length
-    );
-
-    const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        Code: columns.Code[i],
-        Employee: columns.Employee[i],
-        Status: columns.Status[i],
-        Designation: columns.Designation[i],
-        Mobile: columns.Mobile[i],
-        DOB: columns.DOB[i],
-        "Join Date": columns["Join Date"][i],
-        "Adv Code": columns["Adv Code"][i],
-        "Dlv Code": columns["Dlv Code"][i],
-      });
-    }
-
-    return (
+       return (
       <>
         {isLoading ? (
           <>
@@ -1387,7 +1280,7 @@ export default function EmployeeList() {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {tableData.map((item, i) => {
               totalEnteries += 1;
               return (
                 <tr
@@ -1450,7 +1343,7 @@ export default function EmployeeList() {
               );
             })}
             {Array.from({
-              length: Math.max(0, 27 - rows.length),
+              length: Math.max(0, 27 - tableData.length),
             }).map((_, rowIndex) => (
               <tr
                 key={`blank-${rowIndex}`}
@@ -1491,18 +1384,14 @@ export default function EmployeeList() {
     };
   };
 
-  useHotkeys(
-    "alt+s",
-    () => {
-      fetchReceivableReport();
-      resetSorting();
-    },
-    { preventDefault: true }
-  );
+ useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
   return (
     <>
@@ -1518,90 +1407,7 @@ export default function EmployeeList() {
         >
           <NavComponent textdata="Employee List" />
 
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "70px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Location :
-                    </span>
-                  </label>
-                </div>
-                <div style={{ marginLeft: "5px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={saleSelectRef}
-                    options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCompanyselectdata(selectedOption.value);
-                        setCompanyselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCompanyselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setCompanyselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
+        
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1641,34 +1447,56 @@ export default function EmployeeList() {
                   </label>
                 </div>
 
-                <select
-                  ref={input1Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "200px",
-                    height: "24px",
-                    marginLeft: "5px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                  }}
-                >
-                  <option value="">ALL</option>
-                  <option value="A">ACTIVE</option>
-                  <option value="N">NON-ACTIVE</option>
-                </select>
+                <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "200px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+    <option value="">ALL</option>
+    <option value="A">ACTIVE</option>
+    <option value="N">NON-ACTIVE</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
               </div>
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
@@ -1921,7 +1749,7 @@ export default function EmployeeList() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1%",
+              paddingRight: "8px",
               // width: "101.2%",
             }}
           >
@@ -1932,7 +1760,7 @@ export default function EmployeeList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
 
             </div>
             <div

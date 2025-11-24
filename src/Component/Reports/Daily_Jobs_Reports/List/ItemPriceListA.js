@@ -101,8 +101,8 @@ export default function ItemPriceListA() {
     const formData = new URLSearchParams({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      code: 'NASIRTRD',
-      FLocCod: '001',
+      // code: 'NASIRTRD',
+      // FLocCod: '001',
       FYerDsc: yeardescription || getYearDescription,
       FCtgCod: Companyselectdata,
       FCapCod: Capacityselectdata,
@@ -1241,84 +1241,35 @@ export default function ItemPriceListA() {
     }
   }, [tableData]);
 
-  // const handleSorting = (col) => {
-  //   const currentOrder = columnSortOrders[col];
-  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  //   setColumns(prevColumns => {
-  //     const columnData = [...prevColumns[col]];
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-  //     columnData.sort((a, b) => {
-  //       const aValue = a !== null ? a.toString() : "";
-  //       const bValue = b !== null ? b.toString() : "";
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
 
-  //       const numA = parseFloat(aValue.replace(/,/g, ""));
-  //       const numB = parseFloat(bValue.replace(/,/g, ""));
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+  });
 
-  //       if (!isNaN(numA) && !isNaN(numB)) {
-  //         return newOrder === "ASC" ? numA - numB : numB - numA;
-  //       } else {
-  //         return newOrder === "ASC"
-  //           ? aValue.localeCompare(bValue)
-  //           : bValue.localeCompare(aValue);
-  //       }
-  //     });
+  setTableData(sortedData);
 
-  //     return {
-  //       ...prevColumns,
-  //       [col]: columnData,
-  //     };
-  //   });
-
-  //   setColumnSortOrders(prev => ({
-  //     ...Object.fromEntries(Object.keys(prev).map(key => [key, null])),
-  //     [col]: newOrder
-  //   }));
-  // };
-
-  const handleSorting = (col) => {
-    // Always sort in descending order on first click (or toggle if already sorted)
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-    // Create an array of indices [0, 1, 2, ..., n-1]
-    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
-
-    // Sort the indices based on the values in the specified column
-    indices.sort((a, b) => {
-      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
-
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-    });
-
-    // Reorder all columns based on the sorted indices
-    const newColumns = Object.keys(columns).reduce((acc, key) => {
-      acc[key] = indices.map((index) => columns[key][index]);
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
       return acc;
-    }, {});
+    }, {}),
+  }));
+};
 
-    setColumns(newColumns);
-
-    // Update the sort order state
-    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-      (acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      },
-      {}
-    );
-    setColumnSortOrders(updatedSortOrders);
-  };
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -1336,36 +1287,8 @@ export default function ItemPriceListA() {
   };
 
   const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.Code?.length || 0,
-      columns.Description?.length || 0,
-      columns.Stk?.length || 0,
-      columns.Comm?.length || 0,
-      columns["Act Rate"]?.length || 0,
-      columns["Pur Rate"]?.length || 0,
-      columns["SM Rate"]?.length || 0,
-      columns["Sale Rate"]?.length || 0,
-      columns.MRP?.length || 0,
-      columns["Fix Rate"]?.length || 0
-    );
-
-    // Create rows from the columns data (which includes sorted data)
-    const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        Code: columns.Code[i],
-        Description: columns.Description[i],
-        Stk: columns.Stk[i],
-        Comm: columns.Comm[i],
-        "Act Rate": columns["Act Rate"][i],
-        "Pur Rate": columns["Pur Rate"][i],
-        "SM Rate": columns["SM Rate"][i],
-        "Sale Rate": columns["Sale Rate"][i],
-        MRP: columns.MRP[i],
-        "Fix Rate": columns["Fix Rate"][i],
-      });
-    }
-
+   
+  
     return (
       <>
         {isLoading ? (
@@ -1403,7 +1326,7 @@ export default function ItemPriceListA() {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {tableData.map((item, i) => {
               totalEnteries += 1;
               return (
                 <tr
@@ -1466,7 +1389,7 @@ export default function ItemPriceListA() {
                 </tr>
               );
             })}
-            {Array.from({ length: Math.max(0, 27 - rows.length) }).map(
+            {Array.from({ length: Math.max(0, 27 - tableData.length) }).map(
               (_, rowIndex) => (
                 <tr
                   key={`blank-${rowIndex}`}
@@ -1508,50 +1431,14 @@ export default function ItemPriceListA() {
     };
   };
 
-  useHotkeys(
-    "alt+s",
-    () => {
-      fetchReceivableReport();
-      resetSorting();
-    },
-    { preventDefault: true }
-  );
+ useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
-
-  // const firstColWidth = {
-  //   width: "12.5%",
-  // };
-  // const secondColWidth = {
-  //   width: "24.5%",
-  // };
-  // const thirdColWidth = {
-  //   width: "4%",
-  // };
-  // const forthColWidth = {
-  //   width: "7%",
-  // };
-  // const fifthColWidth = {
-  //   width: "8.5%",
-  // };
-  // const sixthColWidth = {
-  //   width: "8.5%",
-  // };
-  // const eightColWidth = {
-  //   width: "8.5%",
-  // };
-  // const ninthColWidth = {
-  //   width: "8.5%",
-  // };
-  // const tenthColWidth = {
-  //   width: "8.5%",
-  // };
-  // const elewenthColWidth = {
-  //   width: "8.5%",
-  // };
-
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
   const firstColWidth = {
     width: "100px",
@@ -1584,7 +1471,7 @@ export default function ItemPriceListA() {
     width: "80px",
   };
 
-  const sixthcol = { width: "13px" };
+  const sixthcol = { width: "8px" };
 
 
 
@@ -2262,7 +2149,7 @@ export default function ItemPriceListA() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "13px",
+              paddingRight: "8px",
               // width: "101.2%",
             }}
           >
@@ -2273,7 +2160,7 @@ export default function ItemPriceListA() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
 
             </div>
             <div

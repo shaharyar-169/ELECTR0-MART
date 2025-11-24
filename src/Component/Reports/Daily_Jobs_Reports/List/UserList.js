@@ -748,7 +748,7 @@ export default function UserList() {
     width: "99px",
   };
   const sixthColWidth = {
-    width: "270px",
+    width: "265px",
   };
   const seventhColWidth = {
     width: "90px",
@@ -758,7 +758,7 @@ export default function UserList() {
   };
 
 
-  const sixthcol = { width: "13px" };
+  const sixthcol = { width: "8px" };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -772,30 +772,6 @@ export default function UserList() {
     };
   }, []);
 
-  // const contentStyle = {
-  //   backgroundColor: getcolor,
-  //   // width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
-  //   position: "relative",
-  //   top: "40%",
-  //   left: isSidebarVisible ? "50%" : "50%",
-  //   transform: "translate(-50%, -50%)",
-  //   transition: isSidebarVisible
-  //     ? "left 3s ease-in-out, width 2s ease-in-out"
-  //     : "left 3s ease-in-out, width 2s ease-in-out",
-  //   display: "flex",
-  //   justifyContent: "center",
-  //   alignItems: "start",
-  //   overflowX: "hidden",
-  //   overflowY: "hidden",
-  //   wordBreak: "break-word",
-  //   textAlign: "center",
-  //   // maxWidth: "1050px",
-  //   fontSize: "15px",
-  //   fontStyle: "normal",
-  //   fontWeight: "400",
-  //   lineHeight: "23px",
-  //   fontFamily: '"Poppins", sans-serif',
-  // };
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
@@ -925,41 +901,7 @@ export default function UserList() {
     }
   }, [tableData]);
 
-  // const handleSorting = (col) => {
-  //   const currentOrder = columnSortOrders[col];
-  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  //   const columnData = [...columns[col]];
-
-  //   columnData.sort((a, b) => {
-  //     const aValue = a !== null ? a.toString() : "";
-  //     const bValue = b !== null ? b.toString() : "";
-
-  //     const numA = parseFloat(aValue.replace(/,/g, ""));
-  //     const numB = parseFloat(bValue.replace(/,/g, ""));
-
-  //     if (!isNaN(numA) && !isNaN(numB)) {
-  //       return newOrder === "ASC" ? numA - numB : numB - numA;
-  //     } else {
-  //       return newOrder === "ASC"
-  //         ? aValue.localeCompare(bValue)
-  //         : bValue.localeCompare(aValue);
-  //     }
-  //   });
-
-  //   // Update only the clicked column's data
-  //   setColumns((prev) => ({
-  //     ...prev,
-  //     [col]: columnData,
-  //   }));
-
-  //   // Reset all columns' sort order except the current one
-  //   const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-  //     acc[key] = key === col ? newOrder : null;
-  //     return acc;
-  //   }, {});
-  //   setColumnSortOrders(resetSortOrders);
-  // };
 
   const handleSorting = (col) => {
     const currentOrder = columnSortOrders[col];
@@ -1004,137 +946,7 @@ export default function UserList() {
     });
   };
 
-  // const renderTableData = () => {
-  //   const rowCount = Math.max(
-  //     columns.ID?.length || 0,
-  //     columns.Name?.length || 0,
-  //     columns.Status?.length || 0,
-  //     columns.Type?.length || 0,
-  //     columns.Mobile?.length || 0,
-  //     columns.Email?.length || 0,
-  //     columns["Log Date"]?.length || 0,
-  //     columns["Log Time"]?.length || 0
-  //   );
 
-  //   const rows = [];
-  //   for (let i = 0; i < rowCount; i++) {
-  //     rows.push({
-  //       ID: columns.ID[i],
-  //       Name: columns.Name[i],
-  //       Status: columns.Status[i],
-  //       Type: columns.Type[i],
-  //       Mobile: columns.Mobile[i],
-  //       Email: columns.Email[i],
-  //       "Log Date": columns["Log Date"][i],
-  //       "Log Time": columns["Log Time"][i]
-  //     });
-  //   }
-
-  //   return (
-  //     <>
-  //       {isLoading ? (
-  //         <>
-  //           <tr style={{ backgroundColor: getcolor }}>
-  //             <td colSpan="8" className="text-center">
-  //               <Spinner animation="border" variant="primary" />
-  //             </td>
-  //           </tr>
-  //           {Array.from({ length: Math.max(0, 30 - 5) }).map((_, rowIndex) => (
-  //             <tr
-  //               key={`blank-${rowIndex}`}
-  //               style={{
-  //                 backgroundColor: getcolor,
-  //                 color: fontcolor,
-  //               }}
-  //             >
-  //               {Array.from({ length: 8 }).map((_, colIndex) => (
-  //                 <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-  //               ))}
-  //             </tr>
-  //           ))}
-  //           <tr>
-  //             <td style={firstColWidth}></td>
-  //             <td style={secondColWidth}></td>
-  //             <td style={thirdColWidth}></td>
-  //             <td style={forthColWidth}></td>
-  //             <td style={fifthColWidth}></td>
-  //             <td style={sixthColWidth}></td>
-  //             <td style={seventhColWidth}></td>
-  //             <td style={eightColWidth}></td>
-  //           </tr>
-  //         </>
-  //       ) : (
-  //         <>
-  //           {rows.map((item, i) => {
-  //             totalEnteries += 1;
-  //             return (
-  //               <tr
-  //                 key={`${i}-${selectedIndex}`}
-  //                 ref={(el) => (rowRefs.current[i] = el)}
-  //                 onClick={() => handleRowClick(i)}
-  //                 className={selectedIndex === i ? "selected-background" : ""}
-  //                 style={{
-  //                   backgroundColor: getcolor,
-  //                   color: fontcolor,
-  //                 }}
-  //               >
-  //                 <td className="text-start" style={firstColWidth}>
-  //                   {item.ID}
-  //                 </td>
-  //                 <td className="text-start" style={secondColWidth}>
-  //                   {item.Name}
-  //                 </td>
-  //                 <td className="text-center" style={thirdColWidth}>
-  //                   {item.Status}
-  //                 </td>
-  //                 <td className="text-center" style={forthColWidth}>
-  //                   {item.Type}
-  //                 </td>
-  //                 <td className="text-start" style={fifthColWidth}>
-  //                   {item.Mobile}
-  //                 </td>
-  //                 <td className="text-start" style={sixthColWidth}>
-  //                   {item.Email}
-  //                 </td>
-  //                 <td className="text-start" style={seventhColWidth}>
-  //                   {item["Log Date"]}
-  //                 </td>
-  //                 <td className="text-start" style={eightColWidth}>
-  //                   {item["Log Time"]}
-  //                 </td>
-  //               </tr>
-  //             );
-  //           })}
-  //           {Array.from({
-  //             length: Math.max(0, 27 - rows.length),
-  //           }).map((_, rowIndex) => (
-  //             <tr
-  //               key={`blank-${rowIndex}`}
-  //               style={{
-  //                 backgroundColor: getcolor,
-  //                 color: fontcolor,
-  //               }}
-  //             >
-  //               {Array.from({ length: 8 }).map((_, colIndex) => (
-  //                 <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-  //               ))}
-  //             </tr>
-  //           ))}
-  //           <tr>
-  //             <td style={firstColWidth}></td>
-  //             <td style={secondColWidth}></td>
-  //             <td style={thirdColWidth}></td>
-  //             <td style={forthColWidth}></td>
-  //             <td style={fifthColWidth}></td>
-  //             <td style={sixthColWidth}></td>
-  //             <td style={seventhColWidth}></td>
-  //             <td style={eightColWidth}></td>
-  //           </tr>
-  //         </>
-  //       )}
-  //     </>
-  //   );
-  // };
 
   const renderTableData = () => {
     return (
@@ -1265,18 +1077,14 @@ export default function UserList() {
     };
   };
 
-  useHotkeys(
-    "alt+s",
-    () => {
-      fetchReceivableReport();
-      resetSorting();
-    },
-    { preventDefault: true }
-  );
+  useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
   return (
     <>
@@ -1331,34 +1139,56 @@ export default function UserList() {
                   </label>
                 </div>
 
-                <select
-                  ref={input1Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "200px",
-                    height: "24px",
-                    marginLeft: "5px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                  }}
-                >
-                  <option value="">ALL</option>
-                  <option value="A">ACTIVE</option>
-                  <option value="N">NON-ACTIVE</option>
-                </select>
+                <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "200px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+    <option value="">ALL</option>
+    <option value="A">ACTIVE</option>
+    <option value="N">NON-ACTIVE</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
               </div>
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
@@ -1607,7 +1437,7 @@ export default function UserList() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
+              paddingRight: "8px",
               // width: "101.2%",
             }}
           >
@@ -1618,7 +1448,7 @@ export default function UserList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
 
             </div>
             <div

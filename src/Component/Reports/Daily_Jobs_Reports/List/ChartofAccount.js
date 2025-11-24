@@ -78,8 +78,8 @@ export default function ChartofAccount() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
 
-      code: 'NASIRTRD',
-      FLocCod: '001',
+      // code: 'NASIRTRD',
+      // FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
@@ -622,46 +622,34 @@ export default function ChartofAccount() {
     }
   }, [tableData]);
 
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    // Copy full rows
-    const fullRows = tableData.slice(); // Don't mutate original
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-    // Perform full-row sorting by the selected column
-    fullRows.sort((a, b) => {
-      const aValue = a[col] !== null ? a[col].toString() : "";
-      const bValue = b[col] !== null ? b[col].toString() : "";
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
 
-      const numA = parseFloat(aValue.replace(/,/g, ""));
-      const numB = parseFloat(bValue.replace(/,/g, ""));
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+  });
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-    });
+  setTableData(sortedData);
 
-    // Transform the sorted full rows back into column format
-    const newColumns = {
-      Code: fullRows.map((row) => row.Code),
-      Description: fullRows.map((row) => row.Description),
-      Status: fullRows.map((row) => row.Status),
-    };
-
-    setColumns(newColumns);
-
-    // Set the sort order
-    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : "";
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
       return acc;
-    }, {});
-    setColumnSortOrders(resetSortOrders);
-  };
+    }, {}),
+  }));
+};
+
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -673,21 +661,7 @@ export default function ChartofAccount() {
 
 
   const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.Code.length,
-      columns.Description.length,
-      columns.Status.length
-    );
-
-    const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        Code: columns.Code[i],
-        Description: columns.Description[i],
-        Status: columns.Status[i],
-      });
-    }
-
+   
     return (
       <>
         {isLoading ? (
@@ -718,7 +692,7 @@ export default function ChartofAccount() {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {tableData.map((item, i) => {
               totalEnteries += 1;
               return (
                 <tr
@@ -744,7 +718,7 @@ export default function ChartofAccount() {
               );
             })}
             {Array.from({
-              length: Math.max(0, 25 - rows.length),
+              length: Math.max(0, 25 - tableData.length),
             }).map((_, rowIndex) => (
               <tr
                 key={`blank-${rowIndex}`}
@@ -779,52 +753,15 @@ export default function ChartofAccount() {
   };
 
 
-  // const handleSorting = (col) => {
-  //   // Get current sort order for this column
-  //   const currentOrder = columnSortOrders[col];
-  //   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-  //   // Create a copy of the column data
-  //   const columnData = [...columns[col]];
-
-  //   // Sort just this column's data
-  //   columnData.sort((a, b) => {
-  //     const aValue = a !== null ? a.toString() : "";
-  //     const bValue = b !== null ? b.toString() : "";
-
-  //     const numA = parseFloat(aValue.replace(/,/g, ""));
-  //     const numB = parseFloat(bValue.replace(/,/g, ""));
-
-  //     if (!isNaN(numA) && !isNaN(numB)) {
-  //       return newOrder === "ASC" ? numA - numB : numB - numA;
-  //     } else {
-  //       return newOrder === "ASC"
-  //         ? aValue.localeCompare(bValue)
-  //         : bValue.localeCompare(aValue);
-  //     }
-  //   });
-
-  //   // Update just this column's data
-  //   setColumns(prev => ({
-  //     ...prev,
-  //     [col]: columnData
-  //   }));
-
-  //   // Update the sort order for this column
-  //   setColumnSortOrders(prev => ({
-  //     ...prev,
-  //     [col]: newOrder
-  //   }));
-  // };
 
   useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    resetSorting();
-  }, { preventDefault: true });
-
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
+          fetchReceivableReport();
+             resetSorting();
+      }, { preventDefault: true, enableOnFormTags: true });
+  
+      useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+      useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+      useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
 
   // const firstColWidth = {
@@ -841,7 +778,7 @@ export default function ChartofAccount() {
   const secondColWidth = { width: "360px" };
   const thirdColWidth = { width: "60px" };
   
-  const sixthcol = { width: "13px" };
+  const sixthcol = { width: "8px" };
 
 
 
@@ -1025,34 +962,56 @@ const contentStyle = {
                   </label>
                 </div>
 
-                <select
-                  ref={input1Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "120px",
-                    height: "24px",
-                    marginLeft: "5px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                  }}
-                >
-                  <option value="">ALL</option>
-                  <option value="A">ACTIVE</option>
-                  <option value="N">NON-ACTIVE</option>
-                </select>
+                <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "150px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+    <option value="">ALL</option>
+    <option value="A">ACTIVE</option>
+    <option value="N">NON-ACTIVE</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
               </div>
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
@@ -1278,7 +1237,7 @@ const contentStyle = {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
 
             </div>
             <div

@@ -724,7 +724,7 @@ export default function GeneralLedger() {
         console.log('gobal font data', globalfontsize)
 
         // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "landscape" });
+        const doc = new jsPDF({ orientation: "potraite" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
@@ -759,7 +759,7 @@ export default function GeneralLedger() {
             "Credit",
             "Balance",
         ];
-        const columnWidths = [22, 15, 12, 110, 30, 30, 30];
+        const columnWidths = [21, 14, 12, 95, 22, 22, 22];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -965,7 +965,7 @@ export default function GeneralLedger() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 47; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -1002,7 +1002,7 @@ export default function GeneralLedger() {
                 doc.setFontSize(pageNumberFontSize);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 30,
+                    rightX - 10,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -1017,7 +1017,7 @@ export default function GeneralLedger() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`General Ledger Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`General Ledger From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -1127,7 +1127,7 @@ export default function GeneralLedger() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`GeneralLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`GeneralLedger Form ${fromInputDate} To ${toInputDate}.pdf`);
 
 
     };
@@ -1191,7 +1191,7 @@ export default function GeneralLedger() {
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`General Ledger Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`General Ledger From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1243,7 +1243,7 @@ export default function GeneralLedger() {
 
         // Apply styling for the status row
         const typeAndStoreRow2 = worksheet.addRow(
-            ["ACCOUNT :", Accountselect, "", "", "STATUS :", typestatus]
+            ["ACCOUNT :", Accountselect, "", "", "TYPE :", typestatus]
         );
 
         const typeAndStoreRow3 = worksheet.addRow(
@@ -1425,7 +1425,7 @@ export default function GeneralLedger() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `General Ledger Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `GeneralLedger  From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1505,7 +1505,7 @@ export default function GeneralLedger() {
         width: "90px",
     };
 
-    const sixthcol = { width: "13px" };
+    const sixthcol = { width: "8px" };
 
 
     useHotkeys("alt+s", () => {
@@ -1515,7 +1515,7 @@ export default function GeneralLedger() {
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1650,6 +1650,29 @@ export default function GeneralLedger() {
             handleRadioChange(days);
         }
     }, [selectedRadio]);
+
+
+    // this function for hide the 0 value figure from the table data 
+
+    const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
+const isMatchedRow = (item) => {
+  if (!searchQuery) return false; // no highlight if search is empty
+
+  const query = searchQuery.toUpperCase();
+
+  // you can match anything you want:
+  return (
+    item.Description?.toUpperCase().includes(query) ||
+    item.Type?.toUpperCase().includes(query) ||
+    item.Date?.toUpperCase().includes(query) ||
+    String(item["Trn#"])?.includes(query)
+  );
+};
+
+
 
     return (
         <>
@@ -1866,30 +1889,33 @@ export default function GeneralLedger() {
                                     </label>
                                 </div>
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
+                               <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "200px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+   <option value="">ALL</option>
                                     <option value="CRV">CASH RECEIVE VORCHER</option>
                                     <option value="CPV">Cash PAYMENT VORCHER</option>
                                     <option value="BRV">Bank RECEIVE VORCHER</option>
@@ -1902,7 +1928,27 @@ export default function GeneralLedger() {
                                     <option value="ISS">ISSUE</option>
                                     <option value="REC">RECEIVED</option>
                                     <option value="SLY">SALARY</option>
-                                </select>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
                         </div>
                     </div>
@@ -2104,6 +2150,8 @@ export default function GeneralLedger() {
                                     />
                                 </div>
                             </div>
+
+                            
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
                                     <span
@@ -2312,6 +2360,8 @@ export default function GeneralLedger() {
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
+                                                             color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
+                                                            //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
                                                         }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
@@ -2327,13 +2377,13 @@ export default function GeneralLedger() {
                                                             {item.Description}
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item.Debit}
+                                                            {formatValue(item.Debit)}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Credit}
+                                                           {formatValue(item.Credit)}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Balance}
+                                                             {formatValue(item.Balance)}
                                                         </td>
                                                     </tr>
                                                 );
@@ -2377,7 +2427,7 @@ export default function GeneralLedger() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "1.2%",
+                            paddingRight: "8px",
                             // width: "101.2%",
                         }}
                     >

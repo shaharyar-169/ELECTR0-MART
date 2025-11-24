@@ -101,8 +101,8 @@ export default function ItemPriceList() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-      code: 'UMAIRPOS',
-      FLocCod: '001',
+      // code: 'UMAIRPOS',
+      // FLocCod: '001',
 
       FCtgCod: Companyselectdata,
       FCapCod: Capacityselectdata,
@@ -1219,7 +1219,7 @@ export default function ItemPriceList() {
     width: "340px",
   };
   const thirdColWidth = {
-    width: "75px",
+    width: "80px",
   };
   const forthColWidth = {
     width: "75px",
@@ -1237,7 +1237,7 @@ export default function ItemPriceList() {
     width: "80px",
   };
 
-    const sixthcol = { width: "13px" };
+    const sixthcol = { width: "8px" };
 
 
 
@@ -1381,49 +1381,34 @@ export default function ItemPriceList() {
     }
   }, [tableData]);
 
-  const handleSorting = (col) => {
-    // Always sort in descending order on first click (or toggle if already sorted)
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    // Create an array of indices [0, 1, 2, ..., n-1]
-    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-    // Sort the indices based on the values in the specified column
-    indices.sort((a, b) => {
-      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
 
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+  });
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-    });
+  setTableData(sortedData);
 
-    // Reorder all columns based on the sorted indices
-    const newColumns = Object.keys(columns).reduce((acc, key) => {
-      acc[key] = indices.map((index) => columns[key][index]);
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
       return acc;
-    }, {});
+    }, {}),
+  }));
+};
 
-    setColumns(newColumns);
-
-    // Update the sort order state
-    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-      (acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      },
-      {}
-    );
-    setColumnSortOrders(updatedSortOrders);
-  };
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -1439,31 +1424,10 @@ export default function ItemPriceList() {
   };
 
   const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.Code?.length || 0,
-      columns.Description?.length || 0,
-      columns.Stk?.length || 0,
-      columns.Comm?.length || 0,
-      columns["SM Rate"]?.length || 0,
-      columns["Sale Rate"]?.length || 0,
-      columns.MRP?.length || 0,
-      columns["Fix Rate"]?.length || 0
-    );
+   
 
     const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        Code: columns.Code[i],
-        Description: columns.Description[i],
-        Stk: columns.Stk[i],
-        Comm: columns.Comm[i],
-        "SM Rate": columns["SM Rate"][i],
-        "Sale Rate": columns["Sale Rate"][i],
-        MRP: columns.MRP[i],
-        "Fix Rate": columns["Fix Rate"][i],
-      });
-    }
-
+    
     return (
       <>
         {isLoading ? (
@@ -1499,7 +1463,7 @@ export default function ItemPriceList() {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {tableData.map((item, i) => {
               totalEnteries += 1;
 
               const show = (val) => (Number(val) === 0 ? "" : val); // <<< hide 0 values
@@ -1560,7 +1524,7 @@ export default function ItemPriceList() {
             })}
 
             {Array.from({
-              length: Math.max(0, 27 - rows.length),
+              length: Math.max(0, 27 - tableData.length),
             }).map((_, rowIndex) => (
               <tr
                 key={`blank-${rowIndex}`}
@@ -1598,18 +1562,14 @@ export default function ItemPriceList() {
     };
   };
 
-  useHotkeys(
-    "alt+s",
-    () => {
-      fetchReceivableReport();
-      resetSorting();
-    },
-    { preventDefault: true }
-  );
+  useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
   return (
     <>
@@ -2016,6 +1976,9 @@ export default function ItemPriceList() {
             </div>
           </div>
 
+
+          
+
           {/* //////////////// TABLE HEADER SECTION ///////////////////////// */}
           <div>
             <div
@@ -2188,7 +2151,7 @@ export default function ItemPriceList() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
+              paddingRight: "8px",
               // width: "100%",
             }}
           >
@@ -2199,7 +2162,7 @@ export default function ItemPriceList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
 
             </div>
             <div

@@ -33,6 +33,7 @@ export default function ItemList() {
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
+  const input11Ref = useRef(null);
   const input4Ref = useRef(null);
   const input5Ref = useRef(null);
   const input6Ref = useRef(null);
@@ -141,12 +142,7 @@ export default function ItemList() {
     setIsLoading(true);
 
     const formData = new URLSearchParams({
-      FItmSts:
-        transectionType === "Non-Active"
-          ? "N"
-          : transectionType === "Active"
-            ? "A"
-            : "",
+      FItmSts:transectionType,
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
@@ -1358,7 +1354,7 @@ export default function ItemList() {
     width: "60px",
   };
 
-  const sixthcol = { width: "13px" };
+  const sixthcol = { width: "8px" };
 
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1498,49 +1494,34 @@ export default function ItemList() {
     }
   }, [tableData]);
 
-  const handleSorting = (col) => {
-    // Always sort in descending order on first click (or toggle if already sorted)
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    // Create an array of indices [0, 1, 2, ..., n-1]
-    const indices = Array.from({ length: columns[col].length }, (_, i) => i);
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-    // Sort the indices based on the values in the specified column
-    indices.sort((a, b) => {
-      const aVal = columns[col][a] !== null ? columns[col][a].toString() : "";
-      const bVal = columns[col][b] !== null ? columns[col][b].toString() : "";
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
 
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+  });
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-    });
+  setTableData(sortedData);
 
-    // Reorder all columns based on the sorted indices
-    const newColumns = Object.keys(columns).reduce((acc, key) => {
-      acc[key] = indices.map((index) => columns[key][index]);
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
       return acc;
-    }, {});
+    }, {}),
+  }));
+};
 
-    setColumns(newColumns);
-
-    // Update the sort order state
-    const updatedSortOrders = Object.keys(columnSortOrders).reduce(
-      (acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      },
-      {}
-    );
-    setColumnSortOrders(updatedSortOrders);
-  };
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -1555,30 +1536,7 @@ export default function ItemList() {
   };
 
   const renderTableData = () => {
-    const rowCount = Math.max(
-      columns.Code?.length || 0,
-      columns.Description?.length || 0,
-      columns.Company?.length || 0,
-      columns.Category?.length || 0,
-      // columns.Capacity?.length || 0,
-      // columns.Type?.length || 0,
-      columns.Status?.length || 0
-    );
-
-    const rows = [];
-    for (let i = 0; i < rowCount; i++) {
-      rows.push({
-        Code: columns.Code[i],
-        Description: columns.Description[i],
-        Company: columns.Company[i],
-        Category: columns.Category[i],
-        // Capacity: columns.Capacity[i],
-        // Type: columns.Type[i],
-        Status: columns.Status[i],
-      });
-    }
-
-    return (
+      return (
       <>
         {isLoading ? (
           <>
@@ -1612,7 +1570,7 @@ export default function ItemList() {
           </>
         ) : (
           <>
-            {rows.map((item, i) => {
+            {tableData.map((item, i) => {
               totalEnteries += 1;
               return (
                 <tr
@@ -1714,7 +1672,7 @@ export default function ItemList() {
               );
             })}
             {Array.from({
-              length: Math.max(0, 27 - rows.length),
+              length: Math.max(0, 27 - tableData.length),
             }).map((_, rowIndex) => (
               <tr
                 key={`blank-${rowIndex}`}
@@ -1752,18 +1710,14 @@ export default function ItemList() {
     };
   };
 
-  useHotkeys(
-    "alt+s",
-    () => {
-      fetchReceivableReport();
-      resetSorting();
-    },
-    { preventDefault: true }
-  );
+ useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
   return (
     <>
@@ -1867,7 +1821,7 @@ export default function ItemList() {
                 </div>
               </div>
 
-              {/* <div
+              <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
               >
@@ -1897,7 +1851,7 @@ export default function ItemList() {
                     className="List-select-class "
                     ref={input3Ref}
                     options={typeoptions}
-                    onKeyDown={(e) => handletypeKeypress(e, input4Ref)}
+                    onKeyDown={(e) => handletypeKeypress(e, input11Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -1934,64 +1888,10 @@ export default function ItemList() {
                     placeholder="ALL"
                   />
                 </div>
-              </div> */}
-
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Status :
-                    </span>
-                  </label>
-                </div>
-
-                <select
-                  ref={input4Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "250px",
-                    height: "24px",
-                    marginLeft: "3px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                    paddingLeft: "12px",
-                  }}
-                >
-                  <option value="">ALL</option>
-                  <option value="A">ACTIVE</option>
-                  <option value="N">NON-ACTIVE</option>
-                </select>
               </div>
+
+
+             
             </div>
           </div>
           {/* //////////////// SECOND ROW ///////////////////////// */}
@@ -2039,7 +1939,7 @@ export default function ItemList() {
                     className="List-select-class "
                     ref={input1Ref}
                     options={categoryoptions}
-                    onKeyDown={(e) => handlecategoryKeypress(e, input4Ref)}
+                    onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2077,7 +1977,7 @@ export default function ItemList() {
                   />
                 </div>
               </div>
-              {/* 
+              
               <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
@@ -2103,104 +2003,64 @@ export default function ItemList() {
                   </label>
                 </div>
 
-                <select
-                  ref={input4Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "250px",
-                    height: "24px",
-                    marginLeft: "3px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                    paddingLeft: "12px",
-                  }}
-                >
-                  <option value="">ALL</option>
-                  <option value="A">ACTIVE</option>
-                  <option value="N">NON-ACTIVE</option>
-                </select>
-              </div> */}
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input5Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input6Ref)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "250px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
+               
+<div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input11Ref}
+    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "250px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingLeft: "12px",
+    }}
+  >
+    <option value="">ALL</option>
+    <option value="A">ACTIVE</option>
+    <option value="N">NON-ACTIVE</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
               </div>
+           
             </div>
           </div>
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
-          {/* <div
+          <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
           >
@@ -2347,7 +2207,7 @@ export default function ItemList() {
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* //////////////// TABLE HEADER SECTION ///////////////////////// */}
           <div>
@@ -2484,7 +2344,7 @@ export default function ItemList() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "52vh",
+                maxHeight: "45vh",
                 // width: "100%",
                 wordBreak: "break-word",
               }}
@@ -2511,7 +2371,7 @@ export default function ItemList() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
+              paddingRight: "8px",
               // width: "101.2%",
             }}
           >
@@ -2522,7 +2382,7 @@ export default function ItemList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
 
             </div>
             <div
