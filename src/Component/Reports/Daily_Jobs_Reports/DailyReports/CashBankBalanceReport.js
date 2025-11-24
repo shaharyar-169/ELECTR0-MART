@@ -980,8 +980,8 @@ export default function DailyCashBankBalance() {
 
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
-        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-        : ["STATUS :", typestatus, ""]
+        ? ["TYPE :", typestatus, "SEARCH :", typesearch]
+        : ["TYPE :", typestatus, ""]
     );
 
     // Apply styling for the status row

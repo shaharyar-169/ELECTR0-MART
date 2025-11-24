@@ -169,13 +169,16 @@ export default function InvoiceLedgerReport() {
     };
 
     function fetchReceivableReport() {
-
+        const mobilenumber = document.getElementById("selectedsale");
         let hasError = false;
         let errorType = "";
 
         switch (true) {
-            case !saleType:
+            case !mobileNumber:
                 errorType = 'saleType';
+                break;
+                 case mobileNumber.length !== 6:
+                errorType = "invalidMobileNumber";
                 break;
 
             default:
@@ -184,9 +187,14 @@ export default function InvoiceLedgerReport() {
         }
 
         switch (errorType) {
-            // case 'saleType':
-            //     toast.error("Please select a Account Code");
-            //     return;
+            case 'saleType':
+                toast.error("Please Enter a Invoice");
+                return;
+
+                case "invalidMobileNumber":
+                toast.error("Invalid Invoice");
+                mobilenumber.style.border = "2px solid red";
+                return;
             default:
                 break;
         }
@@ -195,13 +203,13 @@ export default function InvoiceLedgerReport() {
 
         const formData = new URLSearchParams({
             // FInvNum: '002279',
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            // code: 'BRIGHT',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
             FInvNum: mobileNumber,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
 
 
         }).toString();
@@ -245,8 +253,18 @@ export default function InvoiceLedgerReport() {
         }
     }, []);
 
-    const handleMobilenumberInputChange = (e) => {
-        setmobileNumber(e.target.value);
+     const handleMobilenumberInputChange = (e) => {
+        let value = e.target.value;
+
+        // Allow only numbers
+        value = value.replace(/\D/g, "");
+
+        // Limit to 11 digits
+        if (value.length > 6) {
+            value = value.slice(0, 6);
+        }
+
+        setmobileNumber(value);
     };
 
     const handleMobilePress = (e, nextInputRef) => {
@@ -616,7 +634,7 @@ export default function InvoiceLedgerReport() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Invoice Ledger Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Invoice Ledger`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -703,7 +721,7 @@ export default function InvoiceLedgerReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`InvoiceLedgerReport As On ${date}.pdf`);
+        doc.save(`InvoiceLedger As On ${date}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
        const handleDownloadCSV = async () => {
@@ -979,7 +997,7 @@ export default function InvoiceLedgerReport() {
             const blob = new Blob([buffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             });
-            saveAs(blob, `InvoiceLedgerReport As on ${currentdate}.xlsx`);
+            saveAs(blob, `InvoiceLedger As on ${currentdate}.xlsx`);
         };
 
     const dispatch = useDispatch();
@@ -1004,10 +1022,10 @@ export default function InvoiceLedgerReport() {
 
 
     const firstColWidth = {
-        width: "90px",
+        width: "80px",
     };
     const secondColWidth = {
-        width: "63px",
+        width: "60px",
     };
     const thirdColWidth = {
         width: "36px",
@@ -1022,12 +1040,16 @@ export default function InvoiceLedgerReport() {
         width: "100px",
     };
 
-    const sixthcol = { width: "13px" };
+    const sixthcol = { width: "8px" };
 
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1146,6 +1168,10 @@ export default function InvoiceLedgerReport() {
     };
 
 
+    
+      const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
 
     return (
         <>
@@ -1160,7 +1186,7 @@ export default function InvoiceLedgerReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Invoice Ledger Report" />
+                    <NavComponent textdata="Invoice Ledger" />
 
                     <div
                         className="row"
@@ -1443,10 +1469,10 @@ export default function InvoiceLedgerReport() {
                                                         </td>
 
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item.Sale}
+                                                            {formatValue(item.Sale) }
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Collection}
+                                                            {formatValue(item.Collection) }
                                                         </td>
 
 
@@ -1490,7 +1516,7 @@ export default function InvoiceLedgerReport() {
                     </div>
 
 
-                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' , paddingRight:"8px"}}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>

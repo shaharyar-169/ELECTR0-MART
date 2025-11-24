@@ -395,13 +395,13 @@ export default function CustomerLedger() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
 
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
         };
         console.log(data);
         document.getElementById(
@@ -421,9 +421,9 @@ export default function CustomerLedger() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -968,7 +968,7 @@ export default function CustomerLedger() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 31; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -1018,7 +1018,7 @@ export default function CustomerLedger() {
                 startY += 5; // Adjust vertical position for the company title
 
                 addTitle(
-                    `Customer Ledger Report From: ${fromInputDate} To: ${toInputDate}`,
+                    `Customer Ledger From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -1129,7 +1129,7 @@ export default function CustomerLedger() {
 
         // Save the PDF files
         doc.save(
-            `CustomerLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`
+            `CustomerLedger Form ${fromInputDate} To ${toInputDate}.pdf`
         );
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
@@ -1193,7 +1193,7 @@ export default function CustomerLedger() {
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Customer Ledger Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Customer Ledger From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1245,7 +1245,7 @@ export default function CustomerLedger() {
 
         // Apply styling for the status row
         const typeAndStoreRow2 = worksheet.addRow(
-            ["ACCOUNT :", Accountselect, "", "", "", "", "STATUS :", typestatus]
+            ["ACCOUNT :", Accountselect, "", "", "", "", "TYPE :", typestatus]
         );
 
         const typeAndStoreRow3 = worksheet.addRow(
@@ -1433,7 +1433,7 @@ export default function CustomerLedger() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `Customer Ledger Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `CustomerLedger From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1522,16 +1522,16 @@ export default function CustomerLedger() {
         width: "90px",
     };
 
-    const sixthcol = { width: "13px" };
+    const sixthcol = { width: "8px" };
 
-    useHotkeys("alt+s", () => {
+     useHotkeys("alt+s", () => {
         fetchReceivableReport();
         //    resetSorting();
     }, { preventDefault: true, enableOnFormTags: true });
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1666,6 +1666,25 @@ export default function CustomerLedger() {
             handleRadioChange(days);
         }
     }, [selectedRadio]);
+
+
+        const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
+    const isMatchedRow = (item) => {
+  if (!searchQuery) return false; // no highlight if search is empty
+
+  const query = searchQuery.toUpperCase();
+
+  // you can match anything you want:
+  return (
+    item.Description?.toUpperCase().includes(query) ||
+    item.Type?.toUpperCase().includes(query) ||
+    item.Date?.toUpperCase().includes(query) ||
+    String(item["Trn#"])?.includes(query)
+  );
+};
 
     return (
         <>
@@ -1874,30 +1893,33 @@ export default function CustomerLedger() {
                                     </label>
                                 </div>
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
+                                               <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "200px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+   <option value="">ALL</option>
                                     <option value="CRV">CASH RECEIVE VORCHER</option>
                                     <option value="CPV">Cash PAYMENT VORCHER</option>
                                     <option value="BRV">Bank RECEIVE VORCHER</option>
@@ -1910,7 +1932,27 @@ export default function CustomerLedger() {
                                     <option value="ISS">ISSUE</option>
                                     <option value="REC">RECEIVED</option>
                                     <option value="SLY">SALARY</option>
-                                </select>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
                         </div>
                     </div>
@@ -2338,6 +2380,7 @@ export default function CustomerLedger() {
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
+                                                             color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
                                                         }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
@@ -2354,19 +2397,19 @@ export default function CustomerLedger() {
                                                             {item.Description}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Qnty}
+                                                            { formatValue(item.Qnty) }
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Rate}
+                                                           { formatValue(item.Rate) }
                                                         </td>
                                                         <td className="text-end" style={eightColWidth}>
-                                                            {item.Debit}
+                                                            { formatValue(item.Debit) }
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item.Credit}
+                                                            { formatValue(item.Credit) }
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item.Balance}
+                                                            { formatValue(item.Balance) }
                                                         </td>
                                                     </tr>
                                                 );
@@ -2408,7 +2451,7 @@ export default function CustomerLedger() {
                     </div>
 
 
-                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex' }}>
+                    <div style={{ borderBottom: `1px solid ${fontcolor}`, borderTop: `1px solid ${fontcolor}`, height: '24px', display: 'flex', paddingRight:"8px" }}>
 
                         <div style={{ ...firstColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>
                         <div style={{ ...secondColWidth, background: getcolor, borderRight: `1px solid ${fontcolor}` }}></div>

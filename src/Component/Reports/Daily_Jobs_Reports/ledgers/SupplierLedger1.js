@@ -407,12 +407,12 @@ export default function SupplierLedger1() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
-            code: 'ZOHAELEC',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
         }).toString();
 
         axios
@@ -970,7 +970,7 @@ export default function SupplierLedger1() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 31; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -1020,7 +1020,7 @@ export default function SupplierLedger1() {
                 startY += 5; // Adjust vertical position for the company title
 
                 addTitle(
-                    `Supplier Ledger Report From: ${fromInputDate} To: ${toInputDate}`,
+                    `Supplier Ledger From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -1131,7 +1131,7 @@ export default function SupplierLedger1() {
 
         // Save the PDF files
         doc.save(
-            `SupplierLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`
+            `SupplierLedger Form ${fromInputDate} To ${toInputDate}.pdf`
         );
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
@@ -1195,7 +1195,7 @@ export default function SupplierLedger1() {
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Supplier Ledger Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Supplier Ledger From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1247,7 +1247,7 @@ export default function SupplierLedger1() {
 
         // Apply styling for the status row
         const typeAndStoreRow2 = worksheet.addRow(
-            ["ACCOUNT :", Accountselect, "", "", "", "", "STATUS :", typestatus]
+            ["ACCOUNT :", Accountselect, "", "", "", "", "TYPE :", typestatus]
         );
 
         const typeAndStoreRow3 = worksheet.addRow(
@@ -1435,7 +1435,7 @@ export default function SupplierLedger1() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `Supplier Ledger Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `SupplierLedger  From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1524,7 +1524,7 @@ export default function SupplierLedger1() {
         width: "90px",
     };
 
-    const sixthcol = { width: "13px" };
+    const sixthcol = { width: "8px" };
 
     useHotkeys("alt+s", () => {
         fetchReceivableReport();
@@ -1668,6 +1668,26 @@ export default function SupplierLedger1() {
             handleRadioChange(days);
         }
     }, [selectedRadio]);
+
+
+
+      const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
+const isMatchedRow = (item) => {
+  if (!searchQuery) return false; // no highlight if search is empty
+
+  const query = searchQuery.toUpperCase();
+
+  // you can match anything you want:
+  return (
+    item.Description?.toUpperCase().includes(query) ||
+    item.Type?.toUpperCase().includes(query) ||
+    item.Date?.toUpperCase().includes(query) ||
+    String(item["Trn#"])?.includes(query)
+  );
+};
 
     return (
         <>
@@ -1928,30 +1948,35 @@ export default function SupplierLedger1() {
                                     </label>
                                 </div>
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
+
+
+                                                            <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "200px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+   <option value="">ALL</option>
                                     <option value="CRV">CASH RECEIVE VORCHER</option>
                                     <option value="CPV">Cash PAYMENT VORCHER</option>
                                     <option value="BRV">Bank RECEIVE VORCHER</option>
@@ -1964,7 +1989,27 @@ export default function SupplierLedger1() {
                                     <option value="ISS">ISSUE</option>
                                     <option value="REC">RECEIVED</option>
                                     <option value="SLY">SALARY</option>
-                                </select>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
                         </div>
                     </div>
@@ -2404,6 +2449,8 @@ export default function SupplierLedger1() {
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
+                                                          color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
+
                                                         }}
                                                     >
                                                         <td className="text-center" style={firstColWidth}>
@@ -2420,19 +2467,19 @@ export default function SupplierLedger1() {
                                                             {item.Description}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Qnty}
+                                                            {formatValue(item.Qnty) }
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Rate}
+                                                            {formatValue(item.Rate) }
                                                         </td>
                                                         <td className="text-end" style={eightColWidth}>
-                                                            {item.Debit}
+                                                           {formatValue(item.Debit) }
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item.Credit}
+                                                           {formatValue(item.Credit) }
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item.Balance}
+                                                            {formatValue(item.Balance) }
                                                         </td>
                                                     </tr>
                                                 );
@@ -2479,6 +2526,7 @@ export default function SupplierLedger1() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
+                            paddingRight:'8px'
                         }}
                     >
                         <div

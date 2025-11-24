@@ -1283,7 +1283,7 @@ export default function ItemLedgerReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 31; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -1333,7 +1333,7 @@ export default function ItemLedgerReport() {
                 startY += 5; // Adjust vertical position for the company title
 
                 addTitle(
-                    `Item Ledger Report From: ${fromInputDate} To: ${toInputDate}`,
+                    `Item Ledger From: ${fromInputDate} To: ${toInputDate}`,
                     "",
                     "",
                     pageNumber,
@@ -1443,7 +1443,7 @@ export default function ItemLedgerReport() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`ItemLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`ItemLedger Form ${fromInputDate} To ${toInputDate}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
@@ -1507,7 +1507,7 @@ export default function ItemLedgerReport() {
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Item Ledger Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Item Ledger From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1559,7 +1559,7 @@ export default function ItemLedgerReport() {
 
         // Apply styling for the status row
         const typeAndStoreRow2 = worksheet.addRow(
-            ["ACCOUNT :", Accountselect, "", "", "", "", "", "", "STATUS :", typestatus]
+            ["ACCOUNT :", Accountselect, "", "", "", "", "", "", "TYPE :", typestatus]
         );
 
         const typeAndStoreRow3 = worksheet.addRow(
@@ -1763,7 +1763,7 @@ export default function ItemLedgerReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `Item Ledger Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `ItemLedger From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1786,58 +1786,58 @@ export default function ItemLedgerReport() {
     let totalEntries = 0;
 
     const firstColWidth = {
-        width: "90px",
+        width: "80px",
     };
     const secondColWidth = {
-        width: "63px",
+        width: "55px",
     };
     const thirdColWidth = {
         width: "36px",
     };
     const fifthColWidth = {
-        width: "36px",
+        width: "30px",
     };
     const forthColWidth = {
-        width: "80px",
+        width: "60px",
     };
     const sixthColWidth = {
-        width: "360px",
+        width: "300px",
     };
     const seventhColWidth = {
-        width: "80px",
+        width: "60px",
     };
     const eightColWidth = {
-        width: "80px",
+        width: "60px",
     };
     const ninthColWidth = {
-        width: "80px",
+        width: "60px",
     };
     const tenthColWidth = {
-        width: "80px",
+        width: "60px",
     };
 
     const elewenthColWidth = {
-        width: "80px",
+        width: "60px",
     };
     const tewlthColWidth = {
-        width: "80px",
+        width: "60px",
     };
     const thirteenColWidth = {
-        width: "80px",
+        width: "60px",
     };
 
 
-    const sixthcol = { width: "13px" };
+    const sixthcol = { width: "8px" };
 
 
-    useHotkeys("alt+s", () => {
+     useHotkeys("alt+s", () => {
         fetchReceivableReport();
         //    resetSorting();
     }, { preventDefault: true, enableOnFormTags: true });
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1853,7 +1853,7 @@ export default function ItemLedgerReport() {
 
     const contentStyle = {
         width: "100%", // 100vw ki jagah 100%
-        maxWidth: "1240px",
+        maxWidth: "1000px",
         height: "calc(100vh - 100px)",
         position: "absolute",
         top: "70px",
@@ -1955,6 +1955,25 @@ export default function ItemLedgerReport() {
         setSelectedRadio(days === 0 ? "custom" : `${days}days`);
     };
 
+
+      const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
+    const isMatchedRow = (item) => {
+  if (!searchQuery) return false; // no highlight if search is empty
+
+  const query = searchQuery.toUpperCase();
+
+  // you can match anything you want:
+  return (
+    item.Description?.toUpperCase().includes(query) ||
+    item.Type?.toUpperCase().includes(query) ||
+    item.Date?.toUpperCase().includes(query) ||
+    String(item["Trn#"])?.includes(query)
+  );
+};
+
     return (
         <>
             <ToastContainer />
@@ -1968,7 +1987,7 @@ export default function ItemLedgerReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Item Ledger Report" />
+                    <NavComponent textdata="Item Ledger" />
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -2314,31 +2333,34 @@ export default function ItemLedgerReport() {
                                     </label>
                                 </div>
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        paddingLeft: '15px',
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">ALL</option>
+                               
+                            <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "200px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingLeft: "13px",
+    }}
+  >
+   <option value="">ALL</option>
                                     <option value="CRV">CASH RECEIVE VORCHER</option>
                                     <option value="CPV">Cash PAYMENT VORCHER</option>
                                     <option value="BRV">Bank RECEIVE VORCHER</option>
@@ -2351,7 +2373,27 @@ export default function ItemLedgerReport() {
                                     <option value="ISS">ISSUE</option>
                                     <option value="REC">RECEIVED</option>
                                     <option value="SLY">SALARY</option>
-                                </select>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
                         </div>
                     </div>
@@ -2706,7 +2748,7 @@ export default function ItemLedgerReport() {
                                             Sale
                                         </td>
                                         <td className="border-dark" style={tewlthColWidth}>
-                                            Sale Ret
+                                            Sal Ret
                                         </td>
                                         <td className="border-dark" style={thirteenColWidth}>
                                             Bal
@@ -2737,7 +2779,7 @@ export default function ItemLedgerReport() {
                                 style={{
                                     fontSize: getdatafontsize,
                                     fontFamily: getfontstyle,
-                                    // width: "100%",
+                                    width: "100%",
                                     position: "relative",
                                      ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
 
@@ -2803,6 +2845,7 @@ export default function ItemLedgerReport() {
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
+                                                             color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
@@ -2822,28 +2865,28 @@ export default function ItemLedgerReport() {
                                                             {item.Description}
                                                         </td>
                                                         <td className="text-end" style={forthColWidth}>
-                                                            {item.Rate}
+                                                            {formatValue(item.Rate)}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Purchase}
+                                                            {formatValue(item.Purchase)}
                                                         </td>
                                                         <td className="text-end" style={eightColWidth}>
-                                                            {item["Pur-Ret"]}
+                                                            {formatValue(item["Pur-Ret"])}
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item.Receive}
+                                                            {formatValue(item.Receive)}
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item.Issue}
+                                                            {formatValue(item.Issue)}
                                                         </td>
                                                         <td className="text-end" style={elewenthColWidth}>
-                                                            {item.Sale}
+                                                            {formatValue(item.Sale)}
                                                         </td>
                                                         <td className="text-end" style={tewlthColWidth}>
-                                                            {item["Sale-Ret"]}
+                                                            {formatValue(item["Sale-Ret"])}
                                                         </td>
                                                         <td className="text-end" style={thirteenColWidth}>
-                                                            {item.Bal}
+                                                            {formatValue(item.Bal)}
                                                         </td>
                                                     </tr>
                                                 );
@@ -2895,6 +2938,7 @@ export default function ItemLedgerReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
+                            paddingRight:'8px'
                         }}
                     >
                         <div

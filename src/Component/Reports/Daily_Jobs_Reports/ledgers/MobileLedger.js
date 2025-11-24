@@ -416,9 +416,9 @@ export default function MobileLedger() {
             FYerDsc: yeardescription || getYearDescription,
 
 
-            code: 'ZSTRD',
-            FLocCod: '001',
-            FYerDsc: '2025-2025',
+            // code: 'BRIGHT',
+            // FLocCod: '001',
+            // FYerDsc: '2025-2025',
 
 
         }).toString();
@@ -715,7 +715,7 @@ export default function MobileLedger() {
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
 
-                addTitle(`Mobile Ledger Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                addTitle(`Mobile Ledger From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -825,7 +825,7 @@ export default function MobileLedger() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`MobileLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`MobileLedger Form ${fromInputDate} To ${toInputDate}.pdf`);
 
 
     };
@@ -884,7 +884,7 @@ export default function MobileLedger() {
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Mobile Ledger Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Mobile Ledger From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1098,7 +1098,7 @@ export default function MobileLedger() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `Mobile Ledger Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `MobileLedger From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1195,7 +1195,7 @@ export default function MobileLedger() {
         width: "54px",
     };
     const secondColWidth = {
-        width: "90px",
+        width: "80px",
     };
     const thirdColWidth = {
         width: "360px",
@@ -1209,11 +1209,17 @@ export default function MobileLedger() {
     const sixthColWidth = {
         width: "90px",
     };
-    const sixthcol = { width: "13px" };
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    const sixthcol = { width: "8px" };
+
+
+    useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1366,6 +1372,30 @@ export default function MobileLedger() {
     }
     // Bind to window
     window.closeAlert = closeAlert;
+
+
+       const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
+    const isMatchedRow = (item) => {
+  if (!searchQuery) return false; // no highlight if search is empty
+
+  const query = searchQuery.toUpperCase();
+
+  // you can match anything you want:
+  return (
+    item.ttrnnum?.toUpperCase().includes(query) ||
+    item.ttrndat?.toUpperCase().includes(query) ||
+    item.ttrndsc?.toUpperCase().includes(query) ||
+    item.tsalrat?.toUpperCase().includes(query) ||
+    item.titmqnt?.toUpperCase().includes(query) ||
+    item.Amount?.toUpperCase().includes(query) ||
+
+    String(item["Trn#"])?.includes(query)
+  );
+};
+
 
     return (
         <>
@@ -1899,6 +1929,7 @@ export default function MobileLedger() {
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             color: fontcolor,
+                                                             color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
@@ -1911,13 +1942,13 @@ export default function MobileLedger() {
                                                             {item.ttrndsc}
                                                         </td>
                                                         <td className="text-end" style={forthColWidth}>
-                                                            {item.tsalrat}
+                                                            {formatValue(item.tsalrat) }
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item.titmqnt}
+                                                            {formatValue(item.titmqnt) }
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Amount}
+                                                            {formatValue(item.Amount) }
                                                         </td>
                                                     </tr>
                                                 );
@@ -1960,7 +1991,7 @@ export default function MobileLedger() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "1.2%",
+                            paddingRight: "8px",
                             // width: "101.2%",
                         }}
                     >

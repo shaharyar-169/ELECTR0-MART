@@ -399,13 +399,13 @@ export default function BankRegisterLedger1() {
       FFnlDat: toInputDate,
       FTrnTyp: transectionType,
       FAccCod: saleType,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getYearDescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
 
-      code: 'NASIRTRD',
-      FLocCod: '001',
-      FYerDsc: '2024-2024',
+      // code: 'NASIRTRD',
+      // FLocCod: '001',
+      // FYerDsc: '2024-2024',
     }).toString();
 
     axios
@@ -957,7 +957,7 @@ export default function BankRegisterLedger1() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 31; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1007,7 +1007,7 @@ export default function BankRegisterLedger1() {
         startY += 5; // Adjust vertical position for the company title
 
         addTitle(
-          `Bank Register Ledger Report From: ${fromInputDate} To: ${toInputDate}`,
+          `Bank Register From: ${fromInputDate} To: ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1118,7 +1118,7 @@ export default function BankRegisterLedger1() {
 
     // Save the PDF files
     doc.save(
-      `BAnkRegisterLedgerReport Form ${fromInputDate} To ${toInputDate}.pdf`
+      `BAnkRegister Form ${fromInputDate} To ${toInputDate}.pdf`
     );
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
@@ -1182,7 +1182,7 @@ export default function BankRegisterLedger1() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow([`Bank Register Ledger Report From ${fromInputDate} To ${toInputDate}`]);
+    const storeListRow = worksheet.addRow([`Bank Register From ${fromInputDate} To ${toInputDate}`]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -1422,7 +1422,7 @@ export default function BankRegisterLedger1() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `Bank Register Ledger Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+    saveAs(blob, `BankRegister From ${fromInputDate} To ${toInputDate}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1456,46 +1456,82 @@ export default function BankRegisterLedger1() {
     return filteredData;
   };
 
-  const firstColWidth = {
-    width: "9.1%",
+  // const firstColWidth = {
+  //   width: "9.1%",
+  // };
+  // const secondColWidth = {
+  //   width: "6%",
+  // };
+  // const thirdColWidth = {
+  //   width: "4.3%",
+  // };
+  // const forthColWidth = {
+  //   width: "28.6%",
+  // };
+  // const fifthColWidth = {
+  //   width: "8.7%",
+  // };
+  // const sixthColWidth = {
+  //   width: "9.7%",
+  // };
+  // const seventhColWidth = {
+  //   width: "9.9%",
+  // };
+  // const eightColWidth = {
+  //   width: "9.7%",
+  // };
+  // const ninthColWidth = {
+  //   width: "9.7%",
+  // };
+  // const CheckColWidth = {
+  //   width: "3%",
+  // };
+
+
+    const firstColWidth = {
+    width: "80px",
   };
   const secondColWidth = {
-    width: "6%",
+    width: "60px",
   };
   const thirdColWidth = {
-    width: "4.3%",
+    width: "30px",
   };
   const forthColWidth = {
-    width: "28.6%",
+    width: "340px",
   };
   const fifthColWidth = {
-    width: "8.7%",
+    width: "75px",
   };
   const sixthColWidth = {
-    width: "9.7%",
+    width: "75px",
   };
   const seventhColWidth = {
-    width: "9.9%",
+    width: "75px",
   };
   const eightColWidth = {
-    width: "9.7%",
+    width: "80px",
   };
   const ninthColWidth = {
-    width: "9.7%",
+    width: "150px",
+  };
+  const CheckColWidth = {
+    width: "20px",
   };
 
-  const CheckColWidth = {
-    width: "3%",
+  const sixthcol = {
+    width: "8px",
   };
 
   useHotkeys("alt+s", () => {
-    fetchReceivableReport();
-    //    resetSorting();
-  }, { preventDefault: true, enableOnFormTags: true });
+        fetchReceivableReport();
+        //    resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
-  useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-  useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1509,30 +1545,29 @@ export default function BankRegisterLedger1() {
     };
   }, []);
 
-  const contentStyle = {
-    backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(70vw - 0%)" : "70vw",
-    position: "relative",
-    top: "40%",
-    left: isSidebarVisible ? "50%" : "50%",
-    transform: "translate(-50%, -50%)",
-    transition: isSidebarVisible
-      ? "left 3s ease-in-out, width 2s ease-in-out"
-      : "left 3s ease-in-out, width 2s ease-in-out",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "start",
-    overflowX: "hidden",
-    overflowY: "hidden",
-    wordBreak: "break-word",
-    textAlign: "center",
-    maxWidth: "80vw",
-    fontSize: "15px",
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "23px",
-    fontFamily: '"Poppins", sans-serif',
-  };
+    const contentStyle = {
+        width: "100%", // 100vw ki jagah 100%
+        maxWidth: "1000px",
+        height: "calc(100vh - 100px)",
+        position: "absolute",
+        top: "70px",
+        left: isSidebarVisible ? "60vw" : "50vw",
+        transform: "translateX(-50%)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: "hidden",
+        textAlign: "center",
+        fontSize: "15px",
+        fontStyle: "normal",
+        fontWeight: "400",
+        lineHeight: "23px",
+        fontFamily: '"Poppins", sans-serif',
+        zIndex: 1,
+        padding: "0 20px", // Side padding for small screens
+        boxSizing: "border-box", // Padding ko width mein include kare
+    };
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
@@ -1632,6 +1667,25 @@ export default function BankRegisterLedger1() {
     }
   }, [selectedRadio]);
 
+
+     const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
+  const isMatchedRow = (item) => {
+  if (!searchQuery) return false; // no highlight if search is empty
+
+  const query = searchQuery.toUpperCase();
+
+  // you can match anything you want:
+  return (
+    item.Description?.toUpperCase().includes(query) ||
+    item.Type?.toUpperCase().includes(query) ||
+    item.Date?.toUpperCase().includes(query) ||
+    String(item["Trn#"])?.includes(query)
+  );
+};
+
   return (
     <>
       <ToastContainer />
@@ -1640,12 +1694,12 @@ export default function BankRegisterLedger1() {
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            width: "100%",
+            // width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Bank Register Ledger" />
+          <NavComponent textdata="Bank Register" />
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1890,44 +1944,66 @@ export default function BankRegisterLedger1() {
                   </label>
                 </div>
 
-                <select
-                  ref={input1Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "200px",
-                    height: "24px",
-                    marginLeft: "5px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                  }}
-                >
-                  <option value="">ALL</option>
-                  <option value="CRV">CASH RECEIVE VORCHER</option>
-                  <option value="CPV">Cash PAYMENT VORCHER</option>
-                  <option value="BRV">Bank RECEIVE VORCHER</option>
-                  <option value="BPV">BANK PAYMENT VORCHER</option>
-                  <option value="JRV">JOURNAL VORCHER</option>
-                  <option value="INV">ITEM SALE</option>
-                  <option value="SRN">SALE RETURN</option>
-                  <option value="BIL">PURCHASE</option>
-                  <option value="PRN">PURCHASE RETURN</option>
-                  <option value="ISS">ISSUE</option>
-                  <option value="REC">RECEIVED</option>
-                  <option value="SLY">SALARY</option>
-                </select>
+                                     <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "200px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+   <option value="">ALL</option>
+                                    <option value="CRV">CASH RECEIVE VORCHER</option>
+                                    <option value="CPV">Cash PAYMENT VORCHER</option>
+                                    <option value="BRV">Bank RECEIVE VORCHER</option>
+                                    <option value="BPV">BANK PAYMENT VORCHER</option>
+                                    <option value="JRV">JOURNAL VORCHER</option>
+                                    <option value="INV">ITEM SALE</option>
+                                    <option value="SRN">SALE RETURN</option>
+                                    <option value="BIL">PURCHASE</option>
+                                    <option value="PRN">PURCHASE RETURN</option>
+                                    <option value="ISS">ISSUE</option>
+                                    <option value="REC">RECEIVED</option>
+                                    <option value="SLY">SALARY</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
               </div>
             </div>
           </div>
@@ -2216,7 +2292,7 @@ export default function BankRegisterLedger1() {
             <div
               style={{
                 overflowY: "auto",
-                width: "98.8%",
+                // width: "98.8%",
               }}
             >
               <table
@@ -2225,7 +2301,7 @@ export default function BankRegisterLedger1() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  // width: "100%",
                   position: "relative",
                   paddingRight: "2%",
                 }}
@@ -2288,6 +2364,10 @@ export default function BankRegisterLedger1() {
                     >
                       <input type="checkbox" disabled />
                     </td>
+
+                    <td className="border-dark" style={sixthcol}>
+                      
+                    </td>
                   </tr>
                 </thead>
               </table>
@@ -2299,7 +2379,7 @@ export default function BankRegisterLedger1() {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "48vh",
-                width: "100%",
+                // width: "100%",
                 wordBreak: "break-word",
               }}
             >
@@ -2309,7 +2389,7 @@ export default function BankRegisterLedger1() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  // width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})
                 }}
@@ -2371,6 +2451,8 @@ export default function BankRegisterLedger1() {
                             style={{
                               backgroundColor: getcolor,
                               color: fontcolor,
+                              color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
+
                             }}
                           >
                             <td className="text-center" style={firstColWidth}>
@@ -2413,17 +2495,18 @@ export default function BankRegisterLedger1() {
                             </td>
 
                             <td className="text-end" style={fifthColWidth}>
-                              {item.Debit}
+                              {formatValue(item.Debit) }
                             </td>
                             <td className="text-end" style={sixthColWidth}>
-                              {item.Credit}
+                             {formatValue(item.Credit) }
                             </td>
                             <td className="text-end" style={seventhColWidth}>
-                              {item.Balance}
+                             {formatValue(item.Balance) }
                             </td>
                             <td className="text-end" style={CheckColWidth}>
                               <input type="checkbox" />
                             </td>
+                           
                           </tr>
                         );
                       })}
@@ -2469,8 +2552,8 @@ export default function BankRegisterLedger1() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
-              width: "101.2%",
+              paddingRight: "8px",
+              // width: "101.2%",
             }}
           >
             <div

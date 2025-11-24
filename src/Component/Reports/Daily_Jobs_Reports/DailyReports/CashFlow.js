@@ -1363,7 +1363,11 @@ export default function CashFlowReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="custom">Custom</label>
+                                        <label htmlFor="custom" style={{
+                                              fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                       
+                                        }}>Custom</label>
                                     </div>
                                     <div className="d-flex align-items-baseline mx-2">
                                         <input
@@ -1380,7 +1384,12 @@ export default function CashFlowReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="30">30 Days</label>
+                                        <label htmlFor="30" 
+                                style={{
+                                      fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                                }}
+                                        >30 Days</label>
                                     </div>
                                     <div className="d-flex align-items-baseline mx-2">
                                         <input
@@ -1397,7 +1406,10 @@ export default function CashFlowReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="60">60 Days</label>
+                                        <label htmlFor="60" style={{
+                                              fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                                        }}>60 Days</label>
                                     </div>
                                     <div className="d-flex align-items-baseline mx-2">
                                         <input
@@ -1414,7 +1426,10 @@ export default function CashFlowReport() {
                                             }
                                         />
                                         &nbsp;
-                                        <label htmlFor="90">90 Days</label>
+                                        <label htmlFor="90" style={{
+                                              fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                                        }}>90 Days</label>
                                     </div>
                                 </div>
                             </div>
@@ -1452,7 +1467,9 @@ export default function CashFlowReport() {
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{   fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold", }}>
                                             From:
                                         </span>
                                     </label>
@@ -1546,7 +1563,9 @@ export default function CashFlowReport() {
                                     }}
                                 >
                                     <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                                        <span style={{   fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold", }}>
                                             To:
                                         </span>
                                     </label>

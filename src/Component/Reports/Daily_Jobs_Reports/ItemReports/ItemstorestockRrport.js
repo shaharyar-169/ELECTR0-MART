@@ -1573,7 +1573,7 @@ export default function ItemStoreStockReport() {
         width: "80px",
     };
        const sixthcol = {
-        width: "13px",
+        width: "8px",
     };
 
     
@@ -2640,7 +2640,7 @@ export default function ItemStoreStockReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "13px"
+                            paddingRight: "8px"
                         }}
                     >
                         <div

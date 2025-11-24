@@ -1704,7 +1704,7 @@ export default function ItemSaleReport() {
     };
 
      const sixthcol = {
-        width: "13px",
+        width: "8px",
     };
 
     
@@ -2768,7 +2768,7 @@ export default function ItemSaleReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            // paddingRight: "13px"
+                            paddingRight: "8px"
                         }}
                     >
                         <div
