@@ -1663,15 +1663,17 @@ const handleSorting = (col) => {
           <>
             {tableData.map((item, i) => {
               totalEnteries += 1;
+               const isNegative = item.Qnty < 0 || item.Amount < 0;
               return (
                 <tr
+
                   key={`${i}-${selectedIndex}`}
                   ref={(el) => (rowRefs.current[i] = el)}
                   onClick={() => handleRowClick(i)}
                   className={selectedIndex === i ? "selected-background" : ""}
                   style={{
                     backgroundColor: getcolor,
-                    color: fontcolor,
+                     color: isNegative ? "red" : fontcolor 
                   }}
                 >
                   <td className="text-start" style={firstColWidth}>
