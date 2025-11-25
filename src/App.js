@@ -156,6 +156,9 @@ import MemberRecivableReport from "./Component/Transaction/MemberRecievableRepor
 
 //////////////////////////// MISC REPORT //////////////////////////////
 import ReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ReceivableReport.js";
+import PayableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/Payablereport.js";
+import ReceivableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ReceiableAggingReport.js";
+import PayableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/PayableAggingReport.js";
 
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
@@ -319,7 +322,9 @@ function App() {
 
                 {/* ROUTES FOR MISC REPORT */}
                 <Route exact path="/ReceivableReport" element={<ReceivableReport />} />
-
+                <Route exact path="/PayableReport" element={<PayableReport />} />
+                <Route exact path="/ReceivableAggingReport" element={<ReceivableAggingReport />} />
+                <Route exact path="/PayableAggingReport" element={<PayableAggingReport />} />
 
 
                 {/* Rountes for item reports */}

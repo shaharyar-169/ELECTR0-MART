@@ -30,7 +30,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Balance } from "@mui/icons-material";
 
-export default function ReceivableReport() {
+export default function PayableReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -393,10 +393,10 @@ export default function ReceivableReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/ReceivableReport.php";
+    const apiUrl = apiLinks + "/PayableReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-       //   FLocCod: "001",
+    //   FLocCod: "001",
     //   FYerDsc: "2024-2024",
      
      
@@ -757,7 +757,7 @@ export default function ReceivableReport() {
           addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
           startY += 5; // Adjust vertical position for the company title
   
-          addTitle(`Receivable Report From ${fromInputDate} To ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+          addTitle(`Payable Report From ${fromInputDate} To ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
           startY += -5;
   
           const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -838,7 +838,7 @@ export default function ReceivableReport() {
       handlePagination();
   
       // Save the PDF files
-      doc.save(`ReceivableReport As On ${date}.pdf`);
+      doc.save(`PayableReport As On ${date}.pdf`);
     };
 
 
@@ -898,7 +898,7 @@ export default function ReceivableReport() {
          );
  
          // Add Store List row
-         const storeListRow = worksheet.addRow([`Receiable Report From ${fromInputDate} To ${toInputDate}`]);
+         const storeListRow = worksheet.addRow([`Payable Report From ${fromInputDate} To ${toInputDate}`]);
          storeListRow.eachCell((cell) => {
              cell.font = fontStoreList;
              cell.alignment = { horizontal: "center" };
@@ -1097,7 +1097,7 @@ export default function ReceivableReport() {
          const blob = new Blob([buffer], {
              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
          });
-         saveAs(blob, `ReceivableReport As on ${currentdate}.xlsx`);
+         saveAs(blob, `PayableReport  As on ${currentdate}.xlsx`);
      };
   const dispatch = useDispatch();
 
@@ -1168,7 +1168,8 @@ export default function ReceivableReport() {
             Credit: "",
               Balance: "",
     });
-      // When you receive your initial table data, transform it into column-oriented format
+  
+    // When you receive your initial table data, transform it into column-oriented format
     useEffect(() => {
       if (tableData.length > 0) {
         const newColumns = {
@@ -1211,7 +1212,8 @@ export default function ReceivableReport() {
       }, {}),
     }));
   };
-   
+  
+  
     const resetSorting = () => {
       setColumnSortOrders({
         code: null,
@@ -1279,17 +1281,17 @@ export default function ReceivableReport() {
                       {item.Description}
                     </td>
                     <td className="text-end" style={thirdColWidth}>
-                      {formatValue(item.Opening)}
-                    </td>
-                     <td className="text-end" style={forthColWidth}>
-                      {formatValue(item.Debit) }
-                    </td>
-                     <td className="text-end" style={fifthColWidth}>
-                      {formatValue(item.Credit) }
-                    </td>
-                     <td className="text-end" style={sixthColWidth}>
-                      {formatValue(item.Balance)}
-                    </td>
+                                         {formatValue(item.Opening)}
+                                       </td>
+                                        <td className="text-end" style={forthColWidth}>
+                                         {formatValue(item.Debit) }
+                                       </td>
+                                        <td className="text-end" style={fifthColWidth}>
+                                         {formatValue(item.Credit) }
+                                       </td>
+                                        <td className="text-end" style={sixthColWidth}>
+                                         {formatValue(item.Balance)}
+                                       </td>
                   </tr>
                 );
               })}
@@ -1478,8 +1480,7 @@ useHotkeys("alt+s", () => {
     }
   }, [selectedRadio]);
 
-
-      const formatValue = (val) => {
+    const formatValue = (val) => {
   return Number(val) === 0 ? "" : val;
 };
 
@@ -1496,7 +1497,7 @@ useHotkeys("alt+s", () => {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Receivable Report" />
+          <NavComponent textdata="Payable Report" />
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -2104,8 +2105,7 @@ useHotkeys("alt+s", () => {
  onClick={() => {
                 fetchReceivableReport();
                 resetSorting();
-              }} 
-                           onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              }}              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }
