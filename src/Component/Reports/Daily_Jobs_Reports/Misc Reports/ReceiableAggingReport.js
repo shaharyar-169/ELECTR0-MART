@@ -24,7 +24,7 @@ import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useHotkeys } from "react-hotkeys-hook";
 import { fetchGetUser } from "../../../Redux/action";
-// import "./ledger.css";
+import "./misc.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
