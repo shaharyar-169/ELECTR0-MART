@@ -242,9 +242,9 @@ export default function ItemStockReport() {
             FRepStk: transectionType2,
             FRepRat: transectionType,
 
-            // code: 'NASIRTRD',
-            // FLocCod: '001',
-            // FYerDsc: '2024-2024',
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -2429,8 +2429,8 @@ const handleSorting = (col) => {
     onBlur={(e) =>
       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
     }
-    value={transectionType}
-    onChange={handleTransactionTypeChange}
+    value={transectionType2}
+    onChange={handleTransactionTypeChange2}
     style={{
       width: "250px",
       height: "24px",
@@ -2449,9 +2449,9 @@ const handleSorting = (col) => {
                                       <option value="Z">ZERO</option>
   </select>
 
-  {transectionType !== "" && (
+  {transectionType2 !== "" && (
     <span
-      onClick={() => settransectionType("")}
+      onClick={() => settransectionType2("")}
       style={{
         position: "absolute",
         right: "25px",

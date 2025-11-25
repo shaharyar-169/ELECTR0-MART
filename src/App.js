@@ -154,6 +154,9 @@ import ItemPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemRepor
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
 import MemberRecivableReport from "./Component/Transaction/MemberRecievableReport.js";
 
+//////////////////////////// MISC REPORT //////////////////////////////
+import ReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ReceivableReport.js";
+
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
 import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/TaxsaleRegister.js";
@@ -314,6 +317,8 @@ function App() {
                 <Route exact path="/ItemSaleReport" element={<ItemSaleReport />} />
                 <Route exact path="/ItemPurchaseReport" element={<ItemPurchaseReport />} />
 
+                {/* ROUTES FOR MISC REPORT */}
+                <Route exact path="/ReceivableReport" element={<ReceivableReport />} />
 
 
 
@@ -331,7 +336,7 @@ function App() {
                 <Route exact path="/salesdashboad" element={<Dashboard />} />
                 <Route exact path="/AdminDealer" element={<DashboardAdminDealer />} />
                 <Route exact path="/ResturentDashboard" element={<ResturentDashboard />} />
-                L  <Route exact path="/GymDashboard" element={<GYMDashboard />} />
+                <Route exact path="/GymDashboard" element={<GYMDashboard />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
