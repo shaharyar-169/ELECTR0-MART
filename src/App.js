@@ -150,6 +150,9 @@ import ItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/
 import ItemStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemstorestockRrport.js";
 import ItemSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleReport.js";
 import ItemPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItempurchaseReport.js";
+import ItemStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemStatusReport.js";
+import ItemSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleSummaryReport.js";
+
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
 import MemberRecivableReport from "./Component/Transaction/MemberRecievableReport.js";
@@ -313,12 +316,15 @@ function App() {
 
                 {/* Rountes for item reports */}
                 <Route exact path="/ItemPurchaseSummary" element={<ItemPurchaseSummary />} />
-                <Route exact path="/ItemStatusReport" element={<ItemStockReportPos />} />
-                <Route exact path="/ItemStockReport" element={<ItemStockReport />} />
+                {/* <Route exact path="/ItemStatusReport" element={<ItemStockReportPos />} /> */}
+                <Route exact path="/ItemStockReportElec" element={<ItemStockReport />} />
                 <Route exact path="/ItemAggingReport" element={<ItemAggingReport />} />
                 <Route exact path="/StoreStockReport" element={<ItemStoreStockReport />} />
                 <Route exact path="/ItemSaleReport" element={<ItemSaleReport />} />
                 <Route exact path="/ItemPurchaseReport" element={<ItemPurchaseReport />} />
+                <Route exact path="/ItemStatusReport" element={<ItemStatusReport />} />
+                <Route exact path="/ItemSaleSummary" element={<ItemSaleSummaryReport />} />
+
 
                 {/* ROUTES FOR MISC REPORT */}
                 <Route exact path="/ReceivableReport" element={<ReceivableReport />} />

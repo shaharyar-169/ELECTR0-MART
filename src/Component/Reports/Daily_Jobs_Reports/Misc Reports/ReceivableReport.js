@@ -396,14 +396,17 @@ export default function ReceivableReport() {
     const apiUrl = apiLinks + "/ReceivableReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-       //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+         FLocCod: "001",
+      FYerDsc: "2024-2024",
+      code: 'NASIRTRD',
      
-     
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
       FIntDat: fromInputDate,
+
+
+
       FFnlDat: toInputDate,
       FRepTyp: transectionType,
       FSchTxt: searchQuery,
@@ -469,7 +472,7 @@ export default function ReceivableReport() {
   };
 
   const exportPDFHandler = () => {
-      const globalfontsize = 12;
+      const globalfontsize = 10;
       console.log("gobal font data", globalfontsize);
   
       // Create a new jsPDF instance with landscape orientation
@@ -495,14 +498,14 @@ export default function ReceivableReport() {
   
       // Define table column headers and individual column widths
       const headers = [
- "Code",
+      "Code",
       "Description",
       "Opening",
       "Debit",
       "Credit",
       "Balance",
     ];
-      const columnWidths = [22, 100, 20,20,20,20];
+      const columnWidths = [21, 80, 25,25,25,25];
   
       // Calculate total table width
       const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -519,7 +522,7 @@ export default function ReceivableReport() {
       const addTableHeaders = (startX, startY) => {
         // Set font style and size for headers
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(12); // Set font size for headers
+        doc.setFontSize(10); // Set font size for headers
   
         headers.forEach((header, index) => {
           const cellWidth = columnWidths[index];
@@ -543,7 +546,7 @@ export default function ReceivableReport() {
   
         // Reset font style and size after adding headers
         doc.setFont(getfontstyle);
-        doc.setFontSize(12);
+        doc.setFontSize(10);
       };
   
       const addTableRows = (startX, startY, startIndex, endIndex) => {
@@ -553,7 +556,7 @@ export default function ReceivableReport() {
             const normalFont = getfontstyle;
             const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(11);
+            doc.setFontSize(10);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = rows[i];
@@ -764,7 +767,7 @@ export default function ReceivableReport() {
           const labelsY = startY + 4; // Position the labels below the titles and above the table
   
           // Set font size and weight for the labels
-          doc.setFontSize(12);
+          doc.setFontSize(10);
           doc.setFont(getfontstyle, "300");
   
           let status =
@@ -1184,34 +1187,55 @@ export default function ReceivableReport() {
       }
     }, [tableData]);
   
-   const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-  
-    const sortedData = [...tableData].sort((a, b) => {
-      const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-      const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
-  
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
-  
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-      }
-    });
-  
-    setTableData(sortedData);
-  
-    setColumnSortOrders((prev) => ({
-      ...Object.keys(prev).reduce((acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      }, {}),
-    }));
-  };
+  const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  const sortedData = [...tableData].sort((a, b) => {
+    let aVal = a[col] ?? "";
+    let bVal = b[col] ?? "";
+
+    aVal = aVal.toString();
+    bVal = bVal.toString();
+
+    // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
+    if (col === "code" || col === "Code") {
+      // Reverse strings → compare from right side
+      const revA = aVal.split("").reverse().join("");
+      const revB = bVal.split("").reverse().join("");
+
+      return newOrder === "ASC"
+        ? revA.localeCompare(revB)
+        : revB.localeCompare(revA);
+    }
+
+    // ⭐ Numeric sorting
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    }
+
+    // Default → normal string sorting
+    return newOrder === "ASC"
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
+
+  setTableData(sortedData);
+
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
+
    
+
+  
     const resetSorting = () => {
       setColumnSortOrders({
         code: null,
@@ -1260,6 +1284,15 @@ export default function ReceivableReport() {
           ) : (
             <>
               {tableData.map((item, i) => {
+
+
+  const openingNum = Number(item.Opening?.toString().replace(/,/g, ""));
+  const balanceNum = Number(item.Balance?.toString().replace(/,/g, ""));
+    const balancecre = Number(item.Credit?.toString().replace(/,/g, ""));
+      const balancedeb = Number(item.Debit?.toString().replace(/,/g, ""));
+
+  const isNegative = openingNum < 0 || balanceNum < 0 || balancecre < 0 || balancedeb < 0;
+ 
                 totalEnteries += 1;
                 return (
                   <tr
@@ -1269,7 +1302,7 @@ export default function ReceivableReport() {
                     className={selectedIndex === i ? "selected-background" : ""}
                     style={{
                       backgroundColor: getcolor,
-                      color: fontcolor,
+                     color: isNegative ? "red" : fontcolor 
                     }}
                   >
                     <td className="text-center" style={firstColWidth}>

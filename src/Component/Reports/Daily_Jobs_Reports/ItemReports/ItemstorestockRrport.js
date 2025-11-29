@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import {  getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -233,20 +233,20 @@ export default function ItemStoreStockReport() {
         setIsLoading(true);
         const formMainData = new URLSearchParams({
             FRepDat: toInputDate,
-            // FRepRat: transectionType,
+            FRepRat: transectionType,
             FCtgCod: Categoryselectdata,
             FCapCod: Capacityselectdata,
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
-            FStrdCod: Typeselectdata,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
+            FStrCod: Typeselectdata,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
             FRepStk: transectionType2,
 
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -603,7 +603,7 @@ export default function ItemStoreStockReport() {
         });
 
     const exportPDFHandler = () => {
-        const globalfontsize = 12;
+        const globalfontsize = 10;
         console.log("gobal font data", globalfontsize);
 
         // Create a new jsPDF instance with landscape orientation
@@ -670,7 +670,7 @@ export default function ItemStoreStockReport() {
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
             doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+            doc.setFontSize(10); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -694,7 +694,7 @@ export default function ItemStoreStockReport() {
 
             // Reset font style and size after adding headers
             doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+            doc.setFontSize(10);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
@@ -932,7 +932,7 @@ export default function ItemStoreStockReport() {
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(12);
+                doc.setFontSize(10);
                 doc.setFont(getfontstyle, "300");
 
                 let RATE =
@@ -984,10 +984,10 @@ export default function ItemStoreStockReport() {
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-                // doc.setFont(getfontstyle, "bold"); // Set font to bold
-                // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -1181,9 +1181,12 @@ export default function ItemStoreStockReport() {
         const typeAndStoreRow = worksheet.addRow([
             "COMPANY :",
             typecompany,
-            "",
-            // "STORE :",
-            // typetype,
+             "",
+             "",
+              "",
+               "",
+            "STORE :",
+            typetype,
         ]);
 
         // Add second row
@@ -1508,66 +1511,33 @@ export default function ItemStoreStockReport() {
     };
 
 
-
-    // const firstColWidth = {
-    //     width: "10%",
-    // };
-    // const secondColWidth = {
-    //     width: "30.6%",
-    // };
-    // const thirdColWidth = {
-    //     width: "9%",
-    // };
-    // const forthColWidth = {
-    //     width: "9%",
-    // };
-    // const fifthColWidth = {
-    //     width: "9%",
-    // };
-    // const sixthColWidth = {
-    //     width: "5%",
-    // };
-    // const seventhColWidth = {
-    //     width: "9%",
-    // };
-    // const eighthColWidth = {
-    //     width: "9%",
-    // };
-    // const ninthColWidth = {
-    //     width: "9%",
-    // };
-    // const tenthColWidth = {
-    //     width: "9%",
-    // };
-
-
     const firstColWidth = {
-        width: "135px",
+        width: "125px",
     };
     const secondColWidth = {
-        width: "360px",
+        width: "340px",
     };
     const thirdColWidth = {
         width: "80px",
     };
     const forthColWidth = {
-        width: "53px",
+        width: "60px",
     };
     const sixthColWidth = {
-        width: "53px",
+        width: "60px",
     };
     const seventhColWidth = {
-        width: "53px",
+        width: "60px",
     };
 
  const eightColWidth = {
-        width: "53px",
+        width: "60px",
     };
     const ninthColWidth = {
-        width: "53px",
+        width: "60px",
     };
     const tenthColWidth = {
-        width: "53px",
+        width: "60px",
     };
     const elewenthColWidth = {
         width: "80px",
@@ -1576,12 +1546,250 @@ export default function ItemStoreStockReport() {
         width: "8px",
     };
 
+
+       const [columns, setColumns] = useState({
+     Code: [],
+          Description: [],
+          Rate: [],
+          Amount: [],
+           Qnty: [],
+            Qnt001: [],
+             Qnt002: [],
+              Qnt003: [],
+               Qnt004: [],
+               Qnt005: [],
+    });
+    
+    const [columnSortOrders, setColumnSortOrders] = useState({
+      Code: "",
+          Description: "",
+          Rate: "",
+          Amount: "",
+           Qnty: "",
+            Qnt001: "",
+             Qnt002: "",
+              Qnt003: "",
+               Qnt004: "",
+               Qnt005: "",
+    });
+    
+      // When you receive your initial table data, transform it into column-oriented format
+      useEffect(() => {
+      if (tableData.length > 0) {
+        const newColumns = {
+          Code: tableData.map(row => row.Code),
+          Description: tableData.map(row => row.Description),
+           Rate: tableData.map(row => row.Rate),
+          Amount: tableData.map(row => row.Amount),
+            Qnty: tableData.map(row => row.Qnty),
+              Qnt001: tableData.map(row => row.Qnt001),
+                Qnt002: tableData.map(row => row.Qnt002),
+                  Qnt003: tableData.map(row => row.Qnt003),
+                    Qnt004: tableData.map(row => row.Qnt004),
+                      Qnt005: tableData.map(row => row.Qnt005),
+        };
+        setColumns(newColumns);
+      }
+    }, [tableData]);
+    
+     const getIconStyle = (colKey) => {
+        const order = columnSortOrders[colKey];
+        return {
+          transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+          color: order === "ASC" || order === "DSC" ? "red" : "white",
+          transition: "transform 0.3s ease, color 0.3s ease",
+        };
+      };
+    
+          const resetSorting = () => {
+        setColumnSortOrders({
+          Code: null,
+          Description: null,
+          Rate: null,
+          Amount: null,
+           Qnty: null,
+            Qnt001: null,
+             Qnt002: null,
+              Qnt003: null,
+               Qnt004: null,
+               Qnt005: null,
+
+
+        });
+      };
+    
+    const handleSorting = (col) => {
+      const currentOrder = columnSortOrders[col];
+      const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+    
+      const sortedData = [...tableData].sort((a, b) => {
+        const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+        const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+    
+        // ⭐ SPECIAL CASE: Sort "Last Date" by YEAR
+        if (col === "Last Date") {
+          const aYear = parseInt(aVal.split("-")[2]) || 0; // Extract YYYY
+          const bYear = parseInt(bVal.split("-")[2]) || 0;
+    
+          return newOrder === "ASC" ? aYear - bYear : bYear - aYear;
+        }
+    
+        // ⭐ NORMAL NUMBER SORT
+        const numA = parseFloat(aVal.replace(/,/g, ""));
+        const numB = parseFloat(bVal.replace(/,/g, ""));
+    
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return newOrder === "ASC" ? numA - numB : numB - numA;
+        }
+    
+        // ⭐ NORMAL STRING SORT
+        return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      });
+    
+      setTableData(sortedData);
+    
+      setColumnSortOrders((prev) => ({
+        ...Object.keys(prev).reduce((acc, key) => {
+          acc[key] = key === col ? newOrder : null;
+          return acc;
+        }, {}),
+      }));
+    };
+    
+      const renderTableData = () => {
+        return (
+          <>
+            {isLoading ? (
+              <>
+                <tr style={{ backgroundColor: getcolor }}>
+                  <td colSpan="10" className="text-center">
+                    <Spinner animation="border" variant="primary" />
+                  </td>
+                </tr>
+                {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
+                  <tr
+                    key={`blank-${rowIndex}`}
+                    style={{
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                    }}
+                  >
+                    {Array.from({ length: 10 }).map((_, colIndex) => (
+                      <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                    ))}
+                  </tr>
+                ))}
+                <tr>
+                  <td style={firstColWidth}></td>
+                                                <td style={secondColWidth}></td>
+                                                <td style={thirdColWidth}></td>
+                                                 <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+                                                <td style={forthColWidth}></td> 
+                                               
+                                                <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                </tr>
+              </>
+            ) : (
+              <>
+                {tableData.map((item, i) => {
+                  totalEnteries += 1;
+                   const isNegative = item.Qnty < 0 || item.Amount < 0;
+                  return (
+                        <tr
+                                                        key={`${i}-${selectedIndex}`}
+                                                        ref={(el) => (rowRefs.current[i] = el)}
+                                                        onClick={() => handleRowClick(i)}
+                                                        className={
+                                                            selectedIndex === i ? "selected-background" : ""
+                                                        }
+                                                        style={{
+                                                            backgroundColor: getcolor,
+color: isNegative ? "red" : fontcolor 
+                                                        }}
+                                                    >
+                                                        <td className="text-start" style={firstColWidth}>
+                                                            {item.Code}
+                                                        </td>
+                                                        <td className="text-start" style={secondColWidth}>
+                                                            {item.Description}
+                                                        </td>
+                                                        <td className="text-end" style={thirdColWidth}>
+                                                            {formatValue(item["Pur Rate"]) }
+                                                        </td>
+                                                         <td className="text-end" style={tenthColWidth}>
+                                                            {formatValue(item.Qnty)}
+                                                        </td>
+                                                        <td className="text-end" style={elewenthColWidth}>
+                                                            {formatValue(item.Amount)}
+                                                        </td>
+                                                        <td className="text-end" style={forthColWidth}>
+                                                            {formatValue(item.Qnt001)}
+                                                        </td>
+                                                         <td className="text-end" style={sixthColWidth}>
+                                                            {formatValue(item.Qnt002)}
+                                                        </td>
+                                                         <td className="text-end" style={seventhColWidth}>
+                                                            {formatValue(item.Qnt003)}
+                                                        </td>
+                                                         <td className="text-end" style={eightColWidth}>
+                                                            {formatValue(item.Qnt004)}
+                                                        </td>
+                                                         <td className="text-end" style={ninthColWidth}>
+                                                            {formatValue(item.Qnt005)}
+                                                        </td>
+                                                                                                            
+                                                       
+                                                        
+                                                    </tr>
+                  );
+                })}
+                {Array.from({
+                  length: Math.max(0, 25 - tableData.length),
+                }).map((_, rowIndex) => (
+                  <tr
+                    key={`blank-${rowIndex}`}
+                    style={{
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                    }}
+                  >
+                    {Array.from({ length: 10 }).map((_, colIndex) => (
+                      <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                    ))}
+                  </tr>
+                ))}
+                <tr>
+                 <td style={firstColWidth}></td>
+                                                <td style={secondColWidth}></td>
+                                                <td style={thirdColWidth}></td>
+                                                 <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+                                                <td style={forthColWidth}></td> 
+                                                <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                </tr>
+              </>
+            )}
+          </>
+        );
+      };
+    
     
 
-    useHotkeys("s", fetchDailyStatusReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+s", () => {
+        fetchDailyStatusReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1754,6 +1962,10 @@ export default function ItemStoreStockReport() {
         }
     };
 
+     const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
     return (
         <>
             <ToastContainer />
@@ -1874,7 +2086,7 @@ export default function ItemStoreStockReport() {
                                 </div>
                             </div>
 
-                             {/* <div
+                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginLeft: "7px" }}
                             >
@@ -1945,7 +2157,7 @@ export default function ItemStoreStockReport() {
                                         placeholder="ALL"
                                     />
                                 </div>
-                            </div> */}
+                            </div>
 
                            
                         </div>
@@ -2065,37 +2277,58 @@ export default function ItemStoreStockReport() {
                                     </label>
                                 </div>
 
-                                <select
-                                    ref={input4Refrate}
-                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="A">AVERAGE RATE</option>
+                                                         <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input4Refrate}
+    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "250px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+       paddingLeft: "12px",
+    }}
+  >
+     <option value="A">AVERAGE RATE</option>
                                     <option value="P">PURCHASE RATE</option>
                                     <option value="M">LAST SM RATE</option>
                                       <option value="W">WEIGHTED AVERAGE</option>
                                     <option value="F">FIFO</option>
-                                </select>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
 
                            
@@ -2213,36 +2446,57 @@ export default function ItemStoreStockReport() {
                                     </label>
                                 </div>
 
-                                <select
-                                    ref={input4Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="">ALL</option>
+                                                          <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input4Ref}
+    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType2}
+    onChange={handleTransactionTypeChange2}
+    style={{
+      width: "250px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingLeft: "13px",
+    }}
+  >
+      <option value="">ALL</option>
                                     <option value="P">POSITIVE</option>
                                     <option value="N">NEGATIVE</option>
                                       <option value="Z">ZERO</option>
-                                </select>
+  </select>
+
+  {transectionType2 !== "" && (
+    <span
+      onClick={() => settransectionType2("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
 
                            
@@ -2294,7 +2548,7 @@ export default function ItemStoreStockReport() {
                                         className="List-select-class "
                                         ref={input2Ref}
                                         options={capacityoptions}
-                                        onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
+                                        onKeyDown={(e) => handlecapacityKeypress(e, typeRef)}
                                         id="selectedsale2"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -2433,38 +2687,118 @@ export default function ItemStoreStockReport() {
                                             color: "white",
                                         }}
                                     >
-                                        <td className="border-dark" style={firstColWidth}>
-                                            Code
-                                        </td>
-                                        <td className="border-dark" style={secondColWidth}>
-                                            Description
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
-                                            Rate
-                                        </td>
+                                            <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("Code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
+                    </td>
+                                           <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Description")}
+                    >
+                      Description{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
+                    </td>
+                                           <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Rate")}
+                    >
+                      Rate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Rate")}
+                      ></i>
+                    </td>
 
-                                         <td className="border-dark" style={tenthColWidth}>
-                                            Qnty
-                                        </td>
-                                        <td className="border-dark" style={elewenthColWidth}>
-                                           Amount
-                                        </td>
+                                            <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      onClick={() => handleSorting("Qnty")}
+                    >
+                      Qnty{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnty")}
+                      ></i>
+                    </td>
+                                           <td
+                      className="border-dark"
+                      style={elewenthColWidth}
+                      onClick={() => handleSorting("Amount")}
+                    >
+                      Amount{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Amount")}
+                      ></i>
+                    </td>
                                        
-                                        <td className="border-dark" style={forthColWidth}>
-                                            GD-1
-                                        </td>
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            GD-2
-                                        </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                            GD-3
-                                        </td>
-                                        <td className="border-dark" style={eightColWidth}>
-                                            GD-4
-                                        </td>
-                                        <td className="border-dark" style={ninthColWidth}>
-                                            GD-5
-                                        </td>
+                                            <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Qnt001")}
+                    >
+                       GD-1{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt001")}
+                      ></i>
+                    </td>
+                                                            <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Qnt002")}
+                    >
+                       GD-2{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt002")}
+                      ></i>
+                    </td>
+                                                             <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Qnt003")}
+                    >
+                       GD-32{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt003")}
+                      ></i>
+                    </td>
+                                                             <td
+                      className="border-dark"
+                      style={eightColWidth}
+                      onClick={() => handleSorting("Qnt004")}
+                    >
+                       GD-41{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt004")}
+                      ></i>
+                    </td>
+                                                              <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("Qnt005")}
+                    >
+                       GD-5{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt005")}
+                      ></i>
+                    </td>
 
                                          <td className="border-dark" style={sixthcol}>
                                            
@@ -2484,7 +2818,7 @@ export default function ItemStoreStockReport() {
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
                                 maxHeight: "43vh",
-                                width: "100%",
+                                // width: "100%",
                                 position: "relative",
                                     ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                              
@@ -2494,142 +2828,13 @@ export default function ItemStoreStockReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
-                                    position: "relative",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                     width: "100%",
+                                    // position: "relative",
                                 }}
                             >
-                                <tbody id="tablebody">
-                                    {isLoading ? (
-                                        <>
-                                            <tr
-                                                style={{
-                                                    backgroundColor: getcolor,
-                                                }}
-                                            >
-                                                <td colSpan="10" className="text-center">
-                                                    <Spinner animation="border" variant="primary" />
-                                                </td>
-                                            </tr>
-                                            {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                                                (_, rowIndex) => (
-                                                    <tr
-                                                        key={`blank-${rowIndex}`}
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
-                                                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                                                                &nbsp;
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                )
-                                            )}
-                                            <tr>
-                                                <td style={firstColWidth}></td>
-                                                <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
-                                                 <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
-                                                <td style={forthColWidth}></td> 
-                                               
-                                                <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-                                                <td style={eightColWidth}></td>
-                                                <td style={ninthColWidth}></td>
-                                              
-                                               
-                                            </tr>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {tableData.map((item, i) => {
-                                                totalEnteries += 1;
-                                                return (
-                                                    <tr
-                                                        key={`${i}-${selectedIndex}`}
-                                                        ref={(el) => (rowRefs.current[i] = el)}
-                                                        onClick={() => handleRowClick(i)}
-                                                        className={
-                                                            selectedIndex === i ? "selected-background" : ""
-                                                        }
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        <td className="text-start" style={firstColWidth}>
-                                                            {item.Code}
-                                                        </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
-                                                        </td>
-                                                        <td className="text-end" style={thirdColWidth}>
-                                                            {item["Pur Rate"]}
-                                                        </td>
-                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item.Qnty}
-                                                        </td>
-                                                        <td className="text-end" style={elewenthColWidth}>
-                                                            {item.Amount}
-                                                        </td>
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {item.Qnt001}
-                                                        </td>
-                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item.Qnt002}
-                                                        </td>
-                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Qnt003}
-                                                        </td>
-                                                         <td className="text-end" style={eightColWidth}>
-                                                            {item.Qnt004}
-                                                        </td>
-                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item.Qnt005}
-                                                        </td>
-                                                                                                            
-                                                       
-                                                        
-                                                    </tr>
-                                                );
-                                            })}
-                                            {Array.from({
-                                                length: Math.max(0, 27 - tableData.length),
-                                            }).map((_, rowIndex) => (
-                                                <tr
-                                                    key={`blank-${rowIndex}`}
-                                                    style={{
-                                                        backgroundColor: getcolor,
-                                                        color: fontcolor,
-                                                    }}
-                                                >
-                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
-                                                        <td key={`blank-${rowIndex}-${colIndex}`}>
-                                                            &nbsp;
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                            <tr>
-                                                <td style={firstColWidth}></td>
-                                                <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
-                                                 <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
-                                                <td style={forthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-                                                <td style={eightColWidth}></td>
-                                                <td style={ninthColWidth}></td>
-                                                
-                                              
-                                            </tr>
-                                        </>
-                                    )}
-                                </tbody>
+                                 <tbody id="tablebody" >{renderTableData()}</tbody>
+
                             </table>
                         </div>
                     </div>
@@ -2650,7 +2855,10 @@ export default function ItemStoreStockReport() {
                                 marginLeft: "2px",
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+               <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
+
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2674,7 +2882,7 @@ export default function ItemStoreStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalqnty}</span>
+                            <span className="mobileledger_total">{formatValue(totalqnty)}</span>
                         </div>
                            <div
                             style={{
@@ -2683,7 +2891,7 @@ export default function ItemStoreStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totaltax}</span>
+                            <span className="mobileledger_total">{formatValue(totaltax) }</span>
                         </div>
                         <div
                             style={{
@@ -2692,7 +2900,7 @@ export default function ItemStoreStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{Qnty1}</span>
+                            <span className="mobileledger_total">{formatValue(Qnty1) }</span>
                         </div>
                       
                        
@@ -2703,7 +2911,7 @@ export default function ItemStoreStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{Qnty2}</span>
+                            <span className="mobileledger_total">{formatValue(Qnty2) }</span>
                         </div>
                         <div
                             style={{
@@ -2712,7 +2920,7 @@ export default function ItemStoreStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{Qnty3}</span>
+                            <span className="mobileledger_total">{formatValue(Qnty3) }</span>
                         </div>
                            <div
                             style={{
@@ -2721,7 +2929,7 @@ export default function ItemStoreStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{Qnty4}</span>
+                            <span className="mobileledger_total">{formatValue(Qnty4) }</span>
                         </div>
                            <div
                             style={{
@@ -2730,7 +2938,7 @@ export default function ItemStoreStockReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{Qnty5}</span>
+                            <span className="mobileledger_total">{formatValue(Qnty5) }</span>
                         </div>
                           
                      
@@ -2747,7 +2955,6 @@ export default function ItemStoreStockReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2773,8 +2980,10 @@ export default function ItemStoreStockReport() {
                             id="searchsubmit"
                             text="Select"
                             ref={selectButtonRef}
-                            onClick={fetchDailyStatusReport}
-                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+ onClick={() => {
+                fetchDailyStatusReport();
+                resetSorting();
+              }}                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                             }

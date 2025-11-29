@@ -20,10 +20,10 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Code, Description, Store } from "@mui/icons-material";
+import { Balance } from "@mui/icons-material";
 
 
-export default function ItemPurchaseSummaryReport() {
+export default function ItemStatusReport() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -87,8 +87,15 @@ export default function ItemPurchaseSummaryReport() {
     const [totaltax, settotaltax] = useState(0);
     const [totalincl, settotalincl] = useState(0);
 
-     const [totaldebit, settotaldebit] = useState(0);
-     const [totalcredit, settotalcredit] = useState(0);
+     const [totalOpening, settotalOpening] = useState(0);
+     const [totalPurchase, settotalPurchase] = useState(0);
+     const [totalPurRet, settotalPurRet] = useState(0);
+const [totalreceive, settotalreceive] = useState(0);
+const [totalIssue, settotalIssue] = useState(0);
+const [totalSale, settotalSale] = useState(0);
+const [totalSaleRet, settotalSaleRet] = useState(0);
+const [totalQnty, settotalQnty] = useState(0);
+
 
 
     // state for from DatePicker
@@ -413,7 +420,7 @@ export default function ItemPurchaseSummaryReport() {
                "todatevalidation"
            ).style.border = `1px solid ${fontcolor}`;
    
-           const apiUrl = apiLinks + "/ItemPurchaseSummary.php";
+           const apiUrl = apiLinks + "/ItemStatusReport.php";
            setIsLoading(true);
            const formData = new URLSearchParams({
                FIntDat: fromInputDate,
@@ -427,7 +434,7 @@ export default function ItemPurchaseSummaryReport() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
-            FTrnTyp: transectionType2,
+            FRepTyp: transectionType,
             // code: 'NASIRTRD',
             // FLocCod: '001',
             // FYerDsc: '2024-2024',
@@ -440,9 +447,14 @@ export default function ItemPurchaseSummaryReport() {
                .then((response) => {
                    setIsLoading(false);
    
-                   settotaldebit(response.data["Total Qnty"]);
-                   settotalcredit(response.data["Total Amount"]);
-                //    setClosingBalance(response.data["Closing Bal "]);
+                   settotalOpening(response.data["Total Opening"]);
+                   settotalPurchase(response.data["Total Purchase"]);
+                   settotalPurRet(response.data["Total Pur-Ret"]);
+                     settotalreceive(response.data["Total Receive"]);
+                   settotalIssue(response.data["Total Issue"]);
+                   settotalSale(response.data["Total Sale"]);
+                     settotalSaleRet(response.data["Total Sale-Ret"]);
+                   settotalQnty(response.data["Total Qnty"]);
    
                    if (response.data && Array.isArray(response.data.Detail)) {
                        setTableData(response.data.Detail);
@@ -784,461 +796,478 @@ export default function ItemPurchaseSummaryReport() {
         });
 
     const exportPDFHandler = () => {
-        const globalfontsize = 10;
-        console.log("gobal font data", globalfontsize);
-
-        // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "potraite" });
-
-        // Define table data (rows)
-        const rows = tableData.map((item) => [
-            item.code,
-                 
-            item.Description,
-            item.Rate,
-            item.Qnty,
-            item["Pur Amount"],
-           
-        ]);
-
-        // Add summary row to the table
-        rows.push([ "","Total",  "",String(totaldebit), String(totalcredit)]);
-
-
-        // Define table column headers and individual column widths
-
-        const headers = [
-            "Code",
-           
-            "Description",
-            "Rate",
-            "Qnty",
-            "Amount",
-          
-        ];
-        const columnWidths = [35,100,22,18,22];
-
-        // Calculate total table width
-        const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-
-        // Define page height and padding
-        const pageHeight = doc.internal.pageSize.height;
-        const paddingTop = 15;
-
-        // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
-
-        // Function to add table headers
-        const addTableHeaders = (startX, startY) => {
-            // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(10); // Set font size for headers
-
-            headers.forEach((header, index) => {
-                const cellWidth = columnWidths[index];
-                const cellHeight = 6; // Height of the header row
-                const cellX = startX + cellWidth / 2; // Center the text horizontally
-                const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-                // Draw the grey background for the header
-                doc.setFillColor(200, 200, 200); // Grey color
-                doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-                // Draw the outer border
-                doc.setLineWidth(0.2); // Set the width of the outer border
-                doc.rect(startX, startY, cellWidth, cellHeight);
-
-                // Set text alignment to center
-                doc.setTextColor(0); // Set text color to black
-                doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-                startX += columnWidths[index]; // Move to the next column
-            });
-
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(10);
-        };
-
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust row height
-            const fontSize = 10; // Adjust font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-            doc.setFontSize(fontSize);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
-                let currentX = startX; // Track current column position
-
-                // Check if Qnty (column index 6) is negative
-                if (parseFloat(row[8]) < 0) {
-                    textColor = [255, 0, 0]; // Set red color for negative Qnty
-                }
-
-                // For total row, set bold font and prepare for double border
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, 'bold');
-                }
-
-                // Draw row borders
-                doc.setDrawColor(0);
-
-                // For total row, draw double border
-                if (isTotalRow) {
-                    // First line of the double border
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        currentX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
-
-                    // Second line of the double border (slightly offset)
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        currentX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        tableWidth - 1,
-                        rowHeight - 1
-                    );
-                } else {
-                    // Normal border for other rows
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        currentX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
-                }
-
-                row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
-                    const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-                        : startY + (i - startIndex + 2) * rowHeight + 3;
-
-                    const cellX = currentX + 2;
-
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-                    // For total row, keep bold font
-                    if (!isTotalRow) {
-                        // Set font
-                        doc.setFont(fontName, "normal");
-                    }
-
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
-
-                    if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 ) {
-                        const rightAlignX = currentX + columnWidths[cellIndex] - 2;
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    } else {
-                        // For empty cells in total row, add "Total" label centered
-                        if (isTotalRow && cellIndex === 0 && cell === "") {
-                            const totalLabelX = currentX + columnWidths[0] / 2;
-                            doc.text("", totalLabelX, cellY, {
-                                align: "center",
-                                baseline: "middle"
-                            });
-                        } else {
-                            doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle"
-                            });
-                        }
-                    }
-
-                    // Draw column borders
-                    if (isTotalRow) {
-                        // Double border for total row columns
-                        doc.setLineWidth(0.3);
-                        doc.rect(
-                            currentX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        doc.setLineWidth(0.3);
-                        doc.rect(
-                            currentX + 0.5,
-                            startY + (i - startIndex + 2) * rowHeight + 0.5,
-                            columnWidths[cellIndex] - 1,
-                            rowHeight - 1
-                        );
-                    } else {
-                        // Normal border for other rows
-                        doc.setLineWidth(0.2);
-                        doc.rect(
-                            currentX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                    }
-
-                    // Move to next column
-                    currentX += columnWidths[cellIndex];
-                });
-
-                // Reset font after total row
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, "normal");
-                }
-            }
-
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth;
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-            const lineY = pageHeight - 15;
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY);
-            const headingFontSize = 12;
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2;
-            const headingY = lineY + 5;
-            doc.setFontSize(headingFontSize);
-            doc.setTextColor(0);
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
-
-        // Function to calculate total table width
-        const getTotalTableWidth = () => {
-            let totalWidth = 0;
-            columnWidths.forEach((width) => (totalWidth += width));
-            return totalWidth;
-        };
-
-        // Function to add a new page and reset startY
-        const addNewPage = (startY) => {
-            doc.addPage();
-            return paddingTop; // Set startY for each new page
-        };
-
-        // Define the number of rows per page
-        const rowsPerPage = 47; // Adjust this value based on your requirements
-
-        // Function to handle pagination
-        const handlePagination = () => {
-            // Define the addTitle function
-            const addTitle = (
-                title,
-                date,
-                time,
-                pageNumber,
-                startY,
-                titleFontSize = 18,
-                pageNumberFontSize = 10
-            ) => {
-                doc.setFontSize(titleFontSize); // Set the font size for the title
-                doc.text(title, doc.internal.pageSize.width / 2, startY, {
-                    align: "center",
-                });
-
-                // Calculate the x-coordinate for the right corner
-                const rightX = doc.internal.pageSize.width - 10;
-
-                // if (date) {
-                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                //     if (time) {
-                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-                //     } else {
-                //         doc.text(date, rightX - 10, startY, { align: "right" });
-                //     }
-                // }
-
-                // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
-                    `Page ${pageNumber}`,
-                    rightX - 5,
-                    doc.internal.pageSize.height - 10,
-                    { align: "right" }
-                );
-            };
-
-            let currentPageIndex = 0;
-            let startY = paddingTop; // Initialize startY
-            let pageNumber = 1; // Initialize page number
-
-            while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-                startY += 5; // Adjust vertical position for the company title
-
-                addTitle(
-                    `Item Purchase Summary Report From ${fromInputDate} To ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    12
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += 5;
-
-                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 4; // Position the labels below the titles and above the table
-
-                // Set font size and weight for the labels
-                doc.setFontSize(10);
-                doc.setFont(getfontstyle, "300");
-
-                let RATE =
-                    transectionType === "P"
-                        ? "PURCHASE RATE"
-                        :transectionType =="M"
-                         ? "SM RATE"
-                         :transectionType =="A"
-                         ? "AVERAGE RATE"
-                         :transectionType =="W"
-                         ? "WEIGHTRD AVERAGE"
-                         :transectionType =="F"
-                         ? "FIFP"
-                        : "";
-
-
-                         let transectionsts =
-                   transectionType === "BIL"
-                        ? "PURCHASE"
-                        :transectionType =="SRN"
-                         ? "PURCHASE RETURN"
+           const globalfontsize = 10;
+           console.log("gobal font data", globalfontsize);
+   
+           // Create a new jsPDF instance with landscape orientation
+           const doc = new jsPDF({ orientation: "landscape" });
+   
+           // Define table data (rows)
+           const rows = tableData.map((item) => [
+                item.Code,
+               item.Description,
+            formatValue(item.Opening)    ,
+              formatValue( item.Purchase) ,
+              formatValue(item['Pur-Ret'])  ,
+              formatValue( item.Receive)  ,
+               formatValue( item.Issue),
+               formatValue(item.Sale)  ,
+              formatValue(item['Sale-Ret'])  ,
+              formatValue( item.Balance) ,
+           ]);
+   
+           // Add summary row to the table
+           rows.push(["", "Total", 
+             String(totalOpening), String(totalPurchase)
+            , String(totalPurRet), String(totalreceive)
+            , String(totalIssue), String(totalSale),
+             String(totalSaleRet), String(totalQnty)
+           ]);
+   
+   
+           // Define table column headers and individual column widths
+   
+           const headers = [
+               "Code",
+               "Description",
+               "Opening",
+               "Purchase",
+               "Pur Rate",
+               "Rece",
+               "Issue",
+               "Sale",
+               "Sl-Rate",
+               "Bal",
+           ];
+           const columnWidths = [35,100,20,20,20,20,20,20,20,20 ];
+   
+           // Calculate total table width
+           const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+   
+           // Define page height and padding
+           const pageHeight = doc.internal.pageSize.height;
+           const paddingTop = 15;
+   
+           // Set font properties for the table
+           doc.setFont(getfontstyle);
+           doc.setFontSize(10);
+   
+           // Function to add table headers
+           const addTableHeaders = (startX, startY) => {
+               // Set font style and size for headers
+               doc.setFont(getfontstyle, "bold"); // Set font to bold
+               doc.setFontSize(10); // Set font size for headers
+   
+               headers.forEach((header, index) => {
+                   const cellWidth = columnWidths[index];
+                   const cellHeight = 6; // Height of the header row
+                   const cellX = startX + cellWidth / 2; // Center the text horizontally
+                   const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+   
+                   // Draw the grey background for the header
+                   doc.setFillColor(200, 200, 200); // Grey color
+                   doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+   
+                   // Draw the outer border
+                   doc.setLineWidth(0.2); // Set the width of the outer border
+                   doc.rect(startX, startY, cellWidth, cellHeight);
+   
+                   // Set text alignment to center
+                   doc.setTextColor(0); // Set text color to black
+                   doc.text(header, cellX, cellY, { align: "center" }); // Center the text
+                   startX += columnWidths[index]; // Move to the next column
+               });
+   
+               // Reset font style and size after adding headers
+               doc.setFont(getfontstyle);
+               doc.setFontSize(10);
+           };
+   
+           const addTableRows = (startX, startY, startIndex, endIndex) => {
+               const rowHeight = 5; // Adjust row height
+               const fontSize = 10; // Adjust font size
+               const boldFont = 400; // Bold font
+               const normalFont = getfontstyle; // Default font
+               const tableWidth = getTotalTableWidth(); // Calculate total table width
+   
+               doc.setFontSize(fontSize);
+   
+               for (let i = startIndex; i < endIndex; i++) {
+                   const row = rows[i];
+                   const isTotalRow = i === rows.length - 1; // Check if this is the total row
+                   let textColor = [0, 0, 0]; // Default text color
+                   let fontName = normalFont; // Default font
+                   let currentX = startX; // Track current column position
+   
+                   // Check if Qnty (column index 6) is negative
+                   if (parseFloat(row[8]) < 0) {
+                       textColor = [255, 0, 0]; // Set red color for negative Qnty
+                   }
+   
+                   // For total row, set bold font and prepare for double border
+                   if (isTotalRow) {
+                       doc.setFont(getfontstyle, 'bold');
+                   }
+   
+                   // Draw row borders
+                   doc.setDrawColor(0);
+   
+                   // For total row, draw double border
+                   if (isTotalRow) {
+                       // First line of the double border
+                       doc.setLineWidth(0.3);
+                       doc.rect(
+                           currentX,
+                           startY + (i - startIndex + 2) * rowHeight,
+                           tableWidth,
+                           rowHeight
+                       );
+   
+                       // Second line of the double border (slightly offset)
+                       doc.setLineWidth(0.3);
+                       doc.rect(
+                           currentX + 0.5,
+                           startY + (i - startIndex + 2) * rowHeight + 0.5,
+                           tableWidth - 1,
+                           rowHeight - 1
+                       );
+                   } else {
+                       // Normal border for other rows
+                       doc.setLineWidth(0.2);
+                       doc.rect(
+                           currentX,
+                           startY + (i - startIndex + 2) * rowHeight,
+                           tableWidth,
+                           rowHeight
+                       );
+                   }
+   
+                   row.forEach((cell, cellIndex) => {
+                       // For total row, adjust vertical position to center in the double border
+                       const cellY = isTotalRow
+                           ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+                           : startY + (i - startIndex + 2) * rowHeight + 3;
+   
+                       const cellX = currentX + 2;
+   
+                       // Set text color
+                       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+   
+                       // For total row, keep bold font
+                       if (!isTotalRow) {
+                           // Set font
+                           doc.setFont(fontName, "normal");
+                       }
+   
+                       // Ensure the cell value is a string
+                       const cellValue = String(cell);
+   
+                       if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4
+                        || cellIndex === 5 || cellIndex === 6 || cellIndex === 7
+                        || cellIndex === 8 || cellIndex === 9
                         
-                         : "ALL";
-
-
-                let typeText = capacityselectdatavalue.label
-                    ? capacityselectdatavalue.label
-                    : "ALL";
-                let typeItem = Companyselectdatavalue.label
-                    ? Companyselectdatavalue.label
-                    : "ALL";
-                let category = categoryselectdatavalue.label
-                    ? categoryselectdatavalue.label
-                    : "ALL";
-                let typename = typeselectdatavalue.label
-                    ? typeselectdatavalue.label
-                    : "ALL";
-
-
-                let search = searchQuery ? searchQuery : "";
-
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
-
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
-
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`STORE :`, labelsX + 120, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typename}`, labelsX + 145, labelsY); // Draw the value next to the label
-
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
-
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 120, labelsY + 4.3); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${transectionsts}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
-
-                // doc.setFont(getfontstyle, "bold"); // Set font to bold
-                // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-             
-                    // doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    // doc.text(`STATUS :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-                    // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                    // doc.text(`${transectionsts}`, labelsX + 145, labelsY + 8.5); // Draw the value next to the label
-                
-
-                if (searchQuery) {
-                    doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-                    doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 145, labelsY + 8.5); // Draw the value next to the label
-                }
-
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.setFontSize(10);
-
-                startY += 10; // Adjust vertical position for the labels
-
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
-                const startIndex = currentPageIndex * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-                startY = addTableRows(
-                    (doc.internal.pageSize.width - totalWidth) / 2,
-                    startY,
-                    startIndex,
-                    endIndex
-                );
-                if (endIndex < rows.length) {
-                    startY = addNewPage(startY); // Add new page and update startY
-                    pageNumber++; // Increment page number
-                }
-                currentPageIndex++;
-            }
-        };
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0");
-            const yyyy = today.getFullYear();
-            return `${dd}-${mm}-${yyyy}`;
-        };
-
-        // Function to get current time in the format HH:MM:SS
-        const getCurrentTime = () => {
-            const today = new Date();
-            const hh = String(today.getHours()).padStart(2, "0");
-            const mm = String(today.getMinutes()).padStart(2, "0");
-            const ss = String(today.getSeconds()).padStart(2, "0");
-            return hh + ":" + mm + ":" + ss;
-        };
-
-        const date = getCurrentDate(); // Get current date
-        const time = getCurrentTime(); // Get current time
-
-        // Call function to handle pagination
-        handlePagination();
-
-        // Save the PDF files
-        doc.save(`ItemPurchaseSummaryReportPos As On ${date}.pdf`);
-    };
+                        ) {
+                           const rightAlignX = currentX + columnWidths[cellIndex] - 2;
+                           doc.text(cellValue, rightAlignX, cellY, {
+                               align: "right",
+                               baseline: "middle",
+                           });
+                       } else {
+                           // For empty cells in total row, add "Total" label centered
+                           if (isTotalRow && cellIndex === 0 && cell === "") {
+                               const totalLabelX = currentX + columnWidths[0] / 2;
+                               doc.text("", totalLabelX, cellY, {
+                                   align: "center",
+                                   baseline: "middle"
+                               });
+                           } else {
+                               doc.text(cellValue, cellX, cellY, {
+                                   baseline: "middle"
+                               });
+                           }
+                       }
+   
+                       // Draw column borders
+                       if (isTotalRow) {
+                           // Double border for total row columns
+                           doc.setLineWidth(0.3);
+                           doc.rect(
+                               currentX,
+                               startY + (i - startIndex + 2) * rowHeight,
+                               columnWidths[cellIndex],
+                               rowHeight
+                           );
+                           doc.setLineWidth(0.3);
+                           doc.rect(
+                               currentX + 0.5,
+                               startY + (i - startIndex + 2) * rowHeight + 0.5,
+                               columnWidths[cellIndex] - 1,
+                               rowHeight - 1
+                           );
+                       } else {
+                           // Normal border for other rows
+                           doc.setLineWidth(0.2);
+                           doc.rect(
+                               currentX,
+                               startY + (i - startIndex + 2) * rowHeight,
+                               columnWidths[cellIndex],
+                               rowHeight
+                           );
+                       }
+   
+                       // Move to next column
+                       currentX += columnWidths[cellIndex];
+                   });
+   
+                   // Reset font after total row
+                   if (isTotalRow) {
+                       doc.setFont(getfontstyle, "normal");
+                   }
+               }
+   
+               // Draw line at the bottom of the page with padding
+               const lineWidth = tableWidth;
+               const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+               const lineY = pageHeight - 15;
+               doc.setLineWidth(0.3);
+               doc.line(lineX, lineY, lineX + lineWidth, lineY);
+               const headingFontSize = 10;
+   
+               // Add heading "Crystal Solution" aligned left bottom of the line
+               const headingX = lineX + 2;
+               const headingY = lineY + 5;
+               doc.setFontSize(headingFontSize);
+               doc.setTextColor(0);
+               doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+           };
+   
+           // Function to calculate total table width
+           const getTotalTableWidth = () => {
+               let totalWidth = 0;
+               columnWidths.forEach((width) => (totalWidth += width));
+               return totalWidth;
+           };
+   
+           // Function to add a new page and reset startY
+           const addNewPage = (startY) => {
+               doc.addPage();
+               return paddingTop; // Set startY for each new page
+           };
+   
+           // Define the number of rows per page
+           const rowsPerPage = 28; // Adjust this value based on your requirements
+   
+           // Function to handle pagination
+           const handlePagination = () => {
+               // Define the addTitle function
+               const addTitle = (
+                   title,
+                   date,
+                   time,
+                   pageNumber,
+                   startY,
+                   titleFontSize = 18,
+                   pageNumberFontSize = 10
+               ) => {
+                   doc.setFontSize(titleFontSize); // Set the font size for the title
+                   doc.text(title, doc.internal.pageSize.width / 2, startY, {
+                       align: "center",
+                   });
+   
+                   // Calculate the x-coordinate for the right corner
+                   const rightX = doc.internal.pageSize.width - 10;
+   
+                   // if (date) {
+                   //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                   //     if (time) {
+                   //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                   //     } else {
+                   //         doc.text(date, rightX - 10, startY, { align: "right" });
+                   //     }
+                   // }
+   
+                   // Add page numbering
+                   doc.setFontSize(pageNumberFontSize);
+                   doc.text(
+                       `Page ${pageNumber}`,
+                       rightX - 5,
+                       doc.internal.pageSize.height - 10,
+                       { align: "right" }
+                   );
+               };
+   
+               let currentPageIndex = 0;
+               let startY = paddingTop; // Initialize startY
+               let pageNumber = 1; // Initialize page number
+   
+               while (currentPageIndex * rowsPerPage < rows.length) {
+                   addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                   startY += 5; // Adjust vertical position for the company title
+   
+                   addTitle(
+                       `Item Status Report From ${fromInputDate} To ${toInputDate}`,
+                       "",
+                       "",
+                       pageNumber,
+                       startY,
+                       12
+                   ); // Render sale report title with decreased font size, provide the time, and page number
+                   startY += 5;
+   
+                   const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+                   const labelsY = startY + 4; // Position the labels below the titles and above the table
+   
+                   // Set font size and weight for the labels
+                   doc.setFontSize(10);
+                   doc.setFont(getfontstyle, "300");
+   
+                   let RATE =
+                       transectionType === "P"
+                           ? "PURCHASE RATE"
+                           :transectionType =="M"
+                            ? "SM RATE"
+                            :transectionType =="A"
+                            ? "AVERAGE RATE"
+                            :transectionType =="W"
+                            ? "WEIGHTRD AVERAGE"
+                            :transectionType =="F"
+                            ? "FIFP"
+                           : "";
+   
+   
+                            let transectionsts =
+                       transectionType2 === "P"
+                           ? "POSITIVE"
+                           :transectionType2 =="N"
+                            ? "NEGATIVE"
+                            :transectionType2 =="Z"
+                            ? "ZERO"
+                            : "ALL";
+   
+   
+                   let typeText = capacityselectdatavalue.label
+                       ? capacityselectdatavalue.label
+                       : "ALL";
+                   let typeItem = Companyselectdatavalue.label
+                       ? Companyselectdatavalue.label
+                       : "ALL";
+                   let category = categoryselectdatavalue.label
+                       ? categoryselectdatavalue.label
+                       : "ALL";
+                   let typename = typeselectdatavalue.label
+                       ? typeselectdatavalue.label
+                       : "ALL";
+   
+   
+                   let search = searchQuery ? searchQuery : "";
+   
+                   // Set font style, size, and family
+                   doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
+                   doc.setFontSize(10); // Font size
+   
+                   doc.setFont(getfontstyle, "bold"); // Set font to bold
+                   doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
+                   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                   doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+   
+                   doc.setFont(getfontstyle, "bold"); // Set font to bold
+                   doc.text(`STORE :`, labelsX + 200, labelsY+4.3); // Draw bold label
+                   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                   doc.text(`${typename}`, labelsX + 225, labelsY + 4.3); // Draw the value next to the label
+   
+                   doc.setFont(getfontstyle, "bold"); // Set font to bold
+                   doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
+                   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                   doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+   
+                //    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                //    doc.text(`RATE :`, labelsX + 140, labelsY + 4.3); // Draw bold label
+                //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                //    doc.text(`${RATE}`, labelsX + 160, labelsY + 4.3); // Draw the value next to the label
+   
+                   // doc.setFont(getfontstyle, "bold"); // Set font to bold
+                   // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+                   // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                   // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+   
+   
+                   doc.setFont(getfontstyle, "bold"); // Set font to bold
+                   doc.text(`CAPACITY :`, labelsX +200, labelsY ); // Draw bold label
+                   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                   doc.text(`${typeText}`, labelsX + 225, labelsY); // Draw the value next to the label
+   
+   
+                  
+                    //    doc.setFont(getfontstyle, "bold"); // Set font to bold
+                    //    doc.text(`STATUS :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+                    //    doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                    //    doc.text(`${transectionsts}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
+                   
+   
+                   if (searchQuery) {
+                       doc.setFont(getfontstyle, "bold"); // Set font to bold
+                       doc.text(`SEARCH :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+                       doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                       doc.text(`${search}`, labelsX + 225, labelsY + 8.5); // Draw the value next to the label
+                   }
+   
+                   // // Reset font weight to normal if necessary for subsequent text
+                   doc.setFont(getfontstyle, "bold"); // Set font to bold
+                   doc.setFontSize(10);
+   
+                   startY += 10; // Adjust vertical position for the labels
+   
+                   addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+                   const startIndex = currentPageIndex * rowsPerPage;
+                   const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+                   startY = addTableRows(
+                       (doc.internal.pageSize.width - totalWidth) / 2,
+                       startY,
+                       startIndex,
+                       endIndex
+                   );
+                   if (endIndex < rows.length) {
+                       startY = addNewPage(startY); // Add new page and update startY
+                       pageNumber++; // Increment page number
+                   }
+                   currentPageIndex++;
+               }
+           };
+   
+           const getCurrentDate = () => {
+               const today = new Date();
+               const dd = String(today.getDate()).padStart(2, "0");
+               const mm = String(today.getMonth() + 1).padStart(2, "0");
+               const yyyy = today.getFullYear();
+               return `${dd}-${mm}-${yyyy}`;
+           };
+   
+           // Function to get current time in the format HH:MM:SS
+           const getCurrentTime = () => {
+               const today = new Date();
+               const hh = String(today.getHours()).padStart(2, "0");
+               const mm = String(today.getMinutes()).padStart(2, "0");
+               const ss = String(today.getSeconds()).padStart(2, "0");
+               return hh + ":" + mm + ":" + ss;
+           };
+   
+           const date = getCurrentDate(); // Get current date
+           const time = getCurrentTime(); // Get current time
+   
+           // Call function to handle pagination
+           handlePagination();
+   
+           // Save the PDF files
+           doc.save(`ItemStatusReport As On ${date}.pdf`);
+       };
 
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 5; // Ensure this matches the actual number of columns
+        const numColumns = 10; // Ensure this matches the actual number of columns
 
-        const columnAlignments = ["left", "left", "right", "right", "right"];
+        const columnAlignments = ["left", "left", "right", "right","right","right", "right", "right", "right", "right"];
 
         // Define fonts for different sections
         const fontCompanyName = {
@@ -1279,7 +1308,7 @@ export default function ItemPurchaseSummaryReport() {
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Item Purchase Summary Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Item Status Report From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1338,9 +1367,13 @@ export default function ItemPurchaseSummaryReport() {
             "COMPANY :",
             typecompany,
             "",
-             
-            "STORE :",
-            typetype,
+             "",
+              "",
+               "",
+
+            "CAPACITY :",
+            typecapacity,
+          
           
         ]);
 
@@ -1349,10 +1382,11 @@ export default function ItemPurchaseSummaryReport() {
             "CATEGORY :",
             typecategory,
             "",
-           
-               
-                            "TYPE :",
-            transectionsts,
+             "",
+              "",
+               "",
+                            "STORE :",
+            typetype,
         ]);
 
         // const typeAndStoreRow3 = worksheet.addRow([
@@ -1369,8 +1403,8 @@ export default function ItemPurchaseSummaryReport() {
         // Add third row with conditional rendering for "SEARCH:"
         const typeAndStoreRow4 = worksheet.addRow(
             searchQuery
-                ? [  "CAPACITY :", typecapacity,  "", "SEARCH :", typesearch]
-                : ["CAPACITY :", typecapacity,]
+                ? [  "", "","", "","","", "SEARCH :", typesearch]
+                : ["",]
         );
 
         // Apply styling for the status row
@@ -1378,7 +1412,7 @@ export default function ItemPurchaseSummaryReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1386,7 +1420,7 @@ export default function ItemPurchaseSummaryReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1403,7 +1437,7 @@ export default function ItemPurchaseSummaryReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 4].includes(colIndex),
+                bold: [1, 7].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1428,12 +1462,15 @@ export default function ItemPurchaseSummaryReport() {
         // Add headers
         const headers = [
             "Code",
-          
-            "Description",
-            "Rate",
-            "Qnty",
-           
-            "Amount",
+               "Description",
+               "Opening",
+               "Purchase",
+               "Pur Rate",
+               "Rece",
+               "Issue",
+               "Sale",
+               "Sl-Rate",
+               "Bal",
            
         ];
         const headerRow = worksheet.addRow(headers);
@@ -1442,13 +1479,16 @@ export default function ItemPurchaseSummaryReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                item.code,
-         
-            item.Description,
-            item.Rate,
-            item.Qnty,
-            item["Pur Amount"],
-            
+               item.Code,
+               item.Description,
+            formatValue(item.Opening)    ,
+              formatValue( item.Purchase) ,
+              formatValue(item['Pur-Ret'])  ,
+              formatValue( item.Receive)  ,
+               formatValue( item.Issue),
+               formatValue(item.Sale)  ,
+              formatValue(item['Sale-Ret'])  ,
+              formatValue( item.Balance) ,
              
             ]);
 
@@ -1468,13 +1508,15 @@ export default function ItemPurchaseSummaryReport() {
         });
 
         // Set column widths
-        [12,50,12,8, 12].forEach((width, index) => {
+        [17,45,12,12,12,12,12,12,12,12 ].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
-          "","Total",   "",String(totaldebit),String(totalcredit)
-
+     "", "Total",  String(totalOpening), String(totalPurchase)
+            , String(totalPurRet), String(totalreceive)
+            , String(totalIssue), String(totalSale),
+             String(totalSaleRet), String(totalQnty)
         ]);
 
         // total row added
@@ -1489,12 +1531,16 @@ export default function ItemPurchaseSummaryReport() {
             };
 
             // Align only the "Total" text to the right
-            if (colNumber === 4 || colNumber === 5) {
+            if (colNumber === 2 || colNumber === 3 || colNumber === 4  || colNumber === 5
+                 || colNumber === 6  || colNumber === 7  || colNumber === 8
+                  || colNumber === 9  || colNumber === 10
+            ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
 
         // Add a blank row
+        
         worksheet.addRow([]);
         // Get current date and time
         const getCurrentTime = () => {
@@ -1551,7 +1597,7 @@ export default function ItemPurchaseSummaryReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `ItemPurchaseSummaryReport As On ${currentdate}.xlsx`);
+        saveAs(blob, `ItemStatusReport As On ${currentdate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1677,42 +1723,67 @@ export default function ItemPurchaseSummaryReport() {
     // };
 
 
-    const firstColWidth = {
+     const firstColWidth = {
         width: "135px",
     };
     const secondColWidth = {
         width: "360px",
     };
     const thirdColWidth = {
-        width: "80px",
+        width: "60px",
     };
     const forthColWidth = {
-        width: "80px",
+        width: "60px",
     };   
-    const sixthColWidth = {
-        width: "80px",
+     const fifthColWidth = {
+        width: "60px",
     };
-   
+    const sixthColWidth = {
+        width: "60px",
+    };
+    const seventhColWidth = {
+        width: "60px",
+    };
+        const eightColWidth = {
+        width: "60px",
+    };
+    const ninthColWidth = {
+        width: "60px",
+    };
+    const tenthColWidth = {
+        width: "60px",
+    };
+
      const sixthcol = {
         width: "8px",
     };
 
 
+
      const [columns, setColumns] = useState({
-     Code: [],
-                   Description: [],
-          Rate: [],
-          Anty:[],
-           ["Pur Amount"]: [],
+       Code: [],
+          Description: [],
+                   Opening: [],
+          Purchase: [],
+          ['Pur-Ret']: [],
+             Receive: [],
+                Issue: [],
+                   Sale: [],
+          ['Sale-Ret']: [],
+                   Balance: [],
     });
     
     const [columnSortOrders, setColumnSortOrders] = useState({
-      Code: "",
-          
-         Description: "",
-          Rate: "",
-          Anty:"",
-           ["Pur Amount"]: "",
+     Code: "",
+          Description: "",
+                   Opening: "",
+          Purchase: "",
+          ['Pur-Ret']: "",
+             Receive: "",
+                Issue: "",
+                   Sale: "",
+          ['Sale-Ret']: "",
+                   Balance: "",
     });
     
       // When you receive your initial table data, transform it into column-oriented format
@@ -1720,10 +1791,16 @@ export default function ItemPurchaseSummaryReport() {
       if (tableData.length > 0) {
         const newColumns = {
           Code: tableData.map(row => row.Code),
-         Description: tableData.map(row => row.Description),
-          Rate: tableData.map(row => row.Rate),
-            Qnty: tableData.map(row => row.Qnty),
-                         ["Pur Amount"]: tableData.map(row => row["Pur Amount"]),
+          Description: tableData.map(row => row.Description),
+           Opening: tableData.map(row => row.Opening),
+          Purchase: tableData.map(row => row.Purchase),
+       
+          ['Pur-Ret']: tableData.map(row => row['Pur-Ret']),
+          Receive: tableData.map(row => row.Receive),
+          Issue: tableData.map(row => row.Issue),
+                    Sale: tableData.map(row => row.Sale),
+                              ['Sale-Ret']: tableData.map(row => row['Sale-Ret']),
+                              Balance: tableData.map(row => row.Balance),
 
 
         };
@@ -1743,12 +1820,16 @@ export default function ItemPurchaseSummaryReport() {
           const resetSorting = () => {
         setColumnSortOrders({
           Code: null,
-          
-         Description: null,
-          Rate: null,
-          Anty:null,
-          ["Pur Amount"]: null,
-         
+          Description: null,
+                   Opening: null,
+          Purchase: null,
+          ['Pur-Ret']: null,
+             Receive: null,
+                Issue: null,
+                   Sale: null,
+          ['Sale-Ret']: null,
+                   Balance: null,
+
         });
       };
     
@@ -1789,6 +1870,7 @@ export default function ItemPurchaseSummaryReport() {
         }, {}),
       }));
     };
+
     
 
     useHotkeys("alt+s", () => {
@@ -1826,7 +1908,7 @@ export default function ItemPurchaseSummaryReport() {
         alignItems: "center",
         overflow: "hidden",
         textAlign: "center",
-        fontSize: "15px",
+        fontSize: "10px",
         fontStyle: "normal",
         fontWeight: "400",
         lineHeight: "23px",
@@ -1971,7 +2053,7 @@ export default function ItemPurchaseSummaryReport() {
         }
     };
 
-const formatValue = (val) => {
+    const formatValue = (val) => {
   return Number(val) === 0 ? "" : val;
 };
 
@@ -1988,7 +2070,7 @@ const formatValue = (val) => {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Item Purchase Summary Report" />
+                    <NavComponent textdata="Item Status Report" />
 
                     {/* ------------1st row */}
                     <div
@@ -2002,7 +2084,7 @@ const formatValue = (val) => {
                                                       alignItems: "center",
                                                       margin: "0px",
                                                       padding: "0px",
-                                                      justifyContent: "start",
+                                                      justifyContent: "space-between",
                                                   }}
                                               >
                                                   <div className="d-flex align-items-center" style={{marginLeft:'15px'}}>
@@ -2097,7 +2179,6 @@ const formatValue = (val) => {
                                                   </div>
                                                   <div
                                                       className="d-flex align-items-center"
-                                                      style={{ marginLeft: "50px" }}
                                                   >
                                                       <div
                                                           style={{
@@ -2188,6 +2269,76 @@ const formatValue = (val) => {
                                                           />
                                                       </div>
                                                   </div>
+
+                                                   <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        marginLeft: "10px",
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Capacity :
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div style={{ marginLeft: "3px" }}>
+                                    <Select
+                                        className="List-select-class "
+                                        ref={input2Ref}
+                                        options={capacityoptions}
+                                        onKeyDown={(e) => handlecapacityKeypress(e, input4Ref)}
+                                        id="selectedsale2"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setCapacityselectdata(selectedOption.value);
+                                                setcapacityselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setcapacityselectdatavalue("");
+                                            }
+                                        }}
+                                        onInputChange={(inputValue, { action }) => {
+                                            if (action === "input-change") {
+                                                return inputValue.toUpperCase();
+                                            }
+                                            return inputValue;
+                                        }}
+
+                                        components={{ Option: DropdownOption }}
+                                        styles={{
+                                            ...customStyles1(!Companyselectdata),
+                                            placeholder: (base) => ({
+                                                ...base,
+                                                textAlign: "left",
+                                                marginLeft: "0",
+                                                justifyContent: "flex-start",
+                                                color: fontcolor,
+                                                marginTop: '-5px'
+                                            })
+                                        }}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+                                </div>
+                            </div>
                       
                                                   
                                                 
@@ -2283,79 +2434,78 @@ const formatValue = (val) => {
                                 </div>
                             </div>
 
-                               <div
-                                                                                          className="d-flex align-items-center"
-                                                                                          style={{ marginLeft: "7px" }}
-                                                                                      >
-                                                                                          <div
-                                                                                              style={{
-                                                                                                  marginLeft: "10px",
-                                                                                                  width: "80px",
-                                                                                                  display: "flex",
-                                                                                                  justifyContent: "end",
-                                                                                              }}
-                                                                                          >
-                                                                                              <label htmlFor="transactionType">
-                                                                                                  <span
-                                                                                                      style={{
-                                                                                                          display: "flex",
-                                                                                                          alignItems: "center",
-                                                                                                          justifyContent: "center",
-                                                                                                          fontSize: getdatafontsize,
-                                                                                                          fontFamily: getfontstyle,
-                                                                                                          fontWeight: "bold",
-                                                                                                          marginRight:'3px'
-                                                                                                      }}
-                                                                                                  >
-                                                                                                      Store :
-                                                                                                  </span>
-                                                                                              </label>
-                                                                                          </div>
-                                                          
-                                                                                          <div style={{ marginRight: "21px" }}>
-                                                                                              <Select
-                                                                                                  className="List-select-class"
-                                                                                                  ref={input6Ref}
-                                                                                                  options={typeoptions}
-                                                                                                  onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
-                                                                                                  id="selectedsale"
-                                                                                                  onChange={(selectedOption) => {
-                                                                                                      if (selectedOption && selectedOption.value) {
-                                                                                                          const labelPart = selectedOption.label.split("-")[1];
-                                                                                                          setTypeselectdata(selectedOption.value);
-                                                                                                          settypeselectdatavalue({
-                                                                                                              value: selectedOption.value,
-                                                                                                              label: labelPart,
-                                                                                                          });
-                                                                                                      } else {
-                                                                                                          setTypeselectdata("");
-                                                                                                          settypeselectdatavalue("");
-                                                                                                      }
-                                                                                                  }}
-                                                                                                  onInputChange={(inputValue, { action }) => {
-                                                                                                      if (action === "input-change") {
-                                                                                                          return inputValue.toUpperCase();
-                                                                                                      }
-                                                                                                      return inputValue;
-                                                                                                  }}
-                                                                                                  components={{ Option: DropdownOption }}
-                                                                                                  styles={{
-                                                                                                      ...customStyles1(!Companyselectdata),
-                                                                                                      placeholder: (base) => ({
-                                                                                                          ...base,
-                                                                                                          textAlign: "left",
-                                                                                                          marginLeft: "0",
-                                                                                                          justifyContent: "flex-start",
-                                                                                                          color: fontcolor,
-                                                                                                          marginTop: '-5px'
-                                                                                                      })
-                                                                                                  }}
-                                                                                                  isClearable
-                                                                                                  placeholder="ALL"
-                                                                                              />
-                                                                                          </div>
-                                                                                      </div>
-                            
+                            <div
+                                                              className="d-flex align-items-center"
+                                                              style={{ marginLeft: "7px" }}
+                                                          >
+                                                              <div
+                                                                  style={{
+                                                                      marginLeft: "10px",
+                                                                      width: "80px",
+                                                                      display: "flex",
+                                                                      justifyContent: "end",
+                                                                  }}
+                                                              >
+                                                                  <label htmlFor="transactionType">
+                                                                      <span
+                                                                          style={{
+                                                                              display: "flex",
+                                                                              alignItems: "center",
+                                                                              justifyContent: "center",
+                                                                              fontSize: getdatafontsize,
+                                                                              fontFamily: getfontstyle,
+                                                                              fontWeight: "bold",
+                                                                              marginRight:'3px'
+                                                                          }}
+                                                                      >
+                                                                          Store :
+                                                                      </span>
+                                                                  </label>
+                                                              </div>
+                              
+                                                              <div style={{ marginRight: "21px" }}>
+                                                                  <Select
+                                                                      className="List-select-class"
+                                                                      ref={input4Ref}
+                                                                      options={typeoptions}
+                                                                      onKeyDown={(e) => handlecompanyKeypress(e, input5Ref)}
+                                                                      id="selectedsale"
+                                                                      onChange={(selectedOption) => {
+                                                                          if (selectedOption && selectedOption.value) {
+                                                                              const labelPart = selectedOption.label.split("-")[1];
+                                                                              setTypeselectdata(selectedOption.value);
+                                                                              settypeselectdatavalue({
+                                                                                  value: selectedOption.value,
+                                                                                  label: labelPart,
+                                                                              });
+                                                                          } else {
+                                                                              setTypeselectdata("");
+                                                                              settypeselectdatavalue("");
+                                                                          }
+                                                                      }}
+                                                                      onInputChange={(inputValue, { action }) => {
+                                                                          if (action === "input-change") {
+                                                                              return inputValue.toUpperCase();
+                                                                          }
+                                                                          return inputValue;
+                                                                      }}
+                                                                      components={{ Option: DropdownOption }}
+                                                                      styles={{
+                                                                          ...customStyles1(!Companyselectdata),
+                                                                          placeholder: (base) => ({
+                                                                              ...base,
+                                                                              textAlign: "left",
+                                                                              marginLeft: "0",
+                                                                              justifyContent: "flex-start",
+                                                                              color: fontcolor,
+                                                                              marginTop: '-5px'
+                                                                          })
+                                                                      }}
+                                                                      isClearable
+                                                                      placeholder="ALL"
+                                                                  />
+                                                              </div>
+                                                          </div>
 
                             {/* <div
                                 className="d-flex align-items-center"
@@ -2505,203 +2655,8 @@ const formatValue = (val) => {
                                     />
                                 </div>
                             </div>
-                              <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span
-                                            style={{
-                                                fontSize: getdatafontsize,
-                                                fontFamily: getfontstyle,
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
 
-                                {/* <select
-                                    ref={input4Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="">ALL</option>
-                                    <option value="BIL">PURCHASE</option>
-                                    <option value="PRN">PURCHASE RETURN</option>
-                                </select> */}
-
-                                  <div style={{ position: "relative", display: "inline-block" }}>
-  <select
-    ref={input4Ref}
-    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-    id="submitButton"
-    name="type"
-    onFocus={(e) =>
-      (e.currentTarget.style.border = "4px solid red")
-    }
-    onBlur={(e) =>
-      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-    }
-    value={transectionType2}
-    onChange={handleTransactionTypeChange2}
-    style={{
-      width: "250px",
-      height: "24px",
-      marginLeft: "5px",
-      backgroundColor: getcolor,
-      border: `1px solid ${fontcolor}`,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-       paddingLeft: "12px",
-    }}
-  >
-       <option value="">ALL</option>
-                                    <option value="BIL">PURCHASE</option>
-                                    <option value="PRN">PURCHASE RETURN</option>
-  </select>
-
-  {transectionType2 !== "" && (
-    <span
-      onClick={() => settransectionType2("")}
-      style={{
-        position: "absolute",
-        right: "25px",
-        top: "50%",
-        transform: "translateY(-50%)",
-        cursor: "pointer",
-        fontWeight: "bold",
-        color: fontcolor,
-        userSelect: "none",
-        fontSize: "12px",
-      }}
-    >
-      ✕
-    </span>
-  )}
-</div>
-                            </div>
-
-                           
-                        </div>
-                    </div>
-
-                    {/* //////////////// FORTH ROW ///////////////////////// */}
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                             <div
-                                className="d-flex align-items-center"
-                                style={{ marginLeft: "7px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span
-                                            style={{
-                                                fontSize: getdatafontsize,
-                                                fontFamily: getfontstyle,
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            Capacity :
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <div style={{ marginLeft: "3px" }}>
-                                    <Select
-                                        className="List-select-class "
-                                        ref={input2Ref}
-                                        options={capacityoptions}
-                                        onKeyDown={(e) => handlecapacityKeypress(e, input6Ref)}
-                                        id="selectedsale2"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setCapacityselectdata(selectedOption.value);
-                                                setcapacityselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart, // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setcapacityselectdatavalue("");
-                                            }
-                                        }}
-                                        onInputChange={(inputValue, { action }) => {
-                                            if (action === "input-change") {
-                                                return inputValue.toUpperCase();
-                                            }
-                                            return inputValue;
-                                        }}
-
-                                        components={{ Option: DropdownOption }}
-                                        styles={{
-                                            ...customStyles1(!Companyselectdata),
-                                            placeholder: (base) => ({
-                                                ...base,
-                                                textAlign: "left",
-                                                marginLeft: "0",
-                                                justifyContent: "flex-start",
-                                                color: fontcolor,
-                                                marginTop: '-5px'
-                                            })
-                                        }}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-                                </div>
-                            </div>
-
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
+                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "3px" }}>
                                     <span
                                         style={{
@@ -2764,8 +2719,13 @@ const formatValue = (val) => {
                                     )}
                                 </div>
                             </div>
+                               
+
+                           
                         </div>
                     </div>
+
+                   
 
                     <div>
                         {/* Table Head */}
@@ -2801,18 +2761,18 @@ const formatValue = (val) => {
                                             color: "white",
                                         }}
                                     >
-                                                                                 <td
+                                           <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("code")}
+                      onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
+                        style={getIconStyle("Code")}
                       ></i>
                     </td>
-                                                                                <td
+                                          <td
                       className="border-dark"
                       style={secondColWidth}
                       onClick={() => handleSorting("Description")}
@@ -2823,41 +2783,95 @@ const formatValue = (val) => {
                         style={getIconStyle("Description")}
                       ></i>
                     </td>
-                                                                                 <td
+                                           <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("Rate")}
+                      onClick={() => handleSorting("Opening")}
                     >
-                      Rate{" "}
+                      Open{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Rate")}
+                        style={getIconStyle("Opening")}
                       ></i>
                     </td>
-                                                                                 <td
+                                           <td
                       className="border-dark"
                       style={forthColWidth}
-                      onClick={() => handleSorting("Qnty")}
+                      onClick={() => handleSorting("Purchase")}
                     >
-                      Qnty{" "}
+                      Pur{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
+                        style={getIconStyle("Purchase")}
                       ></i>
                     </td>
                                      
-                                                                                <td
+                                           <td
                       className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Pur Amount")}
+                      style={fifthColWidth}
+                      onClick={() => handleSorting("Pur-Ret")}
                     >
-                      Amount{" "}
+                      P Rat{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Pur Amount")}
+                        style={getIconStyle("Pur-Ret")}
                       ></i>
                     </td>
-                  
+                                           <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Receive")}
+                    >
+                      Rece{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Receive")}
+                      ></i>
+                    </td>
+                                           <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Issue")}
+                    >
+                      Issue{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Issue")}
+                      ></i>
+                    </td>
+                                          <td
+                      className="border-dark"
+                      style={eightColWidth}
+                      onClick={() => handleSorting("Sale")}
+                    >
+                      Sale{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Sale")}
+                      ></i>
+                    </td>
+                                            <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("Saleb-Rate")}
+                    >
+                      S Rat{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Sale-Ret")}
+                      ></i>
+                    </td>
+                                           <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      onClick={() => handleSorting("Balance")}
+                    >
+                      Bal{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i>
+                    </td>
                                         <td className="border-dark" style={sixthcol}>
                                            
                                         </td>
@@ -2873,10 +2887,10 @@ const formatValue = (val) => {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "43vh",
-                                // width: "100%",
-                                position: "relative",
-                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                                maxHeight: "48vh",
+                            //    width: "100%",
+                  position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                              
                             }}
                         >
@@ -2884,7 +2898,8 @@ const formatValue = (val) => {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle, 
+                                    width: "100%",
                                     position: "relative",
                                 }}
                             >
@@ -2896,7 +2911,7 @@ const formatValue = (val) => {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="5"className="text-center">
+                                                <td colSpan="10" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2909,7 +2924,7 @@ const formatValue = (val) => {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 5 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2922,8 +2937,12 @@ const formatValue = (val) => {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
+                                                <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                              
+                                                  <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                  <td style={tenthColWidth}></td>
                                                
                                             </tr>
                                         </>
@@ -2931,9 +2950,9 @@ const formatValue = (val) => {
                                         <>
                                             {tableData.map((item, i) => {
                                                 totalEnteries += 1;
-                                                    const isNegative = item.Qnty < 0 || item.Rate < 0 || item["Pur Amount"] < 0 
-                                                                        
-                                                
+                          const isNegative = item.Opening < 0 || item.Sale < 0 || item.Balance < 0 
+                          || item.Purchase < 0 || item.Receive < 0 || item['Pur-Ret'] < 0 || item["Sale-Ret"] < 0;
+
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
@@ -2945,26 +2964,55 @@ const formatValue = (val) => {
                                                         style={{
                                                             backgroundColor: getcolor,
                                                             // color: fontcolor,
-                                                            color: isNegative ? "red" : fontcolor,
+  color: isNegative ? "red" : fontcolor 
                                                         }}
                                                     >
-                                                        <td className="text-start" style={firstColWidth}>
-                                                            {item.code}
-                                                        </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
-                                                        </td>
-                                                        <td className="text-end" style={thirdColWidth}>
-                                                            {formatValue(item.Rate)}
-                                                        </td>
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {formatValue(item.Qnty)}
-                                                        </td>
-                                                        
-                                                        <td className="text-end" style={sixthColWidth}>
-                                                            {formatValue(item["Pur Amount"]) }
-                                                        </td>
-                                                        
+                                                         <td className="text-start" 
+                   title={item.Code}
+                    style={{
+                      ...firstColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Code}
+                  </td>
+                                                                  <td className="text-start" 
+                   title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
+                            <td className="text-end" style={thirdColWidth}>
+                              {formatValue(item.Opening)}
+                            </td>
+                            <td className="text-end" style={forthColWidth}>
+                              {formatValue(item.Purchase)}
+                            </td>
+                            <td className="text-end" style={fifthColWidth}>
+                              {formatValue(item["Pur-Ret"])}
+                            </td>
+                            <td className="text-end" style={sixthColWidth}>
+                              {formatValue(item["Receive"])}
+                            </td>
+                            <td className="text-end" style={seventhColWidth}>
+                              {formatValue(item["Issue"])}
+                            </td>
+                            <td className="text-end" style={eightColWidth}>
+                              {formatValue(item["Sale"])}
+                            </td>
+                            <td className="text-end" style={ninthColWidth}>
+                              {formatValue(item["Sale-Ret"])}
+                            </td>
+                            <td className="text-end" style={tenthColWidth}>
+                              {formatValue(item["Balance"])}
+                            </td>
                                                         
                                                     </tr>
                                                 );
@@ -2979,7 +3027,7 @@ const formatValue = (val) => {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 5 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2987,17 +3035,23 @@ const formatValue = (val) => {
                                                 </tr>
                                             ))}
                                             <tr>
-                                                <td style={firstColWidth}></td>
+                                              <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={forthColWidth}></td>
+                                                <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                            
+                                                  <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                  <td style={tenthColWidth}></td>
                                               
                                             </tr>
                                         </>
                                     )}
                                 </tbody>
+
+                                
                             </table>
                         </div>
                     </div>
@@ -3019,7 +3073,7 @@ const formatValue = (val) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                        <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
+                       <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
                         </div>
                         <div
@@ -3036,7 +3090,7 @@ const formatValue = (val) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            {/* <span className="mobileledger_total">{totalexcel}</span> */}
+                            <span className="mobileledger_total">{formatValue(totalOpening)}</span>
                         </div>
                         <div
                             style={{
@@ -3045,18 +3099,63 @@ const formatValue = (val) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{formatValue(totaldebit)}</span>
+                            <span className="mobileledger_total">{formatValue(totalPurchase)}</span>
                         </div>
-                       <div
+                       
+                        <div
+                            style={{
+                                ...fifthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{formatValue(totalPurRet)}</span>
+                        </div>
+                        <div
                             style={{
                                 ...sixthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{formatValue(totalcredit)}</span>
+                            <span className="mobileledger_total">{formatValue(totalreceive)}</span>
                         </div>
-                       
+                        <div
+                            style={{
+                                ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{formatValue(totalIssue)}</span>
+                        </div>
+                         <div
+                            style={{
+                                ...eightColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{formatValue(totalSale)}</span>
+                        </div>
+                        <div
+                            style={{
+                                ...ninthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{formatValue(totalSaleRet)}</span>
+                        </div>
+                         <div
+                            style={{
+                                ...tenthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            <span className="mobileledger_total">{formatValue(totalQnty)}</span>
+                        </div>
                      
                       
                        
@@ -3096,10 +3195,10 @@ const formatValue = (val) => {
                             id="searchsubmit"
                             text="Select"
                             ref={selectButtonRef}
- onClick={() => {
+onClick={() => {
                 fetchDailyStatusReport();
                 resetSorting();
-              }}                              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              }}                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                             }

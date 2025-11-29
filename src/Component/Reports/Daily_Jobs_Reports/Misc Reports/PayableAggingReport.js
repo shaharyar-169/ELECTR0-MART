@@ -269,7 +269,7 @@ export default function PayableAggingReport() {
   }, []);
 
   const exportPDFHandler = () => {
-       const globalfontsize = 12;
+       const globalfontsize = 10;
        console.log("gobal font data", globalfontsize);
    
        // Create a new jsPDF instance with landscape orientation
@@ -330,7 +330,7 @@ export default function PayableAggingReport() {
        const addTableHeaders = (startX, startY) => {
          // Set font style and size for headers
          doc.setFont(getfontstyle, "bold"); // Set font to bold
-         doc.setFontSize(12); // Set font size for headers
+         doc.setFontSize(10); // Set font size for headers
    
          headers.forEach((header, index) => {
            const cellWidth = columnWidths[index];
@@ -364,7 +364,7 @@ export default function PayableAggingReport() {
              const normalFont = getfontstyle;
              const tableWidth = getTotalTableWidth();
  
-             doc.setFontSize(11);
+             doc.setFontSize(10);
  
              for (let i = startIndex; i < endIndex; i++) {
                  const row = rows[i];
@@ -577,7 +577,7 @@ export default function PayableAggingReport() {
            const labelsY = startY + 4; // Position the labels below the titles and above the table
    
            // Set font size and weight for the labels
-           doc.setFontSize(12);
+           doc.setFontSize(10);
            doc.setFont(getfontstyle, "300");
    
            let status =
@@ -976,7 +976,7 @@ export default function PayableAggingReport() {
 
 
    const [columns, setColumns] = useState({
-        code: [],
+        Code: [],
           Customer: [],
           Amt001: [],
             Amt002: [],
@@ -987,7 +987,7 @@ export default function PayableAggingReport() {
              Total: [],
       });
       const [columnSortOrders, setColumnSortOrders] = useState({
-        code: "",
+        Code: "",
           Customer: "",
           Amt001: "",
             Amt002: "",
@@ -1001,7 +1001,7 @@ export default function PayableAggingReport() {
       useEffect(() => {
         if (tableData.length > 0) {
           const newColumns = {
-            code: tableData.map((row) => row.code),
+            Code: tableData.map((row) => row.Code),
             Customer: tableData.map((row) => row.Customer),
             Amt001: tableData.map((row) => row.Amt001),
              Amt002: tableData.map((row) => row.Amt002),
@@ -1017,37 +1017,55 @@ export default function PayableAggingReport() {
         }
       }, [tableData]);
     
-     const handleSorting = (col) => {
-      const currentOrder = columnSortOrders[col];
-      const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-    
-      const sortedData = [...tableData].sort((a, b) => {
-        const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-        const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
-    
-        const numA = parseFloat(aVal.replace(/,/g, ""));
-        const numB = parseFloat(bVal.replace(/,/g, ""));
-    
-        if (!isNaN(numA) && !isNaN(numB)) {
-          return newOrder === "ASC" ? numA - numB : numB - numA;
-        } else {
-          return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-        }
-      });
-    
-      setTableData(sortedData);
-    
-      setColumnSortOrders((prev) => ({
-        ...Object.keys(prev).reduce((acc, key) => {
-          acc[key] = key === col ? newOrder : null;
-          return acc;
-        }, {}),
-      }));
-    };
+        const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  const sortedData = [...tableData].sort((a, b) => {
+    let aVal = a[col] ?? "";
+    let bVal = b[col] ?? "";
+
+    aVal = aVal.toString();
+    bVal = bVal.toString();
+
+    // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
+    if (col === "code" || col === "Code") {
+      // Reverse strings → compare from right side
+      const revA = aVal.split("").reverse().join("");
+      const revB = bVal.split("").reverse().join("");
+
+      return newOrder === "ASC"
+        ? revA.localeCompare(revB)
+        : revB.localeCompare(revA);
+    }
+
+    // ⭐ Numeric sorting
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    }
+
+    // Default → normal string sorting
+    return newOrder === "ASC"
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
+
+  setTableData(sortedData);
+
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
      
       const resetSorting = () => {
         setColumnSortOrders({
-          code: null,
+          Code: null,
           Customer: null,
           Amt001: null,
             Amt002: null,
@@ -1601,12 +1619,12 @@ export default function PayableAggingReport() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("code")}
+                      onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
+                        style={getIconStyle("Code")}
                       ></i>
                     </td>
                     <td

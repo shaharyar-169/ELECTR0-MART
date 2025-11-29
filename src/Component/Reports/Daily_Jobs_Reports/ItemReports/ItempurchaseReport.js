@@ -20,6 +20,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Description, Store } from "@mui/icons-material";
 
 
 export default function ItemPurchaseReport() {
@@ -422,14 +423,14 @@ export default function ItemPurchaseReport() {
             FCapCod: Capacityselectdata,
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
-            FStrdCod: Typeselectdata,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
-            FRepTyp: transectionType,
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            FStrCod: Typeselectdata,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
+            FTrnTyp: transectionType2,
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
    
    
            }).toString();
@@ -783,7 +784,7 @@ export default function ItemPurchaseReport() {
         });
 
     const exportPDFHandler = () => {
-        const globalfontsize = 12;
+        const globalfontsize = 10;
         console.log("gobal font data", globalfontsize);
 
         // Create a new jsPDF instance with landscape orientation
@@ -795,14 +796,14 @@ export default function ItemPurchaseReport() {
             item['Trn#'],
             item.Type,
             item.Description,
-            item.code,
+            item.Store,
             item.Qnty,
             item.Rate,
              item['Pur Amount'],
         ]);
 
         // Add summary row to the table
-        rows.push(["", "", "","Total",  "", String(totaldebit), "",String(totalcredit)]);
+        rows.push(["", "", "","Total",  "",String(totaldebit), "",String(totalcredit)]);
 
 
         // Define table column headers and individual column widths
@@ -812,12 +813,12 @@ export default function ItemPurchaseReport() {
             "Trn#",
             "Type",
             "Description",
-            "Code",
+            "Store",
             "Qnty",
             "Rate",
             "Amount",
         ];
-        const columnWidths = [20,15,12,110,35,15,25,25];
+        const columnWidths = [20,15,12,110,15,15,25,25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -834,7 +835,7 @@ export default function ItemPurchaseReport() {
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
             doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+            doc.setFontSize(10); // Set font size for headers
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -858,7 +859,7 @@ export default function ItemPurchaseReport() {
 
             // Reset font style and size after adding headers
             doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+            doc.setFontSize(10);
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
@@ -940,7 +941,7 @@ export default function ItemPurchaseReport() {
                     // Ensure the cell value is a string
                     const cellValue = String(cell);
 
-                    if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7 ) {
+                    if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 ) {
                         const rightAlignX = currentX + columnWidths[cellIndex] - 2;
                         doc.text(cellValue, rightAlignX, cellY, {
                             align: "right",
@@ -1092,7 +1093,7 @@ export default function ItemPurchaseReport() {
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
                 // Set font size and weight for the labels
-                doc.setFontSize(12);
+                doc.setFontSize(10);
                 doc.setFont(getfontstyle, "300");
 
                 let RATE =
@@ -1115,7 +1116,7 @@ export default function ItemPurchaseReport() {
                         :transectionType =="SRN"
                          ? "PURCHASE RETURN"
                         
-                         : "PRN";
+                         : "ALL";
 
 
                 let typeText = capacityselectdatavalue.label
@@ -1143,10 +1144,10 @@ export default function ItemPurchaseReport() {
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-                // doc.setFont(getfontstyle, "bold"); // Set font to bold
-                // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+                doc.setFont(getfontstyle, "bold"); // Set font to bold
+                doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
+                doc.setFont(getfontstyle, "normal"); // Reset font to normal
+                doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
                 doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -1237,9 +1238,9 @@ export default function ItemPurchaseReport() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 6; // Ensure this matches the actual number of columns
+        const numColumns = 7; // Ensure this matches the actual number of columns
 
-        const columnAlignments = ["left", "left", "center", "left","left","right", "right", "right"];
+        const columnAlignments = ["left", "left", "center", "left","right","right", "right", "right"];
 
         // Define fonts for different sections
         const fontCompanyName = {
@@ -1275,7 +1276,7 @@ export default function ItemPurchaseReport() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(67 + numColumns - 1)}${companyRow.number
+            `A${companyRow.number}:${String.fromCharCode(66 + numColumns - 1)}${companyRow.number
             }`
         );
 
@@ -1287,7 +1288,7 @@ export default function ItemPurchaseReport() {
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(67 + numColumns - 1)}${storeListRow.number
+            `A${storeListRow.number}:${String.fromCharCode(66 + numColumns - 1)}${storeListRow.number
             }`
         );
 
@@ -1339,6 +1340,10 @@ export default function ItemPurchaseReport() {
             "COMPANY :",
             typecompany,
             "",
+              "",
+              "",
+            "STORE :",
+            typetype,
           
         ]);
 
@@ -1349,7 +1354,7 @@ export default function ItemPurchaseReport() {
             "",
              "",
               "",
-               "",
+               
                             "TYPE :",
             transectionsts,
         ]);
@@ -1368,7 +1373,7 @@ export default function ItemPurchaseReport() {
         // Add third row with conditional rendering for "SEARCH:"
         const typeAndStoreRow4 = worksheet.addRow(
             searchQuery
-                ? [  "CAPACITY :", typecapacity, "","", "","", "SEARCH :", typesearch]
+                ? [  "CAPACITY :", typecapacity, "","", "", "SEARCH :", typesearch]
                 : ["CAPACITY :", typecapacity,]
         );
 
@@ -1377,7 +1382,7 @@ export default function ItemPurchaseReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 7].includes(colIndex),
+                bold: [1, 6].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1385,7 +1390,7 @@ export default function ItemPurchaseReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 7].includes(colIndex),
+                bold: [1, 6].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1402,7 +1407,7 @@ export default function ItemPurchaseReport() {
             cell.font = {
                 name: "CustomFont" || "CustomFont",
                 size: 10,
-                bold: [1, 7].includes(colIndex),
+                bold: [1, 6].includes(colIndex),
             };
             cell.alignment = { horizontal: "left", vertical: "middle" };
         });
@@ -1430,7 +1435,7 @@ export default function ItemPurchaseReport() {
             "Trn#",
             "Type",
             "Description",
-            "Code",
+            "Store",
             "Qnty",
             "Rate",
             "Amount",
@@ -1446,10 +1451,10 @@ export default function ItemPurchaseReport() {
             item['Trn#'],
             item.Type,
             item.Description,
-            item.code,
+            item.Store,
             item.Qnty,
             item.Rate,
-             item['Sale Amount'],
+             item['Pur Amount'],
              
             ]);
 
@@ -1469,12 +1474,12 @@ export default function ItemPurchaseReport() {
         });
 
         // Set column widths
-        [10,8, 6, 45,18, 8, 15, 15].forEach((width, index) => {
+        [12,8, 6, 50,8,8, 15, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
-          "", "", "","Total",  "", String(totaldebit), "",String(totalcredit)
+          "", "", "","Total",   "",String(totaldebit), "",String(totalcredit)
 
         ]);
 
@@ -1678,20 +1683,20 @@ export default function ItemPurchaseReport() {
     // };
 
 
-     const firstColWidth = {
+    const firstColWidth = {
         width: "80px",
     };
     const secondColWidth = {
         width: "60px",
     };
     const thirdColWidth = {
-        width: "35px",
+        width: "50px",
     };
     const forthColWidth = {
         width: "360px",
     };   
     const sixthColWidth = {
-        width: "135px",
+        width: "40px",
     };
     const seventhColWidth = {
         width: "60px",
@@ -1704,15 +1709,120 @@ export default function ItemPurchaseReport() {
     };
 
      const sixthcol = {
-        width: "13px",
+        width: "8px",
     };
 
+
+     const [columns, setColumns] = useState({
+      Date: [],
+          ["Trn#"]: [],
+         Type: [],
+          Description: [],
+          Qnty: [],
+           Store: [],
+          Rate: [],
+           ["Pur Amount"]: [],
+    });
+    
+    const [columnSortOrders, setColumnSortOrders] = useState({
+       Date: "",
+          ["Trn#"]: "",
+         Type: "",
+          Description: "",
+          Store: "",
+          Qnty: "",
+          Rate: "",
+           ["Pur Amount"]: "",
+    });
+    
+      // When you receive your initial table data, transform it into column-oriented format
+      useEffect(() => {
+      if (tableData.length > 0) {
+        const newColumns = {
+          Date: tableData.map(row => row.Date),
+          ["Trn#"]: tableData.map(row => row["Trn#"]),
+         Type: tableData.map(row => row.Type),
+          Description: tableData.map(row => row.Description),
+            Store: tableData.map(row => row.Store),
+                        Qnty: tableData.map(row => row.Qnty),
+
+          Rate: tableData.map(row => row.Rate),
+          ["Pur Amount"]: tableData.map(row => row["Pur Amount"]),
+
+        };
+        setColumns(newColumns);
+      }
+    }, [tableData]);
+    
+     const getIconStyle = (colKey) => {
+        const order = columnSortOrders[colKey];
+        return {
+          transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+          color: order === "ASC" || order === "DSC" ? "red" : "white",
+          transition: "transform 0.3s ease, color 0.3s ease",
+        };
+      };
+    
+          const resetSorting = () => {
+        setColumnSortOrders({
+          Date: null,
+          ["Trn#"]: null,
+         Type: null,
+          Description: null,
+          Store:null,
+          Qnty: null,
+          Rate: null,
+           ["Pur Amount"]: null,
+        });
+      };
+    
+    const handleSorting = (col) => {
+      const currentOrder = columnSortOrders[col];
+      const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+    
+      const sortedData = [...tableData].sort((a, b) => {
+        const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+        const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+    
+        // ⭐ SPECIAL CASE: Sort "Last Date" by YEAR
+        if (col === "Last Date") {
+          const aYear = parseInt(aVal.split("-")[2]) || 0; // Extract YYYY
+          const bYear = parseInt(bVal.split("-")[2]) || 0;
+    
+          return newOrder === "ASC" ? aYear - bYear : bYear - aYear;
+        }
+    
+        // ⭐ NORMAL NUMBER SORT
+        const numA = parseFloat(aVal.replace(/,/g, ""));
+        const numB = parseFloat(bVal.replace(/,/g, ""));
+    
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return newOrder === "ASC" ? numA - numB : numB - numA;
+        }
+    
+        // ⭐ NORMAL STRING SORT
+        return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      });
+    
+      setTableData(sortedData);
+    
+      setColumnSortOrders((prev) => ({
+        ...Object.keys(prev).reduce((acc, key) => {
+          acc[key] = key === col ? newOrder : null;
+          return acc;
+        }, {}),
+      }));
+    };
     
 
-    useHotkeys("s", fetchDailyStatusReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys("alt+s", () => {
+        fetchDailyStatusReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1884,6 +1994,10 @@ export default function ItemPurchaseReport() {
             focusNextElement(searchRef, selectButtonRef);
         }
     };
+
+const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
 
     return (
         <>
@@ -2118,7 +2232,7 @@ export default function ItemPurchaseReport() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "start",
+                                justifyContent: "space-between",
                             }}
                         >
                             <div
@@ -2192,6 +2306,80 @@ export default function ItemPurchaseReport() {
                                     />
                                 </div>
                             </div>
+
+                               <div
+                                                                                          className="d-flex align-items-center"
+                                                                                          style={{ marginLeft: "7px" }}
+                                                                                      >
+                                                                                          <div
+                                                                                              style={{
+                                                                                                  marginLeft: "10px",
+                                                                                                  width: "80px",
+                                                                                                  display: "flex",
+                                                                                                  justifyContent: "end",
+                                                                                              }}
+                                                                                          >
+                                                                                              <label htmlFor="transactionType">
+                                                                                                  <span
+                                                                                                      style={{
+                                                                                                          display: "flex",
+                                                                                                          alignItems: "center",
+                                                                                                          justifyContent: "center",
+                                                                                                          fontSize: getdatafontsize,
+                                                                                                          fontFamily: getfontstyle,
+                                                                                                          fontWeight: "bold",
+                                                                                                          marginRight:'3px'
+                                                                                                      }}
+                                                                                                  >
+                                                                                                      Store :
+                                                                                                  </span>
+                                                                                              </label>
+                                                                                          </div>
+                                                          
+                                                                                          <div style={{ marginRight: "21px" }}>
+                                                                                              <Select
+                                                                                                  className="List-select-class"
+                                                                                                  ref={input6Ref}
+                                                                                                  options={typeoptions}
+                                                                                                  onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
+                                                                                                  id="selectedsale"
+                                                                                                  onChange={(selectedOption) => {
+                                                                                                      if (selectedOption && selectedOption.value) {
+                                                                                                          const labelPart = selectedOption.label.split("-")[1];
+                                                                                                          setTypeselectdata(selectedOption.value);
+                                                                                                          settypeselectdatavalue({
+                                                                                                              value: selectedOption.value,
+                                                                                                              label: labelPart,
+                                                                                                          });
+                                                                                                      } else {
+                                                                                                          setTypeselectdata("");
+                                                                                                          settypeselectdatavalue("");
+                                                                                                      }
+                                                                                                  }}
+                                                                                                  onInputChange={(inputValue, { action }) => {
+                                                                                                      if (action === "input-change") {
+                                                                                                          return inputValue.toUpperCase();
+                                                                                                      }
+                                                                                                      return inputValue;
+                                                                                                  }}
+                                                                                                  components={{ Option: DropdownOption }}
+                                                                                                  styles={{
+                                                                                                      ...customStyles1(!Companyselectdata),
+                                                                                                      placeholder: (base) => ({
+                                                                                                          ...base,
+                                                                                                          textAlign: "left",
+                                                                                                          marginLeft: "0",
+                                                                                                          justifyContent: "flex-start",
+                                                                                                          color: fontcolor,
+                                                                                                          marginTop: '-5px'
+                                                                                                      })
+                                                                                                  }}
+                                                                                                  isClearable
+                                                                                                  placeholder="ALL"
+                                                                                              />
+                                                                                          </div>
+                                                                                      </div>
+                            
 
                             {/* <div
                                 className="d-flex align-items-center"
@@ -2366,7 +2554,7 @@ export default function ItemPurchaseReport() {
                                     </label>
                                 </div>
 
-                                <select
+                                {/* <select
                                     ref={input4Ref}
                                     onKeyDown={(e) => handleKeyPress(e, input5Ref)}
                                     id="submitButton"
@@ -2394,7 +2582,58 @@ export default function ItemPurchaseReport() {
                                       <option value="">ALL</option>
                                     <option value="BIL">PURCHASE</option>
                                     <option value="PRN">PURCHASE RETURN</option>
-                                </select>
+                                </select> */}
+
+                                  <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input4Ref}
+    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType2}
+    onChange={handleTransactionTypeChange2}
+    style={{
+      width: "250px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+       paddingLeft: "12px",
+    }}
+  >
+       <option value="">ALL</option>
+                                    <option value="BIL">PURCHASE</option>
+                                    <option value="PRN">PURCHASE RETURN</option>
+  </select>
+
+  {transectionType2 !== "" && (
+    <span
+      onClick={() => settransectionType2("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
                             </div>
 
                            
@@ -2446,7 +2685,7 @@ export default function ItemPurchaseReport() {
                                         className="List-select-class "
                                         ref={input2Ref}
                                         options={capacityoptions}
-                                        onKeyDown={(e) => handlecapacityKeypress(e, input4Ref)}
+                                        onKeyDown={(e) => handlecapacityKeypress(e, input6Ref)}
                                         id="selectedsale2"
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -2586,31 +2825,95 @@ export default function ItemPurchaseReport() {
                                             color: "white",
                                         }}
                                     >
-                                        <td className="border-dark" style={firstColWidth}>
-                                            Date
-                                        </td>
-                                        <td className="border-dark" style={secondColWidth}>
-                                            Trn#
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
-                                            Type
-                                        </td>
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Description
-                                        </td>
+                                                                                 <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("Date")}
+                    >
+                      Date{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Date")}
+                      ></i>
+                    </td>
+                                                                                <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Trn#")}
+                    >
+                      Trn#{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Trn#")}
+                      ></i>
+                    </td>
+                                                                                 <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Type")}
+                    >
+                      Type{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Type")}
+                      ></i>
+                    </td>
+                                                                                 <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Description")}
+                    >
+                      Description{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
+                    </td>
                                      
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Code
-                                        </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                           Qnty
-                                        </td>
-                                        <td className="border-dark" style={eightColWidth}>
-                                           Rate
-                                        </td>
-                                        <td className="border-dark" style={ninthColWidth}>
-                                           Amount
-                                        </td>
+                                                                                <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Store")}
+                    >
+                      Str{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Store")}
+                      ></i>
+                    </td>
+                                                                                 <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Qnty")}
+                    >
+                      Qnty{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnty")}
+                      ></i>
+                    </td>
+                                                                                 <td
+                      className="border-dark"
+                      style={eightColWidth}
+                      onClick={() => handleSorting("Rate")}
+                    >
+                      Rate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Rate")}
+                      ></i>
+                    </td>
+                                                                                 <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("Pur Amount")}
+                    >
+                      Amount{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Pur Amount")}
+                      ></i>
+                    </td>
                                         <td className="border-dark" style={sixthcol}>
                                            
                                         </td>
@@ -2649,7 +2952,7 @@ export default function ItemPurchaseReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="6" className="text-center">
+                                                <td colSpan="8"className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2686,6 +2989,9 @@ export default function ItemPurchaseReport() {
                                         <>
                                             {tableData.map((item, i) => {
                                                 totalEnteries += 1;
+                                                    const isNegative = item.Qnty < 0 || item.Rate < 0 || item["Pur Amount"] < 0 
+                                                                        
+                                                
                                                 return (
                                                     <tr
                                                         key={`${i}-${selectedIndex}`}
@@ -2696,7 +3002,8 @@ export default function ItemPurchaseReport() {
                                                         }
                                                         style={{
                                                             backgroundColor: getcolor,
-                                                            color: fontcolor,
+                                                            // color: fontcolor,
+                                                            color: isNegative ? "red" : fontcolor,
                                                         }}
                                                     >
                                                         <td className="text-start" style={firstColWidth}>
@@ -2710,18 +3017,19 @@ export default function ItemPurchaseReport() {
                                                         </td>
                                                         <td className="text-start" style={forthColWidth}>
                                                             {item.Description}
-                                                        </td>
-                                                                                                               <td className="text-start" style={sixthColWidth}>
-                                                            {item.code}
+                                                        
+                                                        </td >
+                                                        <td className="text-end" style={sixthColWidth}>
+                                                            {item.Store}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item.Qnty}
+                                                            {formatValue(item.Qnty) }
                                                         </td>
                                                          <td className="text-end" style={eightColWidth}>
-                                                            {item.Rate}
+                                                            {formatValue(item.Rate)}
                                                         </td>
                                                          <td className="text-end" style={ninthColWidth}>
-                                                            {item["Pur Amount"]}
+                                                            {formatValue(item["Pur Amount"])}
                                                         </td>
                                                         
                                                     </tr>
@@ -2768,7 +3076,7 @@ export default function ItemPurchaseReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            // paddingRight: "13px"
+                            paddingRight: "8px"
                         }}
                     >
                         <div
@@ -2778,7 +3086,10 @@ export default function ItemPurchaseReport() {
                                 marginLeft: "2px",
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+                        <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
+
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2804,16 +3115,16 @@ export default function ItemPurchaseReport() {
                         >
                             {/* <span className="mobileledger_total">{totalexcel}</span> */}
                         </div>
-                       
-                        <div
+                       <div
                             style={{
                                 ...sixthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            {/* <span className="mobileledger_total">{totalqnty}</span> */}
+                            {/* <span className="mobileledger_total">{formatValue(totaldebit)}</span> */}
                         </div>
+                        
                         <div
                             style={{
                                 ...seventhColWidth,
@@ -2821,7 +3132,7 @@ export default function ItemPurchaseReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totaldebit}</span>
+                            <span className="mobileledger_total">{formatValue(totaldebit)}</span>
                         </div>
                         <div
                             style={{
@@ -2839,7 +3150,7 @@ export default function ItemPurchaseReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalcredit}</span>
+                            <span className="mobileledger_total">{formatValue(totalcredit)}</span>
                         </div>
                      
                       
@@ -2880,8 +3191,10 @@ export default function ItemPurchaseReport() {
                             id="searchsubmit"
                             text="Select"
                             ref={selectButtonRef}
-                            onClick={fetchDailyStatusReport}
-                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+ onClick={() => {
+                fetchDailyStatusReport();
+                resetSorting();
+              }}                              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                             }

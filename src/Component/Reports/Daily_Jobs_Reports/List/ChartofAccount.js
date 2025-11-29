@@ -78,8 +78,8 @@ export default function ChartofAccount() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
 
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
+      code: 'NASIRTRD',
+      FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
