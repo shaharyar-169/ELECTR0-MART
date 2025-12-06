@@ -16,7 +16,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function CityList() {
+export default function HelperList() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -71,15 +71,16 @@ export default function CityList() {
   };
 
   function fetchReceivableReport() {
-    const apiUrl = apiLinks + "/CityList.php";
+    const apiUrl = apiLinks + "/HelperList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FCtySts: transectionType,
+      FTchSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
 
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
+    //   code: 'IZONECOMP',
+    //   FLocCod: '001',
+
       FSchTxt: searchQuery,
     }).toString();
 
@@ -129,21 +130,24 @@ export default function CityList() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Code,
-      item.Description,
-      item.Status,
+        item.ttchcod,
+      item.ttchdsc,
+      item.tmobnum,
+      item.tnicnum,
+      item.Area,
+      item.ttchsts,
     ]);
 
     // Add summary row to the table
     // rows.push(["", "", "", "", "", ""]);
 
     // Define table column headers and individual column widths
-    const headers = ["Code", "Description", "Status"];
-    const columnWidths = [15, 110, 15];
+    const headers = ["Code", "Description", "Mobile", "Cnic", "Area", "Status"];
+    const columnWidths = [20, 110, 22,30, 50,15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -243,7 +247,7 @@ export default function CityList() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 2 || cellIndex === 0 || cellIndex === 6) {
+          if (cellIndex === 2 || cellIndex === 5) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
@@ -340,7 +344,7 @@ export default function CityList() {
         doc.setFontSize(pageNumberFontSize);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 40,
+          rightX - 30,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
@@ -354,7 +358,7 @@ export default function CityList() {
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
 
-        addTitle(`City List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+        addTitle(`Helper List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
@@ -435,7 +439,7 @@ export default function CityList() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`CityList As On ${date}.pdf`);
+    doc.save(`HelperList As On ${date}.pdf`);
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
@@ -446,8 +450,8 @@ export default function CityList() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 3; // Ensure this matches the actual number of columns
-    const columnAlignments = ["left", "left", "center"];
+    const numColumns = 6; // Ensure this matches the actual number of columns
+    const columnAlignments = ["left", "left", "center", "left", "left", "center"];
 
     // Define fonts
     const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
@@ -468,7 +472,7 @@ export default function CityList() {
     worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
 
     // Store List
-    const storeListRow = worksheet.addRow(["CityList"]);
+    const storeListRow = worksheet.addRow(["Helper List"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -507,13 +511,20 @@ export default function CityList() {
     };
 
     // Headers
-    const headers = ["Code", "Description", "Status"];
+    const headers = ["Code", "Description", "Mobile", "Cnic", "Area", "Status"];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // ✅ Add data rows with alternating light grey background
     tableData.forEach((item, index) => {
-      const row = worksheet.addRow([item.Code, item.Description, item.Status]);
+      const row = worksheet.addRow([ 
+        item.ttchcod,
+      item.ttchdsc,
+      item.tmobnum,
+      item.tnicnum,
+      item.Area,
+      item.ttchsts,
+    ]);
 
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
@@ -540,7 +551,7 @@ export default function CityList() {
     });
 
     // Column widths
-    [10, 40, 7].forEach((width, index) => {
+    [10, 45, 14,15,15,8].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -574,7 +585,7 @@ export default function CityList() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `CityList As On ${currentDate}.xlsx`);
+    saveAs(blob, `HelperList As On ${currentDate}.xlsx`);
   };
 
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
@@ -600,23 +611,32 @@ export default function CityList() {
   let totalEntries = 0;
 
   const [columns, setColumns] = useState({
-    Code: [],
-    Description: [],
-    Status: [],
+  ttchcod: [] ,
+      ttchdsc: [],
+      tmobnum: [],
+      tnicnum: [],
+      Area: [],
+      ttchsts: [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
-    Code: "",
-    Description: "",
-    Status: "",
+   ttchcod: "" ,
+      ttchdsc: "",
+      tmobnum: "",
+      tnicnum: "",
+      Area: "",
+      ttchsts: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        Code: tableData.map((row) => row.Code),
-        Description: tableData.map((row) => row.Description),
-        Status: tableData.map((row) => row.Status),
+        ttchcod: tableData.map((row) => row.ttchcod),
+        ttchdsc: tableData.map((row) => row.ttchdsc),
+        tmobnum: tableData.map((row) => row.tmobnum),
+        tnicnum: tableData.map((row) => row.tnicnum),
+        Area: tableData.map((row) => row.Area),
+        ttchsts: tableData.map((row) => row.ttchsts),
       };
       setColumns(newColumns);
     }
@@ -653,9 +673,12 @@ export default function CityList() {
 
   const resetSorting = () => {
     setColumnSortOrders({
-      Code: null,
-      Description: null,
-      Status: null,
+       ttchcod: null ,
+      ttchdsc: null,
+      tmobnum: null,
+      tnicnum: null,
+      Area: null,
+      ttchsts: null,
     });
   };
 
@@ -668,7 +691,7 @@ export default function CityList() {
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="3" className="text-center">
+              <td colSpan="6" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -680,7 +703,7 @@ export default function CityList() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 3 }).map((_, colIndex) => (
+                {Array.from({ length: 6 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -689,6 +712,9 @@ export default function CityList() {
               <td style={firstColWidth}></td>
               <td style={secondColWidth}></td>
               <td style={thirdColWidth}></td>
+               <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
             </tr>
           </>
         ) : (
@@ -707,13 +733,22 @@ export default function CityList() {
                   }}
                 >
                   <td className="text-center" style={firstColWidth}>
-                    {item.Code}
+                    {item.ttchcod}
                   </td>
                   <td className="text-start" style={secondColWidth}>
-                    {item.Description}
+                    {item.ttchdsc}
                   </td>
                   <td className="text-center" style={thirdColWidth}>
-                    {item.Status}
+                    {item.tmobnum}
+                  </td>
+                    <td className="text-start" style={forthColWidth}>
+                    {item.tnicnum}
+                  </td>
+                    <td className="text-start" style={fifthColWidth}>
+                    {item.Area}
+                  </td>
+                    <td className="text-center" style={sixthColWidth}>
+                    {item.ttchsts}
                   </td>
                 </tr>
               );
@@ -728,15 +763,18 @@ export default function CityList() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 3 }).map((_, colIndex) => (
+                {Array.from({ length: 6 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
             ))}
             <tr>
-              <td style={firstColWidth}></td>
+             <td style={firstColWidth}></td>
               <td style={secondColWidth}></td>
               <td style={thirdColWidth}></td>
+               <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
+              <td style={sixthColWidth}></td>
             </tr>
           </>
         )}
@@ -765,19 +803,13 @@ export default function CityList() {
     useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
 
-  // const firstColWidth = {
-  //   width: "20.2%",
-  // };
-  // const secondColWidth = {
-  //   width: "62%",
-  // };
-  // const thirdColWidth = {
-  //   width: "15%",
-  // };
-
-  const firstColWidth = { width: "60px" };
+ 
+  const firstColWidth = { width: "55px" };
   const secondColWidth = { width: "360px" };
-  const thirdColWidth = { width: "60px" };
+  const thirdColWidth = { width: "95px" };
+    const forthColWidth = { width: "120px" };
+      const fifthColWidth = { width: "180px" };
+        const sixthColWidth = { width: "60px" };
   
   const sixthcol = { width: "8px" };
 
@@ -797,7 +829,7 @@ export default function CityList() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "700px",
+    maxWidth: "900px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -884,10 +916,10 @@ export default function CityList() {
     }
   }, [selectedIndex]);
 
-  const formatValue = (val) => {
+
+   const formatValue = (val) => {
   return Number(val) === 0 ? "" : val;
 };
-
 
   return (
     <>
@@ -901,7 +933,7 @@ export default function CityList() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="City List" />
+          <NavComponent textdata="Helper List" />
 
           <div
             className="row"
@@ -1097,36 +1129,73 @@ export default function CityList() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("Code")}
+                      onClick={() => handleSorting("ttchcod")}
                     >
                       Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Code")}
+                        style={getIconStyle("ttchcod")}
                       ></i>
                     </td>
 
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
+                      onClick={() => handleSorting("ttchdsc")}
                     >
                       Description{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
+                        style={getIconStyle("ttchdsc")}
                       ></i>
                     </td>
 
                     <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("Status")}
+                      onClick={() => handleSorting("tmobnum")}
+                    >
+                      Mobile{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("tmobnum")}
+                      ></i>
+                    </td>
+
+
+ <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("tnicnum")}
+                    >
+                      Cnic{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("tnicnum")}
+                      ></i>
+                    </td>
+
+ <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                      onClick={() => handleSorting("Area")}
+                    >
+                      Area{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Area")}
+                      ></i>
+                    </td>
+
+ <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("ttchsts")}
                     >
                       Status{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Status")}
+                        style={getIconStyle("ttchsts")}
                       ></i>
                     </td>
 
@@ -1208,7 +1277,7 @@ export default function CityList() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
+              paddingRight: "8px",
               // width: "101.2%",
             }}
           >
@@ -1219,7 +1288,7 @@ export default function CityList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
- <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
+              <span className="mobileledger_total2">{formatValue(tableData.length) }</span>
 
             </div>
             <div
@@ -1232,6 +1301,27 @@ export default function CityList() {
             <div
               style={{
                 ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+             <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+             <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+             <div
+              style={{
+                ...sixthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}

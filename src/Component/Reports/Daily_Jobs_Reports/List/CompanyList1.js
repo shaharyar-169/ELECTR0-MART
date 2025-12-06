@@ -884,6 +884,10 @@ export default function CompanyList() {
     }
   }, [selectedIndex]);
 
+  const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
 
   return (
     <>
@@ -1215,7 +1219,7 @@ export default function CompanyList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length}</span>
+ <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div

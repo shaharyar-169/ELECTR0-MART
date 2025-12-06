@@ -687,6 +687,10 @@ export default function UserList() {
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
+const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
   const dispatch = useDispatch();
 
   const tableTopColor = "#3368B5";
@@ -1448,7 +1452,7 @@ export default function UserList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+  <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div

@@ -78,8 +78,8 @@ export default function ChartofAccount() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
 
-      code: 'NASIRTRD',
-      FLocCod: '001',
+      // code: 'NASIRTRD',
+      // FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
@@ -659,6 +659,10 @@ export default function ChartofAccount() {
     });
   };
 
+   const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
 
   const renderTableData = () => {
    
@@ -1237,7 +1241,7 @@ const contentStyle = {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+ <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div

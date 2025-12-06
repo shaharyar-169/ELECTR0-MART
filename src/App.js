@@ -75,6 +75,7 @@ import PriceListPurSale from "./Component/Reports/Daily_Jobs_Reports/List/PriceL
 import PriceListAPurSale from "./Component/Reports/Daily_Jobs_Reports/List/PriceListAPurSal.js";
 import SparePartsList from "./Component/Reports/Daily_Jobs_Reports/List/SparePartsList.js";
 import ItemPriceList2 from "./Component/Reports/Daily_Jobs_Reports/List/ItempriceList2.js";
+import HelperList from "./Component/Reports/Daily_Jobs_Reports/List/HelperList.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -249,6 +250,7 @@ function App() {
                 <Route exact path="/PriceListAPurSal" element={< PriceListAPurSale />} />
                 <Route exact path="/SparePartsList" element={< SparePartsList />} />
                 <Route exact path="/CategoryListPOS" element={< CategoryListPos />} />
+                <Route exact path="/HelperList" element={< HelperList />} />
 
 
                 {/* Rountes for ledgers reports */}

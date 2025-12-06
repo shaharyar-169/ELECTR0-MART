@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData , getLocationnumber, getYearDescription } from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -22,7 +22,6 @@ export default function ComplaintList() {
   const organisation = getOrganisationData();
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
-
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -30,12 +29,12 @@ export default function ComplaintList() {
 
   const [sortData, setSortData] = useState("ASC");
 
+  const [isAscendingcode, setisAscendingcode] = useState(true);
+  const [isAscendingdec, setisAscendingdec] = useState(true);
+  const [isAscendingsts, setisAscendingsts] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
-
-  const [isAscendingcode, setisAscendingcode] = useState(true);
-      const [isAscendingdec, setisAscendingdec] = useState(true);
-      const [isAscendingsts, setisAscendingsts] = useState(true);
 
   const {
     isSidebarVisible,
@@ -75,8 +74,12 @@ export default function ComplaintList() {
     const apiUrl = apiLinks + "/ComplaintList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FCapSts: transectionType,
+      FCptSts: transectionType,
       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+
+      // code: 'IZONECOMP',
+      // FLocCod: '001',
       FSchTxt: searchQuery,
     }).toString();
 
@@ -140,7 +143,7 @@ export default function ComplaintList() {
 
     // Define table column headers and individual column widths
     const headers = ["Code", "Description", "Status"];
-    const columnWidths = [22, 90, 15];
+    const columnWidths = [15, 110, 15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -196,6 +199,8 @@ export default function ComplaintList() {
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
         const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        // const isevenRow = i % 2 == 0; // Check if the row index is odd
+
         const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
         let textColor = [0, 0, 0]; // Default text color
         let fontName = normalFont; // Default font
@@ -206,16 +211,16 @@ export default function ComplaintList() {
         }
 
         // Set background color for odd-numbered rows
-        // if (isOddRow) {
-        // 	doc.setFillColor(240); // Light background color
-        // 	doc.rect(
-        // 		startX,
-        // 		startY + (i - startIndex + 2) * rowHeight,
-        // 		tableWidth,
-        // 		rowHeight,
-        // 		"F"
-        // 	);
-        // }
+        if (isOddRow) {
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
         // Draw row borders
         doc.setDrawColor(0); // Set color for borders
@@ -238,7 +243,7 @@ export default function ComplaintList() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 2 || cellIndex === 4 || cellIndex === 6) {
+          if (cellIndex === 2 || cellIndex === 0 || cellIndex === 6) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
@@ -300,7 +305,7 @@ export default function ComplaintList() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 47; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -363,8 +368,8 @@ export default function ComplaintList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
+              ? "ACTIVE"
+              : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -409,9 +414,9 @@ export default function ComplaintList() {
     const getCurrentDate = () => {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
       const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
+      return dd + "/" + mm + "/" + yyyy;
     };
 
     // Function to get current time in the format HH:MM:SS
@@ -435,104 +440,143 @@ export default function ComplaintList() {
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-   const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-      
-        const numColumns = 3; // Ensure this matches the actual number of columns
-      
-        const columnAlignments = ["left", "left", "center",];
-      
-        // Define fonts for different sections
-        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-      
-        // Add an empty row at the start
-        worksheet.addRow([]);
-      
-        // Add company name
-        const companyRow = worksheet.addRow([comapnyname]);
-        companyRow.eachCell((cell) => {
-          cell.font = fontCompanyName;
-          cell.alignment = { horizontal: "center" };
-        });
-      
-        worksheet.getRow(companyRow.number).height = 30;
-        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
-      
-        // Add Store List row
-        const storeListRow = worksheet.addRow(["Complaint List"]);
-        storeListRow.eachCell((cell) => {
-          cell.font = fontStoreList;
-          cell.alignment = { horizontal: "center" };
-        });
-      
-        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
-      
-        // Add an empty row after the title section
-        worksheet.addRow([]);
-      
-        let typestatus = transectionType === "N" ? "Non-Active" : transectionType === "A" ? "Active" : "All";
-        let typesearch = searchQuery || "";
-      
-        const typeAndStoreRow3 = worksheet.addRow(
-          searchQuery
-          ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-          : ["STATUS :", typestatus, ""]    );
-      
-        // Apply styling for the status row
-        typeAndStoreRow3.eachCell((cell, colIndex) => {
-          cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
-          cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
-      
-        // Header style
-        const headerStyle = {
-          font: fontHeader,
-          alignment: { horizontal: "center", vertical: "middle" },
-          fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-          border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+
+
+  const handleDownloadCSV = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    const numColumns = 3; // Ensure this matches the actual number of columns
+    const columnAlignments = ["left", "left", "center"];
+
+    // Define fonts
+    const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
+    const fontStoreList = { name: "CustomFont", size: 10, bold: false };
+    const fontHeader = { name: "CustomFont", size: 10, bold: true };
+    const fontTableContent = { name: "CustomFont", size: 10, bold: false };
+
+    // Empty row
+    worksheet.addRow([]);
+
+    // Company name
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
+    });
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+
+    // Store List
+    const storeListRow = worksheet.addRow(["ComplaintList"]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+
+    // Empty row
+    worksheet.addRow([]);
+
+    // Filter data
+    let typestatus =
+      transectionType === "N" ? "NON-ACTIVE" :
+        transectionType === "A" ? "ACTIVE" : "ALL";
+    let typesearch = searchQuery || "";
+
+    const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery ? ["STATUS :", typestatus, "SEARCH :", typesearch] : ["STATUS :", typestatus, ""]
+    );
+
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = { name: "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+
+    // Header style
+    const headerStyle = {
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    // Headers
+    const headers = ["Code", "Description", "Status"];
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    // ✅ Add data rows with alternating light grey background
+    tableData.forEach((item, index) => {
+      const row = worksheet.addRow([item.Code, item.Description, item.Status]);
+
+      row.eachCell((cell, colIndex) => {
+        cell.font = fontTableContent;
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
-      
-        // Add headers
-        const headers = ["Code", "Description", "Status"];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-      
-        // Add data rows
-        tableData.forEach((item) => {
-          const row = worksheet.addRow([item.Code, item.Description, item.Status]);
-      
-          row.eachCell((cell, colIndex) => {
-            cell.font = fontTableContent;
-            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-            cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
-          });
-        });
-      
-        // Set column widths
-        [10, 40, 10, ].forEach((width, index) => {
-          worksheet.getColumn(index + 1).width = width;
-        });
-      
-        // Get current date
-        const getCurrentDate = () => {
-          const today = new Date();
-          const day = String(today.getDate()).padStart(2, "0");
-          const month = String(today.getMonth() + 1).padStart(2, "0");
-          const year = today.getFullYear();
-          return `${day}-${month}-${year}`;
+        cell.alignment = {
+          horizontal: columnAlignments[colIndex - 1] || "left",
+          vertical: "middle",
         };
-      
-        const currentdate = getCurrentDate();
-      
-        // Generate and save the Excel file
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `ComplaintList As On ${currentdate}.xlsx`);
-      };
+
+        // ✅ Apply very light grey background to odd rows
+        if ((index + 1) % 2 !== 0) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFEFEFEF" }, // Very light grey
+          };
+        }
+      });
+    });
+
+    // Column widths
+    [10, 40, 7].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
+    // Blank row
+    worksheet.addRow([]);
+
+    // Date and Time
+    const today = new Date();
+    const currentTime = today.toLocaleTimeString("en-GB");
+    const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+    const userid = user.tusrid;
+
+    const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = { name: "CustomFont", size: 10 };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    dateTimeRow1.eachCell((cell) => {
+      cell.font = { name: "CustomFont", size: 10 };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    // Merge cells
+    worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+    worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+
+    // Save Excel
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `ComplaintList As On ${currentDate}.xlsx`);
+  };
+
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -555,54 +599,189 @@ export default function ComplaintList() {
 
   let totalEntries = 0;
 
-  const handleSorting = async (col) => {
-    const newSortOrder = sortData === "ASC" ? "DSC" : "ASC"; // Determine new sort order before setting state
-  
-    const parseValue = (value) => {
-      return parseFloat(value.replace(/,/g, "")); // Remove commas and parse as float
-    };
-  
-    const sorted = [...tableData].sort((a, b) => {
-      const aValue = a[col] !== null ? a[col].toString() : "";
-      const bValue = b[col] !== null ? b[col].toString() : "";
-  
-      const numA = parseValue(aValue);
-      const numB = parseValue(bValue);
-  
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newSortOrder === "ASC" ? numA - numB : numB - numA; // Use newSortOrder instead of state
-      } else {
-        return newSortOrder === "ASC"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-    });
-  
-    setTableData(sorted);
-    setSortData(newSortOrder); // Update sort order
-    if (col === "Code") {
-      setisAscendingcode(newSortOrder === "ASC");
-    } else if (col === "Description") {
-      setisAscendingdec(newSortOrder === "ASC");
-    } else if (col === "Status") {
-      setisAscendingsts(newSortOrder === "ASC");
+  const [columns, setColumns] = useState({
+    Code: [],
+    Description: [],
+    Status: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Code: "",
+    Description: "",
+    Status: "",
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Code: tableData.map((row) => row.Code),
+        Description: tableData.map((row) => row.Description),
+        Status: tableData.map((row) => row.Status),
+      };
+      setColumns(newColumns);
     }
+  }, [tableData]);
+
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    } else {
+      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+  });
+
+  setTableData(sortedData);
+
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
+
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      Status: null,
+    });
   };
 
-  const firstColWidth = {
-    width: "15%",
-  };
-  const secondColWidth = {
-    width: "68%",
-  };
-  const thirdColWidth = {
-    width: "15%",
+
+  const renderTableData = () => {
+    
+
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="3" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
+            </tr>
+            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 3 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+            </tr>
+          </>
+        ) : (
+          <>
+            {tableData.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: fontcolor,
+                  }}
+                >
+                  <td className="text-center" style={firstColWidth}>
+                    {item.Code}
+                  </td>
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Description}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item.Status}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 25 - tableData.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 3 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
   };
 
-  useHotkeys("s", fetchReceivableReport);
-  useHotkeys("alt+p", exportPDFHandler);
-  useHotkeys("alt+e", handleDownloadCSV);
-  useHotkeys("esc", () => navigate("/MainPage"));
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+
+
+  useHotkeys("alt+s", () => {
+        fetchReceivableReport();
+           resetSorting();
+    }, { preventDefault: true, enableOnFormTags: true });
+
+    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
+
+
+  // const firstColWidth = {
+  //   width: "20.2%",
+  // };
+  // const secondColWidth = {
+  //   width: "62%",
+  // };
+  // const thirdColWidth = {
+  //   width: "15%",
+  // };
+
+  const firstColWidth = { width: "60px" };
+  const secondColWidth = { width: "360px" };
+  const thirdColWidth = { width: "60px" };
+  
+  const sixthcol = { width: "8px" };
+
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -617,29 +796,28 @@ export default function ComplaintList() {
   }, []);
 
   const contentStyle = {
-    backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(45vw - 0%)" : "45vw",
-    position: "relative",
-    top: "40%",
-    left: isSidebarVisible ? "50%" : "50%",
-    transform: "translate(-50%, -50%)",
-    transition: isSidebarVisible
-      ? "left 3s ease-in-out, width 2s ease-in-out"
-      : "left 3s ease-in-out, width 2s ease-in-out",
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: "700px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "50vw",
+    transform: "translateX(-50%)",
     display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
-    alignItems: "start",
-    overflowX: "hidden",
-    overflowY: "hidden",
-    wordBreak: "break-word",
+    alignItems: "center",
+    overflow: "hidden",
     textAlign: "center",
-    maxWidth: "600px",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: "23px",
     fontFamily: '"Poppins", sans-serif',
-  };
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
+};
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
@@ -706,6 +884,11 @@ export default function ComplaintList() {
     }
   }, [selectedIndex]);
 
+  const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
+
   return (
     <>
       <div style={contentStyle}>
@@ -713,7 +896,7 @@ export default function ComplaintList() {
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            width: "100%",
+            // width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
@@ -759,34 +942,58 @@ export default function ComplaintList() {
                   </label>
                 </div>
 
-                <select
-                  ref={input1Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "150px",
-                    height: "24px",
-                    marginLeft: "5px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                  }}
-                >
-                  <option value="">All</option>
-                  <option value="A">Active</option>
-                  <option value="N">Non-Active</option>
-                </select>
+               
+  <div style={{ position: "relative", display: "inline-block" }}>
+  <select
+    ref={input1Ref}
+    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+    id="submitButton"
+    name="type"
+    onFocus={(e) =>
+      (e.currentTarget.style.border = "4px solid red")
+    }
+    onBlur={(e) =>
+      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+    }
+    value={transectionType}
+    onChange={handleTransactionTypeChange}
+    style={{
+      width: "150px",
+      height: "24px",
+      marginLeft: "5px",
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      paddingRight: "25px",
+    }}
+  >
+    <option value="">ALL</option>
+    <option value="A">ACTIVE</option>
+    <option value="N">NON-ACTIVE</option>
+  </select>
+
+  {transectionType !== "" && (
+    <span
+      onClick={() => settransectionType("")}
+      style={{
+        position: "absolute",
+        right: "25px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        fontWeight: "bold",
+        color: fontcolor,
+        userSelect: "none",
+        fontSize: "12px",
+      }}
+    >
+      ✕
+    </span>
+  )}
+</div>
+
               </div>
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
@@ -801,36 +1008,56 @@ export default function ComplaintList() {
                     Search :
                   </span>{" "}
                 </label>
-                <input
-                  ref={input2Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                  type="text"
-                  id="searchsubmit"
-                  placeholder="Item description"
-                  value={searchQuery}
-                  autoComplete="off"
-                  style={{
-                    marginRight: "20px",
-                    width: "200px",
-                    height: "24px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    outline: "none",
-                    paddingLeft: "10px",
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  onChange={(e) =>
-                    setSearchQuery((e.target.value || "").toUpperCase())
-                  }
-                />
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input2Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "140px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -838,7 +1065,7 @@ export default function ComplaintList() {
             <div
               style={{
                 overflowY: "auto",
-                width: "98%",
+                // width: "98.8%",
               }}
             >
               <table
@@ -847,16 +1074,16 @@ export default function ComplaintList() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  // width: "98%",
                   position: "relative",
                   paddingRight: "2%",
                 }}
               >
                 <thead
                   style={{
+                    fontWeight: "bold",
                     fontSize: getdatafontsize,
                     fontFamily: getfontstyle,
-                    fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
                     top: 0,
@@ -865,10 +1092,7 @@ export default function ComplaintList() {
                   }}
                 >
                   <tr
-                    style={{
-                      backgroundColor: tableHeadColor,
-                      color: "white",
-                    }}
+                    style={{ backgroundColor: tableHeadColor, color: "white" }}
                   >
                     <td
                       className="border-dark"
@@ -876,53 +1100,54 @@ export default function ComplaintList() {
                       onClick={() => handleSorting("Code")}
                     >
                       Code{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                      style={{
-                        transform: isAscendingcode ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingcode ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={secondColWidth}
                       onClick={() => handleSorting("Description")}
                     >
                       Description{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                      style={{
-                        transform: isAscendingdec ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingdec ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={thirdColWidth}
                       onClick={() => handleSorting("Status")}
                     >
                       Status{" "}
-                      <i className="fa-solid fa-caret-down caretIconStyle"
-                      style={{
-                        transform: isAscendingsts ? "rotate(0deg)" : "rotate(180deg)", // 180deg for better visual
-                        color: isAscendingsts ? "white" : "red",
-                        transition: "transform 0.3s ease",
-                      }}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Status")}
                       ></i>
+                    </td>
+
+                     <td
+                      className="border-dark"
+                      style={sixthcol}
+                     
+                    >
+                      
                     </td>
                   </tr>
                 </thead>
               </table>
             </div>
-            <div
+            {/* <div
               className="table-scroll"
               style={{
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "60vh",
+                maxHeight: "55vh",
                 width: "100%",
                 wordBreak: "break-word",
               }}
@@ -931,102 +1156,49 @@ export default function ComplaintList() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
+                  fontSize: "12px",
                   width: "100%",
                   position: "relative",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                 }}
               >
                 <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="3" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 3 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        )
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.Code}
-                            </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Description}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Status}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 3 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                      </tr>
-                    </>
-                  )}
+                  {renderTableData()} 
                 </tbody>
               </table>
+            </div> */}
+
+            <div
+              className="table-scroll"
+              style={{
+                // maxHeight: "370px",
+                "--scrollbar-track-color": getcolor,
+                backgroundColor: textColor,
+                // '--selected-bg-color': getnavbarbackgroundcolor,
+                borderBottom: `1px solid ${fontcolor}`,
+                overflowY: "auto",
+                 maxHeight: "55vh",
+                wordBreak: "break-word",
+              }}
+            >
+
+
+              <table
+                className="myTable"
+                id="tableBody"
+                style={{
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  // width: "98%",
+                  tableLayout: "fixed",   // FIXED!
+                  overflowY: "scroll",
+                }}
+              >
+                <tbody id="tablebody" style={{ overflowY: 'scroll' }}>{renderTableData()}</tbody>
+              </table>
+
+
             </div>
           </div>
 
@@ -1037,7 +1209,7 @@ export default function ComplaintList() {
               height: "24px",
               display: "flex",
               paddingRight: "1.2%",
-              width: "101.2%",
+              // width: "101.2%",
             }}
           >
             <div
@@ -1046,7 +1218,10 @@ export default function ComplaintList() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+ <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
+
+            </div>
             <div
               style={{
                 ...secondColWidth,
@@ -1061,7 +1236,11 @@ export default function ComplaintList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
+
+
+
           </div>
+
           <div
             style={{
               margin: "5px",
@@ -1095,8 +1274,12 @@ export default function ComplaintList() {
             <SingleButton
               id="searchsubmit"
               text="Select"
+              highlightFirstLetter={true}
               ref={input3Ref}
-              onClick={fetchReceivableReport}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1108,3 +1291,4 @@ export default function ComplaintList() {
     </>
   );
 }
+

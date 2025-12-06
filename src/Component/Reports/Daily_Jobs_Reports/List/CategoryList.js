@@ -799,16 +799,9 @@ useHotkeys("alt+s", () => {
     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
-
-  // const firstColWidth = {
-  //   width: "20.2%",
-  // };
-  // const secondColWidth = {
-  //   width: "62%",
-  // };
-  // const thirdColWidth = {
-  //   width: "15%",
-  // };
+const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
 
   const firstColWidth = { width: "60px" };
   const secondColWidth = { width: "360px" };
@@ -1247,7 +1240,7 @@ useHotkeys("alt+s", () => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+ <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div

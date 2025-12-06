@@ -921,6 +921,10 @@ const handleSorting = (col) => {
   }, [selectedIndex]);
 
 
+   const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
   return (
     <>
       <div style={contentStyle}>
@@ -1249,7 +1253,7 @@ const handleSorting = (col) => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+ <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div

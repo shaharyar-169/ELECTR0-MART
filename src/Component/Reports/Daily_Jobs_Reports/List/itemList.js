@@ -661,6 +661,8 @@ export default function ItemList() {
       },
     }),
   });
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
 
   const exportPDFHandler = () => {
     const globalfontsize = 12;
@@ -1022,8 +1024,6 @@ export default function ItemList() {
     // Save the PDF files
     doc.save(`ItemList As On ${date}.pdf`);
   };
-  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
 
   const handleDownloadCSV = async () => {
@@ -1290,6 +1290,10 @@ export default function ItemList() {
     });
     saveAs(blob, `ItemList As On ${currentdate}.xlsx`);
   };
+
+   const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
 
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -2382,7 +2386,7 @@ export default function ItemList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+ <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div

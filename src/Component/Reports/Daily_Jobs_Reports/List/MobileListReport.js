@@ -890,6 +890,10 @@ export default function MobileListReport() {
     }
   }, [selectedIndex]);
 
+  const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
+
 
   return (
     <>
@@ -1222,7 +1226,7 @@ export default function MobileListReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+ <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div

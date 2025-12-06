@@ -688,23 +688,6 @@ export default function StoreList() {
 
   let totalEntries = 0;
 
-  // const firstColWidth = {
-  //   width: "20px",
-  // };
-  // const secondColWidth = {
-  //   width: "41%",
-  // };
-  // const thirdColWidth = {
-  //   width: "16%",
-  // };
-  // const forthColWidth = {
-  //   width: "13.7%",
-  // };
-  // const fifthColWidth = {
-  //   width: "12.7%",
-  // };
-
-
   const firstColWidth = { width: "60px" };
   const secondColWidth = { width: "270px" };
   const thirdColWidth = { width: "60px" };
@@ -713,22 +696,6 @@ export default function StoreList() {
    const sixthcol = { width: "8px" };
 
 
-
-  //  const firstColWidth = {
-  //   width: "10px",
-  // };
-  //   const secondColWidth = {
-  //   width: "41px",
-  // };
-  // const thirdColWidth = {
-  //   width: "16px",
-  // };
-  // const forthColWidth = {
-  //   width: "13.7px",
-  // };
-  // const fifthColWidth = {
-  //   width: "12.7px",
-  // };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -766,7 +733,6 @@ export default function StoreList() {
 //     lineHeight: "23px",
 //     fontFamily: '"Poppins", sans-serif',
 //   };
-
 
 const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
@@ -1079,6 +1045,11 @@ const resetSorting = () => {
      useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
      useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
      useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
+
+
+   const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
 
   return (
     <>
@@ -1511,7 +1482,7 @@ const resetSorting = () => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+              <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
 
             </div>
             <div
