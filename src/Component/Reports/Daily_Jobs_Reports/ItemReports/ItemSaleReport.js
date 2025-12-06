@@ -1713,111 +1713,11 @@ export default function ItemSaleReport() {
     };
 
 
-     const [columns, setColumns] = useState({
-      Date: [],
-          ["Trn#"]: [],
-         Type: [],
-          Description: [],
-          Qnty: [],
-           Store: [],
-          Rate: [],
-           ["Sale Amount"]: [],
-    });
-    
-    const [columnSortOrders, setColumnSortOrders] = useState({
-       Date: "",
-          ["Trn#"]: "",
-         Type: "",
-          Description: "",
-          Store: "",
-          Qnty: "",
-          Rate: "",
-           ["Sale Amount"]: "",
-    });
-    
-      // When you receive your initial table data, transform it into column-oriented format
-      useEffect(() => {
-      if (tableData.length > 0) {
-        const newColumns = {
-          Date: tableData.map(row => row.Date),
-          ["Trn#"]: tableData.map(row => row["Trn#"]),
-         Type: tableData.map(row => row.Type),
-          Description: tableData.map(row => row.Description),
-            Store: tableData.map(row => row.Store),
-                        Qnty: tableData.map(row => row.Qnty),
-
-          Rate: tableData.map(row => row.Rate),
-          ["Sale Amount"]: tableData.map(row => row["Sale Amount"]),
-
-        };
-        setColumns(newColumns);
-      }
-    }, [tableData]);
-    
-     const getIconStyle = (colKey) => {
-        const order = columnSortOrders[colKey];
-        return {
-          transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-          color: order === "ASC" || order === "DSC" ? "red" : "white",
-          transition: "transform 0.3s ease, color 0.3s ease",
-        };
-      };
-    
-          const resetSorting = () => {
-        setColumnSortOrders({
-          Date: null,
-          ["Trn#"]: null,
-         Type: null,
-          Description: null,
-          Store:null,
-          Qnty: null,
-          Rate: null,
-           ["Sale Amount"]: null,
-        });
-      };
-    
-    const handleSorting = (col) => {
-      const currentOrder = columnSortOrders[col];
-      const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-    
-      const sortedData = [...tableData].sort((a, b) => {
-        const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-        const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
-    
-        // ⭐ SPECIAL CASE: Sort "Last Date" by YEAR
-        if (col === "Last Date") {
-          const aYear = parseInt(aVal.split("-")[2]) || 0; // Extract YYYY
-          const bYear = parseInt(bVal.split("-")[2]) || 0;
-    
-          return newOrder === "ASC" ? aYear - bYear : bYear - aYear;
-        }
-    
-        // ⭐ NORMAL NUMBER SORT
-        const numA = parseFloat(aVal.replace(/,/g, ""));
-        const numB = parseFloat(bVal.replace(/,/g, ""));
-    
-        if (!isNaN(numA) && !isNaN(numB)) {
-          return newOrder === "ASC" ? numA - numB : numB - numA;
-        }
-    
-        // ⭐ NORMAL STRING SORT
-        return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-      });
-    
-      setTableData(sortedData);
-    
-      setColumnSortOrders((prev) => ({
-        ...Object.keys(prev).reduce((acc, key) => {
-          acc[key] = key === col ? newOrder : null;
-          return acc;
-        }, {}),
-      }));
-    };
-    
-
+       
+  
     useHotkeys("alt+s", () => {
         fetchDailyStatusReport();
-           resetSorting();
+        //    resetSorting();
     }, { preventDefault: true, enableOnFormTags: true });
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
@@ -2828,91 +2728,51 @@ const formatValue = (val) => {
                                                                                  <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("Date")}
                     >
-                      Date{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Date")}
-                      ></i>
+                      Date
                     </td>
                                                                                 <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("Trn#")}
                     >
-                      Trn#{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Trn#")}
-                      ></i>
+                      Trn#
                     </td>
                                                                                  <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("Type")}
                     >
-                      Type{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Type")}
-                      ></i>
+                      Type
                     </td>
                                                                                  <td
                       className="border-dark"
                       style={forthColWidth}
-                      onClick={() => handleSorting("Description")}
                     >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
+                      Description
                     </td>
                                      
                                                                                 <td
                       className="border-dark"
                       style={sixthColWidth}
-                      onClick={() => handleSorting("Store")}
                     >
-                      Str{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Store")}
-                      ></i>
+                      Str
                     </td>
                                                                                  <td
                       className="border-dark"
                       style={seventhColWidth}
-                      onClick={() => handleSorting("Qnty")}
                     >
-                      Qnty{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
-                      ></i>
+                      Qnty
                     </td>
                                                                                  <td
                       className="border-dark"
                       style={eightColWidth}
-                      onClick={() => handleSorting("Rate")}
                     >
-                      Rate{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Rate")}
-                      ></i>
+                      Rate
                     </td>
                                                                                  <td
                       className="border-dark"
                       style={ninthColWidth}
-                      onClick={() => handleSorting("Sale Amount")}
                     >
-                      Amount{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Sale Amount")}
-                      ></i>
+                      Amount
                     </td>
                                         <td className="border-dark" style={sixthcol}>
                                            
@@ -3193,7 +3053,7 @@ const formatValue = (val) => {
                             ref={selectButtonRef}
  onClick={() => {
                 fetchDailyStatusReport();
-                resetSorting();
+                // resetSorting();
               }}                              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

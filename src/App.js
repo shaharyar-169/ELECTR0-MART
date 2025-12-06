@@ -152,6 +152,13 @@ import ItemSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/I
 import ItemPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItempurchaseReport.js";
 import ItemStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemStatusReport.js";
 import ItemSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleSummaryReport.js";
+import ItemEvalutionReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemEvalutionReport.js";
+import ItemReorderLevelReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemReorderLevelReport.js";
+
+//////////////////////////// MISC REPORT //////////////////////////////
+import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
+import EmployeeSaleReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeSaleReport.js";
+import EmployeeSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeSaleSummaryReport.js";
 
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
@@ -324,6 +331,8 @@ function App() {
                 <Route exact path="/ItemPurchaseReport" element={<ItemPurchaseReport />} />
                 <Route exact path="/ItemStatusReport" element={<ItemStatusReport />} />
                 <Route exact path="/ItemSaleSummary" element={<ItemSaleSummaryReport />} />
+                <Route exact path="/ItemSaleComparison" element={<ItemEvalutionReport />} />
+                <Route exact path="/CompanySaleComparison" element={<ItemReorderLevelReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}
@@ -331,6 +340,12 @@ function App() {
                 <Route exact path="/PayableReport" element={<PayableReport />} />
                 <Route exact path="/ReceivableAggingReport" element={<ReceivableAggingReport />} />
                 <Route exact path="/PayableAggingReport" element={<PayableAggingReport />} />
+
+
+                {/* ROUTES FOR EMPLOYEE REPORT */}
+                <Route exact path="/EmployeeAdvanceReport" element={<EmployeeAdvanceReport />} />
+                <Route exact path="/EmployeeSaleReport" element={<EmployeeSaleReport />} />
+                <Route exact path="/EmployeeSaleSummary" element={<EmployeeSaleSummaryReport />} />
 
 
                 {/* Rountes for item reports */}

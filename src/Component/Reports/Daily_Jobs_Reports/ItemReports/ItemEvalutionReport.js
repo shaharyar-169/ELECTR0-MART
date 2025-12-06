@@ -25,9 +25,8 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Description, Store } from "@mui/icons-material";
 
-export default function ItemPurchaseReport() {
+export default function ItemEvalutionReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -88,8 +87,11 @@ export default function ItemPurchaseReport() {
   const [totaltax, settotaltax] = useState(0);
   const [totalincl, settotalincl] = useState(0);
 
-  const [totaldebit, settotaldebit] = useState(0);
-  const [totalcredit, settotalcredit] = useState(0);
+  const [Qnty1, setQnty1] = useState(0);
+  const [Qnty2, setQnty2] = useState(0);
+  const [Qnty3, setQnty3] = useState(0);
+  const [Qnty4, setQnty4] = useState(0);
+  const [Qnty5, setQnty5] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -168,178 +170,22 @@ export default function ItemPurchaseReport() {
     settoInputDate(e.target.value);
   };
 
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleToKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const toDateElement = document.getElementById("todatevalidation");
-      const formattedInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobaltoDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        if (GlobaltoDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        if (fromInputDate) {
-          const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-")
-          );
-          if (enteredDate <= fromDate) {
-            toast.error("To date must be after from date");
-            return;
-          }
-        }
-
-        toDateElement.style.border = `1px solid ${fontcolor}`;
-        settoInputDate(formattedInput);
-
-        if (saleSelectRef.current) {
-          e.preventDefault();
-          saleSelectRef.current.focus();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
   function fetchDailyStatusReport() {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
-
     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-    let hasError = false;
     let errorType = "";
 
     switch (true) {
-      //    case !saleType:
-      //        errorType = "saleType";
-      //        break;
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
       case !toInputDate:
         errorType = "toDate";
         break;
       default:
-        hasError = false;
         break;
     }
 
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
+    if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
     } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
         "$1-$2-$3"
@@ -347,100 +193,69 @@ export default function ItemPurchaseReport() {
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+      if (GlobaltoDate && enteredToDate > GlobaltoDate) {
         errorType = "toDateAfterGlobal";
       } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
         errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
       }
     }
 
     switch (errorType) {
-      case "saleType":
-        toast.error("Please select a Account Code");
+      case "toDate":
+        toast.error("Rep Date is required");
         return;
 
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
       case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
+        toast.error("Rep Date must be in the format dd-mm-yyyy");
         return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
+
       case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
+        toast.error(`Rep Date must be before ${GlobaltoDate1}`);
         return;
       case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
+        toast.error(`Rep Date must be after ${GlobalfromDate1}`);
         return;
 
       default:
         break;
     }
 
-    // console.log(data);
-    document.getElementById(
-      "fromdatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-    document.getElementById(
-      "todatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
+    const fromDateElement = document.getElementById("fromdatevalidation");
+    const toDateElement = document.getElementById("todatevalidation");
 
-    const apiUrl = apiLinks + "/ItemPurchaseReport.php";
+    if (fromDateElement) {
+      fromDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+    if (toDateElement) {
+      toDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+
+    const apiMainUrl = apiLinks + "/ItemEvaluation.php";
     setIsLoading(true);
-    const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-
+    const formMainData = new URLSearchParams({
+      FRepDat: toInputDate,
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
-      FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
-      FStrCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      FTrnTyp: transectionType2,
-    //   code: "NASIRTRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+      //   code: organisation.code,
+      //   FLocCod: locationnumber || getLocationNumber,
+      //   FYerDsc: yeardescription || getyeardescription,
+
+      code: "NASIRTRD",
+      FLocCod: "001",
+      FYerDsc: "2024-2024",
     }).toString();
 
     axios
-      .post(apiUrl, formData)
+      .post(apiMainUrl, formMainData)
       .then((response) => {
         setIsLoading(false);
 
-        settotaldebit(response.data["Total Qnty"]);
-        settotalcredit(response.data["Total Amount"]);
-        //    setClosingBalance(response.data["Closing Bal "]);
+        setQnty1(response.data["Total Purchase "]);
+        setQnty2(response.data["Total Pur Return "]);
+        setQnty3(response.data["Total Sale "]);
+        setQnty4(response.data["Total Sale Return"]);
+        setQnty5(response.data["Closing Balance"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -461,11 +276,11 @@ export default function ItemPurchaseReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-      if (fromRef && fromRef.current) {
+    if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+      if (toRef && toRef.current) {
         setTimeout(() => {
-          fromRef.current.focus();
-          fromRef.current.select();
+          toRef.current.focus();
+          toRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -790,41 +605,47 @@ export default function ItemPurchaseReport() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
+      item.Code,
       item.Description,
-      item.Store,
+      item["Pur Rate"],
       item.Qnty,
-      item.Rate,
-      item["Pur Amount"],
+      item.Amount,
+      item.Qnt001,
+      item.Qnt002,
+      item.Qnt003,
+      item.Qnt004,
+      item.Qnt005,
     ]);
 
     // Add summary row to the table
     rows.push([
       "",
-      "",
-      "",
       "Total",
       "",
-      String(totaldebit),
-      "",
-      String(totalcredit),
+      String(totalqnty),
+      String(totaltax),
+      String(Qnty1),
+      String(Qnty2),
+      String(Qnty3),
+      String(Qnty4),
+      String(Qnty5),
     ]);
 
     // Define table column headers and individual column widths
 
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
       "Description",
-      "Store",
-      "Qnty",
       "Rate",
+      "Qnty",
       "Amount",
+      "GD-1",
+      "GD-2",
+      "GD-3",
+      "GD-4",
+      "GD-5",
     ];
-    const columnWidths = [20, 15, 12, 110, 15, 15, 25, 25];
+    const columnWidths = [35, 110, 25, 15, 25, 15, 15, 15, 15, 15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -948,10 +769,14 @@ export default function ItemPurchaseReport() {
           const cellValue = String(cell);
 
           if (
+            cellIndex === 2 ||
+            cellIndex === 3 ||
             cellIndex === 4 ||
             cellIndex === 5 ||
             cellIndex === 6 ||
-            cellIndex === 7
+            cellIndex === 7 ||
+            cellIndex === 8 ||
+            cellIndex === 9
           ) {
             const rightAlignX = currentX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1091,7 +916,7 @@ export default function ItemPurchaseReport() {
         startY += 5; // Adjust vertical position for the company title
 
         addTitle(
-          `Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
+          `Item Store Stock Report As on ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1121,10 +946,12 @@ export default function ItemPurchaseReport() {
             : "";
 
         let transectionsts =
-          transectionType === "BIL"
-            ? "PURCHASE"
-            : transectionType == "SRN"
-            ? "PURCHASE RETURN"
+          transectionType === "P"
+            ? "POSITIVE"
+            : transectionType == "N"
+            ? "NEGATIVE"
+            : transectionType == "Z"
+            ? "ZERO"
             : "ALL";
 
         let typeText = capacityselectdatavalue.label
@@ -1162,9 +989,9 @@ export default function ItemPurchaseReport() {
         doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+        doc.text(`RATE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${transectionsts}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${RATE}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
@@ -1176,25 +1003,25 @@ export default function ItemPurchaseReport() {
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
           doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+          doc.text(`SEARCH :`, labelsX + 180, labelsY + 12.5); // Draw bold label
           doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+          doc.text(`${search}`, labelsX + 205, labelsY + 12.5); // Draw the value next to the label
         }
 
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += 15; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 44);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1235,20 +1062,22 @@ export default function ItemPurchaseReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`ItemPurchaseReportPos As On ${date}.pdf`);
+    doc.save(`ItemStoreStockReportPos As On ${toInputDate}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 7; // Ensure this matches the actual number of columns
+    const numColumns = 6; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
       "left",
-      "center",
-      "left",
+      "right",
+      "right",
+      "right",
+      "right",
       "right",
       "right",
       "right",
@@ -1289,14 +1118,14 @@ export default function ItemPurchaseReport() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${companyRow.number}:${String.fromCharCode(69 + numColumns - 1)}${
         companyRow.number
       }`
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
+      `Item Store Stock Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1304,7 +1133,7 @@ export default function ItemPurchaseReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${storeListRow.number}:${String.fromCharCode(69 + numColumns - 1)}${
         storeListRow.number
       }`
     );
@@ -1339,11 +1168,13 @@ export default function ItemPurchaseReport() {
         : "";
 
     let transectionsts =
-      transectionType === "BIL"
-        ? "PURCHASE"
-        : transectionType == "SRN"
-        ? "PURCHASE RETURN"
-        : "PRN";
+      transectionType === "P"
+        ? "POSITIVE"
+        : transectionType == "N"
+        ? "NEGATIVE"
+        : transectionType == "Z"
+        ? "ZERO"
+        : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
@@ -1351,6 +1182,7 @@ export default function ItemPurchaseReport() {
     const typeAndStoreRow = worksheet.addRow([
       "COMPANY :",
       typecompany,
+      "",
       "",
       "",
       "",
@@ -1365,27 +1197,25 @@ export default function ItemPurchaseReport() {
       "",
       "",
       "",
+      "",
+      "RATE :",
+      RATE,
+    ]);
 
-      "TYPE :",
+    const typeAndStoreRow3 = worksheet.addRow([
+      "CAPACITY :",
+      typecapacity,
+      "",
+      "",
+      "",
+      "",
+      "STATUS :",
       transectionsts,
     ]);
 
-    // const typeAndStoreRow3 = worksheet.addRow([
-    //     "CAPACITY :",
-    //     typecapacity,
-    //    "",
-    //      "",
-    //       "",
-    //        "",
-    //     "STATUS :",
-    //     transectionsts,
-    // ]);
-
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery
-        ? ["CAPACITY :", typecapacity, "", "", "", "SEARCH :", typesearch]
-        : ["CAPACITY :", typecapacity]
+      searchQuery ? ["", "", "", "", "", "", "SEARCH :", typesearch] : [""]
     );
 
     // Apply styling for the status row
@@ -1393,7 +1223,7 @@ export default function ItemPurchaseReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1401,24 +1231,24 @@ export default function ItemPurchaseReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 7].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
     typeAndStoreRow4.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1442,14 +1272,16 @@ export default function ItemPurchaseReport() {
 
     // Add headers
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
       "Description",
-      "Store",
-      "Qnty",
       "Rate",
+      "Qnty",
       "Amount",
+      "GD-1",
+      "GD-2",
+      "GD-3",
+      "GD-4",
+      "GD-5",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1457,14 +1289,16 @@ export default function ItemPurchaseReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
+        item.Code,
         item.Description,
-        item.Store,
+        item["Pur Rate"],
         item.Qnty,
-        item.Rate,
-        item["Pur Amount"],
+        item.Amount,
+        item.Qnt001,
+        item.Qnt002,
+        item.Qnt003,
+        item.Qnt004,
+        item.Qnt005,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1483,19 +1317,21 @@ export default function ItemPurchaseReport() {
     });
 
     // Set column widths
-    [12, 8, 6, 50, 8, 8, 15, 15].forEach((width, index) => {
+    [20, 45, 12, 10, 12, 10, 10, 10, 10, 10].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
       "",
-      "",
-      "",
       "Total",
       "",
-      String(totaldebit),
-      "",
-      String(totalcredit),
+      String(totalqnty),
+      String(totaltax),
+      String(Qnty1),
+      String(Qnty2),
+      String(Qnty3),
+      String(Qnty4),
+      String(Qnty5),
     ]);
 
     // total row added
@@ -1510,7 +1346,15 @@ export default function ItemPurchaseReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 6 || colNumber === 8) {
+      if (
+        colNumber === 4 ||
+        colNumber === 5 ||
+        colNumber === 6 ||
+        colNumber === 7 ||
+        colNumber === 8 ||
+        colNumber === 9 ||
+        colNumber === 10
+      ) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1578,7 +1422,7 @@ export default function ItemPurchaseReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ItemPurchaseReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `ItemStoreStockReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1670,71 +1514,190 @@ export default function ItemPurchaseReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
+ 
+ const firstColWidth = {
+        width: "80px",
+    };
+    const secondColWidth = {
+        width: "50px",
+    };
+    const thirdColWidth = {
+        width: "40px",
+    };
+    const forthColWidth = {
+        width: "260px",
+    };
+     const fifthColWidth = {
+        width: "70px",
+    };
+    const sixthColWidth = {
+        width: "70px",
+    };
+    const seventhColWidth = {
+        width: "70px",
+    };
 
-  const firstColWidth = {
-    width: "80px",
-  };
-  const secondColWidth = {
-    width: "60px",
-  };
-  const thirdColWidth = {
-    width: "50px",
-  };
-  const forthColWidth = {
-    width: "360px",
-  };
-  const sixthColWidth = {
-    width: "40px",
-  };
-  const seventhColWidth = {
-    width: "60px",
-  };
-  const eightColWidth = {
-    width: "100px",
-  };
-  const ninthColWidth = {
-    width: "100px",
-  };
+ const eightColWidth = {
+        width: "70px",
+    };
+    const ninthColWidth = {
+        width: "70px",
+    };
+    const tenthColWidth = {
+        width: "70px",
+    };
+    const elewenthColWidth = {
+        width: "70px",
+    };
+    const twelethColWidth = {
+        width: "70px",
+    };
+       const sixthcol = {
+        width: "8px",
+    };
 
-  const sixthcol = {
-    width: "8px",
-  };
+
+      
+      const renderTableData = () => {
+        return (
+          <>
+            {isLoading ? (
+              <>
+                <tr style={{ backgroundColor: getcolor }}>
+                  <td colSpan="12" className="text-center">
+                    <Spinner animation="border" variant="primary" />
+                  </td>
+                </tr>
+                {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
+                  <tr
+                    key={`blank-${rowIndex}`}
+                    style={{
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                    }}
+                  >
+                    {Array.from({ length: 12 }).map((_, colIndex) => (
+                      <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                    ))}
+                  </tr>
+                ))}
+                <tr>
+                  <td style={firstColWidth}></td>
+                                                <td style={secondColWidth}></td>
+                                                <td style={thirdColWidth}></td>
+                                                 <td style={forthColWidth}></td>
+                                                  <td style={fifthColWidth}></td>
+                                                <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                   <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+                                                <td style={twelethColWidth}></td>
+                </tr>
+              </>
+            ) : (
+              <>
+                {tableData.map((item, i) => {
+                  totalEnteries += 1;
+                   const isNegative = item.Qnty < 0 || item.Amount < 0;
+                  return (
+                        <tr
+                                                        key={`${i}-${selectedIndex}`}
+                                                        ref={(el) => (rowRefs.current[i] = el)}
+                                                        onClick={() => handleRowClick(i)}
+                                                        className={
+                                                            selectedIndex === i ? "selected-background" : ""
+                                                        }
+                                                        style={{
+                                                            backgroundColor: getcolor,
+color: isNegative ? "red" : fontcolor 
+                                                        }}
+                                                    >
+                                                        <td className="text-start" style={firstColWidth}>
+                                                            {item.Date}
+                                                        </td>
+                                                        <td className="text-start" style={secondColWidth}>
+                                                            {item['Trn#']}
+                                                        </td>
+                                                         <td className="text-center" style={thirdColWidth}>
+                                                            {item.Type}
+                                                        </td>
+                                                         <td className="text-start" style={forthColWidth}>
+                                                            {item.Description}
+                                                        </td>
+                                                        <td className="text-end" style={fifthColWidth}>
+                                                            {formatValue(item.Rate) }
+                                                        </td>
+                                                         <td className="text-end" style={sixthColWidth}>
+                                                            {formatValue(item.Purchase)}
+                                                        </td>
+                                                        <td className="text-end" style={seventhColWidth}>
+                                                            {formatValue(item['Pur-Ret'])}
+                                                        </td>
+                                                        <td className="text-end" style={eightColWidth}>
+                                                            {formatValue(item.Sale)}
+                                                        </td>
+                                                         <td className="text-end" style={ninthColWidth}>
+                                                            {formatValue(item['Sale-Ret'])}
+                                                        </td>
+                                                         <td className="text-end" style={tenthColWidth}>
+                                                            {formatValue(item.amount)}
+                                                        </td>
+                                                         <td className="text-end" style={elewenthColWidth}>
+                                                            {formatValue(item.Average)}
+                                                        </td>
+                                                         <td className="text-end" style={twelethColWidth}>
+                                                            {formatValue(item.Balance)}
+                                                        </td>
+                                                                                                            
+                                                       
+                                                        
+                                                    </tr>
+                  );
+                })}
+                {Array.from({
+                  length: Math.max(0, 25 - tableData.length),
+                }).map((_, rowIndex) => (
+                  <tr
+                    key={`blank-${rowIndex}`}
+                    style={{
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                    }}
+                  >
+                    {Array.from({ length: 12 }).map((_, colIndex) => (
+                      <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                    ))}
+                  </tr>
+                ))}
+                <tr>
+                 <td style={firstColWidth}></td>
+                                                <td style={secondColWidth}></td>
+                                                <td style={thirdColWidth}></td>
+                                                 <td style={forthColWidth}></td>
+                                                  <td style={fifthColWidth}></td>
+                                                <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                   <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+                                                <td style={twelethColWidth}></td>
+                </tr>
+              </>
+            )}
+          </>
+        );
+      };
+    
+
 
   useHotkeys(
     "alt+s",
     () => {
       fetchDailyStatusReport();
-      //    resetSorting();
+    //   resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true }
   );
@@ -1940,7 +1903,7 @@ export default function ItemPurchaseReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Item Purchase Report" />
+          <NavComponent textdata="Item Evalution Report" />
 
           {/* ------------1st row */}
           <div
@@ -1954,117 +1917,14 @@ export default function ItemPurchaseReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "15px" }}
-              >
+              {/* To Date */}
+              <div className="d-flex align-items-center">
                 <div
                   style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: "12px",
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "50px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
+                    width: "100px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2077,7 +1937,7 @@ export default function ItemPurchaseReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      To :
+                      Rep Date :&nbsp;
                     </span>
                   </label>
                 </div>
@@ -2090,7 +1950,6 @@ export default function ItemPurchaseReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
-                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -2118,7 +1977,7 @@ export default function ItemPurchaseReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                    onKeyDown={handleToDateEnter}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2157,6 +2016,75 @@ export default function ItemPurchaseReport() {
                       </div>
                     }
                     disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Capacity :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "5px" }}>
+                  <Select
+                    className="List-select-class "
+                    ref={input2Ref}
+                    options={capacityoptions}
+                    onKeyDown={(e) => handlecapacityKeypress(e, selectButtonRef)}
+                    id="selectedsale2"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCapacityselectdata(selectedOption.value);
+                        setcapacityselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Set only the 'NGS' part of the label
+                        });
+                      } else {
+                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setcapacityselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
                   />
                 </div>
               </div>
@@ -2253,155 +2181,7 @@ export default function ItemPurchaseReport() {
 
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                        marginRight: "3px",
-                      }}
-                    >
-                      Store :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginRight: "21px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={input6Ref}
-                    options={typeoptions}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setTypeselectdata(selectedOption.value);
-                        settypeselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setTypeselectdata("");
-                        settypeselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              {/* <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span
-                                            style={{
-                                                fontSize: getdatafontsize,
-                                                fontFamily: getfontstyle,
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            Rate :
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <select
-                                    ref={input4Refrate}
-                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="A">AVERAGE RATE</option>
-                                    <option value="P">PURCHASE RATE</option>
-                                    <option value="M">LAST SM RATE</option>
-                                      <option value="W">WEIGHTED AVERAGE</option>
-                                    <option value="F">FIFO</option>
-                                </select>
-                            </div> */}
-            </div>
-          </div>
-
-          {/* //////////////// THIRD ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
@@ -2424,7 +2204,7 @@ export default function ItemPurchaseReport() {
                   </label>
                 </div>
 
-                <div style={{ marginLeft: "3px" }}>
+                <div style={{ marginLeft: "5px" }}>
                   <Select
                     className="List-select-class "
                     ref={input1Ref}
@@ -2467,264 +2247,11 @@ export default function ItemPurchaseReport() {
                   />
                 </div>
               </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                {/* <select
-                                    ref={input4Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="">ALL</option>
-                                    <option value="BIL">PURCHASE</option>
-                                    <option value="PRN">PURCHASE RETURN</option>
-                                </select> */}
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType2}
-                    onChange={handleTransactionTypeChange2}
-                    style={{
-                      width: "250px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
-                  </select>
-
-                  {transectionType2 !== "" && (
-                    <span
-                      onClick={() => settransectionType2("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* //////////////// FORTH ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Capacity :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input2Ref}
-                    options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input6Ref)}
-                    id="selectedsale2"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCapacityselectdata(selectedOption.value);
-                        setcapacityselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcapacityselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input5Ref}
-                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "250px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+         
+         
 
           <div>
             {/* Table Head */}
@@ -2740,7 +2267,7 @@ export default function ItemPurchaseReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                 }}
               >
@@ -2756,39 +2283,104 @@ export default function ItemPurchaseReport() {
                     backgroundColor: tableHeadColor,
                   }}
                 >
-                  <tr
-                    style={{
-                      backgroundColor: tableHeadColor,
-                      color: "white",
-                    }}
-                  >
-                    <td className="border-dark" style={firstColWidth}>
+                
+
+
+
+
+ <tr
+                                        style={{
+                                            backgroundColor: tableHeadColor,
+                                            color: "white",
+                                        }}
+                                    >
+                                            <td
+                      className="border-dark"
+                      style={firstColWidth}
+                    >
                       Date
+                     
                     </td>
-                    <td className="border-dark" style={secondColWidth}>
+                                           <td
+                      className="border-dark"
+                      style={secondColWidth}
+                    >
                       Trn#
+                     
                     </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Type
-                    </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Description
+                                           <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                    >
+                      Typ                     
                     </td>
 
-                    <td className="border-dark" style={sixthColWidth}>
-                      Str
+                                            <td
+                      className="border-dark"
+                      style={forthColWidth}
+                    >
+                      Description
+                     
                     </td>
-                    <td className="border-dark" style={seventhColWidth}>
-                      Qnty
-                    </td>
-                    <td className="border-dark" style={eightColWidth}>
+                                           <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                    >
                       Rate
+                     
                     </td>
-                    <td className="border-dark" style={ninthColWidth}>
+                                       
+                                            <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                    >
+                       Pur
+                    </td>
+                                                            <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                    >
+                       Pur-Rate
+                    </td>
+                                                             <td
+                      className="border-dark"
+                      style={eightColWidth}
+                    >
+                       Sale
+                    </td>
+                                                             <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                    >
+                       Sl Rate
+                    </td>
+                                                              <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                    >
                       Amount
                     </td>
-                    <td className="border-dark" style={sixthcol}></td>
-                  </tr>
+                                                             <td
+                      className="border-dark"
+                      style={elewenthColWidth}
+                    >
+                      Average
+                    </td>
+                                                             <td
+                      className="border-dark"
+                      style={twelethColWidth}
+                    >
+                      Balance
+                    </td>
+                    
+
+                                         <td className="border-dark" style={sixthcol}>
+                                           
+                                        </td>
+                                    
+                                       
+                                      
+                                    </tr>
                 </thead>
               </table>
             </div>
@@ -2799,7 +2391,7 @@ export default function ItemPurchaseReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "43vh",
+                maxHeight: "50vh",
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -2812,133 +2404,15 @@ export default function ItemPurchaseReport() {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   width: "100%",
-                  position: "relative",
+                  // position: "relative",
                 }}
               >
-                <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="8" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 8 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        )
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        const isNegative =
-                          item.Qnty < 0 ||
-                          item.Rate < 0 ||
-                          item["Pur Amount"] < 0;
-
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              // color: fontcolor,
-                              color: isNegative ? "red" : fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.Date}
-                            </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item["Trn#"]}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
-                            </td>
-                            <td className="text-start" style={forthColWidth}>
-                              {item.Description}
-                            </td>
-                            <td className="text-end" style={sixthColWidth}>
-                              {item.Store}
-                            </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Qnty)}
-                            </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
-                            <td className="text-end" style={ninthColWidth}>
-                              {formatValue(item["Pur Amount"])}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 8 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
-                      </tr>
-                    </>
-                  )}
-                </tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
           </div>
           {/* Table Footer */}
+
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,
@@ -2983,7 +2457,20 @@ export default function ItemPurchaseReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              <span className="mobileledger_total">
+                {formatValue(totalqnty)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totaltax)}
+              </span>
             </div>
             <div
               style={{
@@ -2992,7 +2479,7 @@ export default function ItemPurchaseReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{formatValue(totaldebit)}</span> */}
+              <span className="mobileledger_total">{formatValue(Qnty1)}</span>
             </div>
 
             <div
@@ -3002,9 +2489,7 @@ export default function ItemPurchaseReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(totaldebit)}
-              </span>
+              <span className="mobileledger_total">{formatValue(Qnty2)}</span>
             </div>
             <div
               style={{
@@ -3013,7 +2498,7 @@ export default function ItemPurchaseReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
+              <span className="mobileledger_total">{formatValue(Qnty3)}</span>
             </div>
             <div
               style={{
@@ -3022,11 +2507,34 @@ export default function ItemPurchaseReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(totalcredit)}
-              </span>
+              <span className="mobileledger_total">{formatValue(Qnty4)}</span>
+            </div>
+            <div
+              style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+
+            <div
+              style={{
+                ...elewenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...twelethColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">{formatValue(Qnty5)}</span>
             </div>
           </div>
+
           {/* Action Buttons */}
           <div
             style={{

@@ -40,12 +40,14 @@ export default function ItemEvaluationReport() {
   const [saleType, setSaleType] = useState("");
   console.log("saleTypedataset", saleType);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-  console.log("companyselectdatavalue", Companyselectdatavalue);
+  // console.log("companyselectdatavalue", Companyselectdatavalue);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("A");
+     console.log("saleTypedataset", transectionType);
+
   const [supplierList, setSupplierList] = useState([]);
-  console.log("supplierList", supplierList);
+  // console.log("supplierList", supplierList);
 
   const [totalpurchase, settotalpurchase] = useState(0);
   const [totalpurchaseReturn, settotalpurchaseReturn] = useState(0);

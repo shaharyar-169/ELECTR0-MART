@@ -25,9 +25,9 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Description, Store } from "@mui/icons-material";
+import { Balance, Description, Store } from "@mui/icons-material";
 
-export default function ItemPurchaseReport() {
+export default function EmployeeAdvanceReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -84,7 +84,8 @@ export default function ItemPurchaseReport() {
   const [transectionType2, settransectionType2] = useState("");
 
   const [totalqnty, settotalqnty] = useState(0);
-  const [totalexcel, settotalexcel] = useState(0);
+  const [totalopening, settotalopening] = useState(0);
+  const [ClosingBalance, setClosingBalance] = useState(0);
   const [totaltax, settotaltax] = useState(0);
   const [totalincl, settotalincl] = useState(0);
 
@@ -292,9 +293,9 @@ export default function ItemPurchaseReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (saleSelectRef.current) {
+        if (selectButtonRef.current) {
           e.preventDefault();
-          saleSelectRef.current.focus();
+          selectButtonRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -413,7 +414,7 @@ export default function ItemPurchaseReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/ItemPurchaseReport.php";
+    const apiUrl = apiLinks + "/EmployeeAdvanceReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -438,9 +439,10 @@ export default function ItemPurchaseReport() {
       .then((response) => {
         setIsLoading(false);
 
-        settotaldebit(response.data["Total Qnty"]);
-        settotalcredit(response.data["Total Amount"]);
-        //    setClosingBalance(response.data["Closing Bal "]);
+        settotalopening(response.data["Total Opening"]);
+        settotaldebit(response.data["Total Debit"]);
+        settotalcredit(response.data["Total Credit"]);
+        setClosingBalance(response.data["Total Balance"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -786,45 +788,41 @@ export default function ItemPurchaseReport() {
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
-      item.Description,
-      item.Store,
-      item.Qnty,
-      item.Rate,
-      item["Pur Amount"],
+      item.code,
+     item.Description,
+    formatValue(item.Opening)   ,
+    formatValue(item.Debit)   ,
+    formatValue(item.Credit)   ,
+    formatValue(item.Balance)   ,
     ]);
 
     // Add summary row to the table
     rows.push([
-      "",
-      "",
+     
       "",
       "Total",
-      "",
-      String(totaldebit),
-      "",
+     
+      String(totalopening),
+          String(totaldebit),
       String(totalcredit),
+      String(ClosingBalance),
     ]);
 
     // Define table column headers and individual column widths
 
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
       "Description",
-      "Store",
-      "Qnty",
-      "Rate",
-      "Amount",
+      "Opening",
+      "Debit",
+      "Credit",
+      "Balance",
     ];
-    const columnWidths = [20, 15, 12, 110, 15, 15, 25, 25];
+    const columnWidths = [20, 100, 22, 22, 22, 22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -948,10 +946,10 @@ export default function ItemPurchaseReport() {
           const cellValue = String(cell);
 
           if (
+            cellIndex === 2 ||
+            cellIndex === 3 ||
             cellIndex === 4 ||
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7
+            cellIndex === 5
           ) {
             const rightAlignX = currentX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1041,7 +1039,7 @@ export default function ItemPurchaseReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 47; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1091,7 +1089,7 @@ export default function ItemPurchaseReport() {
         startY += 5; // Adjust vertical position for the company title
 
         addTitle(
-          `Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
+          `Employee Advance Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1146,55 +1144,46 @@ export default function ItemPurchaseReport() {
         doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
         doc.setFontSize(10); // Font size
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+        // doc.setFont(getfontstyle, "bold"); // Set font to bold
+        // doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
+        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        // doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+        // doc.setFont(getfontstyle, "bold"); // Set font to bold
+        // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
+        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${transectionsts}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+    
+        // doc.setFont(getfontstyle, "bold"); // Set font to bold
+        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
         // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
         // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
 
-        if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-        }
+        // if (searchQuery) {
+        //   doc.setFont(getfontstyle, "bold"); // Set font to bold
+        //   doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+        //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        //   doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+        // }
 
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += 1; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1235,19 +1224,17 @@ export default function ItemPurchaseReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`ItemPurchaseReportPos As On ${date}.pdf`);
+    doc.save(`EmployeeAdvanceReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 7; // Ensure this matches the actual number of columns
+    const numColumns = 6; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
-      "left",
-      "center",
       "left",
       "right",
       "right",
@@ -1289,14 +1276,14 @@ export default function ItemPurchaseReport() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         companyRow.number
       }`
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
+      `Employee Advance Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1304,7 +1291,7 @@ export default function ItemPurchaseReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         storeListRow.number
       }`
     );
@@ -1312,118 +1299,7 @@ export default function ItemPurchaseReport() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
-    let typecapacity = capacityselectdatavalue.label
-      ? capacityselectdatavalue.label
-      : "ALL";
-    let typecategory = categoryselectdatavalue.label
-      ? categoryselectdatavalue.label
-      : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
-      : "ALL ";
-
-    let RATE =
-      transectionType === "P"
-        ? "PURCHASE RATE"
-        : transectionType == "M"
-        ? "SM RATE"
-        : transectionType == "A"
-        ? "AVERAGE RATE"
-        : transectionType == "W"
-        ? "WEIGHTRD AVERAGE"
-        : transectionType == "F"
-        ? "FIFP"
-        : "";
-
-    let transectionsts =
-      transectionType === "BIL"
-        ? "PURCHASE"
-        : transectionType == "SRN"
-        ? "PURCHASE RETURN"
-        : "PRN";
-
-    let typesearch = searchQuery ? searchQuery : "";
-
-    // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "COMPANY :",
-      typecompany,
-      "",
-      "",
-      "",
-      "STORE :",
-      typetype,
-    ]);
-
-    // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "CATEGORY :",
-      typecategory,
-      "",
-      "",
-      "",
-
-      "TYPE :",
-      transectionsts,
-    ]);
-
-    // const typeAndStoreRow3 = worksheet.addRow([
-    //     "CAPACITY :",
-    //     typecapacity,
-    //    "",
-    //      "",
-    //       "",
-    //        "",
-    //     "STATUS :",
-    //     transectionsts,
-    // ]);
-
-    // Add third row with conditional rendering for "SEARCH:"
-    const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery
-        ? ["CAPACITY :", typecapacity, "", "", "", "SEARCH :", typesearch]
-        : ["CAPACITY :", typecapacity]
-    );
-
-    // Apply styling for the status row
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 6].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 6].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
-    typeAndStoreRow4.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 6].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
+  
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
@@ -1442,14 +1318,12 @@ export default function ItemPurchaseReport() {
 
     // Add headers
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
       "Description",
-      "Store",
-      "Qnty",
-      "Rate",
-      "Amount",
+      "Opening",
+      "Debit",
+      "Credit",
+      "Balance",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1457,14 +1331,12 @@ export default function ItemPurchaseReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
-        item.Description,
-        item.Store,
-        item.Qnty,
-        item.Rate,
-        item["Pur Amount"],
+        item.code,
+     item.Description,
+    formatValue(item.Opening)   ,
+    formatValue(item.Debit)   ,
+    formatValue(item.Credit)   ,
+    formatValue(item.Balance)   ,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1483,19 +1355,18 @@ export default function ItemPurchaseReport() {
     });
 
     // Set column widths
-    [12, 8, 6, 50, 8, 8, 15, 15].forEach((width, index) => {
+    [10, 45,12, 12,12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
       "",
-      "",
-      "",
       "Total",
-      "",
-      String(totaldebit),
-      "",
+     
+      String(totalopening),
+          String(totaldebit),
       String(totalcredit),
+      String(ClosingBalance),
     ]);
 
     // total row added
@@ -1510,7 +1381,7 @@ export default function ItemPurchaseReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 6 || colNumber === 8) {
+      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1578,7 +1449,7 @@ export default function ItemPurchaseReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ItemPurchaseReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `EmployeeAdvanceReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1705,19 +1576,19 @@ export default function ItemPurchaseReport() {
     width: "80px",
   };
   const secondColWidth = {
-    width: "60px",
-  };
-  const thirdColWidth = {
-    width: "50px",
-  };
-  const forthColWidth = {
     width: "360px",
   };
+  const thirdColWidth = {
+    width: "90px",
+  };
+  const forthColWidth = {
+    width: "90px",
+  };
   const sixthColWidth = {
-    width: "40px",
+    width: "90px",
   };
   const seventhColWidth = {
-    width: "60px",
+    width: "90px",
   };
   const eightColWidth = {
     width: "100px",
@@ -1730,11 +1601,115 @@ export default function ItemPurchaseReport() {
     width: "8px",
   };
 
+  const [columns, setColumns] = useState({
+    code: [],
+
+    Description: [],
+    Opening: [],
+    Debit: [],
+    Credit: [],
+    Balance: [],
+  });
+
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    code: "",
+
+    Description: "",
+    Opening: "",
+    Debit: "",
+    Credit: "",
+    Balance: "",
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        code: tableData.map((row) => row.code),
+        Description: tableData.map((row) => row.Description),
+        Opening: tableData.map((row) => row.Opening),
+
+        Debit: tableData.map((row) => row.Debit),
+        Credit: tableData.map((row) => row.Credit),
+
+        Balance: tableData.map((row) => row.Balance),
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      code: null,
+
+      Description: null,
+      Opening: null,
+      Debit: null,
+      Credit: null,
+      Balance: null,
+    });
+  };
+
+  const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  const sortedData = [...tableData].sort((a, b) => {
+    let aVal = a[col] ?? "";
+    let bVal = b[col] ?? "";
+
+    aVal = aVal.toString();
+    bVal = bVal.toString();
+
+    // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
+    if (col === "code" || col === "Code") {
+      // Reverse strings → compare from right side
+      const revA = aVal.split("").reverse().join("");
+      const revB = bVal.split("").reverse().join("");
+
+      return newOrder === "ASC"
+        ? revA.localeCompare(revB)
+        : revB.localeCompare(revA);
+    }
+
+    // ⭐ Numeric sorting
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    }
+
+    // Default → normal string sorting
+    return newOrder === "ASC"
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
+
+  setTableData(sortedData);
+
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
+
   useHotkeys(
     "alt+s",
     () => {
       fetchDailyStatusReport();
-      //    resetSorting();
+      resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true }
   );
@@ -1940,7 +1915,7 @@ export default function ItemPurchaseReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Item Purchase Report" />
+          <NavComponent textdata="Employee Advance Report" />
 
           {/* ------------1st row */}
           <div
@@ -2118,7 +2093,7 @@ export default function ItemPurchaseReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                    onKeyDown={(e) => handleToKeyPress(e, selectButtonRef)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2163,569 +2138,6 @@ export default function ItemPurchaseReport() {
             </div>
           </div>
 
-          {/* //////////////// second ROW ///////////////////////// */}
-
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Company :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={saleSelectRef}
-                    options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCompanyselectdata(selectedOption.value);
-                        setCompanyselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setCompanyselectdata("");
-                        setCompanyselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                        marginRight: "3px",
-                      }}
-                    >
-                      Store :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginRight: "21px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={input6Ref}
-                    options={typeoptions}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setTypeselectdata(selectedOption.value);
-                        settypeselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setTypeselectdata("");
-                        settypeselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              {/* <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span
-                                            style={{
-                                                fontSize: getdatafontsize,
-                                                fontFamily: getfontstyle,
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            Rate :
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <select
-                                    ref={input4Refrate}
-                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="A">AVERAGE RATE</option>
-                                    <option value="P">PURCHASE RATE</option>
-                                    <option value="M">LAST SM RATE</option>
-                                      <option value="W">WEIGHTED AVERAGE</option>
-                                    <option value="F">FIFO</option>
-                                </select>
-                            </div> */}
-            </div>
-          </div>
-
-          {/* //////////////// THIRD ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Category :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input1Ref}
-                    options={categoryoptions}
-                    onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCategoryselectdata(selectedOption.value);
-                        setcategoryselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcategoryselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                {/* <select
-                                    ref={input4Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="">ALL</option>
-                                    <option value="BIL">PURCHASE</option>
-                                    <option value="PRN">PURCHASE RETURN</option>
-                                </select> */}
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType2}
-                    onChange={handleTransactionTypeChange2}
-                    style={{
-                      width: "250px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
-                  </select>
-
-                  {transectionType2 !== "" && (
-                    <span
-                      onClick={() => settransectionType2("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* //////////////// FORTH ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Capacity :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input2Ref}
-                    options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input6Ref)}
-                    id="selectedsale2"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCapacityselectdata(selectedOption.value);
-                        setcapacityselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcapacityselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input5Ref}
-                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "250px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div>
             {/* Table Head */}
             <div
@@ -2762,31 +2174,74 @@ export default function ItemPurchaseReport() {
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      Date
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("code")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Trn#
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Description")}
+                    >
+                      Description{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Type
+                    <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Opening")}
+                    >
+                      Opening{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Opening")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Description
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Debit")}
+                    >
+                      Debit{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Debit")}
+                      ></i>
                     </td>
 
-                    <td className="border-dark" style={sixthColWidth}>
-                      Str
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Credit")}
+                    >
+                      Credit{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Credit")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={seventhColWidth}>
-                      Qnty
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Balance")}
+                    >
+                      Balance{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={eightColWidth}>
-                      Rate
-                    </td>
-                    <td className="border-dark" style={ninthColWidth}>
-                      Amount
-                    </td>
+
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
@@ -2799,7 +2254,7 @@ export default function ItemPurchaseReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "43vh",
+                maxHeight: "55vh",
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -2823,7 +2278,7 @@ export default function ItemPurchaseReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="8" className="text-center">
+                        <td colSpan="6" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -2836,7 +2291,7 @@ export default function ItemPurchaseReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 8 }).map((_, colIndex) => (
+                            {Array.from({ length: 6 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2851,8 +2306,6 @@ export default function ItemPurchaseReport() {
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
                       </tr>
                     </>
                   ) : (
@@ -2860,9 +2313,7 @@ export default function ItemPurchaseReport() {
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
                         const isNegative =
-                          item.Qnty < 0 ||
-                          item.Rate < 0 ||
-                          item["Pur Amount"] < 0;
+                          item.Credit < 0 || item.Balance < 0 || item.Debit < 0;
 
                         return (
                           <tr
@@ -2879,28 +2330,22 @@ export default function ItemPurchaseReport() {
                             }}
                           >
                             <td className="text-start" style={firstColWidth}>
-                              {item.Date}
+                              {item.code}
                             </td>
                             <td className="text-start" style={secondColWidth}>
-                              {item["Trn#"]}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
-                            </td>
-                            <td className="text-start" style={forthColWidth}>
                               {item.Description}
                             </td>
+                            <td className="text-end" style={thirdColWidth}>
+                              {formatValue(item.Opening)}
+                            </td>
+                            <td className="text-end" style={forthColWidth}>
+                              {formatValue(item.Debit)}
+                            </td>
                             <td className="text-end" style={sixthColWidth}>
-                              {item.Store}
+                              {formatValue(item.Credit)}
                             </td>
                             <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Qnty)}
-                            </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
-                            <td className="text-end" style={ninthColWidth}>
-                              {formatValue(item["Pur Amount"])}
+                              {formatValue(item.Balance)}
                             </td>
                           </tr>
                         );
@@ -2915,7 +2360,7 @@ export default function ItemPurchaseReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 8 }).map((_, colIndex) => (
+                          {Array.from({ length: 6 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2929,8 +2374,6 @@ export default function ItemPurchaseReport() {
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -2974,30 +2417,13 @@ export default function ItemPurchaseReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              <span className="mobileledger_total">
+                {formatValue(totalopening)}
+              </span>
             </div>
             <div
               style={{
                 ...forthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
-            </div>
-            <div
-              style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{formatValue(totaldebit)}</span> */}
-            </div>
-
-            <div
-              style={{
-                ...seventhColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -3008,22 +2434,25 @@ export default function ItemPurchaseReport() {
             </div>
             <div
               style={{
-                ...eightColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
-            </div>
-            <div
-              style={{
-                ...ninthColWidth,
+                ...sixthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
               <span className="mobileledger_total">
                 {formatValue(totalcredit)}
+              </span>
+            </div>
+
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(ClosingBalance)}
               </span>
             </div>
           </div>
@@ -3064,7 +2493,7 @@ export default function ItemPurchaseReport() {
               ref={selectButtonRef}
               onClick={() => {
                 fetchDailyStatusReport();
-                // resetSorting();
+                resetSorting();
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>

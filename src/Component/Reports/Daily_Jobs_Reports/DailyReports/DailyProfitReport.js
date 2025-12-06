@@ -414,13 +414,13 @@ export default function DailyProfitReport() {
             FFnlDat: toInputDate,
             FRepTyp: transectionType,
             FRepRat: Retrate,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
 
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
 
             FSchTxt: searchQuery
         }).toString();
@@ -954,9 +954,13 @@ export default function DailyProfitReport() {
 
         // Execute the pagination
         handlePagination();
+         let RepRate = Retrate === "A" ? "ALL" :
+                    Retrate === "P" ? "PURCHASE RATE" :
+                        Retrate === "S" ? "SALE MAN RATE" :
+                            Retrate === "A" ? "ACTUAL RATE" : "ALL";
 
         // Save the PDF
-        doc.save(`DailyProfitReport From ${fromInputDate} To ${toInputDate}.pdf`);
+        doc.save(`DailyProfitReport ${RepRate} From ${fromInputDate} To ${toInputDate}.pdf`);
     };
     ///////////////////////////// DOWNLOAD EXCEL CODE ////////////////////////////////////////////////////////////
 
@@ -1250,7 +1254,7 @@ export default function DailyProfitReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `DailyProfitReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `DailyProfitReport ${repRateText} From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
 
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
@@ -1336,7 +1340,7 @@ export default function DailyProfitReport() {
         width: "80px",
     };
     const fifthColWidth = {
-        width: "250px",
+        width: "260px",
     };
     const sixthColWidth = {
         width: "50px",
@@ -1357,7 +1361,7 @@ export default function DailyProfitReport() {
         width: "75px",
     };
 
-    const sixthcol = { width: "13px" };
+    const sixthcol = { width: "8px" };
 
 
     //////////////////// COLUMN WIDTH FOR BOTTOM TABLE  /////////////////////////////////
@@ -1382,7 +1386,7 @@ export default function DailyProfitReport() {
         width: "60px",
     };
     const bottomthirdColWidth = {
-        width: "260px",
+        width: "270px",
     };
     const bottomforthColWidth = {
         width: "80px",
@@ -1413,8 +1417,6 @@ export default function DailyProfitReport() {
     }, []);
 
     
-
-
     const contentStyle = {
         width: "100%", // 100vw ki jagah 100%
         maxWidth: "1000px",
@@ -2299,7 +2301,7 @@ export default function DailyProfitReport() {
                                 borderTop: `1px solid ${fontcolor}`,
                                 height: "24px",
                                 display: "flex",
-                                paddingRight: "1.2%",
+                                paddingRight: "8px",
                                 // width: '101.2%',
 
                             }}
