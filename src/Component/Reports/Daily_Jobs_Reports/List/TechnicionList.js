@@ -135,7 +135,7 @@ export default function TechnicianList() {
     // Define table data (rows)
     const rows = tableData.map((item) => [
         item.ttchcod,
-      item.ttchdsc,
+      item.ttchnam,
       item.tmobnum,
       item.tnicnum,
       item.Area,
@@ -519,7 +519,7 @@ export default function TechnicianList() {
     tableData.forEach((item, index) => {
       const row = worksheet.addRow([ 
         item.ttchcod,
-      item.ttchdsc,
+      item.ttchnam,
       item.tmobnum,
       item.tnicnum,
       item.Area,
@@ -551,7 +551,7 @@ export default function TechnicianList() {
     });
 
     // Column widths
-    [10, 45, 14,15,15,8].forEach((width, index) => {
+    [8, 45, 14,15,15,8].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -612,7 +612,7 @@ export default function TechnicianList() {
 
   const [columns, setColumns] = useState({
   ttchcod: [] ,
-      ttchdsc: [],
+      ttchnam: [],
       tmobnum: [],
       tnicnum: [],
       Area: [],
@@ -620,7 +620,7 @@ export default function TechnicianList() {
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
    ttchcod: "" ,
-      ttchdsc: "",
+      ttchnam: "",
       tmobnum: "",
       tnicnum: "",
       Area: "",
@@ -632,7 +632,7 @@ export default function TechnicianList() {
     if (tableData.length > 0) {
       const newColumns = {
         ttchcod: tableData.map((row) => row.ttchcod),
-        ttchdsc: tableData.map((row) => row.ttchdsc),
+        ttchnam: tableData.map((row) => row.ttchnam),
         tmobnum: tableData.map((row) => row.tmobnum),
         tnicnum: tableData.map((row) => row.tnicnum),
         Area: tableData.map((row) => row.Area),
@@ -674,7 +674,7 @@ export default function TechnicianList() {
   const resetSorting = () => {
     setColumnSortOrders({
        ttchcod: null ,
-      ttchdsc: null,
+      ttchnam: null,
       tmobnum: null,
       tnicnum: null,
       Area: null,
@@ -736,7 +736,7 @@ export default function TechnicianList() {
                     {item.ttchcod}
                   </td>
                   <td className="text-start" style={secondColWidth}>
-                    {item.ttchdsc}
+                    {item.ttchnam}
                   </td>
                   <td className="text-center" style={thirdColWidth}>
                     {item.tmobnum}
@@ -1141,12 +1141,12 @@ export default function TechnicianList() {
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("ttchdsc")}
+                      onClick={() => handleSorting("ttchnam")}
                     >
                       Description{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("ttchdsc")}
+                        style={getIconStyle("ttchnam")}
                       ></i>
                     </td>
 

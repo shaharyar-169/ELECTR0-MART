@@ -78,8 +78,8 @@ export default function HelperList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
 
-    //   code: 'IZONECOMP',
-    //   FLocCod: '001',
+      // code: 'IZONECOMP',
+      // FLocCod: '001',
 
       FSchTxt: searchQuery,
     }).toString();
@@ -134,19 +134,19 @@ export default function HelperList() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-        item.ttchcod,
-      item.ttchdsc,
+      item.thlpcod,
+      item.thlpnam,
       item.tmobnum,
       item.tnicnum,
-      item.Area,
-      item.ttchsts,
+      item.temladd,
+      item.thlpsts,
     ]);
 
     // Add summary row to the table
     // rows.push(["", "", "", "", "", ""]);
 
     // Define table column headers and individual column widths
-    const headers = ["Code", "Description", "Mobile", "Cnic", "Area", "Status"];
+    const headers = ["Code", "Description", "Mobile", "Cnic", "Email", "Status"];
     const columnWidths = [20, 110, 22,30, 50,15];
 
     // Calculate total table width
@@ -511,19 +511,19 @@ export default function HelperList() {
     };
 
     // Headers
-    const headers = ["Code", "Description", "Mobile", "Cnic", "Area", "Status"];
+    const headers = ["Code", "Description", "Mobile", "Cnic", "Email", "Status"];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // ✅ Add data rows with alternating light grey background
     tableData.forEach((item, index) => {
       const row = worksheet.addRow([ 
-        item.ttchcod,
-      item.ttchdsc,
+       item.thlpcod,
+      item.thlpnam,
       item.tmobnum,
       item.tnicnum,
-      item.Area,
-      item.ttchsts,
+      item.temladd,
+      item.thlpsts,
     ]);
 
       row.eachCell((cell, colIndex) => {
@@ -551,7 +551,7 @@ export default function HelperList() {
     });
 
     // Column widths
-    [10, 45, 14,15,15,8].forEach((width, index) => {
+    [10, 45, 14,15,25,8].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -611,32 +611,32 @@ export default function HelperList() {
   let totalEntries = 0;
 
   const [columns, setColumns] = useState({
-  ttchcod: [] ,
-      ttchdsc: [],
+ thlpcod: [] ,
+      thlpnam: [],
       tmobnum: [],
       tnicnum: [],
-      Area: [],
-      ttchsts: [],
+      temladd: [],
+      thlpsts: [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
-   ttchcod: "" ,
-      ttchdsc: "",
+  thlpcod: "" ,
+      thlpnam: "",
       tmobnum: "",
       tnicnum: "",
-      Area: "",
-      ttchsts: "",
+      temladd: "",
+      thlpsts: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        ttchcod: tableData.map((row) => row.ttchcod),
-        ttchdsc: tableData.map((row) => row.ttchdsc),
+        thlpcod: tableData.map((row) => row.thlpcod),
+        thlpnam: tableData.map((row) => row.thlpnam),
         tmobnum: tableData.map((row) => row.tmobnum),
         tnicnum: tableData.map((row) => row.tnicnum),
-        Area: tableData.map((row) => row.Area),
-        ttchsts: tableData.map((row) => row.ttchsts),
+        temladd: tableData.map((row) => row.temladd),
+        thlpsts: tableData.map((row) => row.thlpsts),
       };
       setColumns(newColumns);
     }
@@ -673,12 +673,12 @@ export default function HelperList() {
 
   const resetSorting = () => {
     setColumnSortOrders({
-       ttchcod: null ,
-      ttchdsc: null,
+       thlpcod: null ,
+      thlpnam: null,
       tmobnum: null,
       tnicnum: null,
-      Area: null,
-      ttchsts: null,
+      temladd: null,
+      thlpsts: null,
     });
   };
 
@@ -733,10 +733,10 @@ export default function HelperList() {
                   }}
                 >
                   <td className="text-center" style={firstColWidth}>
-                    {item.ttchcod}
+                    {item.thlpcod}
                   </td>
                   <td className="text-start" style={secondColWidth}>
-                    {item.ttchdsc}
+                    {item.thlpnam}
                   </td>
                   <td className="text-center" style={thirdColWidth}>
                     {item.tmobnum}
@@ -745,10 +745,10 @@ export default function HelperList() {
                     {item.tnicnum}
                   </td>
                     <td className="text-start" style={fifthColWidth}>
-                    {item.Area}
+                    {item.temladd}
                   </td>
                     <td className="text-center" style={sixthColWidth}>
-                    {item.ttchsts}
+                    {item.thlpsts}
                   </td>
                 </tr>
               );
@@ -808,7 +808,7 @@ export default function HelperList() {
   const secondColWidth = { width: "360px" };
   const thirdColWidth = { width: "95px" };
     const forthColWidth = { width: "120px" };
-      const fifthColWidth = { width: "180px" };
+      const fifthColWidth = { width: "190px" };
         const sixthColWidth = { width: "60px" };
   
   const sixthcol = { width: "8px" };
@@ -1129,24 +1129,24 @@ export default function HelperList() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("ttchcod")}
+                      onClick={() => handleSorting("thlpcod")}
                     >
                       Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("ttchcod")}
+                        style={getIconStyle("thlpcod")}
                       ></i>
                     </td>
 
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("ttchdsc")}
+                      onClick={() => handleSorting("thlpnam")}
                     >
                       Description{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("ttchdsc")}
+                        style={getIconStyle("thlpnam")}
                       ></i>
                     </td>
 
@@ -1178,24 +1178,24 @@ export default function HelperList() {
  <td
                       className="border-dark"
                       style={fifthColWidth}
-                      onClick={() => handleSorting("Area")}
+                      onClick={() => handleSorting("temladd")}
                     >
-                      Area{" "}
+                      Email{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Area")}
+                        style={getIconStyle("temladd")}
                       ></i>
                     </td>
 
  <td
                       className="border-dark"
                       style={sixthColWidth}
-                      onClick={() => handleSorting("ttchsts")}
+                      onClick={() => handleSorting("thlpsts")}
                     >
                       Status{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("ttchsts")}
+                        style={getIconStyle("thlpsts")}
                       ></i>
                     </td>
 

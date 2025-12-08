@@ -96,7 +96,7 @@ export default function EmployeeList() {
       FLocCod: Companyselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      // code: "NASIRTRD",
+      // code: "IZONECOMP",
       // FLocCod: "001",
       FSchTxt: searchQuery,
     }).toString();
@@ -674,7 +674,7 @@ export default function EmployeeList() {
         item.Designation,
         item.Mobile,
         item.DOB,
-        item["Joine Date"],
+        item["Join Date"],
         item["Adv Code"],
         item["Dlv Code"],
       ]);
@@ -1012,7 +1012,7 @@ export default function EmployeeList() {
     width: "230px",
   };
   const fifthColWidth = {
-    width: "85px",
+    width: "90px",
   };
   const sixthColWidth = {
     width: "80px",
@@ -1021,10 +1021,10 @@ export default function EmployeeList() {
     width: "80px",
   };
   const eightthColWidth = {
-    width: "70px",
+    width: "80px",
   };
   const ninthColWidth = {
-    width: "70px",
+    width: "80px",
   };
   const sixthcol = {
     width: "8px",
@@ -1042,9 +1042,9 @@ export default function EmployeeList() {
     };
   }, []);
 
-   const formatValue = (val) => {
-  return Number(val) === 0 ? "" : val;
-};
+  const formatValue = (val) => {
+    return Number(val) === 0 ? "" : val;
+  };
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
