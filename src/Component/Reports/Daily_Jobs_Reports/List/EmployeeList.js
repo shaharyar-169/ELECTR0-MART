@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import {
+  getUserData,
+  getOrganisationData,
+  getLocationnumber,
+  getYearDescription,
+} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -55,7 +60,8 @@ export default function EmployeeList() {
     fontcolor,
     toggleChangeColor,
     apiLinks,
-    getLocationNumber, getnavbarbackgroundcolor,
+    getLocationNumber,
+    getnavbarbackgroundcolor,
     getyeardescription,
     getfromdate,
     gettodate,
@@ -95,7 +101,6 @@ export default function EmployeeList() {
       FSchTxt: searchQuery,
     }).toString();
 
-
     axios
       .post(apiUrl, formData)
       .then((response) => {
@@ -120,10 +125,7 @@ export default function EmployeeList() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (
-      !hasComponentMountedPreviously ||
-      (input1Ref && input1Ref.current)
-    ) {
+    if (!hasComponentMountedPreviously || (input1Ref && input1Ref.current)) {
       if (input1Ref && input1Ref.current) {
         setTimeout(() => {
           input1Ref.current.focus();
@@ -408,8 +410,8 @@ export default function EmployeeList() {
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-              ? "ACTIVE"
-              : "ALL";
+            ? "ACTIVE"
+            : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
@@ -504,7 +506,6 @@ export default function EmployeeList() {
       9: "left", // Dlv Code
     };
 
-
     // Define fonts for different sections
     const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
     const fontStoreList = {
@@ -535,7 +536,8 @@ export default function EmployeeList() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(67 + numColumns - 1)}${companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(67 + numColumns - 1)}${
+        companyRow.number
       }`
     );
 
@@ -547,7 +549,8 @@ export default function EmployeeList() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(67 + numColumns - 1)}${storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(67 + numColumns - 1)}${
+        storeListRow.number
       }`
     );
 
@@ -558,14 +561,13 @@ export default function EmployeeList() {
       transectionType === "N"
         ? "Non-Active"
         : transectionType === "A"
-          ? "Active"
-          : "ALL";
+        ? "Active"
+        : "ALL";
     let typesearch = searchQuery || "";
 
     let typecompany = Companyselectdatavalue.label
       ? Companyselectdatavalue.label
       : "ALL";
-
 
     // Create the row with empty placeholder cells
     const typeAndStoreRow = worksheet.addRow(["", "", "", ""]);
@@ -574,15 +576,15 @@ export default function EmployeeList() {
     typeAndStoreRow.getCell(1).value = `LOCATION :   ${typecompany}`;
 
     // Merge A and B so it becomes wide
-    worksheet.mergeCells(`A${typeAndStoreRow.number}:B${typeAndStoreRow.number}`);
+    worksheet.mergeCells(
+      `A${typeAndStoreRow.number}:B${typeAndStoreRow.number}`
+    );
 
     // Style
     typeAndStoreRow.eachCell((cell) => {
       cell.font = { name: "CustomFont", size: 10 };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-
-
 
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
@@ -593,10 +595,8 @@ export default function EmployeeList() {
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
-
-
     // Create row with empty placeholders (so we can merge properly)
-    const typeAndStoreRow3 = worksheet.addRow(["", "", "", "", "",]);
+    const typeAndStoreRow3 = worksheet.addRow(["", "", "", "", ""]);
 
     // Put STATUS + value together in cell A
     typeAndStoreRow3.getCell(1).value = `STATUS :   ${typestatus}`;
@@ -607,17 +607,20 @@ export default function EmployeeList() {
     }
 
     // Merge A + B for STATUS
-    worksheet.mergeCells(`A${typeAndStoreRow3.number}:B${typeAndStoreRow3.number}`);
+    worksheet.mergeCells(
+      `A${typeAndStoreRow3.number}:B${typeAndStoreRow3.number}`
+    );
 
     // Merge C + D for SEARCH (only if search exists)
-    worksheet.mergeCells(`C${typeAndStoreRow3.number}:D${typeAndStoreRow3.number}`);
+    worksheet.mergeCells(
+      `C${typeAndStoreRow3.number}:D${typeAndStoreRow3.number}`
+    );
 
     // Style both
     typeAndStoreRow3.eachCell((cell) => {
       cell.font = { name: "CustomFont", size: 10 };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-
 
     // worksheet.mergeCells(`A${typeAndStoreRow3.number}:B${typeAndStoreRow3.number}`);
     // Apply styling for the status row
@@ -646,8 +649,6 @@ export default function EmployeeList() {
         right: { style: "thin" },
       },
     };
-
-
 
     // Add headers
     const headers = [
@@ -757,11 +758,13 @@ export default function EmployeeList() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
       }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
       }`
     );
 
@@ -880,8 +883,8 @@ export default function EmployeeList() {
       backgroundColor: state.isSelected
         ? "#3368B5"
         : state.isFocused
-          ? "#3368B5"
-          : getcolor,
+        ? "#3368B5"
+        : getcolor,
       color: state.isSelected ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
@@ -996,7 +999,6 @@ export default function EmployeeList() {
 
   let totalEntries = 0;
 
-  
   const firstColWidth = {
     width: "50px",
   };
@@ -1028,9 +1030,6 @@ export default function EmployeeList() {
     width: "8px",
   };
 
-
-
-
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -1042,6 +1041,10 @@ export default function EmployeeList() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+   const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
@@ -1200,34 +1203,37 @@ export default function EmployeeList() {
     }
   }, [tableData]);
 
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  const sortedData = [...tableData].sort((a, b) => {
-    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+    const sortedData = [...tableData].sort((a, b) => {
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    } else {
-      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
-  });
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+    });
 
-  setTableData(sortedData);
+    setTableData(sortedData);
 
-  setColumnSortOrders((prev) => ({
-    ...Object.keys(prev).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {}),
-  }));
-};
-
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -1244,7 +1250,7 @@ export default function EmployeeList() {
   };
 
   const renderTableData = () => {
-       return (
+    return (
       <>
         {isLoading ? (
           <>
@@ -1296,21 +1302,24 @@ export default function EmployeeList() {
                   <td className="text-center" style={firstColWidth}>
                     {item.Code}
                   </td>
-                  <td className="text-start"
+                  <td
+                    className="text-start"
                     title={item.Employee}
                     style={{
                       ...secondColWidth,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                    }}>
+                    }}
+                  >
                     {item.Employee}
                   </td>
                   <td className="text-center" style={thirdColWidth}>
                     {item.Status}
                   </td>
-                  <td className="text-start" 
-                   title={item.Designation}
+                  <td
+                    className="text-start"
+                    title={item.Designation}
                     style={{
                       ...forthColWidth,
                       whiteSpace: "nowrap",
@@ -1324,7 +1333,6 @@ export default function EmployeeList() {
                   <td className="text-start" style={fifthColWidth}>
                     {item.Mobile}
                   </td>
-
 
                   <td className="text-start" style={eightthColWidth}>
                     {item.DOB}
@@ -1384,14 +1392,27 @@ export default function EmployeeList() {
     };
   };
 
- useHotkeys("alt+s", () => {
-        fetchReceivableReport();
-           resetSorting();
-    }, { preventDefault: true, enableOnFormTags: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true, enableOnFormTags: true }
+  );
 
-    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
+  useHotkeys("alt+p", exportPDFHandler, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+e", handleDownloadCSV, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+r", () => navigate("/MainPage"), {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
 
   return (
     <>
@@ -1407,7 +1428,6 @@ export default function EmployeeList() {
         >
           <NavComponent textdata="Employee List" />
 
-        
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1448,55 +1468,55 @@ export default function EmployeeList() {
                 </div>
 
                 <div style={{ position: "relative", display: "inline-block" }}>
-  <select
-    ref={input1Ref}
-    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-    id="submitButton"
-    name="type"
-    onFocus={(e) =>
-      (e.currentTarget.style.border = "4px solid red")
-    }
-    onBlur={(e) =>
-      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-    }
-    value={transectionType}
-    onChange={handleTransactionTypeChange}
-    style={{
-      width: "200px",
-      height: "24px",
-      marginLeft: "5px",
-      backgroundColor: getcolor,
-      border: `1px solid ${fontcolor}`,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      paddingRight: "25px",
-    }}
-  >
-    <option value="">ALL</option>
-    <option value="A">ACTIVE</option>
-    <option value="N">NON-ACTIVE</option>
-  </select>
+                  <select
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="A">ACTIVE</option>
+                    <option value="N">NON-ACTIVE</option>
+                  </select>
 
-  {transectionType !== "" && (
-    <span
-      onClick={() => settransectionType("")}
-      style={{
-        position: "absolute",
-        right: "25px",
-        top: "50%",
-        transform: "translateY(-50%)",
-        cursor: "pointer",
-        fontWeight: "bold",
-        color: fontcolor,
-        userSelect: "none",
-        fontSize: "12px",
-      }}
-    >
-      ✕
-    </span>
-  )}
-</div>
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
@@ -1595,7 +1615,10 @@ export default function EmployeeList() {
                   }}
                 >
                   <tr
-                    style={{ backgroundColor: getnavbarbackgroundcolor, color: "white" }}
+                    style={{
+                      backgroundColor: getnavbarbackgroundcolor,
+                      color: "white",
+                    }}
                   >
                     <td
                       className="border-dark"
@@ -1705,13 +1728,7 @@ export default function EmployeeList() {
                       ></i>
                     </td>
 
-                    <td
-                      className="border-dark"
-                      style={sixthcol}
-
-                    >
-
-                    </td>
+                    <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
               </table>
@@ -1760,8 +1777,9 @@ export default function EmployeeList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
-
+              <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>
             </div>
             <div
               style={{
