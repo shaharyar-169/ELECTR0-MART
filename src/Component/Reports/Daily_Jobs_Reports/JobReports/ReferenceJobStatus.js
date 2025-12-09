@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import {
+  getUserData,
+  getOrganisationData,
+  getLocationnumber,
+  getYearDescription,
+} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -23,1792 +28,2013 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ReferenceJobStatusReport() {
-    const navigate = useNavigate();
-    const user = getUserData();
-    const organisation = getOrganisationData();
+  const navigate = useNavigate();
+  const user = getUserData();
+  const organisation = getOrganisationData();
 
-    const saleSelectRef = useRef(null);
-    const input1Ref = useRef(null);
-    const input1Reftype = useRef(null);
-    const input2Ref = useRef(null);
-    const input3Ref = useRef(null);
+  const saleSelectRef = useRef(null);
+  const input1Ref = useRef(null);
+  const input1Reftype = useRef(null);
+  const input2Ref = useRef(null);
+  const input3Ref = useRef(null);
 
-    const toRef = useRef(null);
-    const fromRef = useRef(null);
+  const toRef = useRef(null);
+  const fromRef = useRef(null);
 
-    const [saleType, setSaleType] = useState("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("");
-    const [transectionType2, settransectionType2] = useState("");
+  const [saleType, setSaleType] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [transectionType, settransectionType] = useState("");
+  const [transectionType2, settransectionType2] = useState("");
 
-    const [supplierList, setSupplierList] = useState([]);
-    console.log('getactivecollectordata', supplierList)
+  const [supplierList, setSupplierList] = useState([]);
+  console.log("getactivecollectordata", supplierList);
 
-    const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
+  const [totalcancelled, settotalcancelled] = useState(0);
+  const [TotalPending, setTotalPending] = useState(0);
+  const [TotalDone, setTotalDone] = useState(0);
+  const [TotalClose, setTotalClose] = useState(0);
+  const [totalreopen, settotalreopen] = useState(0);
+  const [TotalJobs, setTotalJobs] = useState(0);
 
-    const [TotalUnAssigned, setTotalUnAssigned] = useState(0);
-    const [TotalPending, setTotalPending] = useState(0);
-    const [TotalDone, setTotalDone] = useState(0);
-    const [TotalClose, setTotalClose] = useState(0);
-    const [TotalJobs, setTotalJobs] = useState(0);
-   
+  // state for from DatePicker
+  const [selectedfromDate, setSelectedfromDate] = useState(null);
+  const [fromInputDate, setfromInputDate] = useState("");
+  const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
+  // state for To DatePicker
+  const [selectedToDate, setSelectedToDate] = useState(null);
+  const [toInputDate, settoInputDate] = useState("");
+  const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
 
-    // state for from DatePicker
-    const [selectedfromDate, setSelectedfromDate] = useState(null);
-    const [fromInputDate, setfromInputDate] = useState("");
-    const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
-    // state for To DatePicker
-    const [selectedToDate, setSelectedToDate] = useState(null);
-    const [toInputDate, settoInputDate] = useState("");
-    const [toCalendarOpen, settoCalendarOpen] = useState(false);
+  const {
+    isSidebarVisible,
+    toggleSidebar,
+    getcolor,
+    fontcolor,
+    toggleChangeColor,
+    apiLinks,
+    getLocationNumber,
+    getyeardescription,
+    getfromdate,
+    gettodate,
+    getdatafontsize,
+    getfontstyle,
+  } = useTheme();
 
-    const yeardescription = getYearDescription();
-    const locationnumber = getLocationnumber();
+  useEffect(() => {
+    document.documentElement.style.setProperty("--background-color", getcolor);
+  }, [getcolor]);
 
+  const comapnyname = organisation.description;
 
-    const {
-        isSidebarVisible,
-        toggleSidebar,
-        getcolor,
-        fontcolor,
-        toggleChangeColor,
-        apiLinks,
-        getLocationNumber,
-        getyeardescription,
-        getfromdate,
-        gettodate,
-        getdatafontsize,
-        getfontstyle
-    } = useTheme();
+  const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
-    useEffect(() => {
-        document.documentElement.style.setProperty("--background-color", getcolor);
-    }, [getcolor]);
+  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
+  const fromdatevalidate = getfromdate;
+  const todatevaliadete = gettodate;
 
-    const comapnyname = organisation.description;
+  const convertToDate = (dateString) => {
+    const [day, month, year] = dateString.split("-");
+    return new Date(year, month - 1, day);
+  };
 
-    const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
+  const GlobalfromDate = convertToDate(fromdatevalidate);
+  const GlobaltoDate = convertToDate(todatevaliadete);
 
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
+  const formatDate1 = (date) => {
+    return `${String(date.getDate()).padStart(2, "0")}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}-${date.getFullYear()}`;
+  };
 
-    const fromdatevalidate = getfromdate;
-    const todatevaliadete = gettodate;
+  const GlobalfromDate1 = formatDate1(GlobalfromDate);
+  const GlobaltoDate1 = formatDate1(GlobaltoDate);
 
-    const convertToDate = (dateString) => {
-        const [day, month, year] = dateString.split("-");
-        return new Date(year, month - 1, day);
-    };
+  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
-    const GlobalfromDate = convertToDate(fromdatevalidate);
-    const GlobaltoDate = convertToDate(todatevaliadete);
+  // Toggle the ToDATE && FromDATE CalendarOpen state on each click
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
+  const toggleToCalendar = () => {
+    settoCalendarOpen((prevOpen) => !prevOpen);
+  };
+  const formatDate = (date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+  const handlefromInputChange = (e) => {
+    setfromInputDate(e.target.value);
+  };
 
-    const formatDate1 = (date) => {
-        return `${String(date.getDate()).padStart(2, "0")}-${String(
-            date.getMonth() + 1
-        ).padStart(2, "0")}-${date.getFullYear()}`;
-    };
+  const handlefromKeyPress = (e, inputId) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const fromDateElement = document.getElementById("fromdatevalidation");
+      const formattedInput = fromInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
-    const GlobalfromDate1 = formatDate1(GlobalfromDate);
-    const GlobaltoDate1 = formatDate1(GlobaltoDate);
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
 
-    //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
-
-    // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-    const toggleFromCalendar = () => {
-        setfromCalendarOpen((prevOpen) => !prevOpen);
-    };
-    const toggleToCalendar = () => {
-        settoCalendarOpen((prevOpen) => !prevOpen);
-    };
-    const formatDate = (date) => {
-        const day = date.getDate().toString().padStart(2, "0");
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
-    };
-    const handlefromDateChange = (date) => {
-        setSelectedfromDate(date);
-        setfromInputDate(date ? formatDate(date) : "");
-        setfromCalendarOpen(false);
-    };
-    const handlefromInputChange = (e) => {
-        setfromInputDate(e.target.value);
-    };
-
-    const handlefromKeyPress = (e, inputId) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const fromDateElement = document.getElementById("fromdatevalidation");
-            const formattedInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split("-").map(Number);
-
-                if (month > 12 || month === 0) {
-                    toast.error("Please enter a valid month (MM) between 01 and 12");
-                    return;
-                }
-
-                const daysInMonth = new Date(year, month, 0).getDate();
-                if (day > daysInMonth || day === 0) {
-                    toast.error(`Please enter a valid day (DD) for month ${month}`);
-                    return;
-                }
-
-                const currentDate = new Date();
-                const enteredDate = new Date(year, month - 1, day);
-
-                if (GlobalfromDate && enteredDate < GlobalfromDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-                if (GlobalfromDate && enteredDate > GlobaltoDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                fromDateElement.style.border = `1px solid ${fontcolor}`;
-                setfromInputDate(formattedInput);
-
-                const nextInput = document.getElementById(inputId);
-                if (nextInput) {
-                    nextInput.focus();
-                    nextInput.select();
-                } else {
-                    document.getElementById("submitButton").click();
-                }
-            } else {
-                toast.error("Date must be in the format dd-mm-yyyy");
-            }
-        }
-    };
-
-    const handleToKeyPress = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const toDateElement = document.getElementById("todatevalidation");
-            const formattedInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-            if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-                const [day, month, year] = formattedInput.split("-").map(Number);
-
-                if (month > 12 || month === 0) {
-                    toast.error("Please enter a valid month (MM) between 01 and 12");
-                    return;
-                }
-
-                const daysInMonth = new Date(year, month, 0).getDate();
-                if (day > daysInMonth || day === 0) {
-                    toast.error(`Please enter a valid day (DD) for month ${month}`);
-                    return;
-                }
-
-                const currentDate = new Date();
-                const enteredDate = new Date(year, month - 1, day);
-
-                if (GlobaltoDate && enteredDate > GlobaltoDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (GlobaltoDate && enteredDate < GlobalfromDate) {
-                    toast.error(
-                        `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                    );
-                    return;
-                }
-
-                if (fromInputDate) {
-                    const fromDate = new Date(
-                        fromInputDate.split("-").reverse().join("-")
-                    );
-                    if (enteredDate <= fromDate) {
-                        toast.error("To date must be after from date");
-                        return;
-                    }
-                }
-
-                toDateElement.style.border = `1px solid ${fontcolor}`;
-                settoInputDate(formattedInput);
-
-                if (input3Ref.current) {
-                    e.preventDefault();
-                    input3Ref.current.focus();
-                }
-            } else {
-                toast.error("Date must be in the format dd-mm-yyyy");
-            }
-        }
-    };
-
-    const handleToDateChange = (date) => {
-        setSelectedToDate(date);
-        settoInputDate(date ? formatDate(date) : "");
-        settoCalendarOpen(false);
-    };
-    const handleToInputChange = (e) => {
-        settoInputDate(e.target.value);
-    };
-
-
-    const handleSaleKeypress = (event, inputId) => {
-        if (event.key === "Enter") {
-            const selectedOption = saleSelectRef.current.state.selectValue;
-            if (selectedOption && selectedOption.value) {
-                setSaleType(selectedOption.value);
-            }
-            const nextInput = document.getElementById(inputId);
-            if (nextInput) {
-                nextInput.focus();
-                nextInput.select();
-            } else {
-                document.getElementById("submitButton").click();
-            }
-        }
-    };
-
-    const handleKeyPress = (e, nextInputRef) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            if (nextInputRef.current) {
-                nextInputRef.current.focus();
-            }
-        }
-    };
-
-    function fetchReceivableReport() {
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
-
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-
-        let hasError = false;
-        let errorType = "";
-
-        switch (true) {
-
-            case !fromInputDate:
-                errorType = "fromDate";
-                break;
-            case !toInputDate:
-                errorType = "toDate";
-                break;
-            default:
-                hasError = false;
-                break;
+        if (month > 12 || month === 0) {
+          toast.error("Please enter a valid month (MM) between 01 and 12");
+          return;
         }
 
-        if (!dateRegex.test(fromInputDate)) {
-            errorType = "fromDateInvalid";
-        } else if (!dateRegex.test(toInputDate)) {
-            errorType = "toDateInvalid";
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          return;
+        }
+
+        const currentDate = new Date();
+        const enteredDate = new Date(year, month - 1, day);
+
+        if (GlobalfromDate && enteredDate < GlobalfromDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+        if (GlobalfromDate && enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+
+        fromDateElement.style.border = `1px solid ${fontcolor}`;
+        setfromInputDate(formattedInput);
+
+        const nextInput = document.getElementById(inputId);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
         } else {
-            const formattedFromInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [fromDay, fromMonth, fromYear] = formattedFromInput
-                .split("-")
-                .map(Number);
-            const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+          document.getElementById("submitButton").click();
+        }
+      } else {
+        toast.error("Date must be in the format dd-mm-yyyy");
+      }
+    }
+  };
 
-            const formattedToInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-            const enteredToDate = new Date(toYear, toMonth - 1, toDay);
+  const handleToKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const toDateElement = document.getElementById("todatevalidation");
+      const formattedInput = toInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
-            if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-                errorType = "fromDateBeforeGlobal";
-            } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-                errorType = "fromDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = "toDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = "toDateBeforeGlobal";
-            } else if (enteredToDate < enteredFromDate) {
-                errorType = "toDateBeforeFromDate";
-            }
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
+
+        if (month > 12 || month === 0) {
+          toast.error("Please enter a valid month (MM) between 01 and 12");
+          return;
         }
 
-        switch (errorType) {
-
-            case "fromDate":
-                toast.error("From date is required");
-                return;
-            case "toDate":
-                toast.error("To date is required");
-                return;
-            case "fromDateInvalid":
-                toast.error("From date must be in the format dd-mm-yyyy");
-                return;
-            case "toDateInvalid":
-                toast.error("To date must be in the format dd-mm-yyyy");
-                return;
-            case "fromDateBeforeGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "fromDateAfterGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateAfterGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeFromDate":
-                toast.error("To date must be after from date");
-                return;
-
-
-            default:
-                break;
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          return;
         }
 
+        const currentDate = new Date();
+        const enteredDate = new Date(year, month - 1, day);
 
-        console.log(data);
-        document.getElementById(
-            "fromdatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-        document.getElementById(
-            "todatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
+        if (GlobaltoDate && enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
 
-        const apiUrl = apiLinks + "/ReferenceJobStatus.php";
-        setIsLoading(true);
-        const formData = new URLSearchParams({
+        if (GlobaltoDate && enteredDate < GlobalfromDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
 
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
-                    
-        }).toString();
+        if (fromInputDate) {
+          const fromDate = new Date(
+            fromInputDate.split("-").reverse().join("-")
+          );
+          if (enteredDate <= fromDate) {
+            toast.error("To date must be after from date");
+            return;
+          }
+        }
 
-        axios
-            .post(apiUrl, formData)
-            .then((response) => {
-                setIsLoading(false);
+        toDateElement.style.border = `1px solid ${fontcolor}`;
+        settoInputDate(formattedInput);
 
-                setTotalUnAssigned(response.data["TotalUnAssigned "]);
-                setTotalPending(response.data["TotalPending "]);
-                setTotalDone(response.data["TotalDone "]);
-                setTotalClose(response.data["TotalClose "]);
-                setTotalJobs(response.data["TotalJobs "]);
-              
+        if (input3Ref.current) {
+          e.preventDefault();
+          input3Ref.current.focus();
+        }
+      } else {
+        toast.error("Date must be in the format dd-mm-yyyy");
+      }
+    }
+  };
 
-                if (response.data && Array.isArray(response.data.Detail)) {
-                    setTableData(response.data.Detail);
-                } else {
-                    console.warn(
-                        "Response data structure is not as expected:",
-                        response.data
-                    );
-                    setTableData([]);
-                }
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                setIsLoading(false);
-            });
+  const handleToDateChange = (date) => {
+    setSelectedToDate(date);
+    settoInputDate(date ? formatDate(date) : "");
+    settoCalendarOpen(false);
+  };
+  const handleToInputChange = (e) => {
+    settoInputDate(e.target.value);
+  };
+
+  const handleSaleKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = saleSelectRef.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setSaleType(selectedOption.value);
+      }
+      const nextInput = document.getElementById(inputId);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+
+  const handleKeyPress = (e, nextInputRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextInputRef.current) {
+        nextInputRef.current.focus();
+      }
+    }
+  };
+
+  function fetchReceivableReport() {
+    const fromDateElement = document.getElementById("fromdatevalidation");
+    const toDateElement = document.getElementById("todatevalidation");
+
+    const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+
+    let hasError = false;
+    let errorType = "";
+
+    switch (true) {
+      case !fromInputDate:
+        errorType = "fromDate";
+        break;
+      case !toInputDate:
+        errorType = "toDate";
+        break;
+      default:
+        hasError = false;
+        break;
     }
 
-    useEffect(() => {
-        const hasComponentMountedPreviously =
-            sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-            if (fromRef && fromRef.current) {
-                setTimeout(() => {
-                    fromRef.current.focus();
-                    fromRef.current.select();
-                }, 0);
-            }
-            sessionStorage.setItem("componentMounted", "true");
-        }
-    }, []);
+    if (!dateRegex.test(fromInputDate)) {
+      errorType = "fromDateInvalid";
+    } else if (!dateRegex.test(toInputDate)) {
+      errorType = "toDateInvalid";
+    } else {
+      const formattedFromInput = fromInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const [fromDay, fromMonth, fromYear] = formattedFromInput
+        .split("-")
+        .map(Number);
+      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
 
-    useEffect(() => {
-        const currentDate = new Date();
-        setSelectedToDate(currentDate);
-        settoInputDate(formatDate(currentDate));
+      const formattedToInput = toInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
+      const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-        const firstDateOfCurrentMonth = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            1
+      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
+        errorType = "fromDateBeforeGlobal";
+      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
+        errorType = "fromDateAfterGlobal";
+      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+        errorType = "toDateAfterGlobal";
+      } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
+        errorType = "toDateBeforeGlobal";
+      } else if (enteredToDate < enteredFromDate) {
+        errorType = "toDateBeforeFromDate";
+      }
+    }
+
+    switch (errorType) {
+      case "fromDate":
+        toast.error("From date is required");
+        return;
+      case "toDate":
+        toast.error("To date is required");
+        return;
+      case "fromDateInvalid":
+        toast.error("From date must be in the format dd-mm-yyyy");
+        return;
+      case "toDateInvalid":
+        toast.error("To date must be in the format dd-mm-yyyy");
+        return;
+      case "fromDateBeforeGlobal":
+        toast.error(
+          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
         );
-        setSelectedfromDate(firstDateOfCurrentMonth);
-        setfromInputDate(formatDate(firstDateOfCurrentMonth));
-    }, []);
+        return;
+      case "fromDateAfterGlobal":
+        toast.error(
+          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
+        return;
+      case "toDateAfterGlobal":
+        toast.error(
+          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
+        return;
+      case "toDateBeforeGlobal":
+        toast.error(
+          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
+        return;
+      case "toDateBeforeFromDate":
+        toast.error("To date must be after from date");
+        return;
 
+      default:
+        break;
+    }
 
-  
+    console.log(data);
+    document.getElementById(
+      "fromdatevalidation"
+    ).style.border = `1px solid ${fontcolor}`;
+    document.getElementById(
+      "todatevalidation"
+    ).style.border = `1px solid ${fontcolor}`;
 
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-    const exportPDFHandler = () => {
+    const apiUrl = apiLinks + "/ReferenceJobStatus.php";
+    setIsLoading(true);
+    const formData = new URLSearchParams({
+      FIntDat: fromInputDate,
+      FFnlDat: toInputDate,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
 
-        const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
+    //   code: "IZONECOMP",
+    //   FLocCod: "001",
+    }).toString();
 
-        // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "potraite" });
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        setIsLoading(false);
 
-        // Define table data (rows)
-        const rows = tableData.map((item) => [
-            item.Code,
-            item.Reference,
-            item.UnAssigned,
-            item.Pending,
-            item.Done,
-            item.Closed,
-            item.TotalJobs,
-         
-        ]);
+        settotalcancelled(response.data["TotalCancelled "]);
+        setTotalPending(response.data["TotalPending "]);
+        setTotalDone(response.data["TotalDone "]);
+        setTotalClose(response.data["TotalClose "]);
+        setTotalJobs(response.data["TotalJobs "]);
+        settotalreopen(response.data["TotalUnAssigned "]);
 
-        // Add summary row to the table
+        if (response.data && Array.isArray(response.data.Detail)) {
+          setTableData(response.data.Detail);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setTableData([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setIsLoading(false);
+      });
+  }
 
-        rows.push([
-            "",
-            "",
-            String(TotalUnAssigned),
-            String(TotalPending),
-            String(TotalDone),
-            String(TotalClose),
-            String(TotalJobs),
-          
+  useEffect(() => {
+    const hasComponentMountedPreviously =
+      sessionStorage.getItem("componentMounted");
+    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+      if (fromRef && fromRef.current) {
+        setTimeout(() => {
+          fromRef.current.focus();
+          fromRef.current.select();
+        }, 0);
+      }
+      sessionStorage.setItem("componentMounted", "true");
+    }
+  }, []);
 
-        ]);
+  useEffect(() => {
+    const currentDate = new Date();
+    setSelectedToDate(currentDate);
+    settoInputDate(formatDate(currentDate));
 
-        // Define table column headers and individual column widths
-        const headers = [
-            "Code",
-            "Technician",
-            "UnAssigned",
-            "Pending",
-            "Done",
-            "Close",
-            "TotalJobs",
-          
-        ];
-        const columnWidths = [19, 50, 25,22,22,22,22];
+    const firstDateOfCurrentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    setSelectedfromDate(firstDateOfCurrentMonth);
+    setfromInputDate(formatDate(firstDateOfCurrentMonth));
+  }, []);
 
-        // Calculate total table width
-        const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+  const exportPDFHandler = () => {
+    const globalfontsize = 12;
+    console.log("gobal font data", globalfontsize);
 
-        // Define page height and padding
-        const pageHeight = doc.internal.pageSize.height;
-        const paddingTop = 15;
+    // Create a new jsPDF instance with landscape orientation
+    const doc = new jsPDF({ orientation: "landscape" });
 
-        // Set font properties for the table
-        doc.setFont(getfontstyle);
+    // Define table data (rows)
+    const rows = tableData.map((item) => [
+      formatValue(item.Code),
+      formatValue(item.Reference),
+      formatValue(item.Pending),
+      formatValue(item.Done),
+      formatValue(item.Closed),
+      formatValue(item.Cancelled),
+      formatValue(item.UnAssigned),
+      formatValue(item.TotalJobs),
+    ]);
+
+    // Add summary row to the table
+
+    rows.push([
+      "",
+      "Total",
+      String(formatValue(TotalPending)),
+      String(formatValue(TotalDone)),
+      String(formatValue(TotalClose)),
+      String(formatValue(totalcancelled)),
+      String(formatValue(totalreopen)),
+      String(formatValue(TotalJobs)),
+    ]);
+
+    // Define table column headers and individual column widths
+    const headers = [
+      "Code",
+      "Reference",
+      "Pending",
+      "Done",
+      "Close",
+      "Cancelled",
+      "UnAssigned",
+      "TotalJobs",
+    ];
+    const columnWidths = [15, 110, 22, 22, 22, 22, 22, 22];
+
+    // Calculate total table width
+    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+
+    // Define page height and padding
+    const pageHeight = doc.internal.pageSize.height;
+    const paddingTop = 15;
+
+    // Set font properties for the table
+    doc.setFont(getfontstyle);
+    doc.setFontSize(10);
+
+    // Function to add table headers
+    const addTableHeaders = (startX, startY) => {
+      // Set font style and size for headers
+      doc.setFont(getfontstyle, "bold"); // Set font to bold
+      doc.setFontSize(12); // Set font size for headers
+
+      headers.forEach((header, index) => {
+        const cellWidth = columnWidths[index];
+        const cellHeight = 6; // Height of the header row
+        const cellX = startX + cellWidth / 2; // Center the text horizontally
+        const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+
+        // Draw the grey background for the header
+        doc.setFillColor(200, 200, 200); // Grey color
+        doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+
+        // Draw the outer border
+        doc.setLineWidth(0.2); // Set the width of the outer border
+        doc.rect(startX, startY, cellWidth, cellHeight);
+
+        // Set text alignment to center
+        doc.setTextColor(0); // Set text color to black
+        doc.text(header, cellX, cellY, { align: "center" }); // Center the text
+        startX += columnWidths[index]; // Move to the next column
+      });
+
+      // Reset font style and size after adding headers
+      doc.setFont(getfontstyle);
+      doc.setFontSize(12);
+    };
+
+    const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
+
+      doc.setFontSize(11);
+
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
+
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
+
+        if (isTotalRow) {
+          doc.setFont(getfontstyle, "bold");
+        }
+
+        // Set background color for odd-numbered rows
+        if (isOddRow) {
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
+
+        doc.setDrawColor(0);
+
+        // For total row - special border handling
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+
+          // Draw double top border
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+          // Draw double bottom border
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
+
+          // Draw single vertical borders
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          ); // Right border
+        } else {
+          // Normal border for other rows
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
+
+        row.forEach((cell, cellIndex) => {
+          const cellY = isTotalRow
+            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+            : startY + (i - startIndex + 2) * rowHeight + 3;
+
+          const cellX = startX + 2;
+
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+
+          if (!isTotalRow) {
+            doc.setFont(fontName, "normal");
+          }
+
+          const cellValue = String(cell);
+
+          if (cellIndex === 0) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 2 ||
+            cellIndex === 3 ||
+            cellIndex === 4 ||
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle", // This centers vertically
+            });
+          } else {
+            // For empty cells in total row, add "Total" label centered
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle", // This centers vertically
+              });
+            }
+          }
+
+          // Draw column borders
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
+
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont(getfontstyle, "normal");
+        }
+      }
+
+      // Footer section
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFontSize(headingFontSize);
+      doc.setTextColor(0);
+      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+    };
+
+    const getTotalTableWidth = () => {
+      let totalWidth = 0;
+      columnWidths.forEach((width) => (totalWidth += width));
+      return totalWidth;
+    };
+
+    // Function to add a new page and reset startY
+    const addNewPage = (startY) => {
+      doc.addPage();
+      return paddingTop; // Set startY for each new page
+    };
+
+    // Define the number of rows per page
+    const rowsPerPage = 29; // Adjust this value based on your requirements
+
+    // Function to handle pagination
+    const handlePagination = () => {
+      // Define the addTitle function
+      const addTitle = (
+        title,
+        date,
+        time,
+        pageNumber,
+        startY,
+        titleFontSize = 18,
+        pageNumberFontSize = 10
+      ) => {
+        doc.setFontSize(titleFontSize); // Set the font size for the title
+        doc.text(title, doc.internal.pageSize.width / 2, startY, {
+          align: "center",
+        });
+
+        // Calculate the x-coordinate for the right corner
+        const rightX = doc.internal.pageSize.width - 10;
+
+        // if (date) {
+        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+        //     if (time) {
+        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+        //     } else {
+        //         doc.text(date, rightX - 10, startY, { align: "right" });
+        //     }
+        // }
+
+        // Add page numbering
+        doc.setFontSize(pageNumberFontSize);
+        doc.text(
+          `Page ${pageNumber}`,
+          rightX - 5,
+          doc.internal.pageSize.height - 10,
+          { align: "right" }
+        );
+      };
+
+      let currentPageIndex = 0;
+      let startY = paddingTop; // Initialize startY
+      let pageNumber = 1; // Initialize page number
+
+      while (currentPageIndex * rowsPerPage < rows.length) {
+        addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+        startY += 5; // Adjust vertical position for the company title
+
+        addTitle(
+          `Reference Job Status Report From: ${fromInputDate} To: ${toInputDate}`,
+          "",
+          "",
+          pageNumber,
+          startY,
+          12
+        ); // Render sale report title with decreased font size, provide the time, and page number
+        startY += -5;
+
+        const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+        const labelsY = startY + 4; // Position the labels below the titles and above the table
+
+        // // Reset font weight to normal if necessary for subsequent text
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
-        // Function to add table headers
-        const addTableHeaders = (startX, startY) => {
-            // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
-
-            headers.forEach((header, index) => {
-                const cellWidth = columnWidths[index];
-                const cellHeight = 6; // Height of the header row
-                const cellX = startX + cellWidth / 2; // Center the text horizontally
-                const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-                // Draw the grey background for the header
-                doc.setFillColor(200, 200, 200); // Grey color
-                doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-                // Draw the outer border
-                doc.setLineWidth(0.2); // Set the width of the outer border
-                doc.rect(startX, startY, cellWidth, cellHeight);
-
-                // Set text alignment to center
-                doc.setTextColor(0); // Set text color to black
-                doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-                startX += columnWidths[index]; // Move to the next column
-            });
-
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
-        };
-
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-            doc.setFontSize(fontSize);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
-
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
-                }
-
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
-
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
-
-                row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
-
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
-
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
-
-                    if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 ) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    } else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-                    }
-
-
-
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
-
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
-            }
-
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
-
-        // Function to calculate total table width
-        const getTotalTableWidth = () => {
-            let totalWidth = 0;
-            columnWidths.forEach((width) => (totalWidth += width));
-            return totalWidth;
-        };
-
-        // Function to add a new page and reset startY
-        const addNewPage = (startY) => {
-            doc.addPage();
-            return paddingTop; // Set startY for each new page
-        };
-
-        // Define the number of rows per page
-        const rowsPerPage = 47; // Adjust this value based on your requirements
-
-        // Function to handle pagination
-        const handlePagination = () => {
-
-
-            // Define the addTitle function
-            const addTitle = (
-                title,
-                date,
-                time,
-                pageNumber,
-                startY,
-                titleFontSize = 18,
-                pageNumberFontSize = 10
-            ) => {
-                doc.setFontSize(titleFontSize); // Set the font size for the title
-                doc.text(title, doc.internal.pageSize.width / 2, startY, {
-                    align: "center",
-                });
-
-                // Calculate the x-coordinate for the right corner
-                const rightX = doc.internal.pageSize.width - 10;
-
-                // if (date) {
-                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                //     if (time) {
-                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-                //     } else {
-                //         doc.text(date, rightX - 10, startY, { align: "right" });
-                //     }
-                // }
-
-                // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
-                    `Page ${pageNumber}`,
-                    rightX - 5,
-                    doc.internal.pageSize.height - 10,
-                    { align: "right" }
-                );
-            };
-
-            let currentPageIndex = 0;
-            let startY = paddingTop; // Initialize startY
-            let pageNumber = 1; // Initialize page number
-
-            while (currentPageIndex * rowsPerPage < rows.length) {
-
-                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-                startY += 5; // Adjust vertical position for the company title
-
-                addTitle(`Reference Job Status Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
-                startY += -5;
-
-                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 4; // Position the labels below the titles and above the table
-
-           
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.setFontSize(10);
-
-                startY += 5; // Adjust vertical position for the labels
-
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 24);
-                const startIndex = currentPageIndex * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-                startY = addTableRows(
-                    (doc.internal.pageSize.width - totalWidth) / 2,
-                    startY,
-                    startIndex,
-                    endIndex
-                );
-                if (endIndex < rows.length) {
-                    startY = addNewPage(startY); // Add new page and update startY
-                    pageNumber++; // Increment page number
-                }
-                currentPageIndex++;
-            }
-        };
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
-        };
-
-        // Function to get current time in the format HH:MM:SS
-        const getCurrentTime = () => {
-            const today = new Date();
-            const hh = String(today.getHours()).padStart(2, "0");
-            const mm = String(today.getMinutes()).padStart(2, "0");
-            const ss = String(today.getSeconds()).padStart(2, "0");
-            return hh + ":" + mm + ":" + ss;
-        };
-
-        const date = getCurrentDate(); // Get current date
-        const time = getCurrentTime(); // Get current time
-
-        // Call function to handle pagination
-        handlePagination();
-
-        // Save the PDF files
-        doc.save(`ReferenceJobStatusReport Form ${fromInputDate} To ${toInputDate}.pdf`);
-
-
-    };
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
-    ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-    const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
-
-        const numColumns = 10; // Ensure this matches the actual number of columns
-
-        const columnAlignments = [
-            "left",
-            "left",
-            "right",
-            "right",
-            "right",
-            "right",
-            "right",
-          
-        ];
-
-        // Define fonts for different sections
-        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-        // Add company name
-        const companyRow = worksheet.addRow([comapnyname]);
-        companyRow.eachCell((cell) => {
-            cell.font = fontCompanyName;
-            cell.alignment = { horizontal: "center" };
-        });
-
-        worksheet.getRow(companyRow.number).height = 30;
-        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(63 + numColumns - 1)}${companyRow.number}`);
-
-        // Add Store List row
-        const storeListRow = worksheet.addRow([`Reference Job Status Report From ${fromInputDate} To ${toInputDate}`]);
-        storeListRow.eachCell((cell) => {
-            cell.font = fontStoreList;
-            cell.alignment = { horizontal: "center" };
-        });
-
-        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(63 + numColumns - 1)}${storeListRow.number}`);
-
-        // Add an empty row after the title section
-        worksheet.addRow([]);
-
-     
-        // Header style
-        const headerStyle = {
-            font: fontHeader,
-            alignment: { horizontal: "center", vertical: "middle" },
-            fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-            border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
-        };
-
-        // Add headers
-        const headers = [
-            "Code",
-            "Reference",
-            "UnAssigned",
-            "Pending",
-            "Done",
-            "Close",
-            "TotalJobs",
-        ];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-        // Add data rows
-        tableData.forEach((item) => {
-            const row = worksheet.addRow([
-                item.Code,
-            item.Reference,
-            item.UnAssigned,
-            item.Pending,
-            item.Done,
-            item.Closed,
-            item.TotalJobs,
-    
-            ]);
-
-            row.eachCell((cell, colIndex) => {
-                cell.font = fontTableContent;
-                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-                cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
-            });
-        });
-
-        // Set column widths
-        [8,25, 15,15,15,15,15].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
-
-        const totalRow = worksheet.addRow([
-        "",
-            "",
-            String(TotalUnAssigned),
-            String(TotalPending),
-            String(TotalDone),
-            String(TotalClose),
-            String(TotalJobs),
-        ]);
-
-        // total row added
-
-        totalRow.eachCell((cell, colNumber) => {
-            cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
-            cell.border = {
-                top: { style: "thin" },
-                left: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" },
-            };
-
-            // Align only the "Total" text to the right
-            if (
-
-                colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 
-            ) {
-                cell.alignment = { horizontal: "right" };
-            }
-        });
-
-
-        // Get current date
-        const getCurrentDate = () => {
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, "0");
-            const month = String(today.getMonth() + 1).padStart(2, "0");
-            const year = today.getFullYear();
-            return `${day}-${month}-${year}`;
-        };
-
-        const currentdate = getCurrentDate();
-
-        // Generate and save the Excel file
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `ReferenceJobStatusReport From ${fromInputDate} To ${toInputDate}.xlsx`);
-    };
-    ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
-
-    const dispatch = useDispatch();
-
-    const tableTopColor = "#3368B5";
-    const tableHeadColor = "#3368b5";
-    const secondaryColor = "white";
-    const btnColor = "#3368B5";
-    const textColor = "white";
-
-    const [tableData, setTableData] = useState([]);
-    console.log('installment sale reports data', tableData)
-    const [selectedSearch, setSelectedSearch] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const { data, loading, error } = useSelector((state) => state.getuser);
-
-    const handleSearch = (e) => {
-        setSelectedSearch(e.target.value);
-    };
-
-    let totalEntries = 0;
-
-    const getFilteredTableData = () => {
-        let filteredData = tableData;
-        if (selectedSearch.trim() !== "") {
-            const query = selectedSearch.trim().toLowerCase();
-            filteredData = filteredData.filter(
-                (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-            );
+        startY += 5; // Adjust vertical position for the labels
+
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 24);
+        const startIndex = currentPageIndex * rowsPerPage;
+        const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+        startY = addTableRows(
+          (doc.internal.pageSize.width - totalWidth) / 2,
+          startY,
+          startIndex,
+          endIndex
+        );
+        if (endIndex < rows.length) {
+          startY = addNewPage(startY); // Add new page and update startY
+          pageNumber++; // Increment page number
         }
-        return filteredData;
+        currentPageIndex++;
+      }
     };
 
-    const firstColWidth = {
-        width: "8.3%",
-    };
-    const secondColWidth = {
-        width: "25%",
-    };
-    const thirdColWidth = {
-        width: "13%",
-    };
-    const forthColWidth = {
-        width: "13%",
-    };
-    const fifthColWidth = {
-        width: "13%",
-    };
-    const sixthColWidth = {
-        width: "13%",
-    };
-    const seventhColWidth = {
-        width: "13%",
-    };
-   
-
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
-
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setWindowWidth(window.innerWidth);
-        };
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
-
-    const contentStyle = {
-        backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(55vw - 0%)" : "55vw",
-        position: "relative",
-        top: "35%",
-        left: isSidebarVisible ? "50%" : "50%",
-        transform: "translate(-50%, -50%)",
-        transition: isSidebarVisible
-            ? "left 3s ease-in-out, width 2s ease-in-out"
-            : "left 3s ease-in-out, width 2s ease-in-out",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "start",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        wordBreak: "break-word",
-        textAlign: "center",
-        maxWidth: "1000px",
-        fontSize: "15px",
-        fontStyle: "normal",
-        fontWeight: "400",
-        lineHeight: "23px",
-        fontFamily: '"Poppins", sans-serif',
+    const getCurrentDate = () => {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+      const yyyy = today.getFullYear();
+      return dd + "/" + mm + "/" + yyyy;
     };
 
-    const [isFilterApplied, setIsFilterApplied] = useState(false);
-    useEffect(() => {
-        if (isFilterApplied || tableData.length > 0) {
-            setSelectedIndex(0);
-            rowRefs.current[0]?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        } else {
-            setSelectedIndex(-1);
-        }
-    }, [tableData, isFilterApplied]);
-
-    let totalEnteries = 0;
-    const [selectedRowId, setSelectedRowId] = useState(null);
-    const [selectedIndex, setSelectedIndex] = useState(-1);
-    const rowRefs = useRef([]);
-    const handleRowClick = (index) => {
-        setSelectedIndex(index);
-    };
-    useEffect(() => {
-        if (selectedRowId !== null) {
-            const newIndex = tableData.findIndex(
-                (item) => item.tcmpcod === selectedRowId
-            );
-            setSelectedIndex(newIndex);
-        }
-    }, [tableData, selectedRowId]);
-    const handleKeyDown = (e) => {
-        if (selectedIndex === -1 || e.target.id === "searchInput") return;
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-            scrollToSelectedRow();
-        } else if (e.key === "ArrowDown") {
-            e.preventDefault();
-            setSelectedIndex((prevIndex) =>
-                Math.min(prevIndex + 1, tableData.length - 1)
-            );
-            scrollToSelectedRow();
-        }
-    };
-    const scrollToSelectedRow = () => {
-        if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
-            rowRefs.current[selectedIndex].scrollIntoView({
-                behavior: "smooth",
-                block: "nearest",
-            });
-        }
-    };
-    useEffect(() => {
-        window.addEventListener("keydown", handleKeyDown);
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [selectedIndex]);
-    useEffect(() => {
-        if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
-            rowRefs.current[selectedIndex].scrollIntoView({
-                behavior: "smooth",
-                block: "nearest",
-            });
-        }
-    }, [selectedIndex]);
-
-    const parseDate = (dateString) => {
-        const [day, month, year] = dateString.split("-").map(Number);
-        return new Date(year, month - 1, day);
+    // Function to get current time in the format HH:MM:SS
+    const getCurrentTime = () => {
+      const today = new Date();
+      const hh = String(today.getHours()).padStart(2, "0");
+      const mm = String(today.getMinutes()).padStart(2, "0");
+      const ss = String(today.getSeconds()).padStart(2, "0");
+      return hh + ":" + mm + ":" + ss;
     };
 
-    const handleRadioChange = (days) => {
-        const toDate = parseDate(toInputDate);
-        const fromDate = new Date(toDate);
-        fromDate.setUTCDate(fromDate.getUTCDate() - days);
+    const date = getCurrentDate(); // Get current date
+    const time = getCurrentTime(); // Get current time
 
-        setSelectedfromDate(fromDate);
-        setfromInputDate(formatDate(fromDate));
-        setSelectedRadio(days === 0 ? "custom" : `${days}days`);
+    // Call function to handle pagination
+    handlePagination();
+
+    // Save the PDF files
+    doc.save(`ReferenceJobStatusReport As on ${date}.pdf`);
+  };
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
+  ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+  const handleDownloadCSV = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    const numColumns = 8; // Ensure this matches the actual number of columns
+
+    const columnAlignments = [
+      "center",
+      "left",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
+    ];
+
+    // Define fonts for different sections
+    const fontCompanyName = {
+      name: "CustomFont" || "CustomFont",
+      size: 18,
+      bold: true,
+    };
+    const fontStoreList = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+    const fontHeader = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: true,
+    };
+    const fontTableContent = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
     };
 
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(formatDate(firstDateOfCurrentMonth));
-            setSelectedToDate(currentDate);
-            settoInputDate(formatDate(currentDate));
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
-            handleRadioChange(days);
-        }
-    }, [selectedRadio]);
+    // Add an empty row at the start
+    worksheet.addRow([]);
 
-    return (
-        <>
-            <ToastContainer />
-            <div style={contentStyle}>
-                <div
-                    style={{
-                        backgroundColor: getcolor,
-                        color: fontcolor,
-                        width: "100%",
-                        border: `1px solid ${fontcolor}`,
-                        borderRadius: "9px",
-                    }}
-                >
-                    <NavComponent textdata="Reference Job Status Report" />
+    // Add company name
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
+    });
 
-
-                    {/* CODE FOR CODE SELECT */}
-
-
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center">
-                                <div
-                                    style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold", marginLeft: '2px' }}>
-                                            From :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="fromdatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "5px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                            backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        id="frominputid"
-                                        value={fromInputDate}
-                                        ref={fromRef}
-                                        onChange={handlefromInputChange}
-                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedfromDate}
-                                        onChange={handlefromDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={fromCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleFromCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                                        color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
-                            <div
-                                className="d-flex align-items-center"
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="toDatePicker">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            To :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="todatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "5px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        ref={toRef}
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                            backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        value={toInputDate}
-                                        onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, 'searchsubmit')}
-                                        id="toDatePicker"
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="To Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedToDate}
-                                        onChange={handleToDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={toCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleToCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                                        color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="d-flex align-items-center justify-content-center" style={{ marginLeft: '10px' }}>
-
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-                    </div>
-                    <div>
-                        <div
-                            style={{
-                                overflowY: "auto",
-                                width: "98.8%",
-                            }}
-                        >
-                            <table
-                                className="myTable"
-                                id="table"
-                                style={{
-                                    fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                    width: "100%",
-                                    position: "relative",
-                                    paddingRight: "2%",
-                                }}
-                            >
-                                <thead
-                                    style={{
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        fontWeight: "bold",
-                                        height: "24px",
-                                        position: "sticky",
-                                        top: 0,
-                                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                        backgroundColor: tableHeadColor,
-                                    }}
-                                >
-                                    <tr
-                                        style={{
-                                            backgroundColor: tableHeadColor,
-                                            color: "white",
-                                        }}
-                                    >
-                                        <td className="border-dark" style={firstColWidth}>
-                                            Code
-                                        </td>
-                                        <td className="border-dark" style={secondColWidth}>
-                                        Reference
-                                        </td>
-                                        <td className="border-dark" style={thirdColWidth}>
-                                        UnAssigned
-                                        </td>
-                                        <td className="border-dark" style={forthColWidth}>
-                                        Pending
-                                        </td>
-                                        <td className="border-dark" style={fifthColWidth}>
-                                        Done
-                                        </td>
-                                        <td className="border-dark" style={sixthColWidth}>
-                                        Closed
-                                        </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                        TotalJobs
-                                        </td>
-                                       
-
-
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                        <div
-                            className="table-scroll"
-                            style={{
-                                backgroundColor: textColor,
-                                borderBottom: `1px solid ${fontcolor}`,
-                                overflowY: "auto",
-                                maxHeight: "50vh",
-                                width: "100%",
-                                wordBreak: "break-word",
-                            }}
-                        >
-                            <table
-                                className="myTable"
-                                id="tableBody"
-                                style={{
-                                    fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                    width: "100%",
-                                    position: "relative",
-                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})       
-                                                           }}
-                            >
-                                <tbody id="tablebody">
-                                    {isLoading ? (
-                                        <>
-                                            <tr
-                                                style={{
-                                                    backgroundColor: getcolor,
-                                                }}
-                                            >
-                                                <td colSpan="7" className="text-center">
-                                                    <Spinner animation="border" variant="primary" />
-                                                </td>
-                                            </tr>
-                                            {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                                                (_, rowIndex) => (
-                                                    <tr
-                                                        key={`blank-${rowIndex}`}
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        {Array.from({ length: 7 }).map((_, colIndex) => (
-                                                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                                                                &nbsp;
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                )
-                                            )}
-                                            <tr>
-                                                <td style={firstColWidth}></td>
-                                                <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
-                                                <td style={fifthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-                                              
-
-                                            </tr>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {tableData.map((item, i) => {
-                                                totalEnteries += 1;
-                                                return (
-                                                    <tr
-                                                        key={`${i}-${selectedIndex}`}
-                                                        ref={(el) => (rowRefs.current[i] = el)}
-                                                        onClick={() => handleRowClick(i)}
-                                                        className={
-                                                            selectedIndex === i ? "selected-background" : ""
-                                                        }
-                                                        style={{
-                                                            backgroundColor: getcolor,
-                                                            color: fontcolor,
-                                                        }}
-                                                    >
-                                                        <td className="text-start" style={firstColWidth}>
-                                                            {item.Code}
-                                                        </td>
-                                                        <td className="text-start" 
-                                                          title={item.Reference}
-                                                          style={{
-                                                              ...secondColWidth,
-                                                              whiteSpace: "nowrap",
-                                                              overflow: "hidden",
-                                                              textOverflow: "ellipsis",
-                                                          }}
-                                                        >
-                                                            {item.Reference}
-                                                        </td>
-                                                        <td className="text-end"
-                                                            title={item.UnAssigned}
-                                                            style={{
-                                                                ...thirdColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.UnAssigned}
-                                                        </td>
-                                                        <td className="text-end" style={forthColWidth}>
-                                                            {item.Pending}
-                                                        </td>
-                                                        <td className="text-end"
-                                                            title={item.Done}
-                                                            style={{
-                                                                ...fifthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.Done}
-                                                        </td>
-                                                        <td className="text-end"
-                                                            title={item.Closed}
-                                                            style={{
-                                                                ...sixthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.Closed}
-                                                        </td>
-                                                        <td className="text-end"
-                                                            title={item.TotalJobs}
-                                                            style={{
-                                                                ...seventhColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
-                                                            {item.TotalJobs}
-                                                        </td>
-                                                      
-
-                                                    </tr>
-                                                );
-                                            })}
-                                            {Array.from({
-                                                length: Math.max(0, 27 - tableData.length),
-                                            }).map((_, rowIndex) => (
-                                                <tr
-                                                    key={`blank-${rowIndex}`}
-                                                    style={{
-                                                        backgroundColor: getcolor,
-                                                        color: fontcolor,
-                                                    }}
-                                                >
-                                                    {Array.from({ length: 7 }).map((_, colIndex) => (
-                                                        <td key={`blank-${rowIndex}-${colIndex}`}>
-                                                            &nbsp;
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                            <tr>
-                                                <td style={firstColWidth}></td>
-                                                <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
-                                                <td style={forthColWidth}></td>
-                                                <td style={fifthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-                                               
-
-
-                                            </tr>
-                                        </>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-
-                    <div
-                        style={{
-                            borderBottom: `1px solid ${fontcolor}`,
-                            borderTop: `1px solid ${fontcolor}`,
-                            height: "24px",
-                            display: "flex",
-                            paddingRight: "1.2%",
-                            width: '101.2%'
-                        }}
-                    >
-                        <div
-                            style={{
-                                ...firstColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-
-                        </div>
-                        <div
-                            style={{
-                                ...secondColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        ></div>
-                        <div
-                            style={{
-                                ...thirdColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalUnAssigned}</span>
-
-                        </div>
-                        <div
-                            style={{
-                                ...forthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalPending}</span>
-
-                        </div>
-                        <div
-                            style={{
-                                ...fifthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalDone}</span>
-
-                        </div>
-                        <div
-                            style={{
-                                ...sixthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalClose}</span>
-
-                        </div>
-                        <div
-                            style={{
-                                ...seventhColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalJobs}</span>
-
-                        </div>
-                                         
-                                       </div>
-                    <div
-                        style={{
-                            margin: "5px",
-                            marginBottom: "2px",
-                        }}
-                    >
-                        <SingleButton
-                            to="/MainPage"
-                            text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
-                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-                            onBlur={(e) =>
-                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                            }
-                        />
-                        <SingleButton
-                            text="PDF"
-                            onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
-                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-                            onBlur={(e) =>
-                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                            }
-                        />
-                        <SingleButton
-                            text="Excel"
-                            onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
-                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-                            onBlur={(e) =>
-                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                            }
-                        />
-                        <SingleButton
-                            id="searchsubmit"
-                            text="Select"
-                            ref={input3Ref}
-                            onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
-                            onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-                            onBlur={(e) =>
-                                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                            }
-                        />
-                    </div>
-                </div>
-            </div>
-        </>
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        companyRow.number
+      }`
     );
+
+    // Add Store List row
+    const storeListRow = worksheet.addRow([
+      `Reference Job Status Report From ${fromInputDate} To ${toInputDate}`,
+    ]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.mergeCells(
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        storeListRow.number
+      }`
+    );
+
+    // Add an empty row after the title section
+    worksheet.addRow([]);
+
+    // Header style
+    const headerStyle = {
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC6D9F7" },
+      },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    // Add headers
+    const headers = [
+      "Code",
+      "Reference",
+      "Pending",
+      "Done",
+      "Close",
+      "Cancelled",
+      "UnAssigned",
+      "TotalJobs",
+    ];
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    // Add data rows
+    tableData.forEach((item) => {
+      const row = worksheet.addRow([
+        formatValue(item.Code),
+        formatValue(item.Reference),
+        formatValue(item.Pending),
+        formatValue(item.Done),
+        formatValue(item.Closed),
+        formatValue(item.Cancelled),
+        formatValue(item.UnAssigned),
+        formatValue(item.TotalJobs),
+      ]);
+
+      row.eachCell((cell, colIndex) => {
+        cell.font = fontTableContent;
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = {
+          horizontal: columnAlignments[colIndex - 1] || "left",
+          vertical: "middle",
+        };
+      });
+    });
+
+    const totalRow = worksheet.addRow([
+      "",
+      "Total",
+      String(formatValue(TotalPending)),
+      String(formatValue(TotalDone)),
+      String(formatValue(TotalClose)),
+      String(formatValue(totalcancelled)),
+      String(formatValue(totalreopen)),
+      String(formatValue(TotalJobs)),
+    ]);
+
+    // total row added
+
+    totalRow.eachCell((cell, colNumber) => {
+      cell.font = { bold: true };
+      cell.border = {
+        top: { style: "double" },
+        left: { style: "thin" },
+        bottom: { style: "double" },
+        right: { style: "thin" },
+      };
+
+      // Align only the "Total" text to the right
+      if (
+        colNumber === 3 ||
+        colNumber === 4 ||
+        colNumber === 5 ||
+        colNumber === 6 ||
+        colNumber === 7 ||
+        colNumber === 8
+      ) {
+        cell.alignment = { horizontal: "right" };
+      }
+    });
+
+    // Set column widths
+    [8, 45, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
+    // Add a blank row
+    worksheet.addRow([]);
+    // Get current date and time
+    const getCurrentTime = () => {
+      const today = new Date();
+      const hh = String(today.getHours()).padStart(2, "0");
+      const mm = String(today.getMinutes()).padStart(2, "0");
+      const ss = String(today.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    };
+    // Get current date
+    const getCurrentDate = () => {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+    const currentTime = getCurrentTime();
+    const currentdate = getCurrentDate();
+    const userid = user.tusrid;
+
+    // Add date and time row
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    // Merge across all columns
+    worksheet.mergeCells(
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`
+    );
+    worksheet.mergeCells(
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`
+    );
+
+    // Generate and save the Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `ReferenceJobStatusReport As on ${currentdate}.xlsx`);
+  };
+  ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+
+  const dispatch = useDispatch();
+
+  const tableTopColor = "#3368B5";
+  const tableHeadColor = "#3368b5";
+  const secondaryColor = "white";
+  const btnColor = "#3368B5";
+  const textColor = "white";
+
+  const [tableData, setTableData] = useState([]);
+  console.log("installment sale reports data", tableData);
+  const [selectedSearch, setSelectedSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { data, loading, error } = useSelector((state) => state.getuser);
+
+  const handleSearch = (e) => {
+    setSelectedSearch(e.target.value);
+  };
+
+  let totalEntries = 0;
+
+  const getFilteredTableData = () => {
+    let filteredData = tableData;
+    if (selectedSearch.trim() !== "") {
+      const query = selectedSearch.trim().toLowerCase();
+      filteredData = filteredData.filter(
+        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
+      );
+    }
+    return filteredData;
+  };
+
+  const firstColWidth = {
+    width: "55px",
+  };
+  const secondColWidth = {
+    width: "360px",
+  };
+  const thirdColWidth = {
+    width: "70px",
+  };
+  const forthColWidth = {
+    width: "70px",
+  };
+  const fifthColWidth = {
+    width: "70px",
+  };
+  const sixthColWidth = {
+    width: "70px",
+  };
+  const seventhColWidth = {
+    width: "70px",
+  };
+  const eighthColWidth = {
+    width: "70px",
+  };
+  const sixcol = {
+    width: "8px",
+  };
+
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true, enableOnFormTags: true }
+  );
+
+  useHotkeys("alt+p", exportPDFHandler, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+e", handleDownloadCSV, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+r", () => navigate("/MainPage"), {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const formatValue = (val) => {
+    return Number(val) === 0 ? "" : val;
+  };
+
+  const contentStyle = {
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: "900px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "50vw",
+    transform: "translateX(-50%)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    textAlign: "center",
+    fontSize: "15px",
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: "23px",
+    fontFamily: '"Poppins", sans-serif',
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
+  };
+
+  const [columns, setColumns] = useState({
+    Code: [],
+    Technician: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Code: "",
+    Technician: "",
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Code: tableData.map((row) => row.Code),
+        Technician: tableData.map((row) => row.Technician),
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Technician: null,
+    });
+  };
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
+  useEffect(() => {
+    if (isFilterApplied || tableData.length > 0) {
+      setSelectedIndex(0);
+      rowRefs.current[0]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      setSelectedIndex(-1);
+    }
+  }, [tableData, isFilterApplied]);
+
+  let totalEnteries = 0;
+  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const rowRefs = useRef([]);
+  const handleRowClick = (index) => {
+    setSelectedIndex(index);
+  };
+  useEffect(() => {
+    if (selectedRowId !== null) {
+      const newIndex = tableData.findIndex(
+        (item) => item.tcmpcod === selectedRowId
+      );
+      setSelectedIndex(newIndex);
+    }
+  }, [tableData, selectedRowId]);
+  const handleKeyDown = (e) => {
+    if (selectedIndex === -1 || e.target.id === "searchInput") return;
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+      scrollToSelectedRow();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prevIndex) =>
+        Math.min(prevIndex + 1, tableData.length - 1)
+      );
+      scrollToSelectedRow();
+    }
+  };
+  const scrollToSelectedRow = () => {
+    if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
+      rowRefs.current[selectedIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  };
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedIndex]);
+  useEffect(() => {
+    if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
+      rowRefs.current[selectedIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [selectedIndex]);
+
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const handleRadioChange = (days) => {
+    const toDate = parseDate(toInputDate);
+    const fromDate = new Date(toDate);
+    fromDate.setUTCDate(fromDate.getUTCDate() - days);
+
+    setSelectedfromDate(fromDate);
+    setfromInputDate(formatDate(fromDate));
+    setSelectedRadio(days === 0 ? "custom" : `${days}days`);
+  };
+
+  useEffect(() => {
+    if (selectedRadio === "custom") {
+      const currentDate = new Date();
+      const firstDateOfCurrentMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      );
+      setSelectedfromDate(firstDateOfCurrentMonth);
+      setfromInputDate(formatDate(firstDateOfCurrentMonth));
+      setSelectedToDate(currentDate);
+      settoInputDate(formatDate(currentDate));
+    } else {
+      const days = parseInt(selectedRadio.replace("days", ""));
+      handleRadioChange(days);
+    }
+  }, [selectedRadio]);
+
+  return (
+    <>
+      <ToastContainer />
+      <div style={contentStyle}>
+        <div
+          style={{
+            backgroundColor: getcolor,
+            color: fontcolor,
+            // width: "100%",
+            border: `1px solid ${fontcolor}`,
+            borderRadius: "9px",
+          }}
+        >
+          <NavComponent textdata="Reference Job Status Report" />
+
+          {/* CODE FOR CODE SELECT */}
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "start",
+              }}
+            >
+              <div className="d-flex align-items-center">
+                <div
+                  style={{
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                        marginLeft: "2px",
+                      }}
+                    >
+                      From :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="fromdatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontFamily: getfontstyle,
+                      fontSize: getdatafontsize,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    id="frominputid"
+                    value={fromInputDate}
+                    ref={fromRef}
+                    onChange={handlefromInputChange}
+                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedfromDate}
+                    onChange={handlefromDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={fromCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleFromCalendar
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontFamily: getfontstyle,
+                            fontSize: getdatafontsize,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+              <div className="d-flex align-items-center" style={{marginLeft:'100px'}}>
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="toDatePicker">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      To :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="todatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    ref={toRef}
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontFamily: getfontstyle,
+                      fontSize: getdatafontsize,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    value={toInputDate}
+                    onChange={handleToInputChange}
+                    onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
+                    id="toDatePicker"
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="To Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedToDate}
+                    onChange={handleToDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={toCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleToCalendar
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontFamily: getfontstyle,
+                            fontSize: getdatafontsize,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+
+            
+            </div>
+          </div>
+          <div>
+            <div
+              style={{
+                overflowY: "auto",
+                // width: "98.8%",
+              }}
+            >
+              <table
+                className="myTable"
+                id="table"
+                style={{
+                  fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  // width: "100%",
+                  position: "relative",
+                  paddingRight: "2%",
+                }}
+              >
+                <thead
+                  style={{
+                    fontFamily: getfontstyle,
+                    fontSize: getdatafontsize,
+                    fontWeight: "bold",
+                    height: "24px",
+                    position: "sticky",
+                    top: 0,
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                    backgroundColor: tableHeadColor,
+                  }}
+                >
+                  <tr
+                    style={{
+                      backgroundColor: tableHeadColor,
+                      color: "white",
+                    }}
+                  >
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("Code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Technician")}
+                    >
+                      Technician{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Technician")}
+                      ></i>
+                    </td>
+                    <td className="border-dark" style={thirdColWidth}>
+                      Pending
+                    </td>
+                    <td className="border-dark" style={forthColWidth}>
+                      Done
+                    </td>
+                    <td className="border-dark" style={fifthColWidth}>
+                      Closed
+                    </td>
+                    <td className="border-dark" style={sixthColWidth}>
+                      Cancelled
+                    </td>
+                    <td className="border-dark" style={seventhColWidth}>
+                      UnAssign
+                    </td>
+                    <td className="border-dark" style={eighthColWidth}>
+                      TotalJobs
+                    </td>
+
+                    <td className="border-dark" style={sixcol}></td>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            <div
+              className="table-scroll"
+              style={{
+                backgroundColor: textColor,
+                borderBottom: `1px solid ${fontcolor}`,
+                overflowY: "auto",
+                maxHeight: "50vh",
+                // width: "100%",
+                wordBreak: "break-word",
+              }}
+            >
+              <table
+                className="myTable"
+                id="tableBody"
+                style={{
+                  fontFamily: getfontstyle,
+                  fontSize: getdatafontsize,
+                  // width: "100%",
+                  position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                }}
+              >
+                <tbody id="tablebody">
+                  {isLoading ? (
+                    <>
+                      <tr
+                        style={{
+                          backgroundColor: getcolor,
+                        }}
+                      >
+                        <td colSpan="8" className="text-center">
+                          <Spinner animation="border" variant="primary" />
+                        </td>
+                      </tr>
+                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                        (_, rowIndex) => (
+                          <tr
+                            key={`blank-${rowIndex}`}
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            {Array.from({ length: 8 }).map((_, colIndex) => (
+                              <td key={`blank-${rowIndex}-${colIndex}`}>
+                                &nbsp;
+                              </td>
+                            ))}
+                          </tr>
+                        )
+                      )}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eighthColWidth}></td>
+                      </tr>
+                    </>
+                  ) : (
+                    <>
+                      {tableData.map((item, i) => {
+                        totalEnteries += 1;
+                        return (
+                          <tr
+                            key={`${i}-${selectedIndex}`}
+                            ref={(el) => (rowRefs.current[i] = el)}
+                            onClick={() => handleRowClick(i)}
+                            className={
+                              selectedIndex === i ? "selected-background" : ""
+                            }
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            <td className="text-center" style={firstColWidth}>
+                              {formatValue(item.Code)}
+                            </td>
+                            <td
+                              className="text-start"
+                              title={item.Reference}
+                              style={{
+                                ...secondColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {formatValue(item.Reference)}
+                            </td>
+                            <td
+                              className="text-end"
+                              title={item.Pending}
+                              style={{
+                                ...thirdColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {formatValue(item.Pending)}
+                            </td>
+                            <td className="text-end" style={forthColWidth}>
+                              {item.Done}
+                            </td>
+                            <td
+                              className="text-end"
+                              title={item.Closed}
+                              style={{
+                                ...fifthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {formatValue(item.Closed)}
+                            </td>
+                            <td
+                              className="text-end"
+                              title={item.Cancelled}
+                              style={{
+                                ...sixthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {formatValue(item.Cancelled)}
+                            </td>
+                            <td
+                              className="text-end"
+                              title={item.UnAssigned}
+                              style={{
+                                ...seventhColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {formatValue(item.UnAssigned)}
+                            </td>
+                            <td
+                              className="text-end"
+                              title={item.TotalJobs}
+                              style={{
+                                ...eighthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {formatValue(item.TotalJobs)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {Array.from({
+                        length: Math.max(0, 27 - tableData.length),
+                      }).map((_, rowIndex) => (
+                        <tr
+                          key={`blank-${rowIndex}`}
+                          style={{
+                            backgroundColor: getcolor,
+                            color: fontcolor,
+                          }}
+                        >
+                          {Array.from({ length: 8 }).map((_, colIndex) => (
+                            <td key={`blank-${rowIndex}-${colIndex}`}>
+                              &nbsp;
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eighthColWidth}></td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div
+            style={{
+              borderBottom: `1px solid ${fontcolor}`,
+              borderTop: `1px solid ${fontcolor}`,
+              height: "24px",
+              display: "flex",
+              paddingRight: "8px",
+              // width: '101.2%'
+            }}
+          >
+            <div
+              style={{
+                ...firstColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...thirdColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span
+                className="mobileledger_total"
+                style={{ textAlign: "left" }}
+              >
+                {formatValue(TotalPending)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span
+                className="mobileledger_total"
+                style={{ textAlign: "left" }}
+              >
+                {formatValue(TotalDone)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span
+                className="mobileledger_total"
+                style={{ textAlign: "left" }}
+              >
+                {formatValue(TotalClose)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span
+                className="mobileledger_total"
+                style={{ textAlign: "left" }}
+              >
+                {formatValue(totalcancelled)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span
+                className="mobileledger_total"
+                style={{ textAlign: "left" }}
+              >
+                {formatValue(totalreopen)}
+              </span>
+            </div>
+
+            <div
+              style={{
+                ...eighthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span
+                className="mobileledger_total"
+                style={{ textAlign: "left" }}
+              >
+                {formatValue(TotalJobs)}
+              </span>
+            </div>
+          </div>
+          <div
+            style={{
+              margin: "5px",
+              marginBottom: "2px",
+            }}
+          >
+            <SingleButton
+              to="/MainPage"
+              text="Return"
+              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              onBlur={(e) =>
+                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+              }
+            />
+            <SingleButton
+              text="PDF"
+              onClick={exportPDFHandler}
+              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              onBlur={(e) =>
+                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+              }
+            />
+            <SingleButton
+              text="Excel"
+              onClick={handleDownloadCSV}
+              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              onBlur={(e) =>
+                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+              }
+            />
+            <SingleButton
+              id="searchsubmit"
+              text="Select"
+              ref={input3Ref}
+              onClick={() => {
+                fetchReceivableReport();
+                resetSorting();
+              }}
+              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              onBlur={(e) =>
+                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }

@@ -96,7 +96,7 @@ import CompanyMonthlyJobComparison from "./Component/Reports/Daily_Jobs_Reports/
 import CategoryMonthlyJobComparison from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryMonthlyJobComparison.js";
 import CompanyJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyJobSummary.js";
 import CategoryJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryJobSummary.js";
-
+import CompanyJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyjobStatus.js";
 
 //////////////////////////// ledger reports //////////////////////////////
 import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
@@ -287,6 +287,7 @@ function App() {
                 <Route exact path="/CategoryMonthlyJobComparison" element={<CategoryMonthlyJobComparison />} />
                 <Route exact path="/CompanyJobSummary" element={<CompanyJobSummary />} />
                 <Route exact path="/CategoryJobSummary" element={<CategoryJobSummary />} />
+                <Route exact path="/JobLedger" element={<CompanyJobStatusReport />} />
 
 
 

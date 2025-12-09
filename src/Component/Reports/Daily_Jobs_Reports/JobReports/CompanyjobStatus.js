@@ -27,7 +27,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function TechnicianJobStatusReport() {
+export default function CompanyJobStatusReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -249,9 +249,9 @@ export default function TechnicianJobStatusReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input2Ref.current) {
+        if (input3Ref.current) {
           e.preventDefault();
-          input2Ref.current.focus();
+          input3Ref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -397,17 +397,16 @@ export default function TechnicianJobStatusReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/TechnicianJobStatus.php";
+    const apiUrl = apiLinks + "/CompanyJobStatus.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
 
-      code: "IZONECOMP",
-      FLocCod: "001",
+    //   code: "IZONECOMP",
+    //   FLocCod: "001",
     }).toString();
 
     axios
@@ -420,7 +419,7 @@ export default function TechnicianJobStatusReport() {
         setTotalDone(response.data["TotalDone "]);
         setTotalClose(response.data["TotalClose "]);
         setTotalJobs(response.data["TotalJobs "]);
-        settotalreopen(response.data["ReOpen "]);
+        settotalreopen(response.data["TotalUnAssigned "]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -477,12 +476,12 @@ export default function TechnicianJobStatusReport() {
     // Define table data (rows)
     const rows = tableData.map((item) => [
       formatValue(item.Code),
-      formatValue(item.Technician),
+      formatValue(item.Company),
       formatValue(item.Pending),
       formatValue(item.Done),
       formatValue(item.Closed),
       formatValue(item.Cancelled),
-      formatValue(item.Reopen),
+      formatValue(item.UnAssigned),
       formatValue(item.TotalJobs),
     ]);
 
@@ -502,12 +501,12 @@ export default function TechnicianJobStatusReport() {
     // Define table column headers and individual column widths
     const headers = [
       "Code",
-      "Technician",
+      "Company",
       "Pending",
       "Done",
       "Close",
       "Cancelled",
-      "Reopen",
+      "UnAssigned",
       "TotalJobs",
     ];
     const columnWidths = [15, 110, 22, 22, 22, 22, 22, 22];
@@ -779,7 +778,7 @@ export default function TechnicianJobStatusReport() {
         startY += 5; // Adjust vertical position for the company title
 
         addTitle(
-          `Technician Job Status Report From: ${fromInputDate} To: ${toInputDate}`,
+          `Company Job Status Report From: ${fromInputDate} To: ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -838,7 +837,7 @@ export default function TechnicianJobStatusReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`TechnicianJobStatusReport As on ${date}.pdf`);
+    doc.save(`CompanyJobStatusReport As on ${date}.pdf`);
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
@@ -901,7 +900,7 @@ export default function TechnicianJobStatusReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Technician Job Status Report From ${fromInputDate} To ${toInputDate}`,
+      `Company Job Status Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -937,12 +936,12 @@ export default function TechnicianJobStatusReport() {
     // Add headers
     const headers = [
       "Code",
-      "Technician",
+      "Reference",
       "Pending",
       "Done",
       "Close",
       "Cancelled",
-      "Reopen",
+      "UnAssigned",
       "TotalJobs",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -952,12 +951,12 @@ export default function TechnicianJobStatusReport() {
     tableData.forEach((item) => {
       const row = worksheet.addRow([
         formatValue(item.Code),
-        formatValue(item.Technician),
+        formatValue(item.Company),
         formatValue(item.Pending),
         formatValue(item.Done),
         formatValue(item.Closed),
         formatValue(item.Cancelled),
-        formatValue(item.Reopen),
+        formatValue(item.UnAssigned),
         formatValue(item.TotalJobs),
       ]);
 
@@ -1079,7 +1078,7 @@ export default function TechnicianJobStatusReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `TechnicianJobStatusReport As on ${currentdate}.xlsx`);
+    saveAs(blob, `CompanyJobStatusReport As on ${currentdate}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1383,7 +1382,7 @@ export default function TechnicianJobStatusReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Technician Job Status Report" />
+          <NavComponent textdata="Company Job Status Report" />
 
           {/* CODE FOR CODE SELECT */}
 
@@ -1398,7 +1397,7 @@ export default function TechnicianJobStatusReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
               <div className="d-flex align-items-center">
@@ -1501,7 +1500,7 @@ export default function TechnicianJobStatusReport() {
                   />
                 </div>
               </div>
-              <div className="d-flex align-items-center">
+              <div className="d-flex align-items-center" style={{marginLeft:'100px'}}>
                 <div
                   style={{
                     width: "60px",
@@ -1558,7 +1557,7 @@ export default function TechnicianJobStatusReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, input2Ref)}
+                    onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -1601,69 +1600,7 @@ export default function TechnicianJobStatusReport() {
                 </div>
               </div>
 
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input2Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "150px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div>
+            
             </div>
           </div>
           <div>
@@ -1716,12 +1653,12 @@ export default function TechnicianJobStatusReport() {
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("Technician")}
+                      onClick={() => handleSorting("Company")}
                     >
-                      Technician{" "}
+                      Company{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Technician")}
+                        style={getIconStyle("Company")}
                       ></i>
                     </td>
                     <td className="border-dark" style={thirdColWidth}>
@@ -1737,7 +1674,7 @@ export default function TechnicianJobStatusReport() {
                       Cancelled
                     </td>
                     <td className="border-dark" style={seventhColWidth}>
-                      Reopen
+                      UnAssign
                     </td>
                     <td className="border-dark" style={eighthColWidth}>
                       TotalJobs
@@ -1832,7 +1769,7 @@ export default function TechnicianJobStatusReport() {
                             </td>
                             <td
                               className="text-start"
-                              title={item.Technician}
+                              title={item.Company}
                               style={{
                                 ...secondColWidth,
                                 whiteSpace: "nowrap",
@@ -1840,7 +1777,7 @@ export default function TechnicianJobStatusReport() {
                                 textOverflow: "ellipsis",
                               }}
                             >
-                              {formatValue(item.Technician)}
+                              {formatValue(item.Company)}
                             </td>
                             <td
                               className="text-end"
@@ -1883,7 +1820,7 @@ export default function TechnicianJobStatusReport() {
                             </td>
                             <td
                               className="text-end"
-                              title={item.Reopen}
+                              title={item.UnAssigned}
                               style={{
                                 ...seventhColWidth,
                                 whiteSpace: "nowrap",
@@ -1891,7 +1828,7 @@ export default function TechnicianJobStatusReport() {
                                 textOverflow: "ellipsis",
                               }}
                             >
-                              {formatValue(item.Reopen)}
+                              {formatValue(item.UnAssigned)}
                             </td>
                             <td
                               className="text-end"
