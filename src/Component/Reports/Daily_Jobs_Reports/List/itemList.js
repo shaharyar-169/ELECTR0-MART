@@ -567,11 +567,10 @@ export default function ItemList() {
         : state.isFocused
           ? "#3368B5"
           : getcolor,
-      color: state.isSelected ? "white" : fontcolor, // black color
-
+      color: state.isSelected ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
-        color: getcolor, // white color
+        color: "white",
         cursor: "pointer",
       },
       "&:active": {

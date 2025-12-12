@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import {
+  getUserData,
+  getOrganisationData,
+  getLocationnumber,
+  getYearDescription,
+} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -453,8 +458,6 @@ export default function ItemLedgerReport() {
             FLocCod: '001',
             FYerDsc: '2024-2024',
 
-
-
         }).toString();
 
         axios
@@ -655,10 +658,6 @@ export default function ItemLedgerReport() {
         label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
     }));
 
-
-
-
-
     const DropdownOption = (props) => {
         return (
             <components.Option {...props}>
@@ -842,7 +841,6 @@ export default function ItemLedgerReport() {
             },
         }),
     });
-
 
     const customStyles2 = (hasError) => ({
         control: (base, state) => ({
@@ -1568,7 +1566,6 @@ export default function ItemLedgerReport() {
                 : [""]
         );
 
-
         // Merge cells for Accountselect (columns B to D)
         worksheet.mergeCells(`B${typeAndStoreRow2.number}:E${typeAndStoreRow2.number}`);
 
@@ -1826,9 +1823,7 @@ export default function ItemLedgerReport() {
         width: "60px",
     };
 
-
     const sixthcol = { width: "8px" };
-
 
      useHotkeys("alt+s", () => {
         fetchReceivableReport();
@@ -1954,7 +1949,6 @@ export default function ItemLedgerReport() {
         setfromInputDate(formatDate(fromDate));
         setSelectedRadio(days === 0 ? "custom" : `${days}days`);
     };
-
 
       const formatValue = (val) => {
   return Number(val) === 0 ? "" : val;
@@ -2307,8 +2301,6 @@ export default function ItemLedgerReport() {
                                 </div>
                             </div>
 
-
-
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "21px" }}
@@ -2333,7 +2325,6 @@ export default function ItemLedgerReport() {
                                     </label>
                                 </div>
 
-                               
                             <div style={{ position: "relative", display: "inline-block" }}>
   <select
     ref={input1Ref}
@@ -2742,7 +2733,7 @@ export default function ItemLedgerReport() {
                                             Rec
                                         </td>
                                         <td className="border-dark" style={tenthColWidth}>
-                                            Iss          
+                                            Iss
                                                                           </td>
                                         <td className="border-dark" style={elewenthColWidth}>
                                             Sale
@@ -2913,7 +2904,6 @@ export default function ItemLedgerReport() {
                                                 <td style={secondColWidth}></td>
                                                 <td style={thirdColWidth}></td>
                                                 <td style={fifthColWidth}></td>
-
 
                                                 <td style={sixthColWidth}></td>
                                                 <td style={forthColWidth}></td>
@@ -3099,3 +3089,5 @@ export default function ItemLedgerReport() {
         </>
     );
 }
+
+

@@ -427,10 +427,9 @@ export default function TechnicianAggingReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-    //   code: "IZONECOMP",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
-    
+      // code: "IZONECOMP",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -439,10 +438,10 @@ export default function TechnicianAggingReport() {
         setIsLoading(false);
 
         settotaltwo(response.data["TotalTwo "]);
-        settotalfive(response.data["TotalFive "]);
-        settotalseven(response.data["TotalSeven "]);
-        settotalten(response.data["TotalTen "]);
-        settotaltenplus(response.data["TotalTenPlus "]);
+        settotalfive(response.data["TotalToday "]);
+        settotalseven(response.data["TotalOne "]);
+        settotalten(response.data["TotalThree "]);
+        settotaltenplus(response.data["TotalThreePlus "]);
         settotalQnty(response.data["TotalJobs "]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
@@ -795,11 +794,11 @@ export default function TechnicianAggingReport() {
     const rows = tableData.map((item) => [
       formatValue(item.Code),
       formatValue(item.Technician),
+      formatValue(item.Today),
+      formatValue(item.One),
       formatValue(item.Two),
-      formatValue(item.Five),
-      formatValue(item.Seven),
-      formatValue(item.Ten),
-      formatValue(item.TenPlus),
+      formatValue(item.Three),
+      formatValue(item.ThreePlus),
       formatValue(item.Total),
     ]);
 
@@ -820,14 +819,14 @@ export default function TechnicianAggingReport() {
     const headers = [
       "Code",
       "Technician",
+      "Today",
+      "One ",
       "Two",
-      "Five",
-      "Seven",
-      "Ten",
-      "TenPlus",
+      "Three",
+      "ThreePlus",
       "Total",
     ];
-    const columnWidths = [15, 100, 15, 15, 15, 15, 15, 15];
+    const columnWidths = [15, 80, 18, 18, 18, 18, 18, 18];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1250,7 +1249,7 @@ export default function TechnicianAggingReport() {
     const numColumns = 8; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "left",
+      "center",
       "left",
       "right",
       "right",
@@ -1316,7 +1315,6 @@ export default function TechnicianAggingReport() {
 
     // Add an empty row after the title section
     worksheet.addRow([]);
- 
 
     let transectionsts =
       transectionType2 === "D"
@@ -1328,13 +1326,8 @@ export default function TechnicianAggingReport() {
     let typesearch = searchQuery ? searchQuery : "";
 
     // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "TYPE :",
-      transectionsts,
-    ]);
+    const typeAndStoreRow = worksheet.addRow(["TYPE :", transectionsts]);
 
-   
-   
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
@@ -1344,7 +1337,6 @@ export default function TechnicianAggingReport() {
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-   
 
     // Header style
     const headerStyle = {
@@ -1367,11 +1359,11 @@ export default function TechnicianAggingReport() {
     const headers = [
       "Code",
       "Technician",
+      "Today",
+      "One",
       "Two",
-      "Five",
-      "Seven",
-      "Ten",
-      "TenPlus",
+      "Three",
+      "ThreePlus",
       "Total",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1380,14 +1372,14 @@ export default function TechnicianAggingReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        formatValue(item.Code),
-        formatValue(item.Technician),
-        formatValue(item.Two),
-        formatValue(item.Five),
-        formatValue(item.Seven),
-        formatValue(item.Ten),
-        formatValue(item.TenPlus),
-        formatValue(item.Total),
+      formatValue(item.Code),
+      formatValue(item.Technician),
+      formatValue(item.Today),
+      formatValue(item.One),
+      formatValue(item.Two),
+      formatValue(item.Three),
+      formatValue(item.ThreePlus),
+      formatValue(item.Total),
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1604,7 +1596,7 @@ export default function TechnicianAggingReport() {
     width: "55px",
   };
   const secondColWidth = {
-    width: "360px",
+    width: "300px",
   };
   const thirdColWidth = {
     width: "70px",
@@ -1621,8 +1613,16 @@ export default function TechnicianAggingReport() {
   const eightColWidth = {
     width: "70px",
   };
-
   const ninthColWidth = {
+    width: "70px",
+  };
+  const tenthColWidth = {
+    width: "70px",
+  };
+  const tenthColWidth1 = {
+    width: "70px",
+  };
+  const tenthColWidth2 = {
     width: "70px",
   };
 
@@ -2300,24 +2300,23 @@ export default function TechnicianAggingReport() {
                         style={getIconStyle("Technician")}
                       ></i>
                     </td>
+                    <td className="border-dark" style={tenthColWidth}>
+                      Today
+                    </td>
+                    <td className="border-dark" style={tenthColWidth1}>
+                      One
+                    </td>
                     <td className="border-dark" style={thirdColWidth}>
                       Two
                     </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Five
+                    <td className="border-dark" style={tenthColWidth2}>
+                      Three
                     </td>
-
-                    <td className="border-dark" style={sixthColWidth}>
-                      Seven
-                    </td>
-
-                    <td className="border-dark" style={seventhColWidth}>
-                      Ten
-                    </td>
-
                     <td className="border-dark" style={eightColWidth}>
-                      TenPlus
+                      ThrPlus
                     </td>
+                    
+
                     <td className="border-dark" style={ninthColWidth}>
                       Total
                     </td>
@@ -2371,7 +2370,7 @@ export default function TechnicianAggingReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 8 }).map((_, colIndex) => (
+                            {Array.from({ length:8 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2382,11 +2381,14 @@ export default function TechnicianAggingReport() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                        <td style={tenthColWidth1}></td>
+
                         <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
+                        <td style={tenthColWidth2}></td>
                         <td style={eightColWidth}></td>
+                       
+
                         <td style={ninthColWidth}></td>
                       </tr>
                     </>
@@ -2419,22 +2421,22 @@ export default function TechnicianAggingReport() {
                             <td className="text-start" style={secondColWidth}>
                               {item.Technician}
                             </td>
+                             <td className="text-end" style={tenthColWidth}>
+                              {formatValue(item.Today)}
+                            </td>
+                             <td className="text-end" style={tenthColWidth1}>
+                             {formatValue(item.One)}
+                            </td>
                             <td className="text-end" style={thirdColWidth}>
                               {formatValue(item.Two)}
                             </td>
-                            <td className="text-end" style={forthColWidth}>
-                              {formatValue(item.Five)}
-                            </td>
-
-                            <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item.Seven)}
-                            </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Ten)}
-                            </td>
+                             <td className="text-end" style={tenthColWidth2}>
+                             {formatValue(item.Three)}
+                            </td> 
                             <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.TenPlus)}
+                              {formatValue(item.ThreePlus)}
                             </td>
+                                                      
                             <td className="text-end" style={ninthColWidth}>
                               {formatValue(item.Total)}
                             </td>
@@ -2461,10 +2463,10 @@ export default function TechnicianAggingReport() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                        <td style={tenthColWidth1}></td>
                         <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
+                        <td style={tenthColWidth2}></td>
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                       </tr>
@@ -2503,6 +2505,28 @@ export default function TechnicianAggingReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
+             <div
+              style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totaltwo)}
+              </span>{" "}
+            </div>
+             <div
+              style={{
+                ...tenthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalfive)}
+              </span>{" "}
+            </div>
             <div
               style={{
                 ...thirdColWidth,
@@ -2511,45 +2535,21 @@ export default function TechnicianAggingReport() {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totaltwo.toLocaleString())}
+                {formatValue(totalseven)}
               </span>{" "}
             </div>
-            <div
+             <div
               style={{
-                ...forthColWidth,
+                ...tenthColWidth2,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalfive.toLocaleString())}
-              </span>
+                {formatValue(totalten)}
+              </span>{" "}
             </div>
-            <div
-              style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalseven.toLocaleString())}
-              </span>
-            </div>
-
-            <div
-              style={{
-                ...seventhColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalten.toLocaleString())}
-              </span>
-            </div>
-
-            <div
+             <div
               style={{
                 ...eightColWidth,
                 background: getcolor,
@@ -2557,7 +2557,7 @@ export default function TechnicianAggingReport() {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totaltenplus.toLocaleString())}
+                {formatValue(totaltenplus)}
               </span>
             </div>
 
@@ -2569,7 +2569,7 @@ export default function TechnicianAggingReport() {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalQnty.toLocaleString())}
+                {formatValue(totalQnty)}
               </span>
             </div>
           </div>

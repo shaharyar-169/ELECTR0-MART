@@ -39,13 +39,20 @@ export default function DailyJobReport() {
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
+  const fromRefPur = useRef(null);
+  const toRefPur = useRef(null);
+  const fromRefCls = useRef(null);
+  const toRefCls = useRef(null);
+   const WarrantyRef = useRef(null);
+     const NatureRef = useRef(null);
 
   const [saleType, setSaleType] = useState("");
   const [ReferenceCode, setReferenceCode] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
-  const [transectionType2, settransectionType2] = useState("");
+  const [transectionType2, settransectionType2] = useState("Y");
+  const [transectionType3, settransectionType3] = useState("H");
 
   // STATE FOR DROPDOWN SELECTION
   const [Companyselectdata, setCompanyselectdata] = useState("");
@@ -70,6 +77,9 @@ export default function DailyJobReport() {
   const [Cityselectdata, setCityselectdata] = useState("");
   const [Cityselectdatavalue, setCityselectdatavalue] = useState("");
 
+    const [Complainselectdata, setComplainselectdata] = useState("");
+  const [Complainselectdatavalue, setComplainselectdatavalue] = useState("");
+
   /////////////////////
 
   //   REF FOR ALL DROPDOWN
@@ -80,6 +90,7 @@ export default function DailyJobReport() {
   const TypeRef = useRef(null);
   const CityRef = useRef(null);
   const AreaRef = useRef(null);
+  const Complainref = useRef(null);
   const SearchRef = useRef(null);
   ////////////////////////
 
@@ -91,7 +102,7 @@ export default function DailyJobReport() {
   const [GetACtiveCityData, setGetACtiveCityData] = useState([]);
   const [GetCategory, setGetCategory] = useState([]);
   const [GetCompany, setGetCompany] = useState([]);
-  const [GetCapacity, setGetCapacity] = useState([]);
+  const [GetComplain, setGetComplain] = useState([]);
   //////////////////////////////////////
 
   const [totalQnty, setTotalQnty] = useState(0);
@@ -109,6 +120,27 @@ export default function DailyJobReport() {
   const [selectedToDate, setSelectedToDate] = useState(null);
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+
+   // state for Purfrom DatePicker
+  const [selectedfromDatePur, setselectedfromDatePur] = useState(null);
+  const [fromInputDatePur, setfromInputDatePur] = useState("");
+  const [fromCalendarOpenPur, setfromCalendarOpenPur] = useState(false);
+  // state for PurTo DatePicker
+  const [selectedToDatePur, setselectedToDatePur] = useState(null);
+  const [toInputDatePur, settoInputDatePur] = useState("");
+  const [toCalendarOpenPur, settoCalendarOpenPur] = useState(false);
+
+
+     // state for Clsfrom DatePicker
+  const [selectedfromDateCls, setselectedfromDateCls] = useState(null);
+  const [fromInputDateCls, setfromInputDateCls] = useState("");
+  const [fromCalendarOpenCls, setfromCalendarOpenCls] = useState(false);
+  // state for PurTo DatePicker
+  const [selectedToDateCls, setselectedToDateCls] = useState(null);
+  const [toInputDateCls, settoInputDateCls] = useState("");
+  const [toCalendarOpenCls, settoCalendarOpenCls] = useState(false);
+
 
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
@@ -161,17 +193,19 @@ export default function DailyJobReport() {
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-  const toggleToCalendar = () => {
-    settoCalendarOpen((prevOpen) => !prevOpen);
-  };
+ 
+ 
   const formatDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
+  };
+
+      // FUNCTION FOR FIRST FROM DATE
+
+   const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
   };
   const handlefromDateChange = (date) => {
     setSelectedfromDate(date);
@@ -238,7 +272,9 @@ export default function DailyJobReport() {
     }
   };
 
-  const handleToKeyPress = (e) => {
+// FUNCTION FOR FIRST TO DATE
+
+   const handleToKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const toDateElement = document.getElementById("todatevalidation");
@@ -301,6 +337,9 @@ export default function DailyJobReport() {
       }
     }
   };
+   const toggleToCalendar = () => {
+    settoCalendarOpen((prevOpen) => !prevOpen);
+  };
 
   const handleToDateChange = (date) => {
     setSelectedToDate(date);
@@ -311,6 +350,158 @@ export default function DailyJobReport() {
     settoInputDate(e.target.value);
   };
 
+
+  //  FUNCTIONS FOR FROM PUR DATE   
+ const toggleFromCalendarPur = () => {
+    setfromCalendarOpenPur((prevOpen) => !prevOpen);
+  };
+  const handlefromDateChangePur = (date) => {
+    setselectedfromDatePur(date);
+    setfromInputDatePur(date ? formatDate(date) : "");
+    setfromCalendarOpenPur(false);
+  };
+     const handlefromInputChangePur = (e) => {
+  let value = e.target.value;
+  
+  // Remove all non-digit characters
+  let cleaned = value.replace(/\D/g, '');
+  
+  // Limit to 8 digits (DDMMYYYY)
+  cleaned = cleaned.substring(0, 8);
+  
+  // Format as user types
+  if (cleaned.length > 0) {
+    if (cleaned.length <= 2) {
+      // Only day portion
+      value = cleaned;
+    } else if (cleaned.length <= 4) {
+      // Day and month
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+    } else {
+      // Full date
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
+    }
+  }
+  
+  setfromInputDatePur(value);
+  
+  
+};
+
+ //  FUNCTIONS FOR TO PUR DATE   
+       const toggleToCalendar2 = () => {
+    settoCalendarOpenPur((prevOpen) => !prevOpen);
+  };
+  const handleToDateChange2 = (date) => {
+    setselectedToDatePur(date);
+    settoInputDatePur(date ? formatDate(date) : "");
+    settoCalendarOpenPur(false);
+  };
+  const handleToInputChange2 = (e) => {
+  let value = e.target.value;
+  
+  // Remove all non-digit characters
+  let cleaned = value.replace(/\D/g, '');
+  
+  // Limit to 8 digits (DDMMYYYY)
+  cleaned = cleaned.substring(0, 8);
+  
+  // Format as user types
+  if (cleaned.length > 0) {
+    if (cleaned.length <= 2) {
+      // Only day portion
+      value = cleaned;
+    } else if (cleaned.length <= 4) {
+      // Day and month
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+    } else {
+      // Full date
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
+    }
+  }
+  
+  settoInputDatePur(value);
+  
+  
+};
+ 
+
+  //  FUNCTIONS FOR FROM CLS DATE   
+ const toggleFromCalendarCls = () => {
+    setfromCalendarOpenCls((prevOpen) => !prevOpen);
+  };
+  const handlefromDateChangeCls = (date) => {
+    setselectedfromDateCls(date);
+    setfromInputDateCls(date ? formatDate(date) : "");
+    setfromCalendarOpenPur(false);
+  };
+     const handlefromInputChangeCls = (e) => {
+  let value = e.target.value;
+  
+  // Remove all non-digit characters
+  let cleaned = value.replace(/\D/g, '');
+  
+  // Limit to 8 digits (DDMMYYYY)
+  cleaned = cleaned.substring(0, 8);
+  
+  // Format as user types
+  if (cleaned.length > 0) {
+    if (cleaned.length <= 2) {
+      // Only day portion
+      value = cleaned;
+    } else if (cleaned.length <= 4) {
+      // Day and month
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+    } else {
+      // Full date
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
+    }
+  }
+  
+  setfromInputDateCls(value);
+  
+  
+};
+
+ //  FUNCTIONS FOR TO CLS DATE   
+       const toggleToCalendarCls = () => {
+    settoCalendarOpenCls((prevOpen) => !prevOpen);
+  };
+  const handleToDateChangecls = (date) => {
+    setselectedToDateCls(date);
+    settoInputDateCls(date ? formatDate(date) : "");
+    settoCalendarOpenCls(false);
+  };
+  const handleToInputChangecls = (e) => {
+  let value = e.target.value;
+  
+  // Remove all non-digit characters
+  let cleaned = value.replace(/\D/g, '');
+  
+  // Limit to 8 digits (DDMMYYYY)
+  cleaned = cleaned.substring(0, 8);
+  
+  // Format as user types
+  if (cleaned.length > 0) {
+    if (cleaned.length <= 2) {
+      // Only day portion
+      value = cleaned;
+    } else if (cleaned.length <= 4) {
+      // Day and month
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+    } else {
+      // Full date
+      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
+    }
+  }
+  
+  settoInputDateCls(value);
+  
+  
+};
+
+//  FUCTINS FOR HANDLE KEY PRESS
+ 
   const handlecompanyKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = CompanyRef.current.state.selectValue;
@@ -554,6 +745,16 @@ export default function DailyJobReport() {
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
+          // FROM & TO PUR DATE 
+      FIntPur: fromInputDatePur,
+      FFnlPur: toInputDatePur,
+          // FROM & TO Cls DATE
+      FIntCls: fromInputDateCls,
+      FFnlCls: toInputDateCls, 
+          // OTHER POST VARIABLES
+      FWrnSts: transectionType2,
+      FJobNat: transectionType3,
+      FCptCod: Complainselectdata,
       FTchCod: Technicianselectdatavalue,
       FJobTyp: Typeselectdatavalue,
       FJobSts: transectionType,
@@ -813,6 +1014,37 @@ export default function DailyJobReport() {
     label: `${item.tctycod}-${item.tctydsc.trim()}`,
   }));
 
+   /////////////////////////////////////////////////////////
+
+  /////////////// api for City code ////////////////////
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveComplaint.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetComplain(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetComplain([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const ComplaindataOption = GetComplain.map((item) => ({
+    value: item.tcptcod,
+    label: `${item.tcptcod}-${item.tcptdsc.trim()}`,
+  }));
+
   /////////////////////////////////////////////////////////
 
   const DropdownOption = (props) => {
@@ -1006,6 +1238,10 @@ export default function DailyJobReport() {
   const handleTransactionTypeChange2 = (event) => {
     const selectedTransactionType2 = event.target.value;
     settransectionType2(selectedTransactionType2);
+  };
+  const handleTransactionTypeChange3 = (event) => {
+    const selectedTransactionType3 = event.target.value;
+    settransectionType3(selectedTransactionType3);
   };
 
   const exportPDFHandler = () => {
@@ -1367,6 +1603,10 @@ export default function DailyJobReport() {
           ? Companyselectdatavalue.label
           : "ALL";
 
+           let complainvalue = Complainselectdatavalue.label
+          ? Complainselectdatavalue.label
+          : "ALL";
+
         let statuscode =
           transectionType === "N"
             ? "UNASSIGN"
@@ -1392,6 +1632,24 @@ export default function DailyJobReport() {
             ? "CANCLE"
             : "ALL";
 
+              let Warrantydata =
+          transectionType === "Y"
+            ? "YES"
+            : transectionType === "N"
+            ? "NO"
+            : "ALL";
+
+             let Naturedata =
+          transectionType === "H"
+            ? "FIELD"
+            : transectionType === "WORKSHOP"
+            ? "W"
+            : transectionType === "GODOWN"
+            ? "G"
+            : transectionType === "SHOW ROOM"
+            ? "S"
+            : "ALL";
+
         // Set font style, size, and family
         doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
         doc.setFontSize(10); // Font size
@@ -1413,46 +1671,66 @@ export default function DailyJobReport() {
 
         ///////////////////////////////////////////////////////////
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TECNICIAN :`, labelsX, labelsY + 12.5); // Draw bold label
+        doc.text(`TECNICIAN :`, labelsX, labelsY + 12.8); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${technicianvalue}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`REFERENCE :`, labelsX + 100, labelsY + 12.5); // Draw bold label
+        doc.text(`REFERENCE :`, labelsX + 100, labelsY + 12.8); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${referencecode}`, labelsX + 125, labelsY + 12.5); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX + 200, labelsY + 12.5); // Draw bold label
+        doc.text(`STATUS :`, labelsX + 200, labelsY + 12.8); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${statuscode}`, labelsX + 220, labelsY + 12.5); // Draw the value next to the label
 
         ///////////////////////////////////////////////////////////////////
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CITY :`, labelsX, labelsY + 16.5); // Draw bold label
+        doc.text(`CITY :`, labelsX, labelsY + 16.8); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${Citycode}`, labelsX + 25, labelsY + 16.5); // Draw the value next to the label
+        doc.text(`${Citycode}`, labelsX + 25, labelsY + 16.8); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`AREA :`, labelsX + 100, labelsY + 16.5); // Draw bold label
+        doc.text(`AREA :`, labelsX + 100, labelsY + 16.8); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${Areacode}`, labelsX + 125, labelsY + 16.5); // Draw the value next to the label
+        doc.text(`${Areacode}`, labelsX + 125, labelsY + 16.8); // Draw the value next to the label
 
+
+
+          doc.setFont(getfontstyle, "bold"); // Set font to bold
+          doc.text(`WARRANTY :`, labelsX + 200, labelsY + 16.8); // Draw bold label
+          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+          doc.text(`${Warrantydata}`, labelsX + 225, labelsY + 16.8); // Draw the value next to the label
+       
+
+
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`COMPLAIN :`, labelsX, labelsY + 21.5); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${complainvalue}`, labelsX + 25, labelsY + 21.5); // Draw the value next to the label
+
+       doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`NATURE :`, labelsX + 100, labelsY + 21.5); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${Naturedata}`, labelsX + 125, labelsY + 21.5); // Draw the value next to the label
+
+     
         if (searchQuery) {
           doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 200, labelsY + 16.5); // Draw bold label
+          doc.text(`SEARCH :`, labelsX + 200, labelsY + 21.5); // Draw bold label
           doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search1}`, labelsX + 225, labelsY + 16.5); // Draw the value next to the label
+          doc.text(`${search1}`, labelsX + 220, labelsY + 21.5); // Draw the value next to the label
         }
 
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
-        startY += 20; // Adjust vertical position for the labels
+        startY += 24; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 43);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1600,6 +1878,10 @@ export default function DailyJobReport() {
       ? Companyselectdatavalue.label
       : "ALL";
 
+      let complainvalue = Complainselectdatavalue.label
+      ? Complainselectdatavalue.label
+      : "ALL";
+
     let statuscode =
       transectionType === "N"
         ? "UNASSIGN"
@@ -1624,6 +1906,24 @@ export default function DailyJobReport() {
         : transectionType === "C"
         ? "CANCLE"
         : "ALL";
+
+        let Warrantydata =
+          transectionType === "Y"
+            ? "YES"
+            : transectionType === "N"
+            ? "NO"
+            : "ALL";
+
+             let Naturedata =
+          transectionType === "H"
+            ? "FIELD"
+            : transectionType === "WORKSHOP"
+            ? "W"
+            : transectionType === "GODOWN"
+            ? "G"
+            : transectionType === "SHOW ROOM"
+            ? "S"
+            : "ALL";
 
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
@@ -1655,8 +1955,7 @@ export default function DailyJobReport() {
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? [
+              [
             "CITY :",
             Citycode,
             "",
@@ -1665,10 +1964,27 @@ export default function DailyJobReport() {
             Areacode,
             "",
             "",
+            "WARRANTY :",
+            Warrantydata,
+          ]
+       
+    );
+
+     const typeAndStoreRow5 = worksheet.addRow(
+      searchQuery
+        ? [
+            "COMPLAIN :",
+            complainvalue,
+            "",
+            "",
+            "NATURE :",
+            Naturedata,
+            "",
+            "",
             "SEARCH :",
             typesearch,
           ]
-        : ["CITY :", Citycode, "", "", "AREA :", Areacode]
+        : ["COMPLAIN :", complainvalue, "", "", "NATURE :", Naturedata]
     );
 
     // Apply styling for the status row
@@ -1691,6 +2007,14 @@ export default function DailyJobReport() {
     });
 
     typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 5, 9].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+      typeAndStoreRow5.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
@@ -2076,7 +2400,7 @@ export default function DailyJobReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
               <div
@@ -2183,9 +2507,319 @@ export default function DailyJobReport() {
                 </div>
               </div>
 
+   {/* CODE FOR FROM PUR DATE */}
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: isSidebarVisible ? "143px" : "243px" }}
+              >
+                <div
+                  style={{
+                    width: "70px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                        marginLeft: "2px",
+                      }}
+                    >
+                      From :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  // id="fromdatevalidation"
+                  id="purdate"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontFamily: getfontstyle,
+                      fontSize: getdatafontsize,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    id="frominputidpur"
+                    value={fromInputDatePur}
+                    ref={fromRefPur}
+                    onChange={handlefromInputChangePur}
+                    // onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedfromDatePur}
+                    onChange={handlefromDateChangePur}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={fromCalendarOpenPur}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleFromCalendarPur
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontFamily: getfontstyle,
+                            fontSize: getdatafontsize,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+
+               {/* CODE FOR FROM CLS DATE */}
+                 <div
+                className="d-flex align-items-center"
+                style={{marginLeft:"5px"}}
+              >
+                <div
+                  style={{
+                    width: "70px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                        marginLeft: "2px",
+                      }}
+                    >
+                      From :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  // id="fromdatevalidation"
+                  id="clsdate"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontFamily: getfontstyle,
+                      fontSize: getdatafontsize,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    id="frominputidcls"
+                    value={fromInputDateCls}
+                    ref={fromRefCls}
+                    onChange={handlefromInputChangeCls}
+                    // onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedfromDateCls}
+                    onChange={handlefromDateChangeCls}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={fromCalendarOpenCls}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleFromCalendarCls
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontFamily: getfontstyle,
+                            fontSize: getdatafontsize,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+
+              {/* DROPDOWN CODE BLEW */}
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Warranty :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={WarrantyRef}
+                    // onKeyDown={(e) => handleKeyPress(e, SearchRef)}
+                    id="warranty"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange2}
+                    style={{
+                      width: "230px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
+                    }}
+                  >
+                    <option value="Y">YES</option>
+                    <option value="N">NO</option>
+                    
+                  </select>
+
+                  {transectionType2 !== "Y" && (
+                    <span
+                      onClick={() => settransectionType2("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* SECOND DATE ROW */}
+            </div>
+          </div>
+
+            <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+             
+             {/* CODE FOR FIRST TO DATE  */}
+
+              <div
+                className="d-flex align-items-center"
+                // style={{ marginLeft: isSidebarVisible ? "143px" : "243px" }}
+                style={{marginLeft:'38px'}}
               >
                 <div
                   style={{
@@ -2283,6 +2917,294 @@ export default function DailyJobReport() {
                     }
                     disabled={selectedRadio !== "custom"}
                   />
+                </div>
+              </div>
+
+               {/* CODE FOR TO INPUT PUR DATE */}
+                 <div
+                className="d-flex align-items-center"
+                // style={{ marginLeft: isSidebarVisible ? "143px" : "243px" }}
+                // style={{marginLeft:'5px'}}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="toDatePicker">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      To :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="TOdatepur"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    ref={toRefPur}
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontFamily: getfontstyle,
+                      fontSize: getdatafontsize,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    value={toInputDatePur}
+                    onChange={handleToInputChange2}
+                    // onKeyDown={(e) => handleToKeyPress(e, CompanyRef)}
+                    id="toDatePicker"
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="To Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedToDatePur}
+                    onChange={handleToDateChange2}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={toCalendarOpenPur}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleToCalendar2
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontFamily: getfontstyle,
+                            fontSize: getdatafontsize,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+  {/* CODE FOR TO INPUT CLS DATE */}
+ <div
+                className="d-flex align-items-center"
+                // style={{ marginLeft: isSidebarVisible ? "143px" : "243px" }}
+                style={{marginLeft:'5px'}}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="toDatePicker">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      To :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="TOdatecls"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    ref={toRefCls}
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontFamily: getfontstyle,
+                      fontSize: getdatafontsize,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    value={toInputDateCls}
+                    onChange={handleToInputChangecls}
+                    // onKeyDown={(e) => handleToKeyPress(e, CompanyRef)}
+                    id="toDatePicker"
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="To Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedToDateCls}
+                    onChange={handleToDateChangecls}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={toCalendarOpenCls}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleToCalendarCls
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontFamily: getfontstyle,
+                            fontSize: getdatafontsize,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+
+                {/* DROPDOWN CODE BLEW */}
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    width: "70px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Nature :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={NatureRef}
+                    // onKeyDown={(e) => handleKeyPress(e, SearchRef)}
+                    id="warranty"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange3}
+                    style={{
+                      width: "230px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
+                    }}
+                  >
+                    <option value="H">FIELD</option>
+                    <option value="W">WORKSHOP</option>
+                     <option value="S">SHOW ROOM</option>
+                    <option value="G">GODOWN</option>
+                    
+                  </select>
+
+                  {transectionType3 !== "H" && (
+                    <span
+                      onClick={() => settransectionType3("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -2641,7 +3563,7 @@ export default function DailyJobReport() {
                 <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={ReferenceRef}
+                    ref={refoptions}
                     options={Technicianoption}
                     onKeyDown={(e) => handlerefernceKeypress(e, CityRef)}
                     id="selectedsale"
@@ -2992,6 +3914,96 @@ export default function DailyJobReport() {
             </div>
           </div>
 
+           {/* LAST ROW */}
+
+           <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div className="d-flex align-items-center">
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "90px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Complain :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={Complainref}
+                    options={ComplaindataOption}
+                    // onKeyDown={(e) => handlecityKeypress(e, AreaRef)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCompanyselectdata(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setCompanyselectdata("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Complainselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+             
+              
+            </div>
+          </div>
+
           {/* ///////// */}
           <div>
             <div
@@ -3076,7 +4088,7 @@ export default function DailyJobReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "40vh",
+                maxHeight: "34vh",
                 // width: "100%",
                 wordBreak: "break-word",
               }}

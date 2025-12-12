@@ -259,7 +259,7 @@ function App() {
                 <Route exact path="/CustomerLedger" element={<CustomerLedger1 />} />
                 <Route exact path="/BankRegister" element={<BankRegisterLedger1 />} />
                 <Route exact path="/SupplieProgress" element={<SupplierprogressReport />} />
-                <Route exact path="/CustomerProgress" element={<CustomerProgressLedger />} />
+                <Route exact path="/AmericanCustomerProgress" element={<CustomerProgressLedger />} />
                 <Route exact path="/MobileLedger" element={<MobileLedger />} />
                 <Route exact path="/ItemLedger" element={<ItemLedgerReport />} />
                 <Route exact path="/ItemAgging" element={<ItemAggingReport />} />

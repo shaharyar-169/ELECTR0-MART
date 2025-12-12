@@ -15,6 +15,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
+// import { components } from "react-select";
+// import { ToastContainer, toast } from "react-toastify";
 
 export default function CompanyList() {
   const navigate = useNavigate();
@@ -650,7 +652,6 @@ export default function CompanyList() {
   }));
 };
 
-
   const resetSorting = () => {
     setColumnSortOrders({
       Code: null,
@@ -659,7 +660,14 @@ export default function CompanyList() {
     });
   };
 
-
+ const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
   const renderTableData = () => {
     
 
@@ -744,14 +752,7 @@ export default function CompanyList() {
     );
   };
 
-  const getIconStyle = (colKey) => {
-    const order = columnSortOrders[colKey];
-    return {
-      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-      color: order === "ASC" || order === "DSC" ? "red" : "white",
-      transition: "transform 0.3s ease, color 0.3s ease",
-    };
-  };
+ 
 
 
 
@@ -1291,4 +1292,6 @@ export default function CompanyList() {
     </>
   );
 }
+
+
 
