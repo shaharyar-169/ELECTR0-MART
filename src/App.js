@@ -112,6 +112,7 @@ import InvoiceLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/
 import MobileLedgerJob from "./Component/Reports/Daily_Jobs_Reports/ledgers/MobileLedgerJob.js";
 import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemAggingReport.js";
 import SupplierLedgerpos from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedgerpos.js";
+import ProductionOrderLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/ProductionorderLedger.js";
 
 //////////////////////////// Daily reports //////////////////////////////
 import DailyCashBook from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBook.js";
@@ -266,6 +267,7 @@ function App() {
                 <Route exact path="/InvoiceLedger" element={<InvoiceLedgerReport />} />
                 <Route exact path="/MobileLedgerJob" element={<MobileLedgerJob />} />
                 <Route exact path="/SupplierLedgerPos" element={<SupplierLedgerpos />} />
+                <Route exact path="/ProductionOrderLedger" element={<ProductionOrderLedger />} />
 
 
                 {/* Rountes for Job reports */}

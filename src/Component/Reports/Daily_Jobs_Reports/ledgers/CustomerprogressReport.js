@@ -29,7 +29,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { color } from "@mui/system";
 
 export default function CustomerProgressLedger() {
-  const saleSelectRef = useRef(null);
+   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
@@ -340,19 +340,19 @@ export default function CustomerProgressLedger() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/CustomerProgress.php";
+    const apiUrl = apiLinks + "/AmericanCustomerProgress.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getYearDescription,
 
       cusDate: toInputDate,
       cusYear: transectionType,
       cusId: saleType,
-    //   code: "AMRELEC",
-    //   FLocCod: "001",
-    //   FYerDsc: "2019-2025",
+      code: "AMRELEC",
+      FLocCod: "001",
+      FYerDsc: "2019-2025",
     }).toString();
 
     axios
@@ -426,10 +426,10 @@ export default function CustomerProgressLedger() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomer.php";
     const formData = new URLSearchParams({
-      FLocCod: getLocationNumber,
-      code: organisation.code,
-    //   FLocCod: "001",
-    //   code: "AMRELEC",
+      // FLocCod: getLocationNumber,
+      // code: organisation.code,
+      FLocCod: "001",
+      code: "AMRELEC",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -702,27 +702,8 @@ export default function CustomerProgressLedger() {
     ]);
 
     // Add summary row to the table
+    rows.push([]);
 
-    // Function to ensure fixed width for each value
-    const formatColumn = (value, width) => {
-      return value.toString().padEnd(width, " "); // Adjusting width using spaces
-    };
-
-    // Formatting both values to take 25 characters each
-    const formattedTotalde = formatColumn(amt2, 12);
-    const formattedClosingBalance = formatColumn(amt3, 25);
-    const formattedTotalde1= formatColumn(amt4, 10);
-    const formattedClosingBalance1 = formatColumn(amt5, 15);
-
-    // Pushing the row with fixed width concatenated values
-    rows.push([
-      String(formatValue(amt1) ),
-      `${formatValue(formattedTotalde) } | ${formatValue(formattedClosingBalance) }`, // Ensuring equal width for both
-      `${formatValue(formattedTotalde1) } | ${formatValue(formattedClosingBalance1)}`, // Ensuring equal width for both
-      String(formatValue(amt5)),
-      String(formatValue(amt7)),
-   
-    ]);
 
     // Define table column headers and individual column widths
     const headers = ["Sr#", "Month", "Debit", "Credit", "Balance"];
@@ -771,6 +752,157 @@ export default function CustomerProgressLedger() {
       doc.setFontSize(12);
     };
 
+    // ================= BALANCE AGING ROW (DO NOT TOUCH OTHER CODE) =================
+
+// const drawBalanceAgingRow = (startX, startY) => {
+//   const rowHeight = 12;
+//   const halfHeight = rowHeight / 2;
+
+//   const colWidth = 25;
+//   const totalWidth = colWidth * 6;
+
+//   const labels = [
+//     "0 - 30",
+//     "31 - 60",
+//     "61 - 90",
+//     "91 - 120",
+//     "121 - 150",
+//     "150 +",
+//   ];
+
+//   const values = [
+//     formatValue("1323720"),
+//     "",
+//     formatValue("1050000"),
+//     "",
+//     formatValue("275150"),
+//     formatValue("1537178"),
+//   ];
+
+//   let currentX = startX;
+
+//   // Background
+//   doc.setFillColor(220, 220, 220);
+//   doc.rect(startX, startY, totalWidth, rowHeight, "F");
+
+//   doc.setFont(getfontstyle, "bold");
+//   doc.setFontSize(11);
+//   doc.setTextColor(0);
+
+//   // ===== 6 AGING COLUMNS ONLY =====
+//   for (let i = 0; i < 6; i++) {
+//     // Outer border
+//     doc.setLineWidth(0.1);
+//     doc.rect(currentX, startY, colWidth, rowHeight);
+
+//     // Horizontal split
+//     doc.line(
+//       currentX,
+//       startY + halfHeight,
+//       currentX + colWidth,
+//       startY + halfHeight
+//     );
+
+//     // Top label (bold)
+//     doc.setFontSize(10);
+//     doc.text(
+//       labels[i],
+//       currentX + colWidth / 2,
+//       startY + halfHeight / 1.5,
+//       { align: "center" }
+//     );
+
+//     // Bottom value (normal)
+//     doc.setFontSize(11);
+//     doc.setFont(getfontstyle, "normal");
+//     doc.text(
+//       values[i],
+//       currentX + colWidth / 2,
+//       startY + halfHeight + halfHeight / 1.4,
+//       { align: "center" }
+//     );
+
+//     currentX += colWidth;
+//   }
+// };
+
+
+const drawBalanceAgingRow = (startX, startY) => {
+  const rowHeight = 12;
+  const halfHeight = rowHeight / 2;
+
+  // Calculate total table width
+  const tableWidth = columnWidths.reduce((acc, w) => acc + w, 0);
+
+  // Divide table width into 6 equal parts for the aging row
+  const colWidth = tableWidth / 6;
+
+  const labels = [
+    "0 - 30",
+    "31 - 60",
+    "61 - 90",
+    "91 - 120",
+    "121 - 150",
+    "150 +",
+  ];
+
+  const values = [
+    formatValue("1323720"),
+    "",
+    formatValue("1050000"),
+    "",
+    formatValue("275150"),
+    formatValue("1537178"),
+  ];
+
+  let currentX = startX;
+
+  // Background
+  doc.setFillColor(220, 220, 220);
+  doc.rect(startX, startY, tableWidth, rowHeight, "F");
+
+  doc.setFont(getfontstyle, "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(0);
+
+  for (let i = 0; i < 6; i++) {
+    // Outer border
+    doc.setLineWidth(0.1);
+    doc.rect(currentX, startY, colWidth, rowHeight);
+
+    // Horizontal split
+    doc.line(
+      currentX,
+      startY + halfHeight,
+      currentX + colWidth,
+      startY + halfHeight
+    );
+
+    // Top label
+    doc.setFont(getfontstyle, "bold");
+    doc.setFontSize(10);
+    doc.text(labels[i], currentX + colWidth / 2, startY + halfHeight / 1.5, {
+      align: "center",
+    });
+
+    // Bottom value
+    doc.setFontSize(11);
+    doc.setFont(getfontstyle, "normal");
+    doc.text(
+      values[i],
+      currentX + colWidth / 2,
+      startY + halfHeight + halfHeight / 1.4,
+      { align: "center" }
+    );
+
+    currentX += colWidth;
+  }
+};
+
+
+// ================= END BALANCE AGING ROW =================
+
+
     const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
@@ -811,35 +943,7 @@ export default function CustomerProgressLedger() {
 
         doc.setDrawColor(0);
 
-        // For total row - special border handling
-        if (isTotalRow) {
-          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-          const rowBottomY = rowTopY + rowHeight;
-
-          // Draw double top border
-          doc.setLineWidth(0.3);
-          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
-
-          // Draw double bottom border
-          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-          doc.line(
-            startX,
-            rowBottomY - 0.5,
-            startX + tableWidth,
-            rowBottomY - 0.5
-          );
-
-          // Draw single vertical borders
-          doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY); // Left border
-          doc.line(
-            startX + tableWidth,
-            rowTopY,
-            startX + tableWidth,
-            rowBottomY
-          ); // Right border
-        } else {
+      
           // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
@@ -848,7 +952,7 @@ export default function CustomerProgressLedger() {
             tableWidth,
             rowHeight
           );
-        }
+        
 
         row.forEach((cell, cellIndex) => {
           const cellY = isTotalRow
@@ -891,7 +995,7 @@ export default function CustomerProgressLedger() {
               });
             }
           }
-
+  
           // Draw column borders
           if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
@@ -907,9 +1011,20 @@ export default function CustomerProgressLedger() {
 
         startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
-        if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
-        }
+       // ===== DRAW BALANCE AGING IN PLACE OF TOTAL ROW =====
+if (isTotalRow) {
+  const agingTableWidth = 40 + (25 * 6);
+  const agingStartX =
+    (doc.internal.pageSize.width - agingTableWidth) / 2;
+
+  const agingStartY =
+    startY + (i - startIndex + 2) * rowHeight;
+
+  drawBalanceAgingRow(agingStartX +27.5, agingStartY);
+
+  continue; // 🚨 skip normal total row rendering
+}
+
       }
 
       // Footer section
@@ -1089,6 +1204,10 @@ export default function CustomerProgressLedger() {
     // Save the PDF files
     doc.save(`CustomerProgressReport As On ${currentdate}.pdf`);
   };
+
+
+ 
+
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();

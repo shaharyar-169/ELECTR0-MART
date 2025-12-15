@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-
 import axios from "axios";
-
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
 import {
   getUserData,
@@ -23,32 +21,33 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-import { useHotkeys } from "react-hotkeys-hook";
+// import { fetchGetUser } from "../../Redux/action";
 import { fetchGetUser } from "../../../Redux/action";
-import "./misc.css";
+import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Balance } from "@mui/icons-material";
 
-export default function ReceivableReport() {
+export default function ProductionOrderLedger() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
-  const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
+
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
-  const input3Ref = useRef(null);
-  const input4Ref = useRef(null);
+  const searchsubmit = useRef(null);
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
+  const hasInitialized = useRef(false);
 
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
+
+  const [tableData, setTableData] = useState([]);
+  console.log("general ledger tableData", tableData);
 
   const [totalQnty, setTotalQnty] = useState(0);
   const [totalOpening, setTotalOpening] = useState(0);
@@ -56,11 +55,9 @@ export default function ReceivableReport() {
   const [totalCredit, setTotalCredit] = useState(0);
   const [closingBalance, setClosingBalance] = useState(0);
 
-  const [Companyselectdata, setCompanyselectdata] = useState("");
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-  const [GetCompany, setGetCompany] = useState([]);
 
-  console.log('dropdowndata', saleType)
+  console.log("Companyselectdatavalue", Companyselectdatavalue.label);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -71,6 +68,9 @@ export default function ReceivableReport() {
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -80,12 +80,17 @@ export default function ReceivableReport() {
     apiLinks,
     getLocationNumber,
     getyeardescription,
-    getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
     getdatafontsize,
+    getnavbarbackgroundcolor,
   } = useTheme();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--background-color", getcolor);
+    document.documentElement.style.setProperty("--font-color", fontcolor);
+  }, [getcolor, fontcolor]);
 
   const comapnyname = organisation.description;
 
@@ -265,21 +270,23 @@ export default function ReceivableReport() {
   const handleToInputChange = (e) => {
     settoInputDate(e.target.value);
   };
+
   const handleSaleKeypress = (event, inputId) => {
     if (event.key === "Enter") {
-      const selectedOption = input1Ref.current.state.selectValue;
+      const selectedOption = saleSelectRef.current.state.selectValue;
       if (selectedOption && selectedOption.value) {
         setSaleType(selectedOption.value);
       }
       const nextInput = document.getElementById(inputId);
       if (nextInput) {
         nextInput.focus();
-        nextInput.select();
+        // nextInput.select();
       } else {
         document.getElementById("submitButton").click();
       }
     }
   };
+
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -299,134 +306,43 @@ export default function ReceivableReport() {
     let errorType = "";
 
     switch (true) {
-      case !fromInputDate:
-        errorType = "fromDate";
+      case !saleType:
+        errorType = "saleType";
         break;
-      case !toInputDate:
-        errorType = "toDate";
-        break;
+
       default:
         hasError = false;
         break;
     }
 
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
-      errorType = "toDateInvalid";
-    } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
-      const formattedToInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-      const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-        errorType = "toDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-        errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
-      }
-    }
-
     switch (errorType) {
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
-      case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
-        return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
+      case "saleType":
+        toast.error("Please select a Account Code");
         return;
       default:
         break;
     }
 
-    const data = {
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
-      FAccCod: saleType,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-    };
-    console.log(data);
-    document.getElementById(
-      "fromdatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-    document.getElementById(
-      "todatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-
-    const apiUrl = apiLinks + "/ReceivableReport.php";
+    const apiUrl = apiLinks + "/ProductionOrderLedger.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
-      // code: "NASIRTRD",
-      FAccCod : saleType,
-
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      FPrdOrd: saleType,
       code: organisation.code,
-      FIntDat: fromInputDate,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
 
-      FFnlDat: toInputDate,
-      FRepTyp: transectionType,
-      FSchTxt: searchQuery,
+    //   code: "TAHREEMTRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2025-2025",
     }).toString();
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
-        console.log("Response:", response.data);
-        setTotalOpening(response.data["Total Opening"]);
-        setTotalDebit(response.data["Total Debit"]);
-        setTotalCredit(response.data["Total Credit"]);
+
+        setTotalDebit(response.data["Total Production"]);
+        setTotalCredit(response.data["Total Receive"]);
         setClosingBalance(response.data["Total Balance"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
@@ -434,7 +350,7 @@ export default function ReceivableReport() {
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data
+            response.data.Detail
           );
           setTableData([]);
         }
@@ -448,11 +364,14 @@ export default function ReceivableReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-      if (fromRef && fromRef.current) {
+    if (
+      !hasComponentMountedPreviously ||
+      (saleSelectRef && saleSelectRef.current)
+    ) {
+      if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
-          fromRef.current.focus();
-          fromRef.current.select();
+          saleSelectRef.current.focus();
+          // saleSelectRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -473,55 +392,61 @@ export default function ReceivableReport() {
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
+  const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
   useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveSupplier.php";
+    if (supplierList.length > 0) {
+      setIsOptionsLoaded(true);
+    }
+  }, [supplierList]);
+
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetProductionOrderList.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
+    //   FLocCod: getLocationNumber,
+    //   code: organisation.code,
+
+      FLocCod: "001",
+      code: "TAHREEMTRD",
+      FYerDsc: "2025-2025",
     }).toString();
     axios
       .post(apiUrl, formData)
       .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetCompany(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetCompany([]);
-        }
+        setSupplierList(response.data.List);
       })
       .catch((error) => {
-        console.error("Error:", error);
+        console.error("Error fetching data:", error);
       });
   }, []);
-  const options = GetCompany.map((item) => ({
-    value: item.tacccod,
-    label: `${item.tacccod}-${item.taccdsc.trim()}`,
+
+  const options = supplierList.map((item) => ({
+    value: item.ttrnnum,
+    label: `${item.ttrnnum}-${item.taccdsc}`,
   }));
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
+  useEffect(() => {
+    if (
+      isOptionsLoaded &&
+      options.length > 0 &&
+      !saleType &&
+      !hasInitialized.current
+    ) {
+      const firstOption = options[0];
+      setSaleType(firstOption.value);
 
-  const handlecompanyKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = input1Ref.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCompanyselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
+      const fullLabel = firstOption.label;
+      const description = fullLabel.split("-").pop()?.trim();
 
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
+      setCompanyselectdatavalue({
+        value: firstOption.value,
+        label: description,
+        fullLabel: fullLabel,
+      });
+
+      // Mark as initialized
+      hasInitialized.current = true;
     }
-  };
+  }, [isOptionsLoaded, options, saleType]);
 
   const DropdownOption = (props) => {
     return (
@@ -547,7 +472,7 @@ export default function ReceivableReport() {
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 350,
+      width: 360,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -707,43 +632,57 @@ export default function ReceivableReport() {
     }),
   });
 
+  const handleTransactionTypeChange = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType(selectedTransactionType);
+  };
+
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
   const exportPDFHandler = () => {
-    const globalfontsize = 10;
+    const globalfontsize = 12;
     console.log("gobal font data", globalfontsize);
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.code,
-      item.Description,
-      item.Opening,
-      item.Debit,
-      item.Credit,
-      item.Balance,
+      formatValue(item.Date),
+      formatValue(item["Dec#"]),
+      formatValue(item.Type),
+      formatValue(item.Remarks),
+      formatValue(item.Production),
+      formatValue(item.Issue),
+      formatValue(item.Receive),
+      formatValue(item.Balance),
     ]);
 
     // Add summary row to the table
+
     rows.push([
       "",
+      "",
+      "",
       "Total",
-      String(totalOpening),
-      String(totalDebit),
-      String(totalCredit),
-      String(closingBalance),
+      String(formatValue(totalDebit)),
+      "",
+      String(formatValue(totalCredit)),
+      String(formatValue(closingBalance)),
     ]);
 
     // Define table column headers and individual column widths
     const headers = [
-      "Code",
-      "Description",
-      "Opening",
-      "Debit",
-      "Credit",
+      "Date",
+      "Dec#",
+      "Type",
+      "Remarks",
+      "Produciton",
+      "Issue",
+      "Receive",
       "Balance",
     ];
-    const columnWidths = [21, 80, 25, 25, 25, 25];
+    const columnWidths = [21, 14, 12, 100, 22, 22, 22, 22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -760,7 +699,7 @@ export default function ReceivableReport() {
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
       doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
+      doc.setFontSize(12); // Set font size for headers
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -784,7 +723,7 @@ export default function ReceivableReport() {
 
       // Reset font style and size after adding headers
       doc.setFont(getfontstyle);
-      doc.setFontSize(10);
+      doc.setFontSize(12);
     };
 
     const addTableRows = (startX, startY, startIndex, endIndex) => {
@@ -794,7 +733,7 @@ export default function ReceivableReport() {
       const normalFont = getfontstyle;
       const tableWidth = getTotalTableWidth();
 
-      doc.setFontSize(10);
+      doc.setFontSize(11);
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
@@ -881,17 +820,17 @@ export default function ReceivableReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 12) {
+          if (cellIndex === 2) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
             cellIndex === 4 ||
-            cellIndex === 5
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
             doc.text(cellValue, rightAlignX, cellY, {
@@ -961,7 +900,7 @@ export default function ReceivableReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
+    const rowsPerPage = 29; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1010,32 +949,46 @@ export default function ReceivableReport() {
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
 
-        addTitle(
-          `Receivable Report From ${fromInputDate} To ${toInputDate}`,
-          "",
-          "",
-          pageNumber,
-          startY,
-          12
-        ); // Render sale report title with decreased font size, provide the time, and page number
+        addTitle(`Production Order Ledger`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
         // Set font size and weight for the labels
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.setFont(getfontstyle, "300");
 
         let status =
-          transectionType === "R"
-            ? "RECEIVABLE"
-            : transectionType === "P"
-            ? "PAYABLE"
+          transectionType === "A"
+            ? "ALL"
+            : transectionType === "CRV"
+            ? "Cash Receive Voucher"
+            : transectionType === "CPV"
+            ? "Cash Payment Voucher"
+            : transectionType === "BRV"
+            ? "Bank Receive Voucher"
+            : transectionType === "BPV"
+            ? "Bank Payment Voucher"
+            : transectionType === "JRV"
+            ? "Journal Voucher"
+            : transectionType === "INV"
+            ? "Item Sale"
+            : transectionType === "SRN"
+            ? "Sale Return"
+            : transectionType === "BIL"
+            ? "Purchase"
+            : transectionType === "PRN"
+            ? "Purchase Return"
+            : transectionType === "ISS"
+            ? "Issue"
+            : transectionType === "REC"
+            ? "Received"
+            : transectionType === "SLY"
+            ? "Salary"
             : "ALL";
-        let search = searchQuery ? searchQuery : "";
 
-        let accoount = Companyselectdatavalue.label
+        let search = Companyselectdatavalue.label
           ? Companyselectdatavalue.label
           : "ALL";
 
@@ -1044,29 +997,22 @@ export default function ReceivableReport() {
         doc.setFontSize(10); // Font size
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`A/C :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.text(`ACCOUNT :`, labelsX, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${accoount}`, labelsX + 10, labelsY + 8.5); // Draw the value next to the label
+        doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${status}`, labelsX + 140, labelsY + 8.5); // Draw the value next to the label
-
-        if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 120, labelsY + 12.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 140, labelsY + 12.5); // Draw the value next to the label
-        }
+        // doc.setFont(getfontstyle, 'bold'); // Set font to bold
+        // doc.text(`TYPE :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+        // doc.setFont(getfontstyle, 'normal'); // Reset font to normal
+        // doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
 
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(12);
+        doc.setFontSize(10);
 
-        startY += searchQuery ? 14 : 10; // Adjust vertical position for the labels
+        startY += 10; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, searchQuery ? 33 : 29);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1107,17 +1053,22 @@ export default function ReceivableReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`ReceivableReport As On ${date}.pdf`);
+    doc.save(`ProductionOrderLeder As On ${date}.pdf`);
   };
 
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
+  ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 8; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
+      "left",
+      "center",
       "left",
       "right",
       "right",
@@ -1165,9 +1116,7 @@ export default function ReceivableReport() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow([
-      `Receiable Report From ${fromInputDate} To ${toInputDate}`,
-    ]);
+    const storeListRow = worksheet.addRow([`Production Order Ledger`]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -1182,55 +1131,35 @@ export default function ReceivableReport() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let typestatus = "";
-
-    if (transectionType === "R") {
-      typestatus = "RECEIABLE";
-    } else if (transectionType === "P") {
-      typestatus = "PAYABLE";
-    } else {
-      typestatus = "ALL"; // Default value
-    }
+   
+    let Accountselect = Companyselectdatavalue.label
+      ? Companyselectdatavalue.label
+      : "ALL";
 
     let typesearch = searchQuery || "";
 
-    let account = Companyselectdatavalue.label
-     ? Companyselectdatavalue.label :
-     "ALL";
+    // Apply styling for the status row
+    const typeAndStoreRow2 = worksheet.addRow([
+      "ACCOUNT :",
+      Accountselect,
+      "",
+      "",
+    ]);
 
     // Apply styling for the status row
-     const typeAndStoreRow2 = worksheet.addRow(
-    
-        ["A/C", account, "", "", "TYPE :", typestatus]
-       
-    );
-
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["", "", "", "", "SEARCH :", typesearch]
-        : [""]
-    );
-
-    // Merge cells for Accountselect (columns B to D)
-    //  worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
-
-    // Apply styling for the status row
- typeAndStoreRow2.eachCell((cell, colIndex) => {
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
         bold: [1, 5].includes(colIndex),
       };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 5].includes(colIndex),
+      cell.alignment = {
+        horizontal: colIndex === 2 ? "left" : "left", // Left align the account name
+        vertical: "middle",
       };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
     });
+
+  
 
     // Header style
     const headerStyle = {
@@ -1251,11 +1180,13 @@ export default function ReceivableReport() {
 
     // Add headers
     const headers = [
-      "Code",
-      "Description",
-      "Opening",
-      "Debit",
-      "Credit",
+      "Date",
+      "Dec#",
+      "Type",
+      "Remarks",
+      "Produciton",
+      "Issue",
+      "Receive",
       "Balance",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1264,12 +1195,14 @@ export default function ReceivableReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.code,
-        item.Description,
-        item.Opening,
-        item.Debit,
-        item.Credit,
-        item.Balance,
+        formatValue(item.Date),
+        formatValue(item["Dec#"]),
+        formatValue(item.Type),
+        formatValue(item.Remarks),
+        formatValue(item.Production),
+        formatValue(item.Issue),
+        formatValue(item.Receive),
+        formatValue(item.Balance),
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1289,11 +1222,13 @@ export default function ReceivableReport() {
 
     const totalRow = worksheet.addRow([
       "",
+      "",
+      "",
       "Total",
-      String(totalOpening),
-      String(totalDebit),
-      String(totalCredit),
-      String(closingBalance),
+      String(formatValue(totalDebit)),
+      "",
+      String(formatValue(totalCredit)),
+      String(formatValue(closingBalance)),
     ]);
 
     // total row added
@@ -1308,18 +1243,13 @@ export default function ReceivableReport() {
       };
 
       // Align only the "Total" text to the right
-      if (
-        colNumber === 3 ||
-        colNumber === 4 ||
-        colNumber === 5 ||
-        colNumber === 6
-      ) {
+      if (colNumber === 5 || colNumber === 7 || colNumber === 8) {
         cell.alignment = { horizontal: "right" };
       }
     });
 
     // Set column widths
-    [10, 45, 12, 12, 12, 12, 12].forEach((width, index) => {
+    [10, 8, 7, 45, 15, 15, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1386,8 +1316,10 @@ export default function ReceivableReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ReceivableReport As on ${currentdate}.xlsx`);
+    saveAs(blob, `ProductionOrderLedger As On ${currentdate}.xlsx`);
   };
+  ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+
   const dispatch = useDispatch();
 
   const tableTopColor = "#3368B5";
@@ -1396,7 +1328,6 @@ export default function ReceivableReport() {
   const btnColor = "#3368B5";
   const textColor = "white";
 
-  const [tableData, setTableData] = useState([]);
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1418,247 +1349,60 @@ export default function ReceivableReport() {
     return filteredData;
   };
 
+  // const firstColWidth = {
+  //     width: "10%",
+  // };
+  // const secondColWidth = {
+  //     width: "7.1%",
+  // };
+  // const thirdColWidth = {
+  //     width: "4%",
+  // };
+  // const forthColWidth = {
+  //     width: "41.7%",
+  // };
+  // const fifthColWidth = {
+  //     width: "12%",
+  // };
+  // const sixthColWidth = {
+  //     width: "12%",
+  // };
+  // const seventhColWidth = {
+  //     width: "12%",
+  // };
+
   const firstColWidth = {
     width: "80px",
   };
   const secondColWidth = {
-    width: "360px",
+    width: "55px",
   };
   const thirdColWidth = {
-    width: "90px",
+    width: "40px",
   };
   const forthColWidth = {
-    width: "110px",
+    width: "360px",
   };
   const fifthColWidth = {
-    width: "110px",
+    width: "90px",
   };
   const sixthColWidth = {
-    width: "110px",
+    width: "90px",
   };
-  const sixthcol = {
-    width: "8px",
+  const seventhColWidth = {
+    width: "90px",
   };
-
-  const [columns, setColumns] = useState({
-    code: [],
-    Description: [],
-    Opening: [],
-    Debit: [],
-    Credit: [],
-    Balance: [],
-  });
-  const [columnSortOrders, setColumnSortOrders] = useState({
-    code: "",
-    Description: "",
-    Opening: "",
-    Debit: "",
-    Credit: "",
-    Balance: "",
-  });
-  // When you receive your initial table data, transform it into column-oriented format
-  useEffect(() => {
-    if (tableData.length > 0) {
-      const newColumns = {
-        code: tableData.map((row) => row.code),
-        Description: tableData.map((row) => row.Description),
-        Opening: tableData.map((row) => row.Opening),
-        Debit: tableData.map((row) => row.Debit),
-        Credit: tableData.map((row) => row.Credit),
-        Balance: tableData.map((row) => row.Balance),
-      };
-      setColumns(newColumns);
-    }
-  }, [tableData]);
-
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-    const sortedData = [...tableData].sort((a, b) => {
-      let aVal = a[col] ?? "";
-      let bVal = b[col] ?? "";
-
-      aVal = aVal.toString();
-      bVal = bVal.toString();
-
-      // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
-      if (col === "code" || col === "Code") {
-        // Reverse strings → compare from right side
-        const revA = aVal.split("").reverse().join("");
-        const revB = bVal.split("").reverse().join("");
-
-        return newOrder === "ASC"
-          ? revA.localeCompare(revB)
-          : revB.localeCompare(revA);
-      }
-
-      // ⭐ Numeric sorting
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      }
-
-      // Default → normal string sorting
-      return newOrder === "ASC"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    });
-
-    setTableData(sortedData);
-
-    setColumnSortOrders((prev) => ({
-      ...Object.keys(prev).reduce((acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      }, {}),
-    }));
+  const eightColWidth = {
+    width: "90px",
   };
 
-  const resetSorting = () => {
-    setColumnSortOrders({
-      code: null,
-      Description: null,
-      Opening: null,
-      Debit: null,
-      Credit: null,
-      Balance: null,
-    });
-  };
-
-  const renderTableData = () => {
-    return (
-      <>
-        {isLoading ? (
-          <>
-            <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="3" className="text-center">
-                <Spinner animation="border" variant="primary" />
-              </td>
-            </tr>
-            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-
-              <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
-            </tr>
-          </>
-        ) : (
-          <>
-            {tableData.map((item, i) => {
-              const openingNum = Number(
-                item.Opening?.toString().replace(/,/g, "")
-              );
-              const balanceNum = Number(
-                item.Balance?.toString().replace(/,/g, "")
-              );
-              const balancecre = Number(
-                item.Credit?.toString().replace(/,/g, "")
-              );
-              const balancedeb = Number(
-                item.Debit?.toString().replace(/,/g, "")
-              );
-
-              const isNegative =
-                openingNum < 0 ||
-                balanceNum < 0 ||
-                balancecre < 0 ||
-                balancedeb < 0;
-
-              totalEnteries += 1;
-              return (
-                <tr
-                  key={`${i}-${selectedIndex}`}
-                  ref={(el) => (rowRefs.current[i] = el)}
-                  onClick={() => handleRowClick(i)}
-                  className={selectedIndex === i ? "selected-background" : ""}
-                  style={{
-                    backgroundColor: getcolor,
-                    color: isNegative ? "red" : fontcolor,
-                  }}
-                >
-                  <td className="text-center" style={firstColWidth}>
-                    {item.code}
-                  </td>
-                  <td className="text-start" style={secondColWidth}>
-                    {item.Description}
-                  </td>
-                  <td className="text-end" style={thirdColWidth}>
-                    {item.Opening}
-                  </td>
-                  <td className="text-end" style={forthColWidth}>
-                    {item.Debit}
-                  </td>
-                  <td className="text-end" style={fifthColWidth}>
-                    {item.Credit}
-                  </td>
-                  <td className="text-end" style={sixthColWidth}>
-                    {item.Balance}
-                  </td>
-                </tr>
-              );
-            })}
-            {Array.from({
-              length: Math.max(0, 25 - tableData.length),
-            }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-              <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
-            </tr>
-          </>
-        )}
-      </>
-    );
-  };
-
-  const getIconStyle = (colKey) => {
-    const order = columnSortOrders[colKey];
-    return {
-      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-      color: order === "ASC" || order === "DSC" ? "red" : "white",
-      transition: "transform 0.3s ease, color 0.3s ease",
-    };
-  };
+  const sixthcol = { width: "8px" };
 
   useHotkeys(
     "alt+s",
     () => {
       fetchReceivableReport();
-      resetSorting();
+      //    resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true }
   );
@@ -1687,13 +1431,10 @@ export default function ReceivableReport() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  useEffect(() => {
-    document.documentElement.style.setProperty("--background-color", getcolor);
-  }, [getcolor]);
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "1000px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1813,8 +1554,24 @@ export default function ReceivableReport() {
     }
   }, [selectedRadio]);
 
+  // this function for hide the 0 value figure from the table data
+
   const formatValue = (val) => {
     return Number(val) === 0 ? "" : val;
+  };
+
+  const isMatchedRow = (item) => {
+    if (!searchQuery) return false; // no highlight if search is empty
+
+    const query = searchQuery.toUpperCase();
+
+    // you can match anything you want:
+    return (
+      item.Description?.toUpperCase().includes(query) ||
+      item.Type?.toUpperCase().includes(query) ||
+      item.Date?.toUpperCase().includes(query) ||
+      String(item["Trn#"])?.includes(query)
+    );
   };
 
   return (
@@ -1830,7 +1587,8 @@ export default function ReceivableReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Receivable Report" />
+          <NavComponent textdata="Production Order Ledger" />
+
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1845,13 +1603,15 @@ export default function ReceivableReport() {
                 justifyContent: "space-between",
               }}
             >
+              {/* ------ */}
+
               <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "30px" }}
+                className="d-flex align-items-center  "
+                style={{ marginRight: "1px" }}
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -1859,313 +1619,25 @@ export default function ReceivableReport() {
                   <label htmlFor="fromDatePicker">
                     <span
                       style={{
-                        fontSize: parseInt(getdatafontsize),
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "3px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: parseInt(getdatafontsize),
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: parseInt(getdatafontsize),
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="toDatePicker">
-                    <span
-                      style={{
-                        fontSize: parseInt(getdatafontsize),
-                        fontWeight: "bold",
-                      }}
-                    >
-                      To :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="todatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "3px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    ref={toRef}
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: parseInt(getdatafontsize),
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    value={toInputDate}
-                    onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, input1Ref)}
-                    id="toDatePicker"
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="To Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedToDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={toCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleToCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: parseInt(getdatafontsize),
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-
-              {/* ------ */}
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: parseInt(getdatafontsize),
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input3Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "200px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="R">RECEIVABLE</option>
-                    <option value="P">PAYABLE</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
                         fontSize: getdatafontsize,
                         fontFamily: getfontstyle,
                         fontWeight: "bold",
                       }}
                     >
-                      A/C :
-                    </span>
+                      Account :
+                    </span>{" "}
+                    <br />
                   </label>
                 </div>
-
-                <div style={{ marginLeft: "3px" }}>
+                <div style={{ marginLeft: "5px" }}>
                   <Select
                     className="List-select-class"
-                    ref={input1Ref}
+                    ref={saleSelectRef}
                     options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input3Ref)}
+                    value={
+                      options.find((opt) => opt.value === saleType) || null
+                    } // Ensure correct reference
+                    onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2205,90 +1677,31 @@ export default function ReceivableReport() {
                   />
                 </div>
               </div>
-
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input2Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "200px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
+
           <div>
             <div
               style={{
                 overflowY: "auto",
-                // width: "98.3%",
+                // width: "98.8%",
               }}
             >
               <table
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: parseInt(getdatafontsize),
-                  //   width: "100%",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  // width: "100%",
                   position: "relative",
+                  paddingRight: "2%",
                 }}
               >
                 <thead
                   style={{
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -2303,76 +1716,29 @@ export default function ReceivableReport() {
                       color: "white",
                     }}
                   >
-                    <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      onClick={() => handleSorting("code")}
-                    >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
-                      ></i>
+                    <td className="border-dark" style={firstColWidth}>
+                      Date
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
-                    >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
+                    <td className="border-dark" style={secondColWidth}>
+                      Dec#
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Opening")}
-                    >
-                      Opening{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Opening")}
-                      ></i>
+                    <td className="border-dark" style={thirdColWidth}>
+                      Typ
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Debit")}
-                    >
-                      Debit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Debit")}
-                      ></i>
+                    <td className="border-dark" style={forthColWidth}>
+                      Remarks
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={fifthColWidth}
-                      onClick={() => handleSorting("Credit")}
-                    >
-                      Credit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Credit")}
-                      ></i>
+                    <td className="border-dark" style={fifthColWidth}>
+                      Production
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Balance")}
-                    >
-                      Balance{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Balance")}
-                      ></i>
+                    <td className="border-dark" style={sixthColWidth}>
+                      Issue
+                    </td>
+                    <td className="border-dark" style={seventhColWidth}>
+                      Receive
+                    </td>
+                    <td className="border-dark" style={eightColWidth}>
+                      Balance
                     </td>
 
                     <td className="border-dark" style={sixthcol}></td>
@@ -2386,7 +1752,7 @@ export default function ReceivableReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "50vh",
+                maxHeight: "55vh",
                 // width: "100%",
                 wordBreak: "break-word",
               }}
@@ -2397,17 +1763,131 @@ export default function ReceivableReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  //   width: "100%",
-                  tableLayout: "fixed", // FIXED!
-                  overflowY: "scroll",
+                  // width: "100%",
+                  position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
-                <tbody id="tablebody" style={{ overflowY: "scroll" }}>
-                  {renderTableData()}
+                <tbody id="tablebody">
+                  {isLoading ? (
+                    <>
+                      <tr
+                        style={{
+                          backgroundColor: getcolor,
+                        }}
+                      >
+                        <td colSpan="8" className="text-center">
+                          <Spinner animation="border" variant="primary" />
+                        </td>
+                      </tr>
+                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                        (_, rowIndex) => (
+                          <tr
+                            key={`blank-${rowIndex}`}
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            {Array.from({ length: 8 }).map((_, colIndex) => (
+                              <td key={`blank-${rowIndex}-${colIndex}`}>
+                                &nbsp;
+                              </td>
+                            ))}
+                          </tr>
+                        )
+                      )}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                      </tr>
+                    </>
+                  ) : (
+                    <>
+                      {tableData.map((item, i) => {
+                        totalEnteries += 1;
+                        return (
+                          <tr
+                            key={`${i}-${selectedIndex}`}
+                            ref={(el) => (rowRefs.current[i] = el)}
+                            onClick={() => handleRowClick(i)}
+                            className={
+                              selectedIndex === i ? "selected-background" : ""
+                            }
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                              color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
+                              //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
+                            }}
+                          >
+                            <td className="text-center" style={firstColWidth}>
+                              {item.Date}
+                            </td>
+                            <td className="text-center" style={secondColWidth}>
+                              {item["Dec#"]}
+                            </td>
+                            <td className="text-center" style={thirdColWidth}>
+                              {item.Type}
+                            </td>
+                            <td className="text-start" style={forthColWidth}>
+                              {item.Remarks}
+                            </td>
+                            <td className="text-end" style={fifthColWidth}>
+                              {formatValue(item.Production)}
+                            </td>
+                            <td className="text-end" style={sixthColWidth}>
+                              {formatValue(item.Issue)}
+                            </td>
+                            <td className="text-end" style={seventhColWidth}>
+                              {formatValue(item.Receive)}
+                            </td>
+                            <td className="text-end" style={eightColWidth}>
+                              {formatValue(item.Balance)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {Array.from({
+                        length: Math.max(0, 27 - tableData.length),
+                      }).map((_, rowIndex) => (
+                        <tr
+                          key={`blank-${rowIndex}`}
+                          style={{
+                            backgroundColor: getcolor,
+                            color: fontcolor,
+                          }}
+                        >
+                          {Array.from({ length: 8 }).map((_, colIndex) => (
+                            <td key={`blank-${rowIndex}-${colIndex}`}>
+                              &nbsp;
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                      </tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
+
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,
@@ -2415,6 +1895,7 @@ export default function ReceivableReport() {
               height: "24px",
               display: "flex",
               paddingRight: "8px",
+              // width: "101.2%",
             }}
           >
             <div
@@ -2423,11 +1904,7 @@ export default function ReceivableReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total2">
-                {tableData.length.toLocaleString()}
-              </span>
-            </div>
+            ></div>
             <div
               style={{
                 ...secondColWidth,
@@ -2441,18 +1918,14 @@ export default function ReceivableReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">{totalOpening}</span>
-            </div>
+            ></div>
             <div
               style={{
                 ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">{totalDebit}</span>
-            </div>
+            ></div>
             <div
               style={{
                 ...fifthColWidth,
@@ -2460,7 +1933,9 @@ export default function ReceivableReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalCredit}</span>
+              <span className="mobileledger_total">
+                {formatValue(totalDebit)}
+              </span>
             </div>
             <div
               style={{
@@ -2469,9 +1944,32 @@ export default function ReceivableReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{closingBalance}</span>
+              {/* <span className="mobileledger_total">{totalCredit}</span> */}
+            </div>
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalCredit)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(closingBalance)}
+              </span>
             </div>
           </div>
+
           <div
             style={{
               margin: "5px",
@@ -2505,11 +2003,8 @@ export default function ReceivableReport() {
             <SingleButton
               id="searchsubmit"
               text="Select"
-              ref={input4Ref}
-              onClick={() => {
-                fetchReceivableReport();
-                resetSorting();
-              }}
+              ref={searchsubmit}
+              onClick={fetchReceivableReport}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
