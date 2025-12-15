@@ -1510,7 +1510,7 @@ export default function ItemStockReport() {
     width: "90px",
   };
   const seventhColWidth = {
-    width: "90px",
+    width: "110px",
   };
 
   const sixthcol = {
