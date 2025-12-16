@@ -171,6 +171,7 @@ import ReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Report
 import PayableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/Payablereport.js";
 import ReceivableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ReceiableAggingReport.js";
 import PayableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/PayableAggingReport.js";
+import AmericanReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableRepor.js";
 
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
@@ -346,6 +347,7 @@ function App() {
                 <Route exact path="/PayableReport" element={<PayableReport />} />
                 <Route exact path="/ReceivableAggingReport" element={<ReceivableAggingReport />} />
                 <Route exact path="/PayableAggingReport" element={<PayableAggingReport />} />
+                <Route exact path="/AmericanReceiable" element={<AmericanReceivableReport />} />
 
 
                 {/* ROUTES FOR EMPLOYEE REPORT */}
