@@ -429,9 +429,9 @@ export default function EmployeeAdvanceReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-    //   code: "NASIRTRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -689,8 +689,10 @@ export default function EmployeeAdvanceReport() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected ? "white" : fontcolor,
-      "&:hover": {
+   color:
+  state.isSelected || state.isFocused
+    ? "white"
+    : fontcolor,      "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
         cursor: "pointer",
@@ -1659,51 +1661,46 @@ export default function EmployeeAdvanceReport() {
     });
   };
 
-  const handleSorting = (col) => {
+ const handleSorting = (col) => {
   const currentOrder = columnSortOrders[col];
   const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
   const sortedData = [...tableData].sort((a, b) => {
-    let aVal = a[col] ?? "";
-    let bVal = b[col] ?? "";
+    const aVal = a[col] != null ? a[col].toString().trim() : "";
+    const bVal = b[col] != null ? b[col].toString().trim() : "";
 
-    aVal = aVal.toString();
-    bVal = bVal.toString();
+    // Attempt numeric conversion
+    const numA = Number(aVal.replace(/,/g, ""));
+    const numB = Number(bVal.replace(/,/g, ""));
 
-    // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
-    if (col === "code" || col === "Code") {
-      // Reverse strings → compare from right side
-      const revA = aVal.split("").reverse().join("");
-      const revB = bVal.split("").reverse().join("");
+    // Check if numeric sorting is possible
+    const bothNumeric =
+      !isNaN(numA) && !isNaN(numB) && aVal !== "" && bVal !== "";
 
-      return newOrder === "ASC"
-        ? revA.localeCompare(revB)
-        : revB.localeCompare(revA);
-    }
-
-    // ⭐ Numeric sorting
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
-
-    if (!isNaN(numA) && !isNaN(numB)) {
+    if (bothNumeric) {
       return newOrder === "ASC" ? numA - numB : numB - numA;
     }
 
-    // Default → normal string sorting
+    // Alphabetical sorting as fallback
     return newOrder === "ASC"
       ? aVal.localeCompare(bVal)
       : bVal.localeCompare(aVal);
   });
 
+  // Update table
   setTableData(sortedData);
 
-  setColumnSortOrders((prev) => ({
-    ...Object.keys(prev).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {}),
-  }));
+  // Update column sort indicator
+  setColumnSortOrders((prev) => {
+    const updated = {};
+    Object.keys(prev).forEach((key) => {
+      updated[key] = key === col ? newOrder : null;
+    });
+    return updated;
+  });
 };
+
+
 
   useHotkeys(
     "alt+s",

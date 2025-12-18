@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import {
+  getUserData,
+  getOrganisationData,
+  getLocationnumber,
+  getYearDescription,
+} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import "react-datepicker/dist/react-datepicker.css";
@@ -446,7 +451,6 @@ export default function CompanyList() {
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
 
-
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
@@ -672,7 +676,6 @@ export default function CompanyList() {
     };
   };
   const renderTableData = () => {
-    
 
     return (
       <>
@@ -755,10 +758,6 @@ export default function CompanyList() {
     );
   };
 
- 
-
-
-
   useHotkeys("alt+s", () => {
         fetchReceivableReport();
            resetSorting();
@@ -767,7 +766,6 @@ export default function CompanyList() {
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
-
 
   // const firstColWidth = {
   //   width: "20.2%",
@@ -782,10 +780,8 @@ export default function CompanyList() {
   const firstColWidth = { width: "60px" };
   const secondColWidth = { width: "360px" };
   const thirdColWidth = { width: "60px" };
-  
+
   const sixthcol = { width: "8px" };
-
-
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -892,7 +888,6 @@ export default function CompanyList() {
   return Number(val) === 0 ? "" : val;
 };
 
-
   return (
     <>
       <div style={contentStyle}>
@@ -946,7 +941,6 @@ export default function CompanyList() {
                   </label>
                 </div>
 
-               
   <div style={{ position: "relative", display: "inline-block" }}>
   <select
     ref={input1Ref}
@@ -1137,9 +1131,9 @@ export default function CompanyList() {
                      <td
                       className="border-dark"
                       style={sixthcol}
-                     
+
                     >
-                      
+
                     </td>
                   </tr>
                 </thead>
@@ -1168,7 +1162,7 @@ export default function CompanyList() {
                 }}
               >
                 <tbody id="tablebody">
-                  {renderTableData()} 
+                  {renderTableData()}
                 </tbody>
               </table>
             </div> */}
@@ -1187,7 +1181,6 @@ export default function CompanyList() {
               }}
             >
 
-
               <table
                 className="myTable"
                 id="tableBody"
@@ -1201,7 +1194,6 @@ export default function CompanyList() {
               >
                 <tbody id="tablebody" style={{ overflowY: 'scroll' }}>{renderTableData()}</tbody>
               </table>
-
 
             </div>
           </div>
@@ -1240,8 +1232,6 @@ export default function CompanyList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-
-
 
           </div>
 
@@ -1295,7 +1285,5 @@ export default function CompanyList() {
     </>
   );
 }
-
-
 
 

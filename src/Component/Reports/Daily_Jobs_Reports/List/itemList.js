@@ -19,8 +19,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 import './list.css';
 import './demo.css';
-import { getcompanyData } from "../../../File/Category_Maintenance/Category_Maintenance_Api";
-import { SkipNextSharp } from "@mui/icons-material";
+
 
 export default function ItemList() {
   const navigate = useNavigate();
@@ -40,9 +39,7 @@ export default function ItemList() {
 
   const [Companyselectdata, setCompanyselectdata] = useState("");
 
-  console.log("Companyselectdata", Companyselectdata);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-  console.log("Companyselectdatavalue", Companyselectdatavalue.label);
 
   const [GetCompany, setGetCompany] = useState([]);
 
@@ -486,7 +483,7 @@ export default function ItemList() {
             fontFamily: getfontstyle,
             paddingBottom: "5px",
             lineHeight: "3px",
-            // color: fontcolor,
+                    
             textAlign: "start",
           }}
         >
@@ -567,7 +564,11 @@ export default function ItemList() {
         : state.isFocused
           ? "#3368B5"
           : getcolor,
-      color: state.isSelected ? "white" : fontcolor,
+      // color: state.isSelected ? "white" : fontcolor,
+      color:
+  state.isSelected || state.isFocused
+    ? "white"
+    : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -578,6 +579,9 @@ export default function ItemList() {
       },
       transition: "background-color 0.2s ease, color 0.2s ease",
     }),
+   
+
+    
     dropdownIndicator: (base, state) => ({
       ...base,
       padding: 0,
