@@ -25,6 +25,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 import { components } from "react-select";
 import { ToastContainer, toast } from "react-toastify";
+import "../../../vardana/vardana.js";
+import "../../../vardana/verdana-bold.js";
 
 export default function CompanyList() {
   const navigate = useNavigate();
@@ -135,9 +137,6 @@ export default function CompanyList() {
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
-    const globalfontsize = 12;
-    console.log("gobal font data", globalfontsize);
-
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "potraite" });
 
@@ -163,14 +162,14 @@ export default function CompanyList() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
+    doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(12); // Set font size for headers
+      doc.setFont("verdana", "bold"); // Set font to bold
+      doc.setFontSize(10); // Set font size for headers
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -192,116 +191,110 @@ export default function CompanyList() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(12);
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust this value to decrease row height
-      const fontSize = 10; // Adjust this value to decrease font size
-      const boldFont = 400; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
+  const addTableRows = (startX, startY, startIndex, endIndex) => {
+  const rowHeight = 5;
+  const fontSize = 10;
+  const boldFont = 400;
+  const normalFont = getfontstyle;
+  const tableWidth = getTotalTableWidth();
 
+  for (let i = startIndex; i < endIndex; i++) {
+    const row = rows[i];
+    const isOddRow = i % 2 !== 0;
+    const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+    let textColor = [0, 0, 0];
+    let fontName = normalFont;
+
+    if (isRedRow) {
+      textColor = [255, 0, 0];
+      fontName = boldFont;
+    }
+
+    if (isOddRow) {
+      doc.setFillColor(240);
+      doc.rect(
+        startX,
+        startY + (i - startIndex + 2) * rowHeight,
+        tableWidth,
+        rowHeight,
+        "F"
+      );
+    }
+
+    // Draw row border
+    doc.setDrawColor(0);
+    doc.rect(
+      startX,
+      startY + (i - startIndex + 2) * rowHeight,
+      tableWidth,
+      rowHeight
+    );
+
+    let cellStartX = startX;
+
+    row.forEach((cell, cellIndex) => {
+
+      // NEW → Vertically centered text
+      const cellCenterY =
+        startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+
+      // Original X logic same
+      let textX = cellStartX + 2;
+
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setFont("verdana-regular", "normal");
       doc.setFontSize(fontSize);
 
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        // const isevenRow = i % 2 == 0; // Check if the row index is odd
+      const cellValue = String(cell);
 
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
-
-        if (isRedRow) {
-          textColor = [255, 0, 0]; // Red color
-          fontName = boldFont; // Set bold font for red-colored row
-        }
-
-        // Set background color for odd-numbered rows
-        if (isOddRow) {
-          doc.setFillColor(240); // Light background color
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F"
-          );
-        }
-
-        // Draw row borders
-        doc.setDrawColor(0); // Set color for borders
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          tableWidth,
-          rowHeight
-        );
-
-        row.forEach((cell, cellIndex) => {
-          const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-          const cellX = startX + 2;
-
-          // Set text color
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-          // Set font
-          doc.setFont(fontName, "normal");
-
-          // Ensure the cell value is a string
-          const cellValue = String(cell);
-
-          if (cellIndex === 2 || cellIndex === 0 || cellIndex === 6) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else {
-            doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-          }
-
-          // Draw column borders (excluding the last column)
-          if (cellIndex < row.length - 1) {
-            doc.rect(
-              startX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
-            );
-            startX += columnWidths[cellIndex];
-          }
+      if (cellIndex === 2 || cellIndex === 0 || cellIndex === 6) {
+        doc.text(cellValue, cellStartX + columnWidths[cellIndex] / 2, cellCenterY, {
+          align: "center",
+          baseline: "middle",
         });
-
-        // Draw border for the last column
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          columnWidths[row.length - 1],
-          rowHeight
-        );
-        startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+      } else {
+        doc.text(cellValue, textX, cellCenterY, {
+          baseline: "middle",
+        });
       }
 
-      // Draw line at the bottom of the page with padding
-      const lineWidth = tableWidth; // Match line width with table width
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-      const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-      const headingFontSize = 12; // Adjust as needed
+      if (cellIndex < row.length - 1) {
+        doc.rect(
+          cellStartX,
+          startY + (i - startIndex + 2) * rowHeight,
+          columnWidths[cellIndex],
+          rowHeight
+        );
+        cellStartX += columnWidths[cellIndex];
+      }
+    });
 
-      // Add heading "Crystal Solution" aligned left bottom of the line
-      const headingX = lineX + 2; // Padding from left
-      const headingY = lineY + 5; // Padding from bottom
-      doc.setFontSize(headingFontSize); // Set the font size for the heading
-      doc.setTextColor(0); // Reset text color to default
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-    };
+    // Draw last column border
+    doc.rect(
+      cellStartX,
+      startY + (i - startIndex + 2) * rowHeight,
+      columnWidths[row.length - 1],
+      rowHeight
+    );
+  }
 
-    // Function to calculate total table width
+  // Same footer and line logic
+  const lineWidth = tableWidth;
+  const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+  const lineY = pageHeight - 15;
+  doc.setLineWidth(0.3);
+  doc.line(lineX, lineY, lineX + lineWidth, lineY);
+
+  const headingX = lineX + 2;
+  const headingY = lineY + 5;
+  doc.setFont("verdana-regular", "normal")
+  doc.setFontSize(10);
+  doc.setTextColor(0);
+  doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+};
+
     const getTotalTableWidth = () => {
       let totalWidth = 0;
       columnWidths.forEach((width) => (totalWidth += width));
@@ -327,8 +320,8 @@ export default function CompanyList() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10
-      ) => {
+        ) => {
+        doc.setFont("verdana-regular", "normal")
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
           align: "center",
@@ -347,7 +340,8 @@ export default function CompanyList() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
+        doc.setFont("verdana-regular", "normal")
+        doc.setFontSize(10);
         doc.text(
           `Page ${pageNumber}`,
           rightX - 40,
@@ -370,37 +364,29 @@ export default function CompanyList() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-        doc.setFontSize(12);
-        doc.setFont(getfontstyle, "300");
-
         let status =
           transectionType === "N"
             ? "NON-ACTIVE"
             : transectionType === "A"
-              ? "ACTIVE"
-              : "ALL";
+            ? "ACTIVE"
+            : "ALL";
         let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.setFont("verdana-regular", "normal"); // Reset font to normal
+        doc.setFontSize(10);
         doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
+          doc.setFont("verdana", "bold"); // Set font to bold
+          doc.setFontSize(10);
           doc.text(`SEARCH :`, labelsX + 70, labelsY + 8.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+          doc.setFont("verdana-regular", "normal"); // Reset font to normal
+          doc.setFontSize(10);
           doc.text(`${search}`, labelsX + 90, labelsY + 8.5); // Draw the value next to the label
         }
-
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
 
         startY += 10; // Adjust vertical position for the labels
 
@@ -474,7 +460,11 @@ export default function CompanyList() {
       cell.alignment = { horizontal: "center" };
     });
     worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+    worksheet.mergeCells(
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        companyRow.number
+      }`
+    );
 
     // Store List
     const storeListRow = worksheet.addRow(["CompanyList"]);
@@ -482,23 +472,36 @@ export default function CompanyList() {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
-    worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+    worksheet.mergeCells(
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        storeListRow.number
+      }`
+    );
 
     // Empty row
     worksheet.addRow([]);
 
     // Filter data
     let typestatus =
-      transectionType === "N" ? "NON-ACTIVE" :
-        transectionType === "A" ? "ACTIVE" : "ALL";
+      transectionType === "N"
+        ? "NON-ACTIVE"
+        : transectionType === "A"
+        ? "ACTIVE"
+        : "ALL";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery ? ["STATUS :", typestatus, "SEARCH :", typesearch] : ["STATUS :", typestatus, ""]
+      searchQuery
+        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
+        : ["STATUS :", typestatus, ""]
     );
 
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = { name: "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
+      cell.font = {
+        name: "CustomFont",
+        size: 10,
+        bold: [1, 3].includes(colIndex),
+      };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
@@ -506,7 +509,11 @@ export default function CompanyList() {
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
-      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC6D9F7" },
+      },
       border: {
         top: { style: "thin" },
         left: { style: "thin" },
@@ -562,7 +569,9 @@ export default function CompanyList() {
     const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
     const userid = user.tusrid;
 
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentDate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = { name: "CustomFont", size: 10 };
       cell.alignment = { horizontal: "left" };
@@ -575,8 +584,16 @@ export default function CompanyList() {
     });
 
     // Merge cells
-    worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
-    worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+    worksheet.mergeCells(
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`
+    );
+    worksheet.mergeCells(
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`
+    );
 
     // Save Excel
     const buffer = await workbook.xlsx.writeBuffer();
@@ -631,33 +648,37 @@ export default function CompanyList() {
     }
   }, [tableData]);
 
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  const sortedData = [...tableData].sort((a, b) => {
-    const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-    const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+    const sortedData = [...tableData].sort((a, b) => {
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    } else {
-      return newOrder === "ASC" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
-  });
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+    });
 
-  setTableData(sortedData);
+    setTableData(sortedData);
 
-  setColumnSortOrders((prev) => ({
-    ...Object.keys(prev).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {}),
-  }));
-};
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
 
   const resetSorting = () => {
     setColumnSortOrders({
@@ -667,7 +688,7 @@ export default function CompanyList() {
     });
   };
 
- const getIconStyle = (colKey) => {
+  const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
       transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
@@ -676,7 +697,6 @@ export default function CompanyList() {
     };
   };
   const renderTableData = () => {
-
     return (
       <>
         {isLoading ? (
@@ -758,14 +778,27 @@ export default function CompanyList() {
     );
   };
 
-  useHotkeys("alt+s", () => {
-        fetchReceivableReport();
-           resetSorting();
-    }, { preventDefault: true, enableOnFormTags: true });
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchReceivableReport();
+      resetSorting();
+    },
+    { preventDefault: true, enableOnFormTags: true }
+  );
 
-    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
+  useHotkeys("alt+p", exportPDFHandler, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+e", handleDownloadCSV, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+r", () => navigate("/MainPage"), {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
 
   // const firstColWidth = {
   //   width: "20.2%",
@@ -817,7 +850,7 @@ export default function CompanyList() {
     zIndex: 1,
     padding: "0 20px", // Side padding for small screens
     boxSizing: "border-box", // Padding ko width mein include kare
-};
+  };
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
@@ -885,8 +918,8 @@ export default function CompanyList() {
   }, [selectedIndex]);
 
   const formatValue = (val) => {
-  return Number(val) === 0 ? "" : val;
-};
+    return Number(val) === 0 ? "" : val;
+  };
 
   return (
     <>
@@ -941,57 +974,56 @@ export default function CompanyList() {
                   </label>
                 </div>
 
-  <div style={{ position: "relative", display: "inline-block" }}>
-  <select
-    ref={input1Ref}
-    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-    id="submitButton"
-    name="type"
-    onFocus={(e) =>
-      (e.currentTarget.style.border = "4px solid red")
-    }
-    onBlur={(e) =>
-      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-    }
-    value={transectionType}
-    onChange={handleTransactionTypeChange}
-    style={{
-      width: "150px",
-      height: "24px",
-      marginLeft: "5px",
-      backgroundColor: getcolor,
-      border: `1px solid ${fontcolor}`,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      paddingRight: "25px",
-    }}
-  >
-    <option value="">ALL</option>
-    <option value="A">ACTIVE</option>
-    <option value="N">NON-ACTIVE</option>
-  </select>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "150px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="A">ACTIVE</option>
+                    <option value="N">NON-ACTIVE</option>
+                  </select>
 
-  {transectionType !== "" && (
-    <span
-      onClick={() => settransectionType("")}
-      style={{
-        position: "absolute",
-        right: "25px",
-        top: "50%",
-        transform: "translateY(-50%)",
-        cursor: "pointer",
-        fontWeight: "bold",
-        color: fontcolor,
-        userSelect: "none",
-        fontSize: "12px",
-      }}
-    >
-      ✕
-    </span>
-  )}
-</div>
-
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
@@ -1128,13 +1160,7 @@ export default function CompanyList() {
                       ></i>
                     </td>
 
-                     <td
-                      className="border-dark"
-                      style={sixthcol}
-
-                    >
-
-                    </td>
+                    <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
               </table>
@@ -1176,11 +1202,10 @@ export default function CompanyList() {
                 // '--selected-bg-color': getnavbarbackgroundcolor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                 maxHeight: "55vh",
+                maxHeight: "55vh",
                 wordBreak: "break-word",
               }}
             >
-
               <table
                 className="myTable"
                 id="tableBody"
@@ -1188,13 +1213,14 @@ export default function CompanyList() {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   // width: "98%",
-                  tableLayout: "fixed",   // FIXED!
+                  tableLayout: "fixed", // FIXED!
                   overflowY: "scroll",
                 }}
               >
-                <tbody id="tablebody" style={{ overflowY: 'scroll' }}>{renderTableData()}</tbody>
+                <tbody id="tablebody" style={{ overflowY: "scroll" }}>
+                  {renderTableData()}
+                </tbody>
               </table>
-
             </div>
           </div>
 
@@ -1215,8 +1241,9 @@ export default function CompanyList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
- <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString()) }</span>
-
+              <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>
             </div>
             <div
               style={{
@@ -1232,7 +1259,6 @@ export default function CompanyList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-
           </div>
 
           <div

@@ -2811,7 +2811,7 @@ const [totalQnty, settotalQnty] = useState(0);
                       style={fifthColWidth}
                       onClick={() => handleSorting("Pur-Ret")}
                     >
-                      P Rat{" "}
+                      P Ret{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Pur-Ret")}
@@ -2855,7 +2855,7 @@ const [totalQnty, settotalQnty] = useState(0);
                       style={ninthColWidth}
                       onClick={() => handleSorting("Saleb-Rate")}
                     >
-                      S Rat{" "}
+                      S Ret{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Sale-Ret")}

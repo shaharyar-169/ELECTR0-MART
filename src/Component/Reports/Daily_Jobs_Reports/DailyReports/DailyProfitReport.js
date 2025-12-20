@@ -1402,7 +1402,8 @@ export default function DailyProfitReport() {
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("esc", () => navigate("/MainPage"));
+     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
+    useHotkeys("alt+r", () => navigate("/MainPage"), { preventDefault: true, enableOnFormTags: true });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1571,165 +1572,7 @@ export default function DailyProfitReport() {
                             justifyContent: "space-between",
                         }}>
 
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle }}>90 Days</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "25px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "90px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Rep Rate :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="Repdateid"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={Retrate}
-                                    onChange={handleReprateChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: "12px",
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="P">PURCHASE RATE </option>
-                                    <option value="S">SALE MAN RATE</option>
-
-
-                                </select>
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center">
+ <div className="d-flex align-items-center">
                                 <div
                                     style={{
                                         width: "80px",
@@ -1913,6 +1756,83 @@ export default function DailyProfitReport() {
                                     />
                                 </div>
                             </div>
+                           
+
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "25px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "90px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                            Rep Rate :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                <select
+                                    ref={input1Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                                    id="Repdateid"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={Retrate}
+                                    onChange={handleReprateChange}
+                                    style={{
+                                        width: "200px",
+                                        height: "24px",
+                                        marginLeft: "5px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: "12px",
+                                        color: fontcolor,
+                                    }}
+                                >
+                                  
+                    <option value="P">PURCHASE RATE</option>
+                     <option value="A">AVERAGE RATE</option>
+                    <option value="M">LAST SM RATE</option>
+                    <option value="W">WEIGHTED AVERAGE</option>
+                    <option value="F">FIFO</option>
+
+
+                                </select>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "end",
+                            }}
+                        >
+                           
                             <div
                                 className="d-flex align-items-center"
                                 style={{ marginRight: "25px" }}
@@ -1935,7 +1855,7 @@ export default function DailyProfitReport() {
 
                                 <select
                                     ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
                                     id="typeselecet"
                                     name="type"
                                     onFocus={(e) =>
@@ -2650,7 +2570,6 @@ export default function DailyProfitReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2659,7 +2578,6 @@ export default function DailyProfitReport() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2668,7 +2586,6 @@ export default function DailyProfitReport() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2679,7 +2596,6 @@ export default function DailyProfitReport() {
                             text="Select"
                             ref={input4Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

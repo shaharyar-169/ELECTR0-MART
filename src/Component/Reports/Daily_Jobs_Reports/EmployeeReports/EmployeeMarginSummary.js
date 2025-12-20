@@ -29,7 +29,7 @@ import { Code, Description, Store } from "@mui/icons-material";
 import "../../../vardana/vardana";
 import "../../../vardana/verdana-bold";
 
-export default function EmployeeSaleSummaryReport() {
+export default function EmployeeMarginSummary() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -300,9 +300,9 @@ export default function EmployeeSaleSummaryReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (saleSelectRef.current) {
+        if (employeeref.current) {
           e.preventDefault();
-          saleSelectRef.current.focus();
+          employeeref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -421,7 +421,7 @@ export default function EmployeeSaleSummaryReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeSaleSummary.php";
+    const apiUrl = apiLinks + "/EmployeeMarginSummary.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -432,6 +432,7 @@ export default function EmployeeSaleSummaryReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
+      FRepRat: transectionType,
       // code: organisation.code,
       // FLocCod: locationnumber || getLocationNumber,
       // FYerDsc: yeardescription || getyeardescription,
@@ -1781,6 +1782,10 @@ export default function EmployeeSaleSummaryReport() {
     width: "80px",
   };
 
+   const seventhColWidth = {
+    width: "80px",
+  };
+
   const sixthcol = {
     width: "8px",
   };
@@ -2076,7 +2081,7 @@ export default function EmployeeSaleSummaryReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Sale Summary Report" />
+          <NavComponent textdata="Employee Margin Report" />
 
           {/* ------------1st row */}
                    <div
@@ -2090,7 +2095,7 @@ export default function EmployeeSaleSummaryReport() {
                          alignItems: "center",
                          margin: "0px",
                          padding: "0px",
-                         justifyContent: "start",
+                         justifyContent: "space-between",
                        }}
                      >
          
@@ -2195,7 +2200,6 @@ export default function EmployeeSaleSummaryReport() {
                        </div>
                        <div
                          className="d-flex align-items-center"
-                         style={{ marginLeft:'50px' }}
                        >
                          <div
                            style={{
@@ -2253,7 +2257,7 @@ export default function EmployeeSaleSummaryReport() {
                              }}
                              value={toInputDate}
                              onChange={handleToInputChange}
-                             onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                             onKeyDown={(e) => handleToKeyPress(e, employeeref)}
                              id="toDatePicker"
                              autoComplete="off"
                              placeholder="dd-mm-yyyy"
@@ -2292,6 +2296,84 @@ export default function EmployeeSaleSummaryReport() {
                                </div>
                              }
                              disabled={selectedRadio !== "custom"}
+                           />
+                         </div>
+                       </div>
+
+                        <div
+                         className="d-flex align-items-center"
+                         style={{ marginRight: "21px" }}
+                       >
+                         <div
+                           style={{
+                             marginLeft: "10px",
+                             width: "80px",
+                             display: "flex",
+                             justifyContent: "end",
+                           }}
+                         >
+                           <label htmlFor="transactionType">
+                             <span
+                               style={{
+                                 display: "flex",
+                                 alignItems: "center",
+                                 justifyContent: "center",
+                                 fontSize: getdatafontsize,
+                                 fontFamily: getfontstyle,
+                                 fontWeight: "bold",
+                               }}
+                             >
+                               Employee :
+                             </span>
+                           </label>
+                         </div>
+         
+                         <div style={{ marginLeft: "3px" }}>
+                           <Select
+                             className="List-select-class"
+                             ref={employeeref}
+                             options={employeeoptions}
+                             value={
+                               employeeoptions.find(
+                                 (opt) => opt.value === Employeeselectdata
+                               ) || null
+                             } // Ensure correct reference
+                             onKeyDown={(e) => handleEmployeeKeypress(e, saleSelectRef)}
+                             id="selectedsale"
+                             onChange={(selectedOption) => {
+                              if (selectedOption && selectedOption.value) {
+                                 const labelPart = selectedOption.label.split("-")[1];
+         
+                                 setEmployeeselectdata(selectedOption.value);
+                                 setEmployeeselectdatavalue({
+                                   value: selectedOption.value,
+                                   label: labelPart, // Keep only the description
+                                 });
+                               } else {
+                                 setEmployeeselectdata("");
+                                 setEmployeeselectdatavalue("");
+                               }
+                             }}
+                             onInputChange={(inputValue, { action }) => {
+                               if (action === "input-change") {
+                                 return inputValue.toUpperCase();
+                               }
+                               return inputValue;
+                             }}
+                             components={{ Option: DropdownOption }}
+                             styles={{
+                               ...customStyles1(!Employeeselectdata),
+                               placeholder: (base) => ({
+                                 ...base,
+                                 textAlign: "left",
+                                 marginLeft: "0",
+                                 justifyContent: "flex-start",
+                                 color: fontcolor,
+                                 marginTop: "-5px",
+                               }),
+                             }}
+                             isClearable
+                             placeholder="ALL"
                            />
                          </div>
                        </div>
@@ -2408,83 +2490,84 @@ export default function EmployeeSaleSummaryReport() {
                        </div>
          
                        
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginRight: "21px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Employee :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class"
-                             ref={employeeref}
-                             options={employeeoptions}
-                             value={
-                               employeeoptions.find(
-                                 (opt) => opt.value === Employeeselectdata
-                               ) || null
-                             } // Ensure correct reference
-                             onKeyDown={(e) => handleEmployeeKeypress(e, input4Ref)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                              if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-         
-                                 setEmployeeselectdata(selectedOption.value);
-                                 setEmployeeselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart, // Keep only the description
-                                 });
-                               } else {
-                                 setEmployeeselectdata("");
-                                 setEmployeeselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Employeeselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             isClearable
-                             placeholder="ALL"
-                           />
-                         </div>
-                       </div>
+                      <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Rate :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input4Refrate}
+                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "225px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
+                    }}
+                  >
+                    <option value="A">AVERAGE RATE</option>
+                    <option value="P">PURCHASE RATE</option>
+                    <option value="M">LAST SM RATE</option>
+                    <option value="W">WEIGHTED AVERAGE</option>
+                    <option value="F">FIFO</option>
+                  </select>
+
+                  {transectionType !== "A" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
          
                        {/* <div
                                          className="d-flex align-items-center"
@@ -2783,7 +2866,7 @@ export default function EmployeeSaleSummaryReport() {
                     className="List-select-class "
                     ref={input2Ref}
                     options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, employeeref)}
+                    onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
                     id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2981,6 +3064,18 @@ export default function EmployeeSaleSummaryReport() {
                       ></i>
                     </td>
 
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Magin")}
+                    >
+                      Margin{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Magin")}
+                      ></i>
+                    </td>
+
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
@@ -3030,7 +3125,7 @@ export default function EmployeeSaleSummaryReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 5 }).map((_, colIndex) => (
+                            {Array.from({ length: 6 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3044,6 +3139,8 @@ export default function EmployeeSaleSummaryReport() {
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+
                       </tr>
                     </>
                   ) : (
@@ -3085,6 +3182,9 @@ export default function EmployeeSaleSummaryReport() {
                             <td className="text-end" style={sixthColWidth}>
                               {formatValue(item["Sale Amount"])}
                             </td>
+                             <td className="text-end" style={seventhColWidth}>
+                              {formatValue(item.Margin)}
+                            </td>
                           </tr>
                         );
                       })}
@@ -3098,7 +3198,7 @@ export default function EmployeeSaleSummaryReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 5 }).map((_, colIndex) => (
+                          {Array.from({ length: 6 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3111,6 +3211,8 @@ export default function EmployeeSaleSummaryReport() {
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+
                       </tr>
                     </>
                   )}
@@ -3177,6 +3279,18 @@ export default function EmployeeSaleSummaryReport() {
               <span className="mobileledger_total">
                 {formatValue(totalcredit)}
               </span>
+            </div>
+
+             <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">
+                {formatValue(totalcredit)}
+              </span> */}
             </div>
           </div>
           {/* Action Buttons */}

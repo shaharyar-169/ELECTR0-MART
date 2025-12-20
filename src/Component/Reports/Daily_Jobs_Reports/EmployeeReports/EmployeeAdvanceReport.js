@@ -26,6 +26,9 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Balance, Description, Store } from "@mui/icons-material";
+import '../../../vardana/vardana';
+import '../../../vardana/verdana-bold'
+
 
 export default function EmployeeAdvanceReport() {
   const navigate = useNavigate();
@@ -425,13 +428,13 @@ export default function EmployeeAdvanceReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+      code: "NASIRTRD",
+      FLocCod: "001",
+      FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -786,8 +789,7 @@ export default function EmployeeAdvanceReport() {
   });
 
   const exportPDFHandler = () => {
-    const globalfontsize = 10;
-    console.log("gobal font data", globalfontsize);
+   
 
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "potraite" });
@@ -824,7 +826,7 @@ export default function EmployeeAdvanceReport() {
       "Credit",
       "Balance",
     ];
-    const columnWidths = [20, 100, 22, 22, 22, 22];
+    const columnWidths = [25, 75, 22, 22, 22, 22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -834,13 +836,13 @@ export default function EmployeeAdvanceReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
+    // doc.setFont("verdana-regular", "normal");
+    // doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
+      doc.setFont("verdana", "bold"); // Set font to bold
       doc.setFontSize(10); // Set font size for headers
 
       headers.forEach((header, index) => {
@@ -863,64 +865,77 @@ export default function EmployeeAdvanceReport() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(10);
+    
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust row height
-      const fontSize = 10; // Adjust font size
-      const boldFont = 400; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
+      const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-      doc.setFontSize(fontSize);
+      doc.setFontSize(11);
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isTotalRow = i === rows.length - 1; // Check if this is the total row
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
-        let currentX = startX; // Track current column position
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-        // Check if Qnty (column index 6) is negative
-        if (parseFloat(row[8]) < 0) {
-          textColor = [255, 0, 0]; // Set red color for negative Qnty
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
         }
 
-        // For total row, set bold font and prepare for double border
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "bold");
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
         }
 
-        // Draw row borders
-        doc.setDrawColor(0);
-
-        // For total row, draw double border
-        if (isTotalRow) {
-          // First line of the double border
-          doc.setLineWidth(0.3);
+        if (isOddRow) {
+          doc.setFillColor(240);
           doc.rect(
-            currentX,
+            startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
+            "F"
+          );
+        }
+
+        doc.setDrawColor(0);
+
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
           );
 
-          // Second line of the double border (slightly offset)
-          doc.setLineWidth(0.3);
-          doc.rect(
-            currentX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            tableWidth - 1,
-            rowHeight - 1
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
           );
         } else {
-          // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
-            currentX,
+            startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight
@@ -928,40 +943,42 @@ export default function EmployeeAdvanceReport() {
         }
 
         row.forEach((cell, cellIndex) => {
-          // For total row, adjust vertical position to center in the double border
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-          const cellX = currentX + 2;
+          const cellX = startX + 2;
 
-          // Set text color
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-          // For total row, keep bold font
           if (!isTotalRow) {
-            // Set font
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
-          // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (
+          if (cellIndex === 10) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
             cellIndex === 2 ||
             cellIndex === 3 ||
             cellIndex === 4 ||
-            cellIndex === 5
+            cellIndex === 5 
+            
           ) {
-            const rightAlignX = currentX + columnWidths[cellIndex] - 2;
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
               baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = currentX + columnWidths[0] / 2;
+              const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
                 align: "center",
                 baseline: "middle",
@@ -973,58 +990,37 @@ export default function EmployeeAdvanceReport() {
             }
           }
 
-          // Draw column borders
-          if (isTotalRow) {
-            // Double border for total row columns
-            doc.setLineWidth(0.3);
-            doc.rect(
-              currentX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
-            );
-            doc.setLineWidth(0.3);
-            doc.rect(
-              currentX + 0.5,
-              startY + (i - startIndex + 2) * rowHeight + 0.5,
-              columnWidths[cellIndex] - 1,
-              rowHeight - 1
-            );
-          } else {
-            // Normal border for other rows
+          if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
-            doc.rect(
-              currentX,
+            doc.line(
+              startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
             );
+            startX += columnWidths[cellIndex];
           }
-
-          // Move to next column
-          currentX += columnWidths[cellIndex];
         });
 
-        // Reset font after total row
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Draw line at the bottom of the page with padding
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
       doc.setLineWidth(0.3);
       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 12;
-
-      // Add heading "Crystal Solution" aligned left bottom of the line
+      const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -1087,9 +1083,14 @@ export default function EmployeeAdvanceReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+    
+           doc.setFontSize(10);
+        doc.setFont('helvetica', "300");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+       
+        doc.setFont('verdana-regular', "normal");
+         doc.setFontSize(10);
         addTitle(
           `Employee Advance Report From ${fromInputDate} To ${toInputDate}`,
           "",
@@ -1104,8 +1105,7 @@ export default function EmployeeAdvanceReport() {
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
         // Set font size and weight for the labels
-        doc.setFontSize(10);
-        doc.setFont(getfontstyle, "300");
+    
 
         let RATE =
           transectionType === "P"
@@ -1143,8 +1143,8 @@ export default function EmployeeAdvanceReport() {
         let search = searchQuery ? searchQuery : "";
 
         // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
+       doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10); // Font size
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
@@ -1180,8 +1180,7 @@ export default function EmployeeAdvanceReport() {
         // }
 
         // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
+        
 
         startY += 1; // Adjust vertical position for the labels
 
@@ -1270,11 +1269,18 @@ export default function EmployeeAdvanceReport() {
     worksheet.addRow([]);
 
     // Add company name
-    const companyRow = worksheet.addRow([comapnyname]);
-    companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
-      cell.alignment = { horizontal: "center" };
-    });
+ // Add company name
+const companyRow = worksheet.addRow([comapnyname]);
+
+companyRow.eachCell((cell) => {
+  cell.font = {
+    name: "Times New Roman",
+    size: 16,       // optional
+    bold: true,     // optional
+  };
+  cell.alignment = { horizontal: "center" };
+});
+
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(

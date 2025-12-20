@@ -29,7 +29,7 @@ import { Code, Description, Store } from "@mui/icons-material";
 import "../../../vardana/vardana";
 import "../../../vardana/verdana-bold";
 
-export default function EmployeeSaleSummaryReport() {
+export default function EmployeeMarginReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -88,7 +88,7 @@ export default function EmployeeSaleSummaryReport() {
   const [sortData, setSortData] = useState("ASC");
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("A");
+  const [transectionType, settransectionType] = useState("P");
   const [transectionType2, settransectionType2] = useState("");
 
   const [totalqnty, settotalqnty] = useState(0);
@@ -98,6 +98,7 @@ export default function EmployeeSaleSummaryReport() {
 
   const [totaldebit, settotaldebit] = useState(0);
   const [totalcredit, settotalcredit] = useState(0);
+  const [ClosingBalance, setClosingBalance] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -300,9 +301,9 @@ export default function EmployeeSaleSummaryReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (saleSelectRef.current) {
+        if (employeeref.current) {
           e.preventDefault();
-          saleSelectRef.current.focus();
+          employeeref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -421,7 +422,7 @@ export default function EmployeeSaleSummaryReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeSaleSummary.php";
+    const apiUrl = apiLinks + "/EmployeeMarginReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -432,6 +433,7 @@ export default function EmployeeSaleSummaryReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
+      FRepRat: transectionType,
       // code: organisation.code,
       // FLocCod: locationnumber || getLocationNumber,
       // FYerDsc: yeardescription || getyeardescription,
@@ -449,7 +451,7 @@ export default function EmployeeSaleSummaryReport() {
 
         settotaldebit(response.data["Total Qnty"]);
         settotalcredit(response.data["Total Amount"]);
-        //    setClosingBalance(response.data["Closing Bal "]);
+        setClosingBalance(response.data["Total Margin"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -470,10 +472,7 @@ export default function EmployeeSaleSummaryReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (
-      !hasComponentMountedPreviously ||
-      (fromRef && fromRef.current)
-    ) {
+    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
       if (fromRef && fromRef.current) {
         setTimeout(() => {
           fromRef.current.focus();
@@ -856,25 +855,48 @@ export default function EmployeeSaleSummaryReport() {
 
   const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.code,
-
-      item.Description,
-      item.Rate,
-      item.Qnty,
-      item["Sale Amount"],
+      formatValue(item.Date),
+      formatValue(item["Trn#"]),
+      formatValue(item.Type),
+      formatValue(item.Description),
+      //    item.Store,
+      formatValue(item.Qnty),
+      formatValue(item.Rate),
+      formatValue(item["Sale Amount"]),
+      formatValue(item.Margin),
     ]);
 
     // Add summary row to the table
-    rows.push(["", "Total", "", String(totaldebit), String(totalcredit)]);
+    rows.push([
+      "",
+      "",
+      "",
+      "Total",
+      //    "",
+      String(formatValue(totaldebit)),
+      "",
+      String(formatValue(totalcredit)),
+      String(formatValue(ClosingBalance)),
+    ]);
 
     // Define table column headers and individual column widths
 
-    const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-    const columnWidths = [38, 95, 22, 18, 22];
+    const headers = [
+      "Date",
+      "Trn#",
+      "Type",
+      "Description",
+      //    "Store",
+      "Qnty",
+      "Rate",
+      "Amount",
+      "Margin",
+    ];
+    const columnWidths = [24, 18, 12, 110, 15, 25, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1008,13 +1030,18 @@ export default function EmployeeSaleSummaryReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 12) {
+          if (cellIndex === 2) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+          } else if (
+            cellIndex === 4 ||
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7
+          ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1081,7 +1108,7 @@ export default function EmployeeSaleSummaryReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 45; // Adjust this value based on your requirements
+    const rowsPerPage = 27; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1113,10 +1140,11 @@ export default function EmployeeSaleSummaryReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 5,
+          rightX - 15,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
@@ -1127,15 +1155,14 @@ export default function EmployeeSaleSummaryReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-     doc.setFont("Times New Roman", "normal");
-         doc.setFontSize(10);
+        doc.setFont("Times New Roman", "normal");
+        doc.setFontSize(10);
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-    
         doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(12);
+        doc.setFontSize(10);
         addTitle(
-          `Employee Sale Report From ${fromInputDate} To ${toInputDate}`,
+          `Employee Margin Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1147,7 +1174,7 @@ export default function EmployeeSaleSummaryReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let RATE =
+        let ratedata =
           transectionType === "P"
             ? "PURCHASE RATE"
             : transectionType == "M"
@@ -1167,10 +1194,9 @@ export default function EmployeeSaleSummaryReport() {
             ? "PURCHASE RETURN"
             : "ALL";
 
-        let employeedata = Employeeselectdatavalue.label
+        let EMPLOYEEDATA = Employeeselectdatavalue.label
           ? Employeeselectdatavalue.label
           : "ALL";
-
         let typeText = capacityselectdatavalue.label
           ? capacityselectdatavalue.label
           : "ALL";
@@ -1180,71 +1206,71 @@ export default function EmployeeSaleSummaryReport() {
         let category = categoryselectdatavalue.label
           ? categoryselectdatavalue.label
           : "ALL";
-        let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label
-          : "ALL";
+        //  let typename = typeselectdatavalue.label
+        //    ? typeselectdatavalue.label
+        //    : "ALL";
 
         let search = searchQuery ? searchQuery : "";
 
-        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold");
         doc.setFontSize(10);
         doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${employeedata}`, labelsX + 25, labelsY); // Draw the value next to the label
+        doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold");
         doc.setFontSize(10);
         doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Store :`, labelsX + 120, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.text(`Rate :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${typename}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${ratedata}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold");
         doc.setFontSize(10);
         doc.text(`Category :`, labelsX, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         doc.text(`${category}`, labelsX + 25, labelsY + 8.3); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Type :`, labelsX + 120, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.text(`Type :`, labelsX + 180, labelsY + 8.3); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${transectionsts}`, labelsX + 145, labelsY + 8.3); // Draw the value next to the label
+        doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.3); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
         // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold");
         doc.setFontSize(10);
         doc.text(`Capacity :`, labelsX, labelsY + 12.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         doc.text(`${typeText}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 120, labelsY + 8.5); // Draw bold label
+        // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 145, labelsY + 8.5); // Draw the value next to the label
+        // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
-          doc.setFont("verdana", "bold"); // Set font to bold
+          doc.setFont("verdana", "bold");
           doc.setFontSize(10);
-          doc.text(`Search :`, labelsX + 120, labelsY + 12.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal"); // Set font to bold
+          doc.text(`Search :`, labelsX + 180, labelsY + 12.5); // Draw bold label
+          doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
-          doc.text(`${search}`, labelsX + 145, labelsY + 12.5); // Draw the value next to the label
+          doc.text(`${search}`, labelsX + 205, labelsY + 12.5); // Draw the value next to the label
         }
 
         startY += 15; // Adjust vertical position for the labels
@@ -1290,16 +1316,25 @@ export default function EmployeeSaleSummaryReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeSaleSummaryReportPos As On ${date}.pdf`);
+    doc.save(`EmployeeMarginReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 5; // Ensure this matches the actual number of columns
+    const numColumns = 7; // Ensure this matches the actual number of columns
 
-    const columnAlignments = ["left", "left", "right", "right", "right"];
+    const columnAlignments = [
+      "left",
+      "left",
+      "center",
+      "left",
+      "right",
+      "right",
+      "right",
+      "right",
+    ];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -1328,25 +1363,26 @@ export default function EmployeeSaleSummaryReport() {
 
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
+
     companyRow.eachCell((cell) => {
-  cell.font = {
-    name: "Times New Roman",
-    size: 16,       // optional
-    bold: true,     // optional
-  };
-  cell.alignment = { horizontal: "center" };
-});
+      cell.font = {
+        name: "Times New Roman",
+        size: 16, // optional
+        bold: true, // optional
+      };
+      cell.alignment = { horizontal: "center" };
+    });
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      `A${companyRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
         companyRow.number
       }`
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Sale Report From ${fromInputDate} To ${toInputDate}`,
+      `Employee Margin Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1354,7 +1390,7 @@ export default function EmployeeSaleSummaryReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      `A${storeListRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
         storeListRow.number
       }`
     );
@@ -1375,11 +1411,11 @@ export default function EmployeeSaleSummaryReport() {
     let typecategory = categoryselectdatavalue.label
       ? categoryselectdatavalue.label
       : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
-      : "ALL ";
+    //  let typetype = typeselectdatavalue.label
+    //    ? typeselectdatavalue.label
+    //    : "ALL ";
 
-    let RATE =
+    let ratedata =
       transectionType === "P"
         ? "PURCHASE RATE"
         : transectionType == "M"
@@ -1401,59 +1437,64 @@ export default function EmployeeSaleSummaryReport() {
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow5 = worksheet.addRow(["Employee :", employeedata, ""]);
+    const typeAndStoreRow5 = worksheet.addRow([
+      "Employee :",
+      employeedata,
+      "",
+      "",
+      "",
+    ]);
+
+    worksheet.mergeCells(
+      `B${typeAndStoreRow5.number}:D${typeAndStoreRow5.number}`
+    );
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
       "Company :",
       typecompany,
       "",
-
-      "Store :",
-      typetype,
+      "",
+      "",
+      "Rate :",
+      ratedata,
     ]);
+
+    worksheet.mergeCells(
+      `B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`
+    );
 
     // Add second row
     const typeAndStoreRow2 = worksheet.addRow([
       "Category :",
       typecategory,
       "",
+      "",
+      "",
 
       "Type :",
       transectionsts,
     ]);
 
-    // const typeAndStoreRow3 = worksheet.addRow([
-    //     "CAPACITY :",
-    //     typecapacity,
-    //    "",
-    //      "",
-    //       "",
-    //        "",
-    //     "STATUS :",
-    //     transectionsts,
-    // ]);
-
+    worksheet.mergeCells(
+      `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`
+    );
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
       searchQuery
-        ? ["Capacity :", typecapacity, "", "Search :", typesearch]
+        ? ["Capacity :", typecapacity, "", "", "", "Search :", typesearch]
         : ["Capacity :", typecapacity]
     );
 
+    worksheet.mergeCells(
+      `B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`
+    );
+
     // Apply styling for the status row
-    typeAndStoreRow5.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1461,7 +1502,15 @@ export default function EmployeeSaleSummaryReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+    typeAndStoreRow5.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1478,7 +1527,7 @@ export default function EmployeeSaleSummaryReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1501,19 +1550,32 @@ export default function EmployeeSaleSummaryReport() {
     };
 
     // Add headers
-    const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
+    const headers = [
+      "Date",
+      "Trn#",
+      "Type",
+      "Description",
+      //    "Store",
+      "Qnty",
+      "Rate",
+      "Amount",
+      "Margin",
+    ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.code,
-
-        item.Description,
-        item.Rate,
-        item.Qnty,
-        item["Sale Amount"],
+        formatValue(item.Date),
+        formatValue(item["Trn#"]),
+        formatValue(item.Type),
+        formatValue(item.Description),
+        //    item.Store,
+        formatValue(item.Qnty),
+        formatValue(item.Rate),
+        formatValue(item["Sale Amount"]),
+        formatValue(item.Margin),
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1532,16 +1594,20 @@ export default function EmployeeSaleSummaryReport() {
     });
 
     // Set column widths
-    [20, 50, 12, 8, 12].forEach((width, index) => {
+    [10, 8, 6, 50, 8, 8, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
       "",
-      "Total",
       "",
-      String(totaldebit),
-      String(totalcredit),
+      "",
+      "Total",
+      //    "",
+      String(formatValue(totaldebit)),
+      "",
+      String(formatValue(totalcredit)),
+      String(formatValue(ClosingBalance)),
     ]);
 
     // total row added
@@ -1556,7 +1622,7 @@ export default function EmployeeSaleSummaryReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 4 || colNumber === 5) {
+      if (colNumber === 5 || colNumber === 7 || colNumber === 8) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1624,7 +1690,7 @@ export default function EmployeeSaleSummaryReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeSaleSummaryReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `EmployeeMarginReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1734,53 +1800,33 @@ export default function EmployeeSaleSummaryReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
-
   const firstColWidth = {
-    width: "135px",
+    width: "80px",
   };
   const secondColWidth = {
-    width: "360px",
+    width: "55px",
   };
   const thirdColWidth = {
-    width: "80px",
+    width: "45px",
   };
   const forthColWidth = {
-    width: "80px",
+    width: "360px",
   };
-  const sixthColWidth = {
-    width: "80px",
+  //   const sixthColWidth = {
+  //     width: "40px",
+  //   };
+  const seventhColWidth = {
+    width: "60px",
   };
-
+  const eightColWidth = {
+    width: "100px",
+  };
+  const ninthColWidth = {
+    width: "100px",
+  };
+  const tenthColWidth = {
+    width: "100px",
+  };
   const sixthcol = {
     width: "8px",
   };
@@ -2076,475 +2122,490 @@ export default function EmployeeSaleSummaryReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Sale Summary Report" />
+          <NavComponent textdata="Employee Margin Report" />
 
           {/* ------------1st row */}
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "start",
-                       }}
-                     >
-         
-                      
-                       <div className="d-flex align-items-center" style={{marginLeft:'5px'}}>
-                         <div
-                           style={{
-                             width: "90px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="fromDatePicker">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               From :
-                             </span>
-                           </label>
-                         </div>
-                         <div
-                           id="fromdatevalidation"
-                           style={{
-                             width: "135px",
-                             border: `1px solid ${fontcolor}`,
-                             display: "flex",
-                             alignItems: "center",
-                             height: "24px",
-                             justifyContent: "center",
-                             marginLeft: "5px",
-                             background: getcolor,
-                           }}
-                           onFocus={(e) =>
-                             (e.currentTarget.style.border = "2px solid red")
-                           }
-                           onBlur={(e) =>
-                             (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                           }
-                         >
-                           <input
-                             style={{
-                               height: "20px",
-                               width: "90px",
-                               paddingLeft: "5px",
-                               outline: "none",
-                               border: "none",
-                               fontSize: "12px",
-                               backgroundColor: getcolor,
-                               color: fontcolor,
-                               opacity: selectedRadio === "custom" ? 1 : 0.5,
-                               pointerEvents:
-                                 selectedRadio === "custom" ? "auto" : "none",
-                             }}
-                             id="frominputid"
-                             value={fromInputDate}
-                             ref={fromRef}
-                             onChange={handlefromInputChange}
-                             onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                             autoComplete="off"
-                             placeholder="dd-mm-yyyy"
-                             aria-label="Date Input"
-                             disabled={selectedRadio !== "custom"}
-                           />
-                           <DatePicker
-                             selected={selectedfromDate}
-                             onChange={handlefromDateChange}
-                             dateFormat="dd-MM-yyyy"
-                             popperPlacement="bottom"
-                             showPopperArrow={false}
-                             open={fromCalendarOpen}
-                             dropdownMode="select"
-                             customInput={
-                               <div>
-                                 <BsCalendar
-                                   onClick={
-                                     selectedRadio === "custom"
-                                       ? toggleFromCalendar
-                                       : undefined
-                                   }
-                                   style={{
-                                     cursor:
-                                       selectedRadio === "custom"
-                                         ? "pointer"
-                                         : "default",
-                                     marginLeft: "18px",
-                                     fontSize: getdatafontsize,
-                                     fontFamily: getfontstyle,
-                                     color: fontcolor,
-                                     opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                   }}
-                                   disabled={selectedRadio !== "custom"}
-                                 />
-                               </div>
-                             }
-                             disabled={selectedRadio !== "custom"}
-                           />
-                         </div>
-                       </div>
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginLeft:'50px' }}
-                       >
-                         <div
-                           style={{
-                             width: "60px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="toDatePicker">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               To :
-                             </span>
-                           </label>
-                         </div>
-                         <div
-                           id="todatevalidation"
-                           style={{
-                             width: "135px",
-                             border: `1px solid ${fontcolor}`,
-                             display: "flex",
-                             alignItems: "center",
-                             height: "24px",
-                             justifyContent: "center",
-                             marginLeft: "5px",
-                             background: getcolor,
-                           }}
-                           onFocus={(e) =>
-                             (e.currentTarget.style.border = "2px solid red")
-                           }
-                           onBlur={(e) =>
-                             (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                           }
-                         >
-                           <input
-                             ref={toRef}
-                             style={{
-                               height: "20px",
-                               width: "90px",
-                               paddingLeft: "5px",
-                               outline: "none",
-                               border: "none",
-                               fontSize: getdatafontsize,
-                               fontFamily: getfontstyle,
-                               backgroundColor: getcolor,
-                               color: fontcolor,
-                               opacity: selectedRadio === "custom" ? 1 : 0.5,
-                               pointerEvents:
-                                 selectedRadio === "custom" ? "auto" : "none",
-                             }}
-                             value={toInputDate}
-                             onChange={handleToInputChange}
-                             onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
-                             id="toDatePicker"
-                             autoComplete="off"
-                             placeholder="dd-mm-yyyy"
-                             aria-label="To Date Input"
-                             disabled={selectedRadio !== "custom"}
-                           />
-                           <DatePicker
-                             selected={selectedToDate}
-                             onChange={handleToDateChange}
-                             dateFormat="dd-MM-yyyy"
-                             popperPlacement="bottom"
-                             showPopperArrow={false}
-                             open={toCalendarOpen}
-                             dropdownMode="select"
-                             customInput={
-                               <div>
-                                 <BsCalendar
-                                   onClick={
-                                     selectedRadio === "custom"
-                                       ? toggleToCalendar
-                                       : undefined
-                                   }
-                                   style={{
-                                     cursor:
-                                       selectedRadio === "custom"
-                                         ? "pointer"
-                                         : "default",
-                                     marginLeft: "18px",
-                                     fontSize: getdatafontsize,
-                                     fontFamily: getfontstyle,
-                                     color: fontcolor,
-                                     opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                   }}
-                                   disabled={selectedRadio !== "custom"}
-                                 />
-                               </div>
-                             }
-                             disabled={selectedRadio !== "custom"}
-                           />
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-         
-                    <div
-                     className="row"
-                     style={{ marginTop: "8px", marginBottom: "8px" , margin:'0px'}}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "start",
-                         border:'1px solid lightgrey',
-                         // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
-                       }}
-                     ></div>
-         
-                     
-         
-                     </div>
-         
-                   {/* //////////////// second ROW ///////////////////////// */}
-         
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "space-between",
-                       }}
-                     >
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginLeft: "7px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Company :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class"
-                             ref={saleSelectRef}
-                             options={options}
-                             onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                               if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-                                 setCompanyselectdata(selectedOption.value);
-                                 setCompanyselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart,
-                                 });
-                               } else {
-                                 setCompanyselectdata("");
-                                 setCompanyselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Companyselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             isClearable
-                             placeholder="ALL"
-                           />
-                         </div>
-                       </div>
-         
-                       
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginRight: "21px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Employee :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class"
-                             ref={employeeref}
-                             options={employeeoptions}
-                             value={
-                               employeeoptions.find(
-                                 (opt) => opt.value === Employeeselectdata
-                               ) || null
-                             } // Ensure correct reference
-                             onKeyDown={(e) => handleEmployeeKeypress(e, input4Ref)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                              if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-         
-                                 setEmployeeselectdata(selectedOption.value);
-                                 setEmployeeselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart, // Keep only the description
-                                 });
-                               } else {
-                                 setEmployeeselectdata("");
-                                 setEmployeeselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Employeeselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             isClearable
-                             placeholder="ALL"
-                           />
-                         </div>
-                       </div>
-         
-                       {/* <div
-                                         className="d-flex align-items-center"
-                                         style={{ marginRight: "21px" }}
-                                     >
-                                         <div
-                                             style={{
-                                                 marginLeft: "10px",
-                                                 width: "80px",
-                                                 display: "flex",
-                                                 justifyContent: "end",
-                                             }}
-                                         >
-                                             <label htmlFor="transactionType">
-                                                 <span
-                                                     style={{
-                                                         fontSize: getdatafontsize,
-                                                         fontFamily: getfontstyle,
-                                                         fontWeight: "bold",
-                                                     }}
-                                                 >
-                                                     Rate :
-                                                 </span>
-                                             </label>
-                                         </div>
-         
-                                         <select
-                                             ref={input4Refrate}
-                                             onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                             id="submitButton"
-                                             name="type"
-                                             onFocus={(e) =>
-                                                 (e.currentTarget.style.border = "4px solid red")
-                                             }
-                                             onBlur={(e) =>
-                                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                             }
-                                             value={transectionType}
-                                             onChange={handleTransactionTypeChange}
-                                             style={{
-                                                 width: "250px",
-                                                 height: "24px",
-                                                 marginLeft: "3px",
-                                                 backgroundColor: getcolor,
-                                                 border: `1px solid ${fontcolor}`,
-                                                 fontSize: getdatafontsize,
-                                                 fontFamily: getfontstyle,
-                                                 color: fontcolor,
-                                                 paddingLeft: "12px",
-                                             }}
-                                         >
-                                               <option value="A">AVERAGE RATE</option>
-                                             <option value="P">PURCHASE RATE</option>
-                                             <option value="M">LAST SM RATE</option>
-                                               <option value="W">WEIGHTED AVERAGE</option>
-                                             <option value="F">FIFO</option>
-                                         </select>
-                                     </div> */}
-                     </div>
-                   </div>
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "5px" }}
+              >
+                <div
+                  style={{
+                    width: "90px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      From :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="fromdatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontSize: "12px",
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    id="frominputid"
+                    value={fromInputDate}
+                    ref={fromRef}
+                    onChange={handlefromInputChange}
+                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedfromDate}
+                    onChange={handlefromDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={fromCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleFromCalendar
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+              <div className="d-flex align-items-center">
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="toDatePicker">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      To :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="todatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    ref={toRef}
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    value={toInputDate}
+                    onChange={handleToInputChange}
+                    onKeyDown={(e) => handleToKeyPress(e, employeeref)}
+                    id="toDatePicker"
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="To Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedToDate}
+                    onChange={handleToDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={toCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleToCalendar
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Employee :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={employeeref}
+                    options={employeeoptions}
+                    value={
+                      employeeoptions.find(
+                        (opt) => opt.value === Employeeselectdata
+                      ) || null
+                    } // Ensure correct reference
+                    onKeyDown={(e) => handleEmployeeKeypress(e, saleSelectRef)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+
+                        setEmployeeselectdata(selectedOption.value);
+                        setEmployeeselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Keep only the description
+                        });
+                      } else {
+                        setEmployeeselectdata("");
+                        setEmployeeselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Employeeselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="row"
+            style={{ marginTop: "8px", marginBottom: "8px", margin: "0px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "start",
+                border: "1px solid lightgrey",
+                // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
+              }}
+            ></div>
+          </div>
+
+          {/* //////////////// second ROW ///////////////////////// */}
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "7px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Company :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={saleSelectRef}
+                    options={options}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCompanyselectdata(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setCompanyselectdata("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Rate :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input4Refrate}
+                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "225px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
+                    }}
+                  >
+                    <option value="P">PURCHASE RATE</option>
+                    <option value="A">AVERAGE RATE</option>
+                    <option value="M">LAST SM RATE</option>
+                    <option value="W">WEIGHTED AVERAGE</option>
+                    <option value="F">FIFO</option>
+                  </select>
+
+                  {transectionType !== "P" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
           <div
@@ -2654,36 +2715,6 @@ export default function EmployeeSaleSummaryReport() {
                   </label>
                 </div>
 
-                {/* <select
-                                    ref={input4Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="">ALL</option>
-                                    <option value="BIL">PURCHASE</option>
-                                    <option value="PRN">PURCHASE RETURN</option>
-                                </select> */}
-
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <select
                     ref={input4Ref}
@@ -2783,7 +2814,7 @@ export default function EmployeeSaleSummaryReport() {
                     className="List-select-class "
                     ref={input2Ref}
                     options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, employeeref)}
+                    onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
                     id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2889,7 +2920,6 @@ export default function EmployeeSaleSummaryReport() {
           </div>
 
           <div>
-            {/* Table Head */}
             <div
               style={{
                 overflowY: "auto",
@@ -2903,7 +2933,7 @@ export default function EmployeeSaleSummaryReport() {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   // width: "100%",
-                  position: "relative",
+                  // position: "relative",
                 }}
               >
                 <thead
@@ -2924,63 +2954,35 @@ export default function EmployeeSaleSummaryReport() {
                       color: "white",
                     }}
                   >
-                    <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      onClick={() => handleSorting("code")}
-                    >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
-                      ></i>
+                    <td className="border-dark" style={firstColWidth}>
+                      Date
                     </td>
-                    <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
-                    >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
+                    <td className="border-dark" style={secondColWidth}>
+                      Trn#
                     </td>
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Rate")}
-                    >
-                      Rate{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Rate")}
-                      ></i>
+                    <td className="border-dark" style={thirdColWidth}>
+                      Type
                     </td>
-                    <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Qnty")}
-                    >
-                      Qnty{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
-                      ></i>
+                    <td className="border-dark" style={forthColWidth}>
+                      Description
                     </td>
 
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Sale Amount")}
-                    >
-                      Amount{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Sale Amount")}
-                      ></i>
+                    {/* <td className="border-dark" style={sixthColWidth}>
+                                 Str
+                               </td> */}
+                    <td className="border-dark" style={seventhColWidth}>
+                      Qnty
+                    </td>
+                    <td className="border-dark" style={eightColWidth}>
+                      Rate
+                    </td>
+                    <td className="border-dark" style={ninthColWidth}>
+                      Amount
                     </td>
 
+                    <td className="border-dark" style={tenthColWidth}>
+                      Margin
+                    </td>
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
@@ -3017,7 +3019,7 @@ export default function EmployeeSaleSummaryReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="9" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3030,7 +3032,7 @@ export default function EmployeeSaleSummaryReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 5 }).map((_, colIndex) => (
+                            {Array.from({ length: 9 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3043,17 +3045,29 @@ export default function EmployeeSaleSummaryReport() {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
+                        {/* <td style={sixthColWidth}></td> */}
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
                       </tr>
                     </>
                   ) : (
                     <>
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
+                        const nQnty = Number(
+                          String(item.Qnty).replace(/,/g, "")
+                        );
+                        const nRate = Number(
+                          String(item.Rate).replace(/,/g, "")
+                        );
+                        const nMargin = Number(
+                          String(item.Margin).replace(/,/g, "")
+                        );
+
                         const isNegative =
-                          item.Rate < 0 ||
-                          item.Qnty < 0 ||
-                          item["Sale Amount"] < 0;
+                          nQnty < 0 || nRate < 0 || nMargin < 0;
 
                         return (
                           <tr
@@ -3070,20 +3084,31 @@ export default function EmployeeSaleSummaryReport() {
                             }}
                           >
                             <td className="text-start" style={firstColWidth}>
-                              {item.code}
+                              {item.Date}
                             </td>
                             <td className="text-start" style={secondColWidth}>
+                              {item["Trn#"]}
+                            </td>
+                            <td className="text-center" style={thirdColWidth}>
+                              {item.Type}
+                            </td>
+                            <td className="text-start" style={forthColWidth}>
                               {item.Description}
                             </td>
-                            <td className="text-end" style={thirdColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
-                            <td className="text-end" style={forthColWidth}>
+                            {/* <td className="text-end" style={sixthColWidth}>
+                                         {item.Store}
+                                       </td> */}
+                            <td className="text-end" style={seventhColWidth}>
                               {formatValue(item.Qnty)}
                             </td>
-
-                            <td className="text-end" style={sixthColWidth}>
+                            <td className="text-end" style={eightColWidth}>
+                              {formatValue(item.Rate)}
+                            </td>
+                            <td className="text-end" style={ninthColWidth}>
                               {formatValue(item["Sale Amount"])}
+                            </td>
+                            <td className="text-end" style={tenthColWidth}>
+                              {formatValue(item.Margin)}
                             </td>
                           </tr>
                         );
@@ -3098,7 +3123,7 @@ export default function EmployeeSaleSummaryReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 5 }).map((_, colIndex) => (
+                          {Array.from({ length: 9 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3110,7 +3135,11 @@ export default function EmployeeSaleSummaryReport() {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
+                        {/* <td style={sixthColWidth}></td> */}
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -3163,19 +3192,58 @@ export default function EmployeeSaleSummaryReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
+              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+            </div>
+            {/* <div
+                         style={{
+                           ...sixthColWidth,
+                           background: getcolor,
+                           borderRight: `1px solid ${fontcolor}`,
+                         }}
+                       >
+                         <span className="mobileledger_total">{formatValue(totaldebit)}</span>
+                       </div> */}
+
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
               <span className="mobileledger_total">
                 {formatValue(totaldebit)}
               </span>
             </div>
             <div
               style={{
-                ...sixthColWidth,
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">{totaltax}</span> */}
+            </div>
+            <div
+              style={{
+                ...ninthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
               <span className="mobileledger_total">
                 {formatValue(totalcredit)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(ClosingBalance)}
               </span>
             </div>
           </div>

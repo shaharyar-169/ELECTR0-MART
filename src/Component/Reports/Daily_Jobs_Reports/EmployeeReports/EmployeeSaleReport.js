@@ -21,6 +21,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Description, Store } from "@mui/icons-material";
+import '../../../vardana/vardana';
+import '../../../vardana/verdana-bold'
 
 
 export default function EmployeeSaleReport() {
@@ -426,15 +428,15 @@ export default function EmployeeSaleReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
       FEmpCod: Employeeselectdata,
 
-    //   code: 'NASIRTRD',
-    //   FLocCod: '001',
-    //   FYerDsc: '2024-2024',
+      code: 'NASIRTRD',
+      FLocCod: '001',
+      FYerDsc: '2024-2024',
     }).toString();
 
     axios
@@ -467,12 +469,12 @@ export default function EmployeeSaleReport() {
       sessionStorage.getItem("componentMounted");
     if (
       !hasComponentMountedPreviously ||
-      (employeeref && employeeref.current)
+      (fromRef && fromRef.current)
     ) {
-      if (employeeref && employeeref.current) {
+      if (fromRef && fromRef.current) {
         setTimeout(() => {
-          employeeref.current.focus();
-          // employeeref.current.select();
+          fromRef.current.focus();
+          fromRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -496,10 +498,10 @@ export default function EmployeeSaleReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveEmployee.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-    //   code : 'NASIRTRD',
-    //   FLocCod:'001'
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      code : 'NASIRTRD',
+      FLocCod:'001'
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -852,8 +854,7 @@ export default function EmployeeSaleReport() {
   });
 
   const exportPDFHandler = () => {
-    const globalfontsize = 10;
-    console.log("gobal font data", globalfontsize);
+   
 
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
@@ -894,7 +895,7 @@ export default function EmployeeSaleReport() {
       "Rate",
       "Amount",
     ];
-    const columnWidths = [20, 15, 12, 110, 15, 15, 25, 25];
+    const columnWidths = [24, 18, 12, 110, 15, 15, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -904,14 +905,14 @@ export default function EmployeeSaleReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
+    doc.setFont('verdana-regular', 'normal');
     doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
+      doc.setFont('verdana', 'bold');
+    doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -939,58 +940,73 @@ export default function EmployeeSaleReport() {
     };
 
     const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust row height
-      const fontSize = 10; // Adjust font size
-      const boldFont = 400; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-      doc.setFontSize(fontSize);
+      doc.setFontSize(11);
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isTotalRow = i === rows.length - 1; // Check if this is the total row
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
-        let currentX = startX; // Track current column position
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-        // Check if Qnty (column index 6) is negative
-        if (parseFloat(row[8]) < 0) {
-          textColor = [255, 0, 0]; // Set red color for negative Qnty
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
         }
 
-        // For total row, set bold font and prepare for double border
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "bold");
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
         }
 
-        // Draw row borders
-        doc.setDrawColor(0);
-
-        // For total row, draw double border
-        if (isTotalRow) {
-          // First line of the double border
-          doc.setLineWidth(0.3);
+        if (isOddRow) {
+          doc.setFillColor(240);
           doc.rect(
-            currentX,
+            startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
+            "F"
+          );
+        }
+
+        doc.setDrawColor(0);
+
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
           );
 
-          // Second line of the double border (slightly offset)
-          doc.setLineWidth(0.3);
-          doc.rect(
-            currentX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            tableWidth - 1,
-            rowHeight - 1
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
           );
         } else {
-          // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
-            currentX,
+            startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight
@@ -998,40 +1014,43 @@ export default function EmployeeSaleReport() {
         }
 
         row.forEach((cell, cellIndex) => {
-          // For total row, adjust vertical position to center in the double border
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-          const cellX = currentX + 2;
+          const cellX = startX + 2;
 
-          // Set text color
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-          // For total row, keep bold font
           if (!isTotalRow) {
-            // Set font
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
-          // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (
+          if (cellIndex === 2) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+          
             cellIndex === 4 ||
             cellIndex === 5 ||
             cellIndex === 6 ||
-            cellIndex === 7
+            cellIndex === 7 
+          
           ) {
-            const rightAlignX = currentX + columnWidths[cellIndex] - 2;
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
               baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = currentX + columnWidths[0] / 2;
+              const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
                 align: "center",
                 baseline: "middle",
@@ -1043,58 +1062,39 @@ export default function EmployeeSaleReport() {
             }
           }
 
-          // Draw column borders
-          if (isTotalRow) {
-            // Double border for total row columns
-            doc.setLineWidth(0.3);
-            doc.rect(
-              currentX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
-            );
-            doc.setLineWidth(0.3);
-            doc.rect(
-              currentX + 0.5,
-              startY + (i - startIndex + 2) * rowHeight + 0.5,
-              columnWidths[cellIndex] - 1,
-              rowHeight - 1
-            );
-          } else {
-            // Normal border for other rows
+          if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
-            doc.rect(
-              currentX,
+            doc.line(
+              startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
             );
+            startX += columnWidths[cellIndex];
           }
-
-          // Move to next column
-          currentX += columnWidths[cellIndex];
         });
 
-        // Reset font after total row
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Draw line at the bottom of the page with padding
+      
+
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
       doc.setLineWidth(0.3);
       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 12;
-
-      // Add heading "Crystal Solution" aligned left bottom of the line
+      const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -1143,10 +1143,11 @@ export default function EmployeeSaleReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
+        doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 5,
+          rightX - 15,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
@@ -1157,9 +1158,12 @@ export default function EmployeeSaleReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+      doc.setFont('Times New Roman', 'normal');
+    doc.setFontSize(10);
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+ doc.setFont('verdana-regular', 'normal');
+    doc.setFontSize(10);
         addTitle(
           `Item Sale Report From ${fromInputDate} To ${toInputDate}`,
           "",
@@ -1173,9 +1177,6 @@ export default function EmployeeSaleReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-        doc.setFontSize(10);
-        doc.setFont(getfontstyle, "300");
 
         let RATE =
           transectionType === "P"
@@ -1215,33 +1216,42 @@ export default function EmployeeSaleReport() {
 
         let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
+     
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`EMPLOYEE :`, labelsX, labelsY); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
+    doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+                doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`COMPANY :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+                doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STORE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typename}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CATEGORY :`, labelsX, labelsY + 8.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Store :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+                doc.text(`${typename}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Category :`, labelsX, labelsY + 8.3); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)       
         doc.text(`${category}`, labelsX + 25, labelsY + 8.3); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 180, labelsY + 8.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+        doc.text(`Type :`, labelsX + 180, labelsY + 8.3); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
         doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.3); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
@@ -1249,10 +1259,12 @@ export default function EmployeeSaleReport() {
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
         // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CAPACITY :`, labelsX, labelsY + 12.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Capacity :`, labelsX, labelsY + 12.5); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+                doc.text(`${typeText}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
@@ -1260,15 +1272,15 @@ export default function EmployeeSaleReport() {
         // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 180, labelsY + 12.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+          doc.text(`Search :`, labelsX + 180, labelsY + 12.5); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
           doc.text(`${search}`, labelsX + 205, labelsY + 12.5); // Draw the value next to the label
         }
 
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
+       
 
         startY += 15; // Adjust vertical position for the labels
 
@@ -1360,10 +1372,15 @@ export default function EmployeeSaleReport() {
 
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
+ 
     companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
-      cell.alignment = { horizontal: "center" };
-    });
+  cell.font = {
+    name: "Times New Roman",
+    size: 16,       // optional
+    bold: true,     // optional
+  };
+  cell.alignment = { horizontal: "center" };
+});
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
@@ -1430,7 +1447,7 @@ export default function EmployeeSaleReport() {
     let typesearch = searchQuery ? searchQuery : "";
 
     const typeAndStoreRow5 = worksheet.addRow([
-      "EMPLOYEE :",
+      "Employee :",
       employeedata,
       "",
       "",
@@ -1440,12 +1457,12 @@ export default function EmployeeSaleReport() {
      worksheet.mergeCells(`B${typeAndStoreRow5.number}:D${typeAndStoreRow5.number}`);
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
-      "COMPANY :",
+      "Company :",
       typecompany,
       "",
       "",
       "",
-      "STORE :",
+      "Store :",
       typetype,
     ]);
 
@@ -1453,13 +1470,13 @@ export default function EmployeeSaleReport() {
 
     // Add second row
     const typeAndStoreRow2 = worksheet.addRow([
-      "CATEGORY :",
+      "Category :",
       typecategory,
       "",
       "",
       "",
 
-      "TYPE :",
+      "Type :",
       transectionsts,
     ]);
 
@@ -1467,8 +1484,8 @@ export default function EmployeeSaleReport() {
       // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
       searchQuery
-        ? ["CAPACITY :", typecapacity, "", "", "", "SEARCH :", typesearch]
-        : ["CAPACITY :", typecapacity]
+        ? ["Capacity :", typecapacity, "", "", "", "Search :", typesearch]
+        : ["Capacity :", typecapacity]
     );
 
      worksheet.mergeCells(`B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`);
@@ -1577,7 +1594,7 @@ export default function EmployeeSaleReport() {
     });
 
     // Set column widths
-    [12, 8, 6, 50, 8, 8, 15, 15].forEach((width, index) => {
+    [10, 8, 6, 50, 8, 8, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -2065,90 +2082,15 @@ export default function EmployeeSaleReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
+
+             
+              <div className="d-flex align-items-center" style={{marginLeft:'5px'}}>
                 <div
                   style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Employee :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={employeeref}
-                    options={employeeoptions}
-                    value={
-                      employeeoptions.find(
-                        (opt) => opt.value === Employeeselectdata
-                      ) || null
-                    } // Ensure correct reference
-                    onKeyDown={(e) => handleEmployeeKeypress(e, fromRef)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                     if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-
-                        setEmployeeselectdata(selectedOption.value);
-                        setEmployeeselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Keep only the description
-                        });
-                      } else {
-                        setEmployeeselectdata("");
-                        setEmployeeselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Employeeselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <div
-                  style={{
-                    width: "80px",
+                    width: "90px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2245,7 +2187,7 @@ export default function EmployeeSaleReport() {
               </div>
               <div
                 className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
+                style={{ marginLeft:'50px' }}
               >
                 <div
                   style={{
@@ -2348,6 +2290,27 @@ export default function EmployeeSaleReport() {
             </div>
           </div>
 
+           <div
+            className="row"
+            style={{ marginTop: "8px", marginBottom: "8px" , margin:'0px'}}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "start",
+                border:'1px solid lightgrey',
+                // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
+              }}
+            ></div>
+
+            
+
+            </div>
+
           {/* //////////////// second ROW ///////////////////////// */}
 
           <div
@@ -2436,9 +2399,10 @@ export default function EmployeeSaleReport() {
                 </div>
               </div>
 
+              
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
@@ -2457,32 +2421,37 @@ export default function EmployeeSaleReport() {
                         fontSize: getdatafontsize,
                         fontFamily: getfontstyle,
                         fontWeight: "bold",
-                        marginRight: "3px",
                       }}
                     >
-                      Store :
+                      Employee :
                     </span>
                   </label>
                 </div>
 
-                <div style={{ marginRight: "21px" }}>
+                <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={input6Ref}
-                    options={typeoptions}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
+                    ref={employeeref}
+                    options={employeeoptions}
+                    value={
+                      employeeoptions.find(
+                        (opt) => opt.value === Employeeselectdata
+                      ) || null
+                    } // Ensure correct reference
+                    onKeyDown={(e) => handleEmployeeKeypress(e, input4Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
+                     if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
-                        setTypeselectdata(selectedOption.value);
-                        settypeselectdatavalue({
+
+                        setEmployeeselectdata(selectedOption.value);
+                        setEmployeeselectdatavalue({
                           value: selectedOption.value,
-                          label: labelPart,
+                          label: labelPart, // Keep only the description
                         });
                       } else {
-                        setTypeselectdata("");
-                        settypeselectdatavalue("");
+                        setEmployeeselectdata("");
+                        setEmployeeselectdatavalue("");
                       }
                     }}
                     onInputChange={(inputValue, { action }) => {
@@ -2493,7 +2462,7 @@ export default function EmployeeSaleReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata),
+                      ...customStyles1(!Employeeselectdata),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2806,7 +2775,7 @@ export default function EmployeeSaleReport() {
                     className="List-select-class "
                     ref={input2Ref}
                     options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input6Ref)}
+                    onKeyDown={(e) => handlecapacityKeypress(e, employeeref)}
                     id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
