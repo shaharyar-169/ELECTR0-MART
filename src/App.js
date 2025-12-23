@@ -136,14 +136,18 @@ import DailyMemberCollectionReport from "./Component/Reports/Daily_Jobs_Reports/
 import DailyMemberCollectionSummaryReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyMemberCollectionSummary.js";
 import ExpenseReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/ExpenseReport.js";
 import TechnicianCollectionReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/TechnicianCollectionReport.js";
-//////////////////////////// Installments reports //////////////////////////////
+import DailySparePartsDemandReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySparePartsDemandReport.js";
+import DailySparePartsIssueReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySparePartIssueReport.js";
+import PurchaseOrderStatusReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/PurchaseOrderStatusReport.js";
 
+//////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
 import InstallmentSaleReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentSaleReport.js";
 import InstallmentCollectReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectReport.js";
 import InstallmentLedgerReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentLedgerReport.js";
 import InstallmentCollectionDailyComparison from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectionDailyComparison.js";
 import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectionMonthlyComparison.js";
+import InstallmentCustomerList from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCustomerList.js";
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
@@ -321,6 +325,9 @@ function App() {
                 <Route exact path="/MemberCollectionSummary" element={<DailyMemberCollectionSummaryReport />} />
                 <Route exact path="/ExpenseReportGYM" element={<ExpenseReport />} />
                 <Route exact path="/TechnicianCollectionReport" element={<TechnicianCollectionReport />} />
+                <Route exact path="/InstallmentCollectorRoute" element={<DailySparePartsDemandReport />} />
+                <Route exact path="/InstallmentOutstandingReport" element={<DailySparePartsIssueReport />} />
+                <Route exact path="/InstallmentNilCollectionReport" element={<PurchaseOrderStatusReport />} />
 
 
                 {/* Rountes for Installments reports */}
@@ -330,6 +337,7 @@ function App() {
                 <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
                 <Route exact path="/InstallmentCollectionDailyComparison" element={<InstallmentCollectionDailyComparison />} />
                 <Route exact path="/InstallmentCollectorMonthlyComparison" element={<InstallmentCollectionMonthlyComparison />} />
+                <Route exact path="/InstallmentRecveryReport" element={<InstallmentCustomerList />} />
 
 
                 {/* Rountes for item reports */}

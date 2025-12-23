@@ -27,6 +27,8 @@ import "./demo.css";
 import { getcompanyData } from "../../../File/Category_Maintenance/Category_Maintenance_Api";
 import { Category, CategoryTwoTone } from "@mui/icons-material";
 
+
+
 export default function SparePartsList() {
   const navigate = useNavigate();
   const user = getUserData();
@@ -107,10 +109,9 @@ export default function SparePartsList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      code: "IZONECOMP",
-      FLocCod: "001",
-      FCtgCod: Companyselectdata,
-      FCapCod: Capacityselectdata,
+      //   code: "IZONECOMP",
+      //   FLocCod: "001",
+      FCtgCod: Categoryselectdata,
       FTypCod: Typeselectdata,
       FCmpCod: Companyselectdata,
       FSchTxt: searchQuery,
@@ -436,7 +437,7 @@ export default function SparePartsList() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected ? "white" : fontcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -1317,7 +1318,6 @@ export default function SparePartsList() {
   }, [tableData]);
 
   const renderTableData = () => {
-   
     return (
       <>
         {isLoading ? (
@@ -2149,3 +2149,4 @@ export default function SparePartsList() {
     </>
   );
 }
+
