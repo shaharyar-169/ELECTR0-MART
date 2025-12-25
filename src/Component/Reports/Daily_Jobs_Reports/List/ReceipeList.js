@@ -594,6 +594,7 @@ export default function ReceipItemList() {
     });
 
     // Column widths
+    // Column widths
     [10, 45, 7,12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
