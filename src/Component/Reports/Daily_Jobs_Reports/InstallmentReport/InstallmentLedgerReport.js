@@ -30,71 +30,26 @@ import "../../../vardana/vardana";
 import "../../../vardana/verdana-bold";
 
 export default function InstallmentLedgerReport() {
-  const navigate = useNavigate();
-  const user = getUserData();
-  const organisation = getOrganisationData();
-
   const saleSelectRef = useRef(null);
-
-  const toRef = useRef(null);
-  const fromRef = useRef(null);
-  const companyRef = useRef(null);
-  const categoryRef = useRef(null);
-  const capacityRef = useRef(null);
-  const storeRef = useRef(null);
-  const typeRef = useRef(null);
-  const searchRef = useRef(null);
-  const selectButtonRef = useRef(null);
-
-  const [saleType, setSaleType] = useState("");
-
-  const [storeList, setStoreList] = useState([]);
-  const [storeType, setStoreType] = useState("");
-
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
-  const input4Refrate = useRef(null);
-  const input5Ref = useRef(null);
-  const input4Ref = useRef(null);
-  const input6Ref = useRef(null);
+ const navigate = useNavigate();
+  const toRef = useRef(null);
+  const fromRef = useRef(null);
 
-  const [Companyselectdata, setCompanyselectdata] = useState("");
-
-  console.log("Companyselectdata", Companyselectdata);
+  const [CashBookSummaryData, setCashBookSummaryData] = useState([]);
+  const [CashPaymentData, setCashPaymentData] = useState([]);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-
-  const [Capacityselectdata, setCapacityselectdata] = useState("");
-  const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
-
-  const [tableData, setTableData] = useState([]);
-  console.log("tableData", tableData);
-  const [GetCapacity, setGetCapacity] = useState([]);
-  const [GetCompany, setGetCompany] = useState([]);
-  const [Categoryselectdata, setCategoryselectdata] = useState("");
-  const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
-
-  const [GetCategory, setGetCategory] = useState([]);
-
-  const [Typeselectdata, setTypeselectdata] = useState("");
-  const [typeselectdatavalue, settypeselectdatavalue] = useState("");
-
-  const [GetType, setGetType] = useState([]);
-
-  const [sortData, setSortData] = useState("ASC");
-
+  const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("A");
-  const [transectionType2, settransectionType2] = useState("");
+  const [transectionType, settransectionType] = useState("");
+  const [supplierList, setSupplierList] = useState([]);
 
-  const [totalqnty, settotalqnty] = useState(0);
-  const [totalopening, settotalopening] = useState(0);
-  const [ClosingBalance, setClosingBalance] = useState(0);
-  const [totaltax, settotaltax] = useState(0);
-  const [totalincl, settotalincl] = useState(0);
-
-  const [totaldebit, settotaldebit] = useState(0);
-  const [totalcredit, settotalcredit] = useState(0);
+  const [totalQnty, setTotalQnty] = useState(0);
+  const [totalDebit, setTotalDebit] = useState(0);
+  const [totalCredit, setTotalCredit] = useState(0);
+  const [closingBalance, setClosingBalance] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -105,10 +60,7 @@ export default function InstallmentLedgerReport() {
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-  const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
-
-  const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
+  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   const {
     isSidebarVisible,
@@ -123,37 +75,44 @@ export default function InstallmentLedgerReport() {
     gettodate,
     getfontstyle,
     getdatafontsize,
+    getnavbarbackgroundcolor,
   } = useTheme();
+
+  console.log("select year: " + getyeardescription);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
 
-  const comapnyname = organisation.description;
+  // Assume getfromdate and gettodate are dynamic and fetched from context or state
+  const fromdatevalidate = getfromdate; // e.g., "01-01-2023"
+  const todatevaliadete = gettodate; // e.g., "31-12-2023"
 
-  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
-  const fromdatevalidate = getfromdate;
-  const todatevaliadete = gettodate;
-
+  // Function to convert "DD-MM-YYYY" string to Date object
   const convertToDate = (dateString) => {
-    const [day, month, year] = dateString.split("-");
-    return new Date(year, month - 1, day);
+    const [day, month, year] = dateString.split("-"); // Split string into day, month, year
+    return new Date(year, month - 1, day); // Create Date object (Month is zero-indexed)
   };
 
-  const GlobalfromDate = convertToDate(fromdatevalidate);
-  const GlobaltoDate = convertToDate(todatevaliadete);
+  // Convert dynamic date strings to Date objects
+  const GlobalfromDate = convertToDate(fromdatevalidate); // "01-01-2023" -> Date object
+  const GlobaltoDate = convertToDate(todatevaliadete); // "31-12-2023" -> Date object
 
+  // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
   const formatDate1 = (date) => {
     return `${String(date.getDate()).padStart(2, "0")}-${String(
       date.getMonth() + 1
     ).padStart(2, "0")}-${date.getFullYear()}`;
   };
-  const GlobaltoDate1 = formatDate1(GlobaltoDate);
-  const GlobalfromDate1 = formatDate1(GlobalfromDate);
+
+  // Optionally format the Date objects back to string if needed
+  const GlobalfromDate1 = formatDate1(GlobalfromDate); // '01-01-2023'
+  const GlobaltoDate1 = formatDate1(GlobaltoDate); // '31-12-2023'
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
-  // Toggle the ToDATE CalendarOpen state on each click
+  // Toggle the ToDATE && FromDATE CalendarOpen state on each click
+
   const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
   };
@@ -163,87 +122,7 @@ export default function InstallmentLedgerReport() {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
-
-  const handleToDateChange = (date) => {
-    setSelectedToDate(date);
-    settoInputDate(date ? formatDate(date) : "");
-    settoCalendarOpen(false);
-  };
-  const handleToInputChange = (e) => {
-    settoInputDate(e.target.value);
-  };
-
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleToKeyPress = (e) => {
+  const handleToKeyPress = (e, inputref) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const toDateElement = document.getElementById("todatevalidation");
@@ -257,66 +136,85 @@ export default function InstallmentLedgerReport() {
         const [day, month, year] = formattedInput.split("-").map(Number);
 
         if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
+          alert("Please enter a valid month (MM) between 01 and 12");
           return;
         }
 
         const daysInMonth = new Date(year, month, 0).getDate();
         if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          alert(`Please enter a valid day (DD) for month ${month}`);
           return;
         }
 
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
+        const enteredDate = new Date(year, month - 1, day); // Month is zero-based
 
-        if (GlobaltoDate && enteredDate > GlobaltoDate) {
+        // Convert GlobalfromDate and GlobaltoDate to Date objects for comparison
+        // const fromDate = new Date(GlobalfromDate.split('-').reverse().join('-'));
+        // const toDate = new Date(GlobaltoDate.split('-').reverse().join('-'));
+
+        if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
           toast.error(
             `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
           );
           return;
         }
 
-        if (GlobaltoDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        if (fromInputDate) {
-          const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-")
-          );
-          if (enteredDate <= fromDate) {
-            toast.error("To date must be after from date");
-            return;
-          }
-        }
-
-        toDateElement.style.border = `1px solid ${fontcolor}`;
+        toDateElement.style.border = `1px solid ${fontcolor}`; // Add border color
         settoInputDate(formattedInput);
 
-        if (selectButtonRef.current) {
+        if (inputref.current) {
           e.preventDefault();
-          selectButtonRef.current.focus();
+          inputref.current.focus(); // Move focus to React Select
         }
       } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
+        toast.error(
+          `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
+      }
+    }
+  };
+  const handleToDateChange = (date) => {
+    setSelectedToDate(date);
+    settoInputDate(date ? formatDate(date) : "");
+    settoCalendarOpen(false);
+  };
+  const handleToInputChange = (e) => {
+    settoInputDate(e.target.value);
+  };
+  // Function to handle keypress and move focus
+  const handleKeyPress = (e, nextInputRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent form submission
+      if (nextInputRef.current) {
+        nextInputRef.current.focus(); // Move focus to next input
       }
     }
   };
 
-  function fetchDailyStatusReport() {
+  function closeAlert(errorType) {
+    const alertElement = document.getElementById("someElementId");
+    alertElement.innerHTML = ""; // Clears the alert content
+    // if (errorType === 'saleType') {
+    //     saleSelectRef.current.focus();
+    // }
+    if (errorType === "formvalidation") {
+      fromRef.current.select();
+    }
+    if (errorType === "todatevalidation") {
+      toRef.current.select();
+    }
+  }
+  // Bind to window
+  window.closeAlert = closeAlert;
+
+  function fetchGeneralLedger() {
     const apiUrl = apiLinks + "/InstallmentLedger.php";
     setIsLoading(true);
+
     const formData = new URLSearchParams({
-      FInsCod: Companyselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      //   FInsCod:'14-01-0001',
-    //   code: "ABDULLAHTRD",
-    //   FLocCod: "001",
+      code: "ABDULLAHTRD",
+      FLocCod: "001",
+      FInsCod: "14-01-0001",
     }).toString();
 
     axios
@@ -324,19 +222,31 @@ export default function InstallmentLedgerReport() {
       .then((response) => {
         setIsLoading(false);
 
-        // settotalopening(response.data["Total Opening"]);
-        // settotaldebit(response.data["Total Debit"]);
-        // settotalcredit(response.data["Total Credit"]);
-        // setClosingBalance(response.data["Total Balance"]);
+        // Store Profit and Expense data into separate states
+        if (response.data) {
+          if (Array.isArray(response.data.Detail)) {
+            setTableData(response.data.Detail); // Store Profit array in profits state
+          } else {
+            console.warn(
+              "Response data 'Profit' is not an array:",
+              response.data.Detail
+            );
+            setTableData([]); // Fallback to an empty array
+          }
 
-        if (response.data && Array.isArray(response.data.Detail)) {
-          setTableData(response.data.Detail);
+          if (response.data.Header) {
+            setheaderData(response.data.Header); // Store Expense array in expenses state
+          } else {
+            console.warn(
+              "Response data 'Expense' is not an array:",
+              response.data.Header
+            );
+            setheaderData([]); // Fallback to an empty array
+          }
         } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data.Detail
-          );
+          console.warn("Response data is null or undefined:", response.data);
           setTableData([]);
+          setheaderData([]);
         }
       })
       .catch((error) => {
@@ -348,17 +258,22 @@ export default function InstallmentLedgerReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (
-      !hasComponentMountedPreviously ||
-      (saleSelectRef && saleSelectRef.current)
-    ) {
+    // If it hasn't mounted before or on refresh, select the 'from date' input
+    if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
       if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
-          saleSelectRef.current.focus();
-          //   saleSelectRef.current.select();
+          saleSelectRef.current.focus(); // Focus on the input field
+          // saleSelectRef.current.select(); // Select the text within the input field
         }, 0);
       }
-      sessionStorage.setItem("componentMounted", "true");
+      sessionStorage.setItem("componentMounted", "true"); // Set the flag indicating mount
+      // const storedData = localStorage.getItem('globaldata');
+
+      // if (storedData) {
+      //     // Parse the JSON string back to an object
+      //     const parsedData = JSON.parse(storedData);
+      //     setApiData(parsedData);
+      // }
     }
   }, []);
 
@@ -379,31 +294,25 @@ export default function InstallmentLedgerReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomers.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-    //   code: "ABDULLAHTRD",
-    //   FLocCod: "001",
+      //   FLocCod: getLocationNumber,
+      //   code: organisation.code,
+      FLocCod: "001",
+      code: "ABDULLAHTRD",
     }).toString();
     axios
       .post(apiUrl, formData)
       .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetCompany(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetCompany([]);
-        }
+        setSupplierList(response.data);
       })
       .catch((error) => {
-        console.error("Error:", error);
+        console.error("Error fetching data:", error);
       });
   }, []);
-  const options = GetCompany.map((item) => ({
+
+  // Transforming fetched data into options array
+  const options = supplierList.map((item) => ({
     value: item.tcstcod,
-    label: `${item.tcstcod}-${item.tcstnam}`,
+    label: `${item.tcstcod}-${item.tcstnam.trim()}`,
   }));
 
   const DropdownOption = (props) => {
@@ -414,7 +323,7 @@ export default function InstallmentLedgerReport() {
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             paddingBottom: "5px",
-            lineHeight: "3px",
+            lineHeight: "2px",
             // color: fontcolor,
             textAlign: "start",
           }}
@@ -428,16 +337,18 @@ export default function InstallmentLedgerReport() {
   const customStyles1 = (hasError) => ({
     control: (base, state) => ({
       ...base,
-      height: "24px",
+      height: "20px",
       minHeight: "unset",
-      width: 400,
+      width: 360,
+      marginLeft: "5px",
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
       color: fontcolor,
       caretColor: getcolor === "white" ? "black" : "white",
       borderRadius: 0,
-      border: `1px solid ${fontcolor}`,
+      //   border: `1px solid ${fontcolor}`,
+      border: `2px solid grey`,
       transition: "border-color 0.15s ease-in-out",
       "&:hover": {
         borderColor: state.isFocused ? base.borderColor : fontcolor,
@@ -452,6 +363,15 @@ export default function InstallmentLedgerReport() {
         boxShadow: "0 0 0 1px #3368B5",
       },
     }),
+
+    
+    valueContainer: (base) => ({
+  ...base,
+  padding: "0 6px",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+}),
 
     menu: (base) => ({
       ...base,
@@ -519,9 +439,7 @@ export default function InstallmentLedgerReport() {
       transform: state.selectProps.menuIsOpen
         ? "rotate(180deg)"
         : "rotate(0deg)",
-      "&:hover": {
-        color: "#3368B5",
-      },
+      "&:hover": { color: "#3368B5" },
     }),
     indicatorSeparator: () => ({
       display: "none",
@@ -545,9 +463,7 @@ export default function InstallmentLedgerReport() {
       marginTop: "-5px",
       padding: "0 4px",
       color: fontcolor,
-      "&:hover": {
-        color: "#ff4444",
-      },
+      "&:hover": { color: "#ff4444" },
     }),
     placeholder: (base) => ({
       ...base,
@@ -590,929 +506,626 @@ export default function InstallmentLedgerReport() {
     }),
   });
 
-  const exportPDFHandler = () => {
-    // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+  const handleSaleKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = saleSelectRef.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setSaleType(selectedOption.value);
+      }
+      const nextInput = document.getElementById(inputId);
+      if (nextInput) {
+        nextInput.focus();
+        // nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
 
-    // Define table data (rows)
-    const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
-      item.Description,
-      formatValue(item.Sale),
-      formatValue(item.Collection),
+  
+   const formatValue = (val) => {
+  return Number(val) === 0 ? "" : val;
+};
 
-      formatValue(item.Balance),
-    ]);
-
-    // Add summary row to the table
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+ const exportPDFHandler = () => {
+    
+ 
+     // Create a new jsPDF instance with landscape orientation
+     const doc = new jsPDF({ orientation: "potraite" });
+ 
+     // Define table data (rows)
+     const rows = tableData.map((item) => [
+       item.Date,
+      item['Trn#'],
+     item.Type,
+     item.Description   ,
+     formatValue(item.Sale)   ,
+       formatValue(item.Collection)   ,
+     formatValue(item.Balance)   ,
+     ]);
+ 
+     // Add summary row to the table
     //  rows.push([
-
+      
     //    "",
     //    "Total",
-
+      
     //    String(totalopening),
     //        String(totaldebit),
     //    String(totalcredit),
     //    String(ClosingBalance),
     //  ]);
-
-    // Define table column headers and individual column widths
-
-    const headers = [
-      "Date",
-      "Trn#",
-      "Type",
-      "Description",
-      "Sale",
-      "Collection",
-      "Balance",
-    ];
-    const columnWidths = [25, 18, 13, 110, 25, 25, 25];
-
-    // Calculate total table width
-    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-
-    // Define page height and padding
-    const pageHeight = doc.internal.pageSize.height;
-    const paddingTop = 15;
-
-    // Set font properties for the table
-    // doc.setFont("verdana-regular", "normal");
-    // doc.setFontSize(10);
-
-    // Function to add table headers
-    const addTableHeaders = (startX, startY) => {
-      // Set font style and size for headers
-      doc.setFont("verdana", "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
-
-      headers.forEach((header, index) => {
-        const cellWidth = columnWidths[index];
-        const cellHeight = 6; // Height of the header row
-        const cellX = startX + cellWidth / 2; // Center the text horizontally
-        const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-        // Draw the grey background for the header
-        doc.setFillColor(200, 200, 200); // Grey color
-        doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-        // Draw the outer border
-        doc.setLineWidth(0.2); // Set the width of the outer border
-        doc.rect(startX, startY, cellWidth, cellHeight);
-
-        // Set text alignment to center
-        doc.setTextColor(0); // Set text color to black
-        doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-        startX += columnWidths[index]; // Move to the next column
-      });
-    };
-
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5;
-      const fontSize = 10;
-      const boldFont = 400;
-      const normalFont = getfontstyle;
-      const tableWidth = getTotalTableWidth();
-
-      doc.setFontSize(11);
-
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0;
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-        const isTotalRow = i === rows.length - 1;
-        let textColor = [0, 0, 0];
-        let fontName = normalFont;
-
-        if (isRedRow) {
-          textColor = [255, 0, 0];
-          fontName = boldFont;
-        }
-
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-
-        if (isOddRow) {
-          doc.setFillColor(240);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F"
-          );
-        }
-
-        doc.setDrawColor(0);
-
+ 
+     // Define table column headers and individual column widths
+ 
+     const headers = [
+       "Date",
+       "Trn#",
+       "Type",
+       "Description",
+       "Sale",
+       "Collection",
+       "Balance",
+     ];
+     const columnWidths = [25, 20,17,110, 22, 22, 22];
+ 
+     // Calculate total table width
+     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+ 
+     // Define page height and padding
+     const pageHeight = doc.internal.pageSize.height;
+     const paddingTop = 15;
+ 
+     // Set font properties for the table
+     // doc.setFont("verdana-regular", "normal");
+     // doc.setFontSize(10);
+ 
+     // Function to add table headers
+     const addTableHeaders = (startX, startY) => {
+       // Set font style and size for headers
+       doc.setFont("verdana", "bold"); // Set font to bold
+       doc.setFontSize(10); // Set font size for headers
+ 
+       headers.forEach((header, index) => {
+         const cellWidth = columnWidths[index];
+         const cellHeight = 6; // Height of the header row
+         const cellX = startX + cellWidth / 2; // Center the text horizontally
+         const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+ 
+         // Draw the grey background for the header
+         doc.setFillColor(200, 200, 200); // Grey color
+         doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+ 
+         // Draw the outer border
+         doc.setLineWidth(0.2); // Set the width of the outer border
+         doc.rect(startX, startY, cellWidth, cellHeight);
+ 
+         // Set text alignment to center
+         doc.setTextColor(0); // Set text color to black
+         doc.text(header, cellX, cellY, { align: "center" }); // Center the text
+         startX += columnWidths[index]; // Move to the next column
+       });
+ 
+     
+     };
+ 
+       const addTableRows = (startX, startY, startIndex, endIndex) => {
+       const rowHeight = 5;
+       const fontSize = 10;
+       const boldFont = 400;
+       const normalFont = getfontstyle;
+       const tableWidth = getTotalTableWidth();
+ 
+       doc.setFontSize(11);
+ 
+       for (let i = startIndex; i < endIndex; i++) {
+         const row = rows[i];
+         const isOddRow = i % 2 !== 0;
+         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+         const isTotalRow = i === rows.length - 1;
+         let textColor = [0, 0, 0];
+         let fontName = normalFont;
+ 
+         if (isRedRow) {
+           textColor = [255, 0, 0];
+           fontName = boldFont;
+         }
+ 
         //  if (isTotalRow) {
-        //    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-        //    const rowBottomY = rowTopY + rowHeight;
-
-        //    doc.setLineWidth(0.3);
-        //    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-        //    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
-
-        //    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-        //    doc.line(
-        //      startX,
-        //      rowBottomY - 0.5,
-        //      startX + tableWidth,
-        //      rowBottomY - 0.5
-        //    );
-
-        //    doc.setLineWidth(0.2);
-        //    doc.line(startX, rowTopY, startX, rowBottomY);
-        //    doc.line(
-        //      startX + tableWidth,
-        //      rowTopY,
-        //      startX + tableWidth,
-        //      rowBottomY
-        //    );
+        //    doc.setFont("verdana", "bold");
+        //    doc.setFontSize(10);
         //  }
-
-        doc.setLineWidth(0.2);
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          tableWidth,
-          rowHeight
-        );
-
-        row.forEach((cell, cellIndex) => {
-          // ⭐ NEW FIX — Perfect vertical centering
-          const cellY =
-            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
-
-          const cellX = startX + 2;
-
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-          //    if (!isTotalRow) {
-          //      doc.setFont("verdana-regular", "normal");
-          //      doc.setFontSize(10);
+ 
+         if (isOddRow) {
+           doc.setFillColor(240);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight,
+             "F"
+           );
+         }
+ 
+         doc.setDrawColor(0);
+ 
+        
+           doc.setLineWidth(0.2);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight
+           );
+        
+ 
+         row.forEach((cell, cellIndex) => {
+           // ⭐ NEW FIX — Perfect vertical centering
+           const cellY =
+             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+ 
+           const cellX = startX + 2;
+ 
+           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+ 
+           if (!isTotalRow) {
+             doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+           }
+ 
+           const cellValue = String(cell);
+ 
+           if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+             const rightAlignX = startX + columnWidths[cellIndex] / 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "center",
+               baseline: "middle",
+             });
+           } else if (
+             cellIndex === 4 ||
+             cellIndex === 5 ||
+             cellIndex === 6
+            
+             
+           ) {
+             const rightAlignX = startX + columnWidths[cellIndex] - 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "right",
+               baseline: "middle",
+             });
+           } 
+          //  else {
+          //    if (isTotalRow && cellIndex === 0 && cell === "") {
+          //      const totalLabelX = startX + columnWidths[0] / 2;
+          //      doc.text("", totalLabelX, cellY, {
+          //        align: "center",
+          //        baseline: "middle",
+          //      });
+          //    } else {
+          //      doc.text(cellValue, cellX, cellY, {
+          //        baseline: "middle",
+          //      });
           //    }
-
-          const cellValue = String(cell);
-
-          if (cellIndex === 1 || cellIndex === 2) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = startX + columnWidths[0] / 2;
-              doc.text("", totalLabelX, cellY, {
-                align: "center",
-                baseline: "middle",
-              });
-            } else {
-              doc.text(cellValue, cellX, cellY, {
-                baseline: "middle",
-              });
-            }
-          }
-
-          if (cellIndex < row.length - 1) {
-            doc.setLineWidth(0.2);
-            doc.line(
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 2) * rowHeight,
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
-
-        startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
+          //  }
+ 
+           if (cellIndex < row.length - 1) {
+             doc.setLineWidth(0.2);
+             doc.line(
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 2) * rowHeight,
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 3) * rowHeight
+             );
+             startX += columnWidths[cellIndex];
+           }
+         });
+ 
+         startX = (doc.internal.pageSize.width - tableWidth) / 2;
+ 
         //  if (isTotalRow) {
         //    doc.setFont("verdana-regular", "normal");
         //    doc.setFontSize(10);
         //  }
-      }
-
-      const lineWidth = tableWidth;
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-      const lineY = pageHeight - 15;
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 11;
-      const headingX = lineX + 2;
-      const headingY = lineY + 5;
-      doc.setFont("verdana-regular", "normal");
-      doc.setFontSize(10);
-      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-    };
-
-    // Function to calculate total table width
-    const getTotalTableWidth = () => {
-      let totalWidth = 0;
-      columnWidths.forEach((width) => (totalWidth += width));
-      return totalWidth;
-    };
-
-    // Function to add a new page and reset startY
-    const addNewPage = (startY) => {
-      doc.addPage();
-      return paddingTop; // Set startY for each new page
-    };
-
-    // Define the number of rows per page
-    const rowsPerPage = 29; // Adjust this value based on your requirements
-
-    // Function to handle pagination
-    const handlePagination = () => {
-      // Define the addTitle function
-      const addTitle = (
-        title,
-        date,
-        time,
-        pageNumber,
-        startY,
-        titleFontSize = 18,
-        pageNumberFontSize = 10
-      ) => {
-        doc.setFontSize(titleFontSize); // Set the font size for the title
-        doc.text(title, doc.internal.pageSize.width / 2, startY, {
-          align: "center",
-        });
-
-        // Calculate the x-coordinate for the right corner
-        const rightX = doc.internal.pageSize.width - 10;
-
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
-        // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
-          `Page ${pageNumber}`,
-          rightX - 5,
-          doc.internal.pageSize.height - 10,
-          { align: "right" }
-        );
-      };
-
-      let currentPageIndex = 0;
-      let startY = paddingTop; // Initialize startY
-      let pageNumber = 1; // Initialize page number
-
-      while (currentPageIndex * rowsPerPage < rows.length) {
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "300");
-        addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-        startY += 5; // Adjust vertical position for the company title
-
+       }
+ 
+       const lineWidth = tableWidth;
+       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+       const lineY = pageHeight - 15;
+       doc.setLineWidth(0.3);
+       doc.line(lineX, lineY, lineX + lineWidth, lineY);
+       const headingFontSize = 11;
+       const headingX = lineX + 2;
+       const headingY = lineY + 5;
+       doc.setFont("verdana-regular", "normal");
+       doc.setFontSize(10);
+       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+     };
+ 
+     // Function to calculate total table width
+     const getTotalTableWidth = () => {
+       let totalWidth = 0;
+       columnWidths.forEach((width) => (totalWidth += width));
+       return totalWidth;
+     };
+ 
+     // Function to add a new page and reset startY
+     const addNewPage = (startY) => {
+       doc.addPage();
+       return paddingTop; // Set startY for each new page
+     };
+ 
+     // Define the number of rows per page
+     const rowsPerPage = 47; // Adjust this value based on your requirements
+ 
+     // Function to handle pagination
+     const handlePagination = () => {
+       // Define the addTitle function
+       const addTitle = (
+         title,
+         date,
+         time,
+         pageNumber,
+         startY,
+         titleFontSize = 18,
+         pageNumberFontSize = 10
+       ) => {
+         doc.setFontSize(titleFontSize); // Set the font size for the title
+         doc.text(title, doc.internal.pageSize.width / 2, startY, {
+           align: "center",
+         });
+ 
+         // Calculate the x-coordinate for the right corner
+         const rightX = doc.internal.pageSize.width - 10;
+ 
+         // if (date) {
+         //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+         //     if (time) {
+         //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+         //     } else {
+         //         doc.text(date, rightX - 10, startY, { align: "right" });
+         //     }
+         // }
+ 
+         // Add page numbering
+         doc.setFontSize(pageNumberFontSize);
+         doc.text(
+           `Page ${pageNumber}`,
+           rightX - 5,
+           doc.internal.pageSize.height - 10,
+           { align: "right" }
+         );
+       };
+ 
+       let currentPageIndex = 0;
+       let startY = paddingTop; // Initialize startY
+       let pageNumber = 1; // Initialize page number
+ 
+       while (currentPageIndex * rowsPerPage < rows.length) {
+     
+            doc.setFontSize(10);
+         doc.setFont('helvetica', "300");
+         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+         startY += 5; // Adjust vertical position for the company title
+        
+         doc.setFont('verdana-regular', "normal");
+          doc.setFontSize(10);
+         addTitle(
+           `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
+           "",
+           "",
+           pageNumber,
+           startY,
+           12
+         ); // Render sale report title with decreased font size, provide the time, and page number
+         startY += 5;
+ 
+         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+         const labelsY = startY + 4; // Position the labels below the titles and above the table
+ 
+         // Set font size and weight for the labels
+     
+  
+         let search = searchQuery ? searchQuery : "";
+ 
+         // Set font style, size, and family
         doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        addTitle(`Installment Ledger Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
-        startY += 5;
-
-        const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-        const labelsY = startY + 4; // Position the labels below the titles and above the table
-
-        // Set font size and weight for the labels
-
-        let RATE =
-          transectionType === "P"
-            ? "PURCHASE RATE"
-            : transectionType == "M"
-            ? "SM RATE"
-            : transectionType == "A"
-            ? "AVERAGE RATE"
-            : transectionType == "W"
-            ? "WEIGHTRD AVERAGE"
-            : transectionType == "F"
-            ? "FIFP"
-            : "";
-
-        let transectionsts =
-          transectionType === "BIL"
-            ? "PURCHASE"
-            : transectionType == "SRN"
-            ? "PURCHASE RETURN"
-            : "ALL";
-
-        let typeText = capacityselectdatavalue.label
-          ? capacityselectdatavalue.label
-          : "ALL";
-        let typeItem = Companyselectdatavalue.label
-          ? Companyselectdatavalue.label
-          : "ALL";
-        let category = categoryselectdatavalue.label
-          ? categoryselectdatavalue.label
-          : "ALL";
-        let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label
-          : "ALL";
-
-        let search = searchQuery ? searchQuery : "";
-
-        // Set font style, size, and family
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10); // Font size
-        doc.text(`Account :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10); // Font size
-        doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-
-        // if (searchQuery) {
-        //   doc.setFont(getfontstyle, "bold"); // Set font to bold
-        //   doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        //   doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-        // }
-
-        // // Reset font weight to normal if necessary for subsequent text
-
-        startY += 1; // Adjust vertical position for the labels
-
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
-        const startIndex = currentPageIndex * rowsPerPage;
-        const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-        startY = addTableRows(
-          (doc.internal.pageSize.width - totalWidth) / 2,
-          startY,
-          startIndex,
-          endIndex
-        );
-        if (endIndex < rows.length) {
-          startY = addNewPage(startY); // Add new page and update startY
-          pageNumber++; // Increment page number
-        }
-        currentPageIndex++;
-      }
-    };
-
-    const getCurrentDate = () => {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
-    };
-
-    // Function to get current time in the format HH:MM:SS
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return hh + ":" + mm + ":" + ss;
-    };
-
-    const date = getCurrentDate(); // Get current date
-    const time = getCurrentTime(); // Get current time
-
-    // Call function to handle pagination
-    handlePagination();
-
-    // Save the PDF files
-    doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
-  };
-
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
-
-    const numColumns = 7; // Ensure this matches the actual number of columns
-
-    const columnAlignments = [
-      "left",
-      "center",
-      "center",
-      "left",
-      "right",
-      "right",
-      "right",
-    ];
-
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-
-    // Add an empty row at the start
-    worksheet.addRow([]);
-
-    // Add company name
-    // Add company name
-    const companyRow = worksheet.addRow([comapnyname]);
-
-    companyRow.eachCell((cell) => {
-      cell.font = {
-        name: "Times New Roman",
-        size: 16, // optional
-        bold: true, // optional
-      };
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
-      }`
-    );
-
-    // Add Store List row
-    const storeListRow = worksheet.addRow([`Installment Ledger Report `]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
-      }`
-    );
-
-    // Add an empty row after the title section
-    worksheet.addRow([]);
-
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
-
-    const typeAndStoreRow = worksheet.addRow([
-      "Account :",
-      typecompany,
-      "",
-      "",
-      "",
-    ]);
-
-    worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`
-    );
-
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = [
-      "Date",
-      "Trn#",
-      "Type",
-      "Description",
-      "Sale",
-      "Collection",
-      "Balance",
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
-        item.Description,
-        formatValue(item.Sale),
-        formatValue(item.Collection),
-
-        formatValue(item.Balance),
-      ]);
-
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
-      });
-    });
-
-    // Set column widths
-    [10, 8, 7, 45, 12, 12, 12].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    //  const totalRow = worksheet.addRow([
-    //    "",
-    //    "Total",
-
-    //    String(totalopening),
-    //        String(totaldebit),
-    //    String(totalcredit),
-    //    String(ClosingBalance),
-    //  ]);
-
-    //  // total row added
-
-    //  totalRow.eachCell((cell, colNumber) => {
-    //    cell.font = { bold: true };
-    //    cell.border = {
-    //      top: { style: "thin" },
-    //      left: { style: "thin" },
-    //      bottom: { style: "thin" },
-    //      right: { style: "thin" },
-    //    };
-
-    //    // Align only the "Total" text to the right
-    //    if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
-    //      cell.alignment = { horizontal: "right" };
-    //    }
-    //  });
-
-    // Add a blank row
-    worksheet.addRow([]);
-    // Get current date and time
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
-    };
-    // Get current date
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-    const currentTime = getCurrentTime();
-    const currentdate = getCurrentDate();
-    const userid = user.tusrid;
-
-    // Add date and time row
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
-
-    // Merge across all columns
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
-      }`
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
-      }`
-    );
-
-    // Generate and save the Excel file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `InstallmentLedgerReport As On ${currentdate}.xlsx`);
-  };
-
-  const dispatch = useDispatch();
-
-  const tableTopColor = "#3368B5";
-  const tableHeadColor = "#3368b5";
-  const secondaryColor = "white";
-  const btnColor = "#3368B5";
-  const textColor = "white";
-
-  const [selectedSearch, setSelectedSearch] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { data, loading, error } = useSelector((state) => state.getuser);
-
-  const handleSearch = (e) => {
-    setSelectedSearch(e.target.value);
-  };
-
-  let totalEntries = 0;
-  const handlecompanyKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCompanyselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-  const handlecategoryKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCategoryselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-  const handlecapacityKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCapacityselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-
-  const handleKeyPress = (e, nextInputRef) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (nextInputRef.current) {
-        nextInputRef.current.focus();
-      }
-    }
-  };
-
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
-
-  const handleTransactionTypeChange2 = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType2(selectedTransactionType);
-  };
-
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
-
-  const firstColWidth = {
-    width: "80px",
-  };
-  const secondColWidth = {
-    width: "50px",
-  };
-  const thirdColWidth = {
-    width: "40px",
-  };
-  const forthColWidth = {
-    width: "360px",
-  };
-  const sixthColWidth = {
-    width: "100px",
-  };
-  const seventhColWidth = {
-    width: "100px",
-  };
-  const eightColWidth = {
-    width: "100px",
-  };
-
-  const sixthcol = {
-    width: "8px",
-  };
-
-  const [columns, setColumns] = useState({
-    code: [],
-
-    Description: [],
-    Opening: [],
-    Debit: [],
-    Credit: [],
-    Balance: [],
-  });
-
-  const [columnSortOrders, setColumnSortOrders] = useState({
-    code: "",
-
-    Description: "",
-    Opening: "",
-    Debit: "",
-    Credit: "",
-    Balance: "",
-  });
-
-  // When you receive your initial table data, transform it into column-oriented format
-  useEffect(() => {
-    if (tableData.length > 0) {
-      const newColumns = {
-        code: tableData.map((row) => row.code),
-        Description: tableData.map((row) => row.Description),
-        Opening: tableData.map((row) => row.Opening),
-
-        Debit: tableData.map((row) => row.Debit),
-        Credit: tableData.map((row) => row.Credit),
-
-        Balance: tableData.map((row) => row.Balance),
-      };
-      setColumns(newColumns);
-    }
-  }, [tableData]);
-
-  const getIconStyle = (colKey) => {
-    const order = columnSortOrders[colKey];
-    return {
-      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-      color: order === "ASC" || order === "DSC" ? "red" : "white",
-      transition: "transform 0.3s ease, color 0.3s ease",
-    };
-  };
-
-  const resetSorting = () => {
-    setColumnSortOrders({
-      code: null,
-
-      Description: null,
-      Opening: null,
-      Debit: null,
-      Credit: null,
-      Balance: null,
-    });
-  };
-
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-    const sortedData = [...tableData].sort((a, b) => {
-      const aVal = a[col] != null ? a[col].toString().trim() : "";
-      const bVal = b[col] != null ? b[col].toString().trim() : "";
-
-      // Attempt numeric conversion
-      const numA = Number(aVal.replace(/,/g, ""));
-      const numB = Number(bVal.replace(/,/g, ""));
-
-      // Check if numeric sorting is possible
-      const bothNumeric =
-        !isNaN(numA) && !isNaN(numB) && aVal !== "" && bVal !== "";
-
-      if (bothNumeric) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      }
-
-      // Alphabetical sorting as fallback
-      return newOrder === "ASC"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    });
-
-    // Update table
-    setTableData(sortedData);
-
-    // Update column sort indicator
-    setColumnSortOrders((prev) => {
-      const updated = {};
-      Object.keys(prev).forEach((key) => {
-        updated[key] = key === col ? newOrder : null;
-      });
-      return updated;
-    });
-  };
-
-  useHotkeys(
+         doc.setFontSize(10); // Font size
+ 
+         // doc.setFont(getfontstyle, "bold"); // Set font to bold
+         // doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
+         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         // doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+ 
+         // doc.setFont(getfontstyle, "bold"); // Set font to bold
+         // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
+         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+ 
+     
+         // doc.setFont(getfontstyle, "bold"); // Set font to bold
+         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+ 
+         // doc.setFont(getfontstyle, "bold"); // Set font to bold
+         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+ 
+         // doc.setFont(getfontstyle, "bold"); // Set font to bold
+         // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+ 
+         // if (searchQuery) {
+         //   doc.setFont(getfontstyle, "bold"); // Set font to bold
+         //   doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+         //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         //   doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+         // }
+ 
+         // // Reset font weight to normal if necessary for subsequent text
+         
+ 
+         startY += 1; // Adjust vertical position for the labels
+ 
+         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
+         const startIndex = currentPageIndex * rowsPerPage;
+         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+         startY = addTableRows(
+           (doc.internal.pageSize.width - totalWidth) / 2,
+           startY,
+           startIndex,
+           endIndex
+         );
+         if (endIndex < rows.length) {
+           startY = addNewPage(startY); // Add new page and update startY
+           pageNumber++; // Increment page number
+         }
+         currentPageIndex++;
+       }
+     };
+ 
+     const getCurrentDate = () => {
+       const today = new Date();
+       const dd = String(today.getDate()).padStart(2, "0");
+       const mm = String(today.getMonth() + 1).padStart(2, "0");
+       const yyyy = today.getFullYear();
+       return `${dd}-${mm}-${yyyy}`;
+     };
+ 
+     // Function to get current time in the format HH:MM:SS
+     const getCurrentTime = () => {
+       const today = new Date();
+       const hh = String(today.getHours()).padStart(2, "0");
+       const mm = String(today.getMinutes()).padStart(2, "0");
+       const ss = String(today.getSeconds()).padStart(2, "0");
+       return hh + ":" + mm + ":" + ss;
+     };
+ 
+     const date = getCurrentDate(); // Get current date
+     const time = getCurrentTime(); // Get current time
+ 
+     // Call function to handle pagination
+     handlePagination();
+ 
+     // Save the PDF files
+     doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
+   };
+ 
+   const handleDownloadCSV = async () => {
+     const workbook = new ExcelJS.Workbook();
+     const worksheet = workbook.addWorksheet("Sheet1");
+ 
+     const numColumns = 6; // Ensure this matches the actual number of columns
+ 
+     const columnAlignments = [
+       "left",
+       "left",
+       "right",
+       "right",
+       "right",
+       "right",
+     ];
+ 
+     // Define fonts for different sections
+     const fontCompanyName = {
+       name: "CustomFont" || "CustomFont",
+       size: 18,
+       bold: true,
+     };
+     const fontStoreList = {
+       name: "CustomFont" || "CustomFont",
+       size: 10,
+       bold: false,
+     };
+     const fontHeader = {
+       name: "CustomFont" || "CustomFont",
+       size: 10,
+       bold: true,
+     };
+     const fontTableContent = {
+       name: "CustomFont" || "CustomFont",
+       size: 10,
+       bold: false,
+     };
+ 
+     // Add an empty row at the start
+     worksheet.addRow([]);
+ 
+     // Add company name
+  // Add company name
+ const companyRow = worksheet.addRow([comapnyname]);
+ 
+ companyRow.eachCell((cell) => {
+   cell.font = {
+     name: "Times New Roman",
+     size: 16,       // optional
+     bold: true,     // optional
+   };
+   cell.alignment = { horizontal: "center" };
+ });
+ 
+ 
+     worksheet.getRow(companyRow.number).height = 30;
+     worksheet.mergeCells(
+       `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+         companyRow.number
+       }`
+     );
+ 
+     // Add Store List row
+     const storeListRow = worksheet.addRow([
+       `Employee Advance Report From ${fromInputDate} To ${toInputDate}`,
+     ]);
+     storeListRow.eachCell((cell) => {
+       cell.font = fontStoreList;
+       cell.alignment = { horizontal: "center" };
+     });
+ 
+     worksheet.mergeCells(
+       `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+         storeListRow.number
+       }`
+     );
+ 
+     // Add an empty row after the title section
+     worksheet.addRow([]);
+ 
+   
+     const headerStyle = {
+       font: fontHeader,
+       alignment: { horizontal: "center", vertical: "middle" },
+       fill: {
+         type: "pattern",
+         pattern: "solid",
+         fgColor: { argb: "FFC6D9F7" },
+       },
+       border: {
+         top: { style: "thin" },
+         left: { style: "thin" },
+         bottom: { style: "thin" },
+         right: { style: "thin" },
+       },
+     };
+ 
+     // Add headers
+     const headers = [
+       "Code",
+       "Description",
+       "Opening",
+       "Debit",
+       "Credit",
+       "Balance",
+     ];
+     const headerRow = worksheet.addRow(headers);
+     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+ 
+     // Add data rows
+     tableData.forEach((item) => {
+       const row = worksheet.addRow([
+         item.code,
+      item.Description,
+     formatValue(item.Opening)   ,
+     formatValue(item.Debit)   ,
+     formatValue(item.Credit)   ,
+     formatValue(item.Balance)   ,
+       ]);
+ 
+       row.eachCell((cell, colIndex) => {
+         cell.font = fontTableContent;
+         cell.border = {
+           top: { style: "thin" },
+           left: { style: "thin" },
+           bottom: { style: "thin" },
+           right: { style: "thin" },
+         };
+         cell.alignment = {
+           horizontal: columnAlignments[colIndex - 1] || "left",
+           vertical: "middle",
+         };
+       });
+     });
+ 
+     // Set column widths
+     [10, 45,12, 12,12, 12].forEach((width, index) => {
+       worksheet.getColumn(index + 1).width = width;
+     });
+ 
+    
+ 
+     // Add a blank row
+     worksheet.addRow([]);
+     // Get current date and time
+     const getCurrentTime = () => {
+       const today = new Date();
+       const hh = String(today.getHours()).padStart(2, "0");
+       const mm = String(today.getMinutes()).padStart(2, "0");
+       const ss = String(today.getSeconds()).padStart(2, "0");
+       return `${hh}:${mm}:${ss}`;
+     };
+     // Get current date
+     const getCurrentDate = () => {
+       const today = new Date();
+       const day = String(today.getDate()).padStart(2, "0");
+       const month = String(today.getMonth() + 1).padStart(2, "0");
+       const year = today.getFullYear();
+       return `${day}-${month}-${year}`;
+     };
+     const currentTime = getCurrentTime();
+     const currentdate = getCurrentDate();
+     const userid = user.tusrid;
+ 
+     // Add date and time row
+     const dateTimeRow = worksheet.addRow([
+       `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+     ]);
+     dateTimeRow.eachCell((cell) => {
+       cell.font = {
+         name: "CustomFont" || "CustomFont",
+         size: 10,
+         // bold: true
+         // italic: true,
+       };
+       cell.alignment = { horizontal: "left" };
+     });
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+     dateTimeRow.eachCell((cell) => {
+       cell.font = {
+         name: "CustomFont" || "CustomFont",
+         size: 10,
+         // bold: true
+         // italic: true,
+       };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     // Merge across all columns
+     worksheet.mergeCells(
+       `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+         dateTimeRow.number
+       }`
+     );
+     worksheet.mergeCells(
+       `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+         dateTimeRow1.number
+       }`
+     );
+ 
+     // Generate and save the Excel file
+     const buffer = await workbook.xlsx.writeBuffer();
+     const blob = new Blob([buffer], {
+       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     });
+     saveAs(blob, `EmployeeAdvanceReport As On ${currentdate}.xlsx`);
+   };
+  ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+useHotkeys(
     "alt+s",
     () => {
-      fetchDailyStatusReport();
-      resetSorting();
+      fetchGeneralLedger();
+      // resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true }
   );
@@ -1529,13 +1142,81 @@ export default function InstallmentLedgerReport() {
     preventDefault: true,
     enableOnFormTags: true,
   });
+  ///////////////////////////////////////////////////////////////////////////
 
+  const dispatch = useDispatch();
+  const user = getUserData();
+  const organisation = getOrganisationData();
+  const tableTopColor = "#3368B5";
+  const tableHeadColor = "#3368b5";
+  const secondaryColor = "white";
+  const btnColor = "#3368B5";
+  const textColor = "white";
+
+  const [tableData, setTableData] = useState([]);
+  const [headerData, setheaderData] = useState([]);
+
+  console.log("HAJVARY TbaleDate", tableData);
+  console.log("HAJVARY HeaderData", headerData);
+
+  const [selectedSearch, setSelectedSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { data, loading, error } = useSelector((state) => state.getuser);
+
+  const comapnyname = organisation.description;
+
+  const handleSearch = (e) => {
+    setSelectedSearch(e.target.value);
+  };
+
+  let totalEntries = 0;
+
+  const getFilteredTableData = () => {
+    let filteredData = tableData;
+
+    if (selectedSearch.trim() !== "") {
+      const query = selectedSearch.trim().toLowerCase();
+      filteredData = filteredData.filter(
+        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
+      );
+    }
+
+    return filteredData;
+  };
+
+  const firstColWidth = {
+    width: "80px",
+  };
+  const secondColWidth = {
+    width: "60px",
+  };
+  const thirdColWidth = {
+    width: "50px",
+  };
+  const forthColWidth = {
+    width: "500px",
+  };
+  const fifthColWidth = {
+    width: "100px",
+  };
+  const sixthColWidth = {
+    width: "100px",
+  };
+  const seventhColWidth = {
+    width: "100px",
+  };
+  const sixthcol = {
+    width: "8px",
+  };
+
+  // Adjust the content width based on sidebar state
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
+
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -1544,49 +1225,53 @@ export default function InstallmentLedgerReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "900px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
     left: isSidebarVisible ? "60vw" : "50vw",
     transform: "translateX(-50%)",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
+    alignItems: "start",
+    overflowX: "hidden",
+    // overflowY: "hidden",
+    wordBreak: "break-word",
     textAlign: "center",
+    maxWidth: "1000px",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: "23px",
     fontFamily: '"Poppins", sans-serif',
-    zIndex: 1,
-    padding: "0 20px", // Side padding for small screens
-    boxSizing: "border-box", // Padding ko width mein include kare
   };
+
+  ////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
     if (isFilterApplied || tableData.length > 0) {
-      setSelectedIndex(0);
+      setSelectedIndex(0); // Set the selected index to the first row
       rowRefs.current[0]?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     } else {
-      setSelectedIndex(-1);
+      setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
     }
   }, [tableData, isFilterApplied]);
 
   let totalEnteries = 0;
-  const [selectedRowId, setSelectedRowId] = useState(null);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const rowRefs = useRef([]);
+  const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
+
+  // state initialize for table row highlight
+  const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
+  const rowRefs = useRef([]); // Array of refs for rows
   const handleRowClick = (index) => {
     setSelectedIndex(index);
+    // setSelectedRowId(getFilteredTableData[index].tcmpdsc); // Save the selected row's tctgcod
   };
-
   useEffect(() => {
     if (selectedRowId !== null) {
       const newIndex = tableData.findIndex(
@@ -1595,9 +1280,8 @@ export default function InstallmentLedgerReport() {
       setSelectedIndex(newIndex);
     }
   }, [tableData, selectedRowId]);
-
   const handleKeyDown = (e) => {
-    if (selectedIndex === -1 || e.target.id === "searchInput") return;
+    if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
     if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
@@ -1610,7 +1294,6 @@ export default function InstallmentLedgerReport() {
       scrollToSelectedRow();
     }
   };
-
   const scrollToSelectedRow = () => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1619,200 +1302,1736 @@ export default function InstallmentLedgerReport() {
       });
     }
   };
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedIndex]);
-
+  }, [selectedIndex]); // Add selectedIndex as a dependency
   useEffect(() => {
+    // Scroll the selected row into view
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
     }
-  }, [selectedIndex]);
-
-  const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
-
-  const focusNextElement = (currentRef, nextRef) => {
-    if (currentRef.current && nextRef.current) {
-      currentRef.current.focus();
-      nextRef.current.focus();
-    }
-  };
-
-  const handleToDateEnter = (e) => {
-    if (e.key === "Enter") {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-
-      const inputDate = e.target.value;
-      const formattedDate = inputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-
-      // Basic format validation (dd-mm-yyyy)
-      if (
-        !/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
-      ) {
-        toast.error("Date must be in the format dd-mm-yyyy");
-        return;
-      }
-
-      const [day, month, year] = formattedDate.split("-").map(Number);
-      const enteredDate = new Date(year, month - 1, day);
-      const daysInMonth = new Date(year, month, 0).getDate();
-
-      // Validate month, day, and date range
-      if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
-        toast.error("Invalid date. Please check the day and month.");
-        return;
-      }
-      if (enteredDate > GlobaltoDate) {
-        toast.error(`Date must be before ${GlobaltoDate1}`);
-        return;
-      }
-
-      // Update input value and state
-      e.target.value = formattedDate;
-      settoInputDate(formattedDate); // Update the state with formatted date
-
-      // Move focus to the next element
-      focusNextElement(toRef, saleSelectRef);
-    }
-  };
-
-  const handleStoreEnter = (e) => {
-    if (e.key === "Enter" && !menuStoreIsOpen) {
-      e.preventDefault();
-      focusNextElement(storeRef, selectButtonRef);
-    }
-  };
-
-  const handleSearchEnter = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      focusNextElement(searchRef, selectButtonRef);
-    }
-  };
-
-  const formatValue = (val) => {
-    return Number(val) === 0 ? "" : val;
-  };
+  }, [selectedIndex]); // Add selectedIndex as a dependency
+  //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
 
   return (
     <>
+      {/* <div id="someElementId"></div> */}
       <ToastContainer />
       <div style={contentStyle}>
         <div
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            // width: "100%",
+            width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Installment Ledger" />
+          <NavComponent textdata="Installment Ledger Report" />
 
-          {/* ------------1st row */}
+          {/* TOP HEADER SECTIO SECTION */}
           <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+            className="row "
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              height: "330px",
+              marginTop: "5px",
+              marginBottom: "2px",
+              marginRight: "2px",
+            }}
           >
+            {/* FIRST SECTION OF HEADER */}
             <div
+              className="row"
               style={{
+                height: "100%",
                 width: "100%",
-                display: "flex",
-                alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
               }}
             >
+              {/* LEFT PART OF THE HEADER FIRST SECTION  */}
               <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
+                className="col-md-8"
+                style={{ height: "20px", padding: "0px" }}
               >
                 <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
+                  className="row"
+                  style={{ height: "100%", width: "100%", margin: "0px" }}
                 >
-                  <label htmlFor="transactionType">
-                    <span
+                  <div
+                    className="col-md-4"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
                       style={{
+                        width: "60px",
+                        height: "100%",
+                        color: fontcolor,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
+                        justifyContent: "end",
+                        fontSize: "12px",
                         fontWeight: "bold",
                       }}
                     >
-                      Account :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={saleSelectRef}
-                    options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, selectButtonRef)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelParts = selectedOption.label.split("-"); // Split by "-"
-                        const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
-
-                        setCompanyselectdata(selectedOption.value);
-                        setCompanyselectdatavalue({
-                          value: selectedOption.value,
-                          label: description,
-                        });
-                      } else {
-                        setCompanyselectdata("");
-                        setCompanyselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
+                      Code :
+                    </div>
+                    <input
+                      value={saleType}
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
                         color: fontcolor,
-                        marginTop: "-5px",
-                      }),
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "163px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                  </div>
+                  <div
+                    className="col-md-8"
+                    style={{ height: "100%", padding: "0px", display: "flex" }}
+                  >
+                    <div
+                      style={{
+                        width: "40px",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        color: fontcolor,
+                      }}
+                    >
+                      A/C :
+                    </div>
+                    <div>
+                      <Select
+                        className="List-select-class"
+                        ref={saleSelectRef}
+                        options={options}
+                        //   value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
+                        onKeyDown={(e) => handleSaleKeypress(e, 'searchsubmit')}
+                        id="selectedsale"
+                        onChange={(selectedOption) => {
+                          if (selectedOption && selectedOption.value) {
+                            const labelParts = selectedOption.label.split("-"); // Split by "-"
+                            const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+
+                            setSaleType(selectedOption.value);
+                            setCompanyselectdatavalue({
+                              value: selectedOption.value,
+                              label: description, // Keep only the description
+                            });
+                          } else {
+                            setSaleType("");
+                            setCompanyselectdatavalue("");
+                          }
+                        }}
+                        onInputChange={(inputValue, { action }) => {
+                          if (action === "input-change") {
+                            return inputValue.toUpperCase();
+                          }
+                          return inputValue;
+                        }}
+                        components={{ Option: DropdownOption }}
+                        styles={{
+                          ...customStyles1(!saleType),
+                          placeholder: (base) => ({
+                            ...base,
+                            textAlign: "left",
+                            marginLeft: "0",
+                            justifyContent: "flex-start",
+                            color: fontcolor,
+                            marginTop: "-5px",
+                          }),
+                        }}
+                        isClearable
+                        placeholder="ALL"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "2px",
+                  }}
+                >
+                  <div
+                    className="col-md-7"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "99px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Father Name :
+                    </div>
+                    <input
+                      value="14-01-708"
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "290px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                  </div>
+                  <div
+                    className="col-md-5"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Net Amt :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      236,000
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="row"
+                  style={{
+                    height: "40px",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-7"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Address :
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        lineHeight: "13px",
+                        paddingTop: "2px",
+                        textAlign: "start",
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    >
+                      GHULISTAN COLONY QARACHI AMAR SANDHU LAHORE
+                    </div>
+                  </div>
+                  <div
+                    className="col-md-5"
+                    style={{
+                      height: "100%",
+                      display: "flex",
+                      padding: "0px",
+                      margin: "0px",
                     }}
-                    isClearable
-                    placeholder="ALL"
-                  />
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        padding: "0px",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        margin: "0px",
+                        rowGap: "0.5px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "144px",
+                          //   paddingRight: "px",
+                          height: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "end",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Rent :
+                      </div>
+                      <div
+                        style={{
+                          paddingLeft: "3px",
+                          color: fontcolor,
+                          fontSize: "12px",
+                          height: "20px",
+                          backgroundColor: getcolor,
+                          width: "128px",
+                          marginLeft: "3px",
+                          border: "2px solid grey",
+                          borderRadius: "0px",
+                          display: "flex",
+                          justifyContent: "end",
+                          alignItems: "center",
+                        }}
+                      >
+                        236,000
+                      </div>
+
+                      <div
+                        style={{
+                          width: "144px",
+                          height: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "end",
+                          fontSize: "12px",
+                          //   paddingRight: "2px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Total :
+                      </div>
+                      <div
+                        style={{
+                          paddingLeft: "3px",
+                          color: fontcolor,
+                          fontSize: "12px",
+                          height: "20px",
+                          backgroundColor: getcolor,
+                          width: "128px",
+                          marginLeft: "3px",
+                          border: "2px solid grey",
+                          borderRadius: "0px",
+                          display: "flex",
+                          justifyContent: "end",
+                          alignItems: "center",
+                        }}
+                      >
+                        236,000
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-7"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Phone No :
+                    </div>
+                    <input
+                      value="14-01-708"
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                  </div>
+                  <div
+                    className="col-md-5"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Advance :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      236,000
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-7"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Sales Man :
+                    </div>
+                    <input
+                      value="14-01-708"
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                  </div>
+                  <div
+                    className="col-md-5"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Qist Amt :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      236,000
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-12"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "104px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Varify By :
+                    </div>
+                    <input
+                      value="14-01-708"
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "120px",
+                        marginLeft: "4px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Delivereb By :
+                    </div>
+                    <input
+                      value="14-01-708"
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "120px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        marginLeft: "2px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Profession :
+                    </div>
+                    <input
+                      value="14-01-708"
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "129px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                  </div>
+                  {/* <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
+                                        <div style={{ width: '150px', height: '100%',display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Qist Amt :</div>
+                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems:'center' }}>
+                                            236,000
+                                        </div>
+                                    </div> */}
+                </div>
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-12"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Remarks :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "580px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    >
+                      INSTALLMENT SALE
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* RIGHT PART OF THE HEADER FIRST SECTION  */}
+              <div
+                className="col-md-4"
+                style={{
+                  flexWrap: "wrap",
+                  height: "20px",
+                  padding: "0px",
+                  display: "flex",
+                  gap: "0px",
+                }}
+              >
+                {/* hello dear */}
+                <div className="col-md-7" style={{ height: "100%" }}>
+                  <div
+                    className="col-md-12"
+                    style={{ display: "flex", height: "100%" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Months :
+                    </div>
+                    <div
+                      style={{
+                        paddingRight: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "90px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                      }}
+                    >
+                      12.00
+                    </div>
+                  </div>
+
+                  <div
+                    className="col-md-12"
+                    style={{
+                      display: "flex",
+                      height: "100%",
+                      marginTop: "1px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Inv Date :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "90px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    >
+                      30/07/2024
+                    </div>
+                  </div>
+
+                  <div
+                    className="col-md-12"
+                    style={{
+                      display: "flex",
+                      height: "100%",
+                      marginTop: "1px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      From Date :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "90px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    >
+                      10/09/2024
+                    </div>
+                  </div>
+
+                  <div
+                    className="col-md-12"
+                    style={{
+                      display: "flex",
+                      height: "100%",
+                      marginTop: "1px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Engine.# :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "90px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    ></div>
+                  </div>
+
+                  <div
+                    className="col-md-12"
+                    style={{
+                      display: "flex",
+                      height: "100%",
+                      marginTop: "1px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Chasis.# :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "90px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    ></div>
+                  </div>
+
+                  <div
+                    className="col-md-12"
+                    style={{
+                      display: "flex",
+                      height: "100%",
+                      marginTop: "1px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Eng.# : :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "90px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* <div className="col-md-5" style={{ height: '120px', border:'2px solid grey' }}></div> */}
+
+                <div
+                  className="col-md-5"
+                  style={{
+                    height: "120px",
+                    border: "2px solid grey",
+                    position: "relative",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      background:
+                        "linear-gradient(40deg, transparent 49%, grey 49%, grey 40%, transparent 51%)",
+                      pointerEvents: "none", // So it doesn't interfere with clicks
+                    }}
+                  ></div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      background:
+                        "linear-gradient(-40deg, transparent 49%, grey 49%, grey 40%, transparent 51%)",
+                      pointerEvents: "none", // So it doesn't interfere with clicks
+                    }}
+                  ></div>
+                </div>
+
+                <div
+                  className="col-md-12"
+                  style={{ height: "100%", display: "flex", marginTop: "6px" }}
+                >
+                  <div
+                    className="col-md-6"
+                    style={{ height: "100%", display: "flex" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Actual Mths :
+                    </div>
+                    <div
+                      style={{
+                        paddingRight: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "65px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                      }}
+                    >
+                      5.00
+                    </div>
+                  </div>
+                  <div
+                    className="col-md-6"
+                    style={{ height: "100%", display: "flex" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "50px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Grade :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "120px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div
+                  className="col-md-12"
+                  style={{ height: "100%", display: "flex", marginTop: "1px" }}
+                >
+                  <div
+                    className="col-md-6"
+                    style={{ height: "100%", display: "flex" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "65px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Collector :
+                    </div>
+                    <div
+                      style={{
+                        paddingleft: "2px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "100px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    >
+                      REHAN ASLAM
+                    </div>
+                  </div>
+                  <div
+                    className="col-md-6"
+                    style={{ height: "100%", display: "flex" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "50px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                      }}
+                    >
+                      Type :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "120px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "start",
+                      }}
+                    >
+                      MONTHLY
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CENTER SECTION  */}
+              <div
+                className="row downrow"
+                style={{
+                  width: "100%",
+                  height: "20px",
+                  margin: "0px",
+                  padding: "0px",
+                }}
+              >
+                <div
+                  className="col-md-12"
+                  style={{ height: "1px", border: "1px solid grey" }}
+                ></div>
+                <div
+                  className="col-md-12"
+                  style={{
+                    height: "100%",
+                    marginTop: "2px",
+                    marginBottom: "2px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Off Address :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "350px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "50px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Mobile :
+                  </div>
+
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "132px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+                <div
+                  className="col-md-12"
+                  style={{ height: "1px", border: "1px solid grey" }}
+                ></div>
+                <div
+                  className="col-md-12"
+                  style={{
+                    height: "100%",
+                    marginTop: "2px",
+                    marginBottom: "1px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Guaranter :
+                  </div>
+                  <input
+                    value="FAROOQ BHAI S/O"
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "110px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Witness Name :
+                  </div>
+                  <input
+                    value="S/O"
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+                <div
+                  className="col-md-12"
+                  style={{
+                    height: "100%",
+                    marginTop: "1px",
+                    marginBottom: "1px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Address :
+                  </div>
+                  <input
+                    value="H #E-169,ST #4, GHULISTAN COLONY KARACHI"
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "110px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Address :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+                <div
+                  className="col-md-12"
+                  style={{
+                    height: "100%",
+                    marginTop: "1px",
+                    marginBottom: "1px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  ></div>
+                  <input
+                    value="AMAR SADHU LAHORE"
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "110px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  ></div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+                <div
+                  className="col-md-12"
+                  style={{
+                    height: "100%",
+                    marginTop: "1px",
+                    marginBottom: "1px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Mobile :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "146px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "75px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Profession :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "146px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "110px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Mobile :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "146px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "75px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Profession :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "146px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+                <div
+                  className="col-md-12"
+                  style={{
+                    height: "100%",
+                    marginTop: "1px",
+                    marginBottom: "1px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Official :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "110px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Official :
+                  </div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+                <div
+                  className="col-md-12"
+                  style={{
+                    height: "100%",
+                    marginTop: "1px",
+                    marginBottom: "1px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  ></div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      height: "100%",
+                      width: "110px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  ></div>
+                  <input
+                    value=""
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+              </div>
+              {/* DRAW LINER AFTER FIRST SECTION OF HEADER */}
             </div>
           </div>
-
+          {/* TABLE HEADER BODY DATA SECTION */}
           <div>
-            {/* Table Head */}
             <div
               style={{
                 overflowY: "auto",
@@ -1823,143 +3042,74 @@ export default function InstallmentLedgerReport() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  // width: "100%",
+                  fontSize: "12px",
+                  //   width: "100%",
                   position: "relative",
+                  //   paddingRight: "2%",
                 }}
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
-                    <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      //   onClick={() => handleSorting("code")}
-                    >
+                    <td className="border-dark" style={firstColWidth}>
                       Date
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
-                      ></i> */}
                     </td>
-                    <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      //   onClick={() => handleSorting("Description")}
-                    >
+                    <td className="border-dark" style={secondColWidth}>
                       Trn#
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i> */}
                     </td>
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      //   onClick={() => handleSorting("Opening")}
-                    >
+                    <td className="border-dark" style={thirdColWidth}>
                       Type
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Opening")}
-                      ></i> */}
                     </td>
-                    <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      //   onClick={() => handleSorting("Debit")}
-                    >
+                    <td className="border-dark" style={forthColWidth}>
                       Description
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Debit")}
-                      ></i> */}
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      //   onClick={() => handleSorting("Credit")}
-                    >
+                    <td className="border-dark" style={fifthColWidth}>
                       Sale
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Credit")}
-                      ></i> */}
                     </td>
-                    <td
-                      className="border-dark"
-                      style={seventhColWidth}
-                      //   onClick={() => handleSorting("Balance")}
-                    >
+                    <td className="border-dark" style={sixthColWidth}>
                       Collection
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Balance")}
-                      ></i> */}
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={eightColWidth}
-                      //   onClick={() => handleSorting("Balance")}
-                    >
+                    <td className="border-dark" style={seventhColWidth}>
                       Balance
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Balance")}
-                      ></i> */}
                     </td>
-
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
               </table>
             </div>
-            {/* Table Body */}
+
             <div
               className="table-scroll"
               style={{
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "55vh",
+                maxHeight: "18vh",
                 // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                wordBreak: "break-word",
               }}
             >
               <table
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  width: "100%",
+                  fontSize: "12px",
+                  // width: "100%",
                   position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -1996,18 +3146,15 @@ export default function InstallmentLedgerReport() {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
                       </tr>
                     </>
                   ) : (
                     <>
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
-                        const isNegative =
-                          item.Credit < 0 || item.Balance < 0 || item.Debit < 0;
-
                         return (
                           <tr
                             key={`${i}-${selectedIndex}`}
@@ -2018,14 +3165,13 @@ export default function InstallmentLedgerReport() {
                             }
                             style={{
                               backgroundColor: getcolor,
-                              // color: fontcolor,
-                              color: isNegative ? "red" : fontcolor,
+                              color: fontcolor,
                             }}
                           >
                             <td className="text-start" style={firstColWidth}>
                               {item.Date}
                             </td>
-                            <td className="text-center" style={secondColWidth}>
+                            <td className="text-start" style={secondColWidth}>
                               {item["Trn#"]}
                             </td>
                             <td className="text-center" style={thirdColWidth}>
@@ -2034,18 +3180,19 @@ export default function InstallmentLedgerReport() {
                             <td className="text-start" style={forthColWidth}>
                               {item.Description}
                             </td>
+                            <td className="text-end" style={fifthColWidth}>
+                              {item.Sale}
+                            </td>
                             <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item.Sale)}
+                              {item.Collection}
                             </td>
                             <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Collection)}
-                            </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Balance)}
+                              {item.Balance}
                             </td>
                           </tr>
                         );
                       })}
+
                       {Array.from({
                         length: Math.max(0, 27 - tableData.length),
                       }).map((_, rowIndex) => (
@@ -2068,9 +3215,9 @@ export default function InstallmentLedgerReport() {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -2078,11 +3225,12 @@ export default function InstallmentLedgerReport() {
               </table>
             </div>
           </div>
-          {/* Table Footer */}
+          {/* TOTAL ROW SECTION */}
           <div
             style={{
-              borderBottom: `1px solid ${fontcolor}`,
+              //   width: "100%",
               borderTop: `1px solid ${fontcolor}`,
+              borderBottom: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
               paddingRight: "8px",
@@ -2092,14 +3240,9 @@ export default function InstallmentLedgerReport() {
               style={{
                 ...firstColWidth,
                 background: getcolor,
-                marginLeft: "2px",
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total2">
-                {formatValue(tableData.length.toLocaleString())}
-              </span>
-            </div>
+            ></div>
             <div
               style={{
                 ...secondColWidth,
@@ -2113,100 +3256,51 @@ export default function InstallmentLedgerReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              {/* <span className="mobileledger_total">
-                {formatValue(totalopening)}
-              </span> */}
-            </div>
+            ></div>
             <div
               style={{
                 ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              {/* <span className="mobileledger_total">
-                {formatValue(totaldebit)}
-              </span> */}
-            </div>
+            ></div>
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
             <div
               style={{
                 ...sixthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              {/* <span className="mobileledger_total">
-                {formatValue(totalcredit)}
-              </span> */}
-            </div>
-
+            ></div>
             <div
               style={{
                 ...seventhColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              {/* <span className="mobileledger_total">
-                {formatValue(ClosingBalance)}
-              </span> */}
-            </div>
-            <div
-              style={{
-                ...eightColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">
-                {formatValue(ClosingBalance)}
-              </span> */}
-            </div>
+            ></div>
           </div>
-          {/* Action Buttons */}
+          {/* LAST BUTTONS SECTION SELECT, PDF, EXCEL AND RETURN */}
           <div
             style={{
               margin: "5px",
               marginBottom: "2px",
             }}
           >
-            <SingleButton
-              to="/MainPage"
-              text="Return"
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            />
-            <SingleButton
-              text="PDF"
-              onClick={exportPDFHandler}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            />
-            <SingleButton
-              text="Excel"
-              onClick={handleDownloadCSV}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            />
+            <SingleButton to="/MainPage" text="Return" />
+            <SingleButton text="PDF" onClick={exportPDFHandler} />
+            <SingleButton text="EXCEL" onClick={handleDownloadCSV} />
             <SingleButton
               id="searchsubmit"
-              text="Select"
-              ref={selectButtonRef}
-              onClick={() => {
-                fetchDailyStatusReport();
-                resetSorting();
-              }}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
+              text="SELECT"
+              ref={input3Ref}
+              onClick={fetchGeneralLedger}
             />
           </div>
         </div>

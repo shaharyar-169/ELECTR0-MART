@@ -76,6 +76,7 @@ import PriceListAPurSale from "./Component/Reports/Daily_Jobs_Reports/List/Price
 import SparePartsList from "./Component/Reports/Daily_Jobs_Reports/List/SparePartsList.js";
 import ItemPriceList2 from "./Component/Reports/Daily_Jobs_Reports/List/ItempriceList2.js";
 import HelperList from "./Component/Reports/Daily_Jobs_Reports/List/HelperList.js";
+import ReceipItemList from "./Component/Reports/Daily_Jobs_Reports/List/ReceipeList.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -139,6 +140,7 @@ import TechnicianCollectionReport from "./Component/Reports/Daily_Jobs_Reports/D
 import DailySparePartsDemandReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySparePartsDemandReport.js";
 import DailySparePartsIssueReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySparePartIssueReport.js";
 import PurchaseOrderStatusReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/PurchaseOrderStatusReport.js";
+import ProductionOrderStatusReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/ProductionOrderStatusReport.js";
 
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
@@ -261,7 +263,7 @@ function App() {
                 <Route exact path="/SparePartsList" element={< SparePartsList />} />
                 <Route exact path="/CategoryListPOS" element={< CategoryListPos />} />
                 <Route exact path="/HelperList" element={< HelperList />} />
-
+                <Route exact path="/ReceipeReport" element={< ReceipItemList />} />
 
                 {/* Rountes for ledgers reports */}
                 <Route exact path="/GeneralLedger1" element={<GeneralLedger1 />} />
@@ -328,6 +330,7 @@ function App() {
                 <Route exact path="/InstallmentCollectorRoute" element={<DailySparePartsDemandReport />} />
                 <Route exact path="/InstallmentOutstandingReport" element={<DailySparePartsIssueReport />} />
                 <Route exact path="/InstallmentNilCollectionReport" element={<PurchaseOrderStatusReport />} />
+                <Route exact path="/ProductionOrderStatus" element={<ProductionOrderStatusReport />} />
 
 
                 {/* Rountes for Installments reports */}

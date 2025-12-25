@@ -328,6 +328,8 @@ export default function ItemList() {
         console.error("Error:", error);
       });
   }, []);
+
+  
   const options = GetCompany.map((item) => ({
     value: item.tcmpcod,
     label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
