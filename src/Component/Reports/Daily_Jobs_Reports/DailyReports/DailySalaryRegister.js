@@ -25,11 +25,12 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Code, Collections, Description, Store } from "@mui/icons-material";
-import "../../../vardana/vardana";
-import "../../../vardana/verdana-bold";
+import { Balance, Description, Store } from "@mui/icons-material";
+import '../../../vardana/vardana';
+import '../../../vardana/verdana-bold'
 
-export default function EmployeeCommissionReport() {
+
+export default function DailySalryRegisterReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -44,25 +45,12 @@ export default function EmployeeCommissionReport() {
   const storeRef = useRef(null);
   const typeRef = useRef(null);
   const searchRef = useRef(null);
-  const CommissionRef = useRef(null);
   const selectButtonRef = useRef(null);
 
   const [saleType, setSaleType] = useState("");
 
-  const hasInitialized = useRef(false);
-  const employeeref = useRef(null);
-  const [GetEmployee, setGetEmployee] = useState([]);
-  
-  const [Employeeselectdata, setEmployeeselectdata] = useState("");
-  const [Employeeselectdatavalue, setEmployeeselectdatavalue] = useState("");
-
-  
-
   const [storeList, setStoreList] = useState([]);
   const [storeType, setStoreType] = useState("");
-   const [mobileNumber, setmobileNumber] = useState("");
-  const [tableData, setTableData] = useState([]);
-  
 
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -95,20 +83,19 @@ export default function EmployeeCommissionReport() {
   const [sortData, setSortData] = useState("ASC");
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("P");
+  const [transectionType, settransectionType] = useState("A");
   const [transectionType2, settransectionType2] = useState("");
 
-  console.log('transectionType2',transectionType2)
+  const [TotalSalary, setTotalSalary] = useState(0);
+  const [TotalSaleCom, setTotalSaleCom] = useState(0);
+  const [TotalRecCom, setTotalRecCom] = useState(0);
+  const [TotalAdvance, setTotalAdvance] = useState(0);
+  const [TotalFine, setTotalFine] = useState(0);
+    const [TotalNetAmount, setTotalNetAmount] = useState(0);
 
-  const [totalqnty, settotalqnty] = useState(0);
-  const [totalexcel, settotalexcel] = useState(0);
-  const [totaltax, settotaltax] = useState(0);
-  const [totalincl, settotalincl] = useState(0);
 
   const [totaldebit, settotaldebit] = useState(0);
   const [totalcredit, settotalcredit] = useState(0);
-  const [ClosingBalance, setClosingBalance] = useState(0);
-  const [commission,setcommission] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -121,13 +108,6 @@ export default function EmployeeCommissionReport() {
 
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
-
- console.log("Employeeselectdata", Employeeselectdata);
-  console.log("mobile", mobileNumber);
-  console.log("Transection", transectionType);
-   console.log("transectionType2", transectionType2);
-    console.log("tabledta", tableData);
-
 
   const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
@@ -318,9 +298,9 @@ export default function EmployeeCommissionReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (employeeref.current) {
+        if (selectButtonRef.current) {
           e.preventDefault();
-          employeeref.current.focus();
+          selectButtonRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -439,23 +419,15 @@ export default function EmployeeCommissionReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeCommissionReport.php";
+    const apiUrl = apiLinks + "/DailySalaryRegister.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-
-      FCtgCod: Categoryselectdata,
-      FCapCod: Capacityselectdata,
-      FCmpCod: Companyselectdata,
-      FRepRat: transectionType,
+    
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      FRepTyp: transectionType2,
-      FEmpCod: Employeeselectdata,
-      FComPrc: mobileNumber,
-    
       // code: "NASIRTRD",
       // FLocCod: "001",
       // FYerDsc: "2024-2024",
@@ -466,12 +438,14 @@ export default function EmployeeCommissionReport() {
       .then((response) => {
         setIsLoading(false);
 
-        settotaldebit(response.data["Total Qnty"]);
-        settotalcredit(response.data["Total Amount"]);
-        setClosingBalance(response.data["Total Margin"]);
-         setcommission(response.data["Total Commission"]);
+        setTotalSalary(response.data["TotalSalary"]);
+        setTotalSaleCom(response.data["TotalSaleCom"]);
+        setTotalRecCom(response.data["TotalRecCom"]);
+        setTotalAdvance(response.data["TotalAdvance"]);
+        setTotalFine(response.data["TotalFine"]);
+        setTotalNetAmount(response.data["TotalNetAmount"]);
 
-       if (response.data && Array.isArray(response.data.Detail)) {
+        if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
         } else {
           console.warn(
@@ -480,7 +454,7 @@ export default function EmployeeCommissionReport() {
           );
           setTableData([]);
         }
-})
+      })
       .catch((error) => {
         console.error("Error:", error);
         setIsLoading(false);
@@ -514,70 +488,6 @@ export default function EmployeeCommissionReport() {
     setSelectedfromDate(firstDateOfCurrentMonth);
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveEmployee.php";
-    const formData = new URLSearchParams({
-      //    code: organisation.code,
-      //     FLocCod: locationnumber || getLocationNumber,
-      code: "NASIRTRD",
-      FLocCod: "001",
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetEmployee(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetEmployee([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-  const employeeoptions = GetEmployee.map((item) => ({
-    value: item.tempcod,
-    label: `${item.tempcod}-${item.tempnam.trim()}`,
-    tcrtcom: item.tcrtcom,
-    tcshcom: item.tcshcom,
-    tinscom: item.tinscom,
-  }));
-
-  const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
-  useEffect(() => {
-    if (GetEmployee.length > 0) {
-      setIsOptionsLoaded(true);
-    }
-  }, [GetEmployee]);
-
-  useEffect(() => {
-    if (
-      isOptionsLoaded &&
-      employeeoptions.length > 0 &&
-      !Employeeselectdata &&
-      !hasInitialized.current
-    ) {
-      const firstOption = employeeoptions[0];
-      setEmployeeselectdata(firstOption.value);
-
-      const fullLabel = firstOption.label;
-      const description = fullLabel.split("-").pop()?.trim();
-
-      setEmployeeselectdatavalue({
-        value: firstOption.value,
-        label: description,
-        fullLabel: fullLabel,
-      });
-
-      // Mark as initialized
-      hasInitialized.current = true;
-    }
-  }, [isOptionsLoaded, employeeoptions, Employeeselectdata]);
 
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCompany.php";
@@ -714,7 +624,7 @@ export default function EmployeeCommissionReport() {
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 225,
+      width: 250,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -780,8 +690,10 @@ export default function EmployeeCommissionReport() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected || state.isFocused ? "white" : fontcolor,
-      "&:hover": {
+   color:
+  state.isSelected || state.isFocused
+    ? "white"
+    : fontcolor,      "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
         cursor: "pointer",
@@ -875,52 +787,54 @@ export default function EmployeeCommissionReport() {
   });
 
   const exportPDFHandler = () => {
+   
+
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
       item.Date,
-      item["Trn#"],
-      item.Type,
-      item.Description,
-      formatValue(item['Cost Rate']),
-      formatValue(item.Qnty),
-      formatValue(item.Rate),
-      formatValue(item["Sale Amount"]),
-      formatValue(item.Margin),
-        formatValue(item.Commission),
+     item.SLYNo,
+    //   item.Code,
+     item.Employee,
+    formatValue(item.Salary)   ,
+    formatValue(item.SaleCom)   ,
+    formatValue(item.RecCom)   ,
+    formatValue(item.AdvDed)   ,
+    formatValue(item.FineAmt)   ,
+    formatValue(item.TotalAmt)   ,
     ]);
 
     // Add summary row to the table
     rows.push([
       "",
       "",
-      "",
       "Total",
-         "",
-      String(formatValue(totaldebit)),
-      "",
-      String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
-       String(formatValue(commission)),
+     String(formatValue(TotalSalary)),
+     String(formatValue(TotalSaleCom)),
+     String(formatValue(TotalRecCom)),
+     String(formatValue(TotalAdvance)),
+     String(formatValue(TotalFine)),
+     String(formatValue(TotalNetAmount)),
+
+        
     ]);
 
     // Define table column headers and individual column widths
 
     const headers = [
       "Date",
-      "Trn#",
-      "Type",
-      "Description",
-         "Cost Rate",
-      "Qnty",
-      "Rate",
-      "Amount",
-       "Margin",
-       "Commission",
+      "SLYNo",
+     "Employee",
+      "Salary",
+      "SaleCom",
+      "RecCom",
+      "AdvDed",
+      "FineAmt",
+      "TotalAmt"
     ];
-    const columnWidths = [24, 16, 12, 100,25, 18, 25, 25, 25,25];
+    const columnWidths = [24, 20,100,22, 22, 22, 22,22,22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -930,14 +844,14 @@ export default function EmployeeCommissionReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10);
+    // doc.setFont("verdana-regular", "normal");
+    // doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont("verdana", "bold");
-      doc.setFontSize(10);
+      doc.setFont("verdana", "bold"); // Set font to bold
+      doc.setFontSize(10); // Set font size for headers
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -959,12 +873,10 @@ export default function EmployeeCommissionReport() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(10);
+    
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
@@ -1054,19 +966,21 @@ export default function EmployeeCommissionReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 2) {
+          if (cellIndex === 0 || cellIndex === 1 ) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
+            cellIndex === 3  ||
             cellIndex === 4 ||
             cellIndex === 5 ||
             cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8 ||
-             cellIndex === 9 
+            cellIndex === 7 || 
+             cellIndex === 8
+            
+            
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1134,7 +1048,7 @@ export default function EmployeeCommissionReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 29; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1166,11 +1080,10 @@ export default function EmployeeCommissionReport() {
         // }
 
         // Add page numbering
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+        doc.setFontSize(pageNumberFontSize);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 15,
+          rightX - 5,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
@@ -1181,14 +1094,16 @@ export default function EmployeeCommissionReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-        doc.setFont("Times New Roman", "normal");
-        doc.setFontSize(10);
+    
+           doc.setFontSize(10);
+        doc.setFont('helvetica', "300");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+       
+        doc.setFont('verdana-regular', "normal");
+         doc.setFontSize(10);
         addTitle(
-          `Employee Collection Report From ${fromInputDate} To ${toInputDate}`,
+          `Daily Salary Register Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1200,110 +1115,13 @@ export default function EmployeeCommissionReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let ratedata =
-          transectionType === "P"
-            ? "PURCHASE RATE"
-            : transectionType == "M"
-            ? "SM RATE"
-            : transectionType == "A"
-            ? "AVERAGE RATE"
-            : transectionType == "W"
-            ? "WEIGHTRD AVERAGE"
-            : transectionType == "F"
-            ? "FIFP"
-            : "";
+        // Set font size and weight for the labels
+    
+        
 
-        let transectionsts =
-          transectionType === "C"
-            ? "CASH"
-            : transectionType == "R"
-            ? "CREDIT"
-            : transectionType == "I"
-            ? "INSTALLMENT"
-            : "ALL";
+        startY += 1; // Adjust vertical position for the labels
 
-        let EMPLOYEEDATA = Employeeselectdatavalue.label
-          ? Employeeselectdatavalue.label
-          : "ALL";
-        let typeText = capacityselectdatavalue.label
-          ? capacityselectdatavalue.label
-          : "ALL";
-        let typeItem = Companyselectdatavalue.label
-          ? Companyselectdatavalue.label
-          : "ALL";
-        let category = categoryselectdatavalue.label
-          ? categoryselectdatavalue.label
-          : "ALL";
-        //  let typename = typeselectdatavalue.label
-        //    ? typeselectdatavalue.label
-        //    : "ALL";
-
-        let search = searchQuery ? searchQuery : "";
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Rate :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${ratedata}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Category :`, labelsX, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${category}`, labelsX + 25, labelsY + 8.3); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Type :`, labelsX + 180, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.3); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Capacity :`, labelsX, labelsY + 12.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-
-        if (searchQuery) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-          doc.text(`Search :`, labelsX + 180, labelsY + 12.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-          doc.text(`${search}`, labelsX + 205, labelsY + 12.5); // Draw the value next to the label
-        }
-
-        startY += 15; // Adjust vertical position for the labels
-
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 44);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1344,26 +1162,25 @@ export default function EmployeeCommissionReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeCommissionReport As On ${date}.pdf`);
+    doc.save(`DailySalaryRegisterReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 10; // Ensure this matches the actual number of columns
+    const numColumns = 9; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "left",
       "center",
       "center",
       "left",
       "right",
-        "right",
       "right",
       "right",
       "right",
-      "right"
+      "right",
+      "right",
     ];
 
     // Define fonts for different sections
@@ -1392,16 +1209,18 @@ export default function EmployeeCommissionReport() {
     worksheet.addRow([]);
 
     // Add company name
-    const companyRow = worksheet.addRow([comapnyname]);
+ // Add company name
+const companyRow = worksheet.addRow([comapnyname]);
 
-    companyRow.eachCell((cell) => {
-      cell.font = {
-        name: "Times New Roman",
-        size: 16, // optional
-        bold: true, // optional
-      };
-      cell.alignment = { horizontal: "center" };
-    });
+companyRow.eachCell((cell) => {
+  cell.font = {
+    name: "Times New Roman",
+    size: 16,       // optional
+    bold: true,     // optional
+  };
+  cell.alignment = { horizontal: "center" };
+});
+
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
@@ -1412,7 +1231,7 @@ export default function EmployeeCommissionReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Collection Report From ${fromInputDate} To ${toInputDate}`,
+      `Daily Salary Register Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1428,143 +1247,7 @@ export default function EmployeeCommissionReport() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let employeedata = Employeeselectdatavalue.label
-      ? Employeeselectdatavalue.label
-      : "ALL";
-
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
-    let typecapacity = capacityselectdatavalue.label
-      ? capacityselectdatavalue.label
-      : "ALL";
-    let typecategory = categoryselectdatavalue.label
-      ? categoryselectdatavalue.label
-      : "ALL";
-    //  let typetype = typeselectdatavalue.label
-    //    ? typeselectdatavalue.label
-    //    : "ALL ";
-
-    let ratedata =
-      transectionType === "P"
-        ? "PURCHASE RATE"
-        : transectionType == "M"
-        ? "SM RATE"
-        : transectionType == "A"
-        ? "AVERAGE RATE"
-        : transectionType == "W"
-        ? "WEIGHTRD AVERAGE"
-        : transectionType == "F"
-        ? "FIFP"
-        : "";
-
-    let transectionsts =
-          transectionType === "C"
-            ? "CASH"
-            : transectionType == "R"
-            ? "CREDIT"
-            : transectionType == "I"
-            ? "INSTALLMENT"
-            : "ALL";
-
-    let typesearch = searchQuery ? searchQuery : "";
-
-    const typeAndStoreRow5 = worksheet.addRow([
-      "Employee :",
-      employeedata,
-      "",
-      "",
-      "",
-    ]);
-
-    worksheet.mergeCells(
-      `B${typeAndStoreRow5.number}:D${typeAndStoreRow5.number}`
-    );
-    // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "Company :",
-      typecompany,
-      "",
-      "",
-      "",
-      "Rate :",
-      ratedata,
-    ]);
-
-    worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`
-    );
-
-    // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "Category :",
-      typecategory,
-      "",
-      "",
-      "",
-
-      "Type :",
-      transectionsts,
-    ]);
-
-    worksheet.mergeCells(
-      `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`
-    );
-    // Add third row with conditional rendering for "SEARCH:"
-    const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery
-        ? ["Capacity :", typecapacity, "", "", "", "Search :", typesearch]
-        : ["Capacity :", typecapacity]
-    );
-
-    worksheet.mergeCells(
-      `B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`
-    );
-
-    // Apply styling for the status row
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 6].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 6].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow5.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
-    typeAndStoreRow4.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 6].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
+  
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
@@ -1584,15 +1267,14 @@ export default function EmployeeCommissionReport() {
     // Add headers
     const headers = [
       "Date",
-      "Trn#",
-      "Type",
-      "Description",
-         "Cost Rate",
-      "Qnty",
-      "Rate",
-      "Amount",
-      "Margin",
-        "Collection",
+      "SLYNo",
+     "Employee",
+      "Salary",
+      "SaleCom",
+      "RecCom",
+      "AdvDed",
+      "FineAmt",
+      "TotalAmt"
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1600,17 +1282,16 @@ export default function EmployeeCommissionReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
-        item.Description,
-        //    item.Store,
-        formatValue(item['Cost Rate']),
-        formatValue(item.Qnty),
-        formatValue(item.Rate),
-        formatValue(item["Sale Amount"]),
-        formatValue(item.Margin),
-         formatValue(item.Collection),
+       item.Date,
+     item.SLYNo,
+    //   item.Code,
+     item.Employee,
+    formatValue(item.Salary)   ,
+    formatValue(item.SaleCom)   ,
+    formatValue(item.RecCom)   ,
+    formatValue(item.AdvDed)   ,
+    formatValue(item.FineAmt)   ,
+    formatValue(item.TotalAmt)   ,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1629,22 +1310,20 @@ export default function EmployeeCommissionReport() {
     });
 
     // Set column widths
-    [10, 8, 6, 50,12, 8, 12, 15, 15,15].forEach((width, index) => {
+    [10,8, 45,12, 12,12, 12,12,12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
+    "",
       "",
-      "",
-      "",
-      
       "Total",
-         "",
-      String(formatValue(totaldebit)),
-      "",
-      String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
-      String(formatValue(commission)),
+     String(formatValue(TotalSalary)),
+     String(formatValue(TotalSaleCom)),
+     String(formatValue(TotalRecCom)),
+     String(formatValue(TotalAdvance)),
+     String(formatValue(TotalFine)),
+     String(formatValue(TotalNetAmount)),
     ]);
 
     // total row added
@@ -1659,7 +1338,7 @@ export default function EmployeeCommissionReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 6 || colNumber === 8 || colNumber === 9) {
+      if (colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1727,7 +1406,7 @@ export default function EmployeeCommissionReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeCollectionReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `DailySalaryRegisterReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1738,7 +1417,7 @@ export default function EmployeeCommissionReport() {
   const btnColor = "#3368B5";
   const textColor = "white";
 
-
+  const [tableData, setTableData] = useState([]);
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1748,24 +1427,6 @@ export default function EmployeeCommissionReport() {
   };
 
   let totalEntries = 0;
-  const handleEmployeeKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setEmployeeselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-
   const handlecompanyKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = saleSelectRef.current.state.selectValue;
@@ -1837,26 +1498,26 @@ export default function EmployeeCommissionReport() {
     settransectionType2(selectedTransactionType);
   };
 
+  
+  
+
   const firstColWidth = {
     width: "80px",
   };
   const secondColWidth = {
-    width: "55px",
+    width: "60px",
   };
   const thirdColWidth = {
-    width: "45px",
+    width: "40px",
   };
   const forthColWidth = {
-    width: "340px",
+    width: "360px",
   };
-   const forthColWidth1 = {
+  const sixthColWidth = {
     width: "80px",
   };
-  //   const sixthColWidth = {
-  //     width: "40px",
-  //   };
   const seventhColWidth = {
-    width: "60px",
+    width: "80px",
   };
   const eightColWidth = {
     width: "80px",
@@ -1864,10 +1525,10 @@ export default function EmployeeCommissionReport() {
   const ninthColWidth = {
     width: "80px",
   };
-  const tenthColWidth = {
+   const tenthColWidth = {
     width: "80px",
   };
-  const elewenthColWidth = {
+   const elewenthColWidth = {
     width: "80px",
   };
   const sixthcol = {
@@ -1876,18 +1537,22 @@ export default function EmployeeCommissionReport() {
 
   const [columns, setColumns] = useState({
     code: [],
+
     Description: [],
-    Rate: [],
-    Qnty: [],
-    ["Sale Amount"]: [],
+    Opening: [],
+    Debit: [],
+    Credit: [],
+    Balance: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
     code: "",
+
     Description: "",
-    Rate: "",
-    Qnty: "",
-    ["Sale Amount"]: "",
+    Opening: "",
+    Debit: "",
+    Credit: "",
+    Balance: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -1896,9 +1561,12 @@ export default function EmployeeCommissionReport() {
       const newColumns = {
         code: tableData.map((row) => row.code),
         Description: tableData.map((row) => row.Description),
-        Rate: tableData.map((row) => row.Rate),
-        Qnty: tableData.map((row) => row.Qnty),
-        ["Sale Amount"]: tableData.map((row) => row["Sale Amount"]),
+        Opening: tableData.map((row) => row.Opening),
+
+        Debit: tableData.map((row) => row.Debit),
+        Credit: tableData.map((row) => row.Credit),
+
+        Balance: tableData.map((row) => row.Balance),
       };
       setColumns(newColumns);
     }
@@ -1916,44 +1584,55 @@ export default function EmployeeCommissionReport() {
   const resetSorting = () => {
     setColumnSortOrders({
       code: null,
+
       Description: null,
-      Rate: null,
-      Qnty: null,
-      ["Sale Amount"]: null,
+      Opening: null,
+      Debit: null,
+      Credit: null,
+      Balance: null,
     });
   };
 
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    const sortedData = [...tableData].sort((a, b) => {
-      const aVal =
-        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-      const bVal =
-        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+  const sortedData = [...tableData].sort((a, b) => {
+    const aVal = a[col] != null ? a[col].toString().trim() : "";
+    const bVal = b[col] != null ? b[col].toString().trim() : "";
 
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
+    // Attempt numeric conversion
+    const numA = Number(aVal.replace(/,/g, ""));
+    const numB = Number(bVal.replace(/,/g, ""));
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
+    // Check if numeric sorting is possible
+    const bothNumeric =
+      !isNaN(numA) && !isNaN(numB) && aVal !== "" && bVal !== "";
+
+    if (bothNumeric) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    }
+
+    // Alphabetical sorting as fallback
+    return newOrder === "ASC"
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
+
+  // Update table
+  setTableData(sortedData);
+
+  // Update column sort indicator
+  setColumnSortOrders((prev) => {
+    const updated = {};
+    Object.keys(prev).forEach((key) => {
+      updated[key] = key === col ? newOrder : null;
     });
+    return updated;
+  });
+};
 
-    setTableData(sortedData);
 
-    setColumnSortOrders((prev) => ({
-      ...Object.keys(prev).reduce((acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      }, {}),
-    }));
-  };
 
   useHotkeys(
     "alt+s",
@@ -2152,82 +1831,6 @@ export default function EmployeeCommissionReport() {
     return Number(val) === 0 ? "" : val;
   };
 
- const handleMobilePress = (e, nextInputRef) => {
-  const inputEl = document.getElementById("phone");
-  const value = Number(e.target.value);
-
-  if (e.key === "Enter") {
-    e.preventDefault();
-
-    // empty validation
-    if (value === "" || value === null || isNaN(value)) {
-      toast.error("Commission cannot be empty");
-      inputEl.style.border = "2px solid red";
-      return;
-    }
-
-    // range validation
-    if (value < 0 || value > 50) {
-      toast.error("Commission must be between 0% and 50%");
-      inputEl.style.border = "2px solid red";
-      return;
-    }
-
-    inputEl.style.border = "1px solid black";
-
-    // move to next input
-    if (nextInputRef.current) {
-      nextInputRef.current.focus();
-    //   nextInputRef.current.select();
-    }
-  }
-};
-
-
-  const handleMobilenumberInputChange = (e) => {
-  let value = e.target.value;
-
-  // remove non-numeric characters
-  value = value.replace(/\D/g, "");
-
-  // limit to 2 digits only (max 50)
-  if (value.length > 2) {
-    value = value.slice(0, 2);
-  }
-
-  // convert to number
-  let num = Number(value);
-
-  // empty input → show 0
-  if (value === "") {
-    setmobileNumber("0");
-    return;
-  }
-
-  // if value > 50 → ignore
-  if (num > 50) {
-    return;
-  }
-
-  setmobileNumber(value);
-};
-useEffect(() => {
-  if (!Employeeselectdatavalue) return;
-
-  if (transectionType2 === "") {
-    setmobileNumber(0);
-  }
-  else if (transectionType2 === "R") {
-    setmobileNumber(Employeeselectdatavalue.tcrtcom);
-  } 
-  else if (transectionType2 === "C") {
-    setmobileNumber(Employeeselectdatavalue.tcshcom);
-  } 
-  else if (transectionType2 === "I") {
-    setmobileNumber(Employeeselectdatavalue.tinscom);
-  }
-}, [Employeeselectdatavalue, transectionType2]);
-
   return (
     <>
       <ToastContainer />
@@ -2241,7 +1844,7 @@ useEffect(() => {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Commission Report" />
+          <NavComponent textdata="Daily Salary Register Report" />
 
           {/* ------------1st row */}
           <div
@@ -2255,16 +1858,16 @@ useEffect(() => {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "5px" }}
+                style={{ marginLeft: "15px" }}
               >
                 <div
                   style={{
-                    width: "90px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2359,7 +1962,10 @@ useEffect(() => {
                   />
                 </div>
               </div>
-              <div className="d-flex align-items-center">
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "50px" }}
+              >
                 <div
                   style={{
                     width: "60px",
@@ -2416,7 +2022,7 @@ useEffect(() => {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, employeeref)}
+                    onKeyDown={(e) => handleToKeyPress(e, selectButtonRef)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2458,635 +2064,11 @@ useEffect(() => {
                   />
                 </div>
               </div>
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Employee :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={employeeref}
-                    options={employeeoptions}
-                    value={
-                      employeeoptions.find(
-                        (opt) => opt.value === Employeeselectdata
-                      ) || null
-                    } // Ensure correct reference
-                    onKeyDown={(e) => handleEmployeeKeypress(e, saleSelectRef)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-
-                        setEmployeeselectdata(selectedOption.value);
-                          setEmployeeselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                          tcrtcom: selectedOption.tcrtcom,
-                          tcshcom: selectedOption.tcshcom,
-                          tinscom: selectedOption.tinscom,
-                        });
-                      } else {
-                        setEmployeeselectdata("");
-                        setEmployeeselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Employeeselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    // isClearable
-                    // placeholder="ALL"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="row"
-            style={{ marginTop: "8px", marginBottom: "8px", margin: "0px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "start",
-                border: "1px solid lightgrey",
-                // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
-              }}
-            ></div>
-          </div>
-
-          {/* //////////////// second ROW ///////////////////////// */}
-
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Company :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={saleSelectRef}
-                    options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCompanyselectdata(selectedOption.value);
-                        setCompanyselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setCompanyselectdata("");
-                        setCompanyselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Rate :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Refrate}
-                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "225px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
-                    }}
-                  >
-                    <option value="P">PURCHASE RATE</option>
-                    <option value="A">AVERAGE RATE</option>
-                    <option value="M">LAST SM RATE</option>
-                    <option value="W">WEIGHTED AVERAGE</option>
-                    <option value="F">FIFO</option>
-                  </select>
-
-                  {transectionType !== "P" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* //////////////// THIRD ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Category :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input1Ref}
-                    options={categoryoptions}
-                    onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCategoryselectdata(selectedOption.value);
-                        setcategoryselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcategoryselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, CommissionRef)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType2}
-                    onChange={handleTransactionTypeChange2}
-                    style={{
-                      width: "225px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
-                    }}
-                  >
-                    <option value="" >ALL</option>
-                    <option value="C" >CASH</option>
-                    <option value="R" >CREDIT</option>
-                    <option value="I">INSTALLMENT</option>
-                  </select>
-
-                  {transectionType2 !== "" && (
-                    <span
-                      onClick={() => settransectionType2("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* //////////////// FORTH ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Capacity :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input2Ref}
-                    options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
-                    id="selectedsale2"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCapacityselectdata(selectedOption.value);
-                        setcapacityselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcapacityselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              {/* <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input5Ref}
-                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "225px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div> */}
-
-               <div className="d-flex align-items-center " style={{marginRight:'21px'}}>
-                                <div
-                                    style={{
-                                        width: "110px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Commission % :
-                                        </span>{" "}
-                                        <br />
-                                    </label>
-                                </div>
-
-                               <input
-  ref={CommissionRef}
-  value={mobileNumber}
-  onKeyDown={(e) => handleMobilePress(e, selectButtonRef)}
-  onChange={handleMobilenumberInputChange}
-  autoComplete="off"
-  type="number"
-  id="phone"
-  name="phone"
-  placeholder="0"
-  style={{
-    color: fontcolor,
-    width: "225px",
-    height: "24px",
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-    border: `1px solid ${fontcolor}`,
-    backgroundColor: getcolor,
-    outline: "none",
-    paddingLeft: "10px",
-    marginLeft: "3px",
-  }}
-  onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-  onBlur={(e) => (e.currentTarget.style.border = `1px solid ${fontcolor}`)}
-/>
-
-                            </div>
             </div>
           </div>
 
           <div>
+            {/* Table Head */}
             <div
               style={{
                 overflowY: "auto",
@@ -3100,7 +2082,7 @@ useEffect(() => {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   // width: "100%",
-                  // position: "relative",
+                  position: "relative",
                 }}
               >
                 <thead
@@ -3121,41 +2103,82 @@ useEffect(() => {
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                    >
                       Date
+                     
+                      
                     </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Trn#
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                    //   onClick={() => handleSorting("Description")}
+                    >
+                      SLYNo
+                    
                     </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Type
-                    </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Description
-                    </td>
-                     <td className="border-dark" style={forthColWidth1}>
-                      Cost Rate
+                    {/* <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                    >
+                      Code
+                   
+                    </td> */}
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                    >
+                      Employee
+                      
                     </td>
 
-                    {/* <td className="border-dark" style={sixthColWidth}>
-                                 Str
-                               </td> */}
-                    <td className="border-dark" style={seventhColWidth}>
-                      Qnty
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                    >
+                      Salary
+                    
                     </td>
-                    <td className="border-dark" style={eightColWidth}>
-                      Rate
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                    >
+                      SaleCom
+                      
                     </td>
-                    <td className="border-dark" style={ninthColWidth}>
-                      Amount
+                     <td
+                      className="border-dark"
+                      style={eightColWidth}
+                    >
+                      RecCom
+                      
+                    </td>
+                     <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                    >
+                      AdvDed
+                      
                     </td>
 
-                    <td className="border-dark" style={tenthColWidth}>
-                      Margin
+                    <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                    >
+                      FineAmt
+                      
                     </td>
-                     <td className="border-dark" style={elewenthColWidth}>
-                      Comission
+
+                    <td
+                      className="border-dark"
+                      style={elewenthColWidth}
+                    >
+                      TotalAmt
+                      
                     </td>
+
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
@@ -3168,7 +2191,7 @@ useEffect(() => {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "40vh",
+                maxHeight: "55vh",
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -3192,7 +2215,7 @@ useEffect(() => {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="10" className="text-center">
+                        <td colSpan="9" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3205,7 +2228,7 @@ useEffect(() => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 10 }).map((_, colIndex) => (
+                            {Array.from({ length: 9 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3216,35 +2239,22 @@ useEffect(() => {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
+                        {/* <td style={thirdColWidth}></td> */}
                         <td style={forthColWidth}></td>
-                                                <td style={forthColWidth1}></td>
-
-                        {/* <td style={sixthColWidth}></td> */}
+                        <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
-
+                        <td style={elewenthColWidth}></td>
                       </tr>
                     </>
                   ) : (
                     <>
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
-                        const nQnty = Number(
-                          String(item.Qnty).replace(/,/g, "")
-                        );
-                        const nRate = Number(
-                          String(item.Rate).replace(/,/g, "")
-                        );
-                        const nMargin = Number(
-                          String(item.Margin).replace(/,/g, "")
-                        );
-
                         const isNegative =
-                          nQnty < 0 || nRate < 0 || nMargin < 0;
+                          item.Credit < 0 || item.Balance < 0 || item.Debit < 0;
 
                         return (
                           <tr
@@ -3260,38 +2270,35 @@ useEffect(() => {
                               color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            <td className="text-start" style={firstColWidth}>
+                            <td className="text-center" style={firstColWidth}>
                               {item.Date}
                             </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item["Trn#"]}
+                            <td className="text-center" style={secondColWidth}>
+                              {item.SLYNo}
                             </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
-                            </td>
+                            {/* <td className="text-end" style={thirdColWidth}>
+                              {item.Code}
+                            </td> */}
                             <td className="text-start" style={forthColWidth}>
-                              {item.Description}
+                              {item.Employee}
                             </td>
-                            <td className="text-end" style={forthColWidth1}>
-                              {formatValue(item['Cost Rate'])}
+                            <td className="text-end" style={sixthColWidth}>
+                              {formatValue(item.Salary)}
                             </td>
-                            {/* <td className="text-end" style={sixthColWidth}>
-                                         {item.Store}
-                                       </td> */}
                             <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Qnty)}
+                              {formatValue(item.SaleCom)}
                             </td>
                             <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
+                              {formatValue(item.RecCom)}
                             </td>
                             <td className="text-end" style={ninthColWidth}>
-                              {formatValue(item["Sale Amount"])}
+                              {formatValue(item.AdvDed)}
                             </td>
                             <td className="text-end" style={tenthColWidth}>
-                              {formatValue(item.Margin)}
+                              {formatValue(item.FineAmt)}
                             </td>
-                             <td className="text-end" style={elewenthColWidth}>
-                              {formatValue(item.Commission)}
+                            <td className="text-end" style={elewenthColWidth}>
+                              {formatValue(item.TotalAmt)}
                             </td>
                           </tr>
                         );
@@ -3306,7 +2313,7 @@ useEffect(() => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 10 }).map((_, colIndex) => (
+                          {Array.from({ length: 9 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3316,17 +2323,14 @@ useEffect(() => {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
+                        {/* <td style={thirdColWidth}></td> */}
                         <td style={forthColWidth}></td>
-                                                <td style={forthColWidth1}></td>
-
-                        {/* <td style={sixthColWidth}></td> */}
+                        <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
-
+                        <td style={elewenthColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -3363,15 +2367,15 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-            <div
+            {/* <div
               style={{
                 ...thirdColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
-            </div>
+              
+            </div> */}
             <div
               style={{
                 ...forthColWidth,
@@ -3379,26 +2383,19 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              
             </div>
-             <div
+            <div
               style={{
-                ...forthColWidth1,
+                ...sixthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              <span className="mobileledger_total">
+                {formatValue(TotalSalary)}
+              </span>
             </div>
-            {/* <div
-                         style={{
-                           ...sixthColWidth,
-                           background: getcolor,
-                           borderRight: `1px solid ${fontcolor}`,
-                         }}
-                       >
-                         <span className="mobileledger_total">{formatValue(totaldebit)}</span>
-                       </div> */}
 
             <div
               style={{
@@ -3408,19 +2405,22 @@ useEffect(() => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totaldebit)}
+                {formatValue(TotalSaleCom)}
               </span>
             </div>
-            <div
+
+             <div
               style={{
                 ...eightColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
+              <span className="mobileledger_total">
+                {formatValue(TotalRecCom)}
+              </span>
             </div>
-            <div
+             <div
               style={{
                 ...ninthColWidth,
                 background: getcolor,
@@ -3428,10 +2428,10 @@ useEffect(() => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalcredit)}
+                {formatValue(TotalAdvance)}
               </span>
             </div>
-            <div
+             <div
               style={{
                 ...tenthColWidth,
                 background: getcolor,
@@ -3439,10 +2439,9 @@ useEffect(() => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(ClosingBalance)}
+                {formatValue(TotalFine)}
               </span>
             </div>
-
              <div
               style={{
                 ...elewenthColWidth,
@@ -3451,7 +2450,7 @@ useEffect(() => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(commission)}
+                {formatValue(TotalNetAmount)}
               </span>
             </div>
           </div>

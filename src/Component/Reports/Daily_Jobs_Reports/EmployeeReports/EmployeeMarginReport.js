@@ -434,14 +434,14 @@ export default function EmployeeMarginReport() {
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
       FRepRat: transectionType,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
-      FTrnTyp: transectionType2,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
+      FRepTyp: transectionType2,
       FEmpCod: Employeeselectdata,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -859,12 +859,12 @@ export default function EmployeeMarginReport() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      formatValue(item.Date),
-      formatValue(item["Trn#"]),
-      formatValue(item.Type),
-      formatValue(item.Description),
-      //    item.Store,
-      formatValue(item.Qnty),
+      item.Date,
+      item["Trn#"],
+      item.Type,
+      item.Description,
+      formatValue(item['Cost Rate']),
+       formatValue(item.Qnty),
       formatValue(item.Rate),
       formatValue(item["Sale Amount"]),
       formatValue(item.Margin),
@@ -876,7 +876,7 @@ export default function EmployeeMarginReport() {
       "",
       "",
       "Total",
-      //    "",
+         "",
       String(formatValue(totaldebit)),
       "",
       String(formatValue(totalcredit)),
@@ -890,13 +890,13 @@ export default function EmployeeMarginReport() {
       "Trn#",
       "Type",
       "Description",
-      //    "Store",
+         "Cost Rate",
       "Qnty",
       "Rate",
       "Amount",
       "Margin",
     ];
-    const columnWidths = [24, 18, 12, 110, 15, 25, 25, 25];
+    const columnWidths = [24, 18, 12, 110,25, 15, 25, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1040,7 +1040,8 @@ export default function EmployeeMarginReport() {
             cellIndex === 4 ||
             cellIndex === 5 ||
             cellIndex === 6 ||
-            cellIndex === 7
+            cellIndex === 7 ||
+            cellIndex === 8 
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1323,13 +1324,14 @@ export default function EmployeeMarginReport() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 7; // Ensure this matches the actual number of columns
+    const numColumns = 8; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
-      "left",
+      "center",
       "center",
       "left",
+      "right",
       "right",
       "right",
       "right",
@@ -1555,7 +1557,7 @@ export default function EmployeeMarginReport() {
       "Trn#",
       "Type",
       "Description",
-      //    "Store",
+         "Cost Rate",
       "Qnty",
       "Rate",
       "Amount",
@@ -1567,12 +1569,12 @@ export default function EmployeeMarginReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        formatValue(item.Date),
-        formatValue(item["Trn#"]),
-        formatValue(item.Type),
-        formatValue(item.Description),
-        //    item.Store,
-        formatValue(item.Qnty),
+        item.Date,
+        item["Trn#"],
+        item.Type,
+        item.Description,
+  formatValue(item['Cost Rate']),
+          formatValue(item.Qnty),
         formatValue(item.Rate),
         formatValue(item["Sale Amount"]),
         formatValue(item.Margin),
@@ -1594,7 +1596,7 @@ export default function EmployeeMarginReport() {
     });
 
     // Set column widths
-    [10, 8, 6, 50, 8, 8, 15, 15].forEach((width, index) => {
+    [10, 8, 6, 50,12, 8, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1603,7 +1605,7 @@ export default function EmployeeMarginReport() {
       "",
       "",
       "Total",
-      //    "",
+         "",
       String(formatValue(totaldebit)),
       "",
       String(formatValue(totalcredit)),
@@ -1622,7 +1624,7 @@ export default function EmployeeMarginReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 5 || colNumber === 7 || colNumber === 8) {
+      if (colNumber === 6 || colNumber === 8 || colNumber === 9) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1812,6 +1814,9 @@ export default function EmployeeMarginReport() {
   const forthColWidth = {
     width: "360px",
   };
+   const forthColWidth1 = {
+    width: "90px",
+  };
   //   const sixthColWidth = {
   //     width: "40px",
   //   };
@@ -1819,13 +1824,13 @@ export default function EmployeeMarginReport() {
     width: "60px",
   };
   const eightColWidth = {
-    width: "100px",
+    width: "90px",
   };
   const ninthColWidth = {
-    width: "100px",
+    width: "90px",
   };
   const tenthColWidth = {
-    width: "100px",
+    width: "90px",
   };
   const sixthcol = {
     width: "8px",
@@ -2412,8 +2417,8 @@ export default function EmployeeMarginReport() {
                         marginTop: "-5px",
                       }),
                     }}
-                    isClearable
-                    placeholder="ALL"
+                    // isClearable
+                    // placeholder="ALL"
                   />
                 </div>
               </div>
@@ -2741,9 +2746,10 @@ export default function EmployeeMarginReport() {
                       paddingLeft: "12px",
                     }}
                   >
-                    <option value="">ALL</option>
-                    <option value="INV">SALE</option>
-                    <option value="SRN">SALE RETURN</option>
+                      <option value="" >ALL</option>
+                    <option value="C" >CASH</option>
+                    <option value="R" >CREDIT</option>
+                    <option value="I">INSTALLMENT</option>
                   </select>
 
                   {transectionType2 !== "" && (
@@ -2966,7 +2972,9 @@ export default function EmployeeMarginReport() {
                     <td className="border-dark" style={forthColWidth}>
                       Description
                     </td>
-
+<td className="border-dark" style={forthColWidth1}>
+                      Cost Rate
+                    </td>
                     {/* <td className="border-dark" style={sixthColWidth}>
                                  Str
                                </td> */}
@@ -3019,7 +3027,7 @@ export default function EmployeeMarginReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="9" className="text-center">
+                        <td colSpan="10" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3032,7 +3040,7 @@ export default function EmployeeMarginReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 9 }).map((_, colIndex) => (
+                            {Array.from({ length: 10 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3045,6 +3053,8 @@ export default function EmployeeMarginReport() {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
+                                                <td style={forthColWidth1}></td>
+
                         {/* <td style={sixthColWidth}></td> */}
                         <td style={seventhColWidth}></td>
                         <td style={eightColWidth}></td>
@@ -3095,6 +3105,9 @@ export default function EmployeeMarginReport() {
                             <td className="text-start" style={forthColWidth}>
                               {item.Description}
                             </td>
+                             <td className="text-end" style={forthColWidth1}>
+                              {formatValue(item['Cost Rate'])}
+                            </td>
                             {/* <td className="text-end" style={sixthColWidth}>
                                          {item.Store}
                                        </td> */}
@@ -3123,7 +3136,7 @@ export default function EmployeeMarginReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 9 }).map((_, colIndex) => (
+                          {Array.from({ length: 10 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3135,6 +3148,8 @@ export default function EmployeeMarginReport() {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
+                                                <td style={forthColWidth1}></td>
+
                         {/* <td style={sixthColWidth}></td> */}
                         <td style={seventhColWidth}></td>
                         <td style={eightColWidth}></td>
@@ -3188,6 +3203,15 @@ export default function EmployeeMarginReport() {
             <div
               style={{
                 ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+            </div>
+             <div
+              style={{
+                ...forthColWidth1,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}

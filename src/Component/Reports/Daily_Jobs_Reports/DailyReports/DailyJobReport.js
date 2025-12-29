@@ -26,6 +26,8 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "../../../vardana/vardana";
+import "../../../vardana/verdana-bold";
 
 export default function DailyJobReport() {
   const navigate = useNavigate();
@@ -43,8 +45,8 @@ export default function DailyJobReport() {
   const toRefPur = useRef(null);
   const fromRefCls = useRef(null);
   const toRefCls = useRef(null);
-   const WarrantyRef = useRef(null);
-     const NatureRef = useRef(null);
+  const WarrantyRef = useRef(null);
+  const NatureRef = useRef(null);
 
   const [saleType, setSaleType] = useState("");
   const [ReferenceCode, setReferenceCode] = useState("");
@@ -77,7 +79,7 @@ export default function DailyJobReport() {
   const [Cityselectdata, setCityselectdata] = useState("");
   const [Cityselectdatavalue, setCityselectdatavalue] = useState("");
 
-    const [Complainselectdata, setComplainselectdata] = useState("");
+  const [Complainselectdata, setComplainselectdata] = useState("");
   const [Complainselectdatavalue, setComplainselectdatavalue] = useState("");
 
   /////////////////////
@@ -121,8 +123,7 @@ export default function DailyJobReport() {
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-
-   // state for Purfrom DatePicker
+  // state for Purfrom DatePicker
   const [selectedfromDatePur, setselectedfromDatePur] = useState(null);
   const [fromInputDatePur, setfromInputDatePur] = useState("");
   const [fromCalendarOpenPur, setfromCalendarOpenPur] = useState(false);
@@ -131,8 +132,7 @@ export default function DailyJobReport() {
   const [toInputDatePur, settoInputDatePur] = useState("");
   const [toCalendarOpenPur, settoCalendarOpenPur] = useState(false);
 
-
-     // state for Clsfrom DatePicker
+  // state for Clsfrom DatePicker
   const [selectedfromDateCls, setselectedfromDateCls] = useState(null);
   const [fromInputDateCls, setfromInputDateCls] = useState("");
   const [fromCalendarOpenCls, setfromCalendarOpenCls] = useState(false);
@@ -140,7 +140,6 @@ export default function DailyJobReport() {
   const [selectedToDateCls, setselectedToDateCls] = useState(null);
   const [toInputDateCls, settoInputDateCls] = useState("");
   const [toCalendarOpenCls, settoCalendarOpenCls] = useState(false);
-
 
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
@@ -193,8 +192,7 @@ export default function DailyJobReport() {
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
- 
- 
+
   const formatDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -202,9 +200,9 @@ export default function DailyJobReport() {
     return `${day}-${month}-${year}`;
   };
 
-      // FUNCTION FOR FIRST FROM DATE
+  // FUNCTION FOR FIRST FROM DATE
 
-   const toggleFromCalendar = () => {
+  const toggleFromCalendar = () => {
     setfromCalendarOpen((prevOpen) => !prevOpen);
   };
   const handlefromDateChange = (date) => {
@@ -272,9 +270,9 @@ export default function DailyJobReport() {
     }
   };
 
-// FUNCTION FOR FIRST TO DATE
+  // FUNCTION FOR FIRST TO DATE
 
-   const handleToKeyPress = (e) => {
+  const handleToKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const toDateElement = document.getElementById("todatevalidation");
@@ -337,7 +335,7 @@ export default function DailyJobReport() {
       }
     }
   };
-   const toggleToCalendar = () => {
+  const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
   };
 
@@ -350,9 +348,8 @@ export default function DailyJobReport() {
     settoInputDate(e.target.value);
   };
 
-
-  //  FUNCTIONS FOR FROM PUR DATE   
- const toggleFromCalendarPur = () => {
+  //  FUNCTIONS FOR FROM PUR DATE
+  const toggleFromCalendarPur = () => {
     setfromCalendarOpenPur((prevOpen) => !prevOpen);
   };
   const handlefromDateChangePur = (date) => {
@@ -360,36 +357,37 @@ export default function DailyJobReport() {
     setfromInputDatePur(date ? formatDate(date) : "");
     setfromCalendarOpenPur(false);
   };
-     const handlefromInputChangePur = (e) => {
-  let value = e.target.value;
-  
-  // Remove all non-digit characters
-  let cleaned = value.replace(/\D/g, '');
-  
-  // Limit to 8 digits (DDMMYYYY)
-  cleaned = cleaned.substring(0, 8);
-  
-  // Format as user types
-  if (cleaned.length > 0) {
-    if (cleaned.length <= 2) {
-      // Only day portion
-      value = cleaned;
-    } else if (cleaned.length <= 4) {
-      // Day and month
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
-    } else {
-      // Full date
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
-    }
-  }
-  
-  setfromInputDatePur(value);
-  
-  
-};
+  const handlefromInputChangePur = (e) => {
+    let value = e.target.value;
 
- //  FUNCTIONS FOR TO PUR DATE   
-       const toggleToCalendar2 = () => {
+    // Remove all non-digit characters
+    let cleaned = value.replace(/\D/g, "");
+
+    // Limit to 8 digits (DDMMYYYY)
+    cleaned = cleaned.substring(0, 8);
+
+    // Format as user types
+    if (cleaned.length > 0) {
+      if (cleaned.length <= 2) {
+        // Only day portion
+        value = cleaned;
+      } else if (cleaned.length <= 4) {
+        // Day and month
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+      } else {
+        // Full date
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(
+          2,
+          4
+        )}-${cleaned.substring(4)}`;
+      }
+    }
+
+    setfromInputDatePur(value);
+  };
+
+  //  FUNCTIONS FOR TO PUR DATE
+  const toggleToCalendar2 = () => {
     settoCalendarOpenPur((prevOpen) => !prevOpen);
   };
   const handleToDateChange2 = (date) => {
@@ -398,36 +396,36 @@ export default function DailyJobReport() {
     settoCalendarOpenPur(false);
   };
   const handleToInputChange2 = (e) => {
-  let value = e.target.value;
-  
-  // Remove all non-digit characters
-  let cleaned = value.replace(/\D/g, '');
-  
-  // Limit to 8 digits (DDMMYYYY)
-  cleaned = cleaned.substring(0, 8);
-  
-  // Format as user types
-  if (cleaned.length > 0) {
-    if (cleaned.length <= 2) {
-      // Only day portion
-      value = cleaned;
-    } else if (cleaned.length <= 4) {
-      // Day and month
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
-    } else {
-      // Full date
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
-    }
-  }
-  
-  settoInputDatePur(value);
-  
-  
-};
- 
+    let value = e.target.value;
 
-  //  FUNCTIONS FOR FROM CLS DATE   
- const toggleFromCalendarCls = () => {
+    // Remove all non-digit characters
+    let cleaned = value.replace(/\D/g, "");
+
+    // Limit to 8 digits (DDMMYYYY)
+    cleaned = cleaned.substring(0, 8);
+
+    // Format as user types
+    if (cleaned.length > 0) {
+      if (cleaned.length <= 2) {
+        // Only day portion
+        value = cleaned;
+      } else if (cleaned.length <= 4) {
+        // Day and month
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+      } else {
+        // Full date
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(
+          2,
+          4
+        )}-${cleaned.substring(4)}`;
+      }
+    }
+
+    settoInputDatePur(value);
+  };
+
+  //  FUNCTIONS FOR FROM CLS DATE
+  const toggleFromCalendarCls = () => {
     setfromCalendarOpenCls((prevOpen) => !prevOpen);
   };
   const handlefromDateChangeCls = (date) => {
@@ -435,36 +433,37 @@ export default function DailyJobReport() {
     setfromInputDateCls(date ? formatDate(date) : "");
     setfromCalendarOpenPur(false);
   };
-     const handlefromInputChangeCls = (e) => {
-  let value = e.target.value;
-  
-  // Remove all non-digit characters
-  let cleaned = value.replace(/\D/g, '');
-  
-  // Limit to 8 digits (DDMMYYYY)
-  cleaned = cleaned.substring(0, 8);
-  
-  // Format as user types
-  if (cleaned.length > 0) {
-    if (cleaned.length <= 2) {
-      // Only day portion
-      value = cleaned;
-    } else if (cleaned.length <= 4) {
-      // Day and month
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
-    } else {
-      // Full date
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
-    }
-  }
-  
-  setfromInputDateCls(value);
-  
-  
-};
+  const handlefromInputChangeCls = (e) => {
+    let value = e.target.value;
 
- //  FUNCTIONS FOR TO CLS DATE   
-       const toggleToCalendarCls = () => {
+    // Remove all non-digit characters
+    let cleaned = value.replace(/\D/g, "");
+
+    // Limit to 8 digits (DDMMYYYY)
+    cleaned = cleaned.substring(0, 8);
+
+    // Format as user types
+    if (cleaned.length > 0) {
+      if (cleaned.length <= 2) {
+        // Only day portion
+        value = cleaned;
+      } else if (cleaned.length <= 4) {
+        // Day and month
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+      } else {
+        // Full date
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(
+          2,
+          4
+        )}-${cleaned.substring(4)}`;
+      }
+    }
+
+    setfromInputDateCls(value);
+  };
+
+  //  FUNCTIONS FOR TO CLS DATE
+  const toggleToCalendarCls = () => {
     settoCalendarOpenCls((prevOpen) => !prevOpen);
   };
   const handleToDateChangecls = (date) => {
@@ -473,35 +472,36 @@ export default function DailyJobReport() {
     settoCalendarOpenCls(false);
   };
   const handleToInputChangecls = (e) => {
-  let value = e.target.value;
-  
-  // Remove all non-digit characters
-  let cleaned = value.replace(/\D/g, '');
-  
-  // Limit to 8 digits (DDMMYYYY)
-  cleaned = cleaned.substring(0, 8);
-  
-  // Format as user types
-  if (cleaned.length > 0) {
-    if (cleaned.length <= 2) {
-      // Only day portion
-      value = cleaned;
-    } else if (cleaned.length <= 4) {
-      // Day and month
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
-    } else {
-      // Full date
-      value = `${cleaned.substring(0, 2)}-${cleaned.substring(2, 4)}-${cleaned.substring(4)}`;
-    }
-  }
-  
-  settoInputDateCls(value);
-  
-  
-};
+    let value = e.target.value;
 
-//  FUCTINS FOR HANDLE KEY PRESS
- 
+    // Remove all non-digit characters
+    let cleaned = value.replace(/\D/g, "");
+
+    // Limit to 8 digits (DDMMYYYY)
+    cleaned = cleaned.substring(0, 8);
+
+    // Format as user types
+    if (cleaned.length > 0) {
+      if (cleaned.length <= 2) {
+        // Only day portion
+        value = cleaned;
+      } else if (cleaned.length <= 4) {
+        // Day and month
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
+      } else {
+        // Full date
+        value = `${cleaned.substring(0, 2)}-${cleaned.substring(
+          2,
+          4
+        )}-${cleaned.substring(4)}`;
+      }
+    }
+
+    settoInputDateCls(value);
+  };
+
+  //  FUCTINS FOR HANDLE KEY PRESS
+
   const handlecompanyKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = CompanyRef.current.state.selectValue;
@@ -745,13 +745,13 @@ export default function DailyJobReport() {
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-          // FROM & TO PUR DATE 
+      // FROM & TO PUR DATE
       FIntPur: fromInputDatePur,
       FFnlPur: toInputDatePur,
-          // FROM & TO Cls DATE
+      // FROM & TO Cls DATE
       FIntCls: fromInputDateCls,
-      FFnlCls: toInputDateCls, 
-          // OTHER POST VARIABLES
+      FFnlCls: toInputDateCls,
+      // OTHER POST VARIABLES
       FWrnSts: transectionType2,
       FJobNat: transectionType3,
       FCptCod: Complainselectdata,
@@ -764,9 +764,12 @@ export default function DailyJobReport() {
       FAreCod: Areaselectdatavalue,
       FCtyCod: Cityselectdatavalue,
       FSchTxt: searchQuery,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
+
+      code: "IZONECOMP",
+      FLocCod: "001",
     }).toString();
 
     axios
@@ -1014,7 +1017,7 @@ export default function DailyJobReport() {
     label: `${item.tctycod}-${item.tctydsc.trim()}`,
   }));
 
-   /////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////
 
   /////////////// api for City code ////////////////////
   useEffect(() => {
@@ -1066,12 +1069,12 @@ export default function DailyJobReport() {
     );
   };
 
-  const customStyles1 = (hasError) => ({
+  const customStyles1 = (hasError, widthpara) => ({
     control: (base, state) => ({
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 230,
+      width: widthpara,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -1137,7 +1140,7 @@ export default function DailyJobReport() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected ? "white" : fontcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -1255,15 +1258,15 @@ export default function DailyJobReport() {
     const rows = tableData.map((item) => [
       item.Date,
       item["Job#"],
-      (item.Customer?.substring(0, 10) || "") ,
+      item.Customer?.substring(0, 10) || "",
       item.Mobile,
-      (item.Company?.substring(0, 10) || "") ,
-      (item.Item?.substring(0, 10) || "") ,
-      (item.Technician?.substring(0, 10) || "") ,
-      (item.Reference?.substring(0, 10) || "") ,
-      (item.Type?.substring(0, 10) || "") ,
+      item.Company?.substring(0, 10) || "",
+      item.Item?.substring(0, 10) || "",
+      item.Technician?.substring(0, 10) || "",
+      item.Reference?.substring(0, 10) || "",
+      item.Type?.substring(0, 10) || "",
       item.Status,
-     formatValue(item.Day) ,
+      formatValue(item.Day),
     ]);
 
     // Add summary row to the table
@@ -1296,7 +1299,7 @@ export default function DailyJobReport() {
       "Status",
       "Day",
     ];
-    const columnWidths = [22, 16, 30, 25, 30, 30, 30, 30, 32, 25, 20];
+    const columnWidths = [24, 16, 28, 28, 28, 28, 28, 28, 32, 28, 20];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1306,14 +1309,14 @@ export default function DailyJobReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
+    doc.setFont("verdana-regular", "normal"); // Set font to bold
     doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(12); // Set font size for headers
+      doc.setFont("verdana", "bold"); // Set font to bold
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -1340,7 +1343,7 @@ export default function DailyJobReport() {
       doc.setFontSize(12);
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
@@ -1351,7 +1354,7 @@ export default function DailyJobReport() {
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        const isOddRow = i % 2 !== 0;
         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
         const isTotalRow = i === rows.length - 1;
         let textColor = [0, 0, 0];
@@ -1363,12 +1366,12 @@ export default function DailyJobReport() {
         }
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "bold");
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
         }
 
-        // Set background color for odd-numbered rows
         if (isOddRow) {
-          doc.setFillColor(240); // Light background color
+          doc.setFillColor(240);
           doc.rect(
             startX,
             startY + (i - startIndex + 2) * rowHeight,
@@ -1380,17 +1383,14 @@ export default function DailyJobReport() {
 
         doc.setDrawColor(0);
 
-        // For total row - special border handling
         if (isTotalRow) {
           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
           const rowBottomY = rowTopY + rowHeight;
 
-          // Draw double top border
           doc.setLineWidth(0.3);
           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-          // Draw double bottom border
           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
           doc.line(
             startX,
@@ -1399,17 +1399,15 @@ export default function DailyJobReport() {
             rowBottomY - 0.5
           );
 
-          // Draw single vertical borders
           doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+          doc.line(startX, rowTopY, startX, rowBottomY);
           doc.line(
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
             rowBottomY
-          ); // Right border
+          );
         } else {
-          // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
             startX,
@@ -1420,34 +1418,38 @@ export default function DailyJobReport() {
         }
 
         row.forEach((cell, cellIndex) => {
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
           const cellX = startX + 2;
 
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
           if (!isTotalRow) {
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
           const cellValue = String(cell);
 
           if (cellIndex === 20) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 10) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+          } else if (
+            cellIndex === 10
+          
+            
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
-              baseline: "middle", // This centers vertically
+              baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
               const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
@@ -1456,12 +1458,11 @@ export default function DailyJobReport() {
               });
             } else {
               doc.text(cellValue, cellX, cellY, {
-                baseline: "middle", // This centers vertically
+                baseline: "middle",
               });
             }
           }
 
-          // Draw column borders
           if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
             doc.line(
@@ -1477,11 +1478,11 @@ export default function DailyJobReport() {
         startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Footer section
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
@@ -1490,9 +1491,9 @@ export default function DailyJobReport() {
       const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -1603,7 +1604,7 @@ export default function DailyJobReport() {
           ? Companyselectdatavalue.label
           : "ALL";
 
-           let complainvalue = Complainselectdatavalue.label
+        let complainvalue = Complainselectdatavalue.label
           ? Complainselectdatavalue.label
           : "ALL";
 
@@ -1632,14 +1633,14 @@ export default function DailyJobReport() {
             ? "CANCLE"
             : "ALL";
 
-              let Warrantydata =
+        let Warrantydata =
           transectionType === "Y"
             ? "YES"
             : transectionType === "N"
             ? "NO"
             : "ALL";
 
-             let Naturedata =
+        let Naturedata =
           transectionType === "H"
             ? "FIELD"
             : transectionType === "WORKSHOP"
@@ -1650,83 +1651,96 @@ export default function DailyJobReport() {
             ? "S"
             : "ALL";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`COMPANY :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Company :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${companyvalue}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CATEGORY :`, labelsX + 100, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Category :`, labelsX + 100, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${categoryvalue}`, labelsX + 125, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 200, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Type :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${typececode}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
 
         ///////////////////////////////////////////////////////////
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TECNICIAN :`, labelsX, labelsY + 12.8); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${technicianvalue}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
+        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Technician :`, labelsX, labelsY + 12.8); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`${technicianvalue}`, labelsX + 28, labelsY + 12.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`REFERENCE :`, labelsX + 100, labelsY + 12.8); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${referencecode}`, labelsX + 125, labelsY + 12.5); // Draw the value next to the label
+       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+          doc.text(`Reference :`, labelsX + 100, labelsY + 12.8); // Draw bold label
+         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`${referencecode}`, labelsX + 128, labelsY + 12.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX + 200, labelsY + 12.8); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+          doc.text(`Status :`, labelsX + 200, labelsY + 12.8); // Draw bold label
+         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${statuscode}`, labelsX + 220, labelsY + 12.5); // Draw the value next to the label
 
         ///////////////////////////////////////////////////////////////////
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CITY :`, labelsX, labelsY + 16.8); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`City :`, labelsX, labelsY + 16.8); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${Citycode}`, labelsX + 25, labelsY + 16.8); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`AREA :`, labelsX + 100, labelsY + 16.8); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+      doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Area :`, labelsX + 100, labelsY + 16.8); // Draw bold label
+          doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${Areacode}`, labelsX + 125, labelsY + 16.8); // Draw the value next to the label
 
+         doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Warranty :`, labelsX + 200, labelsY + 16.8); // Draw bold label
+       doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`${Warrantydata}`, labelsX + 228, labelsY + 16.8); // Draw the value next to the label
 
-
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`WARRANTY :`, labelsX + 200, labelsY + 16.8); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${Warrantydata}`, labelsX + 225, labelsY + 16.8); // Draw the value next to the label
-       
-
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`COMPLAIN :`, labelsX, labelsY + 21.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Complain :`, labelsX, labelsY + 21.5); // Draw bold label
+         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${complainvalue}`, labelsX + 25, labelsY + 21.5); // Draw the value next to the label
 
-       doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`NATURE :`, labelsX + 100, labelsY + 21.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Nature :`, labelsX + 100, labelsY + 21.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFontSize(10);
         doc.text(`${Naturedata}`, labelsX + 125, labelsY + 21.5); // Draw the value next to the label
 
-     
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 200, labelsY + 21.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+           doc.setFont("verdana", "bold"); // Set font to bold
+          doc.setFontSize(10);
+          doc.text(`Search :`, labelsX + 200, labelsY + 21.5); // Draw bold label
+         doc.setFont("verdana-regular", "normal"); // Set font to bold
+          doc.setFontSize(10);
           doc.text(`${search1}`, labelsX + 220, labelsY + 21.5); // Draw the value next to the label
         }
 
         // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
 
         startY += 24; // Adjust vertical position for the labels
 
@@ -1878,7 +1892,7 @@ export default function DailyJobReport() {
       ? Companyselectdatavalue.label
       : "ALL";
 
-      let complainvalue = Complainselectdatavalue.label
+    let complainvalue = Complainselectdatavalue.label
       ? Complainselectdatavalue.label
       : "ALL";
 
@@ -1907,85 +1921,87 @@ export default function DailyJobReport() {
         ? "CANCLE"
         : "ALL";
 
-        let Warrantydata =
-          transectionType === "Y"
-            ? "YES"
-            : transectionType === "N"
-            ? "NO"
-            : "ALL";
+    let Warrantydata =
+      transectionType === "Y" ? "YES" : transectionType === "N" ? "NO" : "ALL";
 
-             let Naturedata =
-          transectionType === "H"
-            ? "FIELD"
-            : transectionType === "WORKSHOP"
-            ? "W"
-            : transectionType === "GODOWN"
-            ? "G"
-            : transectionType === "SHOW ROOM"
-            ? "S"
-            : "ALL";
+    let Naturedata =
+      transectionType === "H"
+        ? "FIELD"
+        : transectionType === "WORKSHOP"
+        ? "W"
+        : transectionType === "GODOWN"
+        ? "G"
+        : transectionType === "SHOW ROOM"
+        ? "S"
+        : "ALL";
 
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
-      "COMPANY :",
+      "Compnay :",
       companyvalue,
       "",
       "",
-      "CATEGORY :",
+      "Category :",
       categoryvalue,
       "",
       "",
-      "TYPE :",
+      "Type :",
       typececode,
     ]);
+         worksheet.mergeCells(`B${typeAndStoreRow.number}:C${typeAndStoreRow.number}`);
+
 
     const typeAndStoreRow4 = worksheet.addRow([
-      "TECNICIAN :",
+      "Technician :",
       technicianvalue,
       "",
       "",
-      "REFERENCE :",
+      "Reference :",
       referencecode,
       "",
       "",
-      "STATUS :",
+      "Status :",
       statuscode,
     ]);
 
+             worksheet.mergeCells(`B${typeAndStoreRow4.number}:C${typeAndStoreRow4.number}`);
+
+
     let typesearch = searchQuery || "";
 
-    const typeAndStoreRow3 = worksheet.addRow(
-              [
-            "CITY :",
-            Citycode,
-            "",
-            "",
-            "AREA :",
-            Areacode,
-            "",
-            "",
-            "WARRANTY :",
-            Warrantydata,
-          ]
-       
-    );
+    const typeAndStoreRow3 = worksheet.addRow([
+      "City :",
+      Citycode,
+      "",
+      "",
+      "Area :",
+      Areacode,
+      "",
+      "",
+      "Warranty :",
+      Warrantydata,
+    ]);
 
-     const typeAndStoreRow5 = worksheet.addRow(
+             worksheet.mergeCells(`B${typeAndStoreRow3.number}:C${typeAndStoreRow3.number}`);
+
+    const typeAndStoreRow5 = worksheet.addRow(
       searchQuery
         ? [
-            "COMPLAIN :",
+            "Complain :",
             complainvalue,
             "",
             "",
-            "NATURE :",
+            "Nature :",
             Naturedata,
             "",
             "",
-            "SEARCH :",
+            "Search :",
             typesearch,
           ]
-        : ["COMPLAIN :", complainvalue, "", "", "NATURE :", Naturedata]
+        : ["Complain :", complainvalue, "", "", "Nature :", Naturedata]
     );
+
+             worksheet.mergeCells(`B${typeAndStoreRow5.number}:C${typeAndStoreRow5.number}`);
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
@@ -2014,7 +2030,7 @@ export default function DailyJobReport() {
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-      typeAndStoreRow5.eachCell((cell, colIndex) => {
+    typeAndStoreRow5.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
@@ -2409,7 +2425,7 @@ export default function DailyJobReport() {
               >
                 <div
                   style={{
-                    width: "80px",
+                    width: "110px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2423,14 +2439,14 @@ export default function DailyJobReport() {
                         marginLeft: "2px",
                       }}
                     >
-                      From :
+                      Register Date :
                     </span>
                   </label>
                 </div>
                 <div
                   id="fromdatevalidation"
                   style={{
-                    width: "135px",
+                    width: "100px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -2449,8 +2465,8 @@ export default function DailyJobReport() {
                   <input
                     style={{
                       height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
+                      width: "75px",
+                      paddingLeft: "2px",
                       outline: "none",
                       border: "none",
                       fontFamily: getfontstyle,
@@ -2467,7 +2483,7 @@ export default function DailyJobReport() {
                     onChange={handlefromInputChange}
                     onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
                     autoComplete="off"
-                    placeholder="dd-mm-yyyy"
+                    placeholder="dd-mm-yyy"
                     aria-label="Date Input"
                     disabled={selectedRadio !== "custom"}
                   />
@@ -2492,7 +2508,7 @@ export default function DailyJobReport() {
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "5px",
                             fontFamily: getfontstyle,
                             fontSize: getdatafontsize,
                             color: fontcolor,
@@ -2507,13 +2523,11 @@ export default function DailyJobReport() {
                 </div>
               </div>
 
-   {/* CODE FOR FROM PUR DATE */}
-              <div
-                className="d-flex align-items-center"
-              >
+              {/* CODE FOR FROM PUR DATE */}
+              <div className="d-flex align-items-center">
                 <div
                   style={{
-                    width: "70px",
+                    width: "110px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2527,7 +2541,7 @@ export default function DailyJobReport() {
                         marginLeft: "2px",
                       }}
                     >
-                      From :
+                      Purchase Date :
                     </span>
                   </label>
                 </div>
@@ -2535,7 +2549,7 @@ export default function DailyJobReport() {
                   // id="fromdatevalidation"
                   id="purdate"
                   style={{
-                    width: "135px",
+                    width: "100px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -2554,8 +2568,8 @@ export default function DailyJobReport() {
                   <input
                     style={{
                       height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
+                      width: "75px",
+                      paddingLeft: "2px",
                       outline: "none",
                       border: "none",
                       fontFamily: getfontstyle,
@@ -2572,7 +2586,7 @@ export default function DailyJobReport() {
                     onChange={handlefromInputChangePur}
                     // onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
                     autoComplete="off"
-                    placeholder="dd-mm-yyyy"
+                    placeholder="dd-mm-yyy"
                     aria-label="Date Input"
                     disabled={selectedRadio !== "custom"}
                   />
@@ -2597,7 +2611,7 @@ export default function DailyJobReport() {
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "5px",
                             fontFamily: getfontstyle,
                             fontSize: getdatafontsize,
                             color: fontcolor,
@@ -2612,14 +2626,14 @@ export default function DailyJobReport() {
                 </div>
               </div>
 
-               {/* CODE FOR FROM CLS DATE */}
-                 <div
+              {/* CODE FOR FROM CLS DATE */}
+              <div
                 className="d-flex align-items-center"
-                style={{marginLeft:"5px"}}
+                style={{ marginLeft: "5px" }}
               >
                 <div
                   style={{
-                    width: "70px",
+                    width: "90px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2633,7 +2647,7 @@ export default function DailyJobReport() {
                         marginLeft: "2px",
                       }}
                     >
-                      From :
+                      Done Date :
                     </span>
                   </label>
                 </div>
@@ -2641,7 +2655,7 @@ export default function DailyJobReport() {
                   // id="fromdatevalidation"
                   id="clsdate"
                   style={{
-                    width: "135px",
+                    width: "100px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -2660,8 +2674,8 @@ export default function DailyJobReport() {
                   <input
                     style={{
                       height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
+                      width: "75px",
+                      paddingLeft: "2px",
                       outline: "none",
                       border: "none",
                       fontFamily: getfontstyle,
@@ -2678,7 +2692,7 @@ export default function DailyJobReport() {
                     onChange={handlefromInputChangeCls}
                     // onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
                     autoComplete="off"
-                    placeholder="dd-mm-yyyy"
+                    placeholder="dd-mm-yyy"
                     aria-label="Date Input"
                     disabled={selectedRadio !== "custom"}
                   />
@@ -2703,7 +2717,7 @@ export default function DailyJobReport() {
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "5px",
                             fontFamily: getfontstyle,
                             fontSize: getdatafontsize,
                             color: fontcolor,
@@ -2769,9 +2783,9 @@ export default function DailyJobReport() {
                       paddingLeft: "12px",
                     }}
                   >
+                    <option value="">ALL</option>
                     <option value="Y">YES</option>
                     <option value="N">NO</option>
-                    
                   </select>
 
                   {transectionType2 !== "Y" && (
@@ -2799,7 +2813,7 @@ export default function DailyJobReport() {
             </div>
           </div>
 
-            <div
+          <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
           >
@@ -2813,17 +2827,16 @@ export default function DailyJobReport() {
                 justifyContent: "space-between",
               }}
             >
-             
-             {/* CODE FOR FIRST TO DATE  */}
+              {/* CODE FOR FIRST TO DATE  */}
 
               <div
                 className="d-flex align-items-center"
                 // style={{ marginLeft: isSidebarVisible ? "143px" : "243px" }}
-                style={{marginLeft:'38px'}}
+                style={{ marginLeft: "18px" }}
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "110px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2843,7 +2856,7 @@ export default function DailyJobReport() {
                 <div
                   id="todatevalidation"
                   style={{
-                    width: "135px",
+                    width: "100px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -2863,8 +2876,8 @@ export default function DailyJobReport() {
                     ref={toRef}
                     style={{
                       height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
+                      width: "75px",
+                      paddingLeft: "2px",
                       outline: "none",
                       border: "none",
                       fontFamily: getfontstyle,
@@ -2880,7 +2893,7 @@ export default function DailyJobReport() {
                     onKeyDown={(e) => handleToKeyPress(e, CompanyRef)}
                     id="toDatePicker"
                     autoComplete="off"
-                    placeholder="dd-mm-yyyy"
+                    placeholder="dd-mm-yyy"
                     aria-label="To Date Input"
                     disabled={selectedRadio !== "custom"}
                   />
@@ -2905,7 +2918,7 @@ export default function DailyJobReport() {
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "5px",
                             fontFamily: getfontstyle,
                             fontSize: getdatafontsize,
                             color: fontcolor,
@@ -2920,15 +2933,15 @@ export default function DailyJobReport() {
                 </div>
               </div>
 
-               {/* CODE FOR TO INPUT PUR DATE */}
-                 <div
+              {/* CODE FOR TO INPUT PUR DATE */}
+              <div
                 className="d-flex align-items-center"
                 // style={{ marginLeft: isSidebarVisible ? "143px" : "243px" }}
                 // style={{marginLeft:'5px'}}
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "110px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2948,7 +2961,7 @@ export default function DailyJobReport() {
                 <div
                   id="TOdatepur"
                   style={{
-                    width: "135px",
+                    width: "100px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -2968,8 +2981,8 @@ export default function DailyJobReport() {
                     ref={toRefPur}
                     style={{
                       height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
+                      width: "75px",
+                      paddingLeft: "2px",
                       outline: "none",
                       border: "none",
                       fontFamily: getfontstyle,
@@ -2985,7 +2998,7 @@ export default function DailyJobReport() {
                     // onKeyDown={(e) => handleToKeyPress(e, CompanyRef)}
                     id="toDatePicker"
                     autoComplete="off"
-                    placeholder="dd-mm-yyyy"
+                    placeholder="dd-mm-yyy"
                     aria-label="To Date Input"
                     disabled={selectedRadio !== "custom"}
                   />
@@ -3010,7 +3023,7 @@ export default function DailyJobReport() {
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "5px",
                             fontFamily: getfontstyle,
                             fontSize: getdatafontsize,
                             color: fontcolor,
@@ -3024,15 +3037,15 @@ export default function DailyJobReport() {
                   />
                 </div>
               </div>
-  {/* CODE FOR TO INPUT CLS DATE */}
- <div
+              {/* CODE FOR TO INPUT CLS DATE */}
+              <div
                 className="d-flex align-items-center"
                 // style={{ marginLeft: isSidebarVisible ? "143px" : "243px" }}
-                style={{marginLeft:'5px'}}
+                style={{ marginLeft: "5px" }}
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "90px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3052,7 +3065,7 @@ export default function DailyJobReport() {
                 <div
                   id="TOdatecls"
                   style={{
-                    width: "135px",
+                    width: "100px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -3072,8 +3085,8 @@ export default function DailyJobReport() {
                     ref={toRefCls}
                     style={{
                       height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
+                      width: "75px",
+                      paddingLeft: "2px",
                       outline: "none",
                       border: "none",
                       fontFamily: getfontstyle,
@@ -3089,7 +3102,7 @@ export default function DailyJobReport() {
                     // onKeyDown={(e) => handleToKeyPress(e, CompanyRef)}
                     id="toDatePicker"
                     autoComplete="off"
-                    placeholder="dd-mm-yyyy"
+                    placeholder="dd-mm-yyy"
                     aria-label="To Date Input"
                     disabled={selectedRadio !== "custom"}
                   />
@@ -3114,7 +3127,7 @@ export default function DailyJobReport() {
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "5px",
                             fontFamily: getfontstyle,
                             fontSize: getdatafontsize,
                             color: fontcolor,
@@ -3129,14 +3142,14 @@ export default function DailyJobReport() {
                 </div>
               </div>
 
-                {/* DROPDOWN CODE BLEW */}
+              {/* DROPDOWN CODE BLEW */}
               <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
-                    width: "70px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3182,9 +3195,8 @@ export default function DailyJobReport() {
                   >
                     <option value="H">FIELD</option>
                     <option value="W">WORKSHOP</option>
-                     <option value="S">SHOW ROOM</option>
+                    <option value="S">SHOW ROOM</option>
                     <option value="G">GODOWN</option>
-                    
                   </select>
 
                   {transectionType3 !== "H" && (
@@ -3286,7 +3298,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata),
+                      ...customStyles1(!Companyselectdata, 230),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3358,7 +3370,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Categoryselectdata),
+                      ...customStyles1(!Categoryselectdata, 230),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3430,7 +3442,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Typeselectdata),
+                      ...customStyles1(!Typeselectdata, 230),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3493,7 +3505,7 @@ export default function DailyJobReport() {
                     className="List-select-class"
                     ref={TechnicianRef}
                     options={Technicianoption}
-                    onKeyDown={(e) => handleTechnicianKeypress(e, ReferenceRef)}
+                    onKeyDown={(e) => handleTechnicianKeypress(e, Complainref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -3516,7 +3528,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Technicianselectdata),
+                      ...customStyles1(!Technicianselectdata, 230),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3532,14 +3544,11 @@ export default function DailyJobReport() {
                 </div>
               </div>
 
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "6px" }}
-              >
+              <div className="d-flex align-items-center">
                 <div
                   style={{
-                    marginLeft: "10px",
-                    width: "80px",
+                    // marginLeft: "10px",
+                    width: "85px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3555,7 +3564,7 @@ export default function DailyJobReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      Reference :
+                      Complain :
                     </span>
                   </label>
                 </div>
@@ -3563,21 +3572,21 @@ export default function DailyJobReport() {
                 <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={refoptions}
-                    options={Technicianoption}
-                    onKeyDown={(e) => handlerefernceKeypress(e, CityRef)}
+                    ref={Complainref}
+                    options={ComplaindataOption}
+                    onKeyDown={(e) => handlecityKeypress(e, CityRef)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
-                        setReferenceselectdata(selectedOption.value);
-                        setReferenceselectdatavalue({
+                        setComplainselectdata(selectedOption.value);
+                        setComplainselectdatavalue({
                           value: selectedOption.value,
                           label: labelPart,
                         });
                       } else {
-                        setReferenceselectdata("");
-                        setReferenceselectdatavalue("");
+                        setComplainselectdata("");
+                        setComplainselectdatavalue("");
                       }
                     }}
                     onInputChange={(inputValue, { action }) => {
@@ -3588,7 +3597,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Referenceselectdata),
+                      ...customStyles1(!Complainselectdata, 230),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3655,17 +3664,11 @@ export default function DailyJobReport() {
                     }}
                   >
                     <option value="">ALL</option>
-                    <option value="N">UNASSIGN</option>
                     <option value="P">PENDING</option>
-                    <option value="R">PARTS PENDING</option>
-                    <option value="W">WORKING</option>
-                    <option value="K">REFER TO WORKSHOP</option>
                     <option value="T">NOT SOLVE</option>
-                    <option value="O">RE-OPEN</option>
                     <option value="E">REPLACEMENT</option>
                     <option value="D">DONE</option>
                     <option value="C">CANCLE</option>
-                    <option value="S">CLOSE</option>
                   </select>
 
                   {transectionType !== "" && (
@@ -3760,7 +3763,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Cityselectdata),
+                      ...customStyles1(!Cityselectdata, 230),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3809,7 +3812,7 @@ export default function DailyJobReport() {
                     className="List-select-class"
                     ref={AreaRef}
                     options={AreaDataoption}
-                    onKeyDown={(e) => handleAreaKeypress(e, input1Ref)}
+                    onKeyDown={(e) => handleAreaKeypress(e, ReferenceRef)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -3832,7 +3835,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Areaselectdata),
+                      ...customStyles1(!Areaselectdata, 230),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3914,9 +3917,9 @@ export default function DailyJobReport() {
             </div>
           </div>
 
-           {/* LAST ROW */}
+          {/* LAST ROW */}
 
-           <div
+          <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
           >
@@ -3930,11 +3933,15 @@ export default function DailyJobReport() {
                 justifyContent: "space-between",
               }}
             >
-              <div className="d-flex align-items-center">
+
+               <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "6px" }}
+              >
                 <div
                   style={{
-                    marginLeft: "10px",
-                    width: "90px",
+                    marginLeft: "20px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3950,7 +3957,7 @@ export default function DailyJobReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      Complain :
+                      Reference :
                     </span>
                   </label>
                 </div>
@@ -3958,21 +3965,21 @@ export default function DailyJobReport() {
                 <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={Complainref}
-                    options={ComplaindataOption}
-                    // onKeyDown={(e) => handlecityKeypress(e, AreaRef)}
+                    ref={ReferenceRef}
+                    options={refoptions}
+                    onKeyDown={(e) => handlerefernceKeypress(e, input1Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
-                        setCompanyselectdata(selectedOption.value);
-                        setCompanyselectdatavalue({
+                        setReferenceselectdata(selectedOption.value);
+                        setReferenceselectdatavalue({
                           value: selectedOption.value,
                           label: labelPart,
                         });
                       } else {
-                        setCompanyselectdata("");
-                        setCompanyselectdatavalue("");
+                        setReferenceselectdata("");
+                        setReferenceselectdatavalue("");
                       }
                     }}
                     onInputChange={(inputValue, { action }) => {
@@ -3983,7 +3990,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Complainselectdata),
+                      ...customStyles1(!Referenceselectdata, 300),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3998,9 +4005,7 @@ export default function DailyJobReport() {
                   />
                 </div>
               </div>
-
              
-              
             </div>
           </div>
 

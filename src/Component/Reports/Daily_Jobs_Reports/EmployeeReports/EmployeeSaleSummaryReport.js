@@ -2710,9 +2710,10 @@ export default function EmployeeSaleSummaryReport() {
                       paddingLeft: "12px",
                     }}
                   >
-                    <option value="">ALL</option>
-                    <option value="INV">SALE</option>
-                    <option value="SRN">SALE RETURN</option>
+                       <option value="" >ALL</option>
+                    <option value="C" >CASH</option>
+                    <option value="R" >CREDIT</option>
+                    <option value="I">INSTALLMENT</option>
                   </select>
 
                   {transectionType2 !== "" && (

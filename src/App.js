@@ -141,6 +141,7 @@ import DailySparePartsDemandReport from "./Component/Reports/Daily_Jobs_Reports/
 import DailySparePartsIssueReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySparePartIssueReport.js";
 import PurchaseOrderStatusReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/PurchaseOrderStatusReport.js";
 import ProductionOrderStatusReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/ProductionOrderStatusReport.js";
+import DailySalryRegisterReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySalaryRegister.js";
 
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
@@ -170,6 +171,7 @@ import EmployeeSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/Em
 import EmployeeMarginSummary from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeMarginSummary.js";
 import EmployeeMarginReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeMarginReport.js";
 import EmployeeCommissionReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeCommissionReport.js";
+import EmployeeSalryRegisterReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeSalaryRegister.js";
 
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
@@ -331,6 +333,7 @@ function App() {
                 <Route exact path="/InstallmentOutstandingReport" element={<DailySparePartsIssueReport />} />
                 <Route exact path="/InstallmentNilCollectionReport" element={<PurchaseOrderStatusReport />} />
                 <Route exact path="/ProductionOrderStatus" element={<ProductionOrderStatusReport />} />
+                <Route exact path="/DailySalaryRegister" element={<DailySalryRegisterReport />} />
 
 
                 {/* Rountes for Installments reports */}
@@ -372,6 +375,7 @@ function App() {
                 <Route exact path="/EmployeeMarginSummary" element={<EmployeeMarginSummary />} />
                 <Route exact path="/EmployeeMarginReport" element={<EmployeeMarginReport />} />
                 <Route exact path="/EmployeeCommissionReport" element={<EmployeeCommissionReport />} />
+                <Route exact path="/EmployeeSalaryLedger" element={<EmployeeSalryRegisterReport />} />
 
 
                 {/* Rountes for item reports */}

@@ -436,7 +436,7 @@ export default function EmployeeMarginSummary() {
       // code: organisation.code,
       // FLocCod: locationnumber || getLocationNumber,
       // FYerDsc: yeardescription || getyeardescription,
-      FTrnTyp: transectionType2,
+      FRepTyp: transectionType2,
       FEmpCod: Employeeselectdata,
       code: "NASIRTRD",
       FLocCod: "001",
@@ -2081,7 +2081,7 @@ export default function EmployeeMarginSummary() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Margin Report" />
+          <NavComponent textdata="Employee Margin Summary Report" />
 
           {/* ------------1st row */}
                    <div
@@ -2372,8 +2372,8 @@ export default function EmployeeMarginSummary() {
                                  marginTop: "-5px",
                                }),
                              }}
-                             isClearable
-                             placeholder="ALL"
+                            //  isClearable
+                            //  placeholder="ALL"
                            />
                          </div>
                        </div>
@@ -2793,9 +2793,10 @@ export default function EmployeeMarginSummary() {
                       paddingLeft: "12px",
                     }}
                   >
-                    <option value="">ALL</option>
-                    <option value="INV">SALE</option>
-                    <option value="SRN">SALE RETURN</option>
+                  <option value="" >ALL</option>
+                    <option value="C" >CASH</option>
+                    <option value="R" >CREDIT</option>
+                    <option value="I">INSTALLMENT</option>
                   </select>
 
                   {transectionType2 !== "" && (
