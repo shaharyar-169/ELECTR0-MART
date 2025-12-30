@@ -431,12 +431,12 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FEmpCod: Employeeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -1244,7 +1244,7 @@ companyRow.eachCell((cell) => {
       "",
     ]);
 
-     worksheet.mergeCells(`A${typeAndStoreRow5.number}:D${typeAndStoreRow5.number}`);
+     worksheet.mergeCells(`B${typeAndStoreRow5.number}:E${typeAndStoreRow5.number}`);
 
  typeAndStoreRow5.eachCell((cell, colIndex) => {
       cell.font = {

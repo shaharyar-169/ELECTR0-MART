@@ -172,6 +172,7 @@ import EmployeeMarginSummary from "./Component/Reports/Daily_Jobs_Reports/Employ
 import EmployeeMarginReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeMarginReport.js";
 import EmployeeCommissionReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeCommissionReport.js";
 import EmployeeSalryRegisterReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeSalaryRegister.js";
+import EmployeeMarginComparison from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeMarginComparison.js";
 
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
@@ -376,6 +377,7 @@ function App() {
                 <Route exact path="/EmployeeMarginReport" element={<EmployeeMarginReport />} />
                 <Route exact path="/EmployeeCommissionReport" element={<EmployeeCommissionReport />} />
                 <Route exact path="/EmployeeSalaryLedger" element={<EmployeeSalryRegisterReport />} />
+                <Route exact path="/EmployeeMarginComparison" element={<EmployeeMarginComparison />} />
 
 
                 {/* Rountes for item reports */}

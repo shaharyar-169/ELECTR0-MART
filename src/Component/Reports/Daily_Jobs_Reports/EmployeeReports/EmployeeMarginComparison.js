@@ -29,7 +29,7 @@ import { Code, Description, Margin, Store } from "@mui/icons-material";
 import "../../../vardana/vardana";
 import "../../../vardana/verdana-bold";
 
-export default function EmployeeMarginSummary() {
+export default function EmployeeMarginComparison() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -98,7 +98,7 @@ export default function EmployeeMarginSummary() {
 
   const [totaldebit, settotaldebit] = useState(0);
   const [totalcredit, settotalcredit] = useState(0);
-   const [ClosingBalance, setClosingBalance] = useState(0);
+  const [ClosingBalance, setClosingBalance] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -301,9 +301,9 @@ export default function EmployeeMarginSummary() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (employeeref.current) {
+        if (saleSelectRef.current) {
           e.preventDefault();
-          employeeref.current.focus();
+          saleSelectRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -422,7 +422,7 @@ export default function EmployeeMarginSummary() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeMarginSummary.php";
+    const apiUrl = apiLinks + "/EmployeeMarginComparison.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -438,10 +438,9 @@ export default function EmployeeMarginSummary() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType2,
-      FEmpCod: Employeeselectdata,
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+    //   code: "NASIRTRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -451,7 +450,7 @@ export default function EmployeeMarginSummary() {
 
         settotaldebit(response.data["Total Qnty"]);
         settotalcredit(response.data["Total Amount"]);
-           setClosingBalance(response.data["Total Margin"]);
+        setClosingBalance(response.data["Total Margin"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -472,10 +471,7 @@ export default function EmployeeMarginSummary() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (
-      !hasComponentMountedPreviously ||
-      (fromRef && fromRef.current)
-    ) {
+    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
       if (fromRef && fromRef.current) {
         setTimeout(() => {
           fromRef.current.focus();
@@ -863,20 +859,25 @@ export default function EmployeeMarginSummary() {
     // Define table data (rows)
     const rows = tableData.map((item) => [
       item.code,
-      item.Description,
-     formatValue(item.Qnty)  ,
-     formatValue(item.Amount)  ,
-      formatValue(item.Margin) 
+      item["Sales Man"],
+      formatValue(item.Qnty),
+      formatValue(item.Amount),
+      formatValue(item.Margin),
     ]);
 
     // Add summary row to the table
     rows.push([
-      "", "Total", String(formatValue(totaldebit)), String(formatValue(totalcredit)),  String(formatValue(ClosingBalance))]);
+      "",
+      "Total",
+      String(formatValue(totaldebit)),
+      String(formatValue(totalcredit)),
+      String(formatValue(ClosingBalance)),
+    ]);
 
     // Define table column headers and individual column widths
 
-    const headers = ["Code", "Description",  "Qnty", "Amount", "Margin"];
-    const columnWidths = [38, 95, 18, 28, 28];
+    const headers = ["Code", "Sales Man", "Qnty", "Amount", "Margin"];
+    const columnWidths = [15, 100, 20, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1010,7 +1011,7 @@ export default function EmployeeMarginSummary() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 12) {
+          if (cellIndex === 0) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
@@ -1129,15 +1130,15 @@ export default function EmployeeMarginSummary() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-     doc.setFont("Times New Roman", "normal");
-         doc.setFontSize(10);
+        doc.setFont("Times New Roman", "normal");
+        doc.setFontSize(10);
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-    
+
         doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(12);
+        doc.setFontSize(12);
         addTitle(
-          `Employee Margin Summary From ${fromInputDate} To ${toInputDate}`,
+          `Employee Margin Comparison Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1171,9 +1172,9 @@ export default function EmployeeMarginSummary() {
             ? "INSTALLMENT"
             : "ALL";
 
-        let employeedata = Employeeselectdatavalue.label
-          ? Employeeselectdatavalue.label
-          : "ALL";
+        // let employeedata = Employeeselectdatavalue.label
+        //   ? Employeeselectdatavalue.label
+        //   : "ALL";
 
         let typeText = capacityselectdatavalue.label
           ? capacityselectdatavalue.label
@@ -1190,12 +1191,12 @@ export default function EmployeeMarginSummary() {
 
         let search = searchQuery ? searchQuery : "";
 
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${employeedata}`, labelsX + 25, labelsY); // Draw the value next to the label
+        // doc.setFont("verdana", "bold"); // Set font to bold
+        // doc.setFontSize(10);
+        // doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
+        // doc.setFont("verdana-regular", "normal"); // Set font to bold
+        // doc.setFontSize(10);
+        // doc.text(`${employeedata}`, labelsX + 25, labelsY); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1294,7 +1295,7 @@ export default function EmployeeMarginSummary() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeMarginSummary As On ${date}.pdf`);
+    doc.save(`EmployeeMarginComparision As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
@@ -1303,7 +1304,7 @@ export default function EmployeeMarginSummary() {
 
     const numColumns = 5; // Ensure this matches the actual number of columns
 
-    const columnAlignments = ["left", "left", "right", "right", "right"];
+    const columnAlignments = ["center", "left", "right", "right", "right"];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -1333,13 +1334,13 @@ export default function EmployeeMarginSummary() {
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
     companyRow.eachCell((cell) => {
-  cell.font = {
-    name: "Times New Roman",
-    size: 16,       // optional
-    bold: true,     // optional
-  };
-  cell.alignment = { horizontal: "center" };
-});
+      cell.font = {
+        name: "Times New Roman",
+        size: 16, // optional
+        bold: true, // optional
+      };
+      cell.alignment = { horizontal: "center" };
+    });
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
@@ -1350,7 +1351,7 @@ export default function EmployeeMarginSummary() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Margin Summary From ${fromInputDate} To ${toInputDate}`,
+      `Employee Margin Comparison From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1396,18 +1397,18 @@ export default function EmployeeMarginSummary() {
         ? "FIFP"
         : "";
 
-     let transectionsts =
-          transectionType === "C"
-            ? "CASH"
-            : transectionType == "R"
-            ? "CREDIT"
-            : transectionType == "I"
-            ? "INSTALLMENT"
-            : "ALL";
+    let transectionsts =
+      transectionType === "C"
+        ? "CASH"
+        : transectionType == "R"
+        ? "CREDIT"
+        : transectionType == "I"
+        ? "INSTALLMENT"
+        : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow5 = worksheet.addRow(["Employee :", employeedata, ""]);
+    // const typeAndStoreRow5 = worksheet.addRow(["Employee :", employeedata, ""]);
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
       "Company :",
@@ -1447,14 +1448,14 @@ export default function EmployeeMarginSummary() {
     );
 
     // Apply styling for the status row
-    typeAndStoreRow5.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+    // typeAndStoreRow5.eachCell((cell, colIndex) => {
+    //   cell.font = {
+    //     name: "CustomFont" || "CustomFont",
+    //     size: 10,
+    //     bold: [1, 4].includes(colIndex),
+    //   };
+    //   cell.alignment = { horizontal: "left", vertical: "middle" };
+    // });
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1515,10 +1516,10 @@ export default function EmployeeMarginSummary() {
     tableData.forEach((item) => {
       const row = worksheet.addRow([
         item.code,
-      item.Description,
-     formatValue(item.Qnty)  ,
-     formatValue(item.Amount)  ,
-      formatValue(item.Margin) 
+        item.Description,
+        formatValue(item.Qnty),
+        formatValue(item.Amount),
+        formatValue(item.Margin),
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1537,13 +1538,17 @@ export default function EmployeeMarginSummary() {
     });
 
     // Set column widths
-    [20, 50, 9,12, 12].forEach((width, index) => {
+    [8, 50, 9, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
-     "", "Total", String(formatValue(totaldebit)), String(formatValue(totalcredit)),  String(formatValue(ClosingBalance))]);
-
+      "",
+      "Total",
+      String(formatValue(totaldebit)),
+      String(formatValue(totalcredit)),
+      String(formatValue(ClosingBalance)),
+    ]);
 
     // total row added
 
@@ -1625,7 +1630,7 @@ export default function EmployeeMarginSummary() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeMarginSummary As On ${currentdate}.xlsx`);
+    saveAs(blob, `EmployeeMarginComparison As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1767,7 +1772,7 @@ export default function EmployeeMarginSummary() {
   // };
 
   const firstColWidth = {
-    width: "135px",
+    width: "55px",
   };
   const secondColWidth = {
     width: "360px",
@@ -1782,7 +1787,7 @@ export default function EmployeeMarginSummary() {
     width: "100px",
   };
 
-   const seventhColWidth = {
+  const seventhColWidth = {
     width: "100px",
   };
 
@@ -1791,19 +1796,19 @@ export default function EmployeeMarginSummary() {
   };
 
   const [columns, setColumns] = useState({
-   code: [],
-      Description: [],
-       Qnty: [],
-       Amount: [],
-        Margin: [],
+    code: [],
+    ["Sales Man"]: [],
+    Qnty: [],
+    Amount: [],
+    Margin: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-   code: "",
-      Description: "",
-       Qnty: "",
-       Amount: "",
-        Margin: "",
+    code: "",
+    ["Sales Man"]: "",
+    Qnty: "",
+    Amount: "",
+    Margin: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -1811,11 +1816,10 @@ export default function EmployeeMarginSummary() {
     if (tableData.length > 0) {
       const newColumns = {
         code: tableData.map((row) => row.code),
-        Description: tableData.map((row) => row.Description),
+        ["Sales Man"]: tableData.map((row) => row["Sales Man"]),
         Qnty: tableData.map((row) => row.Qnty),
-       Amount: tableData.map((row) => row.Amount),
-       Margin: tableData.map((row) => row.Margin),
-
+        Amount: tableData.map((row) => row.Amount),
+        Margin: tableData.map((row) => row.Margin),
       };
       setColumns(newColumns);
     }
@@ -1833,11 +1837,10 @@ export default function EmployeeMarginSummary() {
   const resetSorting = () => {
     setColumnSortOrders({
       code: null,
-      Description: null,
-       Qnty: null,
-       Amount: null,
-        Margin: null,
-    
+      ["Sales Man"]: null,
+      Qnty: null,
+      Amount: null,
+      Margin: null,
     });
   };
 
@@ -2069,8 +2072,7 @@ export default function EmployeeMarginSummary() {
   const formatValue = (val) => {
     return Number(val) === 0 ? "" : val;
   };
-
-   const toNumber = (value) => {
+  const toNumber = (value) => {
   if (!value) return 0;
   return Number(value.toString().replace(/,/g, ""));
 };
@@ -2088,226 +2090,228 @@ export default function EmployeeMarginSummary() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Margin Summary Report" />
+          <NavComponent textdata="Employee Margin Comparison Report" />
 
           {/* ------------1st row */}
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "space-between",
-                       }}
-                     >
-         
-                      
-                       <div className="d-flex align-items-center" style={{marginLeft:'5px'}}>
-                         <div
-                           style={{
-                             width: "90px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="fromDatePicker">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               From :
-                             </span>
-                           </label>
-                         </div>
-                         <div
-                           id="fromdatevalidation"
-                           style={{
-                             width: "135px",
-                             border: `1px solid ${fontcolor}`,
-                             display: "flex",
-                             alignItems: "center",
-                             height: "24px",
-                             justifyContent: "center",
-                             marginLeft: "5px",
-                             background: getcolor,
-                           }}
-                           onFocus={(e) =>
-                             (e.currentTarget.style.border = "2px solid red")
-                           }
-                           onBlur={(e) =>
-                             (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                           }
-                         >
-                           <input
-                             style={{
-                               height: "20px",
-                               width: "90px",
-                               paddingLeft: "5px",
-                               outline: "none",
-                               border: "none",
-                               fontSize: "12px",
-                               backgroundColor: getcolor,
-                               color: fontcolor,
-                               opacity: selectedRadio === "custom" ? 1 : 0.5,
-                               pointerEvents:
-                                 selectedRadio === "custom" ? "auto" : "none",
-                             }}
-                             id="frominputid"
-                             value={fromInputDate}
-                             ref={fromRef}
-                             onChange={handlefromInputChange}
-                             onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                             autoComplete="off"
-                             placeholder="dd-mm-yyyy"
-                             aria-label="Date Input"
-                             disabled={selectedRadio !== "custom"}
-                           />
-                           <DatePicker
-                             selected={selectedfromDate}
-                             onChange={handlefromDateChange}
-                             dateFormat="dd-MM-yyyy"
-                             popperPlacement="bottom"
-                             showPopperArrow={false}
-                             open={fromCalendarOpen}
-                             dropdownMode="select"
-                             customInput={
-                               <div>
-                                 <BsCalendar
-                                   onClick={
-                                     selectedRadio === "custom"
-                                       ? toggleFromCalendar
-                                       : undefined
-                                   }
-                                   style={{
-                                     cursor:
-                                       selectedRadio === "custom"
-                                         ? "pointer"
-                                         : "default",
-                                     marginLeft: "18px",
-                                     fontSize: getdatafontsize,
-                                     fontFamily: getfontstyle,
-                                     color: fontcolor,
-                                     opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                   }}
-                                   disabled={selectedRadio !== "custom"}
-                                 />
-                               </div>
-                             }
-                             disabled={selectedRadio !== "custom"}
-                           />
-                         </div>
-                       </div>
-                       <div
-                         className="d-flex align-items-center"
-                       >
-                         <div
-                           style={{
-                             width: "60px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="toDatePicker">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               To :
-                             </span>
-                           </label>
-                         </div>
-                         <div
-                           id="todatevalidation"
-                           style={{
-                             width: "135px",
-                             border: `1px solid ${fontcolor}`,
-                             display: "flex",
-                             alignItems: "center",
-                             height: "24px",
-                             justifyContent: "center",
-                             marginLeft: "5px",
-                             background: getcolor,
-                           }}
-                           onFocus={(e) =>
-                             (e.currentTarget.style.border = "2px solid red")
-                           }
-                           onBlur={(e) =>
-                             (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                           }
-                         >
-                           <input
-                             ref={toRef}
-                             style={{
-                               height: "20px",
-                               width: "90px",
-                               paddingLeft: "5px",
-                               outline: "none",
-                               border: "none",
-                               fontSize: getdatafontsize,
-                               fontFamily: getfontstyle,
-                               backgroundColor: getcolor,
-                               color: fontcolor,
-                               opacity: selectedRadio === "custom" ? 1 : 0.5,
-                               pointerEvents:
-                                 selectedRadio === "custom" ? "auto" : "none",
-                             }}
-                             value={toInputDate}
-                             onChange={handleToInputChange}
-                             onKeyDown={(e) => handleToKeyPress(e, employeeref)}
-                             id="toDatePicker"
-                             autoComplete="off"
-                             placeholder="dd-mm-yyyy"
-                             aria-label="To Date Input"
-                             disabled={selectedRadio !== "custom"}
-                           />
-                           <DatePicker
-                             selected={selectedToDate}
-                             onChange={handleToDateChange}
-                             dateFormat="dd-MM-yyyy"
-                             popperPlacement="bottom"
-                             showPopperArrow={false}
-                             open={toCalendarOpen}
-                             dropdownMode="select"
-                             customInput={
-                               <div>
-                                 <BsCalendar
-                                   onClick={
-                                     selectedRadio === "custom"
-                                       ? toggleToCalendar
-                                       : undefined
-                                   }
-                                   style={{
-                                     cursor:
-                                       selectedRadio === "custom"
-                                         ? "pointer"
-                                         : "default",
-                                     marginLeft: "18px",
-                                     fontSize: getdatafontsize,
-                                     fontFamily: getfontstyle,
-                                     color: fontcolor,
-                                     opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                   }}
-                                   disabled={selectedRadio !== "custom"}
-                                 />
-                               </div>
-                             }
-                             disabled={selectedRadio !== "custom"}
-                           />
-                         </div>
-                       </div>
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "start",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "5px" }}
+              >
+                <div
+                  style={{
+                    width: "90px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      From :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="fromdatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontSize: "12px",
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    id="frominputid"
+                    value={fromInputDate}
+                    ref={fromRef}
+                    onChange={handlefromInputChange}
+                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedfromDate}
+                    onChange={handlefromDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={fromCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleFromCalendar
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "50px" }}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="toDatePicker">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      To :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="todatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    ref={toRef}
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    value={toInputDate}
+                    onChange={handleToInputChange}
+                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                    id="toDatePicker"
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="To Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedToDate}
+                    onChange={handleToDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={toCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleToCalendar
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
 
-                        <div
+              {/* <div
                          className="d-flex align-items-center"
                          style={{ marginRight: "21px" }}
                        >
@@ -2383,121 +2387,117 @@ export default function EmployeeMarginSummary() {
                             //  placeholder="ALL"
                            />
                          </div>
-                       </div>
-                     </div>
-                   </div>
-         
-                    <div
-                     className="row"
-                     style={{ marginTop: "8px", marginBottom: "8px" , margin:'0px'}}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "start",
-                         border:'1px solid lightgrey',
-                         // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
-                       }}
-                     ></div>
-         
-                     
-         
-                     </div>
-         
-                   {/* //////////////// second ROW ///////////////////////// */}
-         
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "space-between",
-                       }}
-                     >
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginLeft: "7px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Company :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class"
-                             ref={saleSelectRef}
-                             options={options}
-                             onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                               if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-                                 setCompanyselectdata(selectedOption.value);
-                                 setCompanyselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart,
-                                 });
-                               } else {
-                                 setCompanyselectdata("");
-                                 setCompanyselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Companyselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             isClearable
-                             placeholder="ALL"
-                           />
-                         </div>
-                       </div>
-         
-                       
-                      <div
+                       </div> */}
+            </div>
+          </div>
+
+          <div
+            className="row"
+            style={{ marginTop: "8px", marginBottom: "8px", margin: "0px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "start",
+                border: "1px solid lightgrey",
+                // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
+              }}
+            ></div>
+          </div>
+
+          {/* //////////////// second ROW ///////////////////////// */}
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "7px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Company :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={saleSelectRef}
+                    options={options}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCompanyselectdata(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setCompanyselectdata("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+              <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
               >
@@ -2575,8 +2575,8 @@ export default function EmployeeMarginSummary() {
                   )}
                 </div>
               </div>
-         
-                       {/* <div
+
+              {/* <div
                                          className="d-flex align-items-center"
                                          style={{ marginRight: "21px" }}
                                      >
@@ -2633,8 +2633,8 @@ export default function EmployeeMarginSummary() {
                                              <option value="F">FIFO</option>
                                          </select>
                                      </div> */}
-                     </div>
-                   </div>
+            </div>
+          </div>
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
           <div
@@ -2800,9 +2800,9 @@ export default function EmployeeMarginSummary() {
                       paddingLeft: "12px",
                     }}
                   >
-                  <option value="" >ALL</option>
-                    <option value="C" >CASH</option>
-                    <option value="R" >CREDIT</option>
+                    <option value="">ALL</option>
+                    <option value="C">CASH</option>
+                    <option value="R">CREDIT</option>
                     <option value="I">INSTALLMENT</option>
                   </select>
 
@@ -3029,12 +3029,12 @@ export default function EmployeeMarginSummary() {
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
+                      onClick={() => handleSorting("Sales Man")}
                     >
-                      Description{" "}
+                      Sales Man{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
+                        style={getIconStyle("Sales Man")}
                       ></i>
                     </td>
                     {/* <td
@@ -3147,15 +3147,14 @@ export default function EmployeeMarginSummary() {
                         {/* <td style={thirdColWidth}></td> */}
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-
+                        <td style={seventhColWidth}></td>
                       </tr>
                     </>
                   ) : (
                     <>
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
-                      const amount = toNumber(item.Amount);
+                         const amount = toNumber(item.Amount);
   const qnty   = toNumber(item.Qnty);
   const margin = toNumber(item.Margin);
 
@@ -3175,11 +3174,11 @@ export default function EmployeeMarginSummary() {
                               color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            <td className="text-start" style={firstColWidth}>
+                            <td className="text-center" style={firstColWidth}>
                               {item.code}
                             </td>
                             <td className="text-start" style={secondColWidth}>
-                              {item.Description}
+                              {item["Sales Man"]}
                             </td>
                             {/* <td className="text-end" style={thirdColWidth}>
                               {formatValue(item.Rate)}
@@ -3191,7 +3190,7 @@ export default function EmployeeMarginSummary() {
                             <td className="text-end" style={sixthColWidth}>
                               {formatValue(item.Amount)}
                             </td>
-                             <td className="text-end" style={seventhColWidth}>
+                            <td className="text-end" style={seventhColWidth}>
                               {formatValue(item.Margin)}
                             </td>
                           </tr>
@@ -3220,8 +3219,7 @@ export default function EmployeeMarginSummary() {
                         {/* <td style={thirdColWidth}></td> */}
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
-
+                        <td style={seventhColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -3290,7 +3288,7 @@ export default function EmployeeMarginSummary() {
               </span>
             </div>
 
-             <div
+            <div
               style={{
                 ...seventhColWidth,
                 background: getcolor,
