@@ -29,7 +29,7 @@ import { Code, Collections, Description, Store } from "@mui/icons-material";
 import "../../../vardana/vardana";
 import "../../../vardana/verdana-bold";
 
-export default function EmployeeCommissionReport() {
+export default function EmployeeCommissionSummaryReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -439,7 +439,7 @@ export default function EmployeeCommissionReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeCommissionReport.php";
+    const apiUrl = apiLinks + "/EmployeeCommissionSummary.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -449,16 +449,16 @@ export default function EmployeeCommissionReport() {
       FCapCod: Capacityselectdata,
       FCmpCod: Companyselectdata,
       FRepRat: transectionType,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType2,
       FEmpCod: Employeeselectdata,
       FComPrc: mobileNumber,
     
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+    //   code: "NASIRTRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -469,7 +469,7 @@ export default function EmployeeCommissionReport() {
         settotaldebit(response.data["Total Qnty"]);
         settotalcredit(response.data["Total Amount"]);
         setClosingBalance(response.data["Total Margin"]);
-         setcommission(response.data["Total Commission"]);
+         setcommission(response.data["Total Comm"]);
 
        if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -880,27 +880,21 @@ export default function EmployeeCommissionReport() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
+     
+      item.code,
       item.Description,
-      formatValue(item['Cost Rate']),
       formatValue(item.Qnty),
-      formatValue(item.Rate),
-      formatValue(item["Sale Amount"]),
+      formatValue(item.Amount),
       formatValue(item.Margin),
-        formatValue(item.Commission),
+        formatValue(item.Comm),
     ]);
 
     // Add summary row to the table
     rows.push([
-      "",
-      "",
+     
       "",
       "Total",
-         "",
       String(formatValue(totaldebit)),
-      "",
       String(formatValue(totalcredit)),
       String(formatValue(ClosingBalance)),
        String(formatValue(commission)),
@@ -909,18 +903,15 @@ export default function EmployeeCommissionReport() {
     // Define table column headers and individual column widths
 
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+    
+      "Code",
       "Description",
-         "Cost Rate",
       "Qnty",
-      "Rate",
       "Amount",
        "Margin",
-       "Commission",
+       "Comm",
     ];
-    const columnWidths = [24, 16, 12, 100,25, 18, 25, 25, 25,25];
+    const columnWidths = [40, 110,20,30, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1054,19 +1045,18 @@ export default function EmployeeCommissionReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 2) {
+          if (cellIndex === 12) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
+            cellIndex === 2 ||
+            cellIndex === 3 ||
             cellIndex === 4 ||
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8 ||
-             cellIndex === 9 
+            cellIndex === 5
+            
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1188,7 +1178,7 @@ export default function EmployeeCommissionReport() {
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         addTitle(
-          `Employee Commission Report From ${fromInputDate} To ${toInputDate}`,
+          `Employee Commission Summary Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1344,22 +1334,18 @@ export default function EmployeeCommissionReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeCommissionReport As On ${date}.pdf`);
+    doc.save(`EmployeeCommissionSummaryReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 10; // Ensure this matches the actual number of columns
+    const numColumns = 6; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
-      "center",
-      "center",
       "left",
-      "right",
-        "right",
       "right",
       "right",
       "right",
@@ -1412,7 +1398,7 @@ export default function EmployeeCommissionReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Commission Report From ${fromInputDate} To ${toInputDate}`,
+      `Employee Commission Summary Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1486,13 +1472,12 @@ export default function EmployeeCommissionReport() {
       typecompany,
       "",
       "",
-      "",
-      "Rate :",
+       "Rate :",
       ratedata,
     ]);
 
     worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`
+      `B${typeAndStoreRow.number}:C${typeAndStoreRow.number}`
     );
 
     // Add second row
@@ -1501,24 +1486,22 @@ export default function EmployeeCommissionReport() {
       typecategory,
       "",
       "",
-      "",
-
-      "Type :",
+           "Type :",
       transectionsts,
     ]);
 
     worksheet.mergeCells(
-      `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`
+      `B${typeAndStoreRow2.number}:C${typeAndStoreRow2.number}`
     );
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
       searchQuery
-        ? ["Capacity :", typecapacity, "", "", "", "Search :", typesearch]
+        ? ["Capacity :", typecapacity, "", "", , "Search :", typesearch]
         : ["Capacity :", typecapacity]
     );
 
     worksheet.mergeCells(
-      `B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`
+      `B${typeAndStoreRow4.number}:C${typeAndStoreRow4.number}`
     );
 
     // Apply styling for the status row
@@ -1526,7 +1509,7 @@ export default function EmployeeCommissionReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 5].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1534,7 +1517,7 @@ export default function EmployeeCommissionReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 5].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1559,7 +1542,7 @@ export default function EmployeeCommissionReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 5].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1583,16 +1566,12 @@ export default function EmployeeCommissionReport() {
 
     // Add headers
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
       "Description",
-         "Cost Rate",
       "Qnty",
-      "Rate",
       "Amount",
       "Margin",
-        "Commission",
+        "Comm",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1600,17 +1579,13 @@ export default function EmployeeCommissionReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
+       
+        item.code,
         item.Description,
-        //    item.Store,
-        formatValue(item['Cost Rate']),
         formatValue(item.Qnty),
-        formatValue(item.Rate),
-        formatValue(item["Sale Amount"]),
+        formatValue(item.Amount),
         formatValue(item.Margin),
-         formatValue(item.Commission),
+         formatValue(item.Comm),
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1629,19 +1604,14 @@ export default function EmployeeCommissionReport() {
     });
 
     // Set column widths
-    [10, 8, 6, 50,12, 8, 12, 15, 15,15].forEach((width, index) => {
+    [20, 45,8, 15, 15,15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
-      "",
-      "",
-      "",
-      
-      "Total",
-         "",
-      String(formatValue(totaldebit)),
-      "",
+           "",
+         "Total",
+           String(formatValue(totaldebit)),
       String(formatValue(totalcredit)),
       String(formatValue(ClosingBalance)),
       String(formatValue(commission)),
@@ -1659,7 +1629,7 @@ export default function EmployeeCommissionReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 6 || colNumber === 8 || colNumber === 9) {
+      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1727,7 +1697,7 @@ export default function EmployeeCommissionReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeCommissionReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `EmployeeCommissionSummaryReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1844,10 +1814,10 @@ export default function EmployeeCommissionReport() {
     width: "55px",
   };
   const thirdColWidth = {
-    width: "45px",
+    width: "135px",
   };
   const forthColWidth = {
-    width: "340px",
+    width: "360px",
   };
    const forthColWidth1 = {
     width: "80px",
@@ -1859,16 +1829,16 @@ export default function EmployeeCommissionReport() {
     width: "60px",
   };
   const eightColWidth = {
-    width: "80px",
+    width: "70px",
   };
   const ninthColWidth = {
-    width: "80px",
+    width: "90px",
   };
   const tenthColWidth = {
-    width: "80px",
+    width: "90px",
   };
   const elewenthColWidth = {
-    width: "80px",
+    width: "90px",
   };
   const sixthcol = {
     width: "8px",
@@ -2241,7 +2211,7 @@ useEffect(() => {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Commission Report" />
+          <NavComponent textdata="Employee Commission Summary Report" />
 
           {/* ------------1st row */}
           <div
@@ -3121,30 +3091,30 @@ useEffect(() => {
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
+                    {/* <td className="border-dark" style={firstColWidth}>
                       Date
                     </td>
                     <td className="border-dark" style={secondColWidth}>
                       Trn#
-                    </td>
+                    </td> */}
                     <td className="border-dark" style={thirdColWidth}>
-                      Type
+                      Code
                     </td>
                     <td className="border-dark" style={forthColWidth}>
                       Description
                     </td>
-                     <td className="border-dark" style={forthColWidth1}>
+                     {/* <td className="border-dark" style={forthColWidth1}>
                       Cost Rate
-                    </td>
+                    </td> */}
 
                     {/* <td className="border-dark" style={sixthColWidth}>
                                  Str
                                </td> */}
-                    <td className="border-dark" style={seventhColWidth}>
+                    {/* <td className="border-dark" style={seventhColWidth}>
                       Qnty
-                    </td>
+                    </td> */}
                     <td className="border-dark" style={eightColWidth}>
-                      Rate
+                      Qnty
                     </td>
                     <td className="border-dark" style={ninthColWidth}>
                       Amount
@@ -3192,7 +3162,7 @@ useEffect(() => {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="10" className="text-center">
+                        <td colSpan="6" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3205,7 +3175,7 @@ useEffect(() => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 10 }).map((_, colIndex) => (
+                            {Array.from({ length: 6 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3214,14 +3184,13 @@ useEffect(() => {
                         )
                       )}
                       <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
+                        {/* <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td> */}
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                                                <td style={forthColWidth1}></td>
+                                                {/* <td style={forthColWidth1}></td>
 
-                        {/* <td style={sixthColWidth}></td> */}
-                        <td style={seventhColWidth}></td>
+                        <td style={seventhColWidth}></td> */}
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
@@ -3237,7 +3206,7 @@ useEffect(() => {
                           String(item.Qnty).replace(/,/g, "")
                         );
                         const nRate = Number(
-                          String(item.Rate).replace(/,/g, "")
+                          String(item.Amount).replace(/,/g, "")
                         );
                         const nMargin = Number(
                           String(item.Margin).replace(/,/g, "")
@@ -3260,38 +3229,36 @@ useEffect(() => {
                               color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            <td className="text-start" style={firstColWidth}>
+                            {/* <td className="text-start" style={firstColWidth}>
                               {item.Date}
                             </td>
                             <td className="text-start" style={secondColWidth}>
                               {item["Trn#"]}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
+                            </td> */}
+                            <td className="text-start" style={thirdColWidth}>
+                              {item.code}
                             </td>
                             <td className="text-start" style={forthColWidth}>
                               {item.Description}
                             </td>
-                            <td className="text-end" style={forthColWidth1}>
+                            {/* <td className="text-end" style={forthColWidth1}>
                               {formatValue(item['Cost Rate'])}
                             </td>
-                            {/* <td className="text-end" style={sixthColWidth}>
-                                         {item.Store}
-                                       </td> */}
+                          
                             <td className="text-end" style={seventhColWidth}>
                               {formatValue(item.Qnty)}
-                            </td>
+                            </td> */}
                             <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
+                              {formatValue(item.Qnty)}
                             </td>
                             <td className="text-end" style={ninthColWidth}>
-                              {formatValue(item["Sale Amount"])}
+                              {formatValue(item.Amount)}
                             </td>
                             <td className="text-end" style={tenthColWidth}>
                               {formatValue(item.Margin)}
                             </td>
                              <td className="text-end" style={elewenthColWidth}>
-                              {formatValue(item.Commission)}
+                              {formatValue(item.Comm)}
                             </td>
                           </tr>
                         );
@@ -3306,7 +3273,7 @@ useEffect(() => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 10 }).map((_, colIndex) => (
+                          {Array.from({ length: 6 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3314,14 +3281,13 @@ useEffect(() => {
                         </tr>
                       ))}
                       <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
+                        {/* <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td> */}
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                                                <td style={forthColWidth1}></td>
+                                                {/* <td style={forthColWidth1}></td>
 
-                        {/* <td style={sixthColWidth}></td> */}
-                        <td style={seventhColWidth}></td>
+                        <td style={seventhColWidth}></td> */}
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
@@ -3344,7 +3310,7 @@ useEffect(() => {
               paddingRight: "8px",
             }}
           >
-            <div
+            {/* <div
               style={{
                 ...firstColWidth,
                 background: getcolor,
@@ -3362,7 +3328,7 @@ useEffect(() => {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            ></div> */}
             <div
               style={{
                 ...thirdColWidth,
@@ -3370,8 +3336,9 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
-            </div>
+ <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>            </div>
             <div
               style={{
                 ...forthColWidth,
@@ -3379,38 +3346,12 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              <span className="mobileledger_total">{totalexcel}</span>
             </div>
-             <div
-              style={{
-                ...forthColWidth1,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
-            </div>
-            {/* <div
-                         style={{
-                           ...sixthColWidth,
-                           background: getcolor,
-                           borderRight: `1px solid ${fontcolor}`,
-                         }}
-                       >
-                         <span className="mobileledger_total">{formatValue(totaldebit)}</span>
-                       </div> */}
+           
+          
 
-            <div
-              style={{
-                ...seventhColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totaldebit)}
-              </span>
-            </div>
+          
             <div
               style={{
                 ...eightColWidth,
@@ -3418,7 +3359,9 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
+              <span className="mobileledger_total">{ <span className="mobileledger_total">
+                {formatValue(totaldebit)}
+              </span>}</span>
             </div>
             <div
               style={{

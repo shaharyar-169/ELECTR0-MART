@@ -163,6 +163,9 @@ import ItemStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports
 import ItemSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleSummaryReport.js";
 import ItemEvalutionReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemEvalutionReport.js";
 import ItemReorderLevelReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemReorderLevelReport.js";
+import RawMaterialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/RawMaterialStockReport.js";
+import SemiFinishStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SemiFinishStockReport.js";
+import FinishItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/FinishItemStcokReport.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -173,6 +176,7 @@ import EmployeeMarginReport from "./Component/Reports/Daily_Jobs_Reports/Employe
 import EmployeeCommissionReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeCommissionReport.js";
 import EmployeeSalryRegisterReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeSalaryRegister.js";
 import EmployeeMarginComparison from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeMarginComparison.js";
+import EmployeeCommissionSummaryReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeCommissionSummaryReport.js";
 
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
@@ -359,6 +363,9 @@ function App() {
                 <Route exact path="/ItemSaleSummary" element={<ItemSaleSummaryReport />} />
                 <Route exact path="/ItemSaleComparison" element={<ItemEvalutionReport />} />
                 <Route exact path="/CompanySaleComparison" element={<ItemReorderLevelReport />} />
+                <Route exact path="/RawMaterialStockReport" element={<RawMaterialStockReport />} />
+                <Route exact path="/SemishFinishStockReport" element={<SemiFinishStockReport />} />
+                <Route exact path="/FinishItemStockReport" element={<FinishItemStockReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}
@@ -378,6 +385,7 @@ function App() {
                 <Route exact path="/EmployeeCommissionReport" element={<EmployeeCommissionReport />} />
                 <Route exact path="/EmployeeSalaryLedger" element={<EmployeeSalryRegisterReport />} />
                 <Route exact path="/EmployeeMarginComparison" element={<EmployeeMarginComparison />} />
+                <Route exact path="/EmployeeCommissionSummary" element={<EmployeeCommissionSummaryReport />} />
 
 
                 {/* Rountes for item reports */}
