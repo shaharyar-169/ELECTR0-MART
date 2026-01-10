@@ -163,7 +163,7 @@ export default function EmployeeList() {
     ]);
 
     // Add summary row to the table
-    // rows.push(["", "", "", "", "", ""]);
+    rows.push([String(formatValue(tableData.length.toLocaleString())),"", "", "", "", "", "", "", ""]);
 
     // Define table column headers and individual column widths
     const headers = [
@@ -177,7 +177,7 @@ export default function EmployeeList() {
       "Adv Code",
       "Dlv Code",
     ];
-    const columnWidths = [12, 70, 15, 70, 25, 22, 22, 20, 20];
+    const columnWidths = [12, 65, 15, 65, 28, 25, 25, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -187,14 +187,14 @@ export default function EmployeeList() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
+     doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(12); // Set font size for headers
+        doc.setFont("verdana", "bold");
+             doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -216,118 +216,164 @@ export default function EmployeeList() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(12);
+     
     };
 
     const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust this value to decrease row height
-      const fontSize = 10; // Adjust this value to decrease font size
-      const boldFont = 400; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-      doc.setFontSize(fontSize);
-
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
-
-        if (isRedRow) {
-          textColor = [255, 0, 0]; // Red color
-          fontName = boldFont; // Set bold font for red-colored row
-        }
-
-        // Set background color for odd-numbered rows
-        if (isOddRow) {
-          doc.setFillColor(240); // Light background color
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F"
-          );
-        }
-
-        // Draw row borders
-        doc.setDrawColor(0); // Set color for borders
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          tableWidth,
-          rowHeight
-        );
-
-        row.forEach((cell, cellIndex) => {
-          const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-          const cellX = startX + 2;
-
-          // Set text color
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-          // Set font
-          doc.setFont(fontName, "normal");
-
-          // Ensure the cell value is a string
-          const cellValue = String(cell);
-
-          if (cellIndex === 2 || cellIndex === 0) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (cellIndex === 14) {
-            const rightAlignX = startX + columnWidths[cellIndex] + 10; // Adjust for right alignment
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-          }
-
-          // Draw column borders (excluding the last column)
-          if (cellIndex < row.length - 1) {
-            doc.rect(
-              startX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
-
-        // Draw border for the last column
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          columnWidths[row.length - 1],
-          rowHeight
-        );
-        startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
-      }
-
-      // Draw line at the bottom of the page with padding
-      const lineWidth = tableWidth; // Match line width with table width
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-      const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-      const headingFontSize = 12; // Adjust as needed
-
-      // Add heading "Crystal Solution" aligned left bottom of the line
-      const headingX = lineX + 2; // Padding from left
-      const headingY = lineY + 5; // Padding from bottom
-      doc.setFontSize(headingFontSize); // Set the font size for the heading
-      doc.setTextColor(0); // Reset text color to default
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-    };
+       const rowHeight = 5;
+       const fontSize = 10;
+       const boldFont = 400;
+       const normalFont = getfontstyle;
+       const tableWidth = getTotalTableWidth();
+ 
+      
+ 
+       for (let i = startIndex; i < endIndex; i++) {
+         const row = rows[i];
+         const isOddRow = i % 2 !== 0;
+         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+         const isTotalRow = i === rows.length - 1;
+         let textColor = [0, 0, 0];
+         let fontName = normalFont;
+ 
+         if (isRedRow) {
+           textColor = [255, 0, 0];
+           fontName = boldFont;
+         }
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
+         }
+ 
+         if (isOddRow) {
+           doc.setFillColor(240);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight,
+             "F"
+           );
+         }
+ 
+         doc.setDrawColor(0);
+ 
+         if (isTotalRow) {
+           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+           const rowBottomY = rowTopY + rowHeight;
+ 
+           doc.setLineWidth(0.3);
+           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+ 
+           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+           doc.line(
+             startX,
+             rowBottomY - 0.5,
+             startX + tableWidth,
+             rowBottomY - 0.5
+           );
+ 
+           doc.setLineWidth(0.2);
+           doc.line(startX, rowTopY, startX, rowBottomY);
+           doc.line(
+             startX + tableWidth,
+             rowTopY,
+             startX + tableWidth,
+             rowBottomY
+           );
+         } else {
+           doc.setLineWidth(0.2);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight
+           );
+         }
+ 
+         row.forEach((cell, cellIndex) => {
+           // ⭐ NEW FIX — Perfect vertical centering
+           const cellY =
+             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+ 
+           const cellX = startX + 2;
+ 
+           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+ 
+           if (!isTotalRow) {
+             doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+           }
+ 
+           const cellValue = String(cell);
+ 
+           if (cellIndex === 0 || cellIndex === 2) {
+             const rightAlignX = startX + columnWidths[cellIndex] / 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "center",
+               baseline: "middle",
+             });
+           } else if (
+           
+             cellIndex === 12 
+          
+           
+           ) {
+             const rightAlignX = startX + columnWidths[cellIndex] - 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "right",
+               baseline: "middle",
+             });
+           } else {
+             if (isTotalRow && cellIndex === 0 && cell === "") {
+               const totalLabelX = startX + columnWidths[0] / 2;
+               doc.text("", totalLabelX, cellY, {
+                 align: "center",
+                 baseline: "middle",
+               });
+             } else {
+               doc.text(cellValue, cellX, cellY, {
+                 baseline: "middle",
+               });
+             }
+           }
+ 
+           if (cellIndex < row.length - 1) {
+             doc.setLineWidth(0.2);
+             doc.line(
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 2) * rowHeight,
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 3) * rowHeight
+             );
+             startX += columnWidths[cellIndex];
+           }
+         });
+ 
+         startX = (doc.internal.pageSize.width - tableWidth) / 2;
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+         }
+       }
+ 
+       
+ 
+       const lineWidth = tableWidth;
+       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+       const lineY = pageHeight - 15;
+       doc.setLineWidth(0.3);
+       doc.line(lineX, lineY, lineX + lineWidth, lineY);
+       const headingFontSize = 11;
+       const headingX = lineX + 2;
+       const headingY = lineY + 5;
+       doc.setFont("verdana-regular", "normal");
+       doc.setFontSize(10);
+       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+     };
 
     // Function to calculate total table width
     const getTotalTableWidth = () => {
@@ -389,18 +435,17 @@ export default function EmployeeList() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+       doc.setFont("Times New Roman ", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+        doc.setFont("verdana-regular", "normal");
         addTitle(`Employee List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-        doc.setFontSize(12);
-        doc.setFont(getfontstyle, "300");
+      
 
         let typeItem = Companyselectdatavalue.label
           ? Companyselectdatavalue.label
@@ -414,32 +459,30 @@ export default function EmployeeList() {
             : "ALL";
         let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
+     
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`LOCATIONS :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeItem}`, labelsX + 26, labelsY + 8.5); // Draw the value next to the label
+        // doc.setFont(getfontstyle, "bold"); // Set font to bold
+        // doc.text(`LOCATIONS :`, labelsX, labelsY + 8.5); // Draw bold label
+        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        // doc.text(`${typeItem}`, labelsX + 26, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX, labelsY + 12.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${status}`, labelsX + 20, labelsY + 12.5); // Draw the value next to the label
+ doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
+                   doc.text(`Status :`, labelsX, labelsY + 12.5); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+                   doc.text(`${status}`, labelsX + 20, labelsY + 12.5); // Draw the value next to the label
 
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 140, labelsY + 8.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+ doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
+          doc.text(`Search :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
           doc.text(`${search}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
         }
 
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
-
-        startY += 14; // Adjust vertical position for the labels
+              startY += 14; // Adjust vertical position for the labels
 
         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 33);
         const startIndex = currentPageIndex * rowsPerPage;
@@ -542,7 +585,7 @@ export default function EmployeeList() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["EmployeeList"]);
+    const storeListRow = worksheet.addRow(["Employee List"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -572,38 +615,38 @@ export default function EmployeeList() {
     // Create the row with empty placeholder cells
     const typeAndStoreRow = worksheet.addRow(["", "", "", ""]);
 
-    // Put LOCATION + company in the **first cell**
-    typeAndStoreRow.getCell(1).value = `LOCATION :   ${typecompany}`;
+    // // Put LOCATION + company in the **first cell**
+    // typeAndStoreRow.getCell(1).value = `LOCATION :   ${typecompany}`;
 
-    // Merge A and B so it becomes wide
-    worksheet.mergeCells(
-      `A${typeAndStoreRow.number}:B${typeAndStoreRow.number}`
-    );
+    // // Merge A and B so it becomes wide
+    // worksheet.mergeCells(
+    //   `A${typeAndStoreRow.number}:B${typeAndStoreRow.number}`
+    // );
 
-    // Style
-    typeAndStoreRow.eachCell((cell) => {
-      cell.font = { name: "CustomFont", size: 10 };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+    // // Style
+    // typeAndStoreRow.eachCell((cell) => {
+    //   cell.font = { name: "CustomFont", size: 10 };
+    //   cell.alignment = { horizontal: "left", vertical: "middle" };
+    // });
 
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 2].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+    // typeAndStoreRow.eachCell((cell, colIndex) => {
+    //   cell.font = {
+    //     name: "CustomFont" || "CustomFont",
+    //     size: 10,
+    //     bold: [1, 2].includes(colIndex),
+    //   };
+    //   cell.alignment = { horizontal: "left", vertical: "middle" };
+    // });
 
     // Create row with empty placeholders (so we can merge properly)
     const typeAndStoreRow3 = worksheet.addRow(["", "", "", "", ""]);
 
     // Put STATUS + value together in cell A
-    typeAndStoreRow3.getCell(1).value = `STATUS :   ${typestatus}`;
+    typeAndStoreRow3.getCell(1).value = `Status :   ${typestatus}`;
 
     // If search exists → add SEARCH info in merged C-D
     if (searchQuery) {
-      typeAndStoreRow3.getCell(6).value = `SEARCH :   ${typesearch}`;
+      typeAndStoreRow3.getCell(6).value = `Search :   ${typesearch}`;
     }
 
     // Merge A + B for STATUS
@@ -709,6 +752,36 @@ export default function EmployeeList() {
     [7, 30, 7, 30, 12, 12, 10, 10, 10].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
+
+  const totalRow = worksheet.addRow([
+       String(formatValue(tableData.length.toLocaleString())),
+       "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+       
+     ]);
+ 
+     // total row added
+ 
+     totalRow.eachCell((cell, colNumber) => {
+       cell.font = { bold: true };
+       cell.border = {
+         top: { style: "thin" },
+         left: { style: "thin" },
+         bottom: { style: "thin" },
+         right: { style: "thin" },
+       };
+ 
+       // Align only the "Total" text to the right
+       if (colNumber === 1) {
+         cell.alignment = { horizontal: "center" };
+       }
+     });
 
     // Add a blank row
     worksheet.addRow([]);

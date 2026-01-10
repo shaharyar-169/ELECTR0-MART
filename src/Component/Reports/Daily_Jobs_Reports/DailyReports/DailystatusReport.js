@@ -21,6 +21,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import './dailydemo.css';
+import '../../../vardana/vardana';
+import '../../../vardana/verdana-bold';
 
 export default function DailyStatusReport() {
     const navigate = useNavigate();
@@ -138,81 +140,183 @@ export default function DailyStatusReport() {
         settoInputDate(e.target.value);
     };
 
+     const handlefromInputChange = (e) => {
+    setfromInputDate(e.target.value);
+  };
+
+const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+
+const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleFromDateEnter = (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+
+    const inputDate = e.target.value;
+    const formattedDate = inputDate.replace(
+      /^(\d{2})(\d{2})(\d{4})$/,
+      "$1-$2-$3"
+    );
+
+    // Basic format validation (dd-mm-yyyy)
+    if (
+      !/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+    ) {
+      toast.error("Date must be in the format dd-mm-yyyy");
+      return;
+    }
+
+    const [day, month, year] = formattedDate.split("-").map(Number);
+    const enteredDate = new Date(year, month - 1, day);
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    // Validate month, day, and date range
+    if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+      toast.error("Invalid date. Please check the day and month.");
+      return;
+    }
+    if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+      toast.error(
+        `Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+      );
+      return;
+    }
+
+    // Update input value and state
+    e.target.value = formattedDate;
+    setfromInputDate(formattedDate); // Update the state with formatted date
+
+    // Move focus to the next element
+    focusNextElement(fromRef, toRef);
+
+  };
+
 
 
     function fetchDailyStatusReport() {
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-
-        let errorType = "";
-
-        switch (true) {
+       const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+      
+          let hasError = false;
+          let errorType = "";
+      
+          switch (true) {
+            case !fromInputDate:
+              errorType = "fromDate";
+              break;
             case !toInputDate:
-                errorType = "toDate";
-                break;
+              errorType = "toDate";
+              break;
             default:
-                break;
-        }
-
-        if (!dateRegex.test(toInputDate)) {
+              hasError = false;
+              break;
+          }
+      
+          if (!dateRegex.test(fromInputDate)) {
+            errorType = "fromDateInvalid";
+          } else if (!dateRegex.test(toInputDate)) {
             errorType = "toDateInvalid";
-        } else {
+          } else {
+            const formattedFromInput = fromInputDate.replace(
+              /^(\d{2})(\d{2})(\d{4})$/,
+              "$1-$2-$3"
+            );
+            const [fromDay, fromMonth, fromYear] = formattedFromInput
+              .split("-")
+              .map(Number);
+            const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+      
             const formattedToInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
+              /^(\d{2})(\d{2})(\d{4})$/,
+              "$1-$2-$3"
             );
             const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
             const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-            if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = "toDateAfterGlobal";
+      
+            if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
+              errorType = "fromDateBeforeGlobal";
+            } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
+              errorType = "fromDateAfterGlobal";
+            } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+              errorType = "toDateAfterGlobal";
             } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = "toDateBeforeGlobal";
+              errorType = "toDateBeforeGlobal";
+            } else if (enteredToDate < enteredFromDate) {
+              errorType = "toDateBeforeFromDate";
             }
-        }
-
-        switch (errorType) {
+          }
+      
+          switch (errorType) {
+            case "fromDate":
+              toast.error("From date is required");
+              return;
             case "toDate":
-                toast.error("Rep Date is required");
-                return;
-
+              toast.error("To date is required");
+              return;
+            case "fromDateInvalid":
+              toast.error("From date must be in the format dd-mm-yyyy");
+              return;
             case "toDateInvalid":
-                toast.error("Rep Date must be in the format dd-mm-yyyy");
-                return;
-
+              toast.error("To date must be in the format dd-mm-yyyy");
+              return;
+            case "fromDateBeforeGlobal":
+              toast.error(
+                `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+              );
+              return;
+            case "fromDateAfterGlobal":
+              toast.error(
+                `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+              );
+              return;
             case "toDateAfterGlobal":
-                toast.error(`Rep Date must be before ${GlobaltoDate1}`);
-                return;
+              toast.error(
+                `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+              );
+              return;
             case "toDateBeforeGlobal":
-                toast.error(`Rep Date must be after ${GlobalfromDate1}`);
-                return;
-
+              toast.error(
+                `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+              );
+              return;
+            case "toDateBeforeFromDate":
+              toast.error("To date must be after from date");
+              return;
             default:
-                break;
-        }
+              break;
+          }
+      
+          document.getElementById(
+            "fromdatevalidation"
+          ).style.border = `1px solid ${fontcolor}`;
+          document.getElementById(
+            "todatevalidation"
+          ).style.border = `1px solid ${fontcolor}`;
 
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
-
-        if (fromDateElement) {
-            fromDateElement.style.border = `1px solid ${fontcolor}`;
-        }
-        if (toDateElement) {
-            toDateElement.style.border = `1px solid ${fontcolor}`;
-        }
-
-        const apiMainUrl = apiLinks + "/DailyStatusReport.php";
+        const apiMainUrl = apiLinks + "/ItemStatusReport.php";
         setIsLoading(true);
         const formMainData = new URLSearchParams({
+             FIntDat: fromInputDate,
+               FFnlDat: toInputDate,
+
+            FCtgCod: '',
+            FCapCod: '',
+            FSchTxt: '',
+            FCmpCod: '',
+            FStrCod: '',
             // code: organisation.code,
             // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
-
+            // FYerDsc: yeardescription || getyeardescription,
+            FRepTyp: '',
             code: 'NASIRTRD',
             FLocCod: '001',
             FYerDsc: '2024-2024',
-            FRepDat: toInputDate,
-            FStrCod: storeType,
-            // FSchTxt: "",
+
         }).toString();
 
         axios
@@ -221,14 +325,14 @@ export default function DailyStatusReport() {
                 setIsLoading(false);
                 // console.log("Response:", response.data);
 
-                setTotalOpening(response.data["Opening"]);
-                setTotalPurchase(response.data["Purchase"]);
-                setTotalPurRet(response.data["Pur Ret"]);
-                setTotalReceive(response.data["Receive"]);
-                setTotalIssue(response.data["Issue"]);
-                setTotalSale(response.data["Sale"]);
-                setTotalSaleRet(response.data["Sale Ret"]);
-                setTotalBalance(response.data["Balance"]);
+                setTotalOpening(response.data["Total Opening"]);
+                setTotalPurchase(response.data["Total Purchase"]);
+                setTotalPurRet(response.data["Total Pur-Ret"]);
+                setTotalReceive(response.data["Total Receive"]);
+                setTotalIssue(response.data["Total Issue"]);
+                setTotalSale(response.data["Total Sale"]);
+                setTotalSaleRet(response.data["Total Sale-Ret"]);
+                setTotalBalance(response.data["Total Qnty"]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
                     setTableData(response.data.Detail);
@@ -251,11 +355,11 @@ export default function DailyStatusReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
-            if (toRef && toRef.current) {
+        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+            if (fromRef && fromRef.current) {
                 setTimeout(() => {
-                    toRef.current.focus();
-                    toRef.current.select();
+                    fromRef.current.focus();
+                    fromRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -486,38 +590,35 @@ export default function DailyStatusReport() {
     });
     const exportPDFHandler = () => {
 
-        const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
-
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item.code,
+            item.Code,
             item.Description,
-            item["Opening"],
-            item["Purchase"],
-            item["Pur Ret"],
-            item["Receive"],
-            item["Issue"],
-            item["Sale"],
-            item["Sale Ret"],
-            item["Balance"],
+        formatValue(item["Opening"]),
+        formatValue(item["Purchase"]),
+        formatValue(item["Pur-Ret"]),
+         formatValue(item["Receive"]),
+         formatValue(item["Issue"]),
+        formatValue(item["Sale"]),
+        formatValue(item["Sale-Ret"]),
+        formatValue(item["Balance"]),
         ]);
 
         // Add summary row to the table
         rows.push([
+            String(formatValue(tableData.length.toLocaleString())),
             "",
-            "Total",
-            String(totalOpening),
-            String(totalPurchase),
-            String(totalPurRet),
-            String(totalReceive),
-            String(totalIssue),
-            String(totalSale),
-            String(totalSaleRet),
-            String(totalBalance),
+            String(formatValue(totalOpening)),
+            String(formatValue(totalPurchase)),
+            String(formatValue(totalPurRet)),
+            String(formatValue(totalReceive)),
+            String(formatValue(totalIssue)),
+            String(formatValue(totalSale)),
+            String(formatValue(totalSaleRet)),
+            String(formatValue(totalBalance)),
         ]);
 
         // Define table column headers and individual column widths
@@ -533,7 +634,7 @@ export default function DailyStatusReport() {
             "Sal Ret",
             "Bal",
         ];
-        const columnWidths = [30, 90, 20, 20, 20, 20, 20, 20, 20, 20];
+        const columnWidths = [40, 100, 18, 18, 18, 18, 18, 18, 18, 18];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -543,14 +644,14 @@ export default function DailyStatusReport() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+          doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+             doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -572,164 +673,172 @@ export default function DailyStatusReport() {
                 startX += columnWidths[index]; // Move to the next column
             });
 
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
         };
 
 
 
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust row height
-            const fontSize = 10; // Adjust font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-            doc.setFontSize(fontSize);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
-                let currentX = startX; // Track current column position
-
-                // Check if Qnty (column index 6) is negative
-                if (parseFloat(row[7]) < 0) {
-                    textColor = [255, 0, 0]; // Set red color for negative Qnty
-                }
-
-                // For total row, set bold font
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, 'bold');
-                }
-
-                if (isOddRow) {
-                    doc.setFillColor(240); // Light background color
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight,
-                        "F"
-                    );
-                }
-
-                row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
-                    const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-                        : startY + (i - startIndex + 2) * rowHeight + 3;
-
-                    const cellX = currentX + 2;
-
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-                    // For total row, keep bold font
-                    if (!isTotalRow) {
-                        doc.setFont(fontName, "normal");
-                    }
-
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
-
-                    if (cellIndex === 2 ||
-                        cellIndex === 3 ||
-                        cellIndex === 4 ||
-                        cellIndex === 5 ||
-                        cellIndex === 6 ||
-                        cellIndex === 7 ||
-                        cellIndex === 8 ||
-                        cellIndex === 9
-
-
-                    ) {
-                        const rightAlignX = currentX + columnWidths[cellIndex] - 2;
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    } else {
-                        // For empty cells in total row, add "Total" label centered
-                        if (isTotalRow && cellIndex === 0 && cell === "") {
-                            const totalLabelX = currentX + columnWidths[0] / 2;
-                            doc.text("", totalLabelX, cellY, {
-                                align: "center",
-                                baseline: "middle"
-                            });
-                        } else {
-                            doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle"
-                            });
-                        }
-                    }
-
-                    // Draw borders
-                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-                    const rowBottomY = rowTopY + rowHeight;
-
-                    if (isTotalRow) {
-                        // Double horizontal borders for total row
-                        doc.setDrawColor(0);
-
-                        // Top border - double line
-                        doc.setLineWidth(0.3);
-                        doc.line(currentX, rowTopY, currentX + columnWidths[cellIndex], rowTopY);
-                        doc.line(currentX, rowTopY + 0.5, currentX + columnWidths[cellIndex], rowTopY + 0.5);
-
-                        // Bottom border - double line
-                        doc.line(currentX, rowBottomY, currentX + columnWidths[cellIndex], rowBottomY);
-                        doc.line(currentX, rowBottomY - 0.5, currentX + columnWidths[cellIndex], rowBottomY - 0.5);
-
-                        // Single vertical borders
-                        doc.setLineWidth(0.2);
-                        // Left border (only for first column)
-                        if (cellIndex === 0) {
-                            doc.line(currentX, rowTopY, currentX, rowBottomY);
-                        }
-                        // Right border
-                        doc.line(currentX + columnWidths[cellIndex], rowTopY, currentX + columnWidths[cellIndex], rowBottomY);
-                    } else {
-                        // Normal border for other rows
-                        doc.setDrawColor(0);
-                        doc.setLineWidth(0.2);
-                        doc.rect(
-                            currentX,
-                            rowTopY,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                    }
-
-                    // Move to next column
-                    currentX += columnWidths[cellIndex];
-                });
-
-                // Reset font after total row
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, "normal");
-                }
-            }
-
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth;
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-            const lineY = pageHeight - 15;
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY);
-            const headingFontSize = 12;
-
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2;
-            const headingY = lineY + 5;
-            doc.setFontSize(headingFontSize);
-            doc.setTextColor(0);
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
-
+       const addTableRows = (startX, startY, startIndex, endIndex) => {
+       const rowHeight = 5;
+       const fontSize = 10;
+       const boldFont = 400;
+       const normalFont = getfontstyle;
+       const tableWidth = getTotalTableWidth();
+ 
+      
+ 
+       for (let i = startIndex; i < endIndex; i++) {
+         const row = rows[i];
+         const isOddRow = i % 2 !== 0;
+         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+         const isTotalRow = i === rows.length - 1;
+         let textColor = [0, 0, 0];
+         let fontName = normalFont;
+ 
+         if (isRedRow) {
+           textColor = [255, 0, 0];
+           fontName = boldFont;
+         }
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
+         }
+ 
+         if (isOddRow) {
+           doc.setFillColor(240);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight,
+             "F"
+           );
+         }
+ 
+         doc.setDrawColor(0);
+ 
+         if (isTotalRow) {
+           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+           const rowBottomY = rowTopY + rowHeight;
+ 
+           doc.setLineWidth(0.3);
+           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+ 
+           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+           doc.line(
+             startX,
+             rowBottomY - 0.5,
+             startX + tableWidth,
+             rowBottomY - 0.5
+           );
+ 
+           doc.setLineWidth(0.2);
+           doc.line(startX, rowTopY, startX, rowBottomY);
+           doc.line(
+             startX + tableWidth,
+             rowTopY,
+             startX + tableWidth,
+             rowBottomY
+           );
+         } else {
+           doc.setLineWidth(0.2);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight
+           );
+         }
+ 
+         row.forEach((cell, cellIndex) => {
+           // ⭐ NEW FIX — Perfect vertical centering
+           const cellY =
+             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+ 
+           const cellX = startX + 2;
+ 
+           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+ 
+           if (!isTotalRow) {
+             doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+           }
+ 
+           const cellValue = String(cell);
+ 
+           if (cellIndex === 20) {
+             const rightAlignX = startX + columnWidths[cellIndex] / 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "center",
+               baseline: "middle",
+             });
+           } else if (
+           
+             cellIndex === 2 ||
+             cellIndex === 3 ||
+             cellIndex === 4 ||
+             cellIndex === 5 ||
+             cellIndex === 6 ||
+             cellIndex === 7 ||
+             cellIndex === 8 ||
+             cellIndex === 9
+          
+           
+           ) {
+             const rightAlignX = startX + columnWidths[cellIndex] - 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "right",
+               baseline: "middle",
+             });
+           } else {
+             if (isTotalRow && cellIndex === 0 && cell === "") {
+               const totalLabelX = startX + columnWidths[0] / 2;
+               doc.text("", totalLabelX, cellY, {
+                 align: "center",
+                 baseline: "middle",
+               });
+             } else {
+               doc.text(cellValue, cellX, cellY, {
+                 baseline: "middle",
+               });
+             }
+           }
+ 
+           if (cellIndex < row.length - 1) {
+             doc.setLineWidth(0.2);
+             doc.line(
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 2) * rowHeight,
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 3) * rowHeight
+             );
+             startX += columnWidths[cellIndex];
+           }
+         });
+ 
+         startX = (doc.internal.pageSize.width - tableWidth) / 2;
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+         }
+       }
+ 
+       
+ 
+       const lineWidth = tableWidth;
+       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+       const lineY = pageHeight - 15;
+       doc.setLineWidth(0.3);
+       doc.line(lineX, lineY, lineX + lineWidth, lineY);
+       const headingFontSize = 11;
+       const headingX = lineX + 2;
+       const headingY = lineY + 5;
+       doc.setFont("verdana-regular", "normal");
+       doc.setFontSize(10);
+       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+     };
 
         // Function to calculate total table width
         const getTotalTableWidth = () => {
@@ -745,7 +854,7 @@ export default function DailyStatusReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 29; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -793,52 +902,14 @@ export default function DailyStatusReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-
+  doc.setFont("Times New Roman", "normal");
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
-
-                addTitle(`Daily Status Report As on: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+  doc.setFont("verdana-regular", "normal");
+                addTitle(`Daily Status Report From ${fromInputDate} To ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
-                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 4; // Position the labels below the titles and above the table
-
-                // Set font size and weight for the labels
-                doc.setFontSize(12);
-                doc.setFont(getfontstyle, "300");
-
-
-
-                let typeText = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-
-
-                let search = searchQuery ? searchQuery : "";
-
-
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
-
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`STORE :`, labelsX, labelsY + 8); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${typeText}`, labelsX + 15, labelsY + 8); // Draw the value next to the label
-
-
-
-                if (searchQuery) {
-                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 170, labelsY + 8.5); // Draw bold label
-                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 190, labelsY + 8.5); // Draw the value next to the label
-                }
-
-
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.setFontSize(10);
-
+                
                 startY += 10; // Adjust vertical position for the labels
 
                 addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
@@ -891,7 +962,7 @@ export default function DailyStatusReport() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 6; // Ensure this matches the actual number of columns
+        const numColumns = 10; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
             "left",
@@ -940,48 +1011,25 @@ export default function DailyStatusReport() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(69 + numColumns - 1)}${companyRow.number
+            `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
             }`
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Daily Status Report As on ${toInputDate}`,]);
+        const storeListRow = worksheet.addRow([`Daily Status Report From ${fromInputDate} TO ${toInputDate}`,]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(69 + numColumns - 1)}${storeListRow.number
+            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
             }`
         );
 
         // Add an empty row after the title section
         worksheet.addRow([]);
-
-        let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-
-
-        let typesearch = searchQuery ? searchQuery : "";
-
-        //    const typeAndStoreRow2 = worksheet.addRow(["STORE :", typecategory]);
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["TYPE :", typecompany, "", "", "SEARCH :", typesearch]
-                : ["TYPE :", typecompany, ""]
-        );
-
-
-
-        typeAndStoreRow3.eachCell((cell, colIndex) => {
-            cell.font = {
-                name: "CustomFont" || "CustomFont",
-                size: 10,
-                bold: [1, 4].includes(colIndex),
-            };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
-
+     
         // Header style
         const headerStyle = {
             font: fontHeader,
@@ -1018,16 +1066,16 @@ export default function DailyStatusReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                item.code,
-                item.Description,
-                item["Opening"],
-                item["Purchase"],
-                item["Pur Ret"],
-                item["Receive"],
-                item["Issue"],
-                item["Sale"],
-                item["Sale Ret"],
-                item["Balance"],
+                  item.Code,
+            item.Description,
+        formatValue(item["Opening"]),
+        formatValue(item["Purchase"]),
+        formatValue(item["Pur-Ret"]),
+         formatValue(item["Receive"]),
+         formatValue(item["Issue"]),
+        formatValue(item["Sale"]),
+        formatValue(item["Sale-Ret"]),
+        formatValue(item["Balance"]),
             ]);
 
             // Check if quantity is negative (parse as float)
@@ -1060,16 +1108,16 @@ export default function DailyStatusReport() {
         });
 
         const totalRow = worksheet.addRow([
+           String(formatValue(tableData.length.toLocaleString())),
             "",
-            "Total",
-            String(totalOpening),
-            String(totalPurchase),
-            String(totalPurRet),
-            String(totalReceive),
-            String(totalIssue),
-            String(totalSale),
-            String(totalSaleRet),
-            String(totalBalance),
+            String(formatValue(totalOpening)),
+            String(formatValue(totalPurchase)),
+            String(formatValue(totalPurRet)),
+            String(formatValue(totalReceive)),
+            String(formatValue(totalIssue)),
+            String(formatValue(totalSale)),
+            String(formatValue(totalSaleRet)),
+            String(formatValue(totalBalance)),
         ]);
 
         // total row added
@@ -1165,11 +1213,11 @@ export default function DailyStatusReport() {
         Description: [],
         Opening: [],
         Purchase: [],
-        'Pur Ret': [],
+        'Pur-Ret': [],
         Receive: [],
         Issue: [],
         Sale: [],
-        'Sale Ret': [],
+        'Sale-Ret': [],
         Balance: [],
     });
 
@@ -1178,11 +1226,11 @@ export default function DailyStatusReport() {
         Description: "",
         Opening: "",
         Purchase: "",
-        'Pur Ret': "",
+        'Pur-Ret': "",
         Receive: "",
         Issue: "",
         Sale: "",
-        'Sale Ret': "",
+        'Sale-Ret': "",
         Balance: "",
     });
 
@@ -1194,11 +1242,11 @@ export default function DailyStatusReport() {
                 Description: tableData.map((row) => row.Description),
                 Opening: tableData.map((row) => row.Opening),
                 Purchase: tableData.map((row) => row.Purchase),
-                'Pur Ret': tableData.map((row) => row['Pur Ret']),
+                'Pur-Ret': tableData.map((row) => row['Pur-Ret']),
                 Receive: tableData.map((row) => row.Receive),
                 Issue: tableData.map((row) => row.Issue),
                 Sale: tableData.map((row) => row.Sale),
-                'Sale Ret': tableData.map((row) => row['Sale Ret']),
+                'Sale-Ret': tableData.map((row) => row['Sale-Ret']),
                 Balance: tableData.map((row) => row.Balance),
 
             };
@@ -1238,13 +1286,16 @@ export default function DailyStatusReport() {
 
     const resetSorting = () => {
         setColumnSortOrders({
-            Code: null,
-            Description: null,
-            Company: null,
-            Category: null,
-            Capacity: null,
-            Type: null,
-            Status: null,
+        code: null,
+        Description: null,
+        Opening: null,
+        Purchase: null,
+        'Pur-Ret': null,
+        Receive: null,
+        Issue: null,
+        Sale: null,
+        'Sale-Ret': null,
+        Balance: null,
 
         });
     };
@@ -1288,44 +1339,61 @@ export default function DailyStatusReport() {
     };
 
     const firstColWidth = {
-        width: "13%",
+        width: isSidebarVisible ? "70px" : "135px",
     };
     const secondColWidth = {
-        width: "30.5%",
+         width: isSidebarVisible ? "340px" : "360px",
     };
     const thirdColWidth = {
-        width: "7%",
+        width: "70px",
     };
     const forthColWidth = {
-        width: "7%",
+        width: "70px",
     };
     const fifthColWidth = {
-        width: "7.1%",
+        width: "70px",
     };
     const sixthColWidth = {
-        width: "7%",
+        width: "70px",
     };
     const seventhColWidth = {
-        width: "7%",
+        width: "70px",
     };
     const eighthColWidth = {
-        width: "7%",
+        width: "70px",
     };
     const ninthColWidth = {
-        width: "7%",
+        width: "70px",
     };
     const tenthColWidth = {
-        width: "7%",
+        width: "70px",
+    };
+ const sixthcol = {
+        width: "8px",
     };
 
-    useHotkeys("alt+s", () => {
-        fetchDailyStatusReport();
-           resetSorting();
-    }, { preventDefault: true, enableOnFormTags: true });
 
-    useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys(
+       "alt+s",
+       () => {
+         fetchDailyStatusReport();
+            resetSorting();
+       },
+       { preventDefault: true, enableOnFormTags: true }
+     );
+   
+     useHotkeys("alt+p", exportPDFHandler, {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
+     useHotkeys("alt+e", handleDownloadCSV, {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
+     useHotkeys("alt+r", () => navigate("/MainPage"), {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1339,30 +1407,29 @@ export default function DailyStatusReport() {
         };
     }, []);
 
-    const contentStyle = {
-        backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
-        position: "absolute",
-        top: "53%",
-        left: isSidebarVisible ? "60%" : "50%",
-        transform: "translate(-50%, -50%)",
-        transition: isSidebarVisible
-            ? "left 3s ease-in-out, width 2s ease-in-out"
-            : "left 3s ease-in-out, width 2s ease-in-out",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "start",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        wordBreak: "break-word",
-        textAlign: "center",
-        maxWidth: "1100px",
-        fontSize: "15px",
-        fontStyle: "normal",
-        fontWeight: "400",
-        lineHeight: "23px",
-        fontFamily: '"Poppins", sans-serif',
-    };
+      const contentStyle = {
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: isSidebarVisible ? "1000px" : "1100px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "53vw",
+    transform: "translateX(-50%)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    textAlign: "center",
+    fontSize: "15px",
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: "23px",
+    fontFamily: '"Poppins", sans-serif',
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
+  };
 
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1440,6 +1507,8 @@ export default function DailyStatusReport() {
         if (currentRef.current && nextRef.current) {
             currentRef.current.focus();
             nextRef.current.focus();
+            if(nextRef == toRef)
+             nextRef.current.select();
         }
     };
 
@@ -1481,7 +1550,7 @@ export default function DailyStatusReport() {
             settoInputDate(formattedDate); // Update the state with formatted date
 
             // Move focus to the next element
-            focusNextElement(toRef, storeRef);
+            focusNextElement(toRef, selectButtonRef);
         }
     };
 
@@ -1499,6 +1568,10 @@ export default function DailyStatusReport() {
         }
     };
 
+     const formatValue = (val) => {
+    return Number(val) === 0 ? "" : val;
+  };
+
     return (
         <>
             <ToastContainer />
@@ -1507,7 +1580,7 @@ export default function DailyStatusReport() {
                     style={{
                         backgroundColor: getcolor,
                         color: fontcolor,
-                        width: "100%",
+                        // width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
                     }}
@@ -1515,226 +1588,232 @@ export default function DailyStatusReport() {
                     <NavComponent textdata="Daily Status Report" />
 
                     {/* ------------1st row */}
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
+                  <div
+                            className="row"
+                            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                          >
+                            <div
+                              style={{
+                                // width: "100%",
                                 display: "flex",
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            {/* To Date */}
-                            <div className="d-flex align-items-center">
+                                justifyContent: "start",
+                              }}
+                            >
+                              {/* From Date */}
+                              <div
+                                className="d-flex align-items-center"
+                              // style={{ marginLeft: "20px" }}
+                              >
                                 <div
-                                    style={{
-                                        width: "100px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
+                                  style={{
+                                    width: "100px",
+                                    display: "flex",
+                                    justifyContent: "end",
+                                  }}
                                 >
-                                    <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Rep Date :&nbsp;
-                                        </span>
-                                    </label>
+                                  <label htmlFor="fromDatePicker">
+                                    <span
+                                      style={{
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
+                                        fontWeight: "bold",
+                                      }}
+                                    >
+                                      From :&nbsp;
+                                    </span>
+                                  </label>
                                 </div>
                                 <div
-                                    id="todatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
+                                  id="fromdatevalidation"
+                                  style={{
+                                    width: "135px",
+                                    border: `1px solid ${fontcolor}`,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    height: "24px",
+                                    justifyContent: "center",
+                                    background: getcolor,
+                                  }}
+                                  onFocus={(e) =>
+                                    (e.currentTarget.style.border = "2px solid red")
+                                  }
+                                  onBlur={(e) =>
+                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                  }
                                 >
-                                    <input
-                                        ref={toRef}
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
+                                  <input
+                                    style={{
+                                      height: "20px",
+                                      width: "90px",
+                                      paddingLeft: "5px",
+                                      outline: "none",
+                                      border: "none",
+                                      fontSize: getdatafontsize,
+                                      fontFamily: getfontstyle,
+                                      backgroundColor: getcolor,
+                                      color: fontcolor,
+                                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                      pointerEvents:
+                                        selectedRadio === "custom" ? "auto" : "none",
+                                    }}
+                                    id="frominputid"
+                                    value={fromInputDate}
+                                    ref={fromRef}
+                                    onChange={handlefromInputChange}
+                                    onKeyDown={handleFromDateEnter}
+                                    autoComplete="off"
+                                    placeholder="dd-mm-yyyy"
+                                    aria-label="Date Input"
+                                    disabled={selectedRadio !== "custom"}
+                                  />
+                                  <DatePicker
+                                    selected={selectedfromDate}
+                                    onChange={handlefromDateChange}
+                                    dateFormat="dd-MM-yyyy"
+                                    popperPlacement="bottom"
+                                    showPopperArrow={false}
+                                    open={fromCalendarOpen}
+                                    dropdownMode="select"
+                                    customInput={
+                                      <div>
+                                        <BsCalendar
+                                          onClick={
+                                            selectedRadio === "custom"
+                                              ? toggleFromCalendar
+                                              : undefined
+                                          }
+                                          style={{
+                                            cursor:
+                                              selectedRadio === "custom"
+                                                ? "pointer"
+                                                : "default",
+                                            marginLeft: "18px",
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
-                                        }}
-                                        value={toInputDate}
-                                        onChange={handleToInputChange}
-                                        onKeyDown={handleToDateEnter}
-                                        id="toDatePicker"
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="To Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                    <DatePicker
-                                        selected={selectedToDate}
-                                        onChange={handleToDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                        open={toCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleToCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
-                                                        marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
+                                          }}
+                                          disabled={selectedRadio !== "custom"}
+                                        />
+                                      </div>
+                                    }
+                                    disabled={selectedRadio !== "custom"}
+                                  />
                                 </div>
-                            </div>
-
-                            {/* Store Select */}
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "30px" }}
-                            >
+                              </div>
+                
+                              {/* To Date */}
+                              <div className="d-flex align-items-center" style={{marginLeft:'100px'}}>
                                 <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
+                                  style={{
+                                    width: "60px",
+                                    display: "flex",
+                                    justifyContent: "end",
+                                  }}
                                 >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Store :&nbsp;
-                                        </span>{" "}
-                                        <br />
-                                    </label>
+                                  <label htmlFor="toDatePicker">
+                                    <span
+                                      style={{
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
+                                        fontWeight: "bold",
+                                      }}
+                                    >
+                                      To :&nbsp;
+                                    </span>
+                                  </label>
                                 </div>
-                                <div>
-                                    <Select
-                                        className="List-select-class "
-                                        ref={storeRef}
-                                        options={optionStore}
-                                        onKeyDown={handleStoreEnter}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split('-')[1];
-                                                setStoreType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart,  // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue('')
-                                            }
-                                        }}
-                                        onInputChange={(inputValue, { action }) => {
-                                            if (action === "input-change") {
-                                                return inputValue.toUpperCase();
-                                            }
-                                            return inputValue;
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        styles={{
-                                            ...customStyles1(),
-                                            placeholder: (base) => ({
-                                                ...base,
-                                                textAlign: "left",
-                                                marginLeft: "0",
-                                                justifyContent: "flex-start",
-                                                color: fontcolor,
-                                                marginTop: '-5px'
-                                            })
-                                        }}
-                                        isClearable
-                                        placeholder="ALL"
-                                        menuIsOpen={menuStoreIsOpen}
-                                        onMenuOpen={() => setMenuStoreIsOpen(true)}
-                                        onMenuClose={() => setMenuStoreIsOpen(false)}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Search */}
-                            {/* <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "25px" }}
-                            >
-                                <div>
-                                    <label for="searchInput">
-                                        <span style={{fontSize: getdatafontsize,fontFamily:getfontstyle,  fontWeight: "bold" }}>
-                                            Search :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div>
-                                    <input
-                                        ref={searchRef}
-                                        onKeyDown={handleSearchEnter}
-                                        type="text"
-                                        id="searchsubmit"
-                                        placeholder="Item description"
-                                        value={searchQuery}
-                                        autoComplete="off"
-                                        style={{
-                                            width: "200px",
-                                            height: "24px",
-                                            fontSize: getdatafontsize,fontFamily:getfontstyle,                                             marginLeft: '5px',
+                                <div
+                                  id="todatevalidation"
+                                  style={{
+                                    width: "135px",
+                                    border: `1px solid ${fontcolor}`,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    height: "24px",
+                                    justifyContent: "center",
+                                    background: getcolor,
+                                  }}
+                                  onFocus={(e) =>
+                                    (e.currentTarget.style.border = "2px solid red")
+                                  }
+                                  onBlur={(e) =>
+                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                  }
+                                >
+                                  <input
+                                    ref={toRef}
+                                    style={{
+                                      height: "20px",
+                                      width: "90px",
+                                      paddingLeft: "5px",
+                                      outline: "none",
+                                      border: "none",
+                                      fontSize: getdatafontsize,
+                                      fontFamily: getfontstyle,
+                                      backgroundColor: getcolor,
+                                      color: fontcolor,
+                                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                      pointerEvents:
+                                        selectedRadio === "custom" ? "auto" : "none",
+                                    }}
+                                    value={toInputDate}
+                                    onChange={handleToInputChange}
+                                    onKeyDown={handleToDateEnter}
+                                    id="toDatePicker"
+                                    autoComplete="off"
+                                    placeholder="dd-mm-yyyy"
+                                    aria-label="To Date Input"
+                                    disabled={selectedRadio !== "custom"}
+                                  />
+                                  <DatePicker
+                                    selected={selectedToDate}
+                                    onChange={handleToDateChange}
+                                    dateFormat="dd-MM-yyyy"
+                                    popperPlacement="bottom"
+                                    showPopperArrow={false}
+                                    open={toCalendarOpen}
+                                    dropdownMode="select"
+                                    customInput={
+                                      <div>
+                                        <BsCalendar
+                                          onClick={
+                                            selectedRadio === "custom"
+                                              ? toggleToCalendar
+                                              : undefined
+                                          }
+                                          style={{
+                                            cursor:
+                                              selectedRadio === "custom"
+                                                ? "pointer"
+                                                : "default",
+                                            marginLeft: "18px",
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
                                             color: fontcolor,
-                                            backgroundColor: getcolor,
-                                            border: `1px solid ${fontcolor}`,
-                                            outline: "none",
-                                            paddingLeft: "10px",
-                                        }}
-                                        onFocus={(e) =>
-                                            (e.currentTarget.style.border = "2px solid red")
-                                        }
-                                        onBlur={(e) =>
-                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                        }
-                                        onChange={(e) => setSearchQuery((e.target.value || "").toUpperCase())} />
-
+                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                          }}
+                                          disabled={selectedRadio !== "custom"}
+                                        />
+                                      </div>
+                                    }
+                                    disabled={selectedRadio !== "custom"}
+                                  />
                                 </div>
-                            </div> */}
-                        </div>
-                    </div>
+                              </div>
+                                           
+                            </div>
+                          </div>
 
                     <div>
                         {/* Table Head */}
                         <div
                             style={{
                                 overflowY: "auto",
-                                width: "98.8%",
+                                // width: "98.8%",
                             }}
                         >
                             <table
@@ -1765,12 +1844,12 @@ export default function DailyStatusReport() {
                                         <td
                                             className="border-dark"
                                             style={firstColWidth}
-                                            onClick={() => handleSorting("code")}
+                                            onClick={() => handleSorting("Code")}
                                         >
                                             Code{" "}
                                             <i
                                                 className="fa-solid fa-caret-down caretIconStyle"
-                                                style={getIconStyle("code")}
+                                                style={getIconStyle("Code")}
                                             ></i>
                                         </td>
 
@@ -1815,12 +1894,12 @@ export default function DailyStatusReport() {
                                         <td
                                             className="border-dark"
                                             style={fifthColWidth}
-                                            onClick={() => handleSorting("Pur Ret")}
+                                            onClick={() => handleSorting("Pur-Ret")}
                                         >
                                             Pur Ret{" "}
                                             <i
                                                 className="fa-solid fa-caret-down caretIconStyle"
-                                                style={getIconStyle("Pur Ret")}
+                                                style={getIconStyle("Pur-Ret")}
                                             ></i>
                                         </td>
 
@@ -1865,12 +1944,12 @@ export default function DailyStatusReport() {
                                         <td
                                             className="border-dark"
                                             style={ninthColWidth}
-                                            onClick={() => handleSorting("Sale Ret")}
+                                            onClick={() => handleSorting("Sale-Ret")}
                                         >
                                             Sal Ret{" "}
                                             <i
                                                 className="fa-solid fa-caret-down caretIconStyle"
-                                                style={getIconStyle("Sale Ret")}
+                                                style={getIconStyle("Sale-Ret")}
                                             ></i>
                                         </td>
 
@@ -1887,7 +1966,7 @@ export default function DailyStatusReport() {
                                             ></i>
                                         </td>
 
-
+ <td className="border-dark" style={sixthcol}></td>
 
                                     </tr>
                                 </thead>
@@ -1900,17 +1979,20 @@ export default function DailyStatusReport() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "58vh",
-                                width: "100%",
-                                wordBreak: "break-word",
+                                maxHeight: "55vh",
+                                // width: "100%",
+                             wordBreak: "break-word",
                             }}
                         >
                             <table
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
-                                    position: "relative",
+                                    fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  width: "100%",
+                  position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                                 }}
                             >
                                 <tbody id="tablebody">
@@ -1972,35 +2054,43 @@ export default function DailyStatusReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-start" style={firstColWidth}>
-                                                            {item.code}
-                                                        </td>
+                                                       <td className="text-start" 
+                   title={item.Code}
+                    style={{
+                      ...firstColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Code}
+                  </td>
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item.Description}
                                                         </td>
                                                         <td className="text-end" style={thirdColWidth}>
-                                                            {item["Opening"]}
+                                                            {formatValue(item["Opening"])}
                                                         </td>
                                                         <td className="text-end" style={forthColWidth}>
-                                                            {item["Purchase"]}
+                                                            {formatValue(item["Purchase"])}
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {item["Pur Ret"]}
+                                                            {formatValue(item["Pur-Ret"])}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
-                                                            {item["Receive"]}
+                                                            {formatValue(item["Receive"])}
                                                         </td>
                                                         <td className="text-end" style={seventhColWidth}>
-                                                            {item["Issue"]}
+                                                            {formatValue(item["Issue"])}
                                                         </td>
                                                         <td className="text-end" style={eighthColWidth}>
-                                                            {item["Sale"]}
+                                                            {formatValue(item["Sale"])}
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {item["Sale Ret"]}
+                                                            {formatValue(item["Sale-Ret"])}
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
-                                                            {item["Balance"]}
+                                                            {formatValue(item["Balance"])}
                                                         </td>
                                                     </tr>
                                                 );
@@ -2047,7 +2137,7 @@ export default function DailyStatusReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "10px"
+                            paddingRight: "8px"
                         }}
                     >
                         <div
@@ -2057,7 +2147,10 @@ export default function DailyStatusReport() {
                                 marginLeft: "2px",
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+                        <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString())}</span>
+
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2072,7 +2165,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalOpening}</span>
+                            <span className="mobileledger_total">{formatValue(totalOpening)}</span>
                         </div>
                         <div
                             style={{
@@ -2081,7 +2174,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalPurchase}</span>
+                            <span className="mobileledger_total">{formatValue(totalPurchase)}</span>
                         </div>
                         <div
                             style={{
@@ -2090,7 +2183,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalPurRet}</span>
+                            <span className="mobileledger_total">{formatValue(totalPurRet)}</span>
                         </div>
                         <div
                             style={{
@@ -2099,7 +2192,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalReceive}</span>
+                            <span className="mobileledger_total">{formatValue(totalReceive)}</span>
                         </div>
                         <div
                             style={{
@@ -2108,7 +2201,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalIssue}</span>
+                            <span className="mobileledger_total">{formatValue(totalIssue)}</span>
                         </div>
                         <div
                             style={{
@@ -2117,7 +2210,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalSale}</span>
+                            <span className="mobileledger_total">{formatValue(totalSale)}</span>
                         </div>
                         <div
                             style={{
@@ -2126,7 +2219,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalSaleRet}</span>
+                            <span className="mobileledger_total">{formatValue(totalSaleRet)}</span>
                         </div>
                         <div
                             style={{
@@ -2135,7 +2228,7 @@ export default function DailyStatusReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalBalance}</span>
+                            <span className="mobileledger_total">{formatValue(totalBalance)}</span>
                         </div>
                     </div>
                     {/* Action Buttons */}
@@ -2148,7 +2241,6 @@ export default function DailyStatusReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2157,7 +2249,6 @@ export default function DailyStatusReport() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2166,7 +2257,6 @@ export default function DailyStatusReport() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2181,7 +2271,6 @@ export default function DailyStatusReport() {
                                 fetchDailyStatusReport();
                                 resetSorting();
                             }}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

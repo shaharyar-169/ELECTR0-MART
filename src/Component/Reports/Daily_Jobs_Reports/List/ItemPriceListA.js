@@ -547,7 +547,7 @@ export default function ItemPriceListA() {
     ]);
 
     // Add summary row to the table
-    // rows.push(["", "", "", "", "", ""]);
+    rows.push([String(formatValue(tableData.length.toLocaleString())),"", "", "", "", "", "","", "", ""]);
 
     // Define table column headers and individual column widths
     const headers = [
@@ -562,7 +562,7 @@ export default function ItemPriceListA() {
       "MRP",
       "Fix Rate",
     ];
-    const columnWidths = [35, 110, 14, 14, 19, 19, 19, 19, 19, 19];
+    const columnWidths = [40, 110, 14, 14, 19, 19, 19, 19, 19, 19];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -572,14 +572,14 @@ export default function ItemPriceListA() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
+   doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(12); // Set font size for headers
+     doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -606,122 +606,168 @@ export default function ItemPriceListA() {
       doc.setFontSize(12);
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust this value to decrease row height
-      const fontSize = 10; // Adjust this value to decrease font size
-      const boldFont = 400; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-      doc.setFontSize(fontSize);
-
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
-
-        if (isRedRow) {
-          textColor = [255, 0, 0]; // Red color
-          fontName = boldFont; // Set bold font for red-colored row
-        }
-
-        // Set background color for odd-numbered rows
-        if (isOddRow) {
-          doc.setFillColor(240); // Light background color
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F"
-          );
-        }
-
-        // Draw row borders
-        doc.setDrawColor(0); // Set color for borders
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          tableWidth,
-          rowHeight
-        );
-
-        row.forEach((cell, cellIndex) => {
-          const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-          const cellX = startX + 2;
-
-          // Set text color
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-          // Set font
-          doc.setFont(fontName, "normal");
-
-          // Ensure the cell value is a string
-          const cellValue = String(cell);
-
-          if (cellIndex === 22) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
-            cellIndex === 4 ||
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8 ||
-            cellIndex === 9
-          ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-          }
-
-          // Draw column borders (excluding the last column)
-          if (cellIndex < row.length - 1) {
-            doc.rect(
-              startX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
-
-        // Draw border for the last column
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          columnWidths[row.length - 1],
-          rowHeight
-        );
-        startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
-      }
-
-      // Draw line at the bottom of the page with padding
-      const lineWidth = tableWidth; // Match line width with table width
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-      const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-      const headingFontSize = 12; // Adjust as needed
-
-      // Add heading "Crystal Solution" aligned left bottom of the line
-      const headingX = lineX + 2; // Padding from left
-      const headingY = lineY + 5; // Padding from bottom
-      doc.setFontSize(headingFontSize); // Set the font size for the heading
-      doc.setTextColor(0); // Reset text color to default
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-    };
+     const addTableRows = (startX, startY, startIndex, endIndex) => {
+       const rowHeight = 5;
+       const fontSize = 10;
+       const boldFont = 400;
+       const normalFont = getfontstyle;
+       const tableWidth = getTotalTableWidth();
+       
+ 
+       for (let i = startIndex; i < endIndex; i++) {
+         const row = rows[i];
+         const isOddRow = i % 2 !== 0;
+         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+         const isTotalRow = i === rows.length - 1;
+         let textColor = [0, 0, 0];
+         let fontName = normalFont;
+ 
+         if (isRedRow) {
+           textColor = [255, 0, 0];
+           fontName = boldFont;
+         }
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
+         }
+ 
+         if (isOddRow) {
+           doc.setFillColor(240);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight,
+             "F"
+           );
+         }
+ 
+         doc.setDrawColor(0);
+ 
+         if (isTotalRow) {
+           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+           const rowBottomY = rowTopY + rowHeight;
+ 
+           doc.setLineWidth(0.3);
+           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+ 
+           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+           doc.line(
+             startX,
+             rowBottomY - 0.5,
+             startX + tableWidth,
+             rowBottomY - 0.5
+           );
+ 
+           doc.setLineWidth(0.2);
+           doc.line(startX, rowTopY, startX, rowBottomY);
+           doc.line(
+             startX + tableWidth,
+             rowTopY,
+             startX + tableWidth,
+             rowBottomY
+           );
+         } else {
+           doc.setLineWidth(0.2);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight
+           );
+         }
+ 
+         row.forEach((cell, cellIndex) => {
+           // ⭐ NEW FIX — Perfect vertical centering
+           const cellY =
+             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+ 
+           const cellX = startX + 2;
+ 
+           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+ 
+           if (!isTotalRow) {
+             doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+           }
+ 
+           const cellValue = String(cell);
+ 
+           if (cellIndex === 12) {
+             const rightAlignX = startX + columnWidths[cellIndex] / 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "center",
+               baseline: "middle",
+             });
+           } else if (
+           
+             cellIndex === 2 ||
+              cellIndex === 3 ||
+               cellIndex === 4 ||
+                cellIndex === 5 ||
+                 cellIndex === 6 ||
+                  cellIndex === 7 ||
+                    cellIndex === 8 ||
+                      cellIndex === 9 ||
+                      cellIndex === 10 
+          
+           
+           ) {
+             const rightAlignX = startX + columnWidths[cellIndex] - 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "right",
+               baseline: "middle",
+             });
+           } else {
+             if (isTotalRow && cellIndex === 0 && cell === "") {
+               const totalLabelX = startX + columnWidths[0] / 2;
+               doc.text("", totalLabelX, cellY, {
+                 align: "center",
+                 baseline: "middle",
+               });
+             } else {
+               doc.text(cellValue, cellX, cellY, {
+                 baseline: "middle",
+               });
+             }
+           }
+ 
+           if (cellIndex < row.length - 1) {
+             doc.setLineWidth(0.2);
+             doc.line(
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 2) * rowHeight,
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 3) * rowHeight
+             );
+             startX += columnWidths[cellIndex];
+           }
+         });
+ 
+         startX = (doc.internal.pageSize.width - tableWidth) / 2;
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+         }
+       }
+ 
+       
+ 
+       const lineWidth = tableWidth;
+       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+       const lineY = pageHeight - 15;
+       doc.setLineWidth(0.3);
+       doc.line(lineX, lineY, lineX + lineWidth, lineY);
+       const headingFontSize = 11;
+       const headingX = lineX + 2;
+       const headingY = lineY + 5;
+       doc.setFont("verdana-regular", "normal");
+       doc.setFontSize(10);
+       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+     };
 
     // Function to calculate total table width
     const getTotalTableWidth = () => {
@@ -783,9 +829,10 @@ export default function ItemPriceListA() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+      doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+doc.setFont("verdana-regular", "normal");
         addTitle(`Item Price List A`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
         startY += 5;
 
@@ -811,48 +858,42 @@ export default function ItemPriceListA() {
         // let status = transectionType ? transectionType : "All";
         let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
+        doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+             doc.text(`Company :`, labelsX, labelsY); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
+             doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-        // doc.text(`COMPANY : ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-        // doc.text(`CAPACITY : ${typeText}`, labelsX + 180, labelsY); // Adjust x-coordinate for From Date
-        // doc.text(`CATEGORY : ${category}`, labelsX, labelsY + 4.3); // Adjust x-coordinate for From Date
+doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+             doc.text(`Category :`, labelsX, labelsY + 4.3); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
+             doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-        // doc.text(`TYPE : ${typename}`, labelsX + 180, labelsY + 4.3); // Adjust x-coordinate for From Date
-        // doc.text(`STATUS : ${status}`, labelsX, labelsY + 8.5); // Adjust x-coordinate for From Date
-        // doc.text(`SEARCH : ${search}`, labelsX + 180, labelsY + 8.5); // Adjust x-coordinate for From Date
+doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+             doc.text(`Type :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
+             doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typename}`, labelsX + 195, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+             doc.text(`Capacity :`, labelsX, labelsY + 8.5); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
+             doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+               doc.text(`Search :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
           doc.text(`${search}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
         }
-
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
 
         startY += 10; // Adjust vertical position for the labels
 
@@ -960,7 +1001,7 @@ export default function ItemPriceListA() {
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow(["PriceListA"]);
+    const storeListRow = worksheet.addRow(["Price List A"]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -989,22 +1030,22 @@ export default function ItemPriceListA() {
     //    let typestatus = transectionType ? transectionType : "All";
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow = worksheet.addRow(["COMPANY :", typecompany]);
+    const typeAndStoreRow = worksheet.addRow(["Company :", typecompany]);
 
     const typeAndStoreRow2 = worksheet.addRow([
-      "CATEGORY :",
+      "Category :",
       typecategory,
       "",
       "",
       "",
-      "TYPE :",
+      "Type :",
       typetype,
     ]);
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
-        ? ["CAPACITY :", typecapacity, "", "", "", "SEARCH :", typesearch]
-        : ["CAPACITY :", typecapacity, ""]
+        ? ["Capacity :", typecapacity, "", "", "", "Search :", typesearch]
+        : ["Capacity :", typecapacity, ""]
     );
 
     // Apply styling for the status row
@@ -1110,6 +1151,36 @@ export default function ItemPriceListA() {
     [20, 45, 6, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
+
+  const totalRow = worksheet.addRow([
+       String(formatValue(tableData.length.toLocaleString())),
+       "",
+        "",
+         "",
+        "",
+         "",
+         "",
+        "",      
+         "",
+        "",  
+     ]);
+ 
+     // total row added
+ 
+     totalRow.eachCell((cell, colNumber) => {
+       cell.font = { bold: true };
+       cell.border = {
+         top: { style: "thin" },
+         left: { style: "thin" },
+         bottom: { style: "thin" },
+         right: { style: "thin" },
+       };
+ 
+       // Align only the "Total" text to the right
+       if (colNumber === 1) {
+         cell.alignment = { horizontal: "center" };
+       }
+     });
 
     // Add a blank row
     worksheet.addRow([]);
@@ -1575,6 +1646,10 @@ export default function ItemPriceListA() {
       });
     }
   }, [selectedIndex]);
+
+   const formatValue = (val) => {
+    return Number(val) === 0 ? "" : val;
+  };
 
   return (
     <>

@@ -136,472 +136,532 @@ export default function CompanyList() {
   };
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-  const exportPDFHandler = () => {
-    // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
-
-    // Define table data (rows)
-    const rows = tableData.map((item) => [
-      item.Code,
-      item.Description,
-      item.Status,
-    ]);
-
-    // Add summary row to the table
-    // rows.push(["", "", "", "", "", ""]);
-
-    // Define table column headers and individual column widths
-    const headers = ["Code", "Description", "Status"];
-    const columnWidths = [15, 110, 15];
-
-    // Calculate total table width
-    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-
-    // Define page height and padding
-    const pageHeight = doc.internal.pageSize.height;
-    const paddingTop = 15;
-
-    // Set font properties for the table
-    doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10);
-
-    // Function to add table headers
-    const addTableHeaders = (startX, startY) => {
-      // Set font style and size for headers
-      doc.setFont("verdana", "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
-
-      headers.forEach((header, index) => {
-        const cellWidth = columnWidths[index];
-        const cellHeight = 6; // Height of the header row
-        const cellX = startX + cellWidth / 2; // Center the text horizontally
-        const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-        // Draw the grey background for the header
-        doc.setFillColor(200, 200, 200); // Grey color
-        doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-        // Draw the outer border
-        doc.setLineWidth(0.2); // Set the width of the outer border
-        doc.rect(startX, startY, cellWidth, cellHeight);
-
-        // Set text alignment to center
-        doc.setTextColor(0); // Set text color to black
-        doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-        startX += columnWidths[index]; // Move to the next column
-      });
-
-    };
-
-  const addTableRows = (startX, startY, startIndex, endIndex) => {
-  const rowHeight = 5;
-  const fontSize = 10;
-  const boldFont = 400;
-  const normalFont = getfontstyle;
-  const tableWidth = getTotalTableWidth();
-
-  for (let i = startIndex; i < endIndex; i++) {
-    const row = rows[i];
-    const isOddRow = i % 2 !== 0;
-    const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-    let textColor = [0, 0, 0];
-    let fontName = normalFont;
-
-    if (isRedRow) {
-      textColor = [255, 0, 0];
-      fontName = boldFont;
-    }
-
-    if (isOddRow) {
-      doc.setFillColor(240);
-      doc.rect(
-        startX,
-        startY + (i - startIndex + 2) * rowHeight,
-        tableWidth,
-        rowHeight,
-        "F"
-      );
-    }
-
-    // Draw row border
-    doc.setDrawColor(0);
-    doc.rect(
-      startX,
-      startY + (i - startIndex + 2) * rowHeight,
-      tableWidth,
-      rowHeight
-    );
-
-    let cellStartX = startX;
-
-    row.forEach((cell, cellIndex) => {
-
-      // NEW → Vertically centered text
-      const cellCenterY =
-        startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
-
-      // Original X logic same
-      let textX = cellStartX + 2;
-
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.setFont("verdana-regular", "normal");
-      doc.setFontSize(fontSize);
-
-      const cellValue = String(cell);
-
-      if (cellIndex === 2 || cellIndex === 0 || cellIndex === 6) {
-        doc.text(cellValue, cellStartX + columnWidths[cellIndex] / 2, cellCenterY, {
-          align: "center",
-          baseline: "middle",
-        });
-      } else {
-        doc.text(cellValue, textX, cellCenterY, {
-          baseline: "middle",
-        });
-      }
-
-      if (cellIndex < row.length - 1) {
-        doc.rect(
-          cellStartX,
-          startY + (i - startIndex + 2) * rowHeight,
-          columnWidths[cellIndex],
-          rowHeight
-        );
-        cellStartX += columnWidths[cellIndex];
-      }
-    });
-
-    // Draw last column border
-    doc.rect(
-      cellStartX,
-      startY + (i - startIndex + 2) * rowHeight,
-      columnWidths[row.length - 1],
-      rowHeight
-    );
-  }
-
-  // Same footer and line logic
-  const lineWidth = tableWidth;
-  const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-  const lineY = pageHeight - 15;
-  doc.setLineWidth(0.3);
-  doc.line(lineX, lineY, lineX + lineWidth, lineY);
-
-  const headingX = lineX + 2;
-  const headingY = lineY + 5;
-  doc.setFont("verdana-regular", "normal")
-  doc.setFontSize(10);
-  doc.setTextColor(0);
-  doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-};
-
-    const getTotalTableWidth = () => {
-      let totalWidth = 0;
-      columnWidths.forEach((width) => (totalWidth += width));
-      return totalWidth;
-    };
-
-    // Function to add a new page and reset startY
-    const addNewPage = (startY) => {
-      doc.addPage();
-      return paddingTop; // Set startY for each new page
-    };
-
-    // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
-
-    // Function to handle pagination
-    const handlePagination = () => {
-      // Define the addTitle function
-      const addTitle = (
-        title,
-        date,
-        time,
-        pageNumber,
-        startY,
-        titleFontSize = 18,
-        ) => {
-        doc.setFont("verdana-regular", "normal")
-        doc.setFontSize(titleFontSize); // Set the font size for the title
-        doc.text(title, doc.internal.pageSize.width / 2, startY, {
-          align: "center",
-        });
-
-        // Calculate the x-coordinate for the right corner
-        const rightX = doc.internal.pageSize.width - 10;
-
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
-        // Add page numbering
-        doc.setFont("verdana-regular", "normal")
-        doc.setFontSize(10);
-        doc.text(
-          `Page ${pageNumber}`,
-          rightX - 40,
-          doc.internal.pageSize.height - 10,
-          { align: "right" }
-        );
-      };
-
-      let currentPageIndex = 0;
-      let startY = paddingTop; // Initialize startY
-      let pageNumber = 1; // Initialize page number
-
-      while (currentPageIndex * rowsPerPage < rows.length) {
-        addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-        startY += 5; // Adjust vertical position for the company title
-
-        addTitle(`Company List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
-        startY += -5;
-
-        const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-        const labelsY = startY + 4; // Position the labels below the titles and above the table
-
-        let status =
-          transectionType === "N"
-            ? "NON-ACTIVE"
-            : transectionType === "A"
-            ? "ACTIVE"
-            : "ALL";
-        let search = searchQuery ? searchQuery : "";
-
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Reset font to normal
-        doc.setFontSize(10);
-        doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
-
-        if (searchQuery) {
-          doc.setFont("verdana", "bold"); // Set font to bold
-          doc.setFontSize(10);
-          doc.text(`SEARCH :`, labelsX + 70, labelsY + 8.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal"); // Reset font to normal
-          doc.setFontSize(10);
-          doc.text(`${search}`, labelsX + 90, labelsY + 8.5); // Draw the value next to the label
-        }
-
-        startY += 10; // Adjust vertical position for the labels
-
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
-        const startIndex = currentPageIndex * rowsPerPage;
-        const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-        startY = addTableRows(
-          (doc.internal.pageSize.width - totalWidth) / 2,
-          startY,
-          startIndex,
-          endIndex
-        );
-        if (endIndex < rows.length) {
-          startY = addNewPage(startY); // Add new page and update startY
-          pageNumber++; // Increment page number
-        }
-        currentPageIndex++;
-      }
-    };
-
-    const getCurrentDate = () => {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-      const yyyy = today.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
-    };
-
-    // Function to get current time in the format HH:MM:SS
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return hh + ":" + mm + ":" + ss;
-    };
-
-    const date = getCurrentDate(); // Get current date
-    const time = getCurrentTime(); // Get current time
-
-    // Call function to handle pagination
-    handlePagination();
-
-    // Save the PDF files
-    doc.save(`companyList As On ${date}.pdf`);
-  };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
-  ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
-
-    const numColumns = 3; // Ensure this matches the actual number of columns
-    const columnAlignments = ["left", "left", "center"];
-
-    // Define fonts
-    const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
-    const fontStoreList = { name: "CustomFont", size: 10, bold: false };
-    const fontHeader = { name: "CustomFont", size: 10, bold: true };
-    const fontTableContent = { name: "CustomFont", size: 10, bold: false };
-
-    // Empty row
-    worksheet.addRow([]);
-
-    // Company name
-    const companyRow = worksheet.addRow([comapnyname]);
-    companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
-      cell.alignment = { horizontal: "center" };
-    });
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
-      }`
-    );
-
-    // Store List
-    const storeListRow = worksheet.addRow(["CompanyList"]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
-      }`
-    );
-
-    // Empty row
-    worksheet.addRow([]);
-
-    // Filter data
-    let typestatus =
-      transectionType === "N"
-        ? "NON-ACTIVE"
-        : transectionType === "A"
-        ? "ACTIVE"
-        : "ALL";
-    let typesearch = searchQuery || "";
-
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["STATUS :", typestatus, "SEARCH :", typesearch]
-        : ["STATUS :", typestatus, ""]
-    );
-
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont",
-        size: 10,
-        bold: [1, 3].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      },
-    };
-
-    // Headers
-    const headers = ["Code", "Description", "Status"];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    // ✅ Add data rows with alternating light grey background
-    tableData.forEach((item, index) => {
-      const row = worksheet.addRow([item.Code, item.Description, item.Status]);
-
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
-
-        // ✅ Apply very light grey background to odd rows
-        if ((index + 1) % 2 !== 0) {
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFEFEFEF" }, // Very light grey
-          };
-        }
-      });
-    });
-
-    // Column widths
-    [10, 40, 7].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    // Blank row
-    worksheet.addRow([]);
-
-    // Date and Time
-    const today = new Date();
-    const currentTime = today.toLocaleTimeString("en-GB");
-    const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
-    const userid = user.tusrid;
-
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentDate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = { name: "CustomFont", size: 10 };
-      cell.alignment = { horizontal: "left" };
-    });
-
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow1.eachCell((cell) => {
-      cell.font = { name: "CustomFont", size: 10 };
-      cell.alignment = { horizontal: "left" };
-    });
-
-    // Merge cells
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
-      }`
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
-      }`
-    );
-
-    // Save Excel
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `CompanyList As On ${currentDate}.xlsx`);
-  };
+   const exportPDFHandler = () => {
+    
+ 
+     // Create a new jsPDF instance with landscape orientation
+     const doc = new jsPDF({ orientation: "potraite" });
+ 
+     // Define table data (rows)
+     const rows = tableData.map((item) => [
+       item.Code,
+       item.Description,
+       item.Status,
+     ]);
+ 
+     // Add summary row to the table
+     rows.push([String(formatValue(tableData.length.toLocaleString())), "", ""]);
+ 
+     // Define table column headers and individual column widths
+     const headers = ["Code", "Description", "Status"];
+     const columnWidths = [22, 110, 18];
+ 
+     // Calculate total table width
+     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+ 
+     // Define page height and padding
+     const pageHeight = doc.internal.pageSize.height;
+     const paddingTop = 15;
+ 
+     // Set font properties for the table
+     doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
+ 
+     // Function to add table headers
+     const addTableHeaders = (startX, startY) => {
+       // Set font style and size for headers
+        doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+ 
+       headers.forEach((header, index) => {
+         const cellWidth = columnWidths[index];
+         const cellHeight = 6; // Height of the header row
+         const cellX = startX + cellWidth / 2; // Center the text horizontally
+         const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+ 
+         // Draw the grey background for the header
+         doc.setFillColor(200, 200, 200); // Grey color
+         doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+ 
+         // Draw the outer border
+         doc.setLineWidth(0.2); // Set the width of the outer border
+         doc.rect(startX, startY, cellWidth, cellHeight);
+ 
+         // Set text alignment to center
+         doc.setTextColor(0); // Set text color to black
+         doc.text(header, cellX, cellY, { align: "center" }); // Center the text
+         startX += columnWidths[index]; // Move to the next column
+       });
+       
+     };
+ 
+     const addTableRows = (startX, startY, startIndex, endIndex) => {
+       const rowHeight = 5;
+       const fontSize = 10;
+       const boldFont = 400;
+       const normalFont = getfontstyle;
+       const tableWidth = getTotalTableWidth();
+ 
+      
+ 
+       for (let i = startIndex; i < endIndex; i++) {
+         const row = rows[i];
+         const isOddRow = i % 2 !== 0;
+         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+         const isTotalRow = i === rows.length - 1;
+         let textColor = [0, 0, 0];
+         let fontName = normalFont;
+ 
+         if (isRedRow) {
+           textColor = [255, 0, 0];
+           fontName = boldFont;
+         }
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana", "bold");
+           doc.setFontSize(10);
+         }
+ 
+         if (isOddRow) {
+           doc.setFillColor(240);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight,
+             "F"
+           );
+         }
+ 
+         doc.setDrawColor(0);
+ 
+         if (isTotalRow) {
+           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+           const rowBottomY = rowTopY + rowHeight;
+ 
+           doc.setLineWidth(0.3);
+           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+ 
+           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+           doc.line(
+             startX,
+             rowBottomY - 0.5,
+             startX + tableWidth,
+             rowBottomY - 0.5
+           );
+ 
+           doc.setLineWidth(0.2);
+           doc.line(startX, rowTopY, startX, rowBottomY);
+           doc.line(
+             startX + tableWidth,
+             rowTopY,
+             startX + tableWidth,
+             rowBottomY
+           );
+         } else {
+           doc.setLineWidth(0.2);
+           doc.rect(
+             startX,
+             startY + (i - startIndex + 2) * rowHeight,
+             tableWidth,
+             rowHeight
+           );
+         }
+ 
+         row.forEach((cell, cellIndex) => {
+           // ⭐ NEW FIX — Perfect vertical centering
+           const cellY =
+             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+ 
+           const cellX = startX + 2;
+ 
+           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+ 
+           if (!isTotalRow) {
+             doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+           }
+ 
+           const cellValue = String(cell);
+ 
+           if (cellIndex === 0 || cellIndex === 2) {
+             const rightAlignX = startX + columnWidths[cellIndex] / 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "center",
+               baseline: "middle",
+             });
+           } else if (
+           
+             cellIndex === 12 
+          
+           
+           ) {
+             const rightAlignX = startX + columnWidths[cellIndex] - 2;
+             doc.text(cellValue, rightAlignX, cellY, {
+               align: "right",
+               baseline: "middle",
+             });
+           } else {
+             if (isTotalRow && cellIndex === 0 && cell === "") {
+               const totalLabelX = startX + columnWidths[0] / 2;
+               doc.text("", totalLabelX, cellY, {
+                 align: "center",
+                 baseline: "middle",
+               });
+             } else {
+               doc.text(cellValue, cellX, cellY, {
+                 baseline: "middle",
+               });
+             }
+           }
+ 
+           if (cellIndex < row.length - 1) {
+             doc.setLineWidth(0.2);
+             doc.line(
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 2) * rowHeight,
+               startX + columnWidths[cellIndex],
+               startY + (i - startIndex + 3) * rowHeight
+             );
+             startX += columnWidths[cellIndex];
+           }
+         });
+ 
+         startX = (doc.internal.pageSize.width - tableWidth) / 2;
+ 
+         if (isTotalRow) {
+           doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+         }
+       }
+ 
+       
+ 
+       const lineWidth = tableWidth;
+       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+       const lineY = pageHeight - 15;
+       doc.setLineWidth(0.3);
+       doc.line(lineX, lineY, lineX + lineWidth, lineY);
+       const headingFontSize = 11;
+       const headingX = lineX + 2;
+       const headingY = lineY + 5;
+       doc.setFont("verdana-regular", "normal");
+       doc.setFontSize(10);
+       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+     };
+ 
+     // Function to calculate total table width
+     const getTotalTableWidth = () => {
+       let totalWidth = 0;
+       columnWidths.forEach((width) => (totalWidth += width));
+       return totalWidth;
+     };
+ 
+     // Function to add a new page and reset startY
+     const addNewPage = (startY) => {
+       doc.addPage();
+       return paddingTop; // Set startY for each new page
+     };
+ 
+     // Define the number of rows per page
+     const rowsPerPage = 47; // Adjust this value based on your requirements
+ 
+     // Function to handle pagination
+     const handlePagination = () => {
+       // Define the addTitle function
+       const addTitle = (
+         title,
+         date,
+         time,
+         pageNumber,
+         startY,
+         titleFontSize = 18,
+         pageNumberFontSize = 10
+       ) => {
+         doc.setFontSize(titleFontSize); // Set the font size for the title
+         doc.text(title, doc.internal.pageSize.width / 2, startY, {
+           align: "center",
+         });
+ 
+         // Calculate the x-coordinate for the right corner
+         const rightX = doc.internal.pageSize.width - 10;
+ 
+         // if (date) {
+         //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+         //     if (time) {
+         //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+         //     } else {
+         //         doc.text(date, rightX - 10, startY, { align: "right" });
+         //     }
+         // }
+ 
+         // Add page numbering
+         doc.setFontSize(pageNumberFontSize);
+         doc.text(
+           `Page ${pageNumber}`,
+           rightX - 40,
+           doc.internal.pageSize.height - 10,
+           { align: "right" }
+         );
+       };
+ 
+       let currentPageIndex = 0;
+       let startY = paddingTop; // Initialize startY
+       let pageNumber = 1; // Initialize page number
+ 
+       while (currentPageIndex * rowsPerPage < rows.length) {
+          doc.setFont("Times New Roman", "normal");
+        addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+         startY += 5; // Adjust vertical position for the company title
+       doc.setFont("verdana-regular", "normal");
+         addTitle(`Company List`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+         startY += -5;
+ 
+         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+         const labelsY = startY + 4; // Position the labels below the titles and above the table
+ 
+         // Set font size and weight for the labels
+         doc.setFontSize(12);
+         doc.setFont(getfontstyle, "300");
+ 
+         let status =
+           transectionType === "N"
+             ? "NON-ACTIVE"
+             : transectionType === "A"
+               ? "ACTIVE"
+               : "ALL";
+         let search = searchQuery ? searchQuery : "";
+ 
+         // Set font style, size, and family
+        doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+         doc.text(`Status :`, labelsX, labelsY + 8.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
+         doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
+ 
+         if (searchQuery) {
+  doc.setFont("verdana", "bold");
+     doc.setFontSize(10);
+               doc.text(`Search :`, labelsX + 70, labelsY + 8.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+     doc.setFontSize(10);
+               doc.text(`${search}`, labelsX + 90, labelsY + 8.5); // Draw the value next to the label
+         }
+ 
+       
+ 
+         startY += 10; // Adjust vertical position for the labels
+ 
+         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+         const startIndex = currentPageIndex * rowsPerPage;
+         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+         startY = addTableRows(
+           (doc.internal.pageSize.width - totalWidth) / 2,
+           startY,
+           startIndex,
+           endIndex
+         );
+         if (endIndex < rows.length) {
+           startY = addNewPage(startY); // Add new page and update startY
+           pageNumber++; // Increment page number
+         }
+         currentPageIndex++;
+       }
+     };
+ 
+     const getCurrentDate = () => {
+       const today = new Date();
+       const dd = String(today.getDate()).padStart(2, "0");
+       const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+       const yyyy = today.getFullYear();
+       return dd + "/" + mm + "/" + yyyy;
+     };
+ 
+     // Function to get current time in the format HH:MM:SS
+     const getCurrentTime = () => {
+       const today = new Date();
+       const hh = String(today.getHours()).padStart(2, "0");
+       const mm = String(today.getMinutes()).padStart(2, "0");
+       const ss = String(today.getSeconds()).padStart(2, "0");
+       return hh + ":" + mm + ":" + ss;
+     };
+ 
+     const date = getCurrentDate(); // Get current date
+     const time = getCurrentTime(); // Get current time
+ 
+     // Call function to handle pagination
+     handlePagination();
+ 
+     // Save the PDF files
+     doc.save(`CompanyList As On ${date}.pdf`);
+   };
+   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+ 
+   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+ 
+ 
+   const handleDownloadCSV = async () => {
+     const workbook = new ExcelJS.Workbook();
+     const worksheet = workbook.addWorksheet("Sheet1");
+ 
+     const numColumns = 3; // Ensure this matches the actual number of columns
+     const columnAlignments = ["center", "left", "center"];
+ 
+     // Define fonts
+     const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
+     const fontStoreList = { name: "CustomFont", size: 10, bold: false };
+     const fontHeader = { name: "CustomFont", size: 10, bold: true };
+     const fontTableContent = { name: "CustomFont", size: 10, bold: false };
+ 
+     // Empty row
+     worksheet.addRow([]);
+ 
+     // Company name
+     const companyRow = worksheet.addRow([comapnyname]);
+     companyRow.eachCell((cell) => {
+       cell.font = fontCompanyName;
+       cell.alignment = { horizontal: "center" };
+     });
+     worksheet.getRow(companyRow.number).height = 30;
+     worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+ 
+     // Store List
+     const storeListRow = worksheet.addRow(["Company List"]);
+     storeListRow.eachCell((cell) => {
+       cell.font = fontStoreList;
+       cell.alignment = { horizontal: "center" };
+     });
+     worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+ 
+     // Empty row
+     worksheet.addRow([]);
+ 
+     // Filter data
+     let typestatus =
+       transectionType === "N" ? "NON-ACTIVE" :
+         transectionType === "A" ? "ACTIVE" : "ALL";
+     let typesearch = searchQuery || "";
+ 
+     const typeAndStoreRow3 = worksheet.addRow(
+       searchQuery ? ["Status :", typestatus, "Search :", typesearch] : ["Status :", typestatus, ""]
+     );
+ 
+     typeAndStoreRow3.eachCell((cell, colIndex) => {
+       cell.font = { name: "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
+       cell.alignment = { horizontal: "left", vertical: "middle" };
+     });
+ 
+     // Header style
+     const headerStyle = {
+       font: fontHeader,
+       alignment: { horizontal: "center", vertical: "middle" },
+       fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+       border: {
+         top: { style: "thin" },
+         left: { style: "thin" },
+         bottom: { style: "thin" },
+         right: { style: "thin" },
+       },
+     };
+ 
+     // Headers
+     const headers = ["Code", "Description", "Status"];
+     const headerRow = worksheet.addRow(headers);
+     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+ 
+     // ✅ Add data rows with alternating light grey background
+     tableData.forEach((item, index) => {
+       const row = worksheet.addRow([item.Code, item.Description, item.Status]);
+ 
+       row.eachCell((cell, colIndex) => {
+         cell.font = fontTableContent;
+         cell.border = {
+           top: { style: "thin" },
+           left: { style: "thin" },
+           bottom: { style: "thin" },
+           right: { style: "thin" },
+         };
+         cell.alignment = {
+           horizontal: columnAlignments[colIndex - 1] || "left",
+           vertical: "middle",
+         };
+ 
+         // ✅ Apply very light grey background to odd rows
+         if ((index + 1) % 2 !== 0) {
+           cell.fill = {
+             type: "pattern",
+             pattern: "solid",
+             fgColor: { argb: "FFEFEFEF" }, // Very light grey
+           };
+         }
+       });
+     });
+ 
+     // Column widths
+     [10, 40, 7].forEach((width, index) => {
+       worksheet.getColumn(index + 1).width = width;
+     });
+ 
+     const totalRow = worksheet.addRow([
+       String(formatValue(tableData.length.toLocaleString())),
+       "",
+        "",
+       
+     ]);
+ 
+     // total row added
+ 
+     totalRow.eachCell((cell, colNumber) => {
+       cell.font = { bold: true };
+       cell.border = {
+         top: { style: "thin" },
+         left: { style: "thin" },
+         bottom: { style: "thin" },
+         right: { style: "thin" },
+       };
+ 
+       // Align only the "Total" text to the right
+       if (colNumber === 1) {
+         cell.alignment = { horizontal: "center" };
+       }
+     });
+ 
+ 
+     // Blank row
+     worksheet.addRow([]);
+ 
+     // Date and Time
+     const today = new Date();
+     const currentTime = today.toLocaleTimeString("en-GB");
+     const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+     const userid = user.tusrid;
+ 
+     const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+     dateTimeRow.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+     dateTimeRow1.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     // Merge cells
+     worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+     worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+ 
+     // Save Excel
+     const buffer = await workbook.xlsx.writeBuffer();
+     const blob = new Blob([buffer], {
+       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     });
+     saveAs(blob, `CompanyList As On ${currentDate}.xlsx`);
+   };
 
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1311,5 +1371,8 @@ export default function CompanyList() {
     </>
   );
 }
+
+
+
 
 

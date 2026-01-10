@@ -40,7 +40,7 @@ function Loginn() {
     const formData = new URLSearchParams(data).toString();
 
     axios
-      .post(`https://crystalsolutions.com.pk/api/login.php`, formData, {
+      .post(`https://crystalsolutions.pk/api/login.php`, formData, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },

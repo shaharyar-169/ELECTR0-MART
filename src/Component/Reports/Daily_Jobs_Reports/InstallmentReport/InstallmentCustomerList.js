@@ -45,6 +45,12 @@ export default function InstallmentCustomerList() {
   const [isAscendingdec, setisAscendingdec] = useState(true);
   const [isAscendingsts, setisAscendingsts] = useState(true);
 
+   const [supplierList, setSupplierList] = useState([]);
+ const [saleType, setSaleType] = useState("");
+ const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+
+
+
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
 
@@ -86,12 +92,14 @@ export default function InstallmentCustomerList() {
     const apiUrl = apiLinks + "/InstallmentCustomerList.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      //   FCmpSts: transectionType,
-      //   code: organisation.code,
-      //   FLocCod: locationnumber || getLocationNumber,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FColCod: saleType,
+      FCstSts: transectionType,
+      FSchTxt: searchQuery,
 
-      code: "MTSELEC",
-      FLocCod: "002",
+      // code: "MTSELEC",
+      // FLocCod: "002",
      
     }).toString();
 
@@ -119,16 +127,241 @@ export default function InstallmentCustomerList() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (input3Ref && input3Ref.current)) {
-      if (input3Ref && input3Ref.current) {
+    if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+      if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
-          input3Ref.current.focus();
+          saleSelectRef.current.focus();
           // saleSelectRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
     }
   }, []);
+
+  useEffect(() => {
+        const apiUrl = apiLinks + "/GetActiveCustomers.php";
+        const formData = new URLSearchParams({
+              code: organisation.code,
+              FLocCod: locationnumber || getLocationNumber,
+           
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                setSupplierList(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    }, []);
+
+    const options = supplierList.map((item) => ({
+        value: item.tcstcod,
+        label: `${item.tcstcod}-${item.tcstnam.trim()}`,
+    }));
+
+
+const DropdownOption = (props) => {
+        return (
+            <components.Option {...props}>
+                <div
+                    style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        paddingBottom: "5px",
+                        lineHeight: "3px",
+                        // color: fontcolor,
+                        textAlign: "start",
+                    }}
+                >
+                    {props.data.label}
+                </div>
+            </components.Option>
+        );
+    };
+
+    const customStyles1 = (hasError) => ({
+        control: (base, state) => ({
+            ...base,
+            height: "24px",
+            minHeight: "unset",
+            width: 380,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            backgroundColor: getcolor,
+            color: fontcolor,
+            caretColor: getcolor === "white" ? "black" : "white",
+            borderRadius: 0,
+            border: `1px solid ${fontcolor}`,
+            transition: "border-color 0.15s ease-in-out",
+            "&:hover": {
+                borderColor: state.isFocused ? base.borderColor : fontcolor,
+            },
+            padding: "0 8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            boxShadow: "none",
+            "&:focus-within": {
+                borderColor: "#3368B5",
+                boxShadow: "0 0 0 1px #3368B5",
+            },
+        }),
+
+        menu: (base) => ({
+            ...base,
+            marginTop: "5px",
+            borderRadius: 0,
+            backgroundColor: getcolor,
+            border: `1px solid ${fontcolor}`,
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            zIndex: 9999,
+        }),
+        menuList: (base) => ({
+            ...base,
+            padding: 0,
+            maxHeight: "200px",
+            // Scrollbar styling for Webkit browsers
+            "&::-webkit-scrollbar": {
+                width: "8px",
+                height: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+                background: getcolor,
+                borderRadius: "10px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+                backgroundColor: fontcolor,
+                borderRadius: "10px",
+                border: `2px solid ${getcolor}`,
+                "&:hover": {
+                    backgroundColor: "#3368B5",
+                },
+            },
+            // Scrollbar styling for Firefox
+            scrollbarWidth: "thin",
+            scrollbarColor: `${fontcolor} ${getcolor}`,
+        }),
+        option: (base, state) => ({
+            ...base,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            backgroundColor: state.isSelected
+                ? "#3368B5"
+                : state.isFocused
+                    ? "#3368B5"
+                    : getcolor,
+            color: state.isSelected  || state.isFocused ? "white" : fontcolor,
+            "&:hover": {
+                backgroundColor: "#3368B5",
+                color: "white",
+                cursor: "pointer",
+            },
+            "&:active": {
+                backgroundColor: "#1a66cc",
+            },
+            transition: "background-color 0.2s ease, color 0.2s ease",
+        }),
+        dropdownIndicator: (base, state) => ({
+            ...base,
+            padding: 0,
+            marginTop: "-5px",
+            fontSize: "18px",
+            display: "flex",
+            textAlign: "center",
+            color: fontcolor,
+            transition: "transform 0.2s ease",
+            transform: state.selectProps.menuIsOpen
+                ? "rotate(180deg)"
+                : "rotate(0deg)",
+            "&:hover": {
+                color: "#3368B5",
+            },
+        }),
+        indicatorSeparator: () => ({
+            display: "none",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            textAlign: "left",
+            color: fontcolor,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+        }),
+        input: (base) => ({
+            ...base,
+            color: getcolor === "white" ? "black" : fontcolor,
+            caretColor: getcolor === "white" ? "black" : "white",
+            marginTop: "-5px",
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            marginTop: "-5px",
+            padding: "0 4px",
+            color: fontcolor,
+            "&:hover": {
+                color: "#ff4444",
+            },
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: `${fontcolor}80`, // 50% opacity
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            marginTop: "-5px",
+        }),
+        noOptionsMessage: (base) => ({
+            ...base,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            color: fontcolor,
+            backgroundColor: getcolor,
+        }),
+        loadingMessage: (base) => ({
+            ...base,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            color: fontcolor,
+            backgroundColor: getcolor,
+        }),
+        multiValue: (base) => ({
+            ...base,
+            backgroundColor: `${fontcolor}20`, // Light background for tags
+        }),
+        multiValueLabel: (base) => ({
+            ...base,
+            color: fontcolor,
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+        }),
+        multiValueRemove: (base) => ({
+            ...base,
+            color: `${fontcolor}80`,
+            "&:hover": {
+                backgroundColor: "#ff4444",
+                color: "white",
+            },
+        }),
+    });
+
+
+const handleSaleKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setSaleType(selectedOption.value);
+            }
+            const nextInput = document.getElementById(inputId);
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
@@ -428,17 +661,25 @@ export default function InstallmentCustomerList() {
  
          // Set font style, size, and family
         doc.setFont("verdana-regular", "normal");
-     doc.setFontSize(10); // Font size
+        doc.setFontSize(10); // Font size
+
+         let typestatus =
+      transectionType === "N" ? "NON-ACTIVE" :
+        transectionType === "A" ? "ACTIVE" : "ALL";
+
+        let customerdata= Companyselectdatavalue.label 
+        ? Companyselectdatavalue.label : 'ALL'
+       let typesearch = searchQuery || "";
  
-         // doc.setFont(getfontstyle, "bold"); // Set font to bold
-         // doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-         // doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+         doc.setFont(getfontstyle, "bold"); // Set font to bold
+         doc.text(`Customer :`, labelsX, labelsY); // Draw bold label
+         doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         doc.text(`${customerdata}`, labelsX + 25, labelsY); // Draw the value next to the label
  
-         // doc.setFont(getfontstyle, "bold"); // Set font to bold
-         // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-         // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+         doc.setFont(getfontstyle, "bold"); // Set font to bold
+         doc.text(`Status :`, labelsX + 190, labelsY); // Draw bold label
+         doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         doc.text(`${typestatus}`, labelsX + 210, labelsY); // Draw the value next to the label
  
      
          // doc.setFont(getfontstyle, "bold"); // Set font to bold
@@ -456,19 +697,19 @@ export default function InstallmentCustomerList() {
          // doc.setFont(getfontstyle, "normal"); // Reset font to normal
          // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
  
-         // if (searchQuery) {
-         //   doc.setFont(getfontstyle, "bold"); // Set font to bold
-         //   doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-         //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
-         //   doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-         // }
+         if (searchQuery) {
+           doc.setFont(getfontstyle, "bold"); // Set font to bold
+           doc.text(`Search :`, labelsX + 190, labelsY + 4.5); // Draw bold label
+           doc.setFont(getfontstyle, "normal"); // Reset font to normal
+           doc.text(`${typesearch}`, labelsX + 210, labelsY + 4.5); // Draw the value next to the label
+         }
  
          // // Reset font weight to normal if necessary for subsequent text
          
  
-         startY += 1; // Adjust vertical position for the labels
+         startY += searchQuery ? 6 : 2; // Adjust vertical position for the labels
  
-         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
+         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, searchQuery ? 35 : 31);
          const startIndex = currentPageIndex * rowsPerPage;
          const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
          startY = addTableRows(
@@ -595,6 +836,34 @@ export default function InstallmentCustomerList() {
  
      // Add an empty row after the title section
      worksheet.addRow([]);
+
+           let typestatus =
+      transectionType === "N" ? "NON-ACTIVE" :
+        transectionType === "A" ? "ACTIVE" : "ALL";
+
+        let customerdata= Companyselectdatavalue.label 
+        ? Companyselectdatavalue.label : 'ALL'
+       let typesearch = searchQuery || "";
+
+       const typeAndStoreRow2 = worksheet.addRow(
+       ["Customer :", customerdata, "","","","Status :", typestatus] 
+    );
+         worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
+
+
+       const typeAndStoreRow3 = worksheet.addRow(
+      searchQuery ? ["", "","","","", "Search :", typesearch] : [""]
+    );
+         worksheet.mergeCells(`G${typeAndStoreRow3.number}:H${typeAndStoreRow3.number}`);
+
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
+      cell.font = { name: "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+     typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = { name: "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
  
    
      const headerStyle = {
@@ -1033,7 +1302,7 @@ export default function InstallmentCustomerList() {
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "53vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -1134,7 +1403,7 @@ export default function InstallmentCustomerList() {
         >
           <NavComponent textdata="Installment Customer List" />
 
-          {/* <div
+          <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
           >
@@ -1148,9 +1417,75 @@ export default function InstallmentCustomerList() {
                 justifyContent: "space-between",
               }}
             >
-              <div
+                <div
+                                              className="d-flex align-items-center "
+                                          style={{marginLeft:'20px'}}
+                                         >
+                                              <div
+                                                  style={{
+                                                      width: "80px",
+                                                      display: "flex",
+                                                      justifyContent: "end",
+                                                  }}
+                                              >
+                                                  <label htmlFor="fromDatePicker">
+                                                      <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                                          Collector :
+                                                      </span>{" "}
+                                                      <br />
+                                                  </label>
+                                              </div>
+                                              <div style={{ marginLeft: "5px" }}>
+                                                  <Select
+                                                      className="List-select-class"
+                                                      ref={saleSelectRef}
+                                                      options={options}
+                                                      // value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
+                                                      onKeyDown={(e) => handleSaleKeypress(e, "statusid")}
+                                                      id="selectedsale"
+                                                      onChange={(selectedOption) => {
+                                                          if (selectedOption && selectedOption.value) {
+                                                              const labelParts = selectedOption.label.split("-"); // Split by "-"
+                                                              const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+              
+                                                              setSaleType(selectedOption.value);
+                                                              setCompanyselectdatavalue({
+                                                                  value: selectedOption.value,
+                                                                  label: description, // Keep only the description
+              
+                                                              });
+                                                          } else {
+                                                              setSaleType("");
+                                                              setCompanyselectdatavalue('')
+                                                          }
+                                                      }}
+                                                      onInputChange={(inputValue, { action }) => {
+                                                          if (action === "input-change") {
+                                                              return inputValue.toUpperCase();
+                                                          }
+                                                          return inputValue;
+                                                      }}
+                                                      components={{ Option: DropdownOption }}
+                                                      styles={{
+                                                          ...customStyles1(!saleType),
+                                                          placeholder: (base) => ({
+                                                              ...base,
+                                                              textAlign: "left",
+                                                              marginLeft: "0",
+                                                              justifyContent: "flex-start",
+                                                              color: fontcolor,
+                                                              marginTop: '-5px'
+                                                          })
+                                                      }}
+                                                      isClearable
+                                                      placeholder="ALL"
+                                                  />
+                                              </div>
+                                          </div>
+
+               <div
                 className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
+                style={{ marginRight: "20px" }}
               >
                 <div
                   style={{
@@ -1177,7 +1512,7 @@ export default function InstallmentCustomerList() {
                   <select
                     ref={input1Ref}
                     onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
+                    id="statusid"
                     name="type"
                     onFocus={(e) =>
                       (e.currentTarget.style.border = "4px solid red")
@@ -1188,7 +1523,7 @@ export default function InstallmentCustomerList() {
                     value={transectionType}
                     onChange={handleTransactionTypeChange}
                     style={{
-                      width: "150px",
+                      width: "200px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -1224,8 +1559,26 @@ export default function InstallmentCustomerList() {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div id="lastDiv" style={{ marginRight: "5px" }}>
+           <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "end",
+              }}
+            >
+            
+
+              <div id="lastDiv" >
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
                     style={{
@@ -1248,7 +1601,7 @@ export default function InstallmentCustomerList() {
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "140px",
+                      width: "200px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -1289,7 +1642,7 @@ export default function InstallmentCustomerList() {
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
           <div>
             <div
               style={{
@@ -1462,7 +1815,7 @@ export default function InstallmentCustomerList() {
                 // '--selected-bg-color': getnavbarbackgroundcolor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "55vh",
+                maxHeight: "50vh",
                 wordBreak: "break-word",
               }}
             >

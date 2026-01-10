@@ -337,7 +337,7 @@ const SideBar1 = () => {
       });
   };
 
-  const imagelink = `https://crystalsolutions.com.pk/images/${
+  const imagelink = `https://crystalsolutions.pk/images/${
     organisation && organisation.code
   }`;
 

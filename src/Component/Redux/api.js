@@ -1,4 +1,4 @@
-const apiLink = "https://crystalsolutions.com.pk/api/";
+const apiLink = "https://crystalsolutions.pk/api/";
 
 export const fetchDataMenu = async (userId, code) => {
   const response = await fetch(`${apiLink}GetUserMenu.php`, {

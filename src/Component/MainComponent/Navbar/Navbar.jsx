@@ -36,7 +36,7 @@ function NavBar() {
   }, []);
 
   function fetchMenuItems(userID) {
-    const apiUrl = `${apiLinks}/get_usrmenu.php`;
+    const apiUrl = `${apiLinks}/GetUserMenu.php`;
     const data = {
       userid: userID,
     };

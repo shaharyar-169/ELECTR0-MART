@@ -296,7 +296,7 @@ export default function DailyCashBook() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-            code: 'BRIGHT',
+            code: 'NASIRTRD',
             FLocCod: '001',
             FYerDsc: '2024-2024',
 
@@ -333,7 +333,7 @@ export default function DailyCashBook() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-            code: 'BRIGHT',
+            code: 'NASIRTRD',
             FLocCod: '001',
             FYerDsc: '2024-2024',
 
@@ -371,7 +371,7 @@ export default function DailyCashBook() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-            code: 'BRIGHT',
+            code: 'NASIRTRD',
             FLocCod: '001',
             FYerDsc: '2024-2024',
 

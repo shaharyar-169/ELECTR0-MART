@@ -682,7 +682,7 @@ export default function ItemLedgerReport() {
             ...base,
             height: "24px",
             minHeight: "unset",
-            width: 380,
+            width: 500,
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             backgroundColor: getcolor,
@@ -913,7 +913,7 @@ export default function ItemLedgerReport() {
                 : state.isFocused
                     ? "#3368B5"
                     : getcolor,
-            color: state.isSelected ? "white" : fontcolor,
+            color: state.isSelected || state.isFocused ? "white" : fontcolor,
             "&:hover": {
                 backgroundColor: "#3368B5",
                 color: "white",

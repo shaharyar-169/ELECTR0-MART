@@ -40,7 +40,7 @@ export function ThemeProvider({ children }) {
   const [navbarHeight, setNavbarHeight] = useState(30);
   const [pathHeight, setPathbarHeight] = useState(30);
   const [apiLinks, setApiLinks] = useState(
-    "https://crystalsolutions.com.pk/api"
+    "https://crystalsolutions.pk/api"
   );
 
   // Sidebar toggle function
