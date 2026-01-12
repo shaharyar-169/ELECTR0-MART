@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import {
+  getUserData,
+  getOrganisationData,
+  getLocationnumber,
+  getYearDescription,
+} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -20,6 +25,8 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "../../../vardana/vardana";
+import "../../../vardana/verdana-bold";
 
 export default function DailyCashBankBalance() {
   const navigate = useNavigate();
@@ -101,9 +108,7 @@ export default function DailyCashBankBalance() {
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
+
   const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
   };
@@ -113,11 +118,7 @@ export default function DailyCashBankBalance() {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
+
   const handlefromInputChange = (e) => {
     setfromInputDate(e.target.value);
   };
@@ -176,6 +177,16 @@ export default function DailyCashBankBalance() {
         toast.error("Date must be in the format dd-mm-yyyy");
       }
     }
+  };
+
+  const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
   };
 
   const handleToKeyPress = (e) => {
@@ -250,21 +261,7 @@ export default function DailyCashBankBalance() {
   const handleToInputChange = (e) => {
     settoInputDate(e.target.value);
   };
-  const handleSaleKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setSaleType(selectedOption.value);
-      }
-      const nextInput = document.getElementById(inputId);
-      if (nextInput) {
-        nextInput.focus();
-        nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
+
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -392,11 +389,9 @@ export default function DailyCashBankBalance() {
       FFnlDat: toInputDate,
       FSchTxt: searchQuery,
       FRepTyp: transectionType,
-      code: 'NASIRTRD',
-      FLocCod: '001',
-      FYerDsc: '2024-2024',
-
-
+      code: "NASIRTRD",
+      FLocCod: "001",
+      FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -441,12 +436,16 @@ export default function DailyCashBankBalance() {
 
   useEffect(() => {
     const currentDate = new Date();
-
-    setSelectedfromDate(currentDate);
-    setfromInputDate(formatDate(currentDate));
-
     setSelectedToDate(currentDate);
     settoInputDate(formatDate(currentDate));
+
+    const firstDateOfCurrentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    setSelectedfromDate(firstDateOfCurrentMonth);
+    setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
   useEffect(() => {
@@ -516,13 +515,9 @@ export default function DailyCashBankBalance() {
     }),
   });
 
-
   const exportPDFHandler = () => {
-    const globalfontsize = 12;
-    console.log("gobal font data", globalfontsize);
-
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -536,12 +531,12 @@ export default function DailyCashBankBalance() {
 
     // Add summary row to the table
     rows.push([
+      String(formatValue(tableData.length.toLocaleString())),
       "",
-      "Total",
-      String(totalOpening),
-      String(totalDebit),
-      String(totalCredit),
-      String(closingBalance),
+      String(formatValue(totalOpening)),
+      String(formatValue(totalDebit)),
+      String(formatValue(totalCredit)),
+      String(formatValue(closingBalance)),
     ]);
 
     // Define table column headers and individual column widths
@@ -553,7 +548,7 @@ export default function DailyCashBankBalance() {
       "Credit",
       "Balance",
     ];
-    const columnWidths = [22, 80, 25, 25, 25, 25];
+    const columnWidths = [24, 110, 30, 30, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -563,14 +558,14 @@ export default function DailyCashBankBalance() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
+    doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(12); // Set font size for headers
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -591,163 +586,159 @@ export default function DailyCashBankBalance() {
         doc.text(header, cellX, cellY, { align: "center" }); // Center the text
         startX += columnWidths[index]; // Move to the next column
       });
-
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(12);
     };
 
-    
+    const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-     const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5;
-            const fontSize = 10;
-            const boldFont = 400;
-            const normalFont = getfontstyle;
-            const tableWidth = getTotalTableWidth();
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
 
-            doc.setFontSize(11);
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-                const isTotalRow = i === rows.length - 1;
-                let textColor = [0, 0, 0];
-                let fontName = normalFont;
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
-                if (isRedRow) {
-                    textColor = [255, 0, 0];
-                    fontName = boldFont;
-                }
+        doc.setDrawColor(0);
 
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, 'bold');
-                }
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
 
-                // Set background color for odd-numbered rows
-                if (isOddRow) {
-                    doc.setFillColor(240); // Light background color
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight,
-                        "F"
-                    );
-                }
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                doc.setDrawColor(0);
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
 
-                // For total row - special border handling
-                if (isTotalRow) {
-                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-                    const rowBottomY = rowTopY + rowHeight;
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
 
-                    // Draw double top border
-                    doc.setLineWidth(0.3);
-                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+        row.forEach((cell, cellIndex) => {
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-                    // Draw double bottom border
-                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
+          const cellX = startX + 2;
 
-                    // Draw single vertical borders
-                    doc.setLineWidth(0.2);
-                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
-                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
-                } else {
-                    // Normal border for other rows
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
-                }
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                row.forEach((cell, cellIndex) => {
-                    const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-                        : startY + (i - startIndex + 2) * rowHeight + 3;
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
 
-                    const cellX = startX + 2;
+          const cellValue = String(cell);
 
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-                    if (!isTotalRow) {
-                        doc.setFont(fontName, "normal");
-                    }
-
-                    const cellValue = String(cell);
-
-                    if (cellIndex === 20 ) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
-                    }
-
-                    else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle", // This centers vertically
-                        });
-                    } else {
-                        // For empty cells in total row, add "Total" label centered
-                        if (isTotalRow && cellIndex === 0 && cell === "") {
-                            const totalLabelX = startX + columnWidths[0] / 2;
-                            doc.text("", totalLabelX, cellY, {
-                                align: "center",
-                                baseline: "middle"
-                            });
-                        } else {
-                            doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle" // This centers vertically
-                            });
-                        }
-
-                    }
-
-                    // Draw column borders
-                    if (cellIndex < row.length - 1) {
-                        doc.setLineWidth(0.2);
-                        doc.line(
-                            startX + columnWidths[cellIndex],
-                            startY + (i - startIndex + 2) * rowHeight,
-                            startX + columnWidths[cellIndex],
-                            startY + (i - startIndex + 3) * rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
-
-                startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, "normal");
-                }
+          if (cellIndex === 0) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 2 ||
+            cellIndex === 3 ||
+            cellIndex === 4 ||
+            cellIndex === 5
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle",
+              });
             }
+          }
 
-            // Footer section
-            const lineWidth = tableWidth;
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-            const lineY = pageHeight - 15;
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY);
-            const headingFontSize = 11;
-            const headingX = lineX + 2;
-            const headingY = lineY + 5;
-            doc.setFontSize(headingFontSize);
-            doc.setTextColor(0);
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
 
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    };
 
     // Function to calculate total table width
     const getTotalTableWidth = () => {
@@ -763,7 +754,7 @@ export default function DailyCashBankBalance() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
+    const rowsPerPage = 28; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -809,11 +800,12 @@ export default function DailyCashBankBalance() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+        doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+        doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Cash & Bank Balance From ${fromInputDate} To ${toInputDate}`,
+          `Cash & Bank Balance Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -826,31 +818,19 @@ export default function DailyCashBankBalance() {
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
         let status =
-          transectionType === "N"
-            ? "NON-ACTIVE"
-            : transectionType === "A"
-              ? "ACTIVE"
-              : "ALL";
-        let search = searchQuery ? searchQuery : "";
+          transectionType === "C"
+            ? "CASH"
+            : transectionType === "B"
+            ? "BANK"
+            : "ALL";
+        // let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
-
-
-        // Set font size and weight for the labels
-        doc.setFontSize(12);
-        doc.setFont(getfontstyle, "300");
-
-
-        // Set font size and weight for the labels
-        doc.setFontSize(12);
-        doc.setFont(getfontstyle, "300");
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Type :`, labelsX, labelsY + 4.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${status}`, labelsX + 20, labelsY + 4.5); // Draw the value next to the label
 
         startY += 6; // Adjust vertical position for the labels
 
@@ -896,11 +876,9 @@ export default function DailyCashBankBalance() {
 
     // Save the PDF files
     doc.save(
-      `Cash&BankBalance Report From ${fromInputDate} To ${toInputDate}.pdf`
+      `Cash&BankBalanceReport From ${fromInputDate} To ${toInputDate}.pdf`
     );
   };
-
-
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -951,19 +929,23 @@ export default function DailyCashBankBalance() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        companyRow.number
       }`
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow([`Cash & Bank Balance Report From ${fromInputDate} To ${toInputDate}`]);
+    const storeListRow = worksheet.addRow([
+      `Cash & Bank Balance Report From ${fromInputDate} To ${toInputDate}`,
+    ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        storeListRow.number
       }`
     );
 
@@ -974,14 +956,14 @@ export default function DailyCashBankBalance() {
       transectionType === "C"
         ? "CASH"
         : transectionType === "B"
-          ? "BANK"
-          : "ALL";
+        ? "BANK"
+        : "ALL";
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
-        ? ["TYPE :", typestatus, "SEARCH :", typesearch]
-        : ["TYPE :", typestatus, ""]
+        ? ["Type :", typestatus, "Search :", typesearch]
+        : ["Type :", typestatus, ""]
     );
 
     // Apply styling for the status row
@@ -1050,13 +1032,12 @@ export default function DailyCashBankBalance() {
     });
 
     const totalRow = worksheet.addRow([
+      String(formatValue(tableData.length.toLocaleString())),
       "",
-      "Total",
-      totalOpening,
-      totalDebit,
-      totalCredit,
-      closingBalance
-
+      String(formatValue(totalOpening)),
+      String(formatValue(totalDebit)),
+      String(formatValue(totalCredit)),
+      String(formatValue(closingBalance)),
     ]);
 
     // total row added
@@ -1071,16 +1052,26 @@ export default function DailyCashBankBalance() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
+      if (
+        colNumber === 3 ||
+        colNumber === 4 ||
+        colNumber === 5 ||
+        colNumber === 6
+      ) {
         cell.alignment = { horizontal: "right" };
+      }
+       if (
+        colNumber === 1 
+     
+      ) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
     // Set column widths
-    [10, 40, 15, 15, 15,15 ].forEach((width, index) => {
+    [10, 45, 15, 15, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
-
 
     // Add a blank row
     worksheet.addRow([]);
@@ -1105,7 +1096,9 @@ export default function DailyCashBankBalance() {
     const userid = user.tusrid;
 
     // Add date and time row
-    const dateTimeRow = worksheet.addRow([`DATE:   ${currentdate}  TIME:   ${currentTime}`]);
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
     dateTimeRow.eachCell((cell) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1128,10 +1121,14 @@ export default function DailyCashBankBalance() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -1139,10 +1136,11 @@ export default function DailyCashBankBalance() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `Cash&BankBalance Report From ${fromInputDate} To ${toInputDate}.xlsx`);
+    saveAs(
+      blob,
+      `Cash&BankBalanceReport From ${fromInputDate} To ${toInputDate}.xlsx`
+    );
   };
-
-
 
   const dispatch = useDispatch();
 
@@ -1175,27 +1173,31 @@ export default function DailyCashBankBalance() {
   };
 
   const firstColWidth = {
-    width: "11%",
+    width: "80px",
   };
   const secondColWidth = {
-    width: "37%",
+    width: "360px",
   };
   const thirdColWidth = {
-    width: "13%",
+    width: "90px",
   };
   const forthColWidth = {
-    width: "13.6%",
+    width: "90px",
   };
   const fifthColWidth = {
-    width: "13%",
+    width: "90px",
   };
   const sixthColWidth = {
-    width: "12%",
+    width: "90px",
   };
+
+  const sixthcol = {
+    width: "8px",
+  };
+
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
-
 
   const [columns, setColumns] = useState({
     Code: [],
@@ -1223,12 +1225,10 @@ export default function DailyCashBankBalance() {
         Debit: tableData.map((row) => row.Debit),
         Credit: tableData.map((row) => row.Credit),
         Balance: tableData.map((row) => row.Balance),
-
       };
       setColumns(newColumns);
     }
   }, [tableData]);
-
 
   const handleSorting = (col) => {
     // Determine the new sort order
@@ -1241,8 +1241,10 @@ export default function DailyCashBankBalance() {
     // Sort the data based on the column and order
     sortedData.sort((a, b) => {
       // Get the values to compare
-      const aVal = a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-      const bVal = b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
       // Special handling for code column
       if (col === "Code" && aVal.includes("-") && bVal.includes("-")) {
@@ -1295,8 +1297,7 @@ export default function DailyCashBankBalance() {
       Opening: null,
       Debit: null,
       Credit: null,
-      Balance: null
-
+      Balance: null,
     });
   };
 
@@ -1309,16 +1310,31 @@ export default function DailyCashBankBalance() {
     };
   };
 
+  useHotkeys(
+    "alt+s",
+    () => {
+      fetchDailyCashBankBalance();
+      resetSorting();
+    },
+    { preventDefault: true, enableOnFormTags: true }
+  );
 
- useHotkeys("alt+s", () => {
-         fetchDailyCashBankBalance();
-            resetSorting();
-     }, { preventDefault: true, enableOnFormTags: true });
- 
-     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
-     useHotkeys("alt+e", handleDownloadCSV, { preventDefault: true, enableOnFormTags: true });
-     useHotkeys("esc", () => navigate("/MainPage"));
+  useHotkeys("alt+p", exportPDFHandler, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+e", handleDownloadCSV, {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
+  useHotkeys("alt+r", () => navigate("/MainPage"), {
+    preventDefault: true,
+    enableOnFormTags: true,
+  });
 
+  const formatValue = (val) => {
+    return Number(val) === 0 ? "" : val;
+  };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1333,28 +1349,27 @@ export default function DailyCashBankBalance() {
   }, []);
 
   const contentStyle = {
-    backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
-    position: "relative",
-    top: "40%",
-    left: isSidebarVisible ? "50%" : "50%",
-    transform: "translate(-50%, -50%)",
-    transition: isSidebarVisible
-      ? "left 3s ease-in-out, width 2s ease-in-out"
-      : "left 3s ease-in-out, width 2s ease-in-out",
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: "900px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "50vw",
+    transform: "translateX(-50%)",
     display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
-    alignItems: "start",
-    overflowX: "hidden",
-    overflowY: "hidden",
-    wordBreak: "break-word",
+    alignItems: "center",
+    overflow: "hidden",
     textAlign: "center",
-    maxWidth: "800px",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: "23px",
     fontFamily: '"Poppins", sans-serif',
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
   };
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1413,6 +1428,7 @@ export default function DailyCashBankBalance() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedIndex]);
+
   useEffect(() => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1422,39 +1438,6 @@ export default function DailyCashBankBalance() {
     }
   }, [selectedIndex]);
 
-  const parseDate = (dateString) => {
-    const [day, month, year] = dateString.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  };
-
-  const handleRadioChange = (days) => {
-    const toDate = parseDate(toInputDate);
-    const fromDate = new Date(toDate);
-    fromDate.setUTCDate(fromDate.getUTCDate() - days);
-
-    setSelectedfromDate(fromDate);
-    setfromInputDate(formatDate(fromDate));
-    setSelectedRadio(days === 0 ? "custom" : `${days}days`);
-  };
-
-  useEffect(() => {
-    if (selectedRadio === "custom") {
-      const currentDate = new Date();
-      const firstDateOfCurrentMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1
-      );
-      setSelectedfromDate(currentDate);
-      setfromInputDate(formatDate(currentDate));
-      setSelectedToDate(currentDate);
-      settoInputDate(formatDate(currentDate));
-    } else {
-      const days = parseInt(selectedRadio.replace("days", ""));
-      handleRadioChange(days);
-    }
-  }, [selectedRadio]);
-
   return (
     <>
       <ToastContainer />
@@ -1463,12 +1446,13 @@ export default function DailyCashBankBalance() {
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            width: "100%",
+            // width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
         >
           <NavComponent textdata="Cash & Bank Balance Report" />
+
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1480,146 +1464,8 @@ export default function DailyCashBankBalance() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
-            >
-              <div className="d-flex align-items-center justify-content-center">
-                <div className="mx-3">
-                 
-                </div>
-                <div
-                  className="d-flex align-items-center"
-                  style={{ marginRight: "15px" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "evenly",
-                    }}
-                  >
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="custom"
-                        checked={selectedRadio === "custom"}
-                        onChange={() => handleRadioChange(0)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="custom"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        Custom
-                      </label>
-                    </div>
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="30"
-                        checked={selectedRadio === "30days"}
-                        onChange={() => handleRadioChange(30)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="30"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        30 Days
-                      </label>
-                    </div>
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="60"
-                        checked={selectedRadio === "60days"}
-                        onChange={() => handleRadioChange(60)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="60"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        60 Days
-                      </label>
-                    </div>
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="90"
-                        checked={selectedRadio === "90days"}
-                        onChange={() => handleRadioChange(90)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="90"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        90 Days
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* ------ */}
-
-              <div></div>
-            </div>
-          </div>
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: 'space-between',
-
-              }}
-
             >
               <div className="d-flex align-items-center">
                 <div
@@ -1720,10 +1566,7 @@ export default function DailyCashBankBalance() {
                   />
                 </div>
               </div>
-              <div
-                className="d-flex align-items-center"
-
-              >
+              <div className="d-flex align-items-center">
                 <div
                   style={{
                     width: "60px",
@@ -1825,7 +1668,7 @@ export default function DailyCashBankBalance() {
 
               <div
                 className="d-flex align-items-center"
-                style={{ marginRight: '25px' }}
+                style={{ marginRight: "25px" }}
               >
                 <div
                   style={{
@@ -1848,45 +1691,64 @@ export default function DailyCashBankBalance() {
                   </label>
                 </div>
 
-                <select
-                  ref={input1Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                  id="submitButton"
-                  name="type"
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "4px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  value={transectionType}
-                  onChange={handleTransactionTypeChange}
-                  style={{
-                    width: "150px",
-                    height: "24px",
-                    marginLeft: "5px",
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                  }}
-                >
-                  <option value="">ALL</option>
-                  <option value="C">CASH</option>
-                  <option value="B">BANK</option>
-                </select>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "150px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="C">CASH</option>
+                    <option value="B">BANK</option>
+                  </select>
+
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
               </div>
-
             </div>
-
-
           </div>
           <div>
             <div
               style={{
                 overflowY: "auto",
-                width: "98.8%",
+                // width: "98.8%",
               }}
             >
               <table
@@ -1895,9 +1757,9 @@ export default function DailyCashBankBalance() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  // width: "100%",
                   position: "relative",
-                  paddingRight: "2%",
+                  // paddingRight: "2%",
                 }}
               >
                 <thead
@@ -1985,9 +1847,8 @@ export default function DailyCashBankBalance() {
                       ></i>
                     </td>
 
+                    <td className="border-dark" style={sixthcol}></td>
                   </tr>
-
-
                 </thead>
               </table>
             </div>
@@ -1998,7 +1859,7 @@ export default function DailyCashBankBalance() {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "52vh",
-                width: "100%",
+                // width: "100%",
                 wordBreak: "break-word",
               }}
             >
@@ -2008,8 +1869,9 @@ export default function DailyCashBankBalance() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  //  width: "100%",
                   position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -2125,7 +1987,7 @@ export default function DailyCashBankBalance() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
+              paddingRight: "8px",
             }}
           >
             <div
@@ -2134,7 +1996,11 @@ export default function DailyCashBankBalance() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+              <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>
+            </div>
             <div
               style={{
                 ...secondColWidth,
@@ -2149,7 +2015,9 @@ export default function DailyCashBankBalance() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalOpening}</span>
+              <span className="mobileledger_total">
+                {formatValue(totalOpening)}
+              </span>
             </div>
             <div
               style={{
@@ -2158,7 +2026,9 @@ export default function DailyCashBankBalance() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalDebit}</span>
+              <span className="mobileledger_total">
+                {formatValue(totalDebit)}
+              </span>
             </div>
             <div
               style={{
@@ -2167,7 +2037,9 @@ export default function DailyCashBankBalance() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalCredit}</span>
+              <span className="mobileledger_total">
+                {formatValue(totalCredit)}
+              </span>
             </div>
             <div
               style={{
@@ -2176,7 +2048,9 @@ export default function DailyCashBankBalance() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{closingBalance}</span>
+              <span className="mobileledger_total">
+                {formatValue(closingBalance)}
+              </span>
             </div>
           </div>
           <div
@@ -2229,4 +2103,3 @@ export default function DailyCashBankBalance() {
     </>
   );
 }
-

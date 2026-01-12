@@ -49,7 +49,7 @@ export default function DailyCreditReport() {
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("A");
+    const [transectionType, settransectionType] = useState("");
 
     const [storeList, setStoreList] = useState([]);
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
@@ -204,12 +204,12 @@ export default function DailyCreditReport() {
         const apiMainUrl = apiLinks + "/DailyCreditMemo.php";
         setIsLoading(true);
         const formMainData = new URLSearchParams({
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
             FRepDat: toInputDate,
             FRepTyp: transectionType,
             FSchTxt: searchQuery,
@@ -477,9 +477,6 @@ export default function DailyCreditReport() {
     });
     const exportPDFHandler = () => {
 
-        const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
-
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
@@ -487,7 +484,7 @@ export default function DailyCreditReport() {
         const rows = tableData.map((item) => [
             item['Inv#'],
             item.Date,
-            item.Code,
+            // item.Code,
             item.SalesMan,
             item.Customer,
             item.Mobile,
@@ -499,22 +496,22 @@ export default function DailyCreditReport() {
         // Add summary row to the table
         rows.push([
 
+            String(formatValue(tableData.length.toLocaleString())),
+            "",
+            // "",
             "",
             "",
             "",
-            "",
-            "Total",
-            "",
-            String(totalOpening),
-            String(totalPurchase),
-            String(totalBalance),
+            String(formatValue(totalPurchase)),
+            String(formatValue(totalOpening)),
+            String(formatValue(totalBalance)),
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
             "Inv#",
             "Date",
-            "Code",
+            // "Code",
             "Salesman",
             "Customer",
             "Mobile",
@@ -523,7 +520,7 @@ export default function DailyCreditReport() {
             "Balance",
 
         ];
-        const columnWidths = [15, 19, 20, 70, 70, 24, 23, 23, 23];
+        const columnWidths = [18,22,68, 68, 28, 28, 28, 28];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -533,14 +530,14 @@ export default function DailyCreditReport() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+            doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -562,157 +559,161 @@ export default function DailyCreditReport() {
                 startX += columnWidths[index]; // Move to the next column
             });
 
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+           
         };
 
 
 
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust row height
-            const fontSize = 10; // Adjust font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+         const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(fontSize);
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
-                let currentX = startX; // Track current column position
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
 
-                // Check if Qnty (column index 6) is negative
-                if (parseFloat(row[7]) < 0) {
-                    textColor = [255, 0, 0]; // Set red color for negative Qnty
-                }
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
-                // For total row, set bold font
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, 'bold');
-                }
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
-                if (isOddRow) {
-                    doc.setFillColor(240); // Light background color
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight,
-                        "F"
-                    );
-                }
+        doc.setDrawColor(0);
 
-                row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
-                    const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-                        : startY + (i - startIndex + 2) * rowHeight + 3;
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
 
-                    const cellX = currentX + 2;
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
 
-                    // For total row, keep bold font
-                    if (!isTotalRow) {
-                        doc.setFont(fontName, "normal");
-                    }
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
 
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
+        row.forEach((cell, cellIndex) => {
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-                    if (
-                        cellIndex === 6 ||
-                        cellIndex === 7 ||
-                        cellIndex === 8
-                    ) {
-                        const rightAlignX = currentX + columnWidths[cellIndex] - 2;
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    } else {
-                        // For empty cells in total row, add "Total" label centered
-                        if (isTotalRow && cellIndex === 0 && cell === "") {
-                            const totalLabelX = currentX + columnWidths[0] / 2;
-                            doc.text("", totalLabelX, cellY, {
-                                align: "center",
-                                baseline: "middle"
-                            });
-                        } else {
-                            doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle"
-                            });
-                        }
-                    }
+          const cellX = startX + 2;
 
-                    // Draw borders
-                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-                    const rowBottomY = rowTopY + rowHeight;
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    if (isTotalRow) {
-                        // Double horizontal borders for total row
-                        doc.setDrawColor(0);
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
 
-                        // Top border - double line
-                        doc.setLineWidth(0.3);
-                        doc.line(currentX, rowTopY, currentX + columnWidths[cellIndex], rowTopY);
-                        doc.line(currentX, rowTopY + 0.5, currentX + columnWidths[cellIndex], rowTopY + 0.5);
+          const cellValue = String(cell);
 
-                        // Bottom border - double line
-                        doc.line(currentX, rowBottomY, currentX + columnWidths[cellIndex], rowBottomY);
-                        doc.line(currentX, rowBottomY - 0.5, currentX + columnWidths[cellIndex], rowBottomY - 0.5);
-
-                        // Single vertical borders
-                        doc.setLineWidth(0.2);
-                        // Left border (only for first column)
-                        if (cellIndex === 0) {
-                            doc.line(currentX, rowTopY, currentX, rowBottomY);
-                        }
-                        // Right border
-                        doc.line(currentX + columnWidths[cellIndex], rowTopY, currentX + columnWidths[cellIndex], rowBottomY);
-                    } else {
-                        // Normal border for other rows
-                        doc.setDrawColor(0);
-                        doc.setLineWidth(0.2);
-                        doc.rect(
-                            currentX,
-                            rowTopY,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                    }
-
-                    // Move to next column
-                    currentX += columnWidths[cellIndex];
-                });
-
-                // Reset font after total row
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, "normal");
-                }
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 4 ) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+                        cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7 
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle",
+              });
             }
+          }
 
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth;
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-            const lineY = pageHeight - 15;
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY);
-            const headingFontSize = 12;
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
 
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2;
-            const headingY = lineY + 5;
-            doc.setFontSize(headingFontSize);
-            doc.setTextColor(0);
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    };
 
 
         // Function to calculate total table width
@@ -729,7 +730,7 @@ export default function DailyCreditReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 29; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -777,10 +778,10 @@ export default function DailyCreditReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-
+   doc.setFont("Times New Roman", "normal");
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
-
+   doc.setFont("verdana-regular", "normal");
                 addTitle(`Daily Credit Memo Report As on: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
@@ -812,26 +813,25 @@ export default function DailyCreditReport() {
                 let search = searchQuery ? searchQuery : "";
 
 
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
+            
 
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX, labelsY + 8); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${typestatus}`, labelsX + 15, labelsY + 8); // Draw the value next to the label
+   doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                          doc.text(`Type :`, labelsX, labelsY + 8); // Draw bold label
+   doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(`${typestatus}`, labelsX + 15, labelsY + 8); // Draw the value next to the label
 
                 if (searchQuery) {
-                    doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 170, labelsY + 8.5); // Draw bold label
-                    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 190, labelsY + 8.5); // Draw the value next to the label
+   doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                              doc.text(`Search :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+   doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                              doc.text(`${search}`, labelsX + 190, labelsY + 8.5); // Draw the value next to the label
                 }
 
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.setFontSize(10);
+             
 
                 startY += 10; // Adjust vertical position for the labels
 
@@ -974,8 +974,8 @@ export default function DailyCreditReport() {
         //    const typeAndStoreRow2 = worksheet.addRow(["STORE :", typecategory]);
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
-                ? ["TYPE :", typestatus, "", "", "", "", "SEARCH :", typesearch]
-                : ["TYPE :", typestatus, ""]
+                ? ["Type :", typestatus, "", "", "", "", "Search :", typesearch]
+                : ["Type :", typestatus, ""]
         );
 
 
@@ -1065,15 +1065,15 @@ export default function DailyCreditReport() {
         });
 
         const totalRow = worksheet.addRow([
+           String(formatValue(tableData.length.toLocaleString())),
             "",
             "",
             "",
             "",
-            "Total",
             "",
-            String(totalOpening),
-            String(totalPurchase),
-            String(totalBalance),
+            String(formatValue(totalPurchase)),
+            String(formatValue(totalOpening)),
+            String(formatValue(totalBalance)),
         ]);
 
         // total row added
@@ -1097,6 +1097,15 @@ export default function DailyCreditReport() {
 
             ) {
                 cell.alignment = { horizontal: "right" };
+            }
+
+             if (
+
+                colNumber === 1
+             
+
+            ) {
+                cell.alignment = { horizontal: "center" };
             }
         });
 
@@ -1158,7 +1167,7 @@ export default function DailyCreditReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `DailyCreditMemoReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `DailyCreditMemoReport As on ${toInputDate}.xlsx`);
     };
 
     const handleTransactionTypeChange = (event) => {
@@ -1299,36 +1308,40 @@ export default function DailyCreditReport() {
     };
 
     const firstColWidth = {
-        width: "5%",
+        width: "55px",
     };
     const secondColWidth = {
-        width: "7.5%",
+        width: "80px",
     };
     const thirdColWidth = {
-        width: "7.5%",
+        width: "80px",
     };
     const forthColWidth = {
-        width: "23%",
+        width: isSidebarVisible ? "200px" : "300px",
     };
     const fifthColWidth = {
-        width: "23%",
+        width: isSidebarVisible ? "200px" : "300px",
     };
     const sixthColWidth = {
-        width: "9%",
+        width: "90px",
     };
     const seventhColWidth = {
-        width: "8%",
+        width: "85px",
     };
     const eighthColWidth = {
-        width: "8.5%",
+        width: "85px",
     };
     const ninthColWidth = {
-        width: "8.5%",
+        width: "85px",
+    };
+
+    const sixthCol = {
+        width: "8px",
     };
 
     useHotkeys("alt+s", () => {
         fetchDailyStatusReport();
-           resetSorting();
+        resetSorting();
     }, { preventDefault: true, enableOnFormTags: true });
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
@@ -1348,28 +1361,27 @@ export default function DailyCreditReport() {
     }, []);
 
     const contentStyle = {
-        backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(82vw - 0%)" : "82vw",
+        width: "100%", // 100vw ki jagah 100%
+        maxWidth: isSidebarVisible ? "1000px" : "1200px",
+        height: "calc(100vh - 100px)",
         position: "absolute",
-        top: "53%",
-        left: isSidebarVisible ? "60%" : "50%",
-        transform: "translate(-50%, -50%)",
-        transition: isSidebarVisible
-            ? "left 3s ease-in-out, width 2s ease-in-out"
-            : "left 3s ease-in-out, width 2s ease-in-out",
+        top: "70px",
+        left: isSidebarVisible ? "60vw" : "52vw",
+        transform: "translateX(-50%)",
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
-        alignItems: "start",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        wordBreak: "break-word",
+        alignItems: "center",
+        overflow: "hidden",
         textAlign: "center",
-        maxWidth: "1100px",
         fontSize: "15px",
         fontStyle: "normal",
         fontWeight: "400",
         lineHeight: "23px",
         fontFamily: '"Poppins", sans-serif',
+        zIndex: 1,
+        padding: "0 20px", // Side padding for small screens
+        boxSizing: "border-box", // Padding ko width mein include kare
     };
 
     const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1507,6 +1519,11 @@ export default function DailyCreditReport() {
         }
     };
 
+    const formatValue = (val) => {
+        return Number(val) === 0 ? "" : val;
+    };
+
+
     return (
         <>
             <ToastContainer />
@@ -1515,7 +1532,7 @@ export default function DailyCreditReport() {
                     style={{
                         backgroundColor: getcolor,
                         color: fontcolor,
-                        width: "100%",
+                        // width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
                     }}
@@ -1645,32 +1662,56 @@ export default function DailyCreditReport() {
                                         </span>
                                     </label>
                                 </div>
-                                <select
-                                    ref={storeRef}
-                                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                    }}
-                                >
-                                    <option value="A">ALL</option>
-                                    <option value="N">NILL </option>
-                                    <option value="O">OUTSTANDING</option>
-                                </select>
+                                 <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={storeRef}
+                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="N">NILL</option>
+                    <option value="O">OUTSTANDING</option>
+                  </select>
+
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
                             </div>
 
                             {/* Search */}
@@ -1806,14 +1847,15 @@ export default function DailyCreditReport() {
                         <div
                             style={{
                                 overflowY: "auto",
-                                width: "98.8%",
+                                // width: "98.8%",
                             }}
                         >
                             <table
                                 className="myTable"
                                 id="table"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    //  width: "100%",
                                     position: "relative",
                                 }}
                             >
@@ -1949,6 +1991,13 @@ export default function DailyCreditReport() {
                                             ></i>
                                         </td>
 
+                                        <td
+                                            className="border-dark"
+                                            style={sixthCol}
+                                        >
+
+                                        </td>
+
                                     </tr>
                                 </thead>
                             </table>
@@ -1961,7 +2010,7 @@ export default function DailyCreditReport() {
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
                                 maxHeight: "52vh",
-                                width: "100%",
+                                // width: "100%",
                                 wordBreak: "break-word",
                             }}
                         >
@@ -1969,8 +2018,12 @@ export default function DailyCreditReport() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                    fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                    width: "100%",
                                     position: "relative",
+                                    width: "100%",
+                                    position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                                 }}
                             >
                                 <tbody id="tablebody">
@@ -2040,10 +2093,25 @@ export default function DailyCreditReport() {
                                                         <td className="text-start" style={thirdColWidth}>
                                                             {item.Code}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
+                                                        <td className="text-start"
+                                                            title={item.SalesMan}
+                                                            style={{
+                                                                ...forthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
                                                             {item.SalesMan}
                                                         </td>
-                                                        <td className="text-start" style={fifthColWidth}>
+                                                        <td className="text-start"
+                                                            title={item.Customer}
+                                                            style={{
+                                                                ...fifthColWidth,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}                                                    >
                                                             {item.Customer}
                                                         </td>
                                                         <td className="text-start" style={sixthColWidth}>
@@ -2103,7 +2171,7 @@ export default function DailyCreditReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "10px"
+                            paddingRight: "8px"
                         }}
                     >
                         <div
@@ -2113,7 +2181,10 @@ export default function DailyCreditReport() {
                                 marginLeft: "2px",
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+                            <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString())}</span>
+
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2164,7 +2235,7 @@ export default function DailyCreditReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalPurchase}</span>
+                            <span className="mobileledger_total">{formatValue(totalPurchase)}</span>
                         </div>
                         <div
                             style={{
@@ -2173,7 +2244,7 @@ export default function DailyCreditReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalOpening}</span>
+                            <span className="mobileledger_total">{formatValue(totalOpening)}</span>
                         </div>
                         <div
                             style={{
@@ -2182,7 +2253,7 @@ export default function DailyCreditReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalBalance}</span>
+                            <span className="mobileledger_total">{formatValue(totalBalance)}</span>
                         </div>
 
                     </div>
@@ -2196,7 +2267,6 @@ export default function DailyCreditReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2205,7 +2275,6 @@ export default function DailyCreditReport() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2214,7 +2283,6 @@ export default function DailyCreditReport() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2225,11 +2293,10 @@ export default function DailyCreditReport() {
                             text="Select"
                             ref={input3Ref}
                             // onClick={fetchDailyStatusReport}
-                            onClick={()=>{
+                            onClick={() => {
                                 fetchDailyStatusReport();
                                 resetSorting();
                             }}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
