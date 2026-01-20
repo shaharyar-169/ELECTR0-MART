@@ -407,12 +407,13 @@ export default function SupplierLedger1() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
-            // code: 'NASIRTRD',
-            // FLocCod: '001',
-            // FYerDsc: '2024-2024',
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getyeardescription,
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
+            FSchTxt: searchQuery
         }).toString();
 
         axios

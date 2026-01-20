@@ -460,12 +460,12 @@ export default function CompanyMonthlyJobComparison() {
       FAreCod: Areaselectdatavalue,
       FCtyCod: Cityselectdatavalue,
       FSchTxt: searchQuery,
-        code: organisation.code,
-        FLocCod: locationnumber || getLocationNumber,
-        FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
 
-    //   code: "IZONECOMP",
-    //   FLocCod: "001",
+      //   code: "IZONECOMP",
+      //   FLocCod: "001",
     }).toString();
 
     axios
@@ -919,26 +919,39 @@ export default function CompanyMonthlyJobComparison() {
     // Define table data (rows)
     const rows = tableData.map((item) => [
       item.Jan,
-        item.Feb,
-        item.Mar,
-        item.Apr,
-        item.May,
-        item.Jun,
-        item.Jul,
-        item.Aug,
-        item.Sep,
-        item.Oct,
-        item.Nov,
-          item.Dec,
+      item.Feb,
+      item.Mar,
+      item.Apr,
+      item.May,
+      item.Jun,
+      item.Jul,
+      item.Aug,
+      item.Sep,
+      item.Oct,
+      item.Nov,
+      item.Dec,
     ]);
 
     // Add summary row to the table
 
-    rows.push(["", "", "", "", "", "", "", "", "", "", "",String(formatValue(totalDebit))]);
+    rows.push([
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      String(formatValue(totalDebit)),
+    ]);
 
     // Define table column headers and individual column widths
     const headers = [
-     "Jan",
+      "Jan",
       "Fab",
       "Mar",
       "Apr",
@@ -951,7 +964,7 @@ export default function CompanyMonthlyJobComparison() {
       "Nov",
       "Dec",
     ];
-    const columnWidths = [22 ,22,22,22,22,22,22,22,22,22,22,22];
+    const columnWidths = [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -996,167 +1009,172 @@ export default function CompanyMonthlyJobComparison() {
     };
 
     const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5;
-            const fontSize = 10;
-            const boldFont = 400;
-            const normalFont = getfontstyle;
-            const tableWidth = getTotalTableWidth();
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(11);
+      doc.setFontSize(11);
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-                const isTotalRow = i === rows.length - 1;
-                let textColor = [0, 0, 0];
-                let fontName = normalFont;
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-                if (isRedRow) {
-                    textColor = [255, 0, 0];
-                    fontName = boldFont;
-                }
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
 
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, 'bold');
-                }
+        if (isTotalRow) {
+          doc.setFont(getfontstyle, "bold");
+        }
 
-                // Set background color for odd-numbered rows
-                if (isOddRow) {
-                    doc.setFillColor(240); // Light background color
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight,
-                        "F"
-                    );
-                }
+        // Set background color for odd-numbered rows
+        if (isOddRow) {
+          doc.setFillColor(240); // Light background color
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
-                doc.setDrawColor(0);
+        doc.setDrawColor(0);
 
-                // For total row - special border handling
-                if (isTotalRow) {
-                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-                    const rowBottomY = rowTopY + rowHeight;
+        // For total row - special border handling
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
 
-                    // Draw double top border
-                    doc.setLineWidth(0.3);
-                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+          // Draw double top border
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                    // Draw double bottom border
-                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
+          // Draw double bottom border
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
 
-                    // Draw single vertical borders
-                    doc.setLineWidth(0.2);
-                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
-                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
-                } else {
-                    // Normal border for other rows
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
-                }
+          // Draw single vertical borders
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          ); // Right border
+        } else {
+          // Normal border for other rows
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
 
-                row.forEach((cell, cellIndex) => {
-                    const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-                        : startY + (i - startIndex + 2) * rowHeight + 3;
+        row.forEach((cell, cellIndex) => {
+          const cellY = isTotalRow
+            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
+            : startY + (i - startIndex + 2) * rowHeight + 3;
 
-                    const cellX = startX + 2;
+          const cellX = startX + 2;
 
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    if (!isTotalRow) {
-                        doc.setFont(fontName, "normal");
-                    }
+          if (!isTotalRow) {
+            doc.setFont(fontName, "normal");
+          }
 
-                    const cellValue = String(cell);
+          const cellValue = String(cell);
 
-                    if (cellIndex === 20) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
-                    }
-
-                    else if (
-                        cellIndex === 0 || 
-                        cellIndex === 1 ||
-                         cellIndex === 2 ||
-                         cellIndex === 3 || 
-                        cellIndex === 4 ||
-                         cellIndex === 5 ||
-                         cellIndex === 6 || 
-                        cellIndex === 7||
-                         cellIndex === 8 ||
-                         cellIndex === 9 || 
-                        cellIndex === 10||
-                         cellIndex === 11
-                      
-                       
-                        ) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle", // This centers vertically
-                        });
-                    } else {
-                        // For empty cells in total row, add "Total" label centered
-                        if (isTotalRow && cellIndex === 0 && cell === "") {
-                            const totalLabelX = startX + columnWidths[0] / 2;
-                            doc.text("", totalLabelX, cellY, {
-                                align: "center",
-                                baseline: "middle"
-                            });
-                        } else {
-                            doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle" // This centers vertically
-                            });
-                        }
-
-                    }
-
-                    // Draw column borders
-                    if (cellIndex < row.length - 1) {
-                        doc.setLineWidth(0.2);
-                        doc.line(
-                            startX + columnWidths[cellIndex],
-                            startY + (i - startIndex + 2) * rowHeight,
-                            startX + columnWidths[cellIndex],
-                            startY + (i - startIndex + 3) * rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
-
-                startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, "normal");
-                }
+          if (cellIndex === 20) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 0 ||
+            cellIndex === 1 ||
+            cellIndex === 2 ||
+            cellIndex === 3 ||
+            cellIndex === 4 ||
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7 ||
+            cellIndex === 8 ||
+            cellIndex === 9 ||
+            cellIndex === 10 ||
+            cellIndex === 11
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle", // This centers vertically
+            });
+          } else {
+            // For empty cells in total row, add "Total" label centered
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle", // This centers vertically
+              });
             }
+          }
 
-            // Footer section
-            const lineWidth = tableWidth;
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-            const lineY = pageHeight - 15;
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY);
-            const headingFontSize = 11;
-            const headingX = lineX + 2;
-            const headingY = lineY + 5;
-            doc.setFontSize(headingFontSize);
-            doc.setTextColor(0);
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+          // Draw column borders
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
+
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont(getfontstyle, "normal");
+        }
+      }
+
+      // Footer section
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFontSize(headingFontSize);
+      doc.setTextColor(0);
+      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+    };
 
     // Function to calculate total table width
     const getTotalTableWidth = () => {
@@ -1238,109 +1256,107 @@ export default function CompanyMonthlyJobComparison() {
         doc.setFontSize(12);
         doc.setFont(getfontstyle, "300");
         let search1 = searchQuery ? searchQuery : "";
-        
-    let referencecode = Referenceselectdatavalue.label
-      ? Referenceselectdatavalue.label
-      : "ALL";
 
-    let typececode = Typeselectdatavalue.label
-      ? Typeselectdatavalue.label
-      : "ALL";
+        let referencecode = Referenceselectdatavalue.label
+          ? Referenceselectdatavalue.label
+          : "ALL";
 
-    let Citycode = Cityselectdatavalue.label
-      ? Cityselectdatavalue.label
-      : "ALL";
-    let Areacode = Areaselectdatavalue.label
-      ? Areaselectdatavalue.label
-      : "ALL";
+        let typececode = Typeselectdatavalue.label
+          ? Typeselectdatavalue.label
+          : "ALL";
 
-    let technicianvalue = Technicianselectdatavalue.label
-      ? Technicianselectdatavalue.label
-      : "ALL";
+        let Citycode = Cityselectdatavalue.label
+          ? Cityselectdatavalue.label
+          : "ALL";
+        let Areacode = Areaselectdatavalue.label
+          ? Areaselectdatavalue.label
+          : "ALL";
 
-    let categoryvalue = Categoryselectdatavalue.label
-      ? Categoryselectdatavalue.label
-      : "ALL";
+        let technicianvalue = Technicianselectdatavalue.label
+          ? Technicianselectdatavalue.label
+          : "ALL";
 
-    let companyvalue = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
+        let categoryvalue = Categoryselectdatavalue.label
+          ? Categoryselectdatavalue.label
+          : "ALL";
 
-    let statuscode =
-      transectionType === "N"
-        ? "UNASSIGN"
-        : transectionType === "P"
-        ? "PENDING "
-        : transectionType === "W"
-        ? "WORKING"
-        : transectionType === "R"
-        ? "PARTS PENDING"
-        : transectionType === "K"
-        ? "REFER TO WORKSHOP"
-        : transectionType === "T"
-        ? "NOT SOLVE"
-        : transectionType === "O"
-        ? "RE-OPEN"
-        : transectionType === "E"
-        ? "REPLACEMENT"
-        : transectionType === "D"
-        ? "DONE "
-        : transectionType === "S"
-        ? "CLOSE"
-        : transectionType === "C"
-        ? "CANCLE"
-        : "ALL";
+        let companyvalue = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";
+
+        let statuscode =
+          transectionType === "N"
+            ? "UNASSIGN"
+            : transectionType === "P"
+            ? "PENDING "
+            : transectionType === "W"
+            ? "WORKING"
+            : transectionType === "R"
+            ? "PARTS PENDING"
+            : transectionType === "K"
+            ? "REFER TO WORKSHOP"
+            : transectionType === "T"
+            ? "NOT SOLVE"
+            : transectionType === "O"
+            ? "RE-OPEN"
+            : transectionType === "E"
+            ? "REPLACEMENT"
+            : transectionType === "D"
+            ? "DONE "
+            : transectionType === "S"
+            ? "CLOSE"
+            : transectionType === "C"
+            ? "CANCLE"
+            : "ALL";
 
         // Set font style, size, and family
         doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
         doc.setFontSize(10); // Font size
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`COMPANY :`, labelsX, labelsY +8.5 ); // Draw bold label
+        doc.text(`COMPANY :`, labelsX, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${companyvalue}`, labelsX + 25, labelsY +8.5 ); // Draw the value next to the label
+        doc.text(`${companyvalue}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CATEGORY :`, labelsX + 100, labelsY +8.5 ); // Draw bold label
+        doc.text(`CATEGORY :`, labelsX + 100, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${categoryvalue}`, labelsX + 125, labelsY +8.5  ); // Draw the value next to the label
+        doc.text(`${categoryvalue}`, labelsX + 125, labelsY + 8.5); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 200, labelsY+8.5  ); // Draw bold label
+        doc.text(`TYPE :`, labelsX + 200, labelsY + 8.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typececode}`, labelsX + 215, labelsY +8.5 ); // Draw the value next to the label
+        doc.text(`${typececode}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
 
-      
-///////////////////////////////////////////////////////////
-   doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TECNICIAN :`, labelsX, labelsY +12.5 ); // Draw bold label
+        ///////////////////////////////////////////////////////////
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`TECNICIAN :`, labelsX, labelsY + 12.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${technicianvalue}`, labelsX + 25, labelsY +12.5 ); // Draw the value next to the label
+        doc.text(`${technicianvalue}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`REFERENCE :`, labelsX + 100, labelsY +12.5 ); // Draw bold label
+        doc.text(`REFERENCE :`, labelsX + 100, labelsY + 12.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${referencecode}`, labelsX + 125, labelsY +12.5  ); // Draw the value next to the label
+        doc.text(`${referencecode}`, labelsX + 125, labelsY + 12.5); // Draw the value next to the label
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX + 200, labelsY+12.5  ); // Draw bold label
+        doc.text(`STATUS :`, labelsX + 200, labelsY + 12.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${statuscode}`, labelsX + 220, labelsY +12.5 ); // Draw the value next to the label
+        doc.text(`${statuscode}`, labelsX + 220, labelsY + 12.5); // Draw the value next to the label
 
-
- ///////////////////////////////////////////////////////////////////
-       
- doc.setFont(getfontstyle, "bold"); // Set font to bold
-    doc.text(`CITY :`, labelsX, labelsY +16.5 ); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${Citycode}`, labelsX + 25, labelsY +16.5 ); // Draw the value next to the label
+        ///////////////////////////////////////////////////////////////////
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`AREA :`, labelsX + 100, labelsY +16.5 ); // Draw bold label
+        doc.text(`CITY :`, labelsX, labelsY + 16.5); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${Areacode}`, labelsX + 125, labelsY +16.5  ); // Draw the value next to the label
+        doc.text(`${Citycode}`, labelsX + 25, labelsY + 16.5); // Draw the value next to the label
 
-               if (searchQuery) {
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`AREA :`, labelsX + 100, labelsY + 16.5); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${Areacode}`, labelsX + 125, labelsY + 16.5); // Draw the value next to the label
+
+        if (searchQuery) {
           doc.setFont(getfontstyle, "bold"); // Set font to bold
           doc.text(`SEARCH :`, labelsX + 200, labelsY + 16.5); // Draw bold label
           doc.setFont(getfontstyle, "normal"); // Reset font to normal
@@ -1394,12 +1410,10 @@ export default function CompanyMonthlyJobComparison() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`DailyJobReport Form ${fromInputDate} To ${toInputDate}.pdf`);
+    doc.save(`MonthlyJobComparisonReport As On ${date}.pdf`);
   };
 
   ///////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-
-
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -1654,7 +1668,7 @@ export default function CompanyMonthlyJobComparison() {
         item.Sep,
         item.Oct,
         item.Nov,
-          item.Dec,
+        item.Dec,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1673,7 +1687,7 @@ export default function CompanyMonthlyJobComparison() {
     });
 
     // Set column widths
-    [12,12,12,12,12,12,12,12,12,12,12,12].forEach((width, index) => {
+    [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1687,7 +1701,7 @@ export default function CompanyMonthlyJobComparison() {
       "",
       "",
       "",
-       "",
+      "",
       "",
       String(formatValue(totalDebit)),
     ]);

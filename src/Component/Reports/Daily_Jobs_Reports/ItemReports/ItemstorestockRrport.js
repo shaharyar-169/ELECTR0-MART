@@ -68,6 +68,7 @@ export default function ItemStoreStockReport() {
     const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
 
     const [GetCategory, setGetCategory] = useState([]);
+     const [GetHeading, setGetHeading] = useState([]);
 
     const [Typeselectdata, setTypeselectdata] = useState("");
     const [typeselectdatavalue, settypeselectdatavalue] = useState("");
@@ -305,6 +306,29 @@ export default function ItemStoreStockReport() {
         );
         setSelectedfromDate(firstDateOfCurrentMonth);
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    }, []);
+
+     useEffect(() => {
+        const apiUrl = apiLinks + "/GetStore.php";
+        const formData = new URLSearchParams({
+            code: organisation.code,
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                if (response.data && Array.isArray(response.data)) {
+                    setGetHeading(response.data);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setGetHeading([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
     }, []);
 
     useEffect(() => {
@@ -646,10 +670,7 @@ export default function ItemStoreStockReport() {
             "Rate",
               "Qnty",
             "Amount",
-            "GD-1",
-              "GD-2",
-                "GD-3",
-                  "GD-4",
+             ...GetHeading.map(heading => heading.tstrabb),
                     "GD-5",
           
         ];
@@ -980,22 +1001,22 @@ export default function ItemStoreStockReport() {
                 doc.setFontSize(10); // Font size
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
+                doc.text(`Company :`, labelsX, labelsY); // Draw bold label
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
+                doc.text(`Store :`, labelsX + 180, labelsY); // Draw bold label
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
+                doc.text(`Category :`, labelsX, labelsY + 4.3); // Draw bold label
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`RATE :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                doc.text(`Rate :`, labelsX + 180, labelsY + 4.3); // Draw bold label
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${RATE}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
@@ -1006,21 +1027,21 @@ export default function ItemStoreStockReport() {
 
 
                 doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+                doc.text(`Capacity :`, labelsX, labelsY + 8.5); // Draw bold label
                 doc.setFont(getfontstyle, "normal"); // Reset font to normal
                 doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
 
                
                     doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+                    doc.text(`Status :`, labelsX + 180, labelsY + 8.5); // Draw bold label
                     doc.setFont(getfontstyle, "normal"); // Reset font to normal
                     doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
                 
 
                 if (searchQuery) {
                     doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 12.5); // Draw bold label
+                    doc.text(`Search :`, labelsX + 180, labelsY + 12.5); // Draw bold label
                     doc.setFont(getfontstyle, "normal"); // Reset font to normal
                     doc.text(`${search}`, labelsX + 205, labelsY + 12.5); // Draw the value next to the label
                 }
@@ -1179,43 +1200,43 @@ export default function ItemStoreStockReport() {
 
         // Add first row
         const typeAndStoreRow = worksheet.addRow([
-            "COMPANY :",
+            "Company :",
             typecompany,
              "",
              "",
               "",
                "",
-            "STORE :",
+            "Store :",
             typetype,
         ]);
 
         // Add second row
         const typeAndStoreRow2 = worksheet.addRow([
-            "CATEGORY :",
+            "Category :",
             typecategory,
             "",
              "",
               "",
                "",
-            "RATE :",
+            "Rate :",
             RATE,
         ]);
 
         const typeAndStoreRow3 = worksheet.addRow([
-            "CAPACITY :",
+            "Capacity :",
             typecapacity,
             "",
              "",
               "",
                "",
-            "STATUS :",
+            "Status :",
             transectionsts,
         ]);
 
         // Add third row with conditional rendering for "SEARCH:"
         const typeAndStoreRow4 = worksheet.addRow(
             searchQuery
-                ? ["", "","","", "","", "SEARCH :", typesearch]
+                ? ["", "","","", "","", "Search :", typesearch]
                 : [""]
         );
 
@@ -1278,10 +1299,7 @@ export default function ItemStoreStockReport() {
             "Rate",
               "Qnty",
             "Amount",
-            "GD-1",
-              "GD-2",
-                "GD-3",
-                  "GD-4",
+              ...GetHeading.map(heading => heading.tstrabb),
                     "GD-5",
            
         ];
@@ -2681,7 +2699,7 @@ color: isNegative ? "red" : fontcolor
                                         backgroundColor: tableHeadColor,
                                     }}
                                 >
-                                    <tr
+                                    {/* <tr
                                         style={{
                                             backgroundColor: tableHeadColor,
                                             color: "white",
@@ -2771,7 +2789,7 @@ color: isNegative ? "red" : fontcolor
                       style={seventhColWidth}
                       onClick={() => handleSorting("Qnt003")}
                     >
-                       GD-32{" "}
+                       GD-3{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Qnt003")}
@@ -2782,7 +2800,7 @@ color: isNegative ? "red" : fontcolor
                       style={eightColWidth}
                       onClick={() => handleSorting("Qnt004")}
                     >
-                       GD-41{" "}
+                       GD-4{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Qnt004")}
@@ -2806,7 +2824,114 @@ color: isNegative ? "red" : fontcolor
                                     
                                        
                                       
-                                    </tr>
+                                    </tr> */}
+
+                                    <tr style={{
+    backgroundColor: tableHeadColor,
+    color: "white",
+}}>
+    {/* Fixed columns */}
+    <td
+        className="border-dark"
+        style={firstColWidth}
+        onClick={() => handleSorting("Code")}
+    >
+        Code{" "}
+        <i
+            className="fa-solid fa-caret-down caretIconStyle"
+            style={getIconStyle("Code")}
+        ></i>
+    </td>
+    <td
+        className="border-dark"
+        style={secondColWidth}
+        onClick={() => handleSorting("Description")}
+    >
+        Description{" "}
+        <i
+            className="fa-solid fa-caret-down caretIconStyle"
+            style={getIconStyle("Description")}
+        ></i>
+    </td>
+    <td
+        className="border-dark"
+        style={thirdColWidth}
+        onClick={() => handleSorting("Rate")}
+    >
+        Rate{" "}
+        <i
+            className="fa-solid fa-caret-down caretIconStyle"
+            style={getIconStyle("Rate")}
+        ></i>
+    </td>
+    <td
+        className="border-dark"
+        style={tenthColWidth}
+        onClick={() => handleSorting("Qnty")}
+    >
+        Qnty{" "}
+        <i
+            className="fa-solid fa-caret-down caretIconStyle"
+            style={getIconStyle("Qnty")}
+        ></i>
+    </td>
+    <td
+        className="border-dark"
+        style={elewenthColWidth}
+        onClick={() => handleSorting("Amount")}
+    >
+        Amount{" "}
+        <i
+            className="fa-solid fa-caret-down caretIconStyle"
+            style={getIconStyle("Amount")}
+        ></i>
+    </td>
+    
+    {/* Dynamic GD columns from GetHeading */}
+    {GetHeading.map((heading, index) => {
+        // Generate sorting key like "Qnt001", "Qnt002", etc.
+        const sortKey = `Qnt${String(index + 1).padStart(3, '0')}`;
+        
+        // Define width for each column (you may need to adjust this)
+        const width = [
+            forthColWidth,     // index 0 -> GD-1
+            sixthColWidth,     // index 1 -> GD-2  
+            seventhColWidth,   // index 2 -> GD-3
+            eightColWidth,     // index 3 -> GD-4
+            ninthColWidth      // index 4 -> GD-5
+        ][index] || {};        // Default empty object if index exceeds
+        
+        return (
+            <td
+                key={heading.id || index}
+                className="border-dark"
+                style={width}
+                onClick={() => handleSorting(sortKey)}
+            >
+                {heading.tstrabb}{" "}
+                <i
+                    className="fa-solid fa-caret-down caretIconStyle"
+                    style={getIconStyle(sortKey)}
+                ></i>
+            </td>
+        );
+    })}
+
+     <td
+        className="border-dark"
+        style={forthColWidth}
+        onClick={() => handleSorting("Qnt005")}
+    >
+        GD-5{" "}
+        <i
+            className="fa-solid fa-caret-down caretIconStyle"
+            style={getIconStyle("Qnt005")}
+        ></i>
+    </td>
+    
+    {/* Empty column remains */}
+    <td className="border-dark" style={sixthcol}></td>
+</tr>
                                 </thead>
                             </table>
                         </div>

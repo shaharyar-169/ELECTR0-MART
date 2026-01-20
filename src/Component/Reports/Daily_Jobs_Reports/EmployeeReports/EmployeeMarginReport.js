@@ -53,7 +53,7 @@ export default function EmployeeMarginReport() {
   const [GetEmployee, setGetEmployee] = useState([]);
   const [Employeeselectdata, setEmployeeselectdata] = useState("");
   const [Employeeselectdatavalue, setEmployeeselectdatavalue] = useState("");
-
+ const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
   const [storeList, setStoreList] = useState([]);
   const [storeType, setStoreType] = useState("");
 
@@ -527,7 +527,7 @@ export default function EmployeeMarginReport() {
     label: `${item.tempcod}-${item.tempnam.trim()}`,
   }));
 
-  const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
+ 
   useEffect(() => {
     if (GetEmployee.length > 0) {
       setIsOptionsLoaded(true);

@@ -402,12 +402,12 @@ export default function TechnicianJobStatusReport() {
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      FSchTxt: searchQuery,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
 
-      code: "IZONECOMP",
-      FLocCod: "001",
+    //   code: "IZONECOMP",
+    //   FLocCod: "001",
     }).toString();
 
     axios

@@ -754,77 +754,7 @@ export default function CustomerProgressLedger() {
 
     // ================= BALANCE AGING ROW (DO NOT TOUCH OTHER CODE) =================
 
-// const drawBalanceAgingRow = (startX, startY) => {
-//   const rowHeight = 12;
-//   const halfHeight = rowHeight / 2;
 
-//   const colWidth = 25;
-//   const totalWidth = colWidth * 6;
-
-//   const labels = [
-//     "0 - 30",
-//     "31 - 60",
-//     "61 - 90",
-//     "91 - 120",
-//     "121 - 150",
-//     "150 +",
-//   ];
-
-//   const values = [
-//     formatValue("1323720"),
-//     "",
-//     formatValue("1050000"),
-//     "",
-//     formatValue("275150"),
-//     formatValue("1537178"),
-//   ];
-
-//   let currentX = startX;
-
-//   // Background
-//   doc.setFillColor(220, 220, 220);
-//   doc.rect(startX, startY, totalWidth, rowHeight, "F");
-
-//   doc.setFont(getfontstyle, "bold");
-//   doc.setFontSize(11);
-//   doc.setTextColor(0);
-
-//   // ===== 6 AGING COLUMNS ONLY =====
-//   for (let i = 0; i < 6; i++) {
-//     // Outer border
-//     doc.setLineWidth(0.1);
-//     doc.rect(currentX, startY, colWidth, rowHeight);
-
-//     // Horizontal split
-//     doc.line(
-//       currentX,
-//       startY + halfHeight,
-//       currentX + colWidth,
-//       startY + halfHeight
-//     );
-
-//     // Top label (bold)
-//     doc.setFontSize(10);
-//     doc.text(
-//       labels[i],
-//       currentX + colWidth / 2,
-//       startY + halfHeight / 1.5,
-//       { align: "center" }
-//     );
-
-//     // Bottom value (normal)
-//     doc.setFontSize(11);
-//     doc.setFont(getfontstyle, "normal");
-//     doc.text(
-//       values[i],
-//       currentX + colWidth / 2,
-//       startY + halfHeight + halfHeight / 1.4,
-//       { align: "center" }
-//     );
-
-//     currentX += colWidth;
-//   }
-// };
 
 
 const drawBalanceAgingRow = (startX, startY) => {
@@ -1204,9 +1134,6 @@ if (isTotalRow) {
     // Save the PDF files
     doc.save(`CustomerProgressReport As On ${currentdate}.pdf`);
   };
-
-
- 
 
 
   const handleDownloadCSV = async () => {

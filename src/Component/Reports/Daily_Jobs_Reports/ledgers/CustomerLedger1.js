@@ -412,12 +412,14 @@ export default function CustomerLedgerReport() {
       FFnlDat: toInputDate,
       FTrnTyp: transectionType,
       FAccCod: saleType,
-          // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getYearDescription,
-      code: "AMRELEC",
-      FLocCod: "001",
-      FYerDsc: "2019-2025",
+    
+
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
+    //   code: "AMRELEC",
+    //   FLocCod: "001",
+    //   FYerDsc: "2019-2025",
     }).toString();
 
     axios

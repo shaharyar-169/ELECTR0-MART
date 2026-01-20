@@ -1343,7 +1343,7 @@ export default function DailyJobReport() {
       doc.setFontSize(12);
     };
 
-      const addTableRows = (startX, startY, startIndex, endIndex) => {
+    const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
@@ -1439,11 +1439,7 @@ export default function DailyJobReport() {
               align: "center",
               baseline: "middle",
             });
-          } else if (
-            cellIndex === 10
-          
-            
-          ) {
+          } else if (cellIndex === 10) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1665,10 +1661,10 @@ export default function DailyJobReport() {
         doc.setFontSize(10);
         doc.text(`${categoryvalue}`, labelsX + 125, labelsY + 8.5); // Draw the value next to the label
 
-       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`Type :`, labelsX + 200, labelsY + 8.5); // Draw bold label
-         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`${typececode}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
 
@@ -1680,17 +1676,17 @@ export default function DailyJobReport() {
         doc.setFontSize(10);
         doc.text(`${technicianvalue}`, labelsX + 28, labelsY + 12.5); // Draw the value next to the label
 
-       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-          doc.text(`Reference :`, labelsX + 100, labelsY + 12.8); // Draw bold label
-         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.text(`Reference :`, labelsX + 100, labelsY + 12.8); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`${referencecode}`, labelsX + 128, labelsY + 12.5); // Draw the value next to the label
 
-       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-          doc.text(`Status :`, labelsX + 200, labelsY + 12.8); // Draw bold label
-         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.text(`Status :`, labelsX + 200, labelsY + 12.8); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`${statuscode}`, labelsX + 220, labelsY + 12.5); // Draw the value next to the label
 
@@ -1703,24 +1699,24 @@ export default function DailyJobReport() {
         doc.setFontSize(10);
         doc.text(`${Citycode}`, labelsX + 25, labelsY + 16.8); // Draw the value next to the label
 
-      doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`Area :`, labelsX + 100, labelsY + 16.8); // Draw bold label
-          doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`${Areacode}`, labelsX + 125, labelsY + 16.8); // Draw the value next to the label
 
-         doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`Warranty :`, labelsX + 200, labelsY + 16.8); // Draw bold label
-       doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`${Warrantydata}`, labelsX + 228, labelsY + 16.8); // Draw the value next to the label
 
-       doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`Complain :`, labelsX, labelsY + 21.5); // Draw bold label
-         doc.setFont("verdana-regular", "normal"); // Set font to bold
+        doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`${complainvalue}`, labelsX + 25, labelsY + 21.5); // Draw the value next to the label
 
@@ -1732,10 +1728,10 @@ export default function DailyJobReport() {
         doc.text(`${Naturedata}`, labelsX + 125, labelsY + 21.5); // Draw the value next to the label
 
         if (searchQuery) {
-           doc.setFont("verdana", "bold"); // Set font to bold
+          doc.setFont("verdana", "bold"); // Set font to bold
           doc.setFontSize(10);
           doc.text(`Search :`, labelsX + 200, labelsY + 21.5); // Draw bold label
-         doc.setFont("verdana-regular", "normal"); // Set font to bold
+          doc.setFont("verdana-regular", "normal"); // Set font to bold
           doc.setFontSize(10);
           doc.text(`${search1}`, labelsX + 220, labelsY + 21.5); // Draw the value next to the label
         }
@@ -1948,8 +1944,9 @@ export default function DailyJobReport() {
       "Type :",
       typececode,
     ]);
-         worksheet.mergeCells(`B${typeAndStoreRow.number}:C${typeAndStoreRow.number}`);
-
+    worksheet.mergeCells(
+      `B${typeAndStoreRow.number}:C${typeAndStoreRow.number}`
+    );
 
     const typeAndStoreRow4 = worksheet.addRow([
       "Technician :",
@@ -1964,8 +1961,9 @@ export default function DailyJobReport() {
       statuscode,
     ]);
 
-             worksheet.mergeCells(`B${typeAndStoreRow4.number}:C${typeAndStoreRow4.number}`);
-
+    worksheet.mergeCells(
+      `B${typeAndStoreRow4.number}:C${typeAndStoreRow4.number}`
+    );
 
     let typesearch = searchQuery || "";
 
@@ -1982,7 +1980,9 @@ export default function DailyJobReport() {
       Warrantydata,
     ]);
 
-             worksheet.mergeCells(`B${typeAndStoreRow3.number}:C${typeAndStoreRow3.number}`);
+    worksheet.mergeCells(
+      `B${typeAndStoreRow3.number}:C${typeAndStoreRow3.number}`
+    );
 
     const typeAndStoreRow5 = worksheet.addRow(
       searchQuery
@@ -2001,7 +2001,9 @@ export default function DailyJobReport() {
         : ["Complain :", complainvalue, "", "", "Nature :", Naturedata]
     );
 
-             worksheet.mergeCells(`B${typeAndStoreRow5.number}:C${typeAndStoreRow5.number}`);
+    worksheet.mergeCells(
+      `B${typeAndStoreRow5.number}:C${typeAndStoreRow5.number}`
+    );
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
@@ -3933,8 +3935,7 @@ export default function DailyJobReport() {
                 justifyContent: "space-between",
               }}
             >
-
-               <div
+              <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "6px" }}
               >
@@ -4005,7 +4006,6 @@ export default function DailyJobReport() {
                   />
                 </div>
               </div>
-             
             </div>
           </div>
 

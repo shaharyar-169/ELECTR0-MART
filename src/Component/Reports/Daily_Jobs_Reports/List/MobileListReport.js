@@ -487,10 +487,7 @@ export default function MobileListReport() {
     doc.save(`MobileList As On ${date}.pdf`);
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-
-
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
@@ -652,7 +649,6 @@ export default function MobileListReport() {
     });
     saveAs(blob, `MobileList As On ${currentDate}.xlsx`);
   };
-
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();

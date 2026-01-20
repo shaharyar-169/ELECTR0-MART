@@ -458,19 +458,89 @@ export default function MobileLedger() {
         }
     }, []);
 
-    useEffect(() => {
-        const currentDate = new Date();
-        setSelectedToDate(currentDate);
-        settoInputDate(formatDate(currentDate));
+   
+useEffect(() => {
+  const storedData = sessionStorage.getItem("MobileLedgerData");
 
-        const firstDateOfCurrentMonth = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
+  if (storedData) {
+    try {
+      const parsedData = JSON.parse(storedData);
+
+      // Only proceed if doubleClick AND has the doubleClick flag
+      if (parsedData.source === "doubleClick") {
+        console.log("Setting data from double-click session");
+
+        // 📱 MOBILE
+        if (parsedData.Mobile) {
+          const value = parsedData.Mobile
+            .toString()
+            .replace(/\D/g, "")
+            .slice(0, 11);
+          setmobileNumber(value);
+        }
+
+        // 📅 DATE
+        if (parsedData.toInputDate) {
+          const [day, month, year] = parsedData.toInputDate.split("-");
+          const toDate = new Date(year, month - 1, day);
+
+          setSelectedToDate(toDate);
+          settoInputDate(formatDate(toDate));
+
+          const firstDate = new Date(
+            toDate.getFullYear(),
+            toDate.getMonth(),
             1
-        );
-        setSelectedfromDate(firstDateOfCurrentMonth);
-        setfromInputDate(formatDate(firstDateOfCurrentMonth));
-    }, []);
+          );
+          setSelectedfromDate(firstDate);
+          setfromInputDate(formatDate(firstDate));
+        }
+
+        // ✅ CALL API AFTER SESSION DATA IS SET
+        // Clear session after reading
+        sessionStorage.removeItem("MobileLedgerData");
+
+        // Set a flag to indicate we've processed the double-click
+        sessionStorage.setItem("MobileLedgerProcessed", "true");
+
+        return; // Exit early since session data applied
+      } else {
+        // If session exists but not from double-click, clear it
+        console.log("Clearing non-double-click session data");
+        sessionStorage.removeItem("MobileLedgerData");
+      }
+
+    } catch (err) {
+      console.error("Invalid MobileLedgerData", err);
+      // Clear invalid session data
+      sessionStorage.removeItem("MobileLedgerData");
+    }
+  }
+
+  // Check if we should apply default dates (when opening independently)
+  // Only apply defaults if we haven't just processed a double-click
+  const processedDoubleClick = sessionStorage.getItem("MobileLedgerProcessed");
+
+  if (!processedDoubleClick) {
+    console.log("Setting default dates for independent opening");
+
+    // ⬇️ Normal default dates
+    const currentDate = new Date();
+    setSelectedToDate(currentDate);
+    settoInputDate(formatDate(currentDate));
+
+    const firstDateOfCurrentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    setSelectedfromDate(firstDateOfCurrentMonth);
+    setfromInputDate(formatDate(firstDateOfCurrentMonth));
+  } else {
+    // Clear the processed flag for future visits
+    sessionStorage.removeItem("MobileLedgerProcessed");
+  }
+}, []);
 
     const exportPDFHandler = () => {
 
@@ -829,10 +899,6 @@ export default function MobileLedger() {
 
 
     };
-
-
-
-
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
@@ -1168,6 +1234,8 @@ export default function MobileLedger() {
 
         setmobileNumber(value);
     };
+   
+
 
     // const firstColWidth = {
     //     width: "15.2%",
@@ -1337,24 +1405,7 @@ export default function MobileLedger() {
         setSelectedRadio(days === 0 ? "custom" : `${days}days`);
     };
 
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(formatDate(firstDateOfCurrentMonth));
-            setSelectedToDate(currentDate);
-            settoInputDate(formatDate(currentDate));
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
-            handleRadioChange(days);
-        }
-    }, [selectedRadio]);
-
+   
     function closeAlert(errorType) {
         const alertElement = document.getElementById("someElementId");
         alertElement.innerHTML = ""; // Clears the alert content
@@ -1425,7 +1476,7 @@ export default function MobileLedger() {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "space-between",
+                                justifyContent: "start",
                             }}
                         >
                             {/* ------ */}
@@ -1475,90 +1526,7 @@ export default function MobileLedger() {
                                 />
                             </div>
 
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-2"></div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, }}>90 Days</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                          
                         </div>
                     </div>
 

@@ -428,7 +428,7 @@ export default function AmericanReceivableReport() {
       FIntDat: fromInputDate,
 
       FFnlDat: toInputDate,
-      FRepTyp: transectionType,
+    //   FRepTyp: transectionType,
     //   FSchTxt: searchQuery,
     }).toString();
 

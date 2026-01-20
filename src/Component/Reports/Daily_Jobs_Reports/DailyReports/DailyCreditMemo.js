@@ -49,7 +49,7 @@ export default function DailyCreditReport() {
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("");
+    const [transectionType, settransectionType] = useState("A");
 
     const [storeList, setStoreList] = useState([]);
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
@@ -204,12 +204,12 @@ export default function DailyCreditReport() {
         const apiMainUrl = apiLinks + "/DailyCreditMemo.php";
         setIsLoading(true);
         const formMainData = new URLSearchParams({
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
-            // code: 'NASIRTRD',
-            // FLocCod: '001',
-            // FYerDsc: '2024-2024',
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getYearDescription,
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
             FRepDat: toInputDate,
             FRepTyp: transectionType,
             FSchTxt: searchQuery,
@@ -885,10 +885,9 @@ export default function DailyCreditReport() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 6; // Ensure this matches the actual number of columns
+        const numColumns = 8; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
-            "left",
             "left",
             "left",
             "left",
@@ -934,7 +933,7 @@ export default function DailyCreditReport() {
 
         worksheet.getRow(companyRow.number).height = 30;
         worksheet.mergeCells(
-            `A${companyRow.number}:${String.fromCharCode(68 + numColumns - 1)}${companyRow.number
+            `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
             }`
         );
 
@@ -946,7 +945,7 @@ export default function DailyCreditReport() {
         });
 
         worksheet.mergeCells(
-            `A${storeListRow.number}:${String.fromCharCode(68 + numColumns - 1)}${storeListRow.number
+            `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
             }`
         );
 
@@ -1010,7 +1009,7 @@ export default function DailyCreditReport() {
         const headers = [
             "Inv#",
             "Date",
-            "Code",
+            // "Code",
             "Salesman",
             "Customer",
             "Mobile",
@@ -1026,7 +1025,7 @@ export default function DailyCreditReport() {
             const row = worksheet.addRow([
                 item['Inv#'],
                 item.Date,
-                item.Code,
+                // item.Code,
                 item.SalesMan,
                 item.Customer,
                 item.Mobile,
@@ -1060,13 +1059,12 @@ export default function DailyCreditReport() {
         });
 
         // Set column widths
-        [8, 10, 11, 35, 35, 13, 15, 15, 15].forEach((width, index) => {
+        [8, 10,  35, 35, 13, 15, 15, 15].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
         const totalRow = worksheet.addRow([
            String(formatValue(tableData.length.toLocaleString())),
-            "",
             "",
             "",
             "",
@@ -1090,9 +1088,9 @@ export default function DailyCreditReport() {
             // Align only the "Total" text to the right
             if (
 
+                colNumber === 6 ||
                 colNumber === 7 ||
-                colNumber === 8 ||
-                colNumber === 9
+                colNumber === 8
 
 
             ) {
@@ -1317,10 +1315,10 @@ export default function DailyCreditReport() {
         width: "80px",
     };
     const forthColWidth = {
-        width: isSidebarVisible ? "200px" : "300px",
+        width: isSidebarVisible ? "240px" : "300px",
     };
     const fifthColWidth = {
-        width: isSidebarVisible ? "200px" : "300px",
+        width: isSidebarVisible ? "240px" : "300px",
     };
     const sixthColWidth = {
         width: "90px",
@@ -1688,14 +1686,14 @@ export default function DailyCreditReport() {
                       paddingRight: "25px",
                     }}
                   >
-                    <option value="">ALL</option>
+                    <option value="A">ALL</option>
                     <option value="N">NILL</option>
                     <option value="O">OUTSTANDING</option>
                   </select>
 
-                  {transectionType !== "" && (
+                  {transectionType !== "A" && (
                     <span
-                      onClick={() => settransectionType("")}
+                      onClick={() => settransectionType("A")}
                       style={{
                         position: "absolute",
                         right: "25px",
@@ -1903,7 +1901,7 @@ export default function DailyCreditReport() {
                                         </td>
 
 
-                                        <td
+                                        {/* <td
                                             className="border-dark"
                                             style={thirdColWidth}
                                             onClick={() => handleSorting("Code")}
@@ -1913,7 +1911,7 @@ export default function DailyCreditReport() {
                                                 className="fa-solid fa-caret-down caretIconStyle"
                                                 style={getIconStyle("Code")}
                                             ></i>
-                                        </td>
+                                        </td> */}
 
                                         <td
                                             className="border-dark"
@@ -2019,9 +2017,9 @@ export default function DailyCreditReport() {
                                 id="tableBody"
                                 style={{
                                     fontSize: getdatafontsize, fontFamily: getfontstyle,
-                                    width: "100%",
+                                    // width: "100%",
                                     position: "relative",
-                                    width: "100%",
+                                    // width: "100%",
                                     position: "relative",
                                     ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                                 }}
@@ -2034,7 +2032,7 @@ export default function DailyCreditReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="8" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2047,7 +2045,7 @@ export default function DailyCreditReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 8 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2058,7 +2056,7 @@ export default function DailyCreditReport() {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
+                                                {/* <td style={thirdColWidth}></td> */}
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
@@ -2084,15 +2082,38 @@ export default function DailyCreditReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-start" style={firstColWidth}>
+                                                        {/* <td className="text-start" style={firstColWidth}>
                                                             {item['Inv#']}
-                                                        </td>
+                                                        </td> */}
+
+                                                          <td
+  className="text-start"
+  style={firstColWidth}
+  onDoubleClick={(e) => {
+    e.stopPropagation();
+    // code temporarily store karo
+   sessionStorage.setItem(
+  "InvoiveLedgerData",
+  JSON.stringify({  
+     source: "doubleClick",
+      Invoice: item["Inv#"],
+      
+    })
+  
+);
+
+    // fixed URL open karo
+    window.open("/crystalsol/InvoiceLedger", "_blank");
+  }}
+>
+  {item["Inv#"]}
+</td>
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-start" style={thirdColWidth}>
+                                                        {/* <td className="text-start" style={thirdColWidth}>
                                                             {item.Code}
-                                                        </td>
+                                                        </td> */}
                                                         <td className="text-start"
                                                             title={item.SalesMan}
                                                             style={{
@@ -2114,9 +2135,32 @@ export default function DailyCreditReport() {
                                                             }}                                                    >
                                                             {item.Customer}
                                                         </td>
-                                                        <td className="text-start" style={sixthColWidth}>
+                                                        {/* <td className="text-start" style={sixthColWidth}>
                                                             {item.Mobile}
-                                                        </td>
+                                                        </td> */}
+
+                                                      
+  <td
+  className="text-start"
+  style={firstColWidth}
+  onDoubleClick={(e) => {
+    e.stopPropagation();
+    // code temporarily store karo
+   sessionStorage.setItem(
+  "MobileLedgerData",
+  JSON.stringify({  
+     source: "doubleClick",
+      Mobile: item.Mobile,
+        toInputDate: toInputDate,})
+  
+);
+
+    // fixed URL open karo
+    window.open("/crystalsol/MobileLedger", "_blank");
+  }}
+>
+  {item.Mobile}
+</td>
                                                         <td className="text-end" style={seventhColWidth}>
                                                             {item.Amount}
                                                         </td>
@@ -2140,7 +2184,7 @@ export default function DailyCreditReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 8 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2150,7 +2194,7 @@ export default function DailyCreditReport() {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
+                                                {/* <td style={thirdColWidth}></td> */}
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
@@ -2192,15 +2236,15 @@ export default function DailyCreditReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
-                        <div
+                        {/* <div
                             style={{
                                 ...thirdColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            {/* <span className="mobileledger_total">{totalOpening}</span> */}
-                        </div>
+                            <span className="mobileledger_total">{totalOpening}</span>
+                        </div> */}
                         <div
                             style={{
                                 ...forthColWidth,

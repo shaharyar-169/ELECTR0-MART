@@ -25,10 +25,8 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Code, Description, Store } from "@mui/icons-material";
-import Customer from "../../../MainComponent/Header/Admin/Customer";
 
-export default function TechnicianCollectionReport() {
+export default function ItemStockReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -58,6 +56,8 @@ export default function TechnicianCollectionReport() {
   const input4Ref = useRef(null);
   const input6Ref = useRef(null);
 
+  const [tableData, setTableData] = useState([]);
+ 
   const [Companyselectdata, setCompanyselectdata] = useState("");
 
   console.log("Companyselectdata", Companyselectdata);
@@ -82,15 +82,14 @@ export default function TechnicianCollectionReport() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("A");
+
+  console.log("transectionType", transectionType);
   const [transectionType2, settransectionType2] = useState("");
 
   const [totalqnty, settotalqnty] = useState(0);
   const [totalexcel, settotalexcel] = useState(0);
   const [totaltax, settotaltax] = useState(0);
   const [totalincl, settotalincl] = useState(0);
-
-  const [totaldebit, settotaldebit] = useState(0);
-  const [totalcredit, settotalcredit] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -169,178 +168,22 @@ export default function TechnicianCollectionReport() {
     settoInputDate(e.target.value);
   };
 
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleToKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const toDateElement = document.getElementById("todatevalidation");
-      const formattedInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobaltoDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        if (GlobaltoDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        if (fromInputDate) {
-          const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-")
-          );
-          if (enteredDate <= fromDate) {
-            toast.error("To date must be after from date");
-            return;
-          }
-        }
-
-        toDateElement.style.border = `1px solid ${fontcolor}`;
-        settoInputDate(formattedInput);
-
-        if (saleSelectRef.current) {
-          e.preventDefault();
-          saleSelectRef.current.focus();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
   function fetchDailyStatusReport() {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
-
     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-    let hasError = false;
     let errorType = "";
 
     switch (true) {
-      //    case !saleType:
-      //        errorType = "saleType";
-      //        break;
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
       case !toInputDate:
         errorType = "toDate";
         break;
       default:
-        hasError = false;
         break;
     }
 
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
+    if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
     } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
         "$1-$2-$3"
@@ -348,93 +191,71 @@ export default function TechnicianCollectionReport() {
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+      if (GlobaltoDate && enteredToDate > GlobaltoDate) {
         errorType = "toDateAfterGlobal";
       } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
         errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
       }
     }
 
     switch (errorType) {
-      case "saleType":
-        toast.error("Please select a Account Code");
+      case "toDate":
+        toast.error("Rep Date is required");
         return;
 
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
       case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
+        toast.error("Rep Date must be in the format dd-mm-yyyy");
         return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
+
       case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
+        toast.error(`Rep Date must be before ${GlobaltoDate1}`);
         return;
       case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
+        toast.error(`Rep Date must be after ${GlobalfromDate1}`);
         return;
 
       default:
         break;
     }
 
-    // console.log(data);
-    document.getElementById(
-      "fromdatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-    document.getElementById(
-      "todatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
+    const fromDateElement = document.getElementById("fromdatevalidation");
+    const toDateElement = document.getElementById("todatevalidation");
 
-    const apiUrl = apiLinks + "/TechnicianCollection.php";
+    if (fromDateElement) {
+      fromDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+    if (toDateElement) {
+      toDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+
+    const apiMainUrl = apiLinks + "/ItemStockReport.php";
     setIsLoading(true);
-    const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FTchCod: Companyselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
+    const formMainData = new URLSearchParams({
+      FRepDat: toInputDate,
+      FCtgCod: Categoryselectdata,
+      FCapCod: Capacityselectdata,
+      FSchTxt: searchQuery,
+      FCmpCod: Companyselectdata,
+      FStrCod: Typeselectdata,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+      FRepStk: transectionType2,
+      FRepRat: transectionType,
 
-    //   code: "IZONECOMP",
-    //   FLocCod: "001",
+      code: "NASIRTRD",
+      FLocCod: "001",
+      FYerDsc: "2024-2024",
     }).toString();
 
     axios
-      .post(apiUrl, formData)
+      .post(apiMainUrl, formMainData)
       .then((response) => {
         setIsLoading(false);
-
-        settotaldebit(response.data["Total"]);
-        // settotalcredit(response.data["Total Amount"]);
-        //    setClosingBalance(response.data["Closing Bal "]);
+        settotalqnty(response.data["Total Qnty"]);
+        settotalexcel(response.data["Total Rate"]);
+        settotaltax(response.data["Total Amount"]);
+        // settotalincl(response.data["Total Incl"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -455,11 +276,11 @@ export default function TechnicianCollectionReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-      if (fromRef && fromRef.current) {
+    if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+      if (toRef && toRef.current) {
         setTimeout(() => {
-          fromRef.current.focus();
-          fromRef.current.select();
+          toRef.current.focus();
+          toRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -481,13 +302,9 @@ export default function TechnicianCollectionReport() {
   }, []);
 
   useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveTechnicians.php";
+    const apiUrl = apiLinks + "/GetCompany.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-
-      FLocCod: "001",
-      code: "IZONECOMP",
+      code: organisation.code,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -507,8 +324,8 @@ export default function TechnicianCollectionReport() {
       });
   }, []);
   const options = GetCompany.map((item) => ({
-    value: item.ttchcod,
-    label: `${item.ttchcod}-${item.ttchnam.trim()}`,
+    value: item.tcmpcod,
+    label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
   }));
 
   useEffect(() => {
@@ -788,22 +605,34 @@ export default function TechnicianCollectionReport() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-      item.No,
-      item.Type,
-      item["Job#"],
-      item.Customer,
+      item.Code,
+      item.Description,
+      // item['Last Date'],
+      item["Pur Rate"],
+      item.Qnty,
       item.Amount,
-
     ]);
 
     // Add summary row to the table
-    rows.push(["","","","", "Total",  String(totaldebit)]);
+    rows.push([
+        String(formatValue(tableData.length.toLocaleString())),
+      "Total",
+      "",
+      String(formatValue(totalqnty)),
+      String(formatValue(totaltax)),
+    ]);
 
     // Define table column headers and individual column widths
 
-    const headers = ["Date", "No", "Type", "JOb#", "Customer","Amount"];
-    const columnWidths = [20, 15, 15, 15, 110, 30];
+    const headers = [
+      "Code",
+      "Description",
+      // "Last Date",
+      "Rate",
+      "Qnty",
+      "Amount",
+    ];
+    const columnWidths = [35, 100, 22, 15, 22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -926,7 +755,7 @@ export default function TechnicianCollectionReport() {
           // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 5) {
+          if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
             const rightAlignX = currentX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1015,7 +844,7 @@ export default function TechnicianCollectionReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
+    const rowsPerPage = 45; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1065,7 +894,7 @@ export default function TechnicianCollectionReport() {
         startY += 5; // Adjust vertical position for the company title
 
         addTitle(
-          `Technician Collection Report From ${fromInputDate} To ${toInputDate}`,
+          `Item Stock Report As on ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1095,10 +924,12 @@ export default function TechnicianCollectionReport() {
             : "";
 
         let transectionsts =
-          transectionType === "BIL"
-            ? "PURCHASE"
-            : transectionType == "SRN"
-            ? "PURCHASE RETURN"
+          transectionType2 === "P"
+            ? "POSITIVE"
+            : transectionType2 == "N"
+            ? "NEGATIVE"
+            : transectionType2 == "Z"
+            ? "ZERO"
             : "ALL";
 
         let typeText = capacityselectdatavalue.label
@@ -1111,7 +942,7 @@ export default function TechnicianCollectionReport() {
           ? categoryselectdatavalue.label
           : "ALL";
         let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label
+          ? typeselectdatavalue.label + "-" + "Stock"
           : "ALL";
 
         let search = searchQuery ? searchQuery : "";
@@ -1121,54 +952,57 @@ export default function TechnicianCollectionReport() {
         doc.setFontSize(10); // Font size
 
         doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`Technician :`, labelsX, labelsY); // Draw bold label
+        doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
         doc.setFont(getfontstyle, "normal"); // Reset font to normal
         doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STORE :`, labelsX + 120, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typename}`, labelsX + 145, labelsY); // Draw the value next to the label
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`STORE :`, labelsX + 140, labelsY); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${typename}`, labelsX + 160, labelsY); // Draw the value next to the label
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`TYPE :`, labelsX + 120, labelsY + 4.3); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`RATE :`, labelsX + 140, labelsY + 4.3); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${RATE}`, labelsX + 160, labelsY + 4.3); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
         // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 145, labelsY + 8.5); // Draw the value next to the label
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        // if (searchQuery) {
-        //   doc.setFont(getfontstyle, "bold"); // Set font to bold
-        //   doc.text(`SEARCH :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-        //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        //   doc.text(`${search}`, labelsX + 145, labelsY + 8.5); // Draw the value next to the label
-        // }
+        doc.setFont(getfontstyle, "bold"); // Set font to bold
+        doc.text(`STATUS :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+        doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        doc.text(`${transectionsts}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
+
+        if (searchQuery) {
+          doc.setFont(getfontstyle, "bold"); // Set font to bold
+          doc.text(`SEARCH :`, labelsX + 140, labelsY + 12.5); // Draw bold label
+          doc.setFont(getfontstyle, "normal"); // Reset font to normal
+          doc.text(`${search}`, labelsX + 160, labelsY + 12.5); // Draw the value next to the label
+        }
 
         // // Reset font weight to normal if necessary for subsequent text
         doc.setFont(getfontstyle, "bold"); // Set font to bold
         doc.setFontSize(10);
 
-        startY += 1; // Adjust vertical position for the labels
+        startY += searchQuery ? 15 : 10; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
+        addTableHeaders(
+          (doc.internal.pageSize.width - totalWidth) / 2,
+          searchQuery ? 44 : 39
+        );
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1209,7 +1043,7 @@ export default function TechnicianCollectionReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`TechnicianCollectionReport As On ${date}.pdf`);
+    doc.save(`ItemStockReport As On ${toInputDate}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
@@ -1218,7 +1052,14 @@ export default function TechnicianCollectionReport() {
 
     const numColumns = 6; // Ensure this matches the actual number of columns
 
-    const columnAlignments = ["left", "center", "center", "center","left", "right"];
+    const columnAlignments = [
+      "left",
+      "left",
+      "left",
+      "right",
+      "right",
+      "right",
+    ];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -1261,7 +1102,7 @@ export default function TechnicianCollectionReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Technician Collection Report From ${fromInputDate} To ${toInputDate}`,
+      `Item Stock Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1304,33 +1145,81 @@ export default function TechnicianCollectionReport() {
         : "";
 
     let transectionsts =
-      transectionType === "BIL"
-        ? "PURCHASE"
-        : transectionType == "SRN"
-        ? "PURCHASE RETURN"
-        : "PRN";
+      transectionType === "P"
+        ? "POSITIVE"
+        : transectionType == "N"
+        ? "NEGATIVE"
+        : transectionType == "Z"
+        ? "ZERO"
+        : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
-      "Technician :",
+      "COMPANY :",
       typecompany,
-     
+      "",
+      "STORE :",
+      typetype,
     ]);
 
-   
+    // Add second row
+    const typeAndStoreRow2 = worksheet.addRow([
+      "CATEGORY :",
+      typecategory,
+      "",
+      "RATE :",
+      RATE,
+    ]);
+
+    const typeAndStoreRow3 = worksheet.addRow([
+      "CAPACITY :",
+      typecapacity,
+      "",
+      "STATUS :",
+      transectionsts,
+    ]);
+
+    // Add third row with conditional rendering for "SEARCH:"
+    const typeAndStoreRow4 = worksheet.addRow(
+      searchQuery ? ["", "", "", "SEARCH :", typesearch] : [""]
+    );
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1].includes(colIndex),
+        bold: [1, 4].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-   
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 4].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 4].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+    typeAndStoreRow4.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 4].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
 
     // Header style
     const headerStyle = {
@@ -1350,19 +1239,26 @@ export default function TechnicianCollectionReport() {
     };
 
     // Add headers
-    const headers = ["Date", "No", "Type", "JOb#", "Customer","Amount"];
+    const headers = [
+      "Code",
+      "Description",
+      "Last Date",
+      "Rate",
+      "Qnty",
+      "Amount",
+    ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-          item.Date,
-      item.No,
-      item.Type,
-      item["Job#"],
-      item.Customer,
-      item.Amount,
+        item.Code,
+        item.Description,
+        item["Last Date"],
+        item["Pur Rate"],
+        item.Qnty,
+        item.Amount,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1381,12 +1277,17 @@ export default function TechnicianCollectionReport() {
     });
 
     // Set column widths
-    [10,8,8, 8, 45,15].forEach((width, index) => {
+    [20, 45, 10, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
-"","","","", "Total",  String(totaldebit)
+      "",
+      "Total",
+      "",
+      "",
+      String(totalqnty),
+      String(totaltax),
     ]);
 
     // total row added
@@ -1401,7 +1302,7 @@ export default function TechnicianCollectionReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 6) {
+      if (colNumber === 5 || colNumber === 6) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1469,7 +1370,7 @@ export default function TechnicianCollectionReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `TechnicianCollectionReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `ItemStockReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1480,7 +1381,7 @@ export default function TechnicianCollectionReport() {
   const btnColor = "#3368B5";
   const textColor = "white";
 
-  const [tableData, setTableData] = useState([]);
+  const TotalDataRows = tableData;
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1593,22 +1494,23 @@ export default function TechnicianCollectionReport() {
   // };
 
   const firstColWidth = {
-    width: "80px",
+    width: "135px",
   };
   const secondColWidth = {
-    width: "60px",
-  };
-  const thirdColWidth = {
-    width: "50px",
-  };
-  const forthColWidth = {
-    width: "60px",
-  };
-  const sixthColWidth = {
     width: "360px",
   };
-    const seventhColWidth = {
+  const thirdColWidth = {
     width: "90px",
+  };
+  const forthColWidth = {
+    width: "90px",
+  };
+
+  const sixthColWidth = {
+    width: "90px",
+  };
+  const seventhColWidth = {
+    width: "110px",
   };
 
   const sixthcol = {
@@ -1616,32 +1518,32 @@ export default function TechnicianCollectionReport() {
   };
 
   const [columns, setColumns] = useState({
-    Date: null,
-    No: null,
-    Type: null,
-    ["Job#"]: null,
-    Customer: null,
-    Amount: null,
+    Code: [],
+    Description: [],
+    ["Last Date"]: [],
+    ["Pur Rate"]: [], // ✔ Corrected key
+    Qnty: [],
+    Amount: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-    Date: null,
-    No: null,
-    Type: null,
-    ["Job#"]: null,
-    Customer: null,
-    Amount: null,
+    Code: "",
+    Description: "",
+    ["Last Date"]: "",
+    ["Pur Rate"]: "", // ✔ Corrected key
+    Qnty: "",
+    Amount: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        Date: tableData.map((row) => row.Date),
-        No: tableData.map((row) => row.No),
-        Type: tableData.map((row) => row.Type),
-        ["Job#"]: tableData.map((row) => row["Job#"]),
-        Customer: tableData.map((row) => row.Customer),
+        Code: tableData.map((row) => row.Code),
+        Description: tableData.map((row) => row.Description),
+        ["Last Date"]: tableData.map((row) => row["Last Date"]),
+        ["Pur Rate"]: tableData.map((row) => row["Pur Rate"]),
+        Qnty: tableData.map((row) => row.Qnty),
         Amount: tableData.map((row) => row.Amount),
       };
       setColumns(newColumns);
@@ -1659,60 +1561,171 @@ export default function TechnicianCollectionReport() {
 
   const resetSorting = () => {
     setColumnSortOrders({
-      Date: null,
-      No: null,
-      Type: null,
-      ["Job#"]: null,
-      Customer: null,
+      Code: null,
+      Description: null,
+      ["Last Date"]: null,
+      ["Pur Rate"]: null,
+      Qnty: null,
       Amount: null,
     });
   };
 
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  const sortedData = [...tableData].sort((a, b) => {
-    let aVal = a[col] ?? "";
-    let bVal = b[col] ?? "";
+    const sortedData = [...tableData].sort((a, b) => {
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-    aVal = aVal.toString();
-    bVal = bVal.toString();
+      // ⭐ SPECIAL CASE: Sort "Last Date" by YEAR
+      if (col === "Last Date") {
+        const aYear = parseInt(aVal.split("-")[2]) || 0; // Extract YYYY
+        const bYear = parseInt(bVal.split("-")[2]) || 0;
 
-    // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
-    if (col === "Date" || col === "Date") {
-      // Reverse strings → compare from right side
-      const revA = aVal.split("").reverse().join("");
-      const revB = bVal.split("").reverse().join("");
+        return newOrder === "ASC" ? aYear - bYear : bYear - aYear;
+      }
 
+      // ⭐ NORMAL NUMBER SORT
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // ⭐ NORMAL STRING SORT
       return newOrder === "ASC"
-        ? revA.localeCompare(revB)
-        : revB.localeCompare(revA);
-    }
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
 
-    // ⭐ Numeric sorting
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+    setTableData(sortedData);
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    }
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
 
-    // Default → normal string sorting
-    return newOrder === "ASC"
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  });
+  const renderTableData = () => {
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="6" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
+            </tr>
+            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 6 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        ) : (
+          <>
+            {tableData.map((item, i) => {
+              totalEnteries += 1;
+              const isNegative = item.Qnty < 0 || item.Amount < 0;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: isNegative ? "red" : fontcolor,
+                  }}
+                >
+                  {/* <td className="text-start" style={firstColWidth}>
+                    {item.Code}
+                  </td> */}
 
-  setTableData(sortedData);
+  <td
+  className="text-start"
+  style={firstColWidth}
+  onDoubleClick={(e) => {
+    e.stopPropagation();
 
-  setColumnSortOrders((prev) => ({
-    ...Object.keys(prev).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {}),
-  }));
-};
+    // code temporarily store karo
+    sessionStorage.setItem("itemCode", item.Code);
+
+    // fixed URL open karo
+    window.open("/crystalsol/ItemLedger", "_blank");
+  }}
+>
+  {item.Code}
+</td>
+
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Description}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item["Last Date"]}
+                  </td>
+                  <td className="text-end" style={forthColWidth}>
+                    {formatValue(item["Pur Rate"])}
+                  </td>
+                  <td className="text-end" style={sixthColWidth}>
+                    {formatValue(item.Qnty)}
+                  </td>
+                  <td className="text-end" style={seventhColWidth}>
+                    {formatValue(item.Amount)}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 25 - tableData.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 6 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
+  };
 
   useHotkeys(
     "alt+s",
@@ -1889,7 +1902,7 @@ export default function TechnicianCollectionReport() {
       settoInputDate(formattedDate); // Update the state with formatted date
 
       // Move focus to the next element
-      focusNextElement(toRef, saleSelectRef);
+      focusNextElement(toRef, input5Ref);
     }
   };
 
@@ -1924,7 +1937,7 @@ export default function TechnicianCollectionReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Technician Collection Report" />
+          <NavComponent textdata="Daily Activity Report" />
 
           {/* ------------1st row */}
           <div
@@ -1938,111 +1951,14 @@ export default function TechnicianCollectionReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
-              <div className="d-flex align-items-center" style={{marginLeft:'25px'}}>
+              {/* To Date */}
+              <div className="d-flex align-items-center">
                 <div
                   style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: "12px",
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div className="d-flex align-items-center" style={{marginLeft:'70px'}}>
-                <div
-                  style={{
-                    width: "60px",
+                    width: "100px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2055,7 +1971,7 @@ export default function TechnicianCollectionReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      To :
+                      Rep Date :&nbsp;
                     </span>
                   </label>
                 </div>
@@ -2068,7 +1984,6 @@ export default function TechnicianCollectionReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
-                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -2096,7 +2011,7 @@ export default function TechnicianCollectionReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                    onKeyDown={handleToDateEnter}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2139,101 +2054,73 @@ export default function TechnicianCollectionReport() {
                 </div>
               </div>
 
-            
-            </div>
-          </div>
-
-
-          {/* SECOND ROW HERE */}
-
-           <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "start",
-              }}
-            >
-            
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "90px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
+              <div id="lastDiv" style={{ marginRight: "1px" }}>
+                <label for="searchInput" style={{ marginRight: "3px" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input5Ref}
+                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "250px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
                     <span
+                      onClick={() => setSearchQuery("")}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
                       }}
                     >
-                      Technician :
+                      ×
                     </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={saleSelectRef}
-                    options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, selectButtonRef)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCompanyselectdata(selectedOption.value);
-                        setCompanyselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setCompanyselectdata("");
-                        setCompanyselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
+                  )}
                 </div>
               </div>
             </div>
           </div>
+
+         
 
           <div>
             {/* Table Head */}
@@ -2249,7 +2136,7 @@ export default function TechnicianCollectionReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                 }}
               >
@@ -2274,59 +2161,60 @@ export default function TechnicianCollectionReport() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("Date")}
+                      onClick={() => handleSorting("Code")}
                     >
-                      Date{" "}
+                      Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Date")}
+                        style={getIconStyle("Code")}
                       ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      //   onClick={() => handleSorting("No")}
+                      onClick={() => handleSorting("Description")}
                     >
-                      No
-                      {/* {" "}
+                      Description{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("No")}
-                      ></i> */}
+                        style={getIconStyle("Description")}
+                      ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={thirdColWidth}
-                      //   onClick={() => handleSorting("Type")}
+                      onClick={() => handleSorting("Last Date")}
                     >
-                      Type
-                      {/* {" "}
+                      Last Date{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Type")}
-                      ></i> */}
+                        style={getIconStyle("Last Date")}
+                      ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={forthColWidth}
-                      //   onClick={() => handleSorting("Job#")}
+                      onClick={() => handleSorting("Pur Rate")}
                     >
-                      Job{" "}
-                      {/* <i
+                      Rate{" "}
+                      <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Job#")}
-                      ></i> */}
+                        style={getIconStyle("Pur Rate")}
+                      ></i>
                     </td>
 
                     <td
                       className="border-dark"
                       style={sixthColWidth}
-                      onClick={() => handleSorting("Customer")}
+                      onClick={() => handleSorting("Qnty")}
                     >
-                      Customer{" "}
+                      Qnty{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Customer")}
+                        style={getIconStyle("Qnty")}
                       ></i>
                     </td>
 
@@ -2354,7 +2242,7 @@ export default function TechnicianCollectionReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "50vh",
+                maxHeight: "55vh",
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -2367,117 +2255,10 @@ export default function TechnicianCollectionReport() {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   width: "100%",
-                  position: "relative",
+                  // position: "relative",
                 }}
               >
-                <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="6" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 6 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        )
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        const isNegative = item.Amount < 0;
-
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              // color: fontcolor,
-                              color: isNegative ? "red" : fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.Date}
-                            </td>
-                            <td className="text-center" style={secondColWidth}>
-                              {item.No}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
-                            </td>
-                            <td className="text-center" style={forthColWidth}>
-                              {item["Job#"]}
-                            </td>
-
-                            <td className="text-start" style={sixthColWidth}>
-                              {item.Customer}
-                            </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Amount)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 6 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                      </tr>
-                    </>
-                  )}
-                </tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
           </div>
@@ -2526,10 +2307,9 @@ export default function TechnicianCollectionReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">
-                {formatValue(totaldebit)}
-              </span> */}
+              {/* <span className="mobileledger_total">{totalexcel}</span> */}
             </div>
+
             <div
               style={{
                 ...sixthColWidth,
@@ -2537,12 +2317,11 @@ export default function TechnicianCollectionReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">
-                {formatValue(totalcredit)}
-              </span> */}
+              <span className="mobileledger_total">
+                {formatValue(totalqnty)}
+              </span>
             </div>
-
-             <div
+            <div
               style={{
                 ...seventhColWidth,
                 background: getcolor,
@@ -2550,7 +2329,7 @@ export default function TechnicianCollectionReport() {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totaldebit)}
+                {formatValue(totaltax)}
               </span>
             </div>
           </div>
@@ -2604,3 +2383,7 @@ export default function TechnicianCollectionReport() {
     </>
   );
 }
+
+
+
+

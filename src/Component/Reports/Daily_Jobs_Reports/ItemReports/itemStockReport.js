@@ -1462,37 +1462,6 @@ export default function ItemStockReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
-
   const firstColWidth = {
     width: "135px",
   };
@@ -1660,9 +1629,31 @@ export default function ItemStockReport() {
                     color: isNegative ? "red" : fontcolor,
                   }}
                 >
-                  <td className="text-start" style={firstColWidth}>
+                  {/* <td className="text-start" style={firstColWidth}>
                     {item.Code}
-                  </td>
+                  </td> */}
+
+  <td
+  className="text-start"
+  style={firstColWidth}
+  onDoubleClick={(e) => {
+    e.stopPropagation();
+    // code temporarily store karo
+   sessionStorage.setItem(
+  "itemLedgerData",
+  JSON.stringify({  
+      code: item.Code,
+        toInputDate: toInputDate,})
+  
+);
+
+    // fixed URL open karo
+    window.open("/crystalsol/ItemLedger", "_blank");
+  }}
+>
+  {item.Code}
+</td>
+
                   <td className="text-start" style={secondColWidth}>
                     {item.Description}
                   </td>
@@ -2886,6 +2877,8 @@ export default function ItemStockReport() {
     </>
   );
 }
+
+
 
 
 

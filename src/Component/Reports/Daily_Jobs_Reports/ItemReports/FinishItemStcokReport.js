@@ -238,7 +238,7 @@ export default function FinishItemStockReport() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-   
+     
    
     //   code: "TAHREEMTRD",
     //   FLocCod: "001",

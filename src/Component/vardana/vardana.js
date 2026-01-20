@@ -3,6 +3,6 @@ var font = 'AAEAAAAUAQAABABARFNJR4rC8xsAAjNIAAAVsExUU0hWlNgvAAAVQAAAA4FPUy8yR3WQ
 var callAddFont = function () {
 this.addFileToVFS('verdana-regular-normal.ttf', font);
 this.addFont('verdana-regular-normal.ttf', 'verdana-regular', 'normal');
-this.addFont('verdana-regular-normal.ttf', 'verdana-regular', 'bold');
+this.addFont('verdana-bold.ttf', 'verdana', 'bold');
 };
 jsPDF.API.events.push(['addFonts', callAddFont])

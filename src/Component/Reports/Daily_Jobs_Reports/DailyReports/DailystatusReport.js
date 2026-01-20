@@ -33,6 +33,7 @@ export default function DailyStatusReport() {
     const input1Ref = useRef(null);
 
     const toRef = useRef(null);
+     const input3Ref = useRef(null);
     const fromRef = useRef(null);
     const companyRef = useRef(null);
     const categoryRef = useRef(null);
@@ -298,15 +299,14 @@ const toggleFromCalendar = () => {
             "todatevalidation"
           ).style.border = `1px solid ${fontcolor}`;
 
-        const apiMainUrl = apiLinks + "/ItemStatusReport.php";
+        const apiMainUrl = apiLinks + "/DailyStatusReport.php";
         setIsLoading(true);
         const formMainData = new URLSearchParams({
              FIntDat: fromInputDate,
-               FFnlDat: toInputDate,
-
+             FFnlDat: toInputDate,
+             FSchTxt: searchQuery,
             FCtgCod: '',
             FCapCod: '',
-            FSchTxt: '',
             FCmpCod: '',
             FStrCod: '',
             // code: organisation.code,
@@ -1550,7 +1550,7 @@ const toggleFromCalendar = () => {
             settoInputDate(formattedDate); // Update the state with formatted date
 
             // Move focus to the next element
-            focusNextElement(toRef, selectButtonRef);
+            focusNextElement(toRef, input3Ref);
         }
     };
 
@@ -1558,6 +1558,14 @@ const toggleFromCalendar = () => {
         if (e.key === "Enter" && !menuStoreIsOpen) {
             e.preventDefault();
             focusNextElement(storeRef, selectButtonRef);
+        }
+    };
+     const handleKeyPress = (e, nextInputRef) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (nextInputRef.current) {
+                nextInputRef.current.focus();
+            }
         }
     };
 
@@ -1599,7 +1607,7 @@ const toggleFromCalendar = () => {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "start",
+                                justifyContent: "space-between",
                               }}
                             >
                               {/* From Date */}
@@ -1804,7 +1812,71 @@ const toggleFromCalendar = () => {
                                   />
                                 </div>
                               </div>
-                                           
+
+
+                                      <div id="lastDiv" style={{ marginRight: "10px" }}>
+                                <label for="searchInput" style={{ marginRight: "5px" }}>
+                                    <span
+                                        style={{
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Search :
+                                    </span>{" "}
+                                </label>
+                                <div style={{ position: "relative", display: "inline-block" }}>
+                                    <input
+                                        ref={input3Ref}
+                                        onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
+                                        type="text"
+                                        id="searchsubmit"
+                                        placeholder="Item description"
+                                        value={searchQuery}
+                                        autoComplete="off"
+                                        style={{
+                                            marginRight: "20px",
+                                            width: "200px",
+                                            height: "24px",
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            color: fontcolor,
+                                            backgroundColor: getcolor,
+                                            border: `1px solid ${fontcolor}`,
+                                            outline: "none",
+                                            paddingLeft: "10px",
+                                            paddingRight: "25px", // space for the clear icon
+                                        }}
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.border = "2px solid red")
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                        }
+                                        onChange={(e) =>
+                                            setSearchQuery((e.target.value || "").toUpperCase())
+                                        }
+                                    />
+                                    {searchQuery && (
+                                        <span
+                                            onClick={() => setSearchQuery("")}
+                                            style={{
+                                                position: "absolute",
+                                                right: "30px",
+                                                top: "50%",
+                                                transform: "translateY(-50%)",
+                                                cursor: "pointer",
+                                                fontSize: "20px",
+                                                color: fontcolor,
+                                                userSelect: "none",
+                                            }}
+                                        >
+                                            ×
+                                        </span>
+                                    )}
+                                </div>
+                            </div>      
                             </div>
                           </div>
 

@@ -203,7 +203,7 @@ export default function InvoiceLedgerReport() {
 
         const formData = new URLSearchParams({
             // FInvNum: '002279',
-            // code: 'BRIGHT',
+            // code: 'NASIRTRD',
             // FLocCod: '001',
             // FYerDsc: '2024-2024',
             FInvNum: mobileNumber,
@@ -266,6 +266,73 @@ export default function InvoiceLedgerReport() {
 
         setmobileNumber(value);
     };
+
+    useEffect(() => {
+      const storedData = sessionStorage.getItem("InvoiveLedgerData");
+    
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+    
+          // Only proceed if doubleClick AND has the doubleClick flag
+          if (parsedData.source === "doubleClick") {
+            console.log("Setting data from double-click session");
+    
+            // 📱 MOBILE
+            if (parsedData.Invoice) {
+              const value = parsedData.Invoice
+                .toString()
+                .replace(/\D/g, "")
+                .slice(0, 6);
+              setmobileNumber(value);
+            }
+    
+              
+            // ✅ CALL API AFTER SESSION DATA IS SET
+            // Clear session after reading
+            sessionStorage.removeItem("InvoiveLedgerData");
+    
+            // Set a flag to indicate we've processed the double-click
+            sessionStorage.setItem("MobileLedgerProcessed", "true");
+         
+            return; // Exit early since session data applied
+          } else {
+            // If session exists but not from double-click, clear it
+            console.log("Clearing non-double-click session data");
+            sessionStorage.removeItem("MobileLedgerData");
+          }
+    
+        } catch (err) {
+          console.error("Invalid MobileLedgerData", err);
+          // Clear invalid session data
+          sessionStorage.removeItem("MobileLedgerData");
+        }
+      }
+    
+      // Check if we should apply default dates (when opening independently)
+      // Only apply defaults if we haven't just processed a double-click
+      const processedDoubleClick = sessionStorage.getItem("MobileLedgerProcessed");
+    
+      if (!processedDoubleClick) {
+        console.log("Setting default dates for independent opening");
+    
+        // ⬇️ Normal default dates
+        const currentDate = new Date();
+        setSelectedToDate(currentDate);
+        settoInputDate(formatDate(currentDate));
+    
+        const firstDateOfCurrentMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        );
+        setSelectedfromDate(firstDateOfCurrentMonth);
+        setfromInputDate(formatDate(firstDateOfCurrentMonth));
+      } else {
+        // Clear the processed flag for future visits
+        sessionStorage.removeItem("MobileLedgerProcessed");
+      }
+    }, []);
 
     const handleMobilePress = (e, nextInputRef) => {
         const fromDateElement = document.getElementById("selectedsale");
@@ -1152,22 +1219,7 @@ export default function InvoiceLedgerReport() {
         }
     }, [selectedIndex]);
 
-    const parseDate = (dateString) => {
-        const [day, month, year] = dateString.split("-").map(Number);
-        return new Date(year, month - 1, day);
-    };
-
-    const handleRadioChange = (days) => {
-        const toDate = parseDate(toInputDate);
-        const fromDate = new Date(toDate);
-        fromDate.setUTCDate(fromDate.getUTCDate() - days);
-
-        setSelectedfromDate(fromDate);
-        setfromInputDate(formatDate(fromDate));
-        setSelectedRadio(days === 0 ? "custom" : `${days}days`);
-    };
-
-
+  
     
       const formatValue = (val) => {
   return Number(val) === 0 ? "" : val;

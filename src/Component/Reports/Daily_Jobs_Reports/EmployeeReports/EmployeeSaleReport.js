@@ -1225,6 +1225,7 @@ doc.setFont('verdana-regular', "normal");
         doc.setFontSize(10)
                 doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
 
+                
 doc.setFont('verdana', "bold");
         doc.setFontSize(10)
                 doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -2953,7 +2954,6 @@ doc.setFont('verdana-regular', "normal");
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "40vh",
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),

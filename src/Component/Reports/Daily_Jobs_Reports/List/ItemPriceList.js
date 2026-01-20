@@ -2236,7 +2236,7 @@ const handleSorting = (col) => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total2">{tableData.length.toLocaleString()}</span>
+              <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString())}</span>
 
             </div>
             <div
