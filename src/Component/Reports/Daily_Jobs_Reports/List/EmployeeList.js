@@ -421,8 +421,9 @@ export default function EmployeeList() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+                   doc.text(
           `Page ${pageNumber}`,
           rightX - 15,
           doc.internal.pageSize.height - 10,

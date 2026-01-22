@@ -786,8 +786,9 @@ export default function DailyCashBankBalance() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+                   doc.text(
           `Page ${pageNumber}`,
           rightX - 35,
           doc.internal.pageSize.height - 10,

@@ -26,7 +26,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function ItemStockReport() {
+export default function DailyActivityReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -228,41 +228,29 @@ export default function ItemStockReport() {
       toDateElement.style.border = `1px solid ${fontcolor}`;
     }
 
-    const apiMainUrl = apiLinks + "/ItemStockReport.php";
+    const apiMainUrl = apiLinks + "/DailyActivityReport.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
       FRepDat: toInputDate,
-      FCtgCod: Categoryselectdata,
-      FCapCod: Capacityselectdata,
-      FSchTxt: searchQuery,
-      FCmpCod: Companyselectdata,
-      FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
-      FRepStk: transectionType2,
-      FRepRat: transectionType,
-
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+       FSchTxt: searchQuery,
+       code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
+        // code: "USMANMTR",
+      // FLocCod: "002",
     }).toString();
 
     axios
       .post(apiMainUrl, formMainData)
       .then((response) => {
         setIsLoading(false);
-        settotalqnty(response.data["Total Qnty"]);
-        settotalexcel(response.data["Total Rate"]);
-        settotaltax(response.data["Total Amount"]);
-        // settotalincl(response.data["Total Incl"]);
-
-        if (response.data && Array.isArray(response.data.Detail)) {
-          setTableData(response.data.Detail);
+     
+        if (response.data && Array.isArray(response.data)) {
+          setTableData(response.data);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data.Detail
+            response.data
           );
           setTableData([]);
         }
@@ -597,42 +585,48 @@ export default function ItemStockReport() {
   });
 
   const exportPDFHandler = () => {
-    const globalfontsize = 10;
-    console.log("gobal font data", globalfontsize);
-
+ 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Code,
-      item.Description,
-      // item['Last Date'],
-      item["Pur Rate"],
-      item.Qnty,
+      item.Date,
+      item.TrnNo,
+       item.Type,
+        item["Account Description"],
+        item.Description,
+        item.Qnty,
+      item.Rate,
       item.Amount,
     ]);
 
     // Add summary row to the table
     rows.push([
         String(formatValue(tableData.length.toLocaleString())),
-      "Total",
       "",
-      String(formatValue(totalqnty)),
-      String(formatValue(totaltax)),
+      "",
+     "",
+      "",
+       "",
+      "",
+       ""
+     
     ]);
 
     // Define table column headers and individual column widths
 
     const headers = [
-      "Code",
-      "Description",
-      // "Last Date",
-      "Rate",
+      "Date",
+      "TrnNo",
+     "Type",
+     "Account Description",
+     "Description",
       "Qnty",
+      "Rate",
       "Amount",
     ];
-    const columnWidths = [35, 100, 22, 15, 22];
+    const columnWidths = [22, 16, 13, 90, 70,20, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -642,14 +636,14 @@ export default function ItemStockReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
+    doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
+     doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -671,64 +665,75 @@ export default function ItemStockReport() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(10);
+   
     };
 
     const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust row height
-      const fontSize = 10; // Adjust font size
-      const boldFont = 400; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-      doc.setFontSize(fontSize);
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isTotalRow = i === rows.length - 1; // Check if this is the total row
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
-        let currentX = startX; // Track current column position
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-        // Check if Qnty (column index 6) is negative
-        if (parseFloat(row[8]) < 0) {
-          textColor = [255, 0, 0]; // Set red color for negative Qnty
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
         }
 
-        // For total row, set bold font and prepare for double border
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "bold");
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
         }
 
-        // Draw row borders
-        doc.setDrawColor(0);
-
-        // For total row, draw double border
-        if (isTotalRow) {
-          // First line of the double border
-          doc.setLineWidth(0.3);
+        if (isOddRow) {
+          doc.setFillColor(240);
           doc.rect(
-            currentX,
+            startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
+            "F"
+          );
+        }
+
+        doc.setDrawColor(0);
+
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
           );
 
-          // Second line of the double border (slightly offset)
-          doc.setLineWidth(0.3);
-          doc.rect(
-            currentX + 0.5,
-            startY + (i - startIndex + 2) * rowHeight + 0.5,
-            tableWidth - 1,
-            rowHeight - 1
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
           );
         } else {
-          // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
-            currentX,
+            startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight
@@ -736,35 +741,40 @@ export default function ItemStockReport() {
         }
 
         row.forEach((cell, cellIndex) => {
-          // For total row, adjust vertical position to center in the double border
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-          const cellX = currentX + 2;
+          const cellX = startX + 2;
 
-          // Set text color
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-          // For total row, keep bold font
           if (!isTotalRow) {
-            // Set font
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
-          // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
-            const rightAlignX = currentX + columnWidths[cellIndex] - 2;
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 ) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
               baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = currentX + columnWidths[0] / 2;
+              const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
                 align: "center",
                 baseline: "middle",
@@ -776,58 +786,37 @@ export default function ItemStockReport() {
             }
           }
 
-          // Draw column borders
-          if (isTotalRow) {
-            // Double border for total row columns
-            doc.setLineWidth(0.3);
-            doc.rect(
-              currentX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
-            );
-            doc.setLineWidth(0.3);
-            doc.rect(
-              currentX + 0.5,
-              startY + (i - startIndex + 2) * rowHeight + 0.5,
-              columnWidths[cellIndex] - 1,
-              rowHeight - 1
-            );
-          } else {
-            // Normal border for other rows
+          if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
-            doc.rect(
-              currentX,
+            doc.line(
+              startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
             );
+            startX += columnWidths[cellIndex];
           }
-
-          // Move to next column
-          currentX += columnWidths[cellIndex];
         });
 
-        // Reset font after total row
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Draw line at the bottom of the page with padding
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
       doc.setLineWidth(0.3);
       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 12;
-
-      // Add heading "Crystal Solution" aligned left bottom of the line
+      const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -844,7 +833,7 @@ export default function ItemStockReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 45; // Adjust this value based on your requirements
+    const rowsPerPage = 29; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -890,11 +879,12 @@ export default function ItemStockReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+         doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+  doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Item Stock Report As on ${toInputDate}`,
+          `Daily Activity Report As on ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -907,101 +897,29 @@ export default function ItemStockReport() {
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
         // Set font size and weight for the labels
-        doc.setFontSize(10);
-        doc.setFont(getfontstyle, "300");
+    
 
-        let RATE =
-          transectionType === "P"
-            ? "PURCHASE RATE"
-            : transectionType == "M"
-            ? "SM RATE"
-            : transectionType == "A"
-            ? "AVERAGE RATE"
-            : transectionType == "W"
-            ? "WEIGHTRD AVERAGE"
-            : transectionType == "F"
-            ? "FIFP"
-            : "";
-
-        let transectionsts =
-          transectionType2 === "P"
-            ? "POSITIVE"
-            : transectionType2 == "N"
-            ? "NEGATIVE"
-            : transectionType2 == "Z"
-            ? "ZERO"
-            : "ALL";
-
-        let typeText = capacityselectdatavalue.label
-          ? capacityselectdatavalue.label
-          : "ALL";
-        let typeItem = Companyselectdatavalue.label
-          ? Companyselectdatavalue.label
-          : "ALL";
-        let category = categoryselectdatavalue.label
-          ? categoryselectdatavalue.label
-          : "ALL";
-        let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label + "-" + "Stock"
-          : "ALL";
+     
 
         let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STORE :`, labelsX + 140, labelsY); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typename}`, labelsX + 160, labelsY); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`RATE :`, labelsX + 140, labelsY + 4.3); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${RATE}`, labelsX + 160, labelsY + 4.3); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`STATUS :`, labelsX + 140, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${transectionsts}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
-
+          
+       
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 140, labelsY + 12.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 160, labelsY + 12.5); // Draw the value next to the label
+        doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                    doc.text(`Search :`, labelsX + 160, labelsY-2 ); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                    doc.text(`${search}`, labelsX + 180, labelsY-2 ); // Draw the value next to the label
         }
 
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
+       
 
-        startY += searchQuery ? 15 : 10; // Adjust vertical position for the labels
+        startY +=  0; // Adjust vertical position for the labels
 
         addTableHeaders(
-          (doc.internal.pageSize.width - totalWidth) / 2,
-          searchQuery ? 44 : 39
+          (doc.internal.pageSize.width - totalWidth) / 2, 29
         );
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
@@ -1043,17 +961,19 @@ export default function ItemStockReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`ItemStockReport As On ${toInputDate}.pdf`);
+    doc.save(`DailyActivityReport As On ${toInputDate}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 8 ; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "left",
+      "center",
+      "center",
+      "center",
       "left",
       "left",
       "right",
@@ -1102,7 +1022,7 @@ export default function ItemStockReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Item Stock Report As On ${toInputDate}`,
+      `Daily Activity Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1118,105 +1038,21 @@ export default function ItemStockReport() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
-    let typecapacity = capacityselectdatavalue.label
-      ? capacityselectdatavalue.label
-      : "ALL";
-    let typecategory = categoryselectdatavalue.label
-      ? categoryselectdatavalue.label
-      : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
-      : "ALL ";
-
-    let RATE =
-      transectionType === "P"
-        ? "PURCHASE RATE"
-        : transectionType == "M"
-        ? "SM RATE"
-        : transectionType == "A"
-        ? "AVERAGE RATE"
-        : transectionType == "W"
-        ? "WEIGHTRD AVERAGE"
-        : transectionType == "F"
-        ? "FIFP"
-        : "";
-
-    let transectionsts =
-      transectionType === "P"
-        ? "POSITIVE"
-        : transectionType == "N"
-        ? "NEGATIVE"
-        : transectionType == "Z"
-        ? "ZERO"
-        : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "COMPANY :",
-      typecompany,
-      "",
-      "STORE :",
-      typetype,
-    ]);
-
-    // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "CATEGORY :",
-      typecategory,
-      "",
-      "RATE :",
-      RATE,
-    ]);
-
-    const typeAndStoreRow3 = worksheet.addRow([
-      "CAPACITY :",
-      typecapacity,
-      "",
-      "STATUS :",
-      transectionsts,
-    ]);
 
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery ? ["", "", "", "SEARCH :", typesearch] : [""]
+      searchQuery ? ["", "", "", "", "", "SEARCH :", typesearch] : [""]
     );
 
-    // Apply styling for the status row
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+   
     typeAndStoreRow4.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1240,11 +1076,14 @@ export default function ItemStockReport() {
 
     // Add headers
     const headers = [
-      "Code",
-      "Description",
-      "Last Date",
-      "Rate",
+   
+ "Date",
+      "TrnNo",
+     "Type",
+     "Account Description",
+     "Description",
       "Qnty",
+      "Rate",
       "Amount",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1253,12 +1092,14 @@ export default function ItemStockReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Code,
+       item.Date,
+      item.TrnNo,
+       item.Type,
+        item["Account Description"],
         item.Description,
-        item["Last Date"],
-        item["Pur Rate"],
         item.Qnty,
-        item.Amount,
+      item.Rate,
+      item.Amount,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1277,17 +1118,19 @@ export default function ItemStockReport() {
     });
 
     // Set column widths
-    [20, 45, 10, 12, 12, 12].forEach((width, index) => {
+    [10,8,6, 45,40, 10, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
+      String(formatValue(tableData.length.toLocaleString())),
       "",
-      "Total",
       "",
+     "",
       "",
-      String(totalqnty),
-      String(totaltax),
+       "",
+      "",
+       ""
     ]);
 
     // total row added
@@ -1295,15 +1138,15 @@ export default function ItemStockReport() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 5 || colNumber === 6) {
-        cell.alignment = { horizontal: "right" };
+      if (colNumber === 1) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
@@ -1370,7 +1213,7 @@ export default function ItemStockReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ItemStockReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `DailyActivityReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1462,55 +1305,31 @@ export default function ItemStockReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
+
 
   const firstColWidth = {
-    width: "135px",
+    width: "80px",
   };
   const secondColWidth = {
-    width: "360px",
+    width: "55px",
   };
   const thirdColWidth = {
-    width: "90px",
+    width: "40px",
   };
   const forthColWidth = {
-    width: "90px",
+    width: isSidebarVisible ? "300px": "360px",
   };
-
   const sixthColWidth = {
-    width: "90px",
+    width: isSidebarVisible ? "250px": "360px",
   };
   const seventhColWidth = {
-    width: "110px",
+    width: "80px",
+  };
+   const eightColWidth = {
+    width: "90px",
+  };
+   const ninthColWidth = {
+    width: "90px",
   };
 
   const sixthcol = {
@@ -1618,7 +1437,7 @@ export default function ItemStockReport() {
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="6" className="text-center">
+              <td colSpan="8" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -1630,7 +1449,7 @@ export default function ItemStockReport() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
+                {Array.from({ length: 8 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1642,13 +1461,15 @@ export default function ItemStockReport() {
               <td style={forthColWidth}></td>
               <td style={sixthColWidth}></td>
               <td style={seventhColWidth}></td>
+               <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
             </tr>
           </>
         ) : (
           <>
             {tableData.map((item, i) => {
               totalEnteries += 1;
-              const isNegative = item.Qnty < 0 || item.Amount < 0;
+              const isNegative = item.Qnty < 0 || item.Rate < 0 || item.Amount < 0;
               return (
                 <tr
                   key={`${i}-${selectedIndex}`}
@@ -1665,34 +1486,32 @@ export default function ItemStockReport() {
                   </td> */}
 
   <td
-  className="text-start"
+  className="text-center"
   style={firstColWidth}
-  onDoubleClick={(e) => {
-    e.stopPropagation();
-
-    // code temporarily store karo
-    sessionStorage.setItem("itemCode", item.Code);
-
-    // fixed URL open karo
-    window.open("/crystalsol/ItemLedger", "_blank");
-  }}
+ 
 >
-  {item.Code}
+  {item.Date}
 </td>
 
-                  <td className="text-start" style={secondColWidth}>
-                    {item.Description}
+                  <td className="text-cebter" style={secondColWidth}>
+                    {item['TrnNo']}
                   </td>
                   <td className="text-center" style={thirdColWidth}>
-                    {item["Last Date"]}
+                    {item.Type}
                   </td>
-                  <td className="text-end" style={forthColWidth}>
-                    {formatValue(item["Pur Rate"])}
+                   <td className="text-start" style={forthColWidth}>
+                    {item["Account Description"]}
                   </td>
-                  <td className="text-end" style={sixthColWidth}>
-                    {formatValue(item.Qnty)}
+                   <td className="text-start" style={sixthColWidth}>
+                    {item.Description}
                   </td>
                   <td className="text-end" style={seventhColWidth}>
+                    {formatValue(item.Qnty)}
+                  </td>
+                  <td className="text-end" style={eightColWidth}>
+                    {formatValue(item.Rate)}
+                  </td>
+                  <td className="text-end" style={ninthColWidth}>
                     {formatValue(item.Amount)}
                   </td>
                 </tr>
@@ -1708,7 +1527,7 @@ export default function ItemStockReport() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
+                {Array.from({ length: 8 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1720,6 +1539,8 @@ export default function ItemStockReport() {
               <td style={forthColWidth}></td>
               <td style={sixthColWidth}></td>
               <td style={seventhColWidth}></td>
+               <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
             </tr>
           </>
         )}
@@ -1763,11 +1584,11 @@ export default function ItemStockReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: isSidebarVisible ?"1000px" : "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "52vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -2161,73 +1982,63 @@ export default function ItemStockReport() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("Code")}
                     >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Code")}
-                      ></i>
+                      Date
+                     
                     </td>
 
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
                     >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
+                      TrnNo
+                     
                     </td>
 
                     <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("Last Date")}
                     >
-                      Last Date{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Last Date")}
-                      ></i>
+                      Type
+                     
                     </td>
 
                     <td
                       className="border-dark"
                       style={forthColWidth}
-                      onClick={() => handleSorting("Pur Rate")}
                     >
-                      Rate{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Pur Rate")}
-                      ></i>
+                      Account Description
+                     
                     </td>
 
                     <td
                       className="border-dark"
                       style={sixthColWidth}
-                      onClick={() => handleSorting("Qnty")}
                     >
-                      Qnty{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
-                      ></i>
+                      Description
+                      
                     </td>
 
                     <td
                       className="border-dark"
                       style={seventhColWidth}
-                      onClick={() => handleSorting("Amount")}
                     >
-                      Amount{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amount")}
-                      ></i>
+                      Qnty
+                    
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={eightColWidth}
+                    >
+                      Rate
+                    
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                    >
+                      Amount
+                    
                     </td>
 
                     <td className="border-dark" style={sixthcol}></td>
@@ -2317,9 +2128,9 @@ export default function ItemStockReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
+              {/* <span className="mobileledger_total">
                 {formatValue(totalqnty)}
-              </span>
+              </span> */}
             </div>
             <div
               style={{
@@ -2328,9 +2139,28 @@ export default function ItemStockReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
+              {/* <span className="mobileledger_total">
                 {formatValue(totaltax)}
-              </span>
+              </span> */}
+            </div>
+
+             <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              
+            </div>
+             <div
+              style={{
+                ...ninthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+            
             </div>
           </div>
           {/* Action Buttons */}

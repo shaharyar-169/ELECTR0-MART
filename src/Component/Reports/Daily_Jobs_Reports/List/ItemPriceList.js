@@ -805,7 +805,8 @@ export default function ItemPriceList() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
+        doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
         doc.text(
           `Page ${pageNumber}`,
           rightX - 5,

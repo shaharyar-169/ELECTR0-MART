@@ -302,12 +302,12 @@ const toggleFromCalendar = () => {
         const apiMainUrl = apiLinks + "/DailyStatusReport.php";
         setIsLoading(true);
         const formMainData = new URLSearchParams({
-             FIntDat: fromInputDate,
-             FFnlDat: toInputDate,
-             FSchTxt: searchQuery,
-            FCtgCod: '',
-            FCapCod: '',
-            FCmpCod: '',
+            FIntDat: fromInputDate,
+            FFnlDat: toInputDate,
+            FSchTxt: searchQuery,
+            // FCtgCod: '',
+            // FCapCod: '',
+            // FCmpCod: '',
             FStrCod: '',
             // code: organisation.code,
             // FLocCod: locationnumber || getLocationNumber,
@@ -315,7 +315,7 @@ const toggleFromCalendar = () => {
             FRepTyp: '',
             code: 'NASIRTRD',
             FLocCod: '001',
-            FYerDsc: '2024-2024',
+            // FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -327,11 +327,11 @@ const toggleFromCalendar = () => {
 
                 setTotalOpening(response.data["Total Opening"]);
                 setTotalPurchase(response.data["Total Purchase"]);
-                setTotalPurRet(response.data["Total Pur-Ret"]);
+                setTotalPurRet(response.data["Total PurRet"]);
                 setTotalReceive(response.data["Total Receive"]);
                 setTotalIssue(response.data["Total Issue"]);
                 setTotalSale(response.data["Total Sale"]);
-                setTotalSaleRet(response.data["Total Sale-Ret"]);
+                setTotalSaleRet(response.data["Total SaleRet"]);
                 setTotalBalance(response.data["Total Qnty"]);
 
                 if (response.data && Array.isArray(response.data.Detail)) {
@@ -2147,7 +2147,7 @@ const toggleFromCalendar = () => {
                                                             {formatValue(item["Purchase"])}
                                                         </td>
                                                         <td className="text-end" style={fifthColWidth}>
-                                                            {formatValue(item["Pur-Ret"])}
+                                                            {formatValue(item.PurRet)}
                                                         </td>
                                                         <td className="text-end" style={sixthColWidth}>
                                                             {formatValue(item["Receive"])}
@@ -2159,7 +2159,7 @@ const toggleFromCalendar = () => {
                                                             {formatValue(item["Sale"])}
                                                         </td>
                                                         <td className="text-end" style={ninthColWidth}>
-                                                            {formatValue(item["Sale-Ret"])}
+                                                            {formatValue(item.SaleRet)}
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
                                                             {formatValue(item["Balance"])}

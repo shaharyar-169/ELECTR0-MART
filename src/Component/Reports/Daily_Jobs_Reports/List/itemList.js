@@ -698,7 +698,7 @@ export default function ItemList() {
       // "Type",
       "Status",
     ];
-    const columnWidths = [40, 110, 50, 50, 18];
+    const columnWidths = [40, 110, 50, 60, 18];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -941,8 +941,9 @@ export default function ItemList() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+                   doc.text(
           `Page ${pageNumber}`,
           rightX - 25,
           doc.internal.pageSize.height - 10,

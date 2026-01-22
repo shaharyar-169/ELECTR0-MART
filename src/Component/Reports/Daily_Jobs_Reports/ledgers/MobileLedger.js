@@ -36,6 +36,7 @@ export default function MobileLedger() {
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
+const [isSessionReadonly, setIsSessionReadonly] = useState(false);
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
@@ -283,166 +284,111 @@ export default function MobileLedger() {
         }
     };
 
-    function fetchReceivableReport() {
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
-        const mobilenumber = document.getElementById("phone");
+    
+    function fetchReceivableReport({
+  mobile = mobileNumber,
+  fromDate = fromInputDate,
+  toDate = toInputDate,
+  skipValidation = false,
+} = {}) {
 
+  const mobilenumberEl = document.getElementById("phone");
+  const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+  if (!skipValidation) {
+    let errorType = "";
 
-        let hasError = false;
-        let errorType = "";
-
-        switch (true) {
-            case !mobileNumber:
-                errorType = "saleType";
-                break;
-            case mobileNumber.length !== 11 || !mobileNumber.startsWith("03"):
-                errorType = "invalidMobileNumber";
-                break;
-            case !fromInputDate:
-                errorType = "fromDate";
-                break;
-            case !toInputDate:
-                errorType = "toDate";
-                break;
-            default:
-                hasError = false;
-                break;
-        }
-
-        if (!dateRegex.test(fromInputDate)) {
-            errorType = "fromDateInvalid";
-        } else if (!dateRegex.test(toInputDate)) {
-            errorType = "toDateInvalid";
-        } else {
-            const formattedFromInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [fromDay, fromMonth, fromYear] = formattedFromInput
-                .split("-")
-                .map(Number);
-            const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
-            const formattedToInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-            const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-            if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-                errorType = "fromDateBeforeGlobal";
-            } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-                errorType = "fromDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = "toDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = "toDateBeforeGlobal";
-            } else if (enteredToDate < enteredFromDate) {
-                errorType = "toDateBeforeFromDate";
-            }
-        }
-
-        switch (errorType) {
-
-
-            case "saleType":
-                toast.error("Please Enter a Mobile Number");
-                return;
-
-            case "invalidMobileNumber":
-                toast.error("Invalid Mobile Number");
-                mobilenumber.style.border = "2px solid red";
-                return;
-
-            case "fromDate":
-                toast.error("From date is required");
-                return;
-            case "toDate":
-                toast.error("To date is required");
-                return;
-            case "fromDateInvalid":
-                toast.error("From date must be in the format dd-mm-yyyy");
-                return;
-            case "toDateInvalid":
-                toast.error("To date must be in the format dd-mm-yyyy");
-                return;
-            case "fromDateBeforeGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "fromDateAfterGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateAfterGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeFromDate":
-                toast.error("To date must be after from date");
-                return;
-
-            default:
-                break;
-        }
-
-        document.getElementById(
-            "fromdatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-        document.getElementById(
-            "todatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-
-        const apiUrl = apiLinks + "/MobileLedger.php";
-        setIsLoading(true);
-        const formData = new URLSearchParams({
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
-            FMobNum: mobileNumber,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
-
-
-            // code: 'BRIGHT',
-            // FLocCod: '001',
-            // FYerDsc: '2025-2025',
-
-
-        }).toString();
-
-        axios
-            .post(apiUrl, formData)
-            .then((response) => {
-                setIsLoading(false);
-                setTotalDebit(response.data["Total Amount "]);
-                if (response.data && Array.isArray(response.data.Detail)) {
-                    setTableData(response.data.Detail);
-                } else {
-                    console.warn(
-                        "Response data structure is not as expected:",
-                        response.data
-                    );
-                    setTableData([]);
-                }
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                setIsLoading(false);
-            });
+    switch (true) {
+      case !mobile:
+        errorType = "saleType";
+        break;
+      case mobile.length !== 11 || !mobile.startsWith("03"):
+        errorType = "invalidMobileNumber";
+        break;
+      case !fromDate:
+        errorType = "fromDate";
+        break;
+      case !toDate:
+        errorType = "toDate";
+        break;
+      case !dateRegex.test(fromDate):
+        errorType = "fromDateInvalid";
+        break;
+      case !dateRegex.test(toDate):
+        errorType = "toDateInvalid";
+        break;
+      default:
+        break;
     }
+
+    if (errorType) {
+      switch (errorType) {
+        case "saleType":
+          toast.error("Please Enter a Mobile Number");
+          return;
+        case "invalidMobileNumber":
+          toast.error("Invalid Mobile Number");
+          mobilenumberEl.style.border = "2px solid red";
+          return;
+        case "fromDate":
+          toast.error("From date is required");
+          return;
+        case "toDate":
+          toast.error("To date is required");
+          return;
+        case "fromDateInvalid":
+          toast.error("From date must be dd-mm-yyyy");
+          return;
+        case "toDateInvalid":
+          toast.error("To date must be dd-mm-yyyy");
+          return;
+        default:
+          return;
+      }
+    }
+
+    // 📅 Logical date validation
+    const [fd, fm, fy] = fromDate.split("-").map(Number);
+    const [td, tm, ty] = toDate.split("-").map(Number);
+
+    const enteredFromDate = new Date(fy, fm - 1, fd);
+    const enteredToDate = new Date(ty, tm - 1, td);
+
+    if (enteredToDate < enteredFromDate) {
+      toast.error("To date must be after from date");
+      return;
+    }
+  }
+
+  // 🚀 API CALL
+  const apiUrl = apiLinks + "/MobileLedger.php";
+  setIsLoading(true);
+
+  const formData = new URLSearchParams({
+    FIntDat: fromDate,
+    FFnlDat: toDate,
+    FMobNum: mobile,
+    code: organisation.code,
+    FLocCod: locationnumber || getLocationNumber,
+    FYerDsc: yeardescription || getYearDescription,
+  }).toString();
+
+  axios
+    .post(apiUrl, formData)
+    .then((response) => {
+      setIsLoading(false);
+      setTotalDebit(response.data["Total Amount "]);
+
+      setTableData(
+        Array.isArray(response.data.Detail) ? response.data.Detail : []
+      );
+    })
+    .catch((error) => {
+      console.error(error);
+      setIsLoading(false);
+    });
+}
+
 
     useEffect(() => {
         const hasComponentMountedPreviously =
@@ -458,7 +404,6 @@ export default function MobileLedger() {
         }
     }, []);
 
-   
 useEffect(() => {
   const storedData = sessionStorage.getItem("MobileLedgerData");
 
@@ -466,87 +411,87 @@ useEffect(() => {
     try {
       const parsedData = JSON.parse(storedData);
 
-      // Only proceed if doubleClick AND has the doubleClick flag
       if (parsedData.source === "doubleClick") {
-        console.log("Setting data from double-click session");
+        let mobileValue = "";
+        let fromDateValue = "";
+        let toDateValue = "";
 
-        // 📱 MOBILE
+        // 📱 Mobile
         if (parsedData.Mobile) {
-          const value = parsedData.Mobile
+          mobileValue = parsedData.Mobile
             .toString()
             .replace(/\D/g, "")
             .slice(0, 11);
-          setmobileNumber(value);
+          setmobileNumber(mobileValue);
         }
 
-        // 📅 DATE
+        // 📅 Dates
         if (parsedData.toInputDate) {
           const [day, month, year] = parsedData.toInputDate.split("-");
           const toDate = new Date(year, month - 1, day);
-
-          setSelectedToDate(toDate);
-          settoInputDate(formatDate(toDate));
 
           const firstDate = new Date(
             toDate.getFullYear(),
             toDate.getMonth(),
             1
           );
+
+          fromDateValue = formatDate(firstDate);
+          toDateValue = formatDate(toDate);
+
           setSelectedfromDate(firstDate);
-          setfromInputDate(formatDate(firstDate));
+          setfromInputDate(fromDateValue);
+
+          setSelectedToDate(toDate);
+          settoInputDate(toDateValue);
         }
 
-        // ✅ CALL API AFTER SESSION DATA IS SET
-        // Clear session after reading
-        sessionStorage.removeItem("MobileLedgerData");
+        // 🔒 Lock fields
+        setIsSessionReadonly(true);
 
-        // Set a flag to indicate we've processed the double-click
+        // 🧹 Clear session
+        sessionStorage.removeItem("MobileLedgerData");
         sessionStorage.setItem("MobileLedgerProcessed", "true");
 
-        return; // Exit early since session data applied
-      } else {
-        // If session exists but not from double-click, clear it
-        console.log("Clearing non-double-click session data");
-        sessionStorage.removeItem("MobileLedgerData");
-      }
+        // 🚀 Auto fetch (NO validation)
+        setTimeout(() => {
+          fetchReceivableReport({
+            mobile: mobileValue,
+            fromDate: fromDateValue,
+            toDate: toDateValue,
+            skipValidation: true,
+          });
+        }, 0);
 
+        return;
+      }
     } catch (err) {
       console.error("Invalid MobileLedgerData", err);
-      // Clear invalid session data
       sessionStorage.removeItem("MobileLedgerData");
     }
   }
 
-  // Check if we should apply default dates (when opening independently)
-  // Only apply defaults if we haven't just processed a double-click
-  const processedDoubleClick = sessionStorage.getItem("MobileLedgerProcessed");
+  // 🧾 Normal open
+  const processed = sessionStorage.getItem("MobileLedgerProcessed");
 
-  if (!processedDoubleClick) {
-    console.log("Setting default dates for independent opening");
+  if (!processed) {
+    const today = new Date();
+    const firstDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    // ⬇️ Normal default dates
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
+    setSelectedfromDate(firstDate);
+    setfromInputDate(formatDate(firstDate));
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    setSelectedToDate(today);
+    settoInputDate(formatDate(today));
+
+    setIsSessionReadonly(false);
   } else {
-    // Clear the processed flag for future visits
     sessionStorage.removeItem("MobileLedgerProcessed");
   }
 }, []);
 
+
     const exportPDFHandler = () => {
-
-        const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
-
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
@@ -562,14 +507,14 @@ useEffect(() => {
 
         // Add summary row to the table
 
-        // rows.push([
+        rows.push([
 
-        //     "", "", "Total", String(totalDebit)
-        // ]);
+            "", "", "Total","", "", String(totalDebit)
+        ]);
 
         // Define table column headers and individual column widths
         const headers = ["Trn#", "Date", "Item", "Sale Rate", "Qnty", "Amount"];
-        const columnWidths = [15, 20, 110, 30, 30, 30];
+        const columnWidths = [17, 23, 110, 30, 25, 30];
 
 
         // Calculate total table width
@@ -580,14 +525,14 @@ useEffect(() => {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+       doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+             doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -609,115 +554,159 @@ useEffect(() => {
                 startX += columnWidths[index]; // Move to the next column
             });
 
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+         
         };
 
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+         const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(fontSize);
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
 
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
-                }
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
+        doc.setDrawColor(0);
 
-                row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
 
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
 
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
 
-                    if (cellIndex === 1 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    } else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-                    }
+        row.forEach((cell, cellIndex) => {
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
+          const cellX = startX + 2;
 
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
 
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+          const cellValue = String(cell);
+
+          if (cellIndex === 0 || cellIndex === 1) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 3 ||
+            cellIndex === 4 ||
+            cellIndex === 5
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle",
+              });
             }
+          }
 
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
 
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    };
 
         // Function to calculate total table width
         const getTotalTableWidth = () => {
@@ -767,10 +756,11 @@ useEffect(() => {
                 // }
 
                 // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
+  doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
                 doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 60,
+                    rightX - 30,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -781,78 +771,30 @@ useEffect(() => {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-
+  doc.setFont("Times New Roman", "normal");
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
-
+  doc.setFont("verdana-regular", "normal");
                 addTitle(`Mobile Ledger From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-                // Set font size and weight for the labels
-                doc.setFontSize(12);
-                doc.setFont(getfontstyle, "300");
-
-
-
-
-                let status = transectionType === "A"
-                    ? "ALL"
-                    : transectionType === "CRV"
-                        ? "Cash Receive Voucher"
-                        : transectionType === "CPV"
-                            ? "Cash Payment Voucher"
-                            : transectionType === "BRV"
-                                ? "Bank Receive Voucher"
-                                : transectionType === "BPV"
-                                    ? "Bank Payment Voucher"
-                                    : transectionType === "JRV"
-                                        ? "Journal Voucher"
-                                        : transectionType === "INV"
-                                            ? "Item Sale"
-                                            : transectionType === "SRN"
-                                                ? "Sale Return"
-                                                : transectionType === "BIL"
-                                                    ? "Purchase"
-                                                    : transectionType === "PRN"
-                                                        ? "Purchase Return"
-                                                        : transectionType === "ISS"
-                                                            ? "Issue"
-                                                            : transectionType === "REC"
-                                                                ? "Received"
-                                                                : transectionType === "SLY"
-                                                                    ? "Salary"
-                                                                    : "ALL";
-
                 let search = mobileNumber
                     ? mobileNumber
                     : "ALL";
 
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
+
+  doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                          doc.text(`Mobile :`, labelsX, labelsY + 8.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(`${search}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
 
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`MOBILE :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
-
-
-                //    doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                //    doc.text(`TYPE :`, labelsX + 170, labelsY + 8.5); // Draw bold label
-                //    doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                //    doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
-
-
-
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.setFontSize(10);
-
-                startY += 10; // Adjust vertical position for the labels
+                               startY += 10; // Adjust vertical position for the labels
 
                 addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
                 const startIndex = currentPageIndex * rowsPerPage;
@@ -906,7 +848,7 @@ useEffect(() => {
         const numColumns = 6; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
-            "left", "center", "left", "right", "right", "right"
+            "center", "center", "left", "right", "right", "right"
 
 
         ];
@@ -964,46 +906,12 @@ useEffect(() => {
         // Add an empty row after the title section
         worksheet.addRow([]);
 
-        let typestatus = "";
-
-        if (transectionType === "A") {
-            typestatus = "ALL";
-        } else if (transectionType === "CRV") {
-            typestatus = "Cash Receive Voucher";
-        } else if (transectionType === "CPV") {
-            typestatus = "Cash Payment Voucher";
-        } else if (transectionType === "BRV") {
-            typestatus = "Bank Receive Voucher";
-        } else if (transectionType === "BPV") {
-            typestatus = "Bank Payment Voucher";
-        } else if (transectionType === "JRV") {
-            typestatus = "Journal Voucher";
-        } else if (transectionType === "INV") {
-            typestatus = "Item Sale";
-        } else if (transectionType === "SRN") {
-            typestatus = "Sale Return";
-        } else if (transectionType === "BIL") {
-            typestatus = "Purchase";
-        } else if (transectionType === "PRN") {
-            typestatus = "Purchase Return";
-        } else if (transectionType === "ISS") {
-            typestatus = "Issue";
-        } else if (transectionType === "REC") {
-            typestatus = "Received";
-        } else if (transectionType === "SLY") {
-            typestatus = "Salary";
-        } else {
-            typestatus = "ALL"; // Default value
-        }
-
-
-        let typesearch = mobileNumber ? mobileNumber : "ALL";
+             
+        let typesearch = mobileNumber ? mobileNumber : "";
 
         const typeAndStoreRow3 = worksheet.addRow([
-            "MOBILE:", typesearch
+            "Mobile:", typesearch
         ]);
-
-
 
 
         // Merge cells for Accountselect (columns B to D)
@@ -1072,38 +980,33 @@ useEffect(() => {
             });
         });
 
-        // const totalRow = worksheet.addRow([
-        //     "",
-        //     "",
-        //     "",
-        //     "Total",
-        //     totalQnty,
-        //     "",
-        //     totalDebit,
-        //     totalCredit,
-        //     closingBalance,
+        const totalRow = worksheet.addRow([
+            "",
+            "",
+            "Total",
+            "",
+            "",
+            totalDebit,
+                ]);
 
-        // ]);
+        // total row added
 
-        // // total row added
+        totalRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true };
+            cell.border = {
+                top: { style: "double" },
+                left: { style: "thin" },
+                bottom: { style: "double" },
+                right: { style: "thin" },
+            };
 
-        // totalRow.eachCell((cell, colNumber) => {
-        //     cell.font = { bold: true };
-        //     cell.border = {
-        //         top: { style: "double" },
-        //         left: { style: "thin" },
-        //         bottom: { style: "double" },
-        //         right: { style: "thin" },
-        //     };
-
-        //     // Align only the "Total" text to the right
-        //     if (colNumber === 5 || colNumber === 7 || colNumber === 8 || colNumber === 9) {
-        //         cell.alignment = { horizontal: "right" };
-        //     }
-        // });
-
-        // Set column widths
-        [8, 10, 45, 20, 20, 20].forEach((width, index) => {
+            // Align only the "Total" text to the right
+            if (colNumber === 6) {
+                cell.alignment = { horizontal: "right" };
+            }
+        });
+       
+        [8, 10, 45, 14, 10, 14].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1237,27 +1140,7 @@ useEffect(() => {
    
 
 
-    // const firstColWidth = {
-    //     width: "15.2%",
-    // };
-    // const secondColWidth = {
-    //     width: "15.1%",
-    // };
-    // const thirdColWidth = {
-    //     width: "53.4%",
-    // };
-    // const forthColWidth = {
-    //     width: "14.3%",
-    // };
-    // const fifthColWidth = {
-    //     width: "15%",
-    // };
-    // const sixthColWidth = {
-    //     width: "15%",
-    // };
-    // const seventhColWidth = {
-    //     width: "14.5%",
-    // };
+   
 
     const firstColWidth = {
         width: "54px",
@@ -1500,6 +1383,7 @@ useEffect(() => {
                                 <input
                                     ref={input2Ref}
                                     value={mobileNumber}
+                                    readOnly={isSessionReadonly}
                                     onKeyDown={(e) => handleMobilePress(e, fromRef)}
                                     onChange={handleMobilenumberInputChange}
                                     autoComplete="off"
@@ -1515,6 +1399,7 @@ useEffect(() => {
                                         backgroundColor: getcolor,
                                         outline: "none",
                                         paddingLeft: "10px",
+                                        cursor: isSessionReadonly ? "not-allowed" : "text",
                                         marginLeft: "3px",
                                     }}
                                     onFocus={(e) =>
@@ -1524,7 +1409,7 @@ useEffect(() => {
                                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                                     }
                                 />
-                            </div>
+                                </div>
 
                           
                         </div>
@@ -1587,27 +1472,29 @@ useEffect(() => {
                                             fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
+                                            
+                                            pointerEvents: isSessionReadonly ? "none" : "auto",
                                         }}
                                         id="frominputid"
                                         value={fromInputDate}
                                         ref={fromRef}
+                                        readOnly={isSessionReadonly}
                                         onChange={handlefromInputChange}
                                         onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
+                                        disabled={isSessionReadonly || selectedRadio !== "custom"}  
+                                                                          />
                                     <DatePicker
                                         selected={selectedfromDate}
-                                        onChange={handlefromDateChange}
+                                        // onChange={handlefromDateChange}
+                                        onChange={isSessionReadonly ? undefined : handlefromDateChange}
                                         dateFormat="dd-MM-yyyy"
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
-                                        open={fromCalendarOpen}
-                                        dropdownMode="select"
+ open={isSessionReadonly ? false : fromCalendarOpen}
+                                         dropdownMode="select"
                                         customInput={
                                             <div>
                                                 <BsCalendar
@@ -1617,16 +1504,12 @@ useEffect(() => {
                                                             : undefined
                                                     }
                                                     style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
+                                                       cursor: isSessionReadonly ? "not-allowed" : "pointer",
+        opacity: isSessionReadonly ? 0.5 : 1,
                                                         marginLeft: "18px",
                                                         fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
+ disabled={isSessionReadonly || selectedRadio !== "custom"}                                                />
                                             </div>
                                         }
                                         disabled={selectedRadio !== "custom"}
@@ -1679,25 +1562,26 @@ useEffect(() => {
                                             fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
+                                            pointerEvents: isSessionReadonly ? "none" : "auto",
                                         }}
                                         value={toInputDate}
+                                         readOnly={isSessionReadonly}
                                         onChange={handleToInputChange}
                                         onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="To Date Input"
-                                        disabled={selectedRadio !== "custom"}
-                                    />
+  disabled={isSessionReadonly || selectedRadio !== "custom"}
+                                      />
                                     <DatePicker
                                         selected={selectedToDate}
-                                        onChange={handleToDateChange}
+                                        // onChange={handleToDateChange}
+                                         onChange={isSessionReadonly ? undefined : handleToDateChange}
                                         dateFormat="dd-MM-yyyy"
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
-                                        open={toCalendarOpen}
+                                       open={isSessionReadonly ? false : toCalendarOpen}
                                         dropdownMode="select"
                                         customInput={
                                             <div>
@@ -1708,16 +1592,12 @@ useEffect(() => {
                                                             : undefined
                                                     }
                                                     style={{
-                                                        cursor:
-                                                            selectedRadio === "custom"
-                                                                ? "pointer"
-                                                                : "default",
+                                                        cursor: isSessionReadonly ? "not-allowed" : "pointer",
                                                         marginLeft: "18px",
                                                         fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
                                                     }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
+ disabled={isSessionReadonly || selectedRadio !== "custom"}                                                />
                                             </div>
                                         }
                                         disabled={selectedRadio !== "custom"}

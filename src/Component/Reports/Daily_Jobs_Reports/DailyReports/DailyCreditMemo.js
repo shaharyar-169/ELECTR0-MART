@@ -2099,7 +2099,14 @@ export default function DailyCreditReport() {
       Invoice: item["Inv#"],
       
     })
+    
   
+);
+sessionStorage.setItem(
+  "InvoiveLedgerData2",
+  JSON.stringify({  
+     source: "doubleClick2",
+   }) 
 );
 
     // fixed URL open karo
@@ -2154,6 +2161,8 @@ export default function DailyCreditReport() {
         toInputDate: toInputDate,})
   
 );
+
+
 
     // fixed URL open karo
     window.open("/crystalsol/MobileLedger", "_blank");

@@ -450,7 +450,7 @@ export default function JournalReport() {
 
     // Define table column headers and individual column widths
     const headers = ["Jvr#", "Date", "Code", "Description", "Debit", "Credit"];
-    const columnWidths = [15, 20, 20, 100, 25, 25];
+    const columnWidths = [15, 25, 25,90, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -460,14 +460,14 @@ export default function JournalReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
+    doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(12); // Set font size for headers
+     doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -489,36 +489,35 @@ export default function JournalReport() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(12);
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5; // Adjust row height
-      const fontSize = 10; // Adjust font size for regular text
-      const boldFont = "bold"; // Bold font
-      const normalFont = getfontstyle; // Default font
-      const tableWidth = getTotalTableWidth(); // Calculate total table width
-
-      doc.setFontSize(fontSize);
+      const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
-        const isTotalRow = i === rows.length - 1; // Check if this is the total row
-        let textColor = [0, 0, 0]; // Default text color
-        let fontName = normalFont; // Default font
-        let currentX = startX; // Track current column position
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-        // For total row, set bold font
-        if (isTotalRow) {
-          doc.setFont(getfontstyle, 'bold');
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
         }
 
-        // Set background color for odd-numbered rows
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
+
         if (isOddRow) {
-          doc.setFillColor(240); // Light background color
+          doc.setFillColor(240);
           doc.rect(
             startX,
             startY + (i - startIndex + 2) * rowHeight,
@@ -528,163 +527,119 @@ export default function JournalReport() {
           );
         }
 
+        doc.setDrawColor(0);
+
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
+
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
+
         row.forEach((cell, cellIndex) => {
-          // For total row, adjust vertical position to center in the double border
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-          const cellX = currentX + 2;
+          const cellX = startX + 2;
 
-          // Reset default colors for each cell
-          let backgroundColor = null;
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-          // Apply styling only for "Receipt" or "Payment" in column index 1
-          if (cellIndex === 1) {
-            if (cell === "Receipt") {
-              backgroundColor = [169, 169, 169]; // Light grey background
-              textColor = [0, 0, 0]; // White text
-              fontName = boldFont;
-            } else if (cell === "Payment") {
-              backgroundColor = [169, 169, 169]; // Light grey background
-              textColor = [0, 0, 0]; // White text
-              fontName = boldFont;
-            }
-          }
-
-          // Draw cell background if applicable
-          if (backgroundColor) {
-            doc.setFillColor(...backgroundColor);
-            doc.rect(
-              currentX,
-              startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight,
-              "F"
-            );
-          }
-
-          // Set text color and font
-          doc.setTextColor(...textColor);
-
-          // For total row, keep bold font
           if (!isTotalRow) {
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
-          // Ensure the cell value is a string
           const cellValue = String(cell);
 
-          // Right-align specific columns (like Balance column)
-          if (cellIndex === 4 || cellIndex === 5) {
-            const rightAlignX = currentX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 4 ||
+            cellIndex === 5
+           
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
               baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = currentX + columnWidths[0] / 2;
+              const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
                 align: "center",
-                baseline: "middle"
+                baseline: "middle",
               });
             } else {
               doc.text(cellValue, cellX, cellY, {
-                baseline: "middle"
+                baseline: "middle",
               });
             }
           }
 
-          // Draw borders
-          if (isTotalRow) {
-            // For total row - draw double horizontal borders and single vertical borders
-            const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-            const rowBottomY = rowTopY + rowHeight;
-
-            // Draw double top border
-            doc.setLineWidth(0.3);
-            doc.line(
-              currentX,
-              rowTopY,
-              currentX + columnWidths[cellIndex],
-              rowTopY
-            );
-            doc.line(
-              currentX,
-              rowTopY + 0.5,
-              currentX + columnWidths[cellIndex],
-              rowTopY + 0.5
-            );
-
-            // Draw double bottom border
-            doc.line(
-              currentX,
-              rowBottomY,
-              currentX + columnWidths[cellIndex],
-              rowBottomY
-            );
-            doc.line(
-              currentX,
-              rowBottomY - 0.5,
-              currentX + columnWidths[cellIndex],
-              rowBottomY - 0.5
-            );
-
-            // Draw single vertical borders
+          if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
-            // Left border (only for first column)
-            if (cellIndex === 0) {
-              doc.line(
-                currentX,
-                rowTopY,
-                currentX,
-                rowBottomY
-              );
-            }
-            // Right border
             doc.line(
-              currentX + columnWidths[cellIndex],
-              rowTopY,
-              currentX + columnWidths[cellIndex],
-              rowBottomY
-            );
-          } else {
-            // Normal border for other rows
-            doc.setLineWidth(0.2);
-            doc.rect(
-              currentX,
+              startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
-              columnWidths[cellIndex],
-              rowHeight
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
             );
+            startX += columnWidths[cellIndex];
           }
-
-          // Move to next column
-          currentX += columnWidths[cellIndex];
         });
 
-        // Reset font after total row
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Draw line at the bottom of the page with padding
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
       doc.setLineWidth(0.3);
       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 12;
-
-      // Add heading "Crystal Solution" aligned left bottom of the line
+      const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -733,8 +688,10 @@ export default function JournalReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -747,9 +704,10 @@ export default function JournalReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+        doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+ doc.setFont("verdana-regular", "normal");
         addTitle(
           `Journal From ${fromInputDate} To ${toInputDate}`,
           "",
@@ -763,26 +721,20 @@ export default function JournalReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-        doc.setFontSize(12);
-        doc.setFont(getfontstyle, "300");
+       
 
         let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
 
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 100, labelsY + 8.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 120, labelsY + 8.5); // Draw the value next to the label
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                      doc.text(`Search :`, labelsX + 100, labelsY + 8.5); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                      doc.text(`${search}`, labelsX + 120, labelsY + 8.5); // Draw the value next to the label
         }
 
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
 
         startY += 6; // Adjust vertical position for the labels
 
@@ -953,9 +905,9 @@ export default function JournalReport() {
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
         cell.border = {
-          top: { style: "double" },
+          top: { style: "thin" },
           left: { style: "thin" },
-          bottom: { style: "double" },
+          bottom: { style: "thin" },
           right: { style: "thin" },
         };
         cell.alignment = {
@@ -984,9 +936,9 @@ export default function JournalReport() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
@@ -1092,22 +1044,25 @@ export default function JournalReport() {
   };
 
   const firstColWidth = {
-    width: "7%",
+    width: "55px",
   };
   const secondColWidth = {
-    width: "10%",
+    width: "80px",
   };
   const thirdColWidth = {
-    width: "41.5%",
+    width: "360px",
   };
   const forthColWidth = {
-    width: "15%",
+    width: "90px",
   };
   const fifthColWidth = {
-    width: "15%",
+    width: "90px",
   };
   const sixthColWidth = {
-    width: "10%",
+    width: "80px",
+  };
+  const sixColWidth = {
+    width: "8px",
   };
 
   useHotkeys("alt+s", () => {
@@ -1132,28 +1087,27 @@ export default function JournalReport() {
   }, []);
 
   const contentStyle = {
-    backgroundColor: getcolor,
-    width: isSidebarVisible ? "calc(62vw - 0%)" : "62vw",
-    position: "relative",
-    top: "40%",
-    left: isSidebarVisible ? "50%" : "50%",
-    transform: "translate(-50%, -50%)",
-    transition: isSidebarVisible
-      ? "left 3s ease-in-out, width 2s ease-in-out"
-      : "left 3s ease-in-out, width 2s ease-in-out",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "start",
-    overflowX: "hidden",
-    overflowY: "hidden",
-    wordBreak: "break-word",
-    textAlign: "center",
+    width: "100%", // 100vw ki jagah 100%
     maxWidth: "800px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "50vw",
+    transform: "translateX(-50%)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    textAlign: "center",
     fontSize: "15px",
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: "23px",
     fontFamily: '"Poppins", sans-serif',
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
   };
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1271,7 +1225,7 @@ export default function JournalReport() {
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            width: "100%",
+            // width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
@@ -1281,136 +1235,13 @@ export default function JournalReport() {
           <div
             className="row"
             style={{
-              height: "47px",
+              height: "20px",
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
             }}
           >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "start",
-              }}
-            >
-              <div className="d-flex align-items-center justify-content-start">
-                <div className="mx-2">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "evenly",
-                      marginLeft: "20px",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="custom"
-                        checked={selectedRadio === "custom"}
-                        onChange={() => handleRadioChange(0)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="custom"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        Custom
-                      </label>
-                    </div>
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="30"
-                        checked={selectedRadio === "30days"}
-                        onChange={() => handleRadioChange(30)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="30"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        30 Days
-                      </label>
-                    </div>
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="60"
-                        checked={selectedRadio === "60days"}
-                        onChange={() => handleRadioChange(60)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="60"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        60 Days
-                      </label>
-                    </div>
-                    <div className="d-flex align-items-baseline mx-2">
-                      <input
-                        type="radio"
-                        name="dateRange"
-                        id="90"
-                        checked={selectedRadio === "90days"}
-                        onChange={() => handleRadioChange(90)}
-                        onFocus={(e) =>
-                          (e.currentTarget.style.border = "2px solid red")
-                        }
-                        onBlur={(e) =>
-                          (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                        }
-                      />
-                      &nbsp;
-                      <label
-                        htmlFor="90"
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                        }}
-                      >
-                        90 Days
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+           
 
             <div
               style={{
@@ -1665,7 +1496,7 @@ export default function JournalReport() {
             <div
               style={{
                 overflowY: "auto",
-                width: "98.8%",
+                // width: "98.8%",
               }}
             >
               <table
@@ -1674,9 +1505,9 @@ export default function JournalReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "99.7%",
+                  // width: "99.7%",
                   position: "relative",
-                  paddingRight: "2%",
+                  // paddingRight: "2%",
                 }}
               >
                 <thead
@@ -1714,6 +1545,9 @@ export default function JournalReport() {
                     </td>
                     <td className="border-dark" style={fifthColWidth}>
                       Credit
+                    </td>
+                    <td className="border-dark" style={sixColWidth}>
+                      
                     </td>
                   </tr>
                 </thead>
@@ -1852,9 +1686,9 @@ export default function JournalReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
-                  position: "relative",
-                  borderCollapse: "collapse", // Ensure borders work properly
+                  // width: "100%",
+                 position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -1979,8 +1813,8 @@ export default function JournalReport() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
-              width: "101.2%",
+              paddingRight: "8px",
+              // width: "101.2%",
             }}
           >
             <div

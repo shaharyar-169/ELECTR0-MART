@@ -387,8 +387,9 @@ export default function ChartofAccount() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+           doc.setFontSize(10);
+                   doc.text(
           `Page ${pageNumber}`,
           rightX - 40,
           doc.internal.pageSize.height - 10,
