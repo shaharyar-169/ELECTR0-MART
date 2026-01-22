@@ -239,16 +239,15 @@ export default function ItemStoreStockReport() {
             FCapCod: Capacityselectdata,
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
-            // FStrCod: Typeselectdata,
-            
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
+           
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
             FRepStk: transectionType2,
 
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
 
         }).toString();
 
@@ -663,15 +662,24 @@ export default function ItemStoreStockReport() {
         // Define table column headers and individual column widths
 
         const headers = [
-            "Code",
-            "Description",
-            "Rate",
-              "Qnty",
-            "Amount",
-             ...GetHeading.map(heading => heading.tstrabb),
-                    "GD-5",
-          
-        ];
+    "Code",
+    "Description",
+    "Rate",
+    "Qnty",
+    "Amount",
+    // Map dynamic headings
+    ...GetHeading.map((heading, index) => {
+        // Agar ye 5th item hai (index 4) aur value exists → use heading
+        if (index === 4 && heading.tstrabb) {
+            return heading.tstrabb;
+        }
+        // Baaki normal headings
+        return heading.tstrabb;
+    }),
+    // Fallback GD-5 if GetHeading has less than 5 items
+    ...(GetHeading.length < 5 ? ["GD-5"] : [])
+];
+
         const columnWidths = [35,110,25,15,25,15,15,15,15,15];
 
         // Calculate total table width
@@ -1293,16 +1301,25 @@ export default function ItemStoreStockReport() {
         };
 
         // Add headers
-        const headers = [
-          "Code",
-            "Description",
-            "Rate",
-              "Qnty",
-            "Amount",
-              ...GetHeading.map(heading => heading.tstrabb),
-                    "GD-5",
-           
-        ];
+      const headers = [
+    "Code",
+    "Description",
+    "Rate",
+    "Qnty",
+    "Amount",
+    // Map dynamic headings
+    ...GetHeading.map((heading, index) => {
+        // Agar ye 5th item hai (index 4) aur value exists → use heading
+        if (index === 4 && heading.tstrabb) {
+            return heading.tstrabb;
+        }
+        // Baaki normal headings
+        return heading.tstrabb;
+    }),
+    // Fallback GD-5 if GetHeading has less than 5 items
+    ...(GetHeading.length < 5 ? ["GD-5"] : [])
+];
+
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
@@ -2699,132 +2716,7 @@ color: isNegative ? "red" : fontcolor
                                         backgroundColor: tableHeadColor,
                                     }}
                                 >
-                                    {/* <tr
-                                        style={{
-                                            backgroundColor: tableHeadColor,
-                                            color: "white",
-                                        }}
-                                    >
-                                            <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      onClick={() => handleSorting("Code")}
-                    >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Code")}
-                      ></i>
-                    </td>
-                                           <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
-                    >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
-                    </td>
-                                           <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Rate")}
-                    >
-                      Rate{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Rate")}
-                      ></i>
-                    </td>
-
-                                            <td
-                      className="border-dark"
-                      style={tenthColWidth}
-                      onClick={() => handleSorting("Qnty")}
-                    >
-                      Qnty{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
-                      ></i>
-                    </td>
-                                           <td
-                      className="border-dark"
-                      style={elewenthColWidth}
-                      onClick={() => handleSorting("Amount")}
-                    >
-                      Amount{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amount")}
-                      ></i>
-                    </td>
-                                       
-                                            <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Qnt001")}
-                    >
-                       GD-1{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnt001")}
-                      ></i>
-                    </td>
-                                                            <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Qnt002")}
-                    >
-                       GD-2{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnt002")}
-                      ></i>
-                    </td>
-                                                             <td
-                      className="border-dark"
-                      style={seventhColWidth}
-                      onClick={() => handleSorting("Qnt003")}
-                    >
-                       GD-3{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnt003")}
-                      ></i>
-                    </td>
-                                                             <td
-                      className="border-dark"
-                      style={eightColWidth}
-                      onClick={() => handleSorting("Qnt004")}
-                    >
-                       GD-4{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnt004")}
-                      ></i>
-                    </td>
-                                                              <td
-                      className="border-dark"
-                      style={ninthColWidth}
-                      onClick={() => handleSorting("Qnt005")}
-                    >
-                       GD-5{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnt005")}
-                      ></i>
-                    </td>
-
-                                         <td className="border-dark" style={sixthcol}>
-                                           
-                                        </td>
-                                    
-                                       
-                                      
-                                    </tr> */}
+                                 
 
                                     <tr style={{
     backgroundColor: tableHeadColor,
@@ -2888,38 +2780,43 @@ color: isNegative ? "red" : fontcolor
     </td>
     
     {/* Dynamic GD columns from GetHeading */}
-    {GetHeading.map((heading, index) => {
-        // Generate sorting key like "Qnt001", "Qnt002", etc.
-        const sortKey = `Qnt${String(index + 1).padStart(3, '0')}`;
-        
-        // Define width for each column (you may need to adjust this)
-        const width = [
-            forthColWidth,     // index 0 -> GD-1
-            sixthColWidth,     // index 1 -> GD-2  
-            seventhColWidth,   // index 2 -> GD-3
-            eightColWidth,     // index 3 -> GD-4
-            ninthColWidth      // index 4 -> GD-5
-        ][index] || {};        // Default empty object if index exceeds
-        
-        return (
-            <td
-                key={heading.id || index}
-                className="border-dark"
-                style={width}
-                onClick={() => handleSorting(sortKey)}
-            >
-                {heading.tstrabb}{" "}
-                <i
-                    className="fa-solid fa-caret-down caretIconStyle"
-                    style={getIconStyle(sortKey)}
-                ></i>
-            </td>
-        );
-    })}
+{GetHeading.map((heading, index) => {
+    // Generate sorting key like "Qnt001", "Qnt002", etc.
+    const sortKey = `Qnt${String(index + 1).padStart(3, '0')}`;
 
-     <td
+    // Define width for each column
+    const width = [
+        forthColWidth,     // index 0 -> GD-1
+        sixthColWidth,     // index 1 -> GD-2  
+        seventhColWidth,   // index 2 -> GD-3
+        eightColWidth,     // index 3 -> GD-4
+        ninthColWidth      // index 4 -> GD-5
+    ][index] || {};        // Default empty object if index exceeds
+
+    // ✅ For 5th column, override heading if needed
+    const displayText = index === 4 && !heading.tstrabb ? "GD-5" : heading.tstrabb;
+
+    return (
+        <td
+            key={heading.id || index}
+            className="border-dark"
+            style={width}
+            onClick={() => handleSorting(sortKey)}
+        >
+            {displayText}{" "}
+            <i
+                className="fa-solid fa-caret-down caretIconStyle"
+                style={getIconStyle(sortKey)}
+            ></i>
+        </td>
+    );
+})}
+
+{/* Optional: fallback for 5th column if GetHeading has less than 5 items */}
+{GetHeading.length < 5 && (
+    <td
         className="border-dark"
-        style={forthColWidth}
+        style={ninthColWidth} // same as GD-5 width
         onClick={() => handleSorting("Qnt005")}
     >
         GD-5{" "}
@@ -2928,6 +2825,8 @@ color: isNegative ? "red" : fontcolor
             style={getIconStyle("Qnt005")}
         ></i>
     </td>
+)}
+
     
     {/* Empty column remains */}
     <td className="border-dark" style={sixthcol}></td>

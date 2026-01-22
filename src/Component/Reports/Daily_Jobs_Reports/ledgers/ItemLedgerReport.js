@@ -276,9 +276,9 @@ export default function ItemLedgerReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input1Ref.current) {
+                if (saleSelectRef1.current) {
                     e.preventDefault();
-                    input1Ref.current.focus();
+                    saleSelectRef1.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -317,7 +317,7 @@ export default function ItemLedgerReport() {
             const nextInput = document.getElementById(inputId);
             if (nextInput) {
                 nextInput.focus();
-                nextInput.select();
+                // nextInput.select();
             } else {
                 document.getElementById("submitButton").click();
             }
@@ -332,162 +332,270 @@ export default function ItemLedgerReport() {
         }
     };
 
-    function fetchReceivableReport() {
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
+    // function fetchReceivableReport() {
+    //     const fromDateElement = document.getElementById("fromdatevalidation");
+    //     const toDateElement = document.getElementById("todatevalidation");
 
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+    //     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-        let hasError = false;
-        let errorType = "";
+    //     let hasError = false;
+    //     let errorType = "";
 
-        switch (true) {
-            case !saleType:
-                errorType = "saleType";
-                break;
-            case !fromInputDate:
-                errorType = "fromDate";
-                break;
-            case !toInputDate:
-                errorType = "toDate";
-                break;
-            default:
-                hasError = false;
-                break;
-        }
+    //     switch (true) {
+    //         case !saleType:
+    //             errorType = "saleType";
+    //             break;
+    //         case !fromInputDate:
+    //             errorType = "fromDate";
+    //             break;
+    //         case !toInputDate:
+    //             errorType = "toDate";
+    //             break;
+    //         default:
+    //             hasError = false;
+    //             break;
+    //     }
 
-        if (!dateRegex.test(fromInputDate)) {
-            errorType = "fromDateInvalid";
-        } else if (!dateRegex.test(toInputDate)) {
-            errorType = "toDateInvalid";
-        } else {
-            const formattedFromInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [fromDay, fromMonth, fromYear] = formattedFromInput
-                .split("-")
-                .map(Number);
-            const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+    //     if (!dateRegex.test(fromInputDate)) {
+    //         errorType = "fromDateInvalid";
+    //     } else if (!dateRegex.test(toInputDate)) {
+    //         errorType = "toDateInvalid";
+    //     } else {
+    //         const formattedFromInput = fromInputDate.replace(
+    //             /^(\d{2})(\d{2})(\d{4})$/,
+    //             "$1-$2-$3"
+    //         );
+    //         const [fromDay, fromMonth, fromYear] = formattedFromInput
+    //             .split("-")
+    //             .map(Number);
+    //         const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
 
-            const formattedToInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-            const enteredToDate = new Date(toYear, toMonth - 1, toDay);
+    //         const formattedToInput = toInputDate.replace(
+    //             /^(\d{2})(\d{2})(\d{4})$/,
+    //             "$1-$2-$3"
+    //         );
+    //         const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
+    //         const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-            if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-                errorType = "fromDateBeforeGlobal";
-            } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-                errorType = "fromDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = "toDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = "toDateBeforeGlobal";
-            } else if (enteredToDate < enteredFromDate) {
-                errorType = "toDateBeforeFromDate";
-            }
-        }
+    //         if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
+    //             errorType = "fromDateBeforeGlobal";
+    //         } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
+    //             errorType = "fromDateAfterGlobal";
+    //         } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+    //             errorType = "toDateAfterGlobal";
+    //         } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
+    //             errorType = "toDateBeforeGlobal";
+    //         } else if (enteredToDate < enteredFromDate) {
+    //             errorType = "toDateBeforeFromDate";
+    //         }
+    //     }
 
-        switch (errorType) {
-            case "saleType":
-                toast.error("Please select a Account Code");
-                return;
+    //     switch (errorType) {
+    //         case "saleType":
+    //             toast.error("Please select a Account Code");
+    //             return;
 
-            case "fromDate":
-                toast.error("From date is required");
-                return;
-            case "toDate":
-                toast.error("To date is required");
-                return;
-            case "fromDateInvalid":
-                toast.error("From date must be in the format dd-mm-yyyy");
-                return;
-            case "toDateInvalid":
-                toast.error("To date must be in the format dd-mm-yyyy");
-                return;
-            case "fromDateBeforeGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "fromDateAfterGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateAfterGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeFromDate":
-                toast.error("To date must be after from date");
-                return;
+    //         case "fromDate":
+    //             toast.error("From date is required");
+    //             return;
+    //         case "toDate":
+    //             toast.error("To date is required");
+    //             return;
+    //         case "fromDateInvalid":
+    //             toast.error("From date must be in the format dd-mm-yyyy");
+    //             return;
+    //         case "toDateInvalid":
+    //             toast.error("To date must be in the format dd-mm-yyyy");
+    //             return;
+    //         case "fromDateBeforeGlobal":
+    //             toast.error(
+    //                 `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+    //             );
+    //             return;
+    //         case "fromDateAfterGlobal":
+    //             toast.error(
+    //                 `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+    //             );
+    //             return;
+    //         case "toDateAfterGlobal":
+    //             toast.error(
+    //                 `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+    //             );
+    //             return;
+    //         case "toDateBeforeGlobal":
+    //             toast.error(
+    //                 `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+    //             );
+    //             return;
+    //         case "toDateBeforeFromDate":
+    //             toast.error("To date must be after from date");
+    //             return;
 
-            default:
-                break;
-        }
+    //         default:
+    //             break;
+    //     }
 
-        document.getElementById(
-            "fromdatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-        document.getElementById(
-            "todatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
+    //     document.getElementById(
+    //         "fromdatevalidation"
+    //     ).style.border = `1px solid ${fontcolor}`;
+    //     document.getElementById(
+    //         "todatevalidation"
+    //     ).style.border = `1px solid ${fontcolor}`;
 
-        const apiUrl = apiLinks + "/ItemLedger.php";
-        setIsLoading(true);
-        const formData = new URLSearchParams({
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
-            FTrnTyp: transectionType,
-            FItmCod: saleType,
-            FStrCod: saleType1,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
+    //     const apiUrl = apiLinks + "/ItemLedger.php";
+    //     setIsLoading(true);
+    //     const formData = new URLSearchParams({
+    //         FIntDat: fromInputDate,
+    //         FFnlDat: toInputDate,
+    //         FTrnTyp: transectionType,
+    //         FItmCod: saleType,
+    //         FStrCod: saleType1,
+    //         // code: organisation.code,
+    //         // FLocCod: locationnumber || getLocationNumber,
+    //         // FYerDsc: yeardescription || getYearDescription,
 
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+    //         code: 'NASIRTRD',
+    //         FLocCod: '001',
+    //         FYerDsc: '2024-2024',
 
-        }).toString();
+    //     }).toString();
 
-        axios
-            .post(apiUrl, formData)
-            .then((response) => {
-                setIsLoading(false);
-                // Update total amount and quantity
-                settotalpurchase(response.data["Total Purchase "]);
-                settotalpurchaseReturn(response.data["Total Pur Return "]);
-                settotalReceive(response.data["Total Receive "]);
-                settotalissue(response.data["Total Issue "]);
-                settotalsale(response.data["Total Sale "]);
-                settotalsaleReturn(response.data["Total Sale Return"]);
-                settotalclosingbalance(response.data["Closing Balance"]);
+    //     axios
+    //         .post(apiUrl, formData)
+    //         .then((response) => {
+    //             setIsLoading(false);
+    //             // Update total amount and quantity
+    //             settotalpurchase(response.data["Total Purchase "]);
+    //             settotalpurchaseReturn(response.data["Total Pur Return "]);
+    //             settotalReceive(response.data["Total Receive "]);
+    //             settotalissue(response.data["Total Issue "]);
+    //             settotalsale(response.data["Total Sale "]);
+    //             settotalsaleReturn(response.data["Total Sale Return"]);
+    //             settotalclosingbalance(response.data["Closing Balance"]);
 
-                if (response.data && Array.isArray(response.data.Detail)) {
-                    setTableData(response.data.Detail);
-                } else {
-                    console.warn(
-                        "Response data structure is not as expected:",
-                        response.data
-                    );
-                    setTableData([]);
-                }
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                setIsLoading(false);
-            });
+    //             if (response.data && Array.isArray(response.data.Detail)) {
+    //                 setTableData(response.data.Detail);
+    //             } else {
+    //                 console.warn(
+    //                     "Response data structure is not as expected:",
+    //                     response.data
+    //                 );
+    //                 setTableData([]);
+    //             }
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error:", error);
+    //             setIsLoading(false);
+    //         });
+    // }
+
+    function fetchReceivableReport({
+  saleType: saleTypeParam = saleType,
+  fromDate = fromInputDate,
+  toDate = toInputDate,
+  skipValidation = false,
+} = {}) {
+
+  const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+
+  if (!skipValidation) {
+    let errorType = "";
+
+    switch (true) {
+      case !saleTypeParam:
+        errorType = "saleType";
+        break;
+      case !fromDate:
+        errorType = "fromDate";
+        break;
+      case !toDate:
+        errorType = "toDate";
+        break;
+      case !dateRegex.test(fromDate):
+        errorType = "fromDateInvalid";
+        break;
+      case !dateRegex.test(toDate):
+        errorType = "toDateInvalid";
+        break;
+      default:
+        break;
     }
+
+    if (errorType) {
+      switch (errorType) {
+        case "saleType":
+          toast.error("Please select a Account Code");
+          return;
+        case "fromDate":
+          toast.error("From date is required");
+          return;
+        case "toDate":
+          toast.error("To date is required");
+          return;
+        case "fromDateInvalid":
+          toast.error("From date must be dd-mm-yyyy");
+          return;
+        case "toDateInvalid":
+          toast.error("To date must be dd-mm-yyyy");
+          return;
+        default:
+          return;
+      }
+    }
+
+    const [fd, fm, fy] = fromDate.split("-").map(Number);
+    const [td, tm, ty] = toDate.split("-").map(Number);
+
+    const enteredFrom = new Date(fy, fm - 1, fd);
+    const enteredTo = new Date(ty, tm - 1, td);
+
+    if (enteredTo < enteredFrom) {
+      toast.error("To date must be after from date");
+      return;
+    }
+  }
+
+  // 🚀 API CALL
+  const apiUrl = apiLinks + "/ItemLedger.php";
+  setIsLoading(true);
+
+  const formData = new URLSearchParams({
+    FIntDat: fromDate,
+    FFnlDat: toDate,
+    FTrnTyp: transectionType,
+    FItmCod: saleTypeParam,
+    FStrCod: saleType1,
+     code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
+    // code: "NASIRTRD",
+    // FLocCod: "001",
+    // FYerDsc: "2024-2024",
+  }).toString();
+
+  axios
+    .post(apiUrl, formData)
+    .then((response) => {
+      setIsLoading(false);
+
+      settotalpurchase(response.data["Total Purchase "]);
+      settotalpurchaseReturn(response.data["Total Pur Return "]);
+      settotalReceive(response.data["Total Receive "]);
+      settotalissue(response.data["Total Issue "]);
+      settotalsale(response.data["Total Sale "]);
+      settotalsaleReturn(response.data["Total Sale Return"]);
+      settotalclosingbalance(response.data["Closing Balance"]);
+
+      setTableData(
+        Array.isArray(response.data.Detail) ? response.data.Detail : []
+      );
+    })
+    .catch((error) => {
+      console.error(error);
+      setIsLoading(false);
+    });
+}
+
 
     useEffect(() => {
         const hasComponentMountedPreviously =
@@ -559,22 +667,46 @@ export default function ItemLedgerReport() {
     }));
    
 
-//     useEffect(() => {
-//   console.log("code comes from itemstockreport");
+// useEffect(() => {
+//   if (options.length === 0) return;
+//   if (isItemInitialized) return;
 
 //   const storedData = sessionStorage.getItem("itemLedgerData");
+//   let selectedOption = null;
 
+//   // 🟢 Priority 1: double-click se aaya hua code
 //   if (storedData) {
-//     const parsedData = JSON.parse(storedData);
-//     console.log("Item Code:", parsedData.code);
-//     console.log("To Date:", parsedData.toInputDate);
-//   } else {
-//     console.log("No itemLedgerData found in sessionStorage");
+//     const parsedData = JSON.parse(storedData); // ✅ FIX
+//     const clickedCode = parsedData.code?.trim();
+
+//     selectedOption = options.find(
+//       (opt) => opt.value?.trim() === clickedCode
+//     );
+
+//     sessionStorage.removeItem("itemLedgerData");
 //   }
-// }, []);
 
-// 🔹 Auto fetch on double-click when state is ready
+//   // 🟡 Priority 2: independent open → first option
+//   if (!selectedOption) {
+//     selectedOption = options[0];
+//   }
 
+//   if (selectedOption) {
+//     setSaleType(selectedOption.value);
+
+//     const description =
+//       selectedOption.label.split("-").slice(1).join("-").trim();
+
+//     setCompanyselectdatavalue({
+//       value: selectedOption.value,
+//       label: description,
+//     });
+//   }
+
+//   setIsItemInitialized(true);
+// }, [options, isItemInitialized]);
+const [isCodeReady, setIsCodeReady] = useState(false);
+const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
 
 
 useEffect(() => {
@@ -584,11 +716,12 @@ useEffect(() => {
   const storedData = sessionStorage.getItem("itemLedgerData");
   let selectedOption = null;
 
-  // 🟢 Priority 1: double-click se aaya hua code
   if (storedData) {
-    const parsedData = JSON.parse(storedData); // ✅ FIX
+    const parsedData = JSON.parse(storedData);
     const clickedCode = parsedData.code?.trim();
-
+ if (parsedData.code) {
+    setIsDoubleClickOpen(true); // ✅ ADD
+  }
     selectedOption = options.find(
       (opt) => opt.value?.trim() === clickedCode
     );
@@ -596,7 +729,6 @@ useEffect(() => {
     sessionStorage.removeItem("itemLedgerData");
   }
 
-  // 🟡 Priority 2: independent open → first option
   if (!selectedOption) {
     selectedOption = options[0];
   }
@@ -611,10 +743,20 @@ useEffect(() => {
       value: selectedOption.value,
       label: description,
     });
+
+    setIsCodeReady(true); // ✅ IMPORTANT
   }
 
   setIsItemInitialized(true);
 }, [options, isItemInitialized]);
+useEffect(() => {
+  // 🔥 Dono cheezain ready hon
+  if (isDoubleClickOpen && isCodeReady) {
+    fetchReceivableReport();
+  }
+}, [isDoubleClickOpen, isCodeReady]);
+
+
 
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveStore.php";
@@ -1991,7 +2133,8 @@ useEffect(() => {
                                         options={options}
                                         value={
                                             options.find((opt) => opt.value === saleType) || null
-                                        } // Ensure correct reference
+                                        } 
+                                         isDisabled={isDoubleClickOpen}
                                         onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
@@ -2061,8 +2204,9 @@ useEffect(() => {
                                         className="List-select-class"
                                         ref={saleSelectRef1}
                                         options={storeoption}
-                                        onKeyDown={(e) => handleStoreKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handleStoreKeypress(e, "submitButton")}
                                         id="selectedsale"
+                                         isDisabled={isDoubleClickOpen}
                                         // value={options.find((option) => option.value === saleType1) || null} // Ensure proper value
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -2095,7 +2239,8 @@ useEffect(() => {
                                                 marginLeft: "0",
                                                 justifyContent: "flex-start",
                                                 color: fontcolor,
-                                                marginTop: '-5px'
+                                                marginTop: '-5px',
+                                                
                                             })
                                         }}
                                         isClearable
@@ -2169,21 +2314,21 @@ useEffect(() => {
                                             outline: "none",
                                             border: "none",
                                             fontSize: "12px",
+                                            
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
+                                             cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         id="frominputid"
                                         value={fromInputDate}
+                                        disabled={isDoubleClickOpen} 
                                         ref={fromRef}
                                         onChange={handlefromInputChange}
                                         onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="Date Input"
-                                        disabled={selectedRadio !== "custom"}
                                     />
                                     <DatePicker
                                         selected={selectedfromDate}
@@ -2192,6 +2337,7 @@ useEffect(() => {
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
                                         open={fromCalendarOpen}
+                                         
                                         dropdownMode="select"
                                         customInput={
                                             <div>
@@ -2211,12 +2357,12 @@ useEffect(() => {
                                                         fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                        cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+
                                                     }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
+ disabled={isDoubleClickOpen}                                                 />
                                             </div>
                                         }
-                                        disabled={selectedRadio !== "custom"}
                                     />
                                 </div>
                             </div>
@@ -2275,17 +2421,16 @@ useEffect(() => {
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
+                                            cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                                        onKeyDown={(e) => handleToKeyPress(e, saleSelectRef1)}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="To Date Input"
-                                        disabled={selectedRadio !== "custom"}
+                                     disabled={isDoubleClickOpen} 
                                     />
                                     <DatePicker
                                         selected={selectedToDate}
@@ -2313,9 +2458,9 @@ useEffect(() => {
                                                         fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                         cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                                     }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
+  disabled={isDoubleClickOpen}                                                 />
                                             </div>
                                         }
                                         disabled={selectedRadio !== "custom"}
@@ -2352,6 +2497,7 @@ useEffect(() => {
     ref={input1Ref}
     onKeyDown={(e) => handleKeyPress(e, input2Ref)}
     id="submitButton"
+     disabled={isDoubleClickOpen}
     name="type"
     onFocus={(e) =>
       (e.currentTarget.style.border = "4px solid red")
@@ -2371,6 +2517,7 @@ useEffect(() => {
       fontFamily: getfontstyle,
       color: fontcolor,
       paddingLeft: "13px",
+       cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
     }}
   >
    <option value="">ALL</option>
@@ -2443,6 +2590,7 @@ useEffect(() => {
                                         ref={input2Ref}
                                         onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                                         type="text"
+                                         disabled={isDoubleClickOpen} 
                                         id="searchsubmit"
                                         placeholder="Item description"
                                         value={searchQuery}
@@ -2459,6 +2607,7 @@ useEffect(() => {
                                             outline: "none",
                                             paddingLeft: "10px",
                                             paddingRight: "25px", // space for the clear icon
+                                             cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         onFocus={(e) =>
                                             (e.currentTarget.style.border = "2px solid red")
