@@ -2,15 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { useTheme } from "../../../../ThemeContext";
+import { useTheme } from "../../../../ThemeContext.js";
 import {
   getUserData,
   getOrganisationData,
   getLocationnumber,
   getYearDescription,
-} from "../../../Auth";
-import NavComponent from "../../../MainComponent/Navform/navbarform";
-import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
+} from "../../../Auth.js";
+import NavComponent from "../../../MainComponent/Navform/navbarform.jsx";
+import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton.jsx";
 import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
@@ -20,7 +20,7 @@ import Select from "react-select";
 import { BsCalendar } from "react-icons/bs";
 import DatePicker from "react-datepicker";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchGetUser } from "../../../Redux/action";
+import { fetchGetUser } from "../../../Redux/action.js";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.css";
 import { components } from "react-select";

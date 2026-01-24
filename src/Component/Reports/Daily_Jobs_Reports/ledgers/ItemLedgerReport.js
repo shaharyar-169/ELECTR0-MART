@@ -596,7 +596,6 @@ export default function ItemLedgerReport() {
     });
 }
 
-
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");

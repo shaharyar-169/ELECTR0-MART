@@ -39,7 +39,7 @@ export default function InstallmentCollectReport() {
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("A");
-    const [transectionType2, settransectionType2] = useState("M");
+    const [transectionType2, settransectionType2] = useState("");
 
     const [supplierList, setSupplierList] = useState([]);
     console.log('getactivecollectordata', supplierList)
@@ -412,7 +412,9 @@ export default function InstallmentCollectReport() {
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
-         
+            
+            // code: 'MTSELEC',
+            // FLocCod: '002',
 
         }).toString();
 
@@ -474,8 +476,8 @@ export default function InstallmentCollectReport() {
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveCollector.php";
         const formData = new URLSearchParams({
-            // FLocCod: getLocationNumber,
-            code: 'HAJVERY',
+            FLocCod: getLocationNumber,
+            // code: 'HAJVERY',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -494,69 +496,187 @@ export default function InstallmentCollectReport() {
 
     const DropdownOption = (props) => {
         return (
-            <components.Option {...props}>
-                <div
-                    style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        paddingBottom: "5px",
-                        lineHeight: "3px",
-                        color: "black",
-                        textAlign: "start",
-                    }}
-                >
-                    {props.data.label}
-                </div>
-            </components.Option>
+          <components.Option {...props}>
+            <div
+              style={{
+                fontSize: getdatafontsize,
+                fontFamily: getfontstyle,
+                paddingBottom: "5px",
+                lineHeight: "3px",
+                // color: fontcolor,
+                textAlign: "start",
+              }}
+            >
+              {props.data.label}
+            </div>
+          </components.Option>
         );
-    };
-
-    const customStyles1 = (hasError) => ({
+      };
+    
+      const customStyles1 = (hasError) => ({
         control: (base, state) => ({
-            ...base,
-            height: "24px",
-            minHeight: "unset",
-            width: 250,
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            backgroundColor: getcolor,
-            color: fontcolor,
-            caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
-            borderRadius: 0,
-            border: `1px solid ${fontcolor}`, // Fixed Template Literal
-            transition: "border-color 0.15s ease-in-out",
-            "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
-            },
-            padding: "0 8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+          ...base,
+          height: "24px",
+          minHeight: "unset",
+          width: 250,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          backgroundColor: getcolor,
+          color: fontcolor,
+          caretColor: getcolor === "white" ? "black" : "white",
+          borderRadius: 0,
+          border: `1px solid ${fontcolor}`,
+          transition: "border-color 0.15s ease-in-out",
+          "&:hover": {
+            borderColor: state.isFocused ? base.borderColor : fontcolor,
+          },
+          padding: "0 8px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          boxShadow: "none",
+          "&:focus-within": {
+            borderColor: "#3368B5",
+            boxShadow: "0 0 0 1px #3368B5",
+          },
         }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            marginTop: "-5px",
-            fontSize: "18px",
-            display: "flex",
-            textAlign: "center",
+    
+        menu: (base) => ({
+          ...base,
+          marginTop: "5px",
+          borderRadius: 0,
+          backgroundColor: getcolor,
+          border: `1px solid ${fontcolor}`,
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          zIndex: 9999,
+        }),
+        menuList: (base) => ({
+          ...base,
+          padding: 0,
+          maxHeight: "200px",
+          // Scrollbar styling for Webkit browsers
+          "&::-webkit-scrollbar": {
+            width: "8px",
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: getcolor,
+            borderRadius: "10px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: fontcolor,
+            borderRadius: "10px",
+            border: `2px solid ${getcolor}`,
+            "&:hover": {
+              backgroundColor: "#3368B5",
+            },
+          },
+          // Scrollbar styling for Firefox
+          scrollbarWidth: "thin",
+          scrollbarColor: `${fontcolor} ${getcolor}`,
+        }),
+        option: (base, state) => ({
+          ...base,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          backgroundColor: state.isSelected
+            ? "#3368B5"
+            : state.isFocused
+            ? "#3368B5"
+            : getcolor,
+          color: state.isSelected || state.isFocused ? "white" : fontcolor,
+          "&:hover": {
+            backgroundColor: "#3368B5",
+            color: "white",
+            cursor: "pointer",
+          },
+          "&:active": {
+            backgroundColor: "#1a66cc",
+          },
+          transition: "background-color 0.2s ease, color 0.2s ease",
+        }),
+        dropdownIndicator: (base, state) => ({
+          ...base,
+          padding: 0,
+          marginTop: "-5px",
+          fontSize: "18px",
+          display: "flex",
+          textAlign: "center",
+          color: fontcolor,
+          transition: "transform 0.2s ease",
+          transform: state.selectProps.menuIsOpen
+            ? "rotate(180deg)"
+            : "rotate(0deg)",
+          "&:hover": {
+            color: "#3368B5",
+          },
+        }),
+        indicatorSeparator: () => ({
+          display: "none",
         }),
         singleValue: (base) => ({
-            ...base,
-            marginTop: "-5px",
-            textAlign: "left",
-            color: fontcolor,
+          ...base,
+          marginTop: "-5px",
+          textAlign: "left",
+          color: fontcolor,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
         }),
         input: (base) => ({
-            ...base,
-            color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
-            caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+          ...base,
+          color: getcolor === "white" ? "black" : fontcolor,
+          caretColor: getcolor === "white" ? "black" : "white",
+          marginTop: "-5px",
         }),
         clearIndicator: (base) => ({
-            ...base,
-            marginTop: "-5px",
+          ...base,
+          marginTop: "-5px",
+          padding: "0 4px",
+          color: fontcolor,
+          "&:hover": {
+            color: "#ff4444",
+          },
         }),
-    });
+        placeholder: (base) => ({
+          ...base,
+          color: `${fontcolor}80`, // 50% opacity
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          marginTop: "-5px",
+        }),
+        noOptionsMessage: (base) => ({
+          ...base,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          color: fontcolor,
+          backgroundColor: getcolor,
+        }),
+        loadingMessage: (base) => ({
+          ...base,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          color: fontcolor,
+          backgroundColor: getcolor,
+        }),
+        multiValue: (base) => ({
+          ...base,
+          backgroundColor: `${fontcolor}20`, // Light background for tags
+        }),
+        multiValueLabel: (base) => ({
+          ...base,
+          color: fontcolor,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+        }),
+        multiValueRemove: (base) => ({
+          ...base,
+          color: `${fontcolor}80`,
+          "&:hover": {
+            backgroundColor: "#ff4444",
+            color: "white",
+          },
+        }),
+      });
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -569,9 +689,6 @@ export default function InstallmentCollectReport() {
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
-        const globalfontsize = 12;
-        console.log("gobal font data", globalfontsize);
-
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
@@ -596,10 +713,11 @@ export default function InstallmentCollectReport() {
             "",
             "",
             "",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
-            String(totalDif),]);
+            String(formatValue(totalDebit)),
+            String(formatValue(totalCredit)),
+            String(formatValue(closingBalance)),
+            String(formatValue(totalDif)),
+        ]);
 
         // Define table column headers and individual column widths
         const headers = [
@@ -614,7 +732,7 @@ export default function InstallmentCollectReport() {
             "Collection",
             "Diff"
         ];
-        const columnWidths = [20, 15, 12, 20, 20, 80, 20, 20, 20, 20];
+        const columnWidths = [23, 16, 12, 23, 25, 90, 20, 25, 25, 25];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -624,14 +742,14 @@ export default function InstallmentCollectReport() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+        doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+           doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -653,123 +771,161 @@ export default function InstallmentCollectReport() {
                 startX += columnWidths[index]; // Move to the next column
             });
 
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+          
         };
 
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+         const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(fontSize);
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
 
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
-                }
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
+        doc.setDrawColor(0);
 
-                row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
 
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
 
-                    if (cellIndex === 2) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
 
-                    }
+        row.forEach((cell, cellIndex) => {
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-                    else if (cellIndex === 6 || cellIndex === 7 || cellIndex === 8 || cellIndex === 9) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    }
+          const cellX = startX + 2;
 
-                    else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-                    }
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
 
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+          const cellValue = String(cell);
+
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 || cellIndex === 3) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 6 ||
+            cellIndex === 7 ||
+            cellIndex === 8 ||
+            cellIndex === 9
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle",
+              });
             }
+          }
 
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
 
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    };
+
 
         // Function to calculate total table width
         const getTotalTableWidth = () => {
@@ -785,7 +941,7 @@ export default function InstallmentCollectReport() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 30; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
@@ -817,8 +973,9 @@ export default function InstallmentCollectReport() {
                 // }
 
                 // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(
                     `Page ${pageNumber}`,
                     rightX - 15,
                     doc.internal.pageSize.height - 10,
@@ -831,34 +988,34 @@ export default function InstallmentCollectReport() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
+              doc.setFont("Times New Roman", "normal");
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
-
-                addTitle(`Installment Collection Report`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                doc.setFont("verdana-regular", "normal");
+                addTitle(`Installment Collection Report From ${fromInputDate} To ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-                // Set font size and weight for the labels
-                doc.setFontSize(12);
-                doc.setFont(getfontstyle, "300");
-
+             
                 let status =
-                    transectionType2 === "M"
-                        ? "Monthly"
-                        : transectionType2 === "D"
-                            ? "Daily"
+                    transectionType2 === "001"
+                        ? "MONTHLY"
+                        : transectionType2 === "002"
+                            ? "DAILY"
+                            : transectionType2 === "003"
+                            ? "WEEKLY"
                             : "ALL";
 
 
                 let status2 =
                     transectionType === "L"
-                        ? "Less Ins"
+                        ? "LESS INS"
                         : transectionType === "F"
-                            ? "Full Ins" :
+                            ? "FULL INS" :
                             transectionType === "E"
-                                ? "Extra Ins"
+                                ? "EXTRA INS"
                                 : "ALL";
 
 
@@ -866,31 +1023,30 @@ export default function InstallmentCollectReport() {
                     ? Companyselectdatavalue.label
                     : "ALL";
 
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
-
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`Code :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${Accountcode}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
-
-
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`Type1 :`, labelsX + 150, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${status}`, labelsX + 165, labelsY + 8.5); // Draw the value next to the label
+              
+doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                          doc.text(`Collector :`, labelsX, labelsY + 8.5); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(`${Accountcode}`, labelsX + 23, labelsY + 8.5); // Draw the value next to the label
 
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`Type2 :`, labelsX + 205, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${status2}`, labelsX + 220, labelsY + 8.5); // Draw the value next to the label
+doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                          doc.text(`A/C Types :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(`${status}`, labelsX + 165, labelsY + 8.5); // Draw the value next to the label
 
 
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.setFontSize(10);
+doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                          doc.text(`Type :`, labelsX + 230, labelsY + 8.5); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(`${status2}`, labelsX + 245, labelsY + 8.5); // Draw the value next to the label
+
 
                 startY += 10; // Adjust vertical position for the labels
 
@@ -938,8 +1094,6 @@ export default function InstallmentCollectReport() {
         doc.save(`InastallmentcollectReport from ${fromInputDate} to ${toInputDate}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
-
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -948,10 +1102,10 @@ export default function InstallmentCollectReport() {
         const numColumns = 10; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
-            "left",
-            "left",
             "center",
-            "left",
+            "center",
+            "center",
+            "center",
             "left",
             "left",
             "right",
@@ -995,38 +1149,52 @@ export default function InstallmentCollectReport() {
             ? Companyselectdatavalue.label
             : "ALL";
 
-        let actype = transectionType2 === "M" ?
-            "Monthly" : transectionType2 === "D"
-                ? "Daily" : "All";
+        let actype = transectionType2 === "001" ?
+            "MONTHLY" : transectionType2 === "002"
+                ? "DAILY": transectionType2 === "003"
+                ? "WEEKLY" : "All"
 
         let type = transectionType === "L" ?
-            "Less Ins" : transectionType === "F"
-                ? "Full Ins" : transectionType === "E"
-                    ? "Extra Ins" : "All";
+            "LESS INS" : transectionType === "F"
+                ? "FULL INS" : transectionType === "E"
+                    ? "EXTRA INS" : "ALL";
 
 
 
-        // Add first row
-        const typeAndStoreRow = worksheet.addRow([
-            "Collector :",
-            typecompany,
-            "",
-            "",
-            "A/C Type :",
-            actype,
-            "",
-            "",
-            "Type :",
-            type
-        ]);
+      const typeAndStoreRow = worksheet.addRow([
+  "Collector :",
+  typecompany,
+  "",
+  "",
+  "",
+  "A/C Type :",
+  actype,
+  "",
+  "Type :",
+  type
+]);
 
+worksheet.mergeCells(`B${typeAndStoreRow.number}:E${typeAndStoreRow.number}`);
 
+// Columns that should be RIGHT aligned (values)
+const rightAlignCols = [6,9];
 
-        // Apply styling for the status row
-        typeAndStoreRow.eachCell((cell, colIndex) => {
-            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 5, 9].includes(colIndex) };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
+// Columns that should be BOLD (labels)
+const boldCols = [1, 6, 9];
+
+typeAndStoreRow.eachCell((cell, colIndex) => {
+  cell.font = {
+    name: "CustomFont",
+    size: 10,
+    bold: boldCols.includes(colIndex),
+  };
+
+  cell.alignment = {
+    horizontal: rightAlignCols.includes(colIndex) ? "right" : "left",
+    vertical: "middle",
+  };
+});
+
 
 
         // Header style
@@ -1074,7 +1242,7 @@ export default function InstallmentCollectReport() {
         });
 
         // Set column widths
-        [10, 7, 7, 10, 10, 30, 12, 12, 12, 12].forEach((width, index) => {
+        [11, 8, 7, 11, 10, 45, 12, 14, 14, 14].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1086,10 +1254,10 @@ export default function InstallmentCollectReport() {
             "",
             "",
             "",
-            totalDebit,
-            totalCredit,
-            closingBalance,
-            totalDif
+         String(formatValue(totalDebit)),
+         String(formatValue(totalCredit)),
+         String(formatValue(closingBalance)),
+         String(formatValue(totalDif)),
         ]);
 
         // total row added
@@ -1097,9 +1265,9 @@ export default function InstallmentCollectReport() {
         totalRow.eachCell((cell, colNumber) => {
             cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
             cell.border = {
-                top: { style: "thin" },
+                top: { style: "double" },
                 left: { style: "thin" },
-                bottom: { style: "thin" },
+                bottom: { style: "double" },
                 right: { style: "thin" },
             };
 
@@ -1115,16 +1283,30 @@ export default function InstallmentCollectReport() {
         });
 
 
-        // Get current date
-        const getCurrentDate = () => {
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, "0");
-            const month = String(today.getMonth() + 1).padStart(2, "0");
-            const year = today.getFullYear();
-            return `${day}-${month}-${year}`;
-        };
-
-        const currentdate = getCurrentDate();
+        // Add an empty row after the title section
+        worksheet.addRow([]);
+        // Date and Time
+     const today = new Date();
+     const currentTime = today.toLocaleTimeString("en-GB");
+     const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+     const userid = user.tusrid;
+ 
+     const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+     dateTimeRow.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+     dateTimeRow1.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     // Merge cells
+     worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+     worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+ 
 
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
@@ -1166,41 +1348,60 @@ export default function InstallmentCollectReport() {
     };
 
     const firstColWidth = {
-        width: "9%",
+        width: "80px",
     };
     const secondColWidth = {
-        width: "6%",
+        width: "55px",
     };
     const thirdColWidth = {
-        width: "5%",
+        width: "40px",
     };
     const forthColWidth = {
-        width: "9%",
+        width: "80px",
     };
     const fifthColWidth = {
-        width: "8%",
+        width: "70px",
     };
     const sixthColWidth = {
-        width: "29.7%",
+        width: "300px",
     };
     const seventhColWidth = {
-        width: "8%",
+        width: "85px",
     };
     const eighthColWidth = {
-        width: "8%",
+        width: "85px",
     };
     const ninhthColWidth = {
-        width: "8%",
+        width: "85px",
     };
     const tenthColWidth = {
-        width: "8%",
+        width: "85px",
+    };
+        const sixColWidth = {
+        width: "8px",
     };
 
 
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys(
+      "alt+s",
+      () => {
+        fetchReceivableReport();
+      },
+      { preventDefault: true, enableOnFormTags: true }
+    );
+  
+    useHotkeys("alt+p", exportPDFHandler, {
+      preventDefault: true,
+      enableOnFormTags: true,
+    });
+    useHotkeys("alt+e", handleDownloadCSV, {
+      preventDefault: true,
+      enableOnFormTags: true,
+    });
+    useHotkeys("alt+r", () => navigate("/MainPage"), {
+      preventDefault: true,
+      enableOnFormTags: true,
+    });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1215,29 +1416,28 @@ export default function InstallmentCollectReport() {
     }, []);
 
     const contentStyle = {
-        backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
-        position: "relative",
-        top: "35%",
-        left: isSidebarVisible ? "50%" : "50%",
-        transform: "translate(-50%, -50%)",
-        transition: isSidebarVisible
-            ? "left 3s ease-in-out, width 2s ease-in-out"
-            : "left 3s ease-in-out, width 2s ease-in-out",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "start",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        wordBreak: "break-word",
-        textAlign: "center",
-        maxWidth: "1000px",
-        fontSize: "15px",
-        fontStyle: "normal",
-        fontWeight: "400",
-        lineHeight: "23px",
-        fontFamily: '"Poppins", sans-serif',
-    };
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: "1000px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "50vw",
+    transform: "translateX(-50%)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    textAlign: "center",
+    fontSize: "15px",
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: "23px",
+    fontFamily: '"Poppins", sans-serif',
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
+  };
 
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1337,6 +1537,9 @@ export default function InstallmentCollectReport() {
         }
     }, [selectedRadio]);
 
+    const formatValue = (val) => {
+    return Number(val) === 0  ? "" : val;
+  };
     return (
         <>
             <ToastContainer />
@@ -1345,7 +1548,7 @@ export default function InstallmentCollectReport() {
                     style={{
                         backgroundColor: getcolor,
                         color: fontcolor,
-                        width: "100%",
+                        // width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
                     }}
@@ -1363,91 +1566,54 @@ export default function InstallmentCollectReport() {
                             justifyContent: "space-between",
                         }}>
 
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
+                              <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
+                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Collector :</span>  <br /></label>
                                 </div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
+                                <div style={{ marginLeft: '5px' }} >
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setSaleType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue("");
+                                            }
                                         }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
-                                        </div>
-                                    </div>
+                                         onInputChange={(inputValue, { action }) => {
+                                                             if (action === "input-change") {
+                                                               return inputValue.toUpperCase();
+                                                             }
+                                                             return inputValue;
+                                                           }}
+                                                           components={{ Option: DropdownOption }}
+                                                           styles={{
+                                                             ...customStyles1(!saleType),
+                                                             placeholder: (base) => ({
+                                                               ...base,
+                                                               textAlign: "left",
+                                                               marginLeft: "0",
+                                                               justifyContent: "flex-start",
+                                                               color: fontcolor,
+                                                               marginTop: "-5px",
+                                                             }),
+                                                           }}
+                                                           isClearable
+                                                           placeholder="ALL"
+                                    />
 
                                 </div>
+
 
                             </div>
 
@@ -1473,34 +1639,58 @@ export default function InstallmentCollectReport() {
 
 
 
-                                <select
-                                    ref={input1Reftype}
-                                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
-                                    id="firsttype"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="M">Monthly</option>
-                                    <option value="D">Daily</option>
-                                    <option value="A">All</option>
+                               <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Reftype}
+                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType2}
+                    onChange={handleTransactionTypeChange2}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="001">MONTHLY</option>
+                    <option value="002">DAILY</option>
+                                        <option value="003">WEEKLY</option>
 
-                                </select>
+                  </select>
+
+                  {transectionType2 !== "" && (
+                    <span
+                      onClick={() => settransectionType2("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
                             </div>
 
                         </div>
@@ -1526,119 +1716,7 @@ export default function InstallmentCollectReport() {
                             }}
                         >
 
-
-
-                            {/* ------ */}
-
-
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Collector :</span>  <br /></label>
-                                </div>
-                                <div style={{ marginLeft: '5px' }} >
-                                    <Select
-                                        className="List-select-class"
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setSaleType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart, // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue("");
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="ALL"
-                                    />
-
-                                </div>
-
-
-                            </div>
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "200px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                        color: fontcolor,
-                                    }}
-                                >
-                                    <option value="">All</option>
-                                    <option value="L">Less Ins</option>
-                                    <option value="F">Full Ins</option>
-                                    <option value="E">Extra Ins</option>
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-                    {/* ///////////////////////// */}
-
-
-
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                // justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center">
+                                <div className="d-flex align-items-center">
                                 <div
                                     style={{
                                         width: "80px",
@@ -1732,7 +1810,6 @@ export default function InstallmentCollectReport() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "120px" }}
                             >
                                 <div
                                     style={{
@@ -1825,46 +1902,169 @@ export default function InstallmentCollectReport() {
                                 </div>
                             </div>
 
-                            {/* <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span style={{ fontFamily:getfontstyle, fontSize:getdatafontsize, fontWeight: "bold" }}>
-                                        Search :
-                                    </span>{" "}
-                                </label>
-                                <input
-                                    ref={input2Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    type="text"
-                                    id="searchsubmit"
-                                    placeholder="Item description"
-                                    value={searchQuery}
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
                                     style={{
-                                        marginRight: "20px",
-                                        width: "200px",
-                                        height: "24px",
-                                        fontFamily:getfontstyle, fontSize:getdatafontsize,
-                                        color: fontcolor,
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        outline: "none",
-                                        paddingLeft: "10px",
+                                        width: "60px",
+                                        display: "flex",
+                                        justifyContent: "end",
                                     }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div> */}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                                       <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="A">ALL</option>
+                    <option value="L">LESS INS</option>
+                    <option value="F">FULL INS</option>
+                    <option value="E">EXTRA INS</option>
+
+                  </select>
+
+                  {transectionType !== "A" && (
+                    <span
+                      onClick={() => settransectionType("A")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    {/* ///////////////////////// */}
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "end",
+                            }}
+                        >
+                          
+
+                             <div id="lastDiv"style={{ marginRight: "1px" }} >
+                <label for="searchInput" style={{ marginRight: "5px" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input2Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "200px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
+              </div>
                         </div>
                     </div>
                     <div>
                         <div
                             style={{
                                 overflowY: "auto",
-                                width: "98.8%",
+                                // width: "98.8%",
                             }}
                         >
                             <table
@@ -1872,7 +2072,7 @@ export default function InstallmentCollectReport() {
                                 id="table"
                                 style={{
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                    width: "100%",
+                                    // width: "100%",
                                     position: "relative",
                                     paddingRight: "2%",
                                 }}
@@ -1924,6 +2124,9 @@ export default function InstallmentCollectReport() {
                                         <td className="border-dark" style={eighthColWidth}>
                                             Diff
                                         </td>
+                                          <td className="border-dark" style={sixColWidth}>
+                                            
+                                        </td>
 
                                     </tr>
                                 </thead>
@@ -1936,7 +2139,7 @@ export default function InstallmentCollectReport() {
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
                                 maxHeight: "40vh",
-                                width: "100%",
+                                // width: "100%",
                                 wordBreak: "break-word",
                             }}
                         >
@@ -1945,8 +2148,9 @@ export default function InstallmentCollectReport() {
                                 id="tableBody"
                                 style={{
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                    width: "100%",
-                                    position: "relative",
+                                    // width: "100%",
+                                   position: "relative",
+                                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                                 }}
                             >
                                 <tbody id="tablebody">
@@ -2009,16 +2213,16 @@ export default function InstallmentCollectReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        <td className="text-start" style={firstColWidth}>
+                                                        <td className="text-center" style={firstColWidth}>
                                                             {item.Date}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
+                                                        <td className="text-center" style={secondColWidth}>
                                                             {item['Trn#']}
                                                         </td>
                                                         <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td>
-                                                        <td className="text-start" style={forthColWidth}>
+                                                        <td className="text-center" style={forthColWidth}>
                                                             {item.Code}
                                                         </td>
                                                         <td className="text-start" style={fifthColWidth}>
@@ -2088,8 +2292,8 @@ export default function InstallmentCollectReport() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "1.2%",
-                            width: '101.2%'
+                            paddingRight: "8px",
+                            // width: '101.2%'
                         }}
                     >
                         <div
@@ -2145,7 +2349,7 @@ export default function InstallmentCollectReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalDebit}</span>
+                            <span className="mobileledger_total">{formatValue(totalDebit)}</span>
 
                         </div>
                         <div
@@ -2155,7 +2359,7 @@ export default function InstallmentCollectReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalCredit}</span>
+                            <span className="mobileledger_total">{formatValue(totalCredit)}</span>
 
                         </div>
                         <div
@@ -2165,7 +2369,7 @@ export default function InstallmentCollectReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{closingBalance}</span>
+                            <span className="mobileledger_total">{formatValue(closingBalance)}</span>
 
                         </div>
                         <div
@@ -2175,7 +2379,7 @@ export default function InstallmentCollectReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalDif}</span>
+                            <span className="mobileledger_total">{formatValue(totalDif)}</span>
 
                         </div>
 
@@ -2189,7 +2393,6 @@ export default function InstallmentCollectReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2198,7 +2401,6 @@ export default function InstallmentCollectReport() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2207,7 +2409,6 @@ export default function InstallmentCollectReport() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2218,7 +2419,6 @@ export default function InstallmentCollectReport() {
                             text="Select"
                             ref={input3Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

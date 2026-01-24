@@ -36,6 +36,7 @@ export default function InstallmentCustomerList() {
   const locationnumber = getLocationnumber();
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
+  const input1Reftype=useRef(null);
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
 
@@ -53,6 +54,7 @@ export default function InstallmentCustomerList() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
+  const [transectionType2, settransectionType2] = useState("");
 
   const {
     isSidebarVisible,
@@ -95,11 +97,12 @@ export default function InstallmentCustomerList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FColCod: saleType,
-      FCstSts: transectionType,
+      FTypCod: transectionType,
+      FCstSts: transectionType2,
       FSchTxt: searchQuery,
 
-      // code: "MTSELEC",
-      // FLocCod: "002",
+    //   code: "MTSELEC",
+    //   FLocCod: "002",
      
     }).toString();
 
@@ -143,7 +146,8 @@ export default function InstallmentCustomerList() {
         const formData = new URLSearchParams({
               code: organisation.code,
               FLocCod: locationnumber || getLocationNumber,
-           
+        //        code: 'MTSELEC',
+        //    FLocCod: '002'
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -157,7 +161,7 @@ export default function InstallmentCustomerList() {
 
     const options = supplierList.map((item) => ({
         value: item.tcstcod,
-        label: `${item.tcstcod}-${item.tcstnam.trim()}`,
+        label: `${item.tcstcod}-${item.tcstnam}`,
     }));
 
 
@@ -368,6 +372,12 @@ const handleSaleKeypress = (event, inputId) => {
     settransectionType(selectedTransactionType);
   };
 
+  const handleTransactionTypeChange2 = (event) => {
+        const selectedTransactionType2 = event.target.value;
+        settransectionType2(selectedTransactionType2);
+    };
+
+
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   const exportPDFHandler = () => {
     
@@ -388,16 +398,17 @@ const handleSaleKeypress = (event, inputId) => {
      ]);
  
      // Add summary row to the table
-    //  rows.push([
+     rows.push([
+      String(formatValue(tableData.length.toLocaleString())),
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
       
-    //    "",
-    //    "Total",
-      
-    //    String(totalopening),
-    //        String(totaldebit),
-    //    String(totalcredit),
-    //    String(ClosingBalance),
-    //  ]);
+     ]);
  
      // Define table column headers and individual column widths
  
@@ -444,73 +455,95 @@ const handleSaleKeypress = (event, inputId) => {
      
      };
  
-       const addTableRows = (startX, startY, startIndex, endIndex) => {
-       const rowHeight = 5;
-       const fontSize = 10;
-       const boldFont = 400;
-       const normalFont = getfontstyle;
-       const tableWidth = getTotalTableWidth();
- 
-       doc.setFontSize(11);
- 
-       for (let i = startIndex; i < endIndex; i++) {
-         const row = rows[i];
-         const isOddRow = i % 2 !== 0;
-         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-         const isTotalRow = i === rows.length - 1;
-         let textColor = [0, 0, 0];
-         let fontName = normalFont;
- 
-         if (isRedRow) {
-           textColor = [255, 0, 0];
-           fontName = boldFont;
-         }
- 
-        //  if (isTotalRow) {
-        //    doc.setFont("verdana", "bold");
-        //    doc.setFontSize(10);
-        //  }
- 
-         if (isOddRow) {
-           doc.setFillColor(240);
-           doc.rect(
-             startX,
-             startY + (i - startIndex + 2) * rowHeight,
-             tableWidth,
-             rowHeight,
-             "F"
-           );
-         }
- 
-         doc.setDrawColor(0);
- 
-        
-           doc.setLineWidth(0.2);
-           doc.rect(
-             startX,
-             startY + (i - startIndex + 2) * rowHeight,
-             tableWidth,
-             rowHeight
-           );
-         
- 
-         row.forEach((cell, cellIndex) => {
-           // ⭐ NEW FIX — Perfect vertical centering
-           const cellY =
-             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
- 
-           const cellX = startX + 2;
- 
-           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
- 
-           if (!isTotalRow) {
-             doc.setFont("verdana-regular", "normal");
-             doc.setFontSize(10);
-           }
- 
-           const cellValue = String(cell);
- 
-           if (cellIndex === 0 || cellIndex === 1 || cellIndex === 7 || cellIndex === 5) {
+        const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
+
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
+
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
+
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
+
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
+
+        doc.setDrawColor(0);
+
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
+
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
+
+        row.forEach((cell, cellIndex) => {
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+
+          const cellX = startX + 2;
+
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
+
+          const cellValue = String(cell);
+
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 7 || cellIndex === 5) {
              const rightAlignX = startX + columnWidths[cellIndex] / 2;
              doc.text(cellValue, rightAlignX, cellY, {
                align: "center",
@@ -520,60 +553,57 @@ const handleSaleKeypress = (event, inputId) => {
              cellIndex === 20 
                          
            ) {
-             const rightAlignX = startX + columnWidths[cellIndex] - 2;
-             doc.text(cellValue, rightAlignX, cellY, {
-               align: "right",
-               baseline: "middle",
-             });
-           } 
-           else {
-            //  if (isTotalRow && cellIndex === 0 && cell === "") {
-            //    const totalLabelX = startX + columnWidths[0] / 2;
-            //    doc.text("", totalLabelX, cellY, {
-            //      align: "center",
-            //      baseline: "middle",
-            //    });
-            //  }
-            
-               doc.text(cellValue, cellX, cellY, {
-                 baseline: "middle",
-               });
-             
-           }
- 
-           if (cellIndex < row.length - 1) {
-             doc.setLineWidth(0.2);
-             doc.line(
-               startX + columnWidths[cellIndex],
-               startY + (i - startIndex + 2) * rowHeight,
-               startX + columnWidths[cellIndex],
-               startY + (i - startIndex + 3) * rowHeight
-             );
-             startX += columnWidths[cellIndex];
-           }
-         });
- 
-         startX = (doc.internal.pageSize.width - tableWidth) / 2;
- 
-        //  if (isTotalRow) {
-        //    doc.setFont("verdana-regular", "normal");
-        //    doc.setFontSize(10);
-        //  }
-       }
- 
-       const lineWidth = tableWidth;
-       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-       const lineY = pageHeight - 15;
-       doc.setLineWidth(0.3);
-       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-       const headingFontSize = 11;
-       const headingX = lineX + 2;
-       const headingY = lineY + 5;
-       doc.setFont("verdana-regular", "normal");
-       doc.setFontSize(10);
-       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-     };
- 
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle",
+              });
+            }
+          }
+
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
+
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    };
      // Function to calculate total table width
      const getTotalTableWidth = () => {
        let totalWidth = 0;
@@ -620,8 +650,9 @@ const handleSaleKeypress = (event, inputId) => {
          // }
  
          // Add page numbering
-         doc.setFontSize(pageNumberFontSize);
-         doc.text(
+doc.setFont('verdana-regular', "normal");
+          doc.setFontSize(10);
+                   doc.text(
            `Page ${pageNumber}`,
            rightX - 5,
            doc.internal.pageSize.height - 10,
@@ -666,6 +697,11 @@ const handleSaleKeypress = (event, inputId) => {
          let typestatus =
       transectionType === "N" ? "NON-ACTIVE" :
         transectionType === "A" ? "ACTIVE" : "ALL";
+        
+        let typestatus2 =
+      transectionType2 === "001" ? "MONTHLY" :
+        transectionType2 === "002" ? "DAILY" : 
+        transectionType2 === "003" ? "WEEKLY" :"ALL";
 
         let customerdata= Companyselectdatavalue.label 
         ? Companyselectdatavalue.label : 'ALL'
@@ -676,10 +712,17 @@ const handleSaleKeypress = (event, inputId) => {
          doc.setFont(getfontstyle, "normal"); // Reset font to normal
          doc.text(`${customerdata}`, labelsX + 25, labelsY); // Draw the value next to the label
  
-         doc.setFont(getfontstyle, "bold"); // Set font to bold
-         doc.text(`Status :`, labelsX + 190, labelsY); // Draw bold label
+
+ doc.setFont(getfontstyle, "bold"); // Set font to bold
+         doc.text(`Type :`, labelsX + 135, labelsY); // Draw bold label
          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-         doc.text(`${typestatus}`, labelsX + 210, labelsY); // Draw the value next to the label
+         doc.text(`${typestatus2}`, labelsX + 150, labelsY); // Draw the value next to the label
+ 
+
+         doc.setFont(getfontstyle, "bold"); // Set font to bold
+         doc.text(`Status :`, labelsX + 220, labelsY); // Draw bold label
+         doc.setFont(getfontstyle, "normal"); // Reset font to normal
+         doc.text(`${typestatus}`, labelsX + 238, labelsY); // Draw the value next to the label
  
      
          // doc.setFont(getfontstyle, "bold"); // Set font to bold
@@ -841,14 +884,19 @@ const handleSaleKeypress = (event, inputId) => {
       transectionType === "N" ? "NON-ACTIVE" :
         transectionType === "A" ? "ACTIVE" : "ALL";
 
+        let typestatus2 =
+      transectionType2 === "001" ? "MONTHLY" :
+        transectionType2 === "002" ? "DAILY" : 
+        transectionType2 === "003" ? "WEEKLY" :"ALL";
+
         let customerdata= Companyselectdatavalue.label 
         ? Companyselectdatavalue.label : 'ALL'
        let typesearch = searchQuery || "";
 
        const typeAndStoreRow2 = worksheet.addRow(
-       ["Customer :", customerdata, "","","","Status :", typestatus] 
+       ["Customer :", customerdata, "","Type :",typestatus2,"Status :", typestatus] 
     );
-         worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
+         worksheet.mergeCells(`B${typeAndStoreRow2.number}:C${typeAndStoreRow2.number}`);
 
 
        const typeAndStoreRow3 = worksheet.addRow(
@@ -856,10 +904,24 @@ const handleSaleKeypress = (event, inputId) => {
     );
          worksheet.mergeCells(`G${typeAndStoreRow3.number}:H${typeAndStoreRow3.number}`);
 
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = { name: "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+   // Columns that should be RIGHT aligned (values)
+const rightAlignCols = [4,6];
+
+// Columns that should be BOLD (labels)
+const boldCols = [1, 4,6];
+
+typeAndStoreRow2.eachCell((cell, colIndex) => {
+  cell.font = {
+    name: "CustomFont",
+    size: 10,
+    bold: boldCols.includes(colIndex),
+  };
+
+  cell.alignment = {
+    horizontal: rightAlignCols.includes(colIndex) ? "right" : "left",
+    vertical: "middle",
+  };
+});
      typeAndStoreRow3.eachCell((cell, colIndex) => {
       cell.font = { name: "CustomFont", size: 10, bold: [1, 6].includes(colIndex) };
       cell.alignment = { horizontal: "left", vertical: "middle" };
@@ -922,32 +984,35 @@ const handleSaleKeypress = (event, inputId) => {
        worksheet.getColumn(index + 1).width = width;
      });
  
-    //  const totalRow = worksheet.addRow([
-    //    "",
-    //    "Total",
+     const totalRow = worksheet.addRow([
+       String(formatValue(tableData.length.toLocaleString())),
+        "",
+       "",
+        "",
+       "",
+        "",
+       "",
+        "",
+       
       
-    //    String(totalopening),
-    //        String(totaldebit),
-    //    String(totalcredit),
-    //    String(ClosingBalance),
-    //  ]);
+           ]);
  
-    //  // total row added
+     // total row added
  
-    //  totalRow.eachCell((cell, colNumber) => {
-    //    cell.font = { bold: true };
-    //    cell.border = {
-    //      top: { style: "thin" },
-    //      left: { style: "thin" },
-    //      bottom: { style: "thin" },
-    //      right: { style: "thin" },
-    //    };
+     totalRow.eachCell((cell, colNumber) => {
+       cell.font = { bold: true };
+       cell.border = {
+         top: { style: "double" },
+         left: { style: "thin" },
+         bottom: { style: "double" },
+         right: { style: "thin" },
+       };
  
-    //    // Align only the "Total" text to the right
-    //    if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
-    //      cell.alignment = { horizontal: "right" };
-    //    }
-    //  });
+       // Align only the "Total" text to the right
+       if (colNumber === 1) {
+         cell.alignment = { horizontal: "center" };
+       }
+     });
  
      // Add a blank row
      worksheet.addRow([]);
@@ -1441,7 +1506,7 @@ const handleSaleKeypress = (event, inputId) => {
                                                       ref={saleSelectRef}
                                                       options={options}
                                                       // value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
-                                                      onKeyDown={(e) => handleSaleKeypress(e, "statusid")}
+                                                      onKeyDown={(e) => handleSaleKeypress(e, 'typedrop')}
                                                       id="selectedsale"
                                                       onChange={(selectedOption) => {
                                                           if (selectedOption && selectedOption.value) {
@@ -1537,6 +1602,7 @@ const handleSaleKeypress = (event, inputId) => {
                     <option value="">ALL</option>
                     <option value="A">ACTIVE</option>
                     <option value="N">NON-ACTIVE</option>
+
                   </select>
 
                   {transectionType !== "" && (
@@ -1573,9 +1639,83 @@ const handleSaleKeypress = (event, inputId) => {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "end",
+                justifyContent: "space-between",
               }}
             >
+
+                  <div
+                                className="d-flex align-items-center"
+                                style={{ marginLeft: "25px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "75px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                               <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Reftype}
+                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
+                    id="typedrop"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType2}
+                    onChange={handleTransactionTypeChange2}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="001">MONTHLY</option>
+                    <option value="002">DAILY</option>
+                                        <option value="003">WEEKLY</option>
+
+                  </select>
+
+                  {transectionType2 !== "" && (
+                    <span
+                      onClick={() => settransectionType2("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+                            </div>
             
 
               <div id="lastDiv" >

@@ -2954,6 +2954,7 @@ doc.setFont('verdana-regular', "normal");
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
+                height:'55vh',
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),

@@ -38,7 +38,7 @@ export default function InstallmentCollectionDailyComparison() {
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("D");
+    const [transectionType, settransectionType] = useState("A");
     const [transectionType2, settransectionType2] = useState("");
 
     const [supplierList, setSupplierList] = useState([]);
@@ -46,15 +46,13 @@ export default function InstallmentCollectionDailyComparison() {
 
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
-
-    const [SaleCust, setSaleCust] = useState(0);
+     const [SaleCust, setSaleCust] = useState(0);
     const [TotalSale, setTotalSale] = useState(0);
     const [TotalAdvance, setTotalAdvance] = useState(0);
     const [TotalCust, setTotalCust] = useState(0);
     const [TotalIns, setTotalIns] = useState(0);
     const [TotalCol, setTotalCol] = useState(0);
     const [TotalDif, setTotalDif] = useState(0);
-
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -66,7 +64,7 @@ export default function InstallmentCollectionDailyComparison() {
     const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
     const yeardescription = getYearDescription();
-    const locationnumber = getLocationnumber();
+      const locationnumber = getLocationnumber();
 
 
     const {
@@ -249,9 +247,9 @@ export default function InstallmentCollectionDailyComparison() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input1Ref.current) {
+                if (input1Reftype.current) {
                     e.preventDefault();
-                    input1Ref.current.focus();
+                    input1Reftype.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -388,6 +386,7 @@ export default function InstallmentCollectionDailyComparison() {
                 toast.error("To date must be after from date");
                 return;
 
+
             default:
                 break;
         }
@@ -404,29 +403,33 @@ export default function InstallmentCollectionDailyComparison() {
         const apiUrl = apiLinks + "/InstallmentCollectionDailyComparison.php";
         setIsLoading(true);
         const formData = new URLSearchParams({
-
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FColCod: saleType,
-            FCstTyp: transectionType,
+            FCstTyp: transectionType2,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
+            
+            // code: 'MTSELEC',
+            // FLocCod: '002',
 
-         }).toString();
+        }).toString();
 
         axios
             .post(apiUrl, formData)
             .then((response) => {
                 setIsLoading(false);
 
-                setSaleCust(response.data["SaleCust"]);
+                
+setSaleCust(response.data["SaleCust"]);
                 setTotalSale(response.data["TotalSale"]);
                 setTotalAdvance(response.data["TotalAdvance"]);
                 setTotalCust(response.data["TotalCust"]);
                 setTotalIns(response.data["TotalIns"]);
                 setTotalCol(response.data["TotalCol"]);
                 setTotalDif(response.data["TotalDif"]);
+
 
 
                 if (response.data && Array.isArray(response.data.Detail)) {
@@ -476,9 +479,8 @@ export default function InstallmentCollectionDailyComparison() {
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveCollector.php";
         const formData = new URLSearchParams({
-            FLocCod: locationnumber || getLocationNumber,
-            code: organisation.code,
-          
+            FLocCod: getLocationNumber,
+            // code: 'HAJVERY',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -497,69 +499,187 @@ export default function InstallmentCollectionDailyComparison() {
 
     const DropdownOption = (props) => {
         return (
-            <components.Option {...props}>
-                <div
-                    style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        paddingBottom: "5px",
-                        lineHeight: "3px",
-                        color: "black",
-                        textAlign: "start",
-                    }}
-                >
-                    {props.data.label}
-                </div>
-            </components.Option>
+          <components.Option {...props}>
+            <div
+              style={{
+                fontSize: getdatafontsize,
+                fontFamily: getfontstyle,
+                paddingBottom: "5px",
+                lineHeight: "3px",
+                // color: fontcolor,
+                textAlign: "start",
+              }}
+            >
+              {props.data.label}
+            </div>
+          </components.Option>
         );
-    };
-
-    const customStyles1 = (hasError) => ({
+      };
+    
+      const customStyles1 = (hasError) => ({
         control: (base, state) => ({
-            ...base,
-            height: "24px",
-            minHeight: "unset",
-            width: 250,
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            backgroundColor: getcolor,
-            color: fontcolor,
-            caretColor: getcolor === "white" ? "black" : "white", // Change cursor color based on background
-            borderRadius: 0,
-            border: `1px solid ${fontcolor}`, // Fixed Template Literal
-            transition: "border-color 0.15s ease-in-out",
-            "&:hover": {
-                borderColor: state.isFocused ? base.borderColor : "black",
-            },
-            padding: "0 8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+          ...base,
+          height: "24px",
+          minHeight: "unset",
+          width: 250,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          backgroundColor: getcolor,
+          color: fontcolor,
+          caretColor: getcolor === "white" ? "black" : "white",
+          borderRadius: 0,
+          border: `1px solid ${fontcolor}`,
+          transition: "border-color 0.15s ease-in-out",
+          "&:hover": {
+            borderColor: state.isFocused ? base.borderColor : fontcolor,
+          },
+          padding: "0 8px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          boxShadow: "none",
+          "&:focus-within": {
+            borderColor: "#3368B5",
+            boxShadow: "0 0 0 1px #3368B5",
+          },
         }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            marginTop: "-5px",
-            fontSize: "18px",
-            display: "flex",
-            textAlign: "center",
+    
+        menu: (base) => ({
+          ...base,
+          marginTop: "5px",
+          borderRadius: 0,
+          backgroundColor: getcolor,
+          border: `1px solid ${fontcolor}`,
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          zIndex: 9999,
+        }),
+        menuList: (base) => ({
+          ...base,
+          padding: 0,
+          maxHeight: "200px",
+          // Scrollbar styling for Webkit browsers
+          "&::-webkit-scrollbar": {
+            width: "8px",
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: getcolor,
+            borderRadius: "10px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: fontcolor,
+            borderRadius: "10px",
+            border: `2px solid ${getcolor}`,
+            "&:hover": {
+              backgroundColor: "#3368B5",
+            },
+          },
+          // Scrollbar styling for Firefox
+          scrollbarWidth: "thin",
+          scrollbarColor: `${fontcolor} ${getcolor}`,
+        }),
+        option: (base, state) => ({
+          ...base,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          backgroundColor: state.isSelected
+            ? "#3368B5"
+            : state.isFocused
+            ? "#3368B5"
+            : getcolor,
+          color: state.isSelected || state.isFocused ? "white" : fontcolor,
+          "&:hover": {
+            backgroundColor: "#3368B5",
+            color: "white",
+            cursor: "pointer",
+          },
+          "&:active": {
+            backgroundColor: "#1a66cc",
+          },
+          transition: "background-color 0.2s ease, color 0.2s ease",
+        }),
+        dropdownIndicator: (base, state) => ({
+          ...base,
+          padding: 0,
+          marginTop: "-5px",
+          fontSize: "18px",
+          display: "flex",
+          textAlign: "center",
+          color: fontcolor,
+          transition: "transform 0.2s ease",
+          transform: state.selectProps.menuIsOpen
+            ? "rotate(180deg)"
+            : "rotate(0deg)",
+          "&:hover": {
+            color: "#3368B5",
+          },
+        }),
+        indicatorSeparator: () => ({
+          display: "none",
         }),
         singleValue: (base) => ({
-            ...base,
-            marginTop: "-5px",
-            textAlign: "left",
-            color: fontcolor,
+          ...base,
+          marginTop: "-5px",
+          textAlign: "left",
+          color: fontcolor,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
         }),
         input: (base) => ({
-            ...base,
-            color: getcolor === "white" ? "black" : fontcolor, // Text color based on background
-            caretColor: getcolor === "white" ? "black" : "white", // Cursor color based on background
+          ...base,
+          color: getcolor === "white" ? "black" : fontcolor,
+          caretColor: getcolor === "white" ? "black" : "white",
+          marginTop: "-5px",
         }),
         clearIndicator: (base) => ({
-            ...base,
-            marginTop: "-5px",
+          ...base,
+          marginTop: "-5px",
+          padding: "0 4px",
+          color: fontcolor,
+          "&:hover": {
+            color: "#ff4444",
+          },
         }),
-    });
+        placeholder: (base) => ({
+          ...base,
+          color: `${fontcolor}80`, // 50% opacity
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          marginTop: "-5px",
+        }),
+        noOptionsMessage: (base) => ({
+          ...base,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          color: fontcolor,
+          backgroundColor: getcolor,
+        }),
+        loadingMessage: (base) => ({
+          ...base,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+          color: fontcolor,
+          backgroundColor: getcolor,
+        }),
+        multiValue: (base) => ({
+          ...base,
+          backgroundColor: `${fontcolor}20`, // Light background for tags
+        }),
+        multiValueLabel: (base) => ({
+          ...base,
+          color: fontcolor,
+          fontSize: getdatafontsize,
+          fontFamily: getfontstyle,
+        }),
+        multiValueRemove: (base) => ({
+          ...base,
+          color: `${fontcolor}80`,
+          "&:hover": {
+            backgroundColor: "#ff4444",
+            color: "white",
+          },
+        }),
+      });
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -572,16 +692,12 @@ export default function InstallmentCollectionDailyComparison() {
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
-
-        const globalfontsize = 12;
-        console.log('gobal font data', globalfontsize)
-
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
 
         // Define table data (rows)
         const rows = tableData.map((item) => [
-            item.Date,
+           item.Date,
             item.Day,
             item.SaleCust,
             item.SaleAmt,
@@ -593,21 +709,21 @@ export default function InstallmentCollectionDailyComparison() {
         ]);
 
         // Add summary row to the table
-
         rows.push([
             "",
             "",
-            String(SaleCust),
-            String(TotalSale),
-            String(TotalAdvance),
-            String(TotalCust),
-            String(TotalIns),
-            String(TotalCol),
-            String(TotalDif),
+            String(formatValue(SaleCust)),
+            String(formatValue(TotalSale)),
+            String(formatValue(TotalAdvance)),
+            String(formatValue(TotalCust)),
+            String(formatValue(TotalIns)),
+            String(formatValue(TotalCol)),
+            String(formatValue(TotalDif)),
         ]);
 
         // Define table column headers and individual column widths
-        const headers = [
+        
+   const headers = [
             "Date",
             "Day",
             "SaleCust",
@@ -618,7 +734,7 @@ export default function InstallmentCollectionDailyComparison() {
             "Collection",
             "Diff"
         ];
-        const columnWidths = [20, 20, 25, 25, 25, 25, 25, 25, 25];
+        const columnWidths = [23, 30, 25, 30, 30, 30, 30, 30, 30];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -628,14 +744,14 @@ export default function InstallmentCollectionDailyComparison() {
         const paddingTop = 15;
 
         // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+        doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+           doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -657,114 +773,164 @@ export default function InstallmentCollectionDailyComparison() {
                 startX += columnWidths[index]; // Move to the next column
             });
 
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+          
         };
 
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust this value to decrease row height
-            const fontSize = 10; // Adjust this value to decrease font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+         const addTableRows = (startX, startY, startIndex, endIndex) => {
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(fontSize);
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000; // Check if tctgcod is greater than 100
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
 
-                if (isRedRow) {
-                    textColor = [255, 0, 0]; // Red color
-                    fontName = boldFont; // Set bold font for red-colored row
-                }
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
-                // Set background color for odd-numbered rows
-                // if (isOddRow) {
-                // 	doc.setFillColor(240); // Light background color
-                // 	doc.rect(
-                // 		startX,
-                // 		startY + (i - startIndex + 2) * rowHeight,
-                // 		tableWidth,
-                // 		rowHeight,
-                // 		"F"
-                // 	);
-                // }
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
-                // Draw row borders
-                doc.setDrawColor(0); // Set color for borders
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    tableWidth,
-                    rowHeight
-                );
+        doc.setDrawColor(0);
 
-                row.forEach((cell, cellIndex) => {
-                    const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-                    const cellX = startX + 2;
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
 
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-                    // Set font
-                    doc.setFont(fontName, "normal");
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
 
-                    if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    } else {
-                        doc.text(cellValue, cellX, cellY, { baseline: "middle" });
-                    }
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
 
+        row.forEach((cell, cellIndex) => {
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
+          const cellX = startX + 2;
 
-                    // Draw column borders (excluding the last column)
-                    if (cellIndex < row.length - 1) {
-                        doc.rect(
-                            startX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                // Draw border for the last column
-                doc.rect(
-                    startX,
-                    startY + (i - startIndex + 2) * rowHeight,
-                    columnWidths[row.length - 1],
-                    rowHeight
-                );
-                startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
+
+          const cellValue = String(cell);
+
+          if (cellIndex === 0) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 2 ||
+            cellIndex === 3 ||
+            cellIndex === 4 ||
+            cellIndex === 5 ||
+             cellIndex === 6 ||
+              cellIndex === 7 ||
+               cellIndex === 8 
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle",
+              });
             }
+          }
 
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth; // Match line width with table width
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-            const lineY = pageHeight - 15; // Position the line 20 units from the bottom
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-            const headingFontSize = 12; // Adjust as needed
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
 
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2; // Padding from left
-            const headingY = lineY + 5; // Padding from bottom
-            doc.setFontSize(headingFontSize); // Set the font size for the heading
-            doc.setTextColor(0); // Reset text color to default
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    };
+
 
         // Function to calculate total table width
         const getTotalTableWidth = () => {
@@ -780,12 +946,10 @@ export default function InstallmentCollectionDailyComparison() {
         };
 
         // Define the number of rows per page
-        const rowsPerPage = 27; // Adjust this value based on your requirements
+        const rowsPerPage = 30; // Adjust this value based on your requirements
 
         // Function to handle pagination
         const handlePagination = () => {
-
-
             // Define the addTitle function
             const addTitle = (
                 title,
@@ -814,10 +978,11 @@ export default function InstallmentCollectionDailyComparison() {
                 // }
 
                 // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(
                     `Page ${pageNumber}`,
-                    rightX - 30,
+                    rightX - 15,
                     doc.internal.pageSize.height - 10,
                     { align: "right" }
                 );
@@ -828,68 +993,48 @@ export default function InstallmentCollectionDailyComparison() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-
+              doc.setFont("Times New Roman", "normal");
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
-
-                addTitle(`Installment Collection Daily Comparison Report From: ${fromInputDate} To: ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
+                doc.setFont("verdana-regular", "normal");
+                addTitle(`Installment Collection Daily Comparison From ${fromInputDate} To ${toInputDate}`, "", "", pageNumber, startY, 12); // Render sale report title with decreased font size, provide the time, and page number
                 startY += -5;
 
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-                // Set font size and weight for the labels
-                doc.setFontSize(12);
-                doc.setFont(getfontstyle, "300");
+             
+                let status =
+                    transectionType2 === "001"
+                        ? "MONTHLY"
+                        : transectionType2 === "002"
+                            ? "DAILY"
+                            : transectionType2 === "003"
+                            ? "WEEKLY"
+                            : "ALL";
 
 
-                let status = transectionType === "D"
-                    ? "Daily"
-                    : transectionType === "M"
-                        ? "Monthly "
-
-                        : "ALL"
-
-
-                let search = Companyselectdatavalue.label
+               
+                let Accountcode = Companyselectdatavalue.label
                     ? Companyselectdatavalue.label
                     : "ALL";
 
+              
+doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                          doc.text(`Collector :`, labelsX, labelsY + 8.5); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(`${Accountcode}`, labelsX + 23, labelsY + 8.5); // Draw the value next to the label
 
 
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
+doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                          doc.text(`Types :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                          doc.text(`${status}`, labelsX + 165, labelsY + 8.5); // Draw the value next to the label
 
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`COLLECTOR :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${search}`, labelsX + 27, labelsY + 8.5); // Draw the value next to the label
-
-
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                doc.text(`${status}`, labelsX + 195, labelsY + 8.5); // Draw the value next to the label
-
-
-
-                // doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                // doc.text(`TYPE :`, labelsX, labelsY + 14); // Draw bold label
-                // doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                // doc.text(`${type}`, labelsX + 15, labelsY + 14); // Draw the value next to the label
-
-                // if (searchQuery) {
-                //     doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                //     doc.text(`SEARCH :`, labelsX + 200, labelsY + 14); // Draw bold label
-                //     doc.setFont(getfontstyle, 'normal'); // Reset font to normal
-                //     doc.text(`${search1}`, labelsX + 220, labelsY + 14); // Draw the value next to the label
-
-                // }
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, 'bold'); // Set font to bold
-                doc.setFontSize(10);
 
                 startY += 10; // Adjust vertical position for the labels
 
@@ -913,9 +1058,9 @@ export default function InstallmentCollectionDailyComparison() {
         const getCurrentDate = () => {
             const today = new Date();
             const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
             const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
+            return `${dd}-${mm}-${yyyy}`;
         };
 
         // Function to get current time in the format HH:MM:SS
@@ -934,22 +1079,18 @@ export default function InstallmentCollectionDailyComparison() {
         handlePagination();
 
         // Save the PDF files
-        doc.save(`InstallmentCollectionDailyComparisonReport Form ${fromInputDate} To ${toInputDate}.pdf`);
-
-
+        doc.save(`InastallmentcollectDailyComparison from ${fromInputDate} to ${toInputDate}.pdf`);
     };
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
-
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 10; // Ensure this matches the actual number of columns
+        const numColumns = 9; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
-            "left",
+            "center",
             "left",
             "right",
             "right",
@@ -980,7 +1121,7 @@ export default function InstallmentCollectionDailyComparison() {
         worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Installment Collection Daily Comparison Report From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Installment Collection Daily comparison From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -990,41 +1131,52 @@ export default function InstallmentCollectionDailyComparison() {
 
         // Add an empty row after the title section
         worksheet.addRow([]);
-        let status = transectionType === "D"
-        ? "Daily"
-        : transectionType === "M"
-            ? "Monthly "
 
-            : "ALL"
+        let typecompany = Companyselectdatavalue.label
+            ? Companyselectdatavalue.label
+            : "ALL";
+
+        let actype = transectionType2 === "001" ?
+            "MONTHLY" : transectionType2 === "002"
+                ? "DAILY": transectionType2 === "003"
+                ? "WEEKLY" : "All"
+
+       
+      const typeAndStoreRow = worksheet.addRow([
+  "Collector :",
+  typecompany,
+  "",
+  "",
+  "",
+   "",
+  "Type :",
+  actype,
+ 
+]);
+
+worksheet.mergeCells(`B${typeAndStoreRow.number}:E${typeAndStoreRow.number}`);
+
+// Columns that should be RIGHT aligned (values)
+const rightAlignCols = [7];
+
+// Columns that should be BOLD (labels)
+const boldCols = [1, 7];
+
+typeAndStoreRow.eachCell((cell, colIndex) => {
+  cell.font = {
+    name: "CustomFont",
+    size: 10,
+    bold: boldCols.includes(colIndex),
+  };
+
+  cell.alignment = {
+    horizontal: rightAlignCols.includes(colIndex) ? "right" : "left",
+    vertical: "middle",
+  };
+});
 
 
-    let search = Companyselectdatavalue.label
-        ? Companyselectdatavalue.label
-        : "ALL";
 
-        // Add first row
-        const typeAndStoreRow = worksheet.addRow([
-            "COLLECTOR :",
-            search,
-            "",
-            "",
-            "",
-            "",
-            "",
-            "TYPE",
-            status
-
-        ]);
-
-      
-
-           // Apply styling for the status row
-        typeAndStoreRow.eachCell((cell, colIndex) => {
-            cell.font = { name: 'CustomFont' || "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
-
-      
         // Header style
         const headerStyle = {
             font: fontHeader,
@@ -1035,7 +1187,7 @@ export default function InstallmentCollectionDailyComparison() {
 
         // Add headers
         const headers = [
-           "Date",
+             "Date",
             "Day",
             "SaleCust",
             "SaleAmt",
@@ -1052,14 +1204,14 @@ export default function InstallmentCollectionDailyComparison() {
         tableData.forEach((item) => {
             const row = worksheet.addRow([
                 item.Date,
-                item.Day,
-                item.SaleCust,
-                item.SaleAmt,
-                item.AdvaceAmt,
-                item.CustNos,
-                item.InsAmt,
-                item.Collection,
-                item.Diff
+            item.Day,
+            item.SaleCust,
+            item.SaleAmt,
+            item.AdvaceAmt,
+            item.CustNos,
+            item.InsAmt,
+            item.Collection,
+            item.Diff
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -1070,20 +1222,21 @@ export default function InstallmentCollectionDailyComparison() {
         });
 
         // Set column widths
-        [13, 14, 15,15,15,15,15,15,15].forEach((width, index) => {
+        [11, 14, 10, 14, 14, 14, 14, 14, 14, 14].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
+
         const totalRow = worksheet.addRow([
-           "",
+          "",
             "",
-            String(SaleCust),
-            String(TotalSale),
-            String(TotalAdvance),
-            String(TotalCust),
-            String(TotalIns),
-            String(TotalCol),
-            String(TotalDif),
+            String(formatValue(SaleCust)),
+            String(formatValue(TotalSale)),
+            String(formatValue(TotalAdvance)),
+            String(formatValue(TotalCust)),
+            String(formatValue(TotalIns)),
+            String(formatValue(TotalCol)),
+            String(formatValue(TotalDif)),
         ]);
 
         // total row added
@@ -1091,37 +1244,56 @@ export default function InstallmentCollectionDailyComparison() {
         totalRow.eachCell((cell, colNumber) => {
             cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
             cell.border = {
-                top: { style: "thin" },
+                top: { style: "double" },
                 left: { style: "thin" },
-                bottom: { style: "thin" },
+                bottom: { style: "double" },
                 right: { style: "thin" },
             };
 
             // Align only the "Total" text to the right
             if (
-
-                colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8 || colNumber === 9
+                colNumber === 3 ||
+                colNumber === 4 ||
+                colNumber === 5 ||
+                colNumber === 6 ||
+                colNumber === 7 ||
+                colNumber === 8 ||
+                colNumber === 9 
             ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
 
 
-        // Get current date
-        const getCurrentDate = () => {
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, "0");
-            const month = String(today.getMonth() + 1).padStart(2, "0");
-            const year = today.getFullYear();
-            return `${day}-${month}-${year}`;
-        };
-
-        const currentdate = getCurrentDate();
+        // Add an empty row after the title section
+        worksheet.addRow([]);
+        // Date and Time
+     const today = new Date();
+     const currentTime = today.toLocaleTimeString("en-GB");
+     const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+     const userid = user.tusrid;
+ 
+     const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+     dateTimeRow.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+     dateTimeRow1.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     // Merge cells
+     worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+     worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+ 
 
         // Generate and save the Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `InstallmentCollectionDailyComparisonReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `InstallmentCollectionDailyComparison From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1158,39 +1330,60 @@ export default function InstallmentCollectionDailyComparison() {
     };
 
     const firstColWidth = {
-        width: "9.4%",
+        width: "80px",
     };
     const secondColWidth = {
-        width: "10%",
+        width: "90px",
     };
     const thirdColWidth = {
-        width: "11.3%",
+        width: "85px",
     };
     const forthColWidth = {
-        width: "11.3%",
+        width: "85px",
     };
     const fifthColWidth = {
-        width: "11.3%",
+        width: "85px",
     };
     const sixthColWidth = {
-        width: "11.3%",
+        width: "85px",
     };
     const seventhColWidth = {
-        width: "11.3%",
+        width: "85px",
     };
     const eighthColWidth = {
-        width: "11.3%",
+        width: "85px",
     };
     const ninhthColWidth = {
-        width: "11.3%",
+        width: "85px",
+    };
+    const tenthColWidth = {
+        width: "85px",
+    };
+        const sixColWidth = {
+        width: "8px",
     };
 
 
-
-    useHotkeys("s", fetchReceivableReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys(
+      "alt+s",
+      () => {
+        fetchReceivableReport();
+      },
+      { preventDefault: true, enableOnFormTags: true }
+    );
+  
+    useHotkeys("alt+p", exportPDFHandler, {
+      preventDefault: true,
+      enableOnFormTags: true,
+    });
+    useHotkeys("alt+e", handleDownloadCSV, {
+      preventDefault: true,
+      enableOnFormTags: true,
+    });
+    useHotkeys("alt+r", () => navigate("/MainPage"), {
+      preventDefault: true,
+      enableOnFormTags: true,
+    });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1205,29 +1398,28 @@ export default function InstallmentCollectionDailyComparison() {
     }, []);
 
     const contentStyle = {
-        backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(60vw - 0%)" : "60vw",
-        position: "relative",
-        top: "35%",
-        left: isSidebarVisible ? "50%" : "50%",
-        transform: "translate(-50%, -50%)",
-        transition: isSidebarVisible
-            ? "left 3s ease-in-out, width 2s ease-in-out"
-            : "left 3s ease-in-out, width 2s ease-in-out",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "start",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        wordBreak: "break-word",
-        textAlign: "center",
-        maxWidth: "1000px",
-        fontSize: "15px",
-        fontStyle: "normal",
-        fontWeight: "400",
-        lineHeight: "23px",
-        fontFamily: '"Poppins", sans-serif',
-    };
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: "1000px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "50vw",
+    transform: "translateX(-50%)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    textAlign: "center",
+    fontSize: "15px",
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: "23px",
+    fontFamily: '"Poppins", sans-serif',
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
+  };
 
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1327,6 +1519,9 @@ export default function InstallmentCollectionDailyComparison() {
         }
     }, [selectedRadio]);
 
+    const formatValue = (val) => {
+    return Number(val) === 0  ? "" : val;
+  };
     return (
         <>
             <ToastContainer />
@@ -1335,38 +1530,26 @@ export default function InstallmentCollectionDailyComparison() {
                     style={{
                         backgroundColor: getcolor,
                         color: fontcolor,
-                        width: "100%",
+                        // width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Installment Collection Daily Comparison Report" />
+                    <NavComponent textdata="Installment Collectoin Daily Comparison" />
+                    <div className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px", }}>
 
+                        <div style={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            margin: "0px",
+                            padding: "0px",
+                            justifyContent: "space-between",
+                        }}>
 
-                    {/* CODE FOR CODE SELECT */}
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-
-
-
-                            {/* ------ */}
-
-
-                            <div className="d-flex align-items-center  " style={{ marginLeft: '18px' }}>
-                                <div style={{ width: '90x', display: 'flex', justifyContent: 'end' }}>
+                              <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
+                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
                                     <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Collector :</span>  <br /></label>
                                 </div>
                                 <div style={{ marginLeft: '5px' }} >
@@ -1389,11 +1572,26 @@ export default function InstallmentCollectionDailyComparison() {
                                                 setCompanyselectdatavalue("");
                                             }
                                         }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="ALL"
+                                         onInputChange={(inputValue, { action }) => {
+                                                             if (action === "input-change") {
+                                                               return inputValue.toUpperCase();
+                                                             }
+                                                             return inputValue;
+                                                           }}
+                                                           components={{ Option: DropdownOption }}
+                                                           styles={{
+                                                             ...customStyles1(!saleType),
+                                                             placeholder: (base) => ({
+                                                               ...base,
+                                                               textAlign: "left",
+                                                               marginLeft: "0",
+                                                               justifyContent: "flex-start",
+                                                               color: fontcolor,
+                                                               marginTop: "-5px",
+                                                             }),
+                                                           }}
+                                                           isClearable
+                                                           placeholder="ALL"
                                     />
 
                                 </div>
@@ -1401,100 +1599,89 @@ export default function InstallmentCollectionDailyComparison() {
 
                             </div>
 
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5">
-                                </div>
+                            {/* CODE FOR SELECT */}
 
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ marginRight: "21px" }}
+                            >
                                 <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
+                                    style={{
+                                        width: "75px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
                                 >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="custom" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>Custom</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="30" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>30 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="60" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>60 Days</label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label htmlFor="90" style={{ fontFamily: getfontstyle, fontSize: getdatafontsize }}>90 Days</label>
-                                        </div>
-                                    </div>
-
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            Type :
+                                        </span>
+                                    </label>
                                 </div>
 
+
+
+                               <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Reftype}
+                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType2}
+                    onChange={handleTransactionTypeChange2}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="001">MONTHLY</option>
+                    <option value="002">DAILY</option>
+                                        <option value="003">WEEKLY</option>
+
+                  </select>
+
+                  {transectionType2 !== "" && (
+                    <span
+                      onClick={() => settransectionType2("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
                             </div>
 
                         </div>
+
+
+
                     </div>
-                    {/* ///////////////////////// */}
 
-
-
+                    {/* CODE FOR CODE SELECT */}
 
                     <div
                         className="row"
@@ -1510,13 +1697,14 @@ export default function InstallmentCollectionDailyComparison() {
                                 justifyContent: "space-between",
                             }}
                         >
-                            <div className="d-flex align-items-center">
+
+                                <div className="d-flex align-items-center">
                                 <div
                                     style={{
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
-                                        marginLeft: '7px'
+                                        marginLeft: '5px'
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
@@ -1604,7 +1792,6 @@ export default function InstallmentCollectionDailyComparison() {
                             </div>
                             <div
                                 className="d-flex align-items-center"
-                                style={{ marginLeft: "10px" }}
                             >
                                 <div
                                     style={{
@@ -1655,7 +1842,7 @@ export default function InstallmentCollectionDailyComparison() {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, 'tyepeselect')}
+                                        onKeyDown={(e) => handleToKeyPress(e, 'firsttype')}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1697,61 +1884,84 @@ export default function InstallmentCollectionDailyComparison() {
                                 </div>
                             </div>
 
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Type :
-                                        </span>
-                                    </label>
-                                </div>
+                       
+                          
 
-                                <select
-                                    ref={input1Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                    id="tyepeselect"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "150px",
-                                        height: "24px",
-                                        marginLeft: "5px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                    }}
-                                >
-
-                                    <option value="D">Daily</option>
-                                    <option value="M">Monthly</option>
-                                </select>
-                            </div>
-
+                             <div id="lastDiv"style={{ marginRight: "1px" }} >
+                <label for="searchInput" style={{ marginRight: "5px" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Item description"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "200px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
+              </div>
+                       
+                   
 
                         </div>
                     </div>
+                    {/* ///////////////////////// */}
+                   
                     <div>
                         <div
                             style={{
                                 overflowY: "auto",
-                                width: "98.8%",
+                                // width: "98.8%",
                             }}
                         >
                             <table
@@ -1759,9 +1969,9 @@ export default function InstallmentCollectionDailyComparison() {
                                 id="table"
                                 style={{
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                    width: "100%",
+                                    // width: "100%",
                                     position: "relative",
-                                    paddingRight: "2%",
+                                    // paddingRight: "2%",
                                 }}
                             >
                                 <thead
@@ -1775,7 +1985,8 @@ export default function InstallmentCollectionDailyComparison() {
                                         backgroundColor: tableHeadColor,
                                     }}
                                 >
-                                    <tr
+                                    
+<tr
                                         style={{
                                             backgroundColor: tableHeadColor,
                                             color: "white",
@@ -1808,6 +2019,9 @@ export default function InstallmentCollectionDailyComparison() {
                                         <td className="border-dark" style={ninhthColWidth}>
                                             Diff
                                         </td>
+                                         <td className="border-dark" style={sixColWidth}>
+                                            
+                                        </td>
 
 
                                     </tr>
@@ -1821,16 +2035,17 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
                                 maxHeight: "50vh",
-                                width: "100%",
+                                // width: "100%",
                                 wordBreak: "break-word",
                             }}
-                        >
-                            <table
+                        >                          
+
+<table
                                 className="myTable"
                                 id="tableBody"
                                 style={{
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                    width: "100%",
+                                    // width: "100%",
                                     position: "relative",
                                     ...(tableData.length > 0 ? { tableLayout: "fixed" } : {})
                                 }}
@@ -1900,61 +2115,37 @@ export default function InstallmentCollectionDailyComparison() {
                                                         <td className="text-start" style={secondColWidth}>
                                                             {item.Day}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.SaleCust}
-                                                            style={{
-                                                                ...thirdColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
-                                                        >
+                                                         <td className="text-end" style={thirdColWidth}>
                                                             {item.SaleCust}
                                                         </td>
                                                         <td className="text-end" style={forthColWidth}>
                                                             {item.SaleAmt}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.AdvaceAmt}
-                                                            style={{
-                                                                ...fifthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
+                                                        <td className="text-end" style={  fifthColWidth       }
                                                         >
                                                             {item.AdvaceAmt}
                                                         </td>
-                                                        <td className="text-end"
-                                                            title={item.CustNos}
-                                                            style={{
-                                                                ...sixthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
+
+ <td className="text-end" style={  sixthColWidth       }
                                                         >
                                                             {item.CustNos}
                                                         </td>
+                                                      
                                                         <td className="text-end"
-                                                            title={item.InsAmt}
-                                                            style={{
-                                                                ...seventhColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
+                                                          
+                                                            style={
+                                                                seventhColWidth
+                                                               
+                                                            }
                                                         >
                                                             {item.InsAmt}
                                                         </td>
                                                         <td className="text-end"
-                                                            title={item.Collection}
-                                                            style={{
-                                                                ...eighthColWidth,
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                            }}
+                                                          
+                                                            style={
+                                                                eighthColWidth
+                                                               
+                                                            }
                                                         >
                                                             {item.Collection}
                                                         </td>
@@ -2001,16 +2192,14 @@ export default function InstallmentCollectionDailyComparison() {
                             </table>
                         </div>
                     </div>
-
-
-                    <div
+ <div
                         style={{
                             borderBottom: `1px solid ${fontcolor}`,
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "1.2%",
-                            width: '101.2%'
+                            paddingRight: "8px",
+                            // width: '101.2%'
                         }}
                     >
                         <div
@@ -2019,9 +2208,7 @@ export default function InstallmentCollectionDailyComparison() {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        >
-
-                        </div>
+                        ></div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2036,7 +2223,7 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{SaleCust}</span>
+                       <span className="mobileledger_total">{formatValue(SaleCust)}</span>
 
                         </div>
                         <div
@@ -2046,7 +2233,7 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalSale}</span>
+                        <span className="mobileledger_total">{formatValue(TotalSale)}</span>
 
                         </div>
                         <div
@@ -2056,7 +2243,7 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalAdvance}</span>
+                                                   <span className="mobileledger_total">{formatValue(TotalAdvance)}</span>
 
                         </div>
                         <div
@@ -2066,7 +2253,7 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalCust}</span>
+                                                   <span className="mobileledger_total">{formatValue(TotalCust)}</span>
 
                         </div>
                         <div
@@ -2076,7 +2263,7 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalIns}</span>
+                            <span className="mobileledger_total">{formatValue(TotalIns)}</span>
 
                         </div>
                         <div
@@ -2086,7 +2273,7 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalCol}</span>
+                            <span className="mobileledger_total">{formatValue(TotalCol)}</span>
 
                         </div>
                         <div
@@ -2096,12 +2283,13 @@ export default function InstallmentCollectionDailyComparison() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total" style={{ textAlign: 'left' }}>{TotalDif}</span>
+                            <span className="mobileledger_total">{formatValue(TotalDif)}</span>
 
                         </div>
-
+                       
 
                     </div>
+                  
                     <div
                         style={{
                             margin: "5px",
@@ -2111,7 +2299,6 @@ export default function InstallmentCollectionDailyComparison() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2120,7 +2307,6 @@ export default function InstallmentCollectionDailyComparison() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2129,7 +2315,6 @@ export default function InstallmentCollectionDailyComparison() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2140,7 +2325,6 @@ export default function InstallmentCollectionDailyComparison() {
                             text="Select"
                             ref={input3Ref}
                             onClick={fetchReceivableReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2152,3 +2336,8 @@ export default function InstallmentCollectionDailyComparison() {
         </>
     );
 }
+
+
+
+
+
