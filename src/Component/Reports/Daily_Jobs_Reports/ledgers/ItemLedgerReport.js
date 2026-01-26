@@ -565,12 +565,12 @@ export default function ItemLedgerReport() {
     FTrnTyp: transectionType,
     FItmCod: saleTypeParam,
     FStrCod: saleType1,
-    //  code: organisation.code,
-    //         FLocCod: locationnumber || getLocationNumber,
-    //         FYerDsc: yeardescription || getYearDescription,
-    code: "NASIRTRD",
-    FLocCod: "001",
-    FYerDsc: "2024-2024",
+     code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
+    // code: "NASIRTRD",
+    // FLocCod: "001",
+    // FYerDsc: "2024-2024",
   }).toString();
 
   axios
