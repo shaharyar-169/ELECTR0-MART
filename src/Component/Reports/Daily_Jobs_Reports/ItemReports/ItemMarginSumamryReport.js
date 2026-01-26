@@ -3,12 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import {
-  getUserData,
-  getOrganisationData,
-  getLocationnumber,
-  getYearDescription,
-} from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -25,11 +20,10 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Code, Description, Margin, Store } from "@mui/icons-material";
-import "../../../vardana/vardana";
-import "../../../vardana/verdana-bold";
+import { Description, Store } from "@mui/icons-material";
 
-export default function EmployeeMarginSummary() {
+
+export default function ItemMarginSummary() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -301,9 +295,9 @@ export default function EmployeeMarginSummary() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (employeeref.current) {
+        if (saleSelectRef.current) {
           e.preventDefault();
-          employeeref.current.focus();
+          saleSelectRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -422,7 +416,7 @@ export default function EmployeeMarginSummary() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeMarginSummary.php";
+    const apiUrl = apiLinks + "/ItemMarginSummary.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -434,14 +428,13 @@ export default function EmployeeMarginSummary() {
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
       FRepRat: transectionType,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType2,
-      FEmpCod: Employeeselectdata,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+    //   code: "NASIRTRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -871,7 +864,7 @@ export default function EmployeeMarginSummary() {
 
     // Add summary row to the table
     rows.push([
-      "", "Total", String(formatValue(totaldebit)), String(formatValue(totalcredit)),  String(formatValue(ClosingBalance))]);
+      String(formatValue(tableData.length.toLocaleString())), "", String(formatValue(totaldebit)), String(formatValue(totalcredit)),  String(formatValue(ClosingBalance))]);
 
     // Define table column headers and individual column widths
 
@@ -1115,8 +1108,9 @@ export default function EmployeeMarginSummary() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1137,7 +1131,7 @@ export default function EmployeeMarginSummary() {
         doc.setFont("verdana-regular", "normal");
     doc.setFontSize(12);
         addTitle(
-          `Employee Margin Summary From ${fromInputDate} To ${toInputDate}`,
+          `Item Margin Summary From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1190,12 +1184,12 @@ export default function EmployeeMarginSummary() {
 
         let search = searchQuery ? searchQuery : "";
 
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${employeedata}`, labelsX + 25, labelsY); // Draw the value next to the label
+        // doc.setFont("verdana", "bold"); // Set font to bold
+        // doc.setFontSize(10);
+        // doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
+        // doc.setFont("verdana-regular", "normal"); // Set font to bold
+        // doc.setFontSize(10);
+        // doc.text(`${employeedata}`, labelsX + 25, labelsY); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1294,7 +1288,7 @@ export default function EmployeeMarginSummary() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeMarginSummary As On ${date}.pdf`);
+    doc.save(`ItemMarginSummary As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
@@ -1350,7 +1344,7 @@ export default function EmployeeMarginSummary() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Margin Summary From ${fromInputDate} To ${toInputDate}`,
+      `Item Margin Summary From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1407,7 +1401,6 @@ export default function EmployeeMarginSummary() {
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow5 = worksheet.addRow(["Employee :", employeedata, ""]);
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
       "Company :",
@@ -1428,16 +1421,7 @@ export default function EmployeeMarginSummary() {
       transectionsts,
     ]);
 
-    // const typeAndStoreRow3 = worksheet.addRow([
-    //     "CAPACITY :",
-    //     typecapacity,
-    //    "",
-    //      "",
-    //       "",
-    //        "",
-    //     "STATUS :",
-    //     transectionsts,
-    // ]);
+    
 
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
@@ -1447,14 +1431,7 @@ export default function EmployeeMarginSummary() {
     );
 
     // Apply styling for the status row
-    typeAndStoreRow5.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+  
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1472,13 +1449,7 @@ export default function EmployeeMarginSummary() {
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
+   
     // });
     typeAndStoreRow4.eachCell((cell, colIndex) => {
       cell.font = {
@@ -1542,7 +1513,7 @@ export default function EmployeeMarginSummary() {
     });
 
     const totalRow = worksheet.addRow([
-     "", "Total", String(formatValue(totaldebit)), String(formatValue(totalcredit)),  String(formatValue(ClosingBalance))]);
+     String(formatValue(tableData.length.toLocaleString())), "", String(formatValue(totaldebit)), String(formatValue(totalcredit)),  String(formatValue(ClosingBalance))]);
 
 
     // total row added
@@ -1550,15 +1521,19 @@ export default function EmployeeMarginSummary() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
       // Align only the "Total" text to the right
       if (colNumber === 3 || colNumber === 4 || colNumber === 5) {
         cell.alignment = { horizontal: "right" };
+      }
+
+      if (colNumber === 1) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
@@ -2088,7 +2063,7 @@ export default function EmployeeMarginSummary() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Margin Summary Report" />
+          <NavComponent textdata="Item Margin Summary Report" />
 
           {/* ------------1st row */}
                    <div
@@ -2102,7 +2077,7 @@ export default function EmployeeMarginSummary() {
                          alignItems: "center",
                          margin: "0px",
                          padding: "0px",
-                         justifyContent: "space-between",
+                         justifyContent: "start",
                        }}
                      >
          
@@ -2206,7 +2181,7 @@ export default function EmployeeMarginSummary() {
                          </div>
                        </div>
                        <div
-                         className="d-flex align-items-center"
+                         className="d-flex align-items-center" style={{marginLeft:'100px'}}
                        >
                          <div
                            style={{
@@ -2264,7 +2239,7 @@ export default function EmployeeMarginSummary() {
                              }}
                              value={toInputDate}
                              onChange={handleToInputChange}
-                             onKeyDown={(e) => handleToKeyPress(e, employeeref)}
+                             onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
                              id="toDatePicker"
                              autoComplete="off"
                              placeholder="dd-mm-yyyy"
@@ -2307,83 +2282,7 @@ export default function EmployeeMarginSummary() {
                          </div>
                        </div>
 
-                        <div
-                         className="d-flex align-items-center"
-                         style={{ marginRight: "21px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Employee :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class"
-                             ref={employeeref}
-                             options={employeeoptions}
-                             value={
-                               employeeoptions.find(
-                                 (opt) => opt.value === Employeeselectdata
-                               ) || null
-                             } // Ensure correct reference
-                             onKeyDown={(e) => handleEmployeeKeypress(e, saleSelectRef)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                              if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-         
-                                 setEmployeeselectdata(selectedOption.value);
-                                 setEmployeeselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart, // Keep only the description
-                                 });
-                               } else {
-                                 setEmployeeselectdata("");
-                                 setEmployeeselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Employeeselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                            //  isClearable
-                            //  placeholder="ALL"
-                           />
-                         </div>
-                       </div>
+                      
                      </div>
                    </div>
          

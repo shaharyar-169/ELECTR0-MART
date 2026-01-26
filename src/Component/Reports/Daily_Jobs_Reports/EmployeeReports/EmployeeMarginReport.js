@@ -3027,7 +3027,7 @@ export default function EmployeeMarginReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="10" className="text-center">
+                        <td colSpan="9" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3040,7 +3040,7 @@ export default function EmployeeMarginReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 10 }).map((_, colIndex) => (
+                            {Array.from({ length: 9 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3136,7 +3136,7 @@ export default function EmployeeMarginReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 10 }).map((_, colIndex) => (
+                          {Array.from({ length: 9 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>

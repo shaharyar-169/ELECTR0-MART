@@ -424,13 +424,14 @@ export default function ItemSaleReport() {
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
             FStrCod: Typeselectdata,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getyeardescription,
             FTrnTyp: transectionType2,
-            // code: 'NASIRTRD',
-            // FLocCod: '001',
-            // FYerDsc: '2024-2024',
+
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
    
    
            }).toString();
@@ -1913,6 +1914,14 @@ const formatValue = (val) => {
                     }}
                 >
                     <NavComponent textdata="Item Sale Report" />
+                    {/* ------------Tab Switch Row */}
+
+                     <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+
+                    </div>
 
                     {/* ------------1st row */}
                     <div
@@ -2789,7 +2798,7 @@ const formatValue = (val) => {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "43vh",
+                                maxHeight: "38vh",
                                 // width: "100%",
                                 position: "relative",
                                     ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
