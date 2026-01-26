@@ -1390,7 +1390,7 @@ useEffect(() => {
                                     type="tel"
                                     id="phone"
                                     name="phone"
-                                    placeholder="0302-1127364"
+                                    // placeholder="0302-1127364"
                                     style={{
                                         color: fontcolor,
                                         width: "200px",
@@ -1429,181 +1429,189 @@ useEffect(() => {
                                 justifyContent: "space-between",
                             }}
                         >
-                            <div className="d-flex align-items-center">
-                                <div
-                                    style={{
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            From :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="fromdatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "3px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            
-                                            pointerEvents: isSessionReadonly ? "none" : "auto",
-                                        }}
-                                        id="frominputid"
-                                        value={fromInputDate}
-                                        ref={fromRef}
-                                        readOnly={isSessionReadonly}
-                                        onChange={handlefromInputChange}
-                                        onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="Date Input"
-                                        disabled={isSessionReadonly || selectedRadio !== "custom"}  
-                                                                          />
-                                    <DatePicker
-                                        selected={selectedfromDate}
-                                        // onChange={handlefromDateChange}
-                                        onChange={isSessionReadonly ? undefined : handlefromDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
- open={isSessionReadonly ? false : fromCalendarOpen}
-                                         dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleFromCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                       cursor: isSessionReadonly ? "not-allowed" : "pointer",
-        opacity: isSessionReadonly ? 0.5 : 1,
-                                                        marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                                    }}
- disabled={isSessionReadonly || selectedRadio !== "custom"}                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
-                            <div
-                                className="d-flex align-items-center"
-                            >
-                                <div
-                                    style={{
-                                        width: "60px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="toDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            To :
-                                        </span>
-                                    </label>
-                                </div>
-                                <div
-                                    id="todatevalidation"
-                                    style={{
-                                        width: "135px",
-                                        border: `1px solid ${fontcolor}`,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "24px",
-                                        justifyContent: "center",
-                                        marginLeft: "4px",
-                                        background: getcolor,
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                >
-                                    <input
-                                        ref={toRef}
-                                        style={{
-                                            height: "20px",
-                                            width: "90px",
-                                            paddingLeft: "5px",
-                                            outline: "none",
-                                            border: "none",
-                                            fontSize: getdatafontsize, fontFamily: getfontstyle, backgroundColor: getcolor,
-                                            color: fontcolor,
-                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents: isSessionReadonly ? "none" : "auto",
-                                        }}
-                                        value={toInputDate}
-                                         readOnly={isSessionReadonly}
-                                        onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
-                                        id="toDatePicker"
-                                        autoComplete="off"
-                                        placeholder="dd-mm-yyyy"
-                                        aria-label="To Date Input"
-  disabled={isSessionReadonly || selectedRadio !== "custom"}
-                                      />
-                                    <DatePicker
-                                        selected={selectedToDate}
-                                        // onChange={handleToDateChange}
-                                         onChange={isSessionReadonly ? undefined : handleToDateChange}
-                                        dateFormat="dd-MM-yyyy"
-                                        popperPlacement="bottom"
-                                        showPopperArrow={false}
-                                       open={isSessionReadonly ? false : toCalendarOpen}
-                                        dropdownMode="select"
-                                        customInput={
-                                            <div>
-                                                <BsCalendar
-                                                    onClick={
-                                                        selectedRadio === "custom"
-                                                            ? toggleToCalendar
-                                                            : undefined
-                                                    }
-                                                    style={{
-                                                        cursor: isSessionReadonly ? "not-allowed" : "pointer",
-                                                        marginLeft: "18px",
-                                                        fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
-                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                    }}
- disabled={isSessionReadonly || selectedRadio !== "custom"}                                                />
-                                            </div>
-                                        }
-                                        disabled={selectedRadio !== "custom"}
-                                    />
-                                </div>
-                            </div>
+                            <div className="d-flex align-items-center" style={{marginLeft:'4px'}}>
+                                                            <div
+                                                                style={{
+                                                                    width: "75px",
+                                                                    display: "flex",
+                                                                    justifyContent: "end",
+                                                                }}
+                                                            >
+                                                                <label htmlFor="fromDatePicker">
+                                                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                                                        From :
+                                                                    </span>
+                                                                </label>
+                                                            </div>
+                                                            <div
+                                                                id="fromdatevalidation"
+                                                                style={{
+                                                                    width: "135px",
+                                                                    border: `1px solid ${fontcolor}`,
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    height: "24px",
+                                                                    justifyContent: "center",
+                                                                    marginLeft: "5px",
+                                                                    background: getcolor,
+                                                                }}
+                                                                onFocus={(e) =>
+                                                                    (e.currentTarget.style.border = "2px solid red")
+                                                                }
+                                                                onBlur={(e) =>
+                                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                                }
+                                                            >
+                                                                <input
+                                                                    style={{
+                                                                        height: "20px",
+                                                                        width: "90px",
+                                                                        paddingLeft: "5px",
+                                                                        outline: "none",
+                                                                        border: "none",
+                                                                        fontSize: "12px",
+                                                                        backgroundColor: getcolor,
+                                                                        color: fontcolor,
+                                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                        pointerEvents:
+                                                                            selectedRadio === "custom" ? "auto" : "none",
+                                                                    }}
+                                                                    id="frominputid"
+                                                                    value={fromInputDate}
+                                                                    ref={fromRef}
+                                                                    onChange={handlefromInputChange}
+                                                                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                                                                    autoComplete="off"
+                                                                    placeholder="dd-mm-yyyy"
+                                                                    aria-label="Date Input"
+                                                                    disabled={selectedRadio !== "custom"}
+                                                                />
+                                                                <DatePicker
+                                                                    selected={selectedfromDate}
+                                                                    onChange={handlefromDateChange}
+                                                                    dateFormat="dd-MM-yyyy"
+                                                                    popperPlacement="bottom"
+                                                                    showPopperArrow={false}
+                                                                    open={fromCalendarOpen}
+                                                                    dropdownMode="select"
+                                                                    customInput={
+                                                                        <div>
+                                                                            <BsCalendar
+                                                                                onClick={
+                                                                                    selectedRadio === "custom"
+                                                                                        ? toggleFromCalendar
+                                                                                        : undefined
+                                                                                }
+                                                                                style={{
+                                                                                    cursor:
+                                                                                        selectedRadio === "custom"
+                                                                                            ? "pointer"
+                                                                                            : "default",
+                                                                                    marginLeft: "18px",
+                                                                                    fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                                                                    opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                                }}
+                                                                                disabled={selectedRadio !== "custom"}
+                                                                            />
+                                                                        </div>
+                                                                    }
+                                                                    disabled={selectedRadio !== "custom"}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div
+                                                            className="d-flex align-items-center"
+                                                            style={{ marginLeft: "15px" }}
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    width: "60px",
+                                                                    display: "flex",
+                                                                    justifyContent: "end",
+                                                                }}
+                                                            >
+                                                                <label htmlFor="toDatePicker">
+                                                                    <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                                                        To :
+                                                                    </span>
+                                                                </label>
+                                                            </div>
+                                                            <div
+                                                                id="todatevalidation"
+                                                                style={{
+                                                                    width: "135px",
+                                                                    border: `1px solid ${fontcolor}`,
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    height: "24px",
+                                                                    justifyContent: "center",
+                                                                    marginLeft: "5px",
+                                                                    background: getcolor,
+                                                                }}
+                                                                onFocus={(e) =>
+                                                                    (e.currentTarget.style.border = "2px solid red")
+                                                                }
+                                                                onBlur={(e) =>
+                                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                                                }
+                                                            >
+                                                                <input
+                                                                    ref={toRef}
+                                                                    style={{
+                                                                        height: "20px",
+                                                                        width: "90px",
+                                                                        paddingLeft: "5px",
+                                                                        outline: "none",
+                                                                        border: "none",
+                                                                        fontSize: getdatafontsize, fontFamily: getfontstyle,
+                                                                        backgroundColor: getcolor,
+                                                                        color: fontcolor,
+                                                                        opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                        pointerEvents:
+                                                                            selectedRadio === "custom" ? "auto" : "none",
+                                                                    }}
+                                                                    value={toInputDate}
+                                                                    onChange={handleToInputChange}
+                                                                    onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                                                                    id="toDatePicker"
+                                                                    autoComplete="off"
+                                                                    placeholder="dd-mm-yyyy"
+                                                                    aria-label="To Date Input"
+                                                                    disabled={selectedRadio !== "custom"}
+                                                                />
+                                                                <DatePicker
+                                                                    selected={selectedToDate}
+                                                                    onChange={handleToDateChange}
+                                                                    dateFormat="dd-MM-yyyy"
+                                                                    popperPlacement="bottom"
+                                                                    showPopperArrow={false}
+                                                                    open={toCalendarOpen}
+                                                                    dropdownMode="select"
+                                                                    customInput={
+                                                                        <div>
+                                                                            <BsCalendar
+                                                                                onClick={
+                                                                                    selectedRadio === "custom"
+                                                                                        ? toggleToCalendar
+                                                                                        : undefined
+                                                                                }
+                                                                                style={{
+                                                                                    cursor:
+                                                                                        selectedRadio === "custom"
+                                                                                            ? "pointer"
+                                                                                            : "default",
+                                                                                    marginLeft: "18px",
+                                                                                    fontSize: getdatafontsize, fontFamily: getfontstyle, color: fontcolor,
+                                                                                    opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                                                }}
+                                                                                disabled={selectedRadio !== "custom"}
+                                                                            />
+                                                                        </div>
+                                                                    }
+                                                                    disabled={selectedRadio !== "custom"}
+                                                                />
+                                                            </div>
+                                                        </div>
                             <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "4px" }}>
                                     <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>

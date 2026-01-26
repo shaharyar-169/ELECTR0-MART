@@ -193,13 +193,13 @@ export default function InvoiceLedgerReport() {
     setIsLoading(true);
 
     const formData = new URLSearchParams({
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
-      // FYerDsc: '2024-2024',
+      code: 'NASIRTRD',
+      FLocCod: '001',
+      FYerDsc: '2024-2024',
 
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getYearDescription,
       FInvNum: invoiceValue,
     }).toString();
 

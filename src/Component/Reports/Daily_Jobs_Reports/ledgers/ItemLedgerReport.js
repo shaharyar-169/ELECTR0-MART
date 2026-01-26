@@ -565,12 +565,12 @@ export default function ItemLedgerReport() {
     FTrnTyp: transectionType,
     FItmCod: saleTypeParam,
     FStrCod: saleType1,
-     code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getYearDescription,
-    // code: "NASIRTRD",
-    // FLocCod: "001",
-    // FYerDsc: "2024-2024",
+    //  code: organisation.code,
+    //         FLocCod: locationnumber || getLocationNumber,
+    //         FYerDsc: yeardescription || getYearDescription,
+    code: "NASIRTRD",
+    FLocCod: "001",
+    FYerDsc: "2024-2024",
   }).toString();
 
   axios
@@ -2205,7 +2205,7 @@ useEffect(() => {
                                         options={storeoption}
                                         onKeyDown={(e) => handleStoreKeypress(e, "submitButton")}
                                         id="selectedsale"
-                                         isDisabled={isDoubleClickOpen}
+                                        //  isDisabled={isDoubleClickOpen}
                                         // value={options.find((option) => option.value === saleType1) || null} // Ensure proper value
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -2317,11 +2317,11 @@ useEffect(() => {
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                             cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+                                            //  cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         id="frominputid"
                                         value={fromInputDate}
-                                        disabled={isDoubleClickOpen} 
+                                        // disabled={isDoubleClickOpen} 
                                         ref={fromRef}
                                         onChange={handlefromInputChange}
                                         onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
@@ -2356,10 +2356,11 @@ useEffect(() => {
                                                         fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                        cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
-
+                                                        // cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+cursor:'pointer'
                                                     }}
- disabled={isDoubleClickOpen}                                                 />
+//  disabled={isDoubleClickOpen}  
+                                                />
                                             </div>
                                         }
                                     />
@@ -2420,7 +2421,7 @@ useEffect(() => {
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+                                            // cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
@@ -2429,7 +2430,7 @@ useEffect(() => {
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="To Date Input"
-                                     disabled={isDoubleClickOpen} 
+                                    //  disabled={isDoubleClickOpen} 
                                     />
                                     <DatePicker
                                         selected={selectedToDate}
@@ -2457,9 +2458,11 @@ useEffect(() => {
                                                         fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                                         cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+                                                        //  cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+                                                cursor:"pointer"
                                                     }}
-  disabled={isDoubleClickOpen}                                                 />
+//    disabled={isDoubleClickOpen}                
+                                   />
                                             </div>
                                         }
                                         disabled={selectedRadio !== "custom"}
@@ -2496,7 +2499,7 @@ useEffect(() => {
     ref={input1Ref}
     onKeyDown={(e) => handleKeyPress(e, input2Ref)}
     id="submitButton"
-     disabled={isDoubleClickOpen}
+    //  disabled={isDoubleClickOpen}
     name="type"
     onFocus={(e) =>
       (e.currentTarget.style.border = "4px solid red")
@@ -2516,7 +2519,7 @@ useEffect(() => {
       fontFamily: getfontstyle,
       color: fontcolor,
       paddingLeft: "13px",
-       cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+    //    cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
     }}
   >
    <option value="">ALL</option>
@@ -2589,7 +2592,7 @@ useEffect(() => {
                                         ref={input2Ref}
                                         onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                                         type="text"
-                                         disabled={isDoubleClickOpen} 
+                                        //  disabled={isDoubleClickOpen} 
                                         id="searchsubmit"
                                         placeholder="Item description"
                                         value={searchQuery}
@@ -2606,7 +2609,7 @@ useEffect(() => {
                                             outline: "none",
                                             paddingLeft: "10px",
                                             paddingRight: "25px", // space for the clear icon
-                                             cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+                                            //  cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         onFocus={(e) =>
                                             (e.currentTarget.style.border = "2px solid red")

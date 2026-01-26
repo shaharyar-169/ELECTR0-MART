@@ -2088,7 +2088,9 @@ export default function DailyCreditReport() {
 
                                                           <td
   className="text-start"
-  style={firstColWidth}
+  style={{...firstColWidth,  cursor:'pointer',
+                                textDecoration:"underline",
+                                color:'blue'}}
   onDoubleClick={(e) => {
     e.stopPropagation();
     // code temporarily store karo
@@ -2149,7 +2151,9 @@ sessionStorage.setItem(
                                                       
   <td
   className="text-start"
-  style={firstColWidth}
+   style={{...firstColWidth,  cursor:'pointer',
+                                textDecoration:"underline",
+                                color:'blue'}}
   onDoubleClick={(e) => {
     e.stopPropagation();
     // code temporarily store karo
@@ -2161,8 +2165,6 @@ sessionStorage.setItem(
         toInputDate: toInputDate,})
   
 );
-
-
 
     // fixed URL open karo
     window.open("/crystalsol/MobileLedger", "_blank");

@@ -167,6 +167,7 @@ import RawMaterialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemR
 import SemiFinishStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SemiFinishStockReport.js";
 import FinishItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/FinishItemStcokReport.js";
 import SerialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SerialStockReport.js"; 
+import ItemMarginReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemMarginReport.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -369,6 +370,7 @@ function App() {
                 <Route exact path="/SemishFinishStockReport" element={<SemiFinishStockReport />} />
                 <Route exact path="/FinishItemStockReport" element={<FinishItemStockReport />} />
                 <Route exact path="/SerialStockReport" element={<SerialStockReport />} />
+                <Route exact path="/ItemMarginReport" element={<ItemMarginReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}

@@ -1629,13 +1629,14 @@ export default function ItemStockReport() {
                     color: isNegative ? "red" : fontcolor,
                   }}
                 >
-                  {/* <td className="text-start" style={firstColWidth}>
-                    {item.Code}
-                  </td> */}
+                 
 
   <td
   className="text-start"
-  style={firstColWidth}
+  style={{...firstColWidth, cursor:'pointer',
+                                textDecoration:"underline",
+                                color:'blue'}}
+
   onDoubleClick={(e) => {
     e.stopPropagation();
     // code temporarily store karo
