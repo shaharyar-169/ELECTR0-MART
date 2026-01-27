@@ -37,6 +37,9 @@ export default function CustomerLedgerReport() {
   const [saleType, setSaleType] = useState("");
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
   const [tableData, setTableData] = useState([]);
+
+    const [isCodeReady, setIsCodeReady] = useState(false);
+      const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
       const [isItemInitialized, setIsItemInitialized] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -402,12 +405,12 @@ export default function CustomerLedgerReport() {
              FFnlDat: toInputDate,
              FTrnTyp: transectionType,
              FAccCod: saleType,
-            //  code: organisation.code,
-            //  FLocCod: locationnumber || getLocationNumber,
-            //  FYerDsc: yeardescription || getyeardescription,
-             code: 'NASIRTRD',
-             FLocCod: '001',
-             FYerDsc: '2024-2024',
+             code: organisation.code,
+             FLocCod: locationnumber || getLocationNumber,
+             FYerDsc: yeardescription || getyeardescription,
+            //  code: 'NASIRTRD',
+            //  FLocCod: '001',
+            //  FYerDsc: '2024-2024',
              FSchTxt: searchQuery
          }).toString();
  
@@ -454,43 +457,43 @@ export default function CustomerLedgerReport() {
       sessionStorage.setItem("componentMounted", "true");
     }
   }, []);
-    useEffect(() => {
-        const storedData = sessionStorage.getItem("CustomerLedgerData");
-      
-        let toDate = new Date(); // default today
-        let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+
+
   
-        if (storedData) {
-          const parsedData = JSON.parse(storedData);
-      
-          if (parsedData.toInputDate) {
-            const parts = parsedData.toInputDate.split("-"); // ["12","08","2024"]
-            const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10) - 1; // JS months 0-11
-            const year = parseInt(parts[2], 10);
-      
-            toDate = new Date(year, month, day);
-          }
-  
-          if (parsedData.fromInputDate) {
-            const parts = parsedData.fromInputDate.split("-"); // ["12","08","2024"]
-            const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10) - 1; // JS months 0-11
-            const year = parseInt(parts[2], 10);
-      
-            fromDate = new Date(year, month, day);
-          }
+     useEffect(() => {
+      const storedData = sessionStorage.getItem("CustomerLedgerData");
+    
+      let toDate = new Date(); // default today
+      let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+    
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+    
+        // ✅ TO DATE
+        if (parsedData.toInputDate) {
+          const [day, month, year] = parsedData.toInputDate.split("-").map(Number);
+          toDate = new Date(year, month - 1, day);
         }
-      
-        // ✅ Set TO date
-        setSelectedToDate(toDate);
-        settoInputDate(formatDate(toDate));
-      
-        // ✅ Set FROM date = first day of same month
-      //   const fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
-        setSelectedfromDate(fromDate);
-        setfromInputDate(formatDate(fromDate));
-      }, []);
+    
+        // ✅ FROM DATE
+        if (parsedData.fromInputDate) {
+          // Case: Payable Report (both dates)
+          const [day, month, year] = parsedData.fromInputDate.split("-").map(Number);
+          fromDate = new Date(year, month - 1, day);
+        } else {
+          // Case: Payable Aging (only toDate)
+          fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+        }
+      }
+    
+      // ✅ Apply states
+      setSelectedToDate(toDate);
+      settoInputDate(formatDate(toDate));
+    
+      setSelectedfromDate(fromDate);
+      setfromInputDate(formatDate(fromDate));
+    
+    }, []);
       
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomer.php";
@@ -516,9 +519,6 @@ export default function CustomerLedgerReport() {
     label: `${item.tacccod}-${item.taccdsc.trim()}`,
   }));
 
-   const [isCodeReady, setIsCodeReady] = useState(false);
-      const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
-      
       
       useEffect(() => {
         if (options.length === 0) return;
@@ -1676,24 +1676,7 @@ export default function CustomerLedgerReport() {
     setSelectedRadio(days === 0 ? "custom" : `${days}days`);
   };
 
-  useEffect(() => {
-    if (selectedRadio === "custom") {
-      const currentDate = new Date();
-      const firstDateOfCurrentMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1
-      );
-      setSelectedfromDate(firstDateOfCurrentMonth);
-      setfromInputDate(formatDate(firstDateOfCurrentMonth));
-      setSelectedToDate(currentDate);
-      settoInputDate(formatDate(currentDate));
-    } else {
-      const days = parseInt(selectedRadio.replace("days", ""));
-      handleRadioChange(days);
-    }
-  }, [selectedRadio]);
-
+ 
 const formatValue = (val) => {
   if (val === null || val === undefined || val === "") return "";
 
@@ -1784,6 +1767,7 @@ const formatValue = (val) => {
                     value={
                       options.find((opt) => opt.value === saleType) || null
                     } // Ensure correct reference
+                    isDisabled={isDoubleClickOpen}
                     onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
                     id="selectedsale"
                     onChange={(selectedOption) => {
@@ -1819,8 +1803,8 @@ const formatValue = (val) => {
                         marginTop: "-5px",
                       }),
                     }}
-                    isClearable
-                    placeholder="ALL"
+                    // isClearable
+                    // placeholder="ALL"
                   />
                 </div>
               </div>

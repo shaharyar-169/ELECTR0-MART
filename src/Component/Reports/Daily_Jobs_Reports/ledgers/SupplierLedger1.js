@@ -39,10 +39,10 @@ export default function SupplierLedger1() {
     const [isItemInitialized, setIsItemInitialized] = useState(false);
     const [saleType, setSaleType] = useState("");
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-    console.log('saleType for double click', saleType)
 
+      const [isCodeReady, setIsCodeReady] = useState(false);
+    const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
 
-    console.log('Companyselectdatavalue', Companyselectdatavalue)
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
@@ -53,6 +53,8 @@ export default function SupplierLedger1() {
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [closingBalance, setClosingBalance] = useState(0);
+        const [tableData, setTableData] = useState([]);
+
 
     // state for from DatePicker
     const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -461,43 +463,41 @@ export default function SupplierLedger1() {
         }
     }, []);
    
-      useEffect(() => {
-      const storedData = sessionStorage.getItem("SupplierLedgerData");
-    
-      let toDate = new Date(); // default today
-      let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+  
+    useEffect(() => {
+  const storedData = sessionStorage.getItem("SupplierLedgerData");
 
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-    
-        if (parsedData.toInputDate) {
-          const parts = parsedData.toInputDate.split("-"); // ["12","08","2024"]
-          const day = parseInt(parts[0], 10);
-          const month = parseInt(parts[1], 10) - 1; // JS months 0-11
-          const year = parseInt(parts[2], 10);
-    
-          toDate = new Date(year, month, day);
-        }
+  let toDate = new Date(); // default today
+  let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
 
-        if (parsedData.fromInputDate) {
-          const parts = parsedData.fromInputDate.split("-"); // ["12","08","2024"]
-          const day = parseInt(parts[0], 10);
-          const month = parseInt(parts[1], 10) - 1; // JS months 0-11
-          const year = parseInt(parts[2], 10);
-    
-          fromDate = new Date(year, month, day);
-        }
-      }
-    
-      // ✅ Set TO date
-      setSelectedToDate(toDate);
-      settoInputDate(formatDate(toDate));
-    
-      // ✅ Set FROM date = first day of same month
-    //   const fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
-      setSelectedfromDate(fromDate);
-      setfromInputDate(formatDate(fromDate));
-    }, []);
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+
+    // ✅ TO DATE
+    if (parsedData.toInputDate) {
+      const [day, month, year] = parsedData.toInputDate.split("-").map(Number);
+      toDate = new Date(year, month - 1, day);
+    }
+
+    // ✅ FROM DATE
+    if (parsedData.fromInputDate) {
+      // Case: Payable Report (both dates)
+      const [day, month, year] = parsedData.fromInputDate.split("-").map(Number);
+      fromDate = new Date(year, month - 1, day);
+    } else {
+      // Case: Payable Aging (only toDate)
+      fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+    }
+  }
+
+  // ✅ Apply states
+  setSelectedToDate(toDate);
+  settoInputDate(formatDate(toDate));
+
+  setSelectedfromDate(fromDate);
+  setfromInputDate(formatDate(fromDate));
+
+}, []);
 
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveSupplier.php";
@@ -523,8 +523,6 @@ export default function SupplierLedger1() {
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
 
-    const [isCodeReady, setIsCodeReady] = useState(false);
-    const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
     
     
     useEffect(() => {
@@ -1517,7 +1515,6 @@ export default function SupplierLedger1() {
     const btnColor = "#3368B5";
     const textColor = "white";
 
-    const [tableData, setTableData] = useState([]);
     const [selectedSearch, setSelectedSearch] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1776,8 +1773,7 @@ const isMatchedRow = (item) => {
                                         ref={saleSelectRef}
                                         options={options}
                                         value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
-                                                                                isDisabled={isDoubleClickOpen}
-
+                                        isDisabled={isDoubleClickOpen}
                                         onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {

@@ -467,7 +467,7 @@ export default function PayableReport() {
     settransectionType(selectedTransactionType);
   };
 
-  const exportPDFHandler = () => {
+ const exportPDFHandler = () => {
     const globalfontsize = 10;
     console.log("gobal font data", globalfontsize);
 
@@ -503,7 +503,7 @@ export default function PayableReport() {
       "Credit",
       "Balance",
     ];
-    const columnWidths = [21, 80, 25, 25, 25, 25];
+    const columnWidths = [23, 80, 25, 25, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -512,15 +512,13 @@ export default function PayableReport() {
     const pageHeight = doc.internal.pageSize.height;
     const paddingTop = 15;
 
-    // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
-
+      doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
+          doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -542,23 +540,19 @@ export default function PayableReport() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(10);
+    
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
+   const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
       const normalFont = getfontstyle;
       const tableWidth = getTotalTableWidth();
 
-      doc.setFontSize(10);
-
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        const isOddRow = i % 2 !== 0;
         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
         const isTotalRow = i === rows.length - 1;
         let textColor = [0, 0, 0];
@@ -570,79 +564,75 @@ export default function PayableReport() {
         }
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "bold");
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
         }
 
-        // Set background color for odd-numbered rows
         if (isOddRow) {
-          doc.setFillColor(240); // Light background color
+          doc.setFillColor(240);
           doc.rect(
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F",
+            "F"
           );
         }
 
         doc.setDrawColor(0);
 
-        // For total row - special border handling
         if (isTotalRow) {
           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
           const rowBottomY = rowTopY + rowHeight;
 
-          // Draw double top border
           doc.setLineWidth(0.3);
           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-          // Draw double bottom border
           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
           doc.line(
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5,
+            rowBottomY - 0.5
           );
 
-          // Draw single vertical borders
           doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+          doc.line(startX, rowTopY, startX, rowBottomY);
           doc.line(
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY,
-          ); // Right border
+            rowBottomY
+          );
         } else {
-          // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight,
+            rowHeight
           );
         }
 
         row.forEach((cell, cellIndex) => {
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
           const cellX = startX + 2;
 
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
           if (!isTotalRow) {
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
           const cellValue = String(cell);
 
-          if (cellIndex === 12) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+          if (cellIndex === 0) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
@@ -653,13 +643,12 @@ export default function PayableReport() {
             cellIndex === 4 ||
             cellIndex === 5
           ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
-              baseline: "middle", // This centers vertically
+              baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
               const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
@@ -668,19 +657,18 @@ export default function PayableReport() {
               });
             } else {
               doc.text(cellValue, cellX, cellY, {
-                baseline: "middle", // This centers vertically
+                baseline: "middle",
               });
             }
           }
 
-          // Draw column borders
           if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
             doc.line(
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight,
+              startY + (i - startIndex + 3) * rowHeight
             );
             startX += columnWidths[cellIndex];
           }
@@ -689,11 +677,11 @@ export default function PayableReport() {
         startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Footer section
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
@@ -702,9 +690,9 @@ export default function PayableReport() {
       const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -733,7 +721,7 @@ export default function PayableReport() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10,
+        pageNumberFontSize = 10
       ) => {
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -753,12 +741,13 @@ export default function PayableReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+     doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 10,
           doc.internal.pageSize.height - 10,
-          { align: "right" },
+          { align: "right" }
         );
       };
 
@@ -767,54 +756,54 @@ export default function PayableReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+            doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+     doc.setFont("verdana-regular", "normal");
         addTitle(
           `Payable Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
           startY,
-          12,
+          12
         ); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-        doc.setFontSize(10);
-        doc.setFont(getfontstyle, "300");
-
+     
         let status =
           transectionType === "R"
             ? "RECEIVABLE"
             : transectionType === "P"
-              ? "PAYABLE"
-              : "ALL";
+            ? "PAYABLE"
+            : "ALL";
         let search = searchQuery ? searchQuery : "";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
+        // let accoount = Companyselectdatavalue.label
+        //   ? Companyselectdatavalue.label
+        //   : "ALL";
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${status}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
+  
+     doc.setFont("verdana", "bold");
+            doc.setFontSize(10); 
+                   doc.text(`Type :`, labelsX, labelsY + 8.5); // Draw bold label
+     doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-        if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 70, labelsY + 8.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 90, labelsY + 8.5); // Draw the value next to the label
-        }
+                     if (searchQuery) {
+     doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                    doc.text(`Search :`, labelsX + 120, labelsY + 8.5); // Draw bold label
+     doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(`${search}`, labelsX + 138, labelsY + 8.5); // Draw the value next to the label
+}
 
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(10);
-
+           
         startY += 10; // Adjust vertical position for the labels
 
         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
@@ -824,7 +813,7 @@ export default function PayableReport() {
           (doc.internal.pageSize.width - totalWidth) / 2,
           startY,
           startIndex,
-          endIndex,
+          endIndex
         );
         if (endIndex < rows.length) {
           startY = addNewPage(startY); // Add new page and update startY
@@ -858,7 +847,7 @@ export default function PayableReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`PayableReport As On ${date}.pdf`);
+    doc.save(`payableReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
@@ -1203,51 +1192,54 @@ export default function PayableReport() {
     }
   }, [tableData]);
 
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-    const sortedData = [...tableData].sort((a, b) => {
-      let aVal = a[col] ?? "";
-      let bVal = b[col] ?? "";
+  const sortedData = [...tableData].sort((a, b) => {
+    let aVal = a[col] ?? "";
+    let bVal = b[col] ?? "";
 
-      aVal = aVal.toString();
-      bVal = bVal.toString();
+    aVal = aVal.toString();
+    bVal = bVal.toString();
 
-      // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
-      if (col === "code" || col === "Code") {
-        // Reverse strings → compare from right side
-        const revA = aVal.split("").reverse().join("");
-        const revB = bVal.split("").reverse().join("");
+    // ⭐ CODE SORT (13-01-0005)
+    if (col === "code") {
+      const aParts = aVal.split("-").map(p => parseInt(p, 10));
+      const bParts = bVal.split("-").map(p => parseInt(p, 10));
 
-        return newOrder === "ASC"
-          ? revA.localeCompare(revB)
-          : revB.localeCompare(revA);
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const diff = (aParts[i] || 0) - (bParts[i] || 0);
+        if (diff !== 0) {
+          return newOrder === "ASC" ? diff : -diff;
+        }
       }
+      return 0;
+    }
 
-      // ⭐ Numeric sorting
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
+    // ⭐ Numeric sorting
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
 
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      }
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    }
 
-      // Default → normal string sorting
-      return newOrder === "ASC"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    });
+    // ⭐ String sorting
+    return newOrder === "ASC"
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
 
-    setTableData(sortedData);
+  setTableData(sortedData);
 
-    setColumnSortOrders((prev) => ({
-      ...Object.keys(prev).reduce((acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      }, {}),
-    }));
-  };
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
 
   const resetSorting = () => {
     setColumnSortOrders({

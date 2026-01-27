@@ -1469,7 +1469,7 @@ export default function ReceivableReport() {
       bVal = bVal.toString();
 
       // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
-      if (col === "code" || col === "Code") {
+      if (col === "code" || col === "code") {
         // Reverse strings → compare from right side
         const revA = aVal.split("").reverse().join("");
         const revB = bVal.split("").reverse().join("");
