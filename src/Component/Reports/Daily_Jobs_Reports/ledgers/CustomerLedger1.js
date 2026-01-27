@@ -402,12 +402,12 @@ export default function CustomerLedgerReport() {
              FFnlDat: toInputDate,
              FTrnTyp: transectionType,
              FAccCod: saleType,
-             code: organisation.code,
-             FLocCod: locationnumber || getLocationNumber,
-             FYerDsc: yeardescription || getyeardescription,
-            //  code: 'NASIRTRD',
-            //  FLocCod: '001',
-            //  FYerDsc: '2024-2024',
+            //  code: organisation.code,
+            //  FLocCod: locationnumber || getLocationNumber,
+            //  FYerDsc: yeardescription || getyeardescription,
+             code: 'NASIRTRD',
+             FLocCod: '001',
+             FYerDsc: '2024-2024',
              FSchTxt: searchQuery
          }).toString();
  
@@ -420,24 +420,15 @@ export default function CustomerLedgerReport() {
     setTotalCredit(response.data["Total Credit"]);
     setClosingBalance(response.data["Closing Bal "]);
 
-    if (response.data && Array.isArray(response.data.Detail)) {
-
-       const cleanedDetail = response.data.Detail.map(item => ({
-  ...item,
-  Qnty: Number(item.Qnty?.toString().replace(/,/g, "")) || 0,
-  Rate: Number(item.Rate?.toString().replace(/,/g, "")) || 0,
-  Debit: Number(item.Debit?.toString().replace(/,/g, "")) || 0,
-  Credit: Number(item.Credit?.toString().replace(/,/g, "")) || 0,
-  Balance: Number(item.Balance?.toString().replace(/,/g, "")) || 0,
-}));
-
-
-        setTableData(cleanedDetail);
-
-    } else {
-        console.warn("Response data structure is not as expected:", response.data);
-        setTableData([]);
-    }
+     if (response.data && Array.isArray(response.data.Detail)) {
+                    setTableData(response.data.Detail);
+                } else {
+                    console.warn(
+                        "Response data structure is not as expected:",
+                        response.data
+                    );
+                    setTableData([]);
+                }
 })
 .catch((error) => {
     console.error("Error:", error);
@@ -667,7 +658,7 @@ export default function CustomerLedgerReport() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected ? "white" : fontcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -1378,9 +1369,9 @@ export default function CustomerLedgerReport() {
               row.eachCell((cell, colIndex) => {
                   cell.font = fontTableContent;
                   cell.border = {
-                      top: { style: "double" },
+                      top: { style: "thin" },
                       left: { style: "thin" },
-                      bottom: { style: "double" },
+                      bottom: { style: "thin" },
                       right: { style: "thin" },
                   };
                   cell.alignment = {
@@ -1421,7 +1412,7 @@ export default function CustomerLedgerReport() {
           });
   
           // Set column widths
-          [11, 6, 6, 45, 10, 12, 12, 12, 12].forEach((width, index) => {
+          [11, 8, 6, 45, 10, 12, 12, 12, 12].forEach((width, index) => {
               worksheet.getColumn(index + 1).width = width;
           });
   
@@ -1703,16 +1694,19 @@ export default function CustomerLedgerReport() {
     }
   }, [selectedRadio]);
 
-  const formatValue = (val) => {
-    if (val === undefined || val === null) return "";
-    const num = Number(val);
-    return num === 0
-      ? ""
-      : num.toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-  };
+const formatValue = (val) => {
+  if (val === null || val === undefined || val === "") return "";
+
+  const num = Number(val.toString().replace(/,/g, ""));
+  if (num === 0 || isNaN(num)) return "";
+
+  return Number.isInteger(num)
+    ? num.toLocaleString("en-US")
+    : num.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+};
 
   const isMatchedRow = (item) => {
     if (!searchQuery) return false; // no highlight if search is empty
