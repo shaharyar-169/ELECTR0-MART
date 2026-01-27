@@ -60,7 +60,7 @@ export default function ReceivableReport() {
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
   const [GetCompany, setGetCompany] = useState([]);
 
-  console.log('dropdowndata', saleType)
+  
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
