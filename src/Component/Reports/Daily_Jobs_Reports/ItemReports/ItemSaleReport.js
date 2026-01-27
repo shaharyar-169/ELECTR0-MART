@@ -1914,16 +1914,8 @@ const formatValue = (val) => {
                     }}
                 >
                     <NavComponent textdata="Item Sale Report" />
-                    {/* ------------Tab Switch Row */}
-
-                     <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-
-                    </div>
-
-                    {/* ------------1st row */}
+                
+                                    {/* ------------1st row */}
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -2798,7 +2790,7 @@ const formatValue = (val) => {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "38vh",
+                                maxHeight: "40vh",
                                 // width: "100%",
                                 position: "relative",
                                     ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -2904,6 +2896,7 @@ const formatValue = (val) => {
                                                     </tr>
                                                 );
                                             })}
+                                            
                                             {Array.from({
                                                 length: Math.max(0, 27 - tableData.length),
                                             }).map((_, rowIndex) => (

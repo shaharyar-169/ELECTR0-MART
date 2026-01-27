@@ -36,10 +36,10 @@ export default function SupplierLedger1() {
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
-
+    const [isItemInitialized, setIsItemInitialized] = useState(false);
     const [saleType, setSaleType] = useState("");
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-    console.log('Companyselectdatavalue', Companyselectdatavalue)
+    console.log('saleType for double click', saleType)
 
 
     console.log('Companyselectdatavalue', Companyselectdatavalue)
@@ -407,12 +407,12 @@ export default function SupplierLedger1() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
             FSchTxt: searchQuery
         }).toString();
 
@@ -441,6 +441,9 @@ export default function SupplierLedger1() {
                 setIsLoading(false);
             });
     }
+
+
+    
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
@@ -457,30 +460,52 @@ export default function SupplierLedger1() {
             sessionStorage.setItem("componentMounted", "true");
         }
     }, []);
-    useEffect(() => {
-        const currentDate = new Date();
-        setSelectedToDate(currentDate);
-        settoInputDate(formatDate(currentDate));
+   
+      useEffect(() => {
+      const storedData = sessionStorage.getItem("SupplierLedgerData");
+    
+      let toDate = new Date(); // default today
+      let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
 
-        const firstDateOfCurrentMonth = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            1
-        );
-        setSelectedfromDate(firstDateOfCurrentMonth);
-        setfromInputDate(formatDate(firstDateOfCurrentMonth));
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+    
+        if (parsedData.toInputDate) {
+          const parts = parsedData.toInputDate.split("-"); // ["12","08","2024"]
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1; // JS months 0-11
+          const year = parseInt(parts[2], 10);
+    
+          toDate = new Date(year, month, day);
+        }
+
+        if (parsedData.fromInputDate) {
+          const parts = parsedData.fromInputDate.split("-"); // ["12","08","2024"]
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1; // JS months 0-11
+          const year = parseInt(parts[2], 10);
+    
+          fromDate = new Date(year, month, day);
+        }
+      }
+    
+      // ✅ Set TO date
+      setSelectedToDate(toDate);
+      settoInputDate(formatDate(toDate));
+    
+      // ✅ Set FROM date = first day of same month
+    //   const fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+      setSelectedfromDate(fromDate);
+      setfromInputDate(formatDate(fromDate));
     }, []);
+
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveSupplier.php";
         const formData = new URLSearchParams({
-            // FLocCod: locationnumber || getLocationNumber,
-            // code: organisation.code,
-
+            FLocCod: locationnumber || getLocationNumber,
+            code: organisation.code,
+            //   code: 'NASIRTRD',
             // FLocCod: '001',
-            // code: 'NASIRTRD',
-
-              code: 'ZOHAELEC',
-            FLocCod: '001',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -492,37 +517,82 @@ export default function SupplierLedger1() {
             });
     }, []);
 
-    const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
-    useEffect(() => {
-        if (supplierList.length > 0) {
-            setIsOptionsLoaded(true);
-        }
-    }, [supplierList]);
-
+  
     const options = supplierList.map((item) => ({
         value: item.tacccod,
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
 
-
+    const [isCodeReady, setIsCodeReady] = useState(false);
+    const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
+    
+    
     useEffect(() => {
-        if (isOptionsLoaded && options.length > 0 && !saleType && !hasInitialized.current) {
-            const firstOption = options[0];
-            setSaleType(firstOption.value);
+      if (options.length === 0) return;
+      if (isItemInitialized) return;
+    
+      const storedData = sessionStorage.getItem("SupplierLedgerData");
+      let selectedOption = null;
+    
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        const clickedCode = parsedData.code?.trim();
+     if (parsedData.code) {
+        setIsDoubleClickOpen(true); // ✅ ADD
+      }
+        selectedOption = options.find(
+          (opt) => opt.value?.trim() === clickedCode
+        );
+    
+        sessionStorage.removeItem("SupplierLedgerData");
+      }
+    
+      if (!selectedOption) {
+        selectedOption = options[0];
+      }
+    
+      if (selectedOption) {
+        setSaleType(selectedOption.value);
+    
+        const description =
+          selectedOption.label.split("-").slice(1).join("-").trim();
+    
+        setCompanyselectdatavalue({
+          value: selectedOption.value,
+          label: description,
+        });
+    
+        setIsCodeReady(true); // ✅ IMPORTANT
+      }
+    
+      setIsItemInitialized(true);
+    }, [options, isItemInitialized]);
+    
+    useEffect(() => {
+      // 🔥 Dono cheezain ready hon
+      if (isDoubleClickOpen && isCodeReady) {
+        fetchReceivableReport();
+      }
+    }, [isDoubleClickOpen, isCodeReady]);
 
-            const fullLabel = firstOption.label;
-            const description = fullLabel.split('-').pop()?.trim();
+    // useEffect(() => {
+    //     if (isOptionsLoaded && options.length > 0 && !saleType && !hasInitialized.current) {
+    //         const firstOption = options[0];
+    //         setSaleType(firstOption.value);
 
-            setCompanyselectdatavalue({
-                value: firstOption.value,
-                label: description,
-                fullLabel: fullLabel
-            });
+    //         const fullLabel = firstOption.label;
+    //         const description = fullLabel.split('-').pop()?.trim();
 
-            // Mark as initialized
-            hasInitialized.current = true;
-        }
-    }, [isOptionsLoaded, options, saleType]);
+    //         setCompanyselectdatavalue({
+    //             value: firstOption.value,
+    //             label: description,
+    //             fullLabel: fullLabel
+    //         });
+
+    //         // Mark as initialized
+    //         hasInitialized.current = true;
+    //     }
+    // }, [isOptionsLoaded, options, saleType]);
 
 
 
@@ -616,7 +686,7 @@ export default function SupplierLedger1() {
                 : state.isFocused
                     ? "#3368B5"
                     : getcolor,
-            color: state.isSelected ? "white" : fontcolor,
+            color: state.isSelected || state.isFocused ? "white" : fontcolor,
             "&:hover": {
                 backgroundColor: "#3368B5",
                 color: "white",
@@ -732,11 +802,11 @@ export default function SupplierLedger1() {
             item["Trn#"],
             item.Type,
             item.Description,
-            item.Qnty,
-            item.Rate,
-            item.Debit,
-            item.Credit,
-            item.Balance,
+        formatValue(item.Qnty)    ,
+       formatValue(item.Rate)      ,
+         formatValue(item.Debit)    ,
+         formatValue(item.Credit)    ,
+          formatValue(item.Balance)   ,
         ]);
 
         // Add summary row to the table
@@ -746,11 +816,11 @@ export default function SupplierLedger1() {
             "",
             "",
             "Total",
-            String(totalQnty),
+            String(formatValue(totalQnty)),
             "",
-            String(totalDebit),
-            String(totalCredit),
-            String(closingBalance),
+            String(formatValue(totalDebit)),
+            String(formatValue(totalCredit)),
+            String(formatValue(closingBalance)),
         ]);
 
         // Define table column headers and individual column widths
@@ -765,7 +835,7 @@ export default function SupplierLedger1() {
             "Credit",
             "Balance",
         ];
-        const columnWidths = [21, 15, 11, 101, 20, 30, 30, 30, 30];
+        const columnWidths = [23, 17, 13, 90, 20, 25, 30, 30, 30];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -774,15 +844,14 @@ export default function SupplierLedger1() {
         const pageHeight = doc.internal.pageSize.height;
         const paddingTop = 15;
 
-        // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -804,158 +873,161 @@ export default function SupplierLedger1() {
                 startX += columnWidths[index]; // Move to the next column
             });
 
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+           
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5;
-            const fontSize = 10;
-            const boldFont = 400;
-            const normalFont = getfontstyle;
-            const tableWidth = getTotalTableWidth();
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(11);
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
+        let fontName = normalFont;
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isOddRow = i % 2 !== 0; // Check if the row index is odd
-                const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-                const isTotalRow = i === rows.length - 1;
-                let textColor = [0, 0, 0];
-                let fontName = normalFont;
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+          fontName = boldFont;
+        }
 
-                if (isRedRow) {
-                    textColor = [255, 0, 0];
-                    fontName = boldFont;
-                }
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, 'bold');
-                }
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F"
+          );
+        }
 
-                // Set background color for odd-numbered rows
-                if (isOddRow) {
-                    doc.setFillColor(240); // Light background color
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight,
-                        "F"
-                    );
-                }
+        doc.setDrawColor(0);
 
-                doc.setDrawColor(0);
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
 
-                // For total row - special border handling
-                if (isTotalRow) {
-                    const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-                    const rowBottomY = rowTopY + rowHeight;
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                    // Draw double top border
-                    doc.setLineWidth(0.3);
-                    doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-                    doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5
+          );
 
-                    // Draw double bottom border
-                    doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-                    doc.line(startX, rowBottomY - 0.5, startX + tableWidth, rowBottomY - 0.5);
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight
+          );
+        }
 
-                    // Draw single vertical borders
-                    doc.setLineWidth(0.2);
-                    doc.line(startX, rowTopY, startX, rowBottomY); // Left border
-                    doc.line(startX + tableWidth, rowTopY, startX + tableWidth, rowBottomY); // Right border
-                } else {
-                    // Normal border for other rows
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        startX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
-                }
+        row.forEach((cell, cellIndex) => {
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-                row.forEach((cell, cellIndex) => {
-                    const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-                        : startY + (i - startIndex + 2) * rowHeight + 3;
+          const cellX = startX + 2;
 
-                    const cellX = startX + 2;
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
 
-                    if (!isTotalRow) {
-                        doc.setFont(fontName, "normal");
-                    }
+          const cellValue = String(cell);
 
-                    const cellValue = String(cell);
-
-                    if (cellIndex === 2) {
-                        const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "center",
-                            baseline: "middle",
-                        });
-                    }
-
-                    else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
-                        const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle", // This centers vertically
-                        });
-                    } else {
-                        // For empty cells in total row, add "Total" label centered
-                        if (isTotalRow && cellIndex === 0 && cell === "") {
-                            const totalLabelX = startX + columnWidths[0] / 2;
-                            doc.text("", totalLabelX, cellY, {
-                                align: "center",
-                                baseline: "middle"
-                            });
-                        } else {
-                            doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle" // This centers vertically
-                            });
-                        }
-
-                    }
-
-                    // Draw column borders
-                    if (cellIndex < row.length - 1) {
-                        doc.setLineWidth(0.2);
-                        doc.line(
-                            startX + columnWidths[cellIndex],
-                            startY + (i - startIndex + 2) * rowHeight,
-                            startX + columnWidths[cellIndex],
-                            startY + (i - startIndex + 3) * rowHeight
-                        );
-                        startX += columnWidths[cellIndex];
-                    }
-                });
-
-                startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, "normal");
-                }
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if (
+            cellIndex === 4 ||
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7 ||
+            cellIndex === 8
+          ) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              const totalLabelX = startX + columnWidths[0] / 2;
+              doc.text("", totalLabelX, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, {
+                baseline: "middle",
+              });
             }
+          }
 
-            // Footer section
-            const lineWidth = tableWidth;
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-            const lineY = pageHeight - 15;
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY);
-            const headingFontSize = 11;
-            const headingX = lineX + 2;
-            const headingY = lineY + 5;
-            doc.setFontSize(headingFontSize);
-            doc.setTextColor(0);
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
+
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+      const lineWidth = tableWidth;
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + lineWidth, lineY);
+      const headingFontSize = 11;
+      const headingX = lineX + 2;
+      const headingY = lineY + 5;
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    };
 
         // Function to calculate total table width
         const getTotalTableWidth = () => {
@@ -1003,8 +1075,10 @@ export default function SupplierLedger1() {
                 // }
 
                 // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+            
+            doc.text(
                     `Page ${pageNumber}`,
                     rightX - 20,
                     doc.internal.pageSize.height - 10,
@@ -1017,9 +1091,10 @@ export default function SupplierLedger1() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
+               doc.setFont("Times New Roman", "normal");
                 addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
-
+ doc.setFont("verdana-regular", "normal");
                 addTitle(
                     `Supplier Ledger From: ${fromInputDate} To: ${toInputDate}`,
                     "",
@@ -1033,10 +1108,7 @@ export default function SupplierLedger1() {
                 const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
                 const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-                // Set font size and weight for the labels
-                doc.setFontSize(12);
-                doc.setFont(getfontstyle, "300");
-
+              
                 let status =
                     transectionType === "A"
                         ? "ALL"
@@ -1070,24 +1142,21 @@ export default function SupplierLedger1() {
                     ? Companyselectdatavalue.label
                     : "ALL";
 
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);     
+                       doc.text(`Account :`, labelsX, labelsY + 8.5); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                            doc.text(`${search}`, labelsX + 22, labelsY + 8.5); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`ACCOUNT :`, labelsX, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                            doc.text(`Type :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                            doc.text(`${status}`, labelsX + 195, labelsY + 8.5); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`TYPE :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${status}`, labelsX + 195, labelsY + 8.5); // Draw the value next to the label
-
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.setFontSize(10);
-
+              
                 startY += 10; // Adjust vertical position for the labels
 
                 addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
@@ -1248,12 +1317,12 @@ export default function SupplierLedger1() {
 
         // Apply styling for the status row
         const typeAndStoreRow2 = worksheet.addRow(
-            ["ACCOUNT :", Accountselect, "", "", "", "", "TYPE :", typestatus]
+            ["Account :", Accountselect, "", "", "", "", "Type :", typestatus]
         );
 
         const typeAndStoreRow3 = worksheet.addRow(
             searchQuery
-                ? ["", "", "", "", "", "", "SEARCH :", typesearch]
+                ? ["", "", "", "", "", "", "Search :", typesearch]
                 : [""]
         );
 
@@ -1318,23 +1387,24 @@ export default function SupplierLedger1() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                item.Date,
-                item["Trn#"],
-                item.Type,
-                item.Description,
-                item.Qnty,
-                item.Rate,
-                item.Debit,
-                item.Credit,
-                item.Balance,
+              item.Date,
+            item["Trn#"],
+            item.Type,
+            item.Description,
+        formatValue(item.Qnty)    ,
+       formatValue(item.Rate)      ,
+         formatValue(item.Debit)    ,
+         formatValue(item.Credit)    ,
+          formatValue(item.Balance)   ,
+
             ]);
 
             row.eachCell((cell, colIndex) => {
                 cell.font = fontTableContent;
                 cell.border = {
-                    top: { style: "thin" },
+                    top: { style: "double" },
                     left: { style: "thin" },
-                    bottom: { style: "thin" },
+                    bottom: { style: "double" },
                     right: { style: "thin" },
                 };
                 cell.alignment = {
@@ -1345,15 +1415,15 @@ export default function SupplierLedger1() {
         });
 
         const totalRow = worksheet.addRow([
-            "",
+               "",
             "",
             "",
             "Total",
-            totalQnty,
+            String(formatValue(totalQnty)),
             "",
-            totalDebit,
-            totalCredit,
-            closingBalance,
+            String(formatValue(totalDebit)),
+            String(formatValue(totalCredit)),
+            String(formatValue(closingBalance)),
 
         ]);
 
@@ -1375,7 +1445,7 @@ export default function SupplierLedger1() {
         });
 
         // Set column widths
-        [10, 7, 7, 45, 12, 12, 12, 12, 12].forEach((width, index) => {
+        [11, 6, 6, 45, 10, 12, 12, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1469,36 +1539,10 @@ export default function SupplierLedger1() {
         return filteredData;
     };
 
-    // const firstColWidth = {
-    //     width: "8%",
-    // };
-    // const secondColWidth = {
-    //     width: "5.5%",
-    // };
-    // const thirdColWidth = {
-    //     width: "3.7%",
-    // };
-    // const fifthColWidth = {
-    //     width: "35.5%",
-    // };
-    // const sixthColWidth = {
-    //     width: "4%",
-    // };
-    // const seventhColWidth = {
-    //     width: "10.5%",
-    // };
-    // const eightColWidth = {
-    //     width: "10.5%",
-    // };
-    // const ninthColWidth = {
-    //     width: "10.5%",
-    // };
-    // const tenthColWidth = {
-    //     width: "10.5%",
-    // };
+   
 
     const firstColWidth = {
-        width: "90px",
+        width: "80px",
     };
     const secondColWidth = {
         width: "54px",
@@ -1510,7 +1554,7 @@ export default function SupplierLedger1() {
         width: "360px",
     };
     const sixthColWidth = {
-        width: "90px",
+        width: "70px",
     };
     const seventhColWidth = {
         width: "90px",
@@ -1652,26 +1696,7 @@ export default function SupplierLedger1() {
         setSelectedRadio(days === 0 ? "custom" : `${days}days`);
     };
 
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(formatDate(firstDateOfCurrentMonth));
-            setSelectedToDate(currentDate);
-            settoInputDate(formatDate(currentDate));
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
-            handleRadioChange(days);
-        }
-    }, [selectedRadio]);
-
-
-
+    
       const formatValue = (val) => {
   return Number(val) === 0 ? "" : val;
 };
@@ -1704,139 +1729,7 @@ const isMatchedRow = (item) => {
                     }}
                 >
                     <NavComponent textdata="Supplier Ledger" />
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div className="d-flex align-items-center justify-content-center">
-                                <div className="mx-5"></div>
-
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ marginRight: "15px" }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "evenly",
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="custom"
-                                                checked={selectedRadio === "custom"}
-                                                onChange={() => handleRadioChange(0)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label
-                                                htmlFor="custom"
-                                                style={{
-                                                    fontSize: getdatafontsize,
-                                                    fontFamily: getfontstyle,
-                                                }}
-                                            >
-                                                Custom
-                                            </label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="30"
-                                                checked={selectedRadio === "30days"}
-                                                onChange={() => handleRadioChange(30)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label
-                                                htmlFor="30"
-                                                style={{
-                                                    fontSize: getdatafontsize,
-                                                    fontFamily: getfontstyle,
-                                                }}
-                                            >
-                                                30 Days
-                                            </label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="60"
-                                                checked={selectedRadio === "60days"}
-                                                onChange={() => handleRadioChange(60)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label
-                                                htmlFor="60"
-                                                style={{
-                                                    fontSize: getdatafontsize,
-                                                    fontFamily: getfontstyle,
-                                                }}
-                                            >
-                                                60 Days
-                                            </label>
-                                        </div>
-                                        <div className="d-flex align-items-baseline mx-2">
-                                            <input
-                                                type="radio"
-                                                name="dateRange"
-                                                id="90"
-                                                checked={selectedRadio === "90days"}
-                                                onChange={() => handleRadioChange(90)}
-                                                onFocus={(e) =>
-                                                    (e.currentTarget.style.border = "2px solid red")
-                                                }
-                                                onBlur={(e) =>
-                                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                }
-                                            />
-                                            &nbsp;
-                                            <label
-                                                htmlFor="90"
-                                                style={{
-                                                    fontSize: getdatafontsize,
-                                                    fontFamily: getfontstyle,
-                                                }}
-                                            >
-                                                90 Days
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+             
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1883,6 +1776,8 @@ const isMatchedRow = (item) => {
                                         ref={saleSelectRef}
                                         options={options}
                                         value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
+                                                                                isDisabled={isDoubleClickOpen}
+
                                         onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
                                         id="selectedsale"
                                         onChange={(selectedOption) => {
@@ -1919,8 +1814,8 @@ const isMatchedRow = (item) => {
                                                 marginTop: '-5px'
                                             })
                                         }}
-                                        isClearable
-                                        placeholder="ALL"
+                                        // isClearable
+                                        // placeholder="ALL"
                                     />
                                 </div>
                             </div>
@@ -2565,7 +2460,7 @@ const isMatchedRow = (item) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalQnty}</span>
+                            <span className="mobileledger_total">{formatValue(totalQnty)}</span>
                         </div>
                         <div
                             style={{
@@ -2582,7 +2477,7 @@ const isMatchedRow = (item) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalDebit}</span>
+                            <span className="mobileledger_total">{formatValue(totalDebit)}</span>
                         </div>
                         <div
                             style={{
@@ -2591,7 +2486,7 @@ const isMatchedRow = (item) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalCredit}</span>
+                            <span className="mobileledger_total">{formatValue(totalCredit)}</span>
                         </div>
                         <div
                             style={{
@@ -2600,7 +2495,7 @@ const isMatchedRow = (item) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{closingBalance}</span>
+                            <span className="mobileledger_total">{formatValue(closingBalance)}</span>
                         </div>
                     </div>
 

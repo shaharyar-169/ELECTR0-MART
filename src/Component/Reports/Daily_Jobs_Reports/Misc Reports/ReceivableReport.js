@@ -289,7 +289,7 @@ export default function ReceivableReport() {
     }
   };
 
-  function fetchReceivableReport() {
+   function fetchReceivableReport() {
     const fromDateElement = document.getElementById("fromdatevalidation");
     const toDateElement = document.getElementById("todatevalidation");
 
@@ -404,16 +404,15 @@ export default function ReceivableReport() {
     const apiUrl = apiLinks + "/ReceivableReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      // FLocCod: "001",
+      //    FLocCod: "001",
       // FYerDsc: "2024-2024",
-      // code: "NASIRTRD",
-      FAccCod : saleType,
-
+      // code: 'NASIRTRD',
+     
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       code: organisation.code,
+      FAccCod:saleType,
       FIntDat: fromInputDate,
-
       FFnlDat: toInputDate,
       FRepTyp: transectionType,
       FSchTxt: searchQuery,
@@ -613,7 +612,7 @@ export default function ReceivableReport() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected ? "white" : fontcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -743,7 +742,7 @@ export default function ReceivableReport() {
       "Credit",
       "Balance",
     ];
-    const columnWidths = [21, 80, 25, 25, 25, 25];
+    const columnWidths = [23, 80, 25, 25, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -752,15 +751,13 @@ export default function ReceivableReport() {
     const pageHeight = doc.internal.pageSize.height;
     const paddingTop = 15;
 
-    // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
-
+      doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
+          doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -782,23 +779,19 @@ export default function ReceivableReport() {
         startX += columnWidths[index]; // Move to the next column
       });
 
-      // Reset font style and size after adding headers
-      doc.setFont(getfontstyle);
-      doc.setFontSize(10);
+    
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
+   const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
       const normalFont = getfontstyle;
       const tableWidth = getTotalTableWidth();
 
-      doc.setFontSize(10);
-
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        const isOddRow = i % 2 !== 0;
         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
         const isTotalRow = i === rows.length - 1;
         let textColor = [0, 0, 0];
@@ -810,12 +803,12 @@ export default function ReceivableReport() {
         }
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "bold");
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
         }
 
-        // Set background color for odd-numbered rows
         if (isOddRow) {
-          doc.setFillColor(240); // Light background color
+          doc.setFillColor(240);
           doc.rect(
             startX,
             startY + (i - startIndex + 2) * rowHeight,
@@ -827,17 +820,14 @@ export default function ReceivableReport() {
 
         doc.setDrawColor(0);
 
-        // For total row - special border handling
         if (isTotalRow) {
           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
           const rowBottomY = rowTopY + rowHeight;
 
-          // Draw double top border
           doc.setLineWidth(0.3);
           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-          // Draw double bottom border
           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
           doc.line(
             startX,
@@ -846,17 +836,15 @@ export default function ReceivableReport() {
             rowBottomY - 0.5
           );
 
-          // Draw single vertical borders
           doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+          doc.line(startX, rowTopY, startX, rowBottomY);
           doc.line(
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
             rowBottomY
-          ); // Right border
+          );
         } else {
-          // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
             startX,
@@ -867,22 +855,23 @@ export default function ReceivableReport() {
         }
 
         row.forEach((cell, cellIndex) => {
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
           const cellX = startX + 2;
 
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
           if (!isTotalRow) {
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
           const cellValue = String(cell);
 
-          if (cellIndex === 12) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+          if (cellIndex === 0) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
@@ -893,13 +882,12 @@ export default function ReceivableReport() {
             cellIndex === 4 ||
             cellIndex === 5
           ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
-              baseline: "middle", // This centers vertically
+              baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
               const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
@@ -908,12 +896,11 @@ export default function ReceivableReport() {
               });
             } else {
               doc.text(cellValue, cellX, cellY, {
-                baseline: "middle", // This centers vertically
+                baseline: "middle",
               });
             }
           }
 
-          // Draw column borders
           if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
             doc.line(
@@ -929,11 +916,11 @@ export default function ReceivableReport() {
         startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Footer section
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
@@ -942,9 +929,9 @@ export default function ReceivableReport() {
       const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -993,8 +980,9 @@ export default function ReceivableReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+     doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 10,
           doc.internal.pageSize.height - 10,
@@ -1007,9 +995,10 @@ export default function ReceivableReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+            doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+     doc.setFont("verdana-regular", "normal");
         addTitle(
           `Receivable Report From ${fromInputDate} To ${toInputDate}`,
           "",
@@ -1023,10 +1012,7 @@ export default function ReceivableReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-        doc.setFontSize(10);
-        doc.setFont(getfontstyle, "300");
-
+     
         let status =
           transectionType === "R"
             ? "RECEIVABLE"
@@ -1039,31 +1025,31 @@ export default function ReceivableReport() {
           ? Companyselectdatavalue.label
           : "ALL";
 
-        // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
+  
+     doc.setFont("verdana", "bold");
+            doc.setFontSize(10); 
+                   doc.text(`A/C :`, labelsX, labelsY + 8.5); // Draw bold label
+     doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(`${accoount}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`A/C :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${accoount}`, labelsX + 10, labelsY + 8.5); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`TYPE :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${status}`, labelsX + 140, labelsY + 8.5); // Draw the value next to the label
+     doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                    doc.text(`Type :`, labelsX + 120, labelsY + 8.5); // Draw bold label
+     doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(`${status}`, labelsX + 135, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`SEARCH :`, labelsX + 120, labelsY + 12.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${search}`, labelsX + 140, labelsY + 12.5); // Draw the value next to the label
+     doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                      doc.text(`Search :`, labelsX + 120, labelsY + 12.5); // Draw bold label
+     doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                      doc.text(`${search}`, labelsX + 140, labelsY + 12.5); // Draw the value next to the label
         }
 
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(12);
-
+       
         startY += searchQuery ? 14 : 10; // Adjust vertical position for the labels
 
         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, searchQuery ? 33 : 29);
@@ -1534,7 +1520,7 @@ export default function ReceivableReport() {
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="3" className="text-center">
+              <td colSpan="6" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -1595,9 +1581,37 @@ export default function ReceivableReport() {
                     color: isNegative ? "red" : fontcolor,
                   }}
                 >
-                  <td className="text-center" style={firstColWidth}>
+                  {/* <td className="text-center" style={firstColWidth}>
+                    {item.code}
+                  </td> */}
+
+<td
+                    className="text-start"
+                    style={{
+                      ...firstColWidth,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      color: "blue",
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      // code temporarily store karo
+                      sessionStorage.setItem(
+                        "CustomerLedgerData",
+                        JSON.stringify({
+                          code: item.code,
+                          fromInputDate: fromInputDate,
+                          toInputDate: toInputDate,
+                        }),
+                      );
+
+                      // fixed URL open karo
+                      window.open("/crystalsol/CustomerLedger", "_blank");
+                    }}
+                  >
                     {item.code}
                   </td>
+
                   <td className="text-start" style={secondColWidth}>
                     {item.Description}
                   </td>
@@ -2425,7 +2439,7 @@ export default function ReceivableReport() {
               }}
             >
               <span className="mobileledger_total2">
-                {tableData.length.toLocaleString()}
+                {formatValue(tableData.length.toLocaleString())}
               </span>
             </div>
             <div
@@ -2442,7 +2456,7 @@ export default function ReceivableReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalOpening}</span>
+              <span className="mobileledger_total">{formatValue(totalOpening)}</span>
             </div>
             <div
               style={{
@@ -2451,7 +2465,7 @@ export default function ReceivableReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalDebit}</span>
+              <span className="mobileledger_total">{formatValue(totalDebit)}</span>
             </div>
             <div
               style={{
@@ -2460,7 +2474,7 @@ export default function ReceivableReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalCredit}</span>
+              <span className="mobileledger_total">{formatValue(totalCredit)}</span>
             </div>
             <div
               style={{
@@ -2469,7 +2483,7 @@ export default function ReceivableReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{closingBalance}</span>
+              <span className="mobileledger_total">{formatValue(closingBalance)}</span>
             </div>
           </div>
           <div
