@@ -632,7 +632,7 @@ export default function ItemStockReport() {
       "Qnty",
       "Amount",
     ];
-    const columnWidths = [40, 95, 22, 15, 30];
+    const columnWidths = [38, 95, 20, 20, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
