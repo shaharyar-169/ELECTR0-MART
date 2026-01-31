@@ -27,7 +27,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Description, Store } from "@mui/icons-material";
 
-export default function ItemPurchaseReport() {
+export default function SparePartsPurchaseReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -413,7 +413,7 @@ export default function ItemPurchaseReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/ItemPurchaseReport.php";
+    const apiUrl = apiLinks + "/SparePartsPurchaseReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -428,9 +428,9 @@ export default function ItemPurchaseReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+    //   code: "NASIRTRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -1079,7 +1079,7 @@ export default function ItemPurchaseReport() {
           startY += 5; // Adjust vertical position for the company title
           doc.setFont("verdana-regular", "normal");
           addTitle(
-            `Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
+            `Spare Parts Purchase Report From ${fromInputDate} To ${toInputDate}`,
             "",
             "",
             pageNumber,
@@ -1213,7 +1213,7 @@ export default function ItemPurchaseReport() {
       handlePagination();
   
       // Save the PDF files
-      doc.save(`ItemPurchaseReport As On ${date}.pdf`);
+      doc.save(`SparePartsPurchaseReport As On ${date}.pdf`);
     };
   
     const handleDownloadCSV = async () => {
@@ -1274,7 +1274,7 @@ export default function ItemPurchaseReport() {
   
       // Add Store List row
       const storeListRow = worksheet.addRow([
-        `Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
+        `Spare Parts Purchase Report From ${fromInputDate} To ${toInputDate}`,
       ]);
       storeListRow.eachCell((cell) => {
         cell.font = fontStoreList;
@@ -1553,7 +1553,7 @@ export default function ItemPurchaseReport() {
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      saveAs(blob, `ItemPurchaseReport As On ${currentdate}.xlsx`);
+      saveAs(blob, `SparePartsPurchaseReport As On ${currentdate}.xlsx`);
     };
 
   const dispatch = useDispatch();
@@ -1915,7 +1915,7 @@ export default function ItemPurchaseReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Item Purchase Report" />
+          <NavComponent textdata="Spare Parts Purchase Report" />
 
           {/* ------------1st row */}
           <div

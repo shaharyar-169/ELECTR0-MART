@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function SerialNoLedgerReport() {
+export default function SparePartsLedger() {
     const navigate = useNavigate();
     const user = getUserData();
     const organisation = getOrganisationData();
@@ -39,14 +39,13 @@ export default function SerialNoLedgerReport() {
 
     const toRef = useRef(null);
     const fromRef = useRef(null);
-
+    const [isItemInitialized, setIsItemInitialized] = useState(false);
     const [saleType, setSaleType] = useState("");
     const [saleType1, setSaleType1] = useState("");
     console.log("saleTypedataset", saleType);
-      const [isItemInitialized, setIsItemInitialized] = useState(false);
     const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
     const [Storeselectdatavalue, setStoreselectdatavalue] = useState("");
-    const [mobileNumber,setmobileNumber] = useState('');
+
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
     const [supplierList, setSupplierList] = useState([]);
@@ -277,9 +276,9 @@ export default function SerialNoLedgerReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input1Ref.current) {
+                if (saleSelectRef1.current) {
                     e.preventDefault();
-                    input1Ref.current.focus();
+                    saleSelectRef1.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -318,7 +317,7 @@ export default function SerialNoLedgerReport() {
             const nextInput = document.getElementById(inputId);
             if (nextInput) {
                 nextInput.focus();
-                nextInput.select();
+                // nextInput.select();
             } else {
                 document.getElementById("submitButton").click();
             }
@@ -333,162 +332,112 @@ export default function SerialNoLedgerReport() {
         }
     };
 
-    function fetchReceivableReport() {
-        const fromDateElement = document.getElementById("fromdatevalidation");
-        const toDateElement = document.getElementById("todatevalidation");
+    function fetchReceivableReport({
+  saleType: saleTypeParam = saleType,
+  fromDate = fromInputDate,
+  toDate = toInputDate,
+  skipValidation = false,
+} = {}) {
 
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+  const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-        let hasError = false;
-        let errorType = "";
+  if (!skipValidation) {
+    let errorType = "";
 
-        switch (true) {
-          case !isDoubleClickOpen && !saleType:
-                errorType = "saleType";
-                break;
-            case !fromInputDate:
-                errorType = "fromDate";
-                break;
-            case !toInputDate:
-                errorType = "toDate";
-                break;
-            default:
-                hasError = false;
-                break;
-        }
+    switch (true) {
+      case !saleTypeParam:
+        errorType = "saleType";
+        break;
+      case !fromDate:
+        errorType = "fromDate";
+        break;
+      case !toDate:
+        errorType = "toDate";
+        break;
+      case !dateRegex.test(fromDate):
+        errorType = "fromDateInvalid";
+        break;
+      case !dateRegex.test(toDate):
+        errorType = "toDateInvalid";
+        break;
+      default:
+        break;
+    }
 
-        if (!dateRegex.test(fromInputDate)) {
-            errorType = "fromDateInvalid";
-        } else if (!dateRegex.test(toInputDate)) {
-            errorType = "toDateInvalid";
-        } else {
-            const formattedFromInput = fromInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [fromDay, fromMonth, fromYear] = formattedFromInput
-                .split("-")
-                .map(Number);
-            const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+    if (errorType) {
+      switch (errorType) {
+        case "saleType":
+          toast.error("Please select a Account Code");
+          return;
+        case "fromDate":
+          toast.error("From date is required");
+          return;
+        case "toDate":
+          toast.error("To date is required");
+          return;
+        case "fromDateInvalid":
+          toast.error("From date must be dd-mm-yyyy");
+          return;
+        case "toDateInvalid":
+          toast.error("To date must be dd-mm-yyyy");
+          return;
+        default:
+          return;
+      }
+    }
 
-            const formattedToInput = toInputDate.replace(
-                /^(\d{2})(\d{2})(\d{4})$/,
-                "$1-$2-$3"
-            );
-            const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-            const enteredToDate = new Date(toYear, toMonth - 1, toDay);
+    const [fd, fm, fy] = fromDate.split("-").map(Number);
+    const [td, tm, ty] = toDate.split("-").map(Number);
 
-            if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-                errorType = "fromDateBeforeGlobal";
-            } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-                errorType = "fromDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-                errorType = "toDateAfterGlobal";
-            } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-                errorType = "toDateBeforeGlobal";
-            } else if (enteredToDate < enteredFromDate) {
-                errorType = "toDateBeforeFromDate";
-            }
-        }
+    const enteredFrom = new Date(fy, fm - 1, fd);
+    const enteredTo = new Date(ty, tm - 1, td);
 
-        switch (errorType) {
-            case "saleType":
-                toast.error("Please select a Account Code");
-                return;
+    if (enteredTo < enteredFrom) {
+      toast.error("To date must be after from date");
+      return;
+    }
+  }
 
-            case "fromDate":
-                toast.error("From date is required");
-                return;
-            case "toDate":
-                toast.error("To date is required");
-                return;
-            case "fromDateInvalid":
-                toast.error("From date must be in the format dd-mm-yyyy");
-                return;
-            case "toDateInvalid":
-                toast.error("To date must be in the format dd-mm-yyyy");
-                return;
-            case "fromDateBeforeGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "fromDateAfterGlobal":
-                toast.error(
-                    `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateAfterGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeGlobal":
-                toast.error(
-                    `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-                );
-                return;
-            case "toDateBeforeFromDate":
-                toast.error("To date must be after from date");
-                return;
+  // 🚀 API CALL
+  const apiUrl = apiLinks + "/ItemLedger.php";
+  setIsLoading(true);
 
-            default:
-                break;
-        }
-
-        document.getElementById(
-            "fromdatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-        document.getElementById(
-            "todatevalidation"
-        ).style.border = `1px solid ${fontcolor}`;
-
-        const apiUrl = apiLinks + "/SerialNoLedger.php";
-        setIsLoading(true);
-        const formData = new URLSearchParams({
-            FIntDat: fromInputDate,
-            FFnlDat: toInputDate,
-            FTrnTyp: transectionType,
-            FStrCod: saleType1,
-            FItmSer: mobileNumber,
-            code: organisation.code,
+  const formData = new URLSearchParams({
+    FIntDat: fromDate,
+    FFnlDat: toDate,
+    FTrnTyp: transectionType,
+    FItmCod: saleTypeParam,
+    FStrCod: saleType1,
+     code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getYearDescription,
+    // code: "IZONETRD",
+    // FLocCod: "001",
+    // FYerDsc: "2025-2025",
+  }).toString();
 
-            // code: 'USMANMTR',
-            // FLocCod: '002',
-            // FYerDsc: '2025-2025',
+  axios
+    .post(apiUrl, formData)
+    .then((response) => {
+      setIsLoading(false);
 
-        }).toString();
+      settotalpurchase(response.data["Total Purchase "]);
+      settotalpurchaseReturn(response.data["Total Pur Return "]);
+      settotalReceive(response.data["Total Receive "]);
+      settotalissue(response.data["Total Issue "]);
+      settotalsale(response.data["Total Sale "]);
+      settotalsaleReturn(response.data["Total Sale Return"]);
+      settotalclosingbalance(response.data["Closing Balance"]);
 
-        axios
-            .post(apiUrl, formData)
-            .then((response) => {
-                setIsLoading(false);
-                // Update total amount and quantity
-                settotalpurchase(response.data["Total Purchase "]);
-                settotalpurchaseReturn(response.data["Total Pur Return "]);
-                settotalReceive(response.data["Total Receive "]);
-                settotalissue(response.data["Total Issue "]);
-                settotalsale(response.data["Total Sale "]);
-                settotalsaleReturn(response.data["Total Sale Return"]);
-                settotalclosingbalance(response.data["Closing Balance"]);
-
-                if (response.data && Array.isArray(response.data.Detail)) {
-                    setTableData(response.data.Detail);
-                } else {
-                    console.warn(
-                        "Response data structure is not as expected:",
-                        response.data
-                    );
-                    setTableData([]);
-                }
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                setIsLoading(false);
-            });
-    }
+      setTableData(
+        Array.isArray(response.data.Detail) ? response.data.Detail : []
+      );
+    })
+    .catch((error) => {
+      console.error(error);
+      setIsLoading(false);
+    });
+}
 
     useEffect(() => {
         const hasComponentMountedPreviously =
@@ -507,35 +456,111 @@ export default function SerialNoLedgerReport() {
         }
     }, []);
 
-   useEffect(() => {
-   const storedData = sessionStorage.getItem("SerialLedgerData");
+   
+  useEffect(() => {
+  const storedData = sessionStorage.getItem("SparePartsLedgerData");
+
+  let toDate = new Date(); // default today
+
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+
+    if (parsedData.toInputDate) {
+      const parts = parsedData.toInputDate.split("-"); // ["12","08","2024"]
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // JS months 0-11
+      const year = parseInt(parts[2], 10);
+
+      toDate = new Date(year, month, day);
+    }
+  }
+
+  // ✅ Set TO date
+  setSelectedToDate(toDate);
+  settoInputDate(formatDate(toDate));
+
+  // ✅ Set FROM date = first day of same month
+  const firstDateOfMonth = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+  setSelectedfromDate(firstDateOfMonth);
+  setfromInputDate(formatDate(firstDateOfMonth));
+}, []);
+
  
-   let toDate = new Date(); // default today
- 
-   if (storedData) {
-     const parsedData = JSON.parse(storedData);
- 
-     if (parsedData.toInputDate) {
-       const parts = parsedData.toInputDate.split("-"); // ["12","08","2024"]
-       const day = parseInt(parts[0], 10);
-       const month = parseInt(parts[1], 10) - 1; // JS months 0-11
-       const year = parseInt(parts[2], 10);
- 
-       toDate = new Date(year, month, day);
-     }
-   }
- 
-   // ✅ Set TO date
-   setSelectedToDate(toDate);
-   settoInputDate(formatDate(toDate));
- 
-   // ✅ Set FROM date = first day of same month
-   const firstDateOfMonth = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
-   setSelectedfromDate(firstDateOfMonth);
-   setfromInputDate(formatDate(firstDateOfMonth));
- }, []);
- 
+    useEffect(() => {
+        const apiUrl = apiLinks + "/GetSpareParts.php";
+        const formData = new URLSearchParams({
+            FLocCod: getLocationNumber,
+            code: organisation.code,
+        }).toString();
+        axios
+            .post(apiUrl, formData)
+            .then((response) => {
+                setSupplierList(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    }, []);
+
   
+    const options = supplierList.map((item) => ({
+        value: item.titmcod,
+        label: `${item.titmcod}-${item.titmdsc.trim()}`,
+    }));
+   
+
+const [isCodeReady, setIsCodeReady] = useState(false);
+const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
+
+
+useEffect(() => {
+  if (options.length === 0) return;
+  if (isItemInitialized) return;
+
+  const storedData = sessionStorage.getItem("SparePartsLedgerData");
+  let selectedOption = null;
+
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+    const clickedCode = parsedData.code?.trim();
+ if (parsedData.code) {
+    setIsDoubleClickOpen(true); // ✅ ADD
+  }
+    selectedOption = options.find(
+      (opt) => opt.value?.trim() === clickedCode
+    );
+
+    sessionStorage.removeItem("SparePartsLedgerData");
+  }
+
+  if (!selectedOption) {
+    selectedOption = options[0];
+  }
+
+  if (selectedOption) {
+    setSaleType(selectedOption.value);
+
+    const description =
+      selectedOption.label.split("-").slice(1).join("-").trim();
+
+    setCompanyselectdatavalue({
+      value: selectedOption.value,
+      label: description,
+    });
+
+    setIsCodeReady(true); // ✅ IMPORTANT
+  }
+
+  setIsItemInitialized(true);
+}, [options, isItemInitialized]);
+useEffect(() => {
+  // 🔥 Dono cheezain ready hon
+  if (isDoubleClickOpen && isCodeReady) {
+    fetchReceivableReport();
+  }
+}, [isDoubleClickOpen, isCodeReady]);
+
+
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveStore.php";
         const formData = new URLSearchParams({
@@ -551,52 +576,11 @@ export default function SerialNoLedgerReport() {
                 console.error("Error fetching data:", error);
             });
     }, []);
+   
     const storeoption = storeList.map((item) => ({
         value: item.tstrcod,
         label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
     }));
-
-    const [isCodeReady, setIsCodeReady] = useState(false);
-    const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
-    
-    
-   useEffect(() => {
-  if (isItemInitialized) return;
-
-  const storedData = sessionStorage.getItem("SerialLedgerData");
-
-  if (storedData) {
-    const parsedData = JSON.parse(storedData);
-
-    if (parsedData.SerNo) {
-      // ✅ Double click open
-      setIsDoubleClickOpen(true);
-
-      // ✅ Directly set Serial No (NO FIND)
-      setmobileNumber(parsedData.SerNo);
-
-      // ✅ Mark ready for API
-      setIsCodeReady(true);
-    }
-
-    // cleanup
-    sessionStorage.removeItem("SerialLedgerData");
-  }
-
-  // ✅ Mark initialized so it runs only once
-  setIsItemInitialized(true);
-}, [isItemInitialized]);
-
-    
-    useEffect(() => {
-      // 🔥 Dono cheezain ready hon
-      if (isDoubleClickOpen && isCodeReady) {
-        fetchReceivableReport();
-      }
-    }, [isDoubleClickOpen, isCodeReady]);
-
-
-
     const DropdownOption = (props) => {
         return (
             <components.Option {...props}>
@@ -615,12 +599,13 @@ export default function SerialNoLedgerReport() {
             </components.Option>
         );
     };
+
     const customStyles1 = (hasError) => ({
         control: (base, state) => ({
             ...base,
             height: "24px",
             minHeight: "unset",
-            width: 500,
+            width: 490,
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             backgroundColor: getcolor,
@@ -779,6 +764,7 @@ export default function SerialNoLedgerReport() {
             },
         }),
     });
+
     const customStyles2 = (hasError) => ({
         control: (base, state) => ({
             ...base,
@@ -943,473 +929,442 @@ export default function SerialNoLedgerReport() {
             },
         }),
     });
+
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
         settransectionType(selectedTransactionType);
     };
- const handleMobilenumberInputChange = (e) => {
-        let value = e.target.value;
-
-        // Allow only numbers
-        value = value.replace(/\D/g, "");
-
-        // Limit to 11 digits
-        if (value.length > 12) {
-            value = value.slice(0, 11);
-        }
-
-        setmobileNumber(value);
-    };
- const handleMobilePress = (e, nextInputRef) => {
-        const fromDateElement = document.getElementById("phone");
-        const mobileNumber = e.target.value;
-        if (e.key === "Enter") {
-            e.preventDefault();
-            // Mobile number validation
-            // if (mobileNumber.length !== 11 || !mobileNumber.startsWith("03")) {
-            //     toast.error("Invalid Mobile Number");
-            //     fromDateElement.style.border = "2px solid red";
-            //     return;
-            // }
-            fromDateElement.style.border = "1px solid black";
-            // Move focus to next input if validation passes
-            if (nextInputRef.current) {
-                nextInputRef.current.focus();
-                nextInputRef.current.select();
-            }
-        }
-    };
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-    const exportPDFHandler = () => {
-        const globalfontsize = 12;
-        console.log("gobal font data", globalfontsize);
-
-        // Create a new jsPDF instance with landscape orientation
-        const doc = new jsPDF({ orientation: "landscape" });
-
-        // Define table data (rows)
-        const rows = tableData.map((item) => [
-            item.Date,
-            item["Trn#"],
-            item.Type,
-            item.Str,
-            item.Description,
-    formatValue(item.Purchase)        ,
-     formatValue(item["Pur-Ret"])         ,
-       formatValue(item.Receive)       ,
-       formatValue(item.Issue)       ,
-       formatValue(item.Sale)       ,
-        formatValue(item["Sale-Ret"])      ,
-        formatValue(item.Bal)      ,
-        ]);
-
-        // Add summary row to the table
-
-        rows.push([
-            "",
-            "",
-            "",
-            "",
-            "Total",
-            String(formatValue(totalpurchase)),
-            String(formatValue(totalpurchaseReturn)),
-            String(formatValue(totalReceive)),
-            String(formatValue(totalissue)),
-            String(formatValue(totalsale)),
-            String(formatValue(totalsaleReturn)),
-            String(formatValue(totalclosingbalance)),
-        ]);
-
-        // Define table column headers and individual column widths
-        const headers = [
-            "Date",
-            "Trn#",
-            "Type",
-            "Str",
-            "Description",
-            "Pur",
-            "Pur-Ret",
-            "Receive",
-            "Issue",
-            "Sale",
-            "Sale-Ret",
-            "Bal",
-        ];
-        const columnWidths = [22, 15, 12, 12, 100, 18, 18, 18, 18, 18, 18, 18];
-
-        // Calculate total table width
-        const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-
-        // Define page height and padding
-        const pageHeight = doc.internal.pageSize.height;
-        const paddingTop = 15;
-
-        // Set font properties for the table
-       doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-
-        // Function to add table headers
-        const addTableHeaders = (startX, startY) => {
-            // Set font style and size for headers
-             doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-
-            headers.forEach((header, index) => {
-                const cellWidth = columnWidths[index];
-                const cellHeight = 6; // Height of the header row
-                const cellX = startX + cellWidth / 2; // Center the text horizontally
-                const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-                // Draw the grey background for the header
-                doc.setFillColor(200, 200, 200); // Grey color
-                doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-                // Draw the outer border
-                doc.setLineWidth(0.2); // Set the width of the outer border
-                doc.rect(startX, startY, cellWidth, cellHeight);
-
-                // Set text alignment to center
-                doc.setTextColor(0); // Set text color to black
-                doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-                startX += columnWidths[index]; // Move to the next column
-            });
-
-        };
-
-        const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5;
-      const fontSize = 10;
-      const boldFont = 400;
-      const normalFont = getfontstyle;
-      const tableWidth = getTotalTableWidth();
-
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0;
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-        const isTotalRow = i === rows.length - 1;
-        let textColor = [0, 0, 0];
-        let fontName = normalFont;
-
-        if (isRedRow) {
-          textColor = [255, 0, 0];
-          fontName = boldFont;
-        }
-
-        if (isTotalRow) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-        }
-
-        if (isOddRow) {
-          doc.setFillColor(240);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F"
-          );
-        }
-
-        doc.setDrawColor(0);
-
-        if (isTotalRow) {
-          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-          const rowBottomY = rowTopY + rowHeight;
-
-          doc.setLineWidth(0.3);
-          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
-
-          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-          doc.line(
-            startX,
-            rowBottomY - 0.5,
-            startX + tableWidth,
-            rowBottomY - 0.5
-          );
-
-          doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY);
-          doc.line(
-            startX + tableWidth,
-            rowTopY,
-            startX + tableWidth,
-            rowBottomY
-          );
-        } else {
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight
-          );
-        }
-
-        row.forEach((cell, cellIndex) => {
-          // ⭐ NEW FIX — Perfect vertical centering
-          const cellY =
-            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
-
-          const cellX = startX + 2;
-
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-          if (!isTotalRow) {
-            doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-          }
-
-          const cellValue = String(cell);
-
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 || cellIndex === 3 ) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7 ||
-             cellIndex === 8 ||
-              cellIndex === 9 ||
-               cellIndex === 10 ||
-            cellIndex === 11
-          ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = startX + columnWidths[0] / 2;
-              doc.text("", totalLabelX, cellY, {
-                align: "center",
-                baseline: "middle",
-              });
-            } else {
-              doc.text(cellValue, cellX, cellY, {
-                baseline: "middle",
-              });
-            }
-          }
-
-          if (cellIndex < row.length - 1) {
-            doc.setLineWidth(0.2);
-            doc.line(
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 2) * rowHeight,
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
-
-        startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
-        if (isTotalRow) {
+    const exportPDFHandler = () => { 
+           const globalfontsize = 12;
+           console.log("gobal font data", globalfontsize);
+   
+           // Create a new jsPDF instance with landscape orientation
+           const doc = new jsPDF({ orientation: "landscape" });
+   
+           // Define table data (rows)
+           const rows = tableData.map((item) => [
+               item.Date,
+               item["Trn#"],
+               item.Type,
+               item.Str,
+               item.Description,
+       formatValue(item.Purchase)        ,
+        formatValue(item["Pur-Ret"])         ,
+          formatValue(item.Receive)       ,
+          formatValue(item.Issue)       ,
+          formatValue(item.Sale)       ,
+           formatValue(item["Sale-Ret"])      ,
+           formatValue(item.Bal)      ,
+           ]);
+   
+           // Add summary row to the table
+   
+           rows.push([
+               "",
+               "",
+               "",
+               "",
+               "Total",
+               String(formatValue(totalpurchase)),
+               String(formatValue(totalpurchaseReturn)),
+               String(formatValue(totalReceive)),
+               String(formatValue(totalissue)),
+               String(formatValue(totalsale)),
+               String(formatValue(totalsaleReturn)),
+               String(formatValue(totalclosingbalance)),
+           ]);
+   
+           // Define table column headers and individual column widths
+           const headers = [
+               "Date",
+               "Trn#",
+               "Type",
+               "Str",
+               "Description",
+               "Pur",
+               "Pur-Ret",
+               "Receive",
+               "Issue",
+               "Sale",
+               "Sale-Ret",
+               "Bal",
+           ];
+           const columnWidths = [22, 15, 12, 12, 100, 18, 18, 18, 18, 18, 18, 18];
+   
+           // Calculate total table width
+           const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+   
+           // Define page height and padding
+           const pageHeight = doc.internal.pageSize.height;
+           const paddingTop = 15;
+   
+           // Set font properties for the table
           doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-        }
-      }
-
-      const lineWidth = tableWidth;
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-      const lineY = pageHeight - 15;
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 11;
-      const headingX = lineX + 2;
-      const headingY = lineY + 5;
-      doc.setFont("verdana-regular", "normal");
-      doc.setFontSize(10);
-      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-    };
-
-        // Function to calculate total table width
-        const getTotalTableWidth = () => {
-            let totalWidth = 0;
-            columnWidths.forEach((width) => (totalWidth += width));
-            return totalWidth;
-        };
-
-        // Function to add a new page and reset startY
-        const addNewPage = (startY) => {
-            doc.addPage();
-            return paddingTop; // Set startY for each new page
-        };
-
-        // Define the number of rows per page
-        const rowsPerPage = 31; // Adjust this value based on your requirements
-
-        // Function to handle pagination
-        const handlePagination = () => {
-            // Define the addTitle function
-            const addTitle = (
-                title,
-                date,
-                time,
-                pageNumber,
-                startY,
-                titleFontSize = 18,
-                pageNumberFontSize = 10
-            ) => {
-                doc.setFontSize(titleFontSize); // Set the font size for the title
-                doc.text(title, doc.internal.pageSize.width / 2, startY, {
-                    align: "center",
-                });
-
-                // Calculate the x-coordinate for the right corner
-                const rightX = doc.internal.pageSize.width - 10;
-
-                // if (date) {
-                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                //     if (time) {
-                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-                //     } else {
-                //         doc.text(date, rightX - 10, startY, { align: "right" });
-                //     }
-                // }
-
-                // Add page numbering
- doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                            doc.text(
-                    `Page ${pageNumber}`,
-                    rightX - 10,
-                    doc.internal.pageSize.height - 10,
-                    { align: "right" }
-                );
-            };
-
-            let currentPageIndex = 0;
-            let startY = paddingTop; // Initialize startY
-            let pageNumber = 1; // Initialize page number
-
-            while (currentPageIndex * rowsPerPage < rows.length) {
-               doc.setFont("Times New Roman", "normal");
-                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-                startY += 5; // Adjust vertical position for the company title
- doc.setFont("verdana-regular", "normal");
-                        addTitle(
-                    `Serial No Ledger From: ${fromInputDate} To: ${toInputDate}`,
-                    "",
-                    "",
-                    pageNumber,
-                    startY,
-                    12
-                ); // Render sale report title with decreased font size, provide the time, and page number
-                startY += -5;
-
-                const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-                const labelsY = startY + 4; // Position the labels below the titles and above the table
-
-                // Set font size and weight for the labels
-                doc.setFontSize(12);
-                doc.setFont(getfontstyle, "300");
-
-                let status =
-                    transectionType === "A"
-                        ? "ALL"
-                        : transectionType === "CRV"
-                            ? "Cash Receive Voucher"
-                            : transectionType === "CPV"
-                                ? "Cash Payment Voucher"
-                                : transectionType === "BRV"
-                                    ? "Bank Receive Voucher"
-                                    : transectionType === "BPV"
-                                        ? "Bank Payment Voucher"
-                                        : transectionType === "JRV"
-                                            ? "Journal Voucher"
-                                            : transectionType === "INV"
-                                                ? "Item Sale"
-                                                : transectionType === "SRN"
-                                                    ? "Sale Return"
-                                                    : transectionType === "BIL"
-                                                        ? "Purchase"
-                                                        : transectionType === "PRN"
-                                                            ? "Purchase Return"
-                                                            : transectionType === "ISS"
-                                                                ? "Issue"
-                                                                : transectionType === "REC"
-                                                                    ? "Received"
-                                                                    : transectionType === "SLY"
-                                                                        ? "Salary"
-                                                                        : "ALL";
-
-                let search = mobileNumber
-                    ? mobileNumber
-                    : "";
-
-            
-
- doc.setFont("verdana", "bold");
-            doc.setFontSize(10);  
-                          doc.text(`Serial No :`, labelsX, labelsY + 8.5); // Draw bold label
- doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                            doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
- doc.setFont("verdana", "bold");
-            doc.setFontSize(10);
-                            doc.text(`Type :`, labelsX + 200, labelsY + 8.5); // Draw bold label
- doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                            doc.text(`${status}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
-
-              
-
-                startY += 10; // Adjust vertical position for the labels
-
-                addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
-                const startIndex = currentPageIndex * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-                startY = addTableRows(
-                    (doc.internal.pageSize.width - totalWidth) / 2,
-                    startY,
-                    startIndex,
-                    endIndex
-                );
-                if (endIndex < rows.length) {
-                    startY = addNewPage(startY); // Add new page and update startY
-                    pageNumber++; // Increment page number
-                }
-                currentPageIndex++;
-            }
-        };
-
-        const getCurrentDate = () => {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, "0");
-            const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-            const yyyy = today.getFullYear();
-            return dd + "/" + mm + "/" + yyyy;
-        };
-
-        // Function to get current time in the format HH:MM:SS
-        const getCurrentTime = () => {
-            const today = new Date();
-            const hh = String(today.getHours()).padStart(2, "0");
-            const mm = String(today.getMinutes()).padStart(2, "0");
-            const ss = String(today.getSeconds()).padStart(2, "0");
-            return hh + ":" + mm + ":" + ss;
-        };
-
-        const date = getCurrentDate(); // Get current date
-        const time = getCurrentTime(); // Get current time
-
-        // Call function to handle pagination
-        handlePagination();
-
-        // Save the PDF files
-        doc.save(`SerialNoLedger Form ${fromInputDate} To ${toInputDate}.pdf`);
-    };
+             doc.setFontSize(10);
+   
+           // Function to add table headers
+           const addTableHeaders = (startX, startY) => {
+               // Set font style and size for headers
+                doc.setFont("verdana", "bold");
+             doc.setFontSize(10);
+   
+               headers.forEach((header, index) => {
+                   const cellWidth = columnWidths[index];
+                   const cellHeight = 6; // Height of the header row
+                   const cellX = startX + cellWidth / 2; // Center the text horizontally
+                   const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+   
+                   // Draw the grey background for the header
+                   doc.setFillColor(200, 200, 200); // Grey color
+                   doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+   
+                   // Draw the outer border
+                   doc.setLineWidth(0.2); // Set the width of the outer border
+                   doc.rect(startX, startY, cellWidth, cellHeight);
+   
+                   // Set text alignment to center
+                   doc.setTextColor(0); // Set text color to black
+                   doc.text(header, cellX, cellY, { align: "center" }); // Center the text
+                   startX += columnWidths[index]; // Move to the next column
+               });
+   
+           };
+   
+           const addTableRows = (startX, startY, startIndex, endIndex) => {
+         const rowHeight = 5;
+         const fontSize = 10;
+         const boldFont = 400;
+         const normalFont = getfontstyle;
+         const tableWidth = getTotalTableWidth();
+   
+         for (let i = startIndex; i < endIndex; i++) {
+           const row = rows[i];
+           const isOddRow = i % 2 !== 0;
+           const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+           const isTotalRow = i === rows.length - 1;
+           let textColor = [0, 0, 0];
+           let fontName = normalFont;
+   
+           if (isRedRow) {
+             textColor = [255, 0, 0];
+             fontName = boldFont;
+           }
+   
+           if (isTotalRow) {
+             doc.setFont("verdana", "bold");
+             doc.setFontSize(10);
+           }
+   
+           if (isOddRow) {
+             doc.setFillColor(240);
+             doc.rect(
+               startX,
+               startY + (i - startIndex + 2) * rowHeight,
+               tableWidth,
+               rowHeight,
+               "F"
+             );
+           }
+   
+           doc.setDrawColor(0);
+   
+           if (isTotalRow) {
+             const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+             const rowBottomY = rowTopY + rowHeight;
+   
+             doc.setLineWidth(0.3);
+             doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+             doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+   
+             doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+             doc.line(
+               startX,
+               rowBottomY - 0.5,
+               startX + tableWidth,
+               rowBottomY - 0.5
+             );
+   
+             doc.setLineWidth(0.2);
+             doc.line(startX, rowTopY, startX, rowBottomY);
+             doc.line(
+               startX + tableWidth,
+               rowTopY,
+               startX + tableWidth,
+               rowBottomY
+             );
+           } else {
+             doc.setLineWidth(0.2);
+             doc.rect(
+               startX,
+               startY + (i - startIndex + 2) * rowHeight,
+               tableWidth,
+               rowHeight
+             );
+           }
+   
+           row.forEach((cell, cellIndex) => {
+             // ⭐ NEW FIX — Perfect vertical centering
+             const cellY =
+               startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+   
+             const cellX = startX + 2;
+   
+             doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+   
+             if (!isTotalRow) {
+               doc.setFont("verdana-regular", "normal");
+               doc.setFontSize(10);
+             }
+   
+             const cellValue = String(cell);
+   
+             if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 || cellIndex === 3 ) {
+               const rightAlignX = startX + columnWidths[cellIndex] / 2;
+               doc.text(cellValue, rightAlignX, cellY, {
+                 align: "center",
+                 baseline: "middle",
+               });
+             } else if (
+               cellIndex === 5 ||
+               cellIndex === 6 ||
+               cellIndex === 7 ||
+                cellIndex === 8 ||
+                 cellIndex === 9 ||
+                  cellIndex === 10 ||
+               cellIndex === 11
+             ) {
+               const rightAlignX = startX + columnWidths[cellIndex] - 2;
+               doc.text(cellValue, rightAlignX, cellY, {
+                 align: "right",
+                 baseline: "middle",
+               });
+             } else {
+               if (isTotalRow && cellIndex === 0 && cell === "") {
+                 const totalLabelX = startX + columnWidths[0] / 2;
+                 doc.text("", totalLabelX, cellY, {
+                   align: "center",
+                   baseline: "middle",
+                 });
+               } else {
+                 doc.text(cellValue, cellX, cellY, {
+                   baseline: "middle",
+                 });
+               }
+             }
+   
+             if (cellIndex < row.length - 1) {
+               doc.setLineWidth(0.2);
+               doc.line(
+                 startX + columnWidths[cellIndex],
+                 startY + (i - startIndex + 2) * rowHeight,
+                 startX + columnWidths[cellIndex],
+                 startY + (i - startIndex + 3) * rowHeight
+               );
+               startX += columnWidths[cellIndex];
+             }
+           });
+   
+           startX = (doc.internal.pageSize.width - tableWidth) / 2;
+   
+           if (isTotalRow) {
+             doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+           }
+         }
+   
+         const lineWidth = tableWidth;
+         const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+         const lineY = pageHeight - 15;
+         doc.setLineWidth(0.3);
+         doc.line(lineX, lineY, lineX + lineWidth, lineY);
+         const headingFontSize = 11;
+         const headingX = lineX + 2;
+         const headingY = lineY + 5;
+         doc.setFont("verdana-regular", "normal");
+         doc.setFontSize(10);
+         doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+       };
+   
+           // Function to calculate total table width
+           const getTotalTableWidth = () => {
+               let totalWidth = 0;
+               columnWidths.forEach((width) => (totalWidth += width));
+               return totalWidth;
+           };
+   
+           // Function to add a new page and reset startY
+           const addNewPage = (startY) => {
+               doc.addPage();
+               return paddingTop; // Set startY for each new page
+           };
+   
+           // Define the number of rows per page
+           const rowsPerPage = 31; // Adjust this value based on your requirements
+   
+           // Function to handle pagination
+           const handlePagination = () => {
+               // Define the addTitle function
+               const addTitle = (
+                   title,
+                   date,
+                   time,
+                   pageNumber,
+                   startY,
+                   titleFontSize = 18,
+                   pageNumberFontSize = 10
+               ) => {
+                   doc.setFontSize(titleFontSize); // Set the font size for the title
+                   doc.text(title, doc.internal.pageSize.width / 2, startY, {
+                       align: "center",
+                   });
+   
+                   // Calculate the x-coordinate for the right corner
+                   const rightX = doc.internal.pageSize.width - 10;
+   
+                   // if (date) {
+                   //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+                   //     if (time) {
+                   //         doc.text(date + " " + time, rightX, startY, { align: "right" });
+                   //     } else {
+                   //         doc.text(date, rightX - 10, startY, { align: "right" });
+                   //     }
+                   // }
+   
+                   // Add page numbering
+doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+                                doc.text(
+                       `Page ${pageNumber}`,
+                       rightX - 10,
+                       doc.internal.pageSize.height - 10,
+                       { align: "right" }
+                   );
+               };
+   
+               let currentPageIndex = 0;
+               let startY = paddingTop; // Initialize startY
+               let pageNumber = 1; // Initialize page number
+   
+               while (currentPageIndex * rowsPerPage < rows.length) {
+                  doc.setFont("Times New Roman", "normal");
+                   addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+                   startY += 5; // Adjust vertical position for the company title
+    doc.setFont("verdana-regular", "normal");
+                           addTitle(
+                       `Spare Parts Ledger From: ${fromInputDate} To: ${toInputDate}`,
+                       "",
+                       "",
+                       pageNumber,
+                       startY,
+                       12
+                   ); // Render sale report title with decreased font size, provide the time, and page number
+                   startY += -5;
+   
+                   const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+                   const labelsY = startY + 4; // Position the labels below the titles and above the table
+   
+                   // Set font size and weight for the labels
+                   doc.setFontSize(12);
+                   doc.setFont(getfontstyle, "300");
+   
+                   let status =
+                       transectionType === "A"
+                           ? "ALL"
+                           : transectionType === "CRV"
+                               ? "Cash Receive Voucher"
+                               : transectionType === "CPV"
+                                   ? "Cash Payment Voucher"
+                                   : transectionType === "BRV"
+                                       ? "Bank Receive Voucher"
+                                       : transectionType === "BPV"
+                                           ? "Bank Payment Voucher"
+                                           : transectionType === "JRV"
+                                               ? "Journal Voucher"
+                                               : transectionType === "INV"
+                                                   ? "Item Sale"
+                                                   : transectionType === "SRN"
+                                                       ? "Sale Return"
+                                                       : transectionType === "BIL"
+                                                           ? "Purchase"
+                                                           : transectionType === "PRN"
+                                                               ? "Purchase Return"
+                                                               : transectionType === "ISS"
+                                                                   ? "Issue"
+                                                                   : transectionType === "REC"
+                                                                       ? "Received"
+                                                                       : transectionType === "SLY"
+                                                                           ? "Salary"
+                                                                           : "ALL";
+   
+                   let search = Companyselectdatavalue.label
+                       ? Companyselectdatavalue.label
+                       : "ALL";
+   
+               
+   
+    doc.setFont("verdana", "bold");
+               doc.setFontSize(10);  
+                             doc.text(`Account :`, labelsX, labelsY + 8.5); // Draw bold label
+    doc.setFont("verdana-regular", "normal");
+               doc.setFontSize(10);
+                               doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+   
+    doc.setFont("verdana", "bold");
+               doc.setFontSize(10);
+                               doc.text(`Type :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+    doc.setFont("verdana-regular", "normal");
+               doc.setFontSize(10);
+                               doc.text(`${status}`, labelsX + 215, labelsY + 8.5); // Draw the value next to the label
+   
+                 
+   
+                   startY += 10; // Adjust vertical position for the labels
+   
+                   addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+                   const startIndex = currentPageIndex * rowsPerPage;
+                   const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+                   startY = addTableRows(
+                       (doc.internal.pageSize.width - totalWidth) / 2,
+                       startY,
+                       startIndex,
+                       endIndex
+                   );
+                   if (endIndex < rows.length) {
+                       startY = addNewPage(startY); // Add new page and update startY
+                       pageNumber++; // Increment page number
+                   }
+                   currentPageIndex++;
+               }
+           };
+   
+           const getCurrentDate = () => {
+               const today = new Date();
+               const dd = String(today.getDate()).padStart(2, "0");
+               const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+               const yyyy = today.getFullYear();
+               return dd + "/" + mm + "/" + yyyy;
+           };
+   
+           // Function to get current time in the format HH:MM:SS
+           const getCurrentTime = () => {
+               const today = new Date();
+               const hh = String(today.getHours()).padStart(2, "0");
+               const mm = String(today.getMinutes()).padStart(2, "0");
+               const ss = String(today.getSeconds()).padStart(2, "0");
+               return hh + ":" + mm + ":" + ss;
+           };
+   
+           const date = getCurrentDate(); // Get current date
+           const time = getCurrentTime(); // Get current time
+   
+           // Call function to handle pagination
+           handlePagination();
+   
+           // Save the PDF files
+           doc.save(`SparePartsLedger Form ${fromInputDate} To ${toInputDate}.pdf`);
+       };
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -1472,7 +1427,7 @@ export default function SerialNoLedgerReport() {
         );
 
         // Add Store List row
-        const storeListRow = worksheet.addRow([`Serial No Ledger From ${fromInputDate} To ${toInputDate}`]);
+        const storeListRow = worksheet.addRow([`Spare Parts Ledger From ${fromInputDate} To ${toInputDate}`]);
         storeListRow.eachCell((cell) => {
             cell.font = fontStoreList;
             cell.alignment = { horizontal: "center" };
@@ -1518,21 +1473,16 @@ export default function SerialNoLedgerReport() {
             typestatus = "ALL"; // Default value
         }
 
-   let search = mobileNumber
-                    ? mobileNumber
-                    : "";
+        let Accountselect = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+
         let typesearch = searchQuery || "";
 
         // Apply styling for the status row
         const typeAndStoreRow2 = worksheet.addRow(
-            ["Serial No :", search, "", "", "", "", "", "", "Type :", typestatus]
+            ["Account :", Accountselect, "", "", "", "", "", "", "Type :", typestatus]
         );
 
-        const typeAndStoreRow3 = worksheet.addRow(
-            searchQuery
-                ? ["", "", "", "", "", "", "", "", "Search :", typesearch]
-                : [""]
-        );
+     
 
         // Merge cells for Accountselect (columns B to D)
         worksheet.mergeCells(`B${typeAndStoreRow2.number}:E${typeAndStoreRow2.number}`);
@@ -1550,14 +1500,6 @@ export default function SerialNoLedgerReport() {
             };
         });
 
-        typeAndStoreRow3.eachCell((cell, colIndex) => {
-            cell.font = {
-                name: "CustomFont" || "CustomFont",
-                size: 10,
-                bold: [9].includes(colIndex),
-            };
-            cell.alignment = { horizontal: "left", vertical: "middle" };
-        });
 
         // Header style
         const headerStyle = {
@@ -1597,18 +1539,18 @@ export default function SerialNoLedgerReport() {
         // Add data rows
         tableData.forEach((item) => {
             const row = worksheet.addRow([
-                  item.Date,
-            item["Trn#"],
-            item.Type,
-            item.Str,
-            item.Description,
-    formatValue(item.Purchase)        ,
-     formatValue(item["Pur-Ret"])         ,
-       formatValue(item.Receive)       ,
-       formatValue(item.Issue)       ,
-       formatValue(item.Sale)       ,
-        formatValue(item["Sale-Ret"])      ,
-        formatValue(item.Bal)      ,
+                     item.Date,
+               item["Trn#"],
+               item.Type,
+               item.Str,
+               item.Description,
+       formatValue(item.Purchase)        ,
+        formatValue(item["Pur-Ret"])         ,
+          formatValue(item.Receive)       ,
+          formatValue(item.Issue)       ,
+          formatValue(item.Sale)       ,
+           formatValue(item["Sale-Ret"])      ,
+           formatValue(item.Bal)      ,
             ]);
 
             row.eachCell((cell, colIndex) => {
@@ -1628,17 +1570,17 @@ export default function SerialNoLedgerReport() {
 
         const totalRow = worksheet.addRow([
            "",
-            "",
-            "",
-            "",
-            "Total",
-            String(formatValue(totalpurchase)),
-            String(formatValue(totalpurchaseReturn)),
-            String(formatValue(totalReceive)),
-            String(formatValue(totalissue)),
-            String(formatValue(totalsale)),
-            String(formatValue(totalsaleReturn)),
-            String(formatValue(totalclosingbalance)),
+               "",
+               "",
+               "",
+               "Total",
+               String(formatValue(totalpurchase)),
+               String(formatValue(totalpurchaseReturn)),
+               String(formatValue(totalReceive)),
+               String(formatValue(totalissue)),
+               String(formatValue(totalsale)),
+               String(formatValue(totalsaleReturn)),
+               String(formatValue(totalclosingbalance)),
         ]);
 
         // total row added
@@ -1727,7 +1669,7 @@ export default function SerialNoLedgerReport() {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `SerialNoLedger From ${fromInputDate} To ${toInputDate}.xlsx`);
+        saveAs(blob, `SparePartsLedger From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
 
     const dispatch = useDispatch();
@@ -1768,32 +1710,32 @@ export default function SerialNoLedgerReport() {
         width: "300px",
     };
     const seventhColWidth = {
-        width: "65px",
+        width: "60px",
     };
     const eightColWidth = {
-        width: "65px",
+        width: "60px",
     };
     const ninthColWidth = {
-        width: "65px",
+        width: "60px",
     };
     const tenthColWidth = {
-        width: "65px",
+        width: "60px",
     };
+
     const elewenthColWidth = {
-        width: "65px",
+        width: "60px",
     };
     const tewlthColWidth = {
-        width: "65px",
+        width: "60px",
     };
     const thirteenColWidth = {
-        width: "65px",
+        width: "60px",
     };
 
     const sixthcol = { width: "8px" };
 
      useHotkeys("alt+s", () => {
         fetchReceivableReport();
-        //    resetSorting();
     }, { preventDefault: true, enableOnFormTags: true });
 
     useHotkeys("alt+p", exportPDFHandler, { preventDefault: true, enableOnFormTags: true });
@@ -1947,7 +1889,7 @@ export default function SerialNoLedgerReport() {
                         borderRadius: "9px",
                     }}
                 >
-                    <NavComponent textdata="Serial No Ledger" />
+                    <NavComponent textdata="Spare Parts Ledger" />
                     <div
                         className="row"
                         style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1962,50 +1904,79 @@ export default function SerialNoLedgerReport() {
                                 justifyContent: "space-between",
                             }}
                         >
-                          <div className="d-flex align-items-center ">
+                             <div
+                                className="d-flex align-items-center  "
+                                style={{ marginRight: "1px" }}
+                            >
                                 <div
                                     style={{
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
-                                        marginLeft:'20px'
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Serial No :
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Item :
                                         </span>{" "}
                                         <br />
                                     </label>
                                 </div>
+                                <div style={{ marginLeft: "5px" }}>
+                                   
 
-                                <input
-                                    ref={saleSelectRef}
-                                    value={mobileNumber}
-                                    onKeyDown={(e) => handleMobilePress(e, fromRef)}
-                                    onChange={handleMobilenumberInputChange}
-                                    autoComplete="off"
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    // placeholder="0302-1127364"
-                                    style={{
-                                        color: fontcolor,
-                                        width: "150px",
-                                        height: "24px",
-                                        fontSize: getdatafontsize, fontFamily: getfontstyle, border: `1px solid ${fontcolor}`,
-                                        backgroundColor: getcolor,
-                                        outline: "none",
-                                        paddingLeft: "10px",
-                                        marginLeft: "3px",
-                                    }}
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "2px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                />
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        value={
+                                            options.find((opt) => opt.value === saleType) || null
+                                        } 
+                                         isDisabled={isDoubleClickOpen}
+                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelParts = selectedOption.label.split("-"); // Split by "-"
+                                                const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+                                                setSaleType(selectedOption ? selectedOption.value : ""); // Correctly update state
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: description, // Keep only the description
+                                                });
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue("");
+                                            }
+                                        }}
+                                        onInputChange={(inputValue, { action }) => {
+                                            if (action === "input-change") {
+                                                return inputValue.toUpperCase();
+                                            }
+                                            return inputValue;
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        styles={{
+                                            ...customStyles1(!saleType, "400px"),
+                                            placeholder: (base) => ({
+                                                ...base,
+                                                textAlign: "left",
+                                                marginLeft: "0",
+                                                justifyContent: "flex-start",
+                                                color: fontcolor,
+                                                marginTop: '-5px'
+                                            })
+                                        }}
+                                        // isClearable
+                                        placeholder="ALL"
+                                    />
+                                </div>
                             </div>
 
                             <div
@@ -2037,8 +2008,9 @@ export default function SerialNoLedgerReport() {
                                         className="List-select-class"
                                         ref={saleSelectRef1}
                                         options={storeoption}
-                                        onKeyDown={(e) => handleStoreKeypress(e, "frominputid")}
+                                        onKeyDown={(e) => handleStoreKeypress(e, "submitButton")}
                                         id="selectedsale"
+                                        //  isDisabled={isDoubleClickOpen}
                                         // value={options.find((option) => option.value === saleType1) || null} // Ensure proper value
                                         onChange={(selectedOption) => {
                                             if (selectedOption && selectedOption.value) {
@@ -2071,7 +2043,8 @@ export default function SerialNoLedgerReport() {
                                                 marginLeft: "0",
                                                 justifyContent: "flex-start",
                                                 color: fontcolor,
-                                                marginTop: '-5px'
+                                                marginTop: '-5px',
+                                                
                                             })
                                         }}
                                         isClearable
@@ -2098,13 +2071,12 @@ export default function SerialNoLedgerReport() {
                         >
                             {/* ------ */}
 
-                            <div className="d-flex align-items-center">
+                              <div className="d-flex align-items-center">
                                 <div
                                     style={{
                                         width: "80px",
                                         display: "flex",
                                         justifyContent: "end",
-                                        marginLeft:'18px'
                                     }}
                                 >
                                     <label htmlFor="fromDatePicker">
@@ -2146,21 +2118,21 @@ export default function SerialNoLedgerReport() {
                                             outline: "none",
                                             border: "none",
                                             fontSize: "12px",
+                                            
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
+                                            //  cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         id="frominputid"
                                         value={fromInputDate}
+                                        // disabled={isDoubleClickOpen} 
                                         ref={fromRef}
                                         onChange={handlefromInputChange}
                                         onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="Date Input"
-                                        disabled={selectedRadio !== "custom"}
                                     />
                                     <DatePicker
                                         selected={selectedfromDate}
@@ -2169,6 +2141,7 @@ export default function SerialNoLedgerReport() {
                                         popperPlacement="bottom"
                                         showPopperArrow={false}
                                         open={fromCalendarOpen}
+                                         
                                         dropdownMode="select"
                                         customInput={
                                             <div>
@@ -2188,12 +2161,13 @@ export default function SerialNoLedgerReport() {
                                                         fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                        // cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+cursor:'pointer'
                                                     }}
-                                                    disabled={selectedRadio !== "custom"}
+//  disabled={isDoubleClickOpen}  
                                                 />
                                             </div>
                                         }
-                                        disabled={selectedRadio !== "custom"}
                                     />
                                 </div>
                             </div>
@@ -2252,17 +2226,16 @@ export default function SerialNoLedgerReport() {
                                             backgroundColor: getcolor,
                                             color: fontcolor,
                                             opacity: selectedRadio === "custom" ? 1 : 0.5,
-                                            pointerEvents:
-                                                selectedRadio === "custom" ? "auto" : "none",
+                                            // cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                                        onKeyDown={(e) => handleToKeyPress(e, saleSelectRef1)}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
                                         aria-label="To Date Input"
-                                        disabled={selectedRadio !== "custom"}
+                                    //  disabled={isDoubleClickOpen} 
                                     />
                                     <DatePicker
                                         selected={selectedToDate}
@@ -2290,9 +2263,11 @@ export default function SerialNoLedgerReport() {
                                                         fontFamily: getfontstyle,
                                                         color: fontcolor,
                                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                                        //  cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
+                                                cursor:"pointer"
                                                     }}
-                                                    disabled={selectedRadio !== "custom"}
-                                                />
+//    disabled={isDoubleClickOpen}                
+                                   />
                                             </div>
                                         }
                                         disabled={selectedRadio !== "custom"}
@@ -2329,6 +2304,7 @@ export default function SerialNoLedgerReport() {
     ref={input1Ref}
     onKeyDown={(e) => handleKeyPress(e, input2Ref)}
     id="submitButton"
+    //  disabled={isDoubleClickOpen}
     name="type"
     onFocus={(e) =>
       (e.currentTarget.style.border = "4px solid red")
@@ -2348,6 +2324,7 @@ export default function SerialNoLedgerReport() {
       fontFamily: getfontstyle,
       color: fontcolor,
       paddingLeft: "13px",
+    //    cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
     }}
   >
    <option value="">ALL</option>
@@ -2420,6 +2397,7 @@ export default function SerialNoLedgerReport() {
                                         ref={input2Ref}
                                         onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                                         type="text"
+                                        //  disabled={isDoubleClickOpen} 
                                         id="searchsubmit"
                                         placeholder="Item description"
                                         value={searchQuery}
@@ -2436,6 +2414,7 @@ export default function SerialNoLedgerReport() {
                                             outline: "none",
                                             paddingLeft: "10px",
                                             paddingRight: "25px", // space for the clear icon
+                                            //  cursor: isDoubleClickOpen ? "not-allowed" : "pointer", // optional
                                         }}
                                         onFocus={(e) =>
                                             (e.currentTarget.style.border = "2px solid red")
@@ -2520,9 +2499,9 @@ export default function SerialNoLedgerReport() {
                                         <td className="border-dark" style={sixthColWidth}>
                                             Description
                                         </td>
-                                        {/* <td className="border-dark" style={forthColWidth}>
+                                        <td className="border-dark" style={forthColWidth}>
                                             Rate
-                                        </td> */}
+                                        </td>
                                         <td className="border-dark" style={seventhColWidth}>
                                             Pur
                                         </td>
@@ -2530,10 +2509,10 @@ export default function SerialNoLedgerReport() {
                                             Pur Ret
                                         </td>
                                         <td className="border-dark" style={ninthColWidth}>
-                                            Receive
+                                            Rec
                                         </td>
                                         <td className="border-dark" style={tenthColWidth}>
-                                            Issue
+                                            Iss
                                                                           </td>
                                         <td className="border-dark" style={elewenthColWidth}>
                                             Sale
@@ -2542,7 +2521,7 @@ export default function SerialNoLedgerReport() {
                                             Sal Ret
                                         </td>
                                         <td className="border-dark" style={thirteenColWidth}>
-                                            Balance
+                                            Bal
                                         </td>
                                         <td
                                             className="border-dark"
@@ -2570,7 +2549,7 @@ export default function SerialNoLedgerReport() {
                                 style={{
                                     fontSize: getdatafontsize,
                                     fontFamily: getfontstyle,
-                                    // width: "100%",
+                                    width: "100%",
                                     position: "relative",
                                      ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
 
@@ -2584,7 +2563,7 @@ export default function SerialNoLedgerReport() {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="12" className="text-center">
+                                                <td colSpan="13" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2597,7 +2576,7 @@ export default function SerialNoLedgerReport() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 12 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 13 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2611,7 +2590,7 @@ export default function SerialNoLedgerReport() {
                                                 <td style={thirdColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                {/* <td style={forthColWidth}></td> */}
+                                                <td style={forthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
@@ -2655,9 +2634,9 @@ export default function SerialNoLedgerReport() {
                                                         <td className="text-start" style={sixthColWidth}>
                                                             {item.Description}
                                                         </td>
-                                                        {/* <td className="text-end" style={forthColWidth}>
+                                                        <td className="text-end" style={forthColWidth}>
                                                             {formatValue(item.Rate)}
-                                                        </td> */}
+                                                        </td>
                                                         <td className="text-end" style={seventhColWidth}>
                                                             {formatValue(item.Purchase)}
                                                         </td>
@@ -2692,7 +2671,7 @@ export default function SerialNoLedgerReport() {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 12 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 13 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2706,7 +2685,7 @@ export default function SerialNoLedgerReport() {
                                                 <td style={fifthColWidth}></td>
 
                                                 <td style={sixthColWidth}></td>
-                                                {/* <td style={forthColWidth}></td> */}
+                                                <td style={forthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
                                                 <td style={eightColWidth}></td>
                                                 <td style={ninthColWidth}></td>
@@ -2768,13 +2747,13 @@ export default function SerialNoLedgerReport() {
                             }}
                         ></div>
 
-                        {/* <div
+                        <div
                             style={{
                                 ...forthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div> */}
+                        ></div>
 
                         <div
                             style={{
@@ -2783,7 +2762,7 @@ export default function SerialNoLedgerReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalpurchase}</span>
+                            <span className="mobileledger_total">{formatValue(totalpurchase)}</span>
                         </div>
 
                         <div
@@ -2793,7 +2772,7 @@ export default function SerialNoLedgerReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalpurchaseReturn}</span>
+                            <span className="mobileledger_total">{formatValue(totalpurchaseReturn)}</span>
                         </div>
                         <div
                             style={{
@@ -2802,7 +2781,7 @@ export default function SerialNoLedgerReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalReceive}</span>
+                            <span className="mobileledger_total">{formatValue(totalReceive)}</span>
                         </div>
                         <div
                             style={{
@@ -2811,7 +2790,7 @@ export default function SerialNoLedgerReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalissue}</span>
+                            <span className="mobileledger_total">{formatValue(totalissue)}</span>
                         </div>
 
                         <div
@@ -2821,7 +2800,7 @@ export default function SerialNoLedgerReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalsale}</span>
+                            <span className="mobileledger_total">{formatValue(totalsale)}</span>
                         </div>
                         <div
                             style={{
@@ -2830,7 +2809,7 @@ export default function SerialNoLedgerReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalsaleReturn}</span>
+                            <span className="mobileledger_total">{formatValue(totalsaleReturn)}</span>
                         </div>
                         <div
                             style={{
@@ -2839,7 +2818,7 @@ export default function SerialNoLedgerReport() {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                            <span className="mobileledger_total">{totalclosingbalance}</span>
+                            <span className="mobileledger_total">{formatValue(totalclosingbalance)}</span>
                         </div>
                     </div>
 
@@ -2889,5 +2868,6 @@ export default function SerialNoLedgerReport() {
         </>
     );
 }
+
 
 

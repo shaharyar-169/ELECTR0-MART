@@ -25,9 +25,8 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Description, Store } from "@mui/icons-material";
 
-export default function ItemSaleReport() {
+export default function SparePartsStockReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -57,6 +56,8 @@ export default function ItemSaleReport() {
   const input4Ref = useRef(null);
   const input6Ref = useRef(null);
 
+  const [tableData, setTableData] = useState([]);
+
   const [Companyselectdata, setCompanyselectdata] = useState("");
 
   console.log("Companyselectdata", Companyselectdata);
@@ -81,15 +82,14 @@ export default function ItemSaleReport() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("A");
+
+  console.log("transectionType", transectionType);
   const [transectionType2, settransectionType2] = useState("");
 
   const [totalqnty, settotalqnty] = useState(0);
   const [totalexcel, settotalexcel] = useState(0);
   const [totaltax, settotaltax] = useState(0);
   const [totalincl, settotalincl] = useState(0);
-
-  const [totaldebit, settotaldebit] = useState(0);
-  const [totalcredit, settotalcredit] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -168,178 +168,22 @@ export default function ItemSaleReport() {
     settoInputDate(e.target.value);
   };
 
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleToKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const toDateElement = document.getElementById("todatevalidation");
-      const formattedInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobaltoDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        if (GlobaltoDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        if (fromInputDate) {
-          const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-"),
-          );
-          if (enteredDate <= fromDate) {
-            toast.error("To date must be after from date");
-            return;
-          }
-        }
-
-        toDateElement.style.border = `1px solid ${fontcolor}`;
-        settoInputDate(formattedInput);
-
-        if (saleSelectRef.current) {
-          e.preventDefault();
-          saleSelectRef.current.focus();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
   function fetchDailyStatusReport() {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
-
     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-    let hasError = false;
     let errorType = "";
 
     switch (true) {
-      //    case !saleType:
-      //        errorType = "saleType";
-      //        break;
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
       case !toInputDate:
         errorType = "toDate";
         break;
       default:
-        hasError = false;
         break;
     }
 
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
+    if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
     } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
         "$1-$2-$3",
@@ -347,99 +191,71 @@ export default function ItemSaleReport() {
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+      if (GlobaltoDate && enteredToDate > GlobaltoDate) {
         errorType = "toDateAfterGlobal";
       } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
         errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
       }
     }
 
     switch (errorType) {
-      case "saleType":
-        toast.error("Please select a Account Code");
+      case "toDate":
+        toast.error("Rep Date is required");
         return;
 
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
       case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
+        toast.error("Rep Date must be in the format dd-mm-yyyy");
         return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
+
       case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
+        toast.error(`Rep Date must be before ${GlobaltoDate1}`);
         return;
       case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
+        toast.error(`Rep Date must be after ${GlobalfromDate1}`);
         return;
 
       default:
         break;
     }
 
-    // console.log(data);
-    document.getElementById("fromdatevalidation").style.border =
-      `1px solid ${fontcolor}`;
-    document.getElementById("todatevalidation").style.border =
-      `1px solid ${fontcolor}`;
+    const fromDateElement = document.getElementById("fromdatevalidation");
+    const toDateElement = document.getElementById("todatevalidation");
 
-    const apiUrl = apiLinks + "/ItemSaleReport.php";
+    if (fromDateElement) {
+      fromDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+    if (toDateElement) {
+      toDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+
+    const apiMainUrl = apiLinks + "/SparePartsStockReport.php";
     setIsLoading(true);
-    const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-
+    const formMainData = new URLSearchParams({
+      FRepDat: toInputDate,
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      FTrnTyp: transectionType2,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+      FRepStk: transectionType2,
+      FRepRat: transectionType,
 
-    //   code: "NASIRTRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+      code: "IZONETRD",
+      FLocCod: "001",
+      FYerDsc: "2025-2025",
     }).toString();
 
     axios
-      .post(apiUrl, formData)
+      .post(apiMainUrl, formMainData)
       .then((response) => {
         setIsLoading(false);
-
-        settotaldebit(response.data["Total Qnty"]);
-        settotalcredit(response.data["Total Amount"]);
-        //    setClosingBalance(response.data["Closing Bal "]);
+        settotalqnty(response.data["Total Qnty"]);
+        settotalexcel(response.data["Total Rate"]);
+        settotaltax(response.data["Total Amount"]);
+        // settotalincl(response.data["Total Incl"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -460,11 +276,11 @@ export default function ItemSaleReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-      if (fromRef && fromRef.current) {
+    if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+      if (toRef && toRef.current) {
         setTimeout(() => {
-          fromRef.current.focus();
-          fromRef.current.select();
+          toRef.current.focus();
+          toRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -781,46 +597,40 @@ export default function ItemSaleReport() {
   });
 
   const exportPDFHandler = () => {
+   
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+    const doc = new jsPDF({ orientation: "potraite" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
+      item.Code,
       item.Description,
-      item.Store,
+      // item['Last Date'],
+      item["Pur Rate"],
       item.Qnty,
-      item.Rate,
-      item["Sale Amount"],
+      item.Amount,
     ]);
 
     // Add summary row to the table
     rows.push([
       String(formatValue(tableData.length.toLocaleString())),
-      "",
-      "",
       "Total",
       "",
-      String(formatValue(totaldebit)),
-      "",
-      String(formatValue(totalcredit)),
+      String(formatValue(totalqnty)),
+      String(formatValue(totaltax)),
     ]);
 
     // Define table column headers and individual column widths
 
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
       "Description",
-      "Store",
-      "Qnty",
+      // "Last Date",
       "Rate",
+      "Qnty",
       "Amount",
     ];
-    const columnWidths = [24, 17, 14, 110, 20, 20, 30, 30];
+    const columnWidths = [18, 100, 25, 28, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -829,8 +639,7 @@ export default function ItemSaleReport() {
     const pageHeight = doc.internal.pageSize.height;
     const paddingTop = 15;
 
-    // Set font properties for the table
-    doc.setFont(getfontstyle);
+    doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10);
 
     // Function to add table headers
@@ -948,18 +757,13 @@ export default function ItemSaleReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+          if (cellIndex === 10) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (
-            cellIndex === 4 ||
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7
-          ) {
+          } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1026,7 +830,7 @@ export default function ItemSaleReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 28; // Adjust this value based on your requirements
+    const rowsPerPage = 45; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1062,7 +866,7 @@ export default function ItemSaleReport() {
         doc.setFontSize(10);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 10,
+          rightX - 5,
           doc.internal.pageSize.height - 10,
           { align: "right" },
         );
@@ -1078,7 +882,7 @@ export default function ItemSaleReport() {
         startY += 5; // Adjust vertical position for the company title
         doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Item Sale Report From ${fromInputDate} To ${toInputDate}`,
+          `Item Stock Report As on ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1104,11 +908,13 @@ export default function ItemSaleReport() {
                     : "";
 
         let transectionsts =
-          transectionType2 === "BIL"
-            ? "PURCHASE"
-            : transectionType2 == "PRN"
-              ? "PURCHASE RETURN"
-              : "ALL";
+          transectionType2 === "P"
+            ? "POSITIVE"
+            : transectionType2 == "N"
+              ? "NEGATIVE"
+              : transectionType2 == "Z"
+                ? "ZERO"
+                : "ALL";
 
         let typeText = capacityselectdatavalue.label
           ? capacityselectdatavalue.label
@@ -1120,7 +926,7 @@ export default function ItemSaleReport() {
           ? categoryselectdatavalue.label
           : "ALL";
         let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label
+          ? typeselectdatavalue.label + "-" + "Stock"
           : "ALL";
 
         let search = searchQuery ? searchQuery : "";
@@ -1134,10 +940,10 @@ export default function ItemSaleReport() {
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Store :`, labelsX + 180, labelsY); // Draw bold label
+        doc.text(`Store :`, labelsX + 140, labelsY); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${typename}`, labelsX + 200, labelsY); // Draw the value next to the label
+        doc.text(`${typename}`, labelsX + 160, labelsY); // Draw the value next to the label
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
@@ -1148,10 +954,15 @@ export default function ItemSaleReport() {
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Type :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+        doc.text(`Rate :`, labelsX + 140, labelsY + 4.3); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${transectionsts}`, labelsX + 200, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${RATE}`, labelsX + 160, labelsY + 4.3); // Draw the value next to the label
+
+        // doc.setFont(getfontstyle, "bold"); // Set font to bold
+        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
+        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
+        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
@@ -1160,18 +971,28 @@ export default function ItemSaleReport() {
         doc.setFontSize(10);
         doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Status :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${transectionsts}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
+
         if (searchQuery) {
           doc.setFont("verdana", "bold");
           doc.setFontSize(10);
-          doc.text(`Search :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+          doc.text(`Search :`, labelsX + 140, labelsY + 12.5); // Draw bold label
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
-          doc.text(`${search}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
+          doc.text(`${search}`, labelsX + 160, labelsY + 12.5); // Draw the value next to the label
         }
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += searchQuery ? 15 : 10; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+        addTableHeaders(
+          (doc.internal.pageSize.width - totalWidth) / 2,
+          searchQuery ? 44 : 39,
+        );
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1212,21 +1033,19 @@ export default function ItemSaleReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`ItemSaleReport As On ${date}.pdf`);
+    doc.save(`ItemStockReport As On ${toInputDate}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 7; // Ensure this matches the actual number of columns
+    const numColumns = 6; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "center",
-      "center",
-      "center",
       "left",
-      "right",
+      "left",
+      "left",
       "right",
       "right",
       "right",
@@ -1266,14 +1085,14 @@ export default function ItemSaleReport() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         companyRow.number
       }`,
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Item Sale Report From ${fromInputDate} To ${toInputDate}`,
+      `Item Stock Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1281,7 +1100,7 @@ export default function ItemSaleReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         storeListRow.number
       }`,
     );
@@ -1316,51 +1135,45 @@ export default function ItemSaleReport() {
                 : "";
 
     let transectionsts =
-      transectionType2 === "BIL"
-        ? "PURCHASE"
-        : transectionType2 == "PRN"
-          ? "PURCHASE RETURN"
-          : "ALL";
+      transectionType === "P"
+        ? "POSITIVE"
+        : transectionType == "N"
+          ? "NEGATIVE"
+          : transectionType == "Z"
+            ? "ZERO"
+            : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
-      "Company :",
+      "COMPANY :",
       typecompany,
       "",
-      "",
-      "",
-      "Store :",
+      "STORE :",
       typetype,
     ]);
-    worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`,
-    );
 
     // Add second row
     const typeAndStoreRow2 = worksheet.addRow([
-      "Category :",
+      "CATEGORY :",
       typecategory,
       "",
-      "",
-      "",
+      "RATE :",
+      RATE,
+    ]);
 
-      "Type :",
+    const typeAndStoreRow3 = worksheet.addRow([
+      "CAPACITY :",
+      typecapacity,
+      "",
+      "STATUS :",
       transectionsts,
     ]);
-    worksheet.mergeCells(
-      `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`,
-    );
 
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery
-        ? ["Capacity :", typecapacity, "", "", "", "Search :", typesearch]
-        : ["Capacity :", typecapacity],
-    );
-    worksheet.mergeCells(
-      `B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`,
+      searchQuery ? ["", "", "", "SEARCH :", typesearch] : [""],
     );
 
     // Apply styling for the status row
@@ -1368,7 +1181,7 @@ export default function ItemSaleReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 4].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1376,24 +1189,24 @@ export default function ItemSaleReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 4].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 4].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
     typeAndStoreRow4.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 6].includes(colIndex),
+        bold: [1, 4].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1417,13 +1230,11 @@ export default function ItemSaleReport() {
 
     // Add headers
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
       "Description",
-      "Store",
-      "Qnty",
+      "Last Date",
       "Rate",
+      "Qnty",
       "Amount",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1432,14 +1243,12 @@ export default function ItemSaleReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
+        item.Code,
         item.Description,
-        item.Store,
+        item["Last Date"],
+        item["Pur Rate"],
         item.Qnty,
-        item.Rate,
-        item["Sale Amount"],
+        item.Amount,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1458,19 +1267,17 @@ export default function ItemSaleReport() {
     });
 
     // Set column widths
-    [11, 8, 6, 50, 8, 10, 15, 15].forEach((width, index) => {
+    [20, 45, 10, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
-      String(formatValue(tableData.length.toLocaleString())),
-      "",
       "",
       "Total",
       "",
-      String(formatValue(totaldebit)),
       "",
-      String(formatValue(totalcredit)),
+      String(totalqnty),
+      String(totaltax),
     ]);
 
     // total row added
@@ -1478,18 +1285,15 @@ export default function ItemSaleReport() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "double" },
+        top: { style: "thin" },
         left: { style: "thin" },
-        bottom: { style: "double" },
+        bottom: { style: "thin" },
         right: { style: "thin" },
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 6 || colNumber === 8) {
+      if (colNumber === 5 || colNumber === 6) {
         cell.alignment = { horizontal: "right" };
-      }
-      if (colNumber === 1) {
-        cell.alignment = { horizontal: "center" };
       }
     });
 
@@ -1541,10 +1345,14 @@ export default function ItemSaleReport() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`,
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`,
     );
 
     // Generate and save the Excel file
@@ -1552,7 +1360,7 @@ export default function ItemSaleReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ItemSaleReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `ItemStockReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1563,7 +1371,7 @@ export default function ItemSaleReport() {
   const btnColor = "#3368B5";
   const textColor = "white";
 
-  const [tableData, setTableData] = useState([]);
+  const TotalDataRows = tableData;
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1644,71 +1452,252 @@ export default function ItemSaleReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
-
   const firstColWidth = {
-    width: "80px",
+    width: "55px",
   };
   const secondColWidth = {
-    width: "60px",
-  };
-  const thirdColWidth = {
-    width: "50px",
-  };
-  const forthColWidth = {
     width: "360px",
   };
+  const thirdColWidth = {
+    width: "90px",
+  };
+  const forthColWidth = {
+    width: "90px",
+  };
+
   const sixthColWidth = {
-    width: "40px",
+    width: "90px",
   };
   const seventhColWidth = {
-    width: "60px",
-  };
-  const eightColWidth = {
-    width: "100px",
-  };
-  const ninthColWidth = {
-    width: "100px",
+    width: "110px",
   };
 
   const sixthcol = {
     width: "8px",
   };
 
+  const [columns, setColumns] = useState({
+    Code: [],
+    Description: [],
+    ["Last Date"]: [],
+    ["Pur Rate"]: [], // ✔ Corrected key
+    Qnty: [],
+    Amount: [],
+  });
+
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Code: "",
+    Description: "",
+    ["Last Date"]: "",
+    ["Pur Rate"]: "", // ✔ Corrected key
+    Qnty: "",
+    Amount: "",
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Code: tableData.map((row) => row.Code),
+        Description: tableData.map((row) => row.Description),
+        ["Last Date"]: tableData.map((row) => row["Last Date"]),
+        ["Pur Rate"]: tableData.map((row) => row["Pur Rate"]),
+        Qnty: tableData.map((row) => row.Qnty),
+        Amount: tableData.map((row) => row.Amount),
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Description: null,
+      ["Last Date"]: null,
+      ["Pur Rate"]: null,
+      Qnty: null,
+      Amount: null,
+    });
+  };
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+      // ⭐ SPECIAL CASE: Sort "Last Date" by YEAR
+      if (col === "Last Date") {
+        const aYear = parseInt(aVal.split("-")[2]) || 0; // Extract YYYY
+        const bYear = parseInt(bVal.split("-")[2]) || 0;
+
+        return newOrder === "ASC" ? aYear - bYear : bYear - aYear;
+      }
+
+      // ⭐ NORMAL NUMBER SORT
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // ⭐ NORMAL STRING SORT
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const renderTableData = () => {
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="6" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
+            </tr>
+            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 6 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        ) : (
+          <>
+            {tableData.map((item, i) => {
+              totalEnteries += 1;
+              const isNegative = item.Qnty < 0 || item.Amount < 0;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: isNegative ? "red" : fontcolor,
+                  }}
+                >
+                  <td
+                    className="text-start"
+                    style={{
+                      ...firstColWidth,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      color: "blue",
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      // code temporarily store karo
+                      sessionStorage.setItem(
+                        "SparePartsLedgerData",
+                        JSON.stringify({
+                          code: item.Code,
+                          toInputDate: toInputDate,
+                          fromInputDate: fromInputDate
+                        }),
+                      );
+
+                      // fixed URL open karo
+                      window.open("/crystalsol/SparePartsLedger", "_blank");
+                    }}
+                  >
+                    {item.Code}
+                  </td>
+
+                  <td className="text-start" style={secondColWidth}>
+                    {item.Description}
+                  </td>
+                  <td className="text-center" style={thirdColWidth}>
+                    {item["Last Date"]}
+                  </td>
+                  <td className="text-end" style={forthColWidth}>
+                    {formatValue(item['Pur Rate'])}
+                  </td>
+                  <td className="text-end" style={sixthColWidth}>
+                    {formatValue(item.Qnty)}
+                  </td>
+                  <td className="text-end" style={seventhColWidth}>
+                    {formatValue(item.Amount)}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 25 - tableData.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 6 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
+  };
+
   useHotkeys(
     "alt+s",
     () => {
       fetchDailyStatusReport();
-      //    resetSorting();
+      resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true },
   );
@@ -1914,7 +1903,7 @@ export default function ItemSaleReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Item Sale Report" />
+          <NavComponent textdata="Spare Parts Stock Report" />
 
           {/* ------------1st row */}
           <div
@@ -1928,117 +1917,14 @@ export default function ItemSaleReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "15px" }}
-              >
+              {/* To Date */}
+              <div className="d-flex align-items-center">
                 <div
                   style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: "12px",
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "50px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
+                    width: "100px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2051,7 +1937,7 @@ export default function ItemSaleReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      To :
+                      Rep Date :&nbsp;
                     </span>
                   </label>
                 </div>
@@ -2064,7 +1950,6 @@ export default function ItemSaleReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
-                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -2092,7 +1977,7 @@ export default function ItemSaleReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                    onKeyDown={handleToDateEnter}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2131,6 +2016,79 @@ export default function ItemSaleReport() {
                       </div>
                     }
                     disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "7px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                        marginRight: "3px",
+                      }}
+                    >
+                      Store :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginRight: "21px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={typeRef}
+                    options={typeoptions}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input4Refrate)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setTypeselectdata(selectedOption.value);
+                        settypeselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setTypeselectdata("");
+                        settypeselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata, 250),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
                   />
                 </div>
               </div>
@@ -2209,7 +2167,7 @@ export default function ItemSaleReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata, 300),
+                      ...customStyles1(!Companyselectdata,300),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2227,7 +2185,7 @@ export default function ItemSaleReport() {
 
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
@@ -2240,121 +2198,69 @@ export default function ItemSaleReport() {
                   <label htmlFor="transactionType">
                     <span
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
                         fontSize: getdatafontsize,
                         fontFamily: getfontstyle,
                         fontWeight: "bold",
-                        marginRight: "3px",
                       }}
                     >
-                      Store :
+                      Rate :
                     </span>
                   </label>
                 </div>
 
-                <div style={{ marginRight: "21px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={input6Ref}
-                    options={typeoptions}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setTypeselectdata(selectedOption.value);
-                        settypeselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setTypeselectdata("");
-                        settypeselectdatavalue("");
-                      }
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input4Refrate}
+                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "250px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
                     }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata, 250),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
+                  >
+                    <option value="A">AVERAGE RATE</option>
+                    <option value="P">PURCHASE RATE</option>
+                    <option value="M">LAST SM RATE</option>
+                    <option value="W">WEIGHTED AVERAGE</option>
+                    <option value="F">FIFO</option>
+                  </select>
+
+                  {transectionType !== "A" && (
+                    <span
+                      onClick={() => settransectionType("A")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
                         color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
                 </div>
               </div>
-
-              {/* <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span
-                                            style={{
-                                                fontSize: getdatafontsize,
-                                                fontFamily: getfontstyle,
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            Rate :
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <select
-                                    ref={input4Refrate}
-                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="A">AVERAGE RATE</option>
-                                    <option value="P">PURCHASE RATE</option>
-                                    <option value="M">LAST SM RATE</option>
-                                      <option value="W">WEIGHTED AVERAGE</option>
-                                    <option value="F">FIFO</option>
-                                </select>
-                            </div> */}
             </div>
           </div>
 
@@ -2461,41 +2367,12 @@ export default function ItemSaleReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      Type :
+                      Status :
                     </span>
                   </label>
                 </div>
 
-                {/* <select
-                                    ref={input4Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="">ALL</option>
-                                    <option value="BIL">PURCHASE</option>
-                                    <option value="PRN">PURCHASE RETURN</option>
-                                </select> */}
-
+               
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <select
                     ref={input4Ref}
@@ -2519,12 +2396,13 @@ export default function ItemSaleReport() {
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
                       color: fontcolor,
-                      paddingLeft: "12px",
+                      paddingLeft: "13px",
                     }}
                   >
                     <option value="">ALL</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
+                    <option value="P">POSITIVE</option>
+                    <option value="N">NEGATIVE</option>
+                    <option value="Z">ZERO</option>
                   </select>
 
                   {transectionType2 !== "" && (
@@ -2595,7 +2473,7 @@ export default function ItemSaleReport() {
                     className="List-select-class "
                     ref={input2Ref}
                     options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input6Ref)}
+                    onKeyDown={(e) => handlecapacityKeypress(e, typeRef)}
                     id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2714,7 +2592,7 @@ export default function ItemSaleReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                 }}
               >
@@ -2736,31 +2614,78 @@ export default function ItemSaleReport() {
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      Date
-                    </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Trn#
-                    </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Type
-                    </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Description
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("Code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
                     </td>
 
-                    <td className="border-dark" style={sixthColWidth}>
-                      Str
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Description")}
+                    >
+                      Description{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={seventhColWidth}>
-                      Qnty
+
+                    <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Last Date")}
+                    >
+                      Last Date{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Last Date")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={eightColWidth}>
-                      Rate
+
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Pur Rate")}
+                    >
+                      Rate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Pur Rate")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={ninthColWidth}>
-                      Amount
+
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Qnty")}
+                    >
+                      Qnty{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnty")}
+                      ></i>
                     </td>
+
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Amount")}
+                    >
+                      Amount{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Amount")}
+                      ></i>
+                    </td>
+
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
@@ -2773,7 +2698,7 @@ export default function ItemSaleReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "40vh",
+                maxHeight: "43vh",
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -2786,130 +2711,10 @@ export default function ItemSaleReport() {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   width: "100%",
-                  position: "relative",
+                  // position: "relative",
                 }}
               >
-                <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="8" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 8 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        ),
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        const isNegative =
-                          item.Qnty < 0 ||
-                          item.Rate < 0 ||
-                          item["Pur Amount"] < 0;
-
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              // color: fontcolor,
-                              color: isNegative ? "red" : fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.Date}
-                            </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item["Trn#"]}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
-                            </td>
-                            <td className="text-start" style={forthColWidth}>
-                              {item.Description}
-                            </td>
-                            <td className="text-end" style={sixthColWidth}>
-                              {item.Store}
-                            </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Qnty)}
-                            </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
-                            <td className="text-end" style={ninthColWidth}>
-                              {formatValue(item["Sale Amount"])}
-                            </td>
-                          </tr>
-                        );
-                      })}
-
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 8 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
-                      </tr>
-                    </>
-                  )}
-                </tbody>
+                <tbody id="tablebody">{renderTableData()}</tbody>
               </table>
             </div>
           </div>
@@ -2960,6 +2765,7 @@ export default function ItemSaleReport() {
             >
               {/* <span className="mobileledger_total">{totalexcel}</span> */}
             </div>
+
             <div
               style={{
                 ...sixthColWidth,
@@ -2967,9 +2773,10 @@ export default function ItemSaleReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{formatValue(totaldebit)}</span> */}
+              <span className="mobileledger_total">
+                {formatValue(totalqnty)}
+              </span>
             </div>
-
             <div
               style={{
                 ...seventhColWidth,
@@ -2978,27 +2785,7 @@ export default function ItemSaleReport() {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totaldebit)}
-              </span>
-            </div>
-            <div
-              style={{
-                ...eightColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
-            </div>
-            <div
-              style={{
-                ...ninthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalcredit)}
+                {formatValue(totaltax)}
               </span>
             </div>
           </div>
@@ -3039,7 +2826,7 @@ export default function ItemSaleReport() {
               ref={selectButtonRef}
               onClick={() => {
                 fetchDailyStatusReport();
-                // resetSorting();
+                resetSorting();
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>

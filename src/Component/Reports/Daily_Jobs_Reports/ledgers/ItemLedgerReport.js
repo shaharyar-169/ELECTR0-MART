@@ -748,6 +748,7 @@ useEffect(() => {
 
   setIsItemInitialized(true);
 }, [options, isItemInitialized]);
+
 useEffect(() => {
   // 🔥 Dono cheezain ready hon
   if (isDoubleClickOpen && isCodeReady) {
@@ -1429,8 +1430,9 @@ useEffect(() => {
                    // }
    
                    // Add page numbering
-                   doc.setFontSize(pageNumberFontSize);
-                   doc.text(
+   doc.setFont("verdana-regular", "normal");
+             doc.setFontSize(10);
+                                doc.text(
                        `Page ${pageNumber}`,
                        rightX - 10,
                        doc.internal.pageSize.height - 10,

@@ -114,6 +114,8 @@ import MobileLedgerJob from "./Component/Reports/Daily_Jobs_Reports/ledgers/Mobi
 import ItemAggingReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/ItemAggingReport.js";
 import SupplierLedgerpos from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedgerpos.js";
 import ProductionOrderLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/ProductionorderLedger.js";
+import SparePartsLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/SparePartsLedger.js";
+import SerialNoLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SerialNoLedgerReport.js";
 
 //////////////////////////// Daily reports //////////////////////////////
 import DailyCashBook from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBook.js";
@@ -169,6 +171,11 @@ import FinishItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemRe
 import SerialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SerialStockReport.js"; 
 import ItemMarginReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemMarginReport.js";
 import ItemMarginSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemMarginSumamryReport.js";
+import SparePartsSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsSaleReport.js";
+import SparePartsSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartSaleSummaryReport.js";
+import SparePartsPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsPurchaseReport.js";
+import SparePartsPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsPurchaseSummary.js";
+import SparePartsStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsStockReports.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -290,6 +297,8 @@ function App() {
                 <Route exact path="/MobileLedgerJob" element={<MobileLedgerJob />} />
                 <Route exact path="/SupplierLedgerPos" element={<SupplierLedgerpos />} />
                 <Route exact path="/ProductionOrderLedger" element={<ProductionOrderLedger />} />
+                <Route exact path="/SparePartsLedger" element={<SparePartsLedger />} />
+                <Route exact path="/SerialLedger" element={<SerialNoLedgerReport />} />
 
 
                 {/* Rountes for Job reports */}
@@ -373,6 +382,11 @@ function App() {
                 <Route exact path="/SerialStockReport" element={<SerialStockReport />} />
                 <Route exact path="/ItemMarginReport" element={<ItemMarginReport />} />
                 <Route exact path="/ItemMarginSummary" element={<ItemMarginSummary />} />
+                <Route exact path="/SparePartsSaleReport" element={<SparePartsSaleReport />} />
+                <Route exact path="/SparePartsSaleSummary" element={<SparePartsSaleSummaryReport />} />
+                <Route exact path="/SparePartsPurchaseReport" element={<SparePartsPurchaseReport />} />
+                <Route exact path="/SparePartsPurchaseSummary" element={<SparePartsPurchaseSummary />} />
+                <Route exact path="/SparePartsStockReport" element={<SparePartsStockReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}

@@ -410,13 +410,13 @@ export default function GeneralLedger() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
 
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024'
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024'
 
 
         }).toString();

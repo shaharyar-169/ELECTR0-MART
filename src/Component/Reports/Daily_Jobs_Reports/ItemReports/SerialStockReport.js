@@ -241,9 +241,9 @@ export default function SerialStockReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
    
-    //   code: "USMANMTR",
-    //   FLocCod: "002",
-    //   FYerDsc: "2025-2025",
+      // code: "USMANMTR",
+      // FLocCod: "002",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -867,8 +867,9 @@ export default function SerialStockReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+ doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                  doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1584,9 +1585,37 @@ export default function SerialStockReport() {
                     color: isNegative ? "red" : fontcolor,
                   }}
                 >
-                  <td className="text-start" style={firstColWidth}>
+                  {/* <td className="text-start" style={firstColWidth}>
+                    {item.SerNo}
+                  </td> */}
+
+                    <td
+                    className="text-start"
+                    style={{
+                      ...firstColWidth,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      color: "blue",
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      // code temporarily store karo
+                      sessionStorage.setItem(
+                        "SerialLedgerData",
+                        JSON.stringify({
+                          SerNo: item.SerNo,
+                          toInputDate: toInputDate,
+                        }),
+                      );
+
+                      // fixed URL open karo
+                      window.open("/crystalsol/SerialLedger", "_blank");
+                    }}
+                  >
                     {item.SerNo}
                   </td>
+
+
                   <td className="text-start" style={secondColWidth}>
                     {item.Description}
                   </td>
