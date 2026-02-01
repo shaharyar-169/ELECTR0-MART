@@ -1054,8 +1054,9 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1339,9 +1340,9 @@ companyRow.eachCell((cell) => {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 

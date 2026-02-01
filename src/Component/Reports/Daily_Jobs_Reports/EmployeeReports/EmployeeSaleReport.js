@@ -428,15 +428,15 @@ export default function EmployeeSaleReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
       FEmpCod: Employeeselectdata,
 
-      code: 'NASIRTRD',
-      FLocCod: '001',
-      FYerDsc: '2024-2024',
+      // code: 'NASIRTRD',
+      // FLocCod: '001',
+      // FYerDsc: '2024-2024',
     }).toString();
 
     axios
@@ -895,7 +895,7 @@ export default function EmployeeSaleReport() {
       "Rate",
       "Amount",
     ];
-    const columnWidths = [24, 18, 12, 110, 15, 15, 25, 25];
+    const columnWidths = [24, 18, 12, 110, 15, 20, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1192,10 +1192,10 @@ export default function EmployeeSaleReport() {
             : "";
 
         let transectionsts =
-          transectionType === "BIL"
-            ? "PURCHASE"
-            : transectionType == "SRN"
-            ? "PURCHASE RETURN"
+          transectionType2 === "INV"
+            ? "SALE"
+            : transectionType2 == "SRN"
+            ? "SALE RETURN"
             : "ALL";
 
         let EMPLOYEEDATA = Employeeselectdatavalue.label
@@ -1218,12 +1218,12 @@ export default function EmployeeSaleReport() {
 
      
 
-    doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
-        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
-                doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
+//     doc.setFont('verdana', "bold");
+//         doc.setFontSize(10)
+//         doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
+// doc.setFont('verdana-regular', "normal");
+//         doc.setFontSize(10)
+//                 doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
 
                 
 doc.setFont('verdana', "bold");
@@ -1236,10 +1236,10 @@ doc.setFont('verdana-regular', "normal");
 
 doc.setFont('verdana', "bold");
         doc.setFontSize(10)
-                doc.text(`Store :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+                doc.text(`Empolyee :`, labelsX + 180, labelsY + 4.3); // Draw bold label
 doc.setFont('verdana-regular', "normal");
         doc.setFontSize(10)
-                doc.text(`${typename}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+                doc.text(`${EMPLOYEEDATA}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
 doc.setFont('verdana', "bold");
         doc.setFontSize(10)
@@ -1337,7 +1337,7 @@ doc.setFont('verdana-regular', "normal");
 
     const columnAlignments = [
       "left",
-      "left",
+      "center",
       "center",
       "left",
       "right",
@@ -1439,23 +1439,15 @@ doc.setFont('verdana-regular', "normal");
         : "";
 
     let transectionsts =
-      transectionType === "BIL"
-        ? "PURCHASE"
-        : transectionType == "SRN"
-        ? "PURCHASE RETURN"
-        : "PRN";
+      transectionType2 === "INV"
+        ? "SALE"
+        : transectionType2 == "SRN"
+        ? "SALE RETURN"
+        : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow5 = worksheet.addRow([
-      "Employee :",
-      employeedata,
-      "",
-      "",
-      "",
-    ]);
 
-     worksheet.mergeCells(`B${typeAndStoreRow5.number}:D${typeAndStoreRow5.number}`);
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
       "Company :",
@@ -1463,8 +1455,8 @@ doc.setFont('verdana-regular', "normal");
       "",
       "",
       "",
-      "Store :",
-      typetype,
+      "Employee :",
+      employeedata,
     ]);
 
     worksheet.mergeCells(`B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`);
@@ -1509,24 +1501,8 @@ doc.setFont('verdana-regular', "normal");
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-    typeAndStoreRow5.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
-    typeAndStoreRow4.eachCell((cell, colIndex) => {
+  
+     typeAndStoreRow4.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
@@ -1615,9 +1591,9 @@ doc.setFont('verdana-regular', "normal");
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
@@ -2473,70 +2449,13 @@ doc.setFont('verdana-regular', "normal");
                         marginTop: "-5px",
                       }),
                     }}
-                    isClearable
-                    placeholder="ALL"
+                    // isClearable
+                    // placeholder="ALL"
                   />
                 </div>
               </div>
 
-              {/* <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        marginLeft: "10px",
-                                        width: "80px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span
-                                            style={{
-                                                fontSize: getdatafontsize,
-                                                fontFamily: getfontstyle,
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            Rate :
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <select
-                                    ref={input4Refrate}
-                                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType}
-                                    onChange={handleTransactionTypeChange}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="A">AVERAGE RATE</option>
-                                    <option value="P">PURCHASE RATE</option>
-                                    <option value="M">LAST SM RATE</option>
-                                      <option value="W">WEIGHTED AVERAGE</option>
-                                    <option value="F">FIFO</option>
-                                </select>
-                            </div> */}
-            </div>
+                        </div>
           </div>
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
@@ -2933,12 +2852,13 @@ doc.setFont('verdana-regular', "normal");
                     <td className="border-dark" style={sixthColWidth}>
                       Str
                     </td>
+                     <td className="border-dark" style={eightColWidth}>
+                      Rate
+                    </td>
                     <td className="border-dark" style={seventhColWidth}>
                       Qnty
                     </td>
-                    <td className="border-dark" style={eightColWidth}>
-                      Rate
-                    </td>
+                   
                     <td className="border-dark" style={ninthColWidth}>
                       Amount
                     </td>
@@ -2954,7 +2874,7 @@ doc.setFont('verdana-regular', "normal");
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                height:'55vh',
+                height:'45vh',
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -3006,7 +2926,8 @@ doc.setFont('verdana-regular', "normal");
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
+                                                <td style={eightColWidth}></td>
+
                         <td style={ninthColWidth}></td>
                       </tr>
                     </>
@@ -3048,12 +2969,13 @@ doc.setFont('verdana-regular', "normal");
                             <td className="text-end" style={sixthColWidth}>
                               {item.Store}
                             </td>
+                             <td className="text-end" style={eightColWidth}>
+                              {formatValue(item.Rate)}
+                            </td>
                             <td className="text-end" style={seventhColWidth}>
                               {formatValue(item.Qnty)}
                             </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
+                           
                             <td className="text-end" style={ninthColWidth}>
                               {formatValue(item["Sale Amount"])}
                             </td>
@@ -3083,8 +3005,9 @@ doc.setFont('verdana-regular', "normal");
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
                         <td style={eightColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+
                         <td style={ninthColWidth}></td>
                       </tr>
                     </>
@@ -3149,6 +3072,15 @@ doc.setFont('verdana-regular', "normal");
             >
               {/* <span className="mobileledger_total">{formatValue(totaldebit)}</span> */}
             </div>
+              <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">{totaltax}</span> */}
+            </div>
 
             <div
               style={{
@@ -3161,15 +3093,7 @@ doc.setFont('verdana-regular', "normal");
                 {formatValue(totaldebit)}
               </span>
             </div>
-            <div
-              style={{
-                ...eightColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
-            </div>
+          
             <div
               style={{
                 ...ninthColWidth,

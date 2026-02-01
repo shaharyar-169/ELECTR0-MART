@@ -434,14 +434,14 @@ export default function EmployeeMarginSummary() {
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
       FRepRat: transectionType,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType2,
       FEmpCod: Employeeselectdata,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -1115,8 +1115,9 @@ export default function EmployeeMarginSummary() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
+            doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1149,7 +1150,7 @@ export default function EmployeeMarginSummary() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let RATE =
+        let Ratefilter =
           transectionType === "P"
             ? "PURCHASE RATE"
             : transectionType == "M"
@@ -1163,11 +1164,11 @@ export default function EmployeeMarginSummary() {
             : "";
 
         let transectionsts =
-          transectionType === "C"
+          transectionType2 === "C"
             ? "CASH"
-            : transectionType == "R"
+            : transectionType2 == "R"
             ? "CREDIT"
-            : transectionType == "I"
+            : transectionType2 == "I"
             ? "INSTALLMENT"
             : "ALL";
 
@@ -1206,10 +1207,10 @@ export default function EmployeeMarginSummary() {
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Store :`, labelsX + 120, labelsY + 4.3); // Draw bold label
+        doc.text(`Rate :`, labelsX + 120, labelsY + 4.3); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${typename}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${Ratefilter}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1383,7 +1384,7 @@ export default function EmployeeMarginSummary() {
       ? typeselectdatavalue.label
       : "ALL ";
 
-    let RATE =
+    let Ratefilter =
       transectionType === "P"
         ? "PURCHASE RATE"
         : transectionType == "M"
@@ -1397,11 +1398,11 @@ export default function EmployeeMarginSummary() {
         : "";
 
      let transectionsts =
-          transectionType === "C"
+          transectionType2 === "C"
             ? "CASH"
-            : transectionType == "R"
+            : transectionType2 == "R"
             ? "CREDIT"
-            : transectionType == "I"
+            : transectionType2 == "I"
             ? "INSTALLMENT"
             : "ALL";
 
@@ -1414,8 +1415,8 @@ export default function EmployeeMarginSummary() {
       typecompany,
       "",
 
-      "Store :",
-      typetype,
+      "Rate :",
+      Ratefilter,
     ]);
 
     // Add second row
@@ -1550,9 +1551,9 @@ export default function EmployeeMarginSummary() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 

@@ -432,14 +432,14 @@ export default function EmployeeSaleSummaryReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
       FEmpCod: Employeeselectdata,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -874,7 +874,7 @@ export default function EmployeeSaleSummaryReport() {
     // Define table column headers and individual column widths
 
     const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-    const columnWidths = [38, 95, 22, 18, 22];
+    const columnWidths = [36, 95, 20, 18, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1113,8 +1113,9 @@ export default function EmployeeSaleSummaryReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+  doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
+            doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1135,7 +1136,7 @@ export default function EmployeeSaleSummaryReport() {
         doc.setFont("verdana-regular", "normal");
     doc.setFontSize(12);
         addTitle(
-          `Employee Sale Report From ${fromInputDate} To ${toInputDate}`,
+          `Employee Sale Summary Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1161,9 +1162,9 @@ export default function EmployeeSaleSummaryReport() {
             : "";
 
         let transectionsts =
-          transectionType === "BIL"
+          transectionType2 === "BIL"
             ? "PURCHASE"
-            : transectionType == "SRN"
+            : transectionType2 == "SRN"
             ? "PURCHASE RETURN"
             : "ALL";
 
@@ -1186,13 +1187,7 @@ export default function EmployeeSaleSummaryReport() {
 
         let search = searchQuery ? searchQuery : "";
 
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${employeedata}`, labelsX + 25, labelsY); // Draw the value next to the label
-
+     
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -1202,10 +1197,10 @@ export default function EmployeeSaleSummaryReport() {
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Store :`, labelsX + 120, labelsY + 4.3); // Draw bold label
+        doc.text(`Employee :`, labelsX + 120, labelsY + 4.3); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${typename}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${employeedata}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1346,7 +1341,7 @@ export default function EmployeeSaleSummaryReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Sale Report From ${fromInputDate} To ${toInputDate}`,
+      `Employee Sale Summary Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1393,23 +1388,22 @@ export default function EmployeeSaleSummaryReport() {
         : "";
 
     let transectionsts =
-      transectionType === "BIL"
-        ? "PURCHASE"
+      transectionType === "INV"
+        ? "SALE"
         : transectionType == "SRN"
-        ? "PURCHASE RETURN"
-        : "PRN";
+        ? "SALE RETURN"
+        : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow5 = worksheet.addRow(["Employee :", employeedata, ""]);
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
       "Company :",
       typecompany,
       "",
 
-      "Store :",
-      typetype,
+      "Employee :",
+      employeedata,
     ]);
 
     // Add second row
@@ -1441,14 +1435,7 @@ export default function EmployeeSaleSummaryReport() {
     );
 
     // Apply styling for the status row
-    typeAndStoreRow5.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
+  
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
@@ -1549,9 +1536,9 @@ export default function EmployeeSaleSummaryReport() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
@@ -2480,69 +2467,13 @@ export default function EmployeeSaleSummaryReport() {
                                  marginTop: "-5px",
                                }),
                              }}
-                             isClearable
-                             placeholder="ALL"
+                            //  isClearable
+                            //  placeholder="ALL"
                            />
                          </div>
                        </div>
          
-                       {/* <div
-                                         className="d-flex align-items-center"
-                                         style={{ marginRight: "21px" }}
-                                     >
-                                         <div
-                                             style={{
-                                                 marginLeft: "10px",
-                                                 width: "80px",
-                                                 display: "flex",
-                                                 justifyContent: "end",
-                                             }}
-                                         >
-                                             <label htmlFor="transactionType">
-                                                 <span
-                                                     style={{
-                                                         fontSize: getdatafontsize,
-                                                         fontFamily: getfontstyle,
-                                                         fontWeight: "bold",
-                                                     }}
-                                                 >
-                                                     Rate :
-                                                 </span>
-                                             </label>
-                                         </div>
-         
-                                         <select
-                                             ref={input4Refrate}
-                                             onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                             id="submitButton"
-                                             name="type"
-                                             onFocus={(e) =>
-                                                 (e.currentTarget.style.border = "4px solid red")
-                                             }
-                                             onBlur={(e) =>
-                                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                             }
-                                             value={transectionType}
-                                             onChange={handleTransactionTypeChange}
-                                             style={{
-                                                 width: "250px",
-                                                 height: "24px",
-                                                 marginLeft: "3px",
-                                                 backgroundColor: getcolor,
-                                                 border: `1px solid ${fontcolor}`,
-                                                 fontSize: getdatafontsize,
-                                                 fontFamily: getfontstyle,
-                                                 color: fontcolor,
-                                                 paddingLeft: "12px",
-                                             }}
-                                         >
-                                               <option value="A">AVERAGE RATE</option>
-                                             <option value="P">PURCHASE RATE</option>
-                                             <option value="M">LAST SM RATE</option>
-                                               <option value="W">WEIGHTED AVERAGE</option>
-                                             <option value="F">FIFO</option>
-                                         </select>
-                                     </div> */}
+                      
                      </div>
                    </div>
 

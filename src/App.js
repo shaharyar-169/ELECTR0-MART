@@ -188,6 +188,10 @@ import EmployeeSalryRegisterReport from "./Component/Reports/Daily_Jobs_Reports/
 import EmployeeMarginComparison from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeMarginComparison.js";
 import EmployeeCommissionSummaryReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeCommissionSummaryReport.js";
 import EmployeeSaleComparisonReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeSaleComparison.js";
+import EmployeeCommissionComparison from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeCommissionComparison.js";
+import EmployeeFixCommissionReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeFixCommissionRepoet.js";
+import EmployeeFixCommissionSummary from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeFixCommissionSummary.js";
+import EmployeeFixCommissionComparison from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeFixCommissionComparison.js";
 
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
@@ -301,7 +305,7 @@ function App() {
                 <Route exact path="/SerialLedger" element={<SerialNoLedgerReport />} />
 
 
-                {/* Rountes for Job reports */}
+                {/* Rountes for Job reports */}s
                 <Route exact path="/SparePartsProfitReport" element={<SparePartProfitReport />} />
                 <Route exact path="/SparePartsProfitSummary" element={<SparePartProfitSummary />} />
                 <Route exact path="/TechnicianPerformance" element={<TechnicianPerformanceReport />} />
@@ -408,6 +412,10 @@ function App() {
                 <Route exact path="/EmployeeMarginComparison" element={<EmployeeMarginComparison />} />
                 <Route exact path="/EmployeeCommissionSummary" element={<EmployeeCommissionSummaryReport />} />
                 <Route exact path="/EmployeeSaleComarison" element={<EmployeeSaleComparisonReport />} />
+                <Route exact path="/EmployeeCommissionComparison" element={<EmployeeCommissionComparison />} />
+                <Route exact path="/FixCommissionReport" element={<EmployeeFixCommissionReport />} />
+                <Route exact path="/FixCommissionSummaryReport" element={<EmployeeFixCommissionSummary />} />
+                <Route exact path="/EmployeePerformanceReport" element={<EmployeeFixCommissionComparison />} />
 
 
                 {/* Rountes for item reports */}

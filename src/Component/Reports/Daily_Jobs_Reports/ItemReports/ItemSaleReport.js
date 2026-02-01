@@ -1104,10 +1104,10 @@ export default function ItemSaleReport() {
                     : "";
 
         let transectionsts =
-          transectionType2 === "BIL"
-            ? "PURCHASE"
-            : transectionType2 == "PRN"
-              ? "PURCHASE RETURN"
+          transectionType2 === "INV"
+            ? "SALE"
+            : transectionType2 == "SRN"
+              ? "SALE RETURN"
               : "ALL";
 
         let typeText = capacityselectdatavalue.label
@@ -1316,10 +1316,10 @@ export default function ItemSaleReport() {
                 : "";
 
     let transectionsts =
-      transectionType2 === "BIL"
-        ? "PURCHASE"
-        : transectionType2 == "PRN"
-          ? "PURCHASE RETURN"
+      transectionType2 === "INV"
+        ? "SALE"
+        : transectionType2 == "SRN"
+          ? "SALE RETURN"
           : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
@@ -2523,8 +2523,8 @@ export default function ItemSaleReport() {
                     }}
                   >
                     <option value="">ALL</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
+                    <option value="INV">SALE</option>
+                    <option value="SRN">SALE RETURN</option>
                   </select>
 
                   {transectionType2 !== "" && (
@@ -2752,12 +2752,13 @@ export default function ItemSaleReport() {
                     <td className="border-dark" style={sixthColWidth}>
                       Str
                     </td>
+                     <td className="border-dark" style={eightColWidth}>
+                      Rate
+                    </td>
                     <td className="border-dark" style={seventhColWidth}>
                       Qnty
                     </td>
-                    <td className="border-dark" style={eightColWidth}>
-                      Rate
-                    </td>
+                   
                     <td className="border-dark" style={ninthColWidth}>
                       Amount
                     </td>
@@ -2824,8 +2825,10 @@ export default function ItemSaleReport() {
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
+                                                    <td style={eightColWidth}></td>
+
                         <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
+                    
                         <td style={ninthColWidth}></td>
                       </tr>
                     </>
@@ -2867,12 +2870,13 @@ export default function ItemSaleReport() {
                             <td className="text-end" style={sixthColWidth}>
                               {item.Store}
                             </td>
+                             <td className="text-end" style={eightColWidth}>
+                              {formatValue(item.Rate)}
+                            </td>
                             <td className="text-end" style={seventhColWidth}>
                               {formatValue(item.Qnty)}
                             </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
+                           
                             <td className="text-end" style={ninthColWidth}>
                               {formatValue(item["Sale Amount"])}
                             </td>
@@ -2903,8 +2907,10 @@ export default function ItemSaleReport() {
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
+                          <td style={eightColWidth}></td>
                         <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
+                       
+                       
                         <td style={ninthColWidth}></td>
                       </tr>
                     </>
@@ -2969,6 +2975,15 @@ export default function ItemSaleReport() {
             >
               {/* <span className="mobileledger_total">{formatValue(totaldebit)}</span> */}
             </div>
+             <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">{totaltax}</span> */}
+            </div>
 
             <div
               style={{
@@ -2981,15 +2996,7 @@ export default function ItemSaleReport() {
                 {formatValue(totaldebit)}
               </span>
             </div>
-            <div
-              style={{
-                ...eightColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
-            </div>
+           
             <div
               style={{
                 ...ninthColWidth,

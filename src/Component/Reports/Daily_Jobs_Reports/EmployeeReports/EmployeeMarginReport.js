@@ -434,14 +434,14 @@ export default function EmployeeMarginReport() {
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
       FRepRat: transectionType,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType2,
       FEmpCod: Employeeselectdata,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -1189,10 +1189,10 @@ export default function EmployeeMarginReport() {
             : "";
 
         let transectionsts =
-          transectionType === "BIL"
-            ? "PURCHASE"
-            : transectionType == "SRN"
-            ? "PURCHASE RETURN"
+          transectionType2 === "INV"
+            ? "SALE"
+            : transectionType2 == "SRN"
+            ? "SALE RETURN"
             : "ALL";
 
         let EMPLOYEEDATA = Employeeselectdatavalue.label
@@ -1431,11 +1431,11 @@ export default function EmployeeMarginReport() {
         : "";
 
     let transectionsts =
-      transectionType === "BIL"
-        ? "PURCHASE"
-        : transectionType == "SRN"
-        ? "PURCHASE RETURN"
-        : "PRN";
+      transectionType2 === "INV"
+        ? "SALE"
+        : transectionType2 == "SRN"
+        ? "SALE RETURN"
+        : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
@@ -1617,9 +1617,9 @@ export default function EmployeeMarginReport() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
@@ -2978,11 +2978,12 @@ export default function EmployeeMarginReport() {
                     {/* <td className="border-dark" style={sixthColWidth}>
                                  Str
                                </td> */}
-                    <td className="border-dark" style={seventhColWidth}>
-                      Qnty
-                    </td>
+                   
                     <td className="border-dark" style={eightColWidth}>
                       Rate
+                    </td>
+                     <td className="border-dark" style={seventhColWidth}>
+                      Qnty
                     </td>
                     <td className="border-dark" style={ninthColWidth}>
                       Amount
@@ -3056,8 +3057,9 @@ export default function EmployeeMarginReport() {
                                                 <td style={forthColWidth1}></td>
 
                         {/* <td style={sixthColWidth}></td> */}
-                        <td style={seventhColWidth}></td>
                         <td style={eightColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
                       </tr>
@@ -3111,12 +3113,13 @@ export default function EmployeeMarginReport() {
                             {/* <td className="text-end" style={sixthColWidth}>
                                          {item.Store}
                                        </td> */}
+                                        <td className="text-end" style={eightColWidth}>
+                              {formatValue(item.Rate)}
+                            </td>
                             <td className="text-end" style={seventhColWidth}>
                               {formatValue(item.Qnty)}
                             </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
+                           
                             <td className="text-end" style={ninthColWidth}>
                               {formatValue(item["Sale Amount"])}
                             </td>
@@ -3151,8 +3154,9 @@ export default function EmployeeMarginReport() {
                                                 <td style={forthColWidth1}></td>
 
                         {/* <td style={sixthColWidth}></td> */}
-                        <td style={seventhColWidth}></td>
                         <td style={eightColWidth}></td>
+                                                <td style={seventhColWidth}></td>
+
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
                       </tr>
@@ -3227,6 +3231,15 @@ export default function EmployeeMarginReport() {
                        >
                          <span className="mobileledger_total">{formatValue(totaldebit)}</span>
                        </div> */}
+                          <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">{totaltax}</span> */}
+            </div>
 
             <div
               style={{
@@ -3239,15 +3252,7 @@ export default function EmployeeMarginReport() {
                 {formatValue(totaldebit)}
               </span>
             </div>
-            <div
-              style={{
-                ...eightColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              {/* <span className="mobileledger_total">{totaltax}</span> */}
-            </div>
+         
             <div
               style={{
                 ...ninthColWidth,

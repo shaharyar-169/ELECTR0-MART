@@ -430,7 +430,6 @@ export default function EmployeeMarginComparison() {
 
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
-      FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
       FRepRat: transectionType,
@@ -438,9 +437,9 @@ export default function EmployeeMarginComparison() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType2,
-    //   code: "NASIRTRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -1116,8 +1115,9 @@ export default function EmployeeMarginComparison() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1150,7 +1150,7 @@ export default function EmployeeMarginComparison() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let RATE =
+        let Ratefilter =
           transectionType === "P"
             ? "PURCHASE RATE"
             : transectionType == "M"
@@ -1164,11 +1164,11 @@ export default function EmployeeMarginComparison() {
             : "";
 
         let transectionsts =
-          transectionType === "C"
+          transectionType2 === "C"
             ? "CASH"
-            : transectionType == "R"
+            : transectionType2 == "R"
             ? "CREDIT"
-            : transectionType == "I"
+            : transectionType2 == "I"
             ? "INSTALLMENT"
             : "ALL";
 
@@ -1207,10 +1207,10 @@ export default function EmployeeMarginComparison() {
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Store :`, labelsX + 120, labelsY + 4.3); // Draw bold label
+        doc.text(`Rate :`, labelsX + 120, labelsY + 4.3); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${typename}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${Ratefilter}`, labelsX + 145, labelsY + 4.3); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1384,7 +1384,7 @@ export default function EmployeeMarginComparison() {
       ? typeselectdatavalue.label
       : "ALL ";
 
-    let RATE =
+    let Ratefilter =
       transectionType === "P"
         ? "PURCHASE RATE"
         : transectionType == "M"
@@ -1398,11 +1398,11 @@ export default function EmployeeMarginComparison() {
         : "";
 
     let transectionsts =
-      transectionType === "C"
+      transectionType2 === "C"
         ? "CASH"
-        : transectionType == "R"
+        : transectionType2 == "R"
         ? "CREDIT"
-        : transectionType == "I"
+        : transectionType2 == "I"
         ? "INSTALLMENT"
         : "ALL";
 
@@ -1415,7 +1415,7 @@ export default function EmployeeMarginComparison() {
       typecompany,
       "",
 
-      "Store :",
+      "Rate :",
       typetype,
     ]);
 
@@ -1555,9 +1555,9 @@ export default function EmployeeMarginComparison() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
@@ -2576,63 +2576,7 @@ export default function EmployeeMarginComparison() {
                 </div>
               </div>
 
-              {/* <div
-                                         className="d-flex align-items-center"
-                                         style={{ marginRight: "21px" }}
-                                     >
-                                         <div
-                                             style={{
-                                                 marginLeft: "10px",
-                                                 width: "80px",
-                                                 display: "flex",
-                                                 justifyContent: "end",
-                                             }}
-                                         >
-                                             <label htmlFor="transactionType">
-                                                 <span
-                                                     style={{
-                                                         fontSize: getdatafontsize,
-                                                         fontFamily: getfontstyle,
-                                                         fontWeight: "bold",
-                                                     }}
-                                                 >
-                                                     Rate :
-                                                 </span>
-                                             </label>
-                                         </div>
-         
-                                         <select
-                                             ref={input4Refrate}
-                                             onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                                             id="submitButton"
-                                             name="type"
-                                             onFocus={(e) =>
-                                                 (e.currentTarget.style.border = "4px solid red")
-                                             }
-                                             onBlur={(e) =>
-                                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                             }
-                                             value={transectionType}
-                                             onChange={handleTransactionTypeChange}
-                                             style={{
-                                                 width: "250px",
-                                                 height: "24px",
-                                                 marginLeft: "3px",
-                                                 backgroundColor: getcolor,
-                                                 border: `1px solid ${fontcolor}`,
-                                                 fontSize: getdatafontsize,
-                                                 fontFamily: getfontstyle,
-                                                 color: fontcolor,
-                                                 paddingLeft: "12px",
-                                             }}
-                                         >
-                                               <option value="A">AVERAGE RATE</option>
-                                             <option value="P">PURCHASE RATE</option>
-                                             <option value="M">LAST SM RATE</option>
-                                               <option value="W">WEIGHTED AVERAGE</option>
-                                             <option value="F">FIFO</option>
-                                         </select>
-                                     </div> */}
+            
             </div>
           </div>
 
@@ -2744,40 +2688,11 @@ export default function EmployeeMarginComparison() {
                   </label>
                 </div>
 
-                {/* <select
-                                    ref={input4Ref}
-                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                                    id="submitButton"
-                                    name="type"
-                                    onFocus={(e) =>
-                                        (e.currentTarget.style.border = "4px solid red")
-                                    }
-                                    onBlur={(e) =>
-                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                    }
-                                    value={transectionType2}
-                                    onChange={handleTransactionTypeChange2}
-                                    style={{
-                                        width: "250px",
-                                        height: "24px",
-                                        marginLeft: "3px",
-                                        backgroundColor: getcolor,
-                                        border: `1px solid ${fontcolor}`,
-                                        fontSize: getdatafontsize,
-                                        fontFamily: getfontstyle,
-                                        color: fontcolor,
-                                        paddingLeft: "12px",
-                                    }}
-                                >
-                                      <option value="">ALL</option>
-                                    <option value="BIL">PURCHASE</option>
-                                    <option value="PRN">PURCHASE RETURN</option>
-                                </select> */}
-
+               
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <select
                     ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     id="submitButton"
                     name="type"
                     onFocus={(e) =>
@@ -2913,69 +2828,7 @@ export default function EmployeeMarginComparison() {
                 </div>
               </div>
 
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input5Ref}
-                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "225px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div>
+             
             </div>
           </div>
 

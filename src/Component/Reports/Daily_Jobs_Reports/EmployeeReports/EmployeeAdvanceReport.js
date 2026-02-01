@@ -428,13 +428,13 @@ export default function EmployeeAdvanceReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -810,10 +810,10 @@ export default function EmployeeAdvanceReport() {
       "",
       "Total",
      
-      String(totalopening),
-          String(totaldebit),
-      String(totalcredit),
-      String(ClosingBalance),
+      String(formatValue(totalopening)),
+          String(formatValue(totaldebit)),
+      String(formatValue(totalcredit)),
+      String(formatValue(ClosingBalance)),
     ]);
 
     // Define table column headers and individual column widths
@@ -1069,8 +1069,9 @@ export default function EmployeeAdvanceReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1368,13 +1369,14 @@ companyRow.eachCell((cell) => {
     });
 
     const totalRow = worksheet.addRow([
+     
       "",
       "Total",
      
-      String(totalopening),
-          String(totaldebit),
-      String(totalcredit),
-      String(ClosingBalance),
+      String(formatValue(totalopening)),
+          String(formatValue(totaldebit)),
+      String(formatValue(totalcredit)),
+      String(formatValue(ClosingBalance)),
     ]);
 
     // total row added
@@ -1382,9 +1384,9 @@ companyRow.eachCell((cell) => {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 

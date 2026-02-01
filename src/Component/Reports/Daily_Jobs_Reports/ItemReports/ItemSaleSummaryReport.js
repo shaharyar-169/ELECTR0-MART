@@ -1214,10 +1214,10 @@ export default function ItemSaleSummaryReport() {
                     : "";
 
         let transectionsts =
-          transectionType === "BIL"
-            ? "PURCHASE"
+          transectionType === "INV"
+            ? "SALE"
             : transectionType == "SRN"
-              ? "PURCHASE RETURN"
+              ? "SALE RETURN"
               : "ALL";
 
         let typeText = capacityselectdatavalue.label
@@ -1423,11 +1423,11 @@ export default function ItemSaleSummaryReport() {
                 : "";
 
     let transectionsts =
-      transectionType === "BIL"
-        ? "PURCHASE"
+      transectionType === "INV"
+        ? "SALE"
         : transectionType == "SRN"
-          ? "PURCHASE RETURN"
-          : "PRN";
+          ? "SALE RETURN"
+          : "ALL";
 
     let typesearch = searchQuery ? searchQuery : "";
 
@@ -2829,8 +2829,8 @@ export default function ItemSaleSummaryReport() {
                       }}
                     >
                       <option value="">ALL</option>
-                      <option value="BIL">PURCHASE</option>
-                      <option value="PRN">PURCHASE RETURN</option>
+                      <option value="INV">SALE</option>
+                      <option value="SRN">SALE RETURN</option>
                     </select>
 
                     {transectionType2 !== "" && (
@@ -3313,13 +3313,13 @@ export default function ItemSaleSummaryReport() {
                                 {item.Description}
                               </td>
                               <td className="text-end" style={thirdColWidth}>
-                                {formatValue(item.Rate)}
+                                {item.Rate}
                               </td>
                               <td className="text-end" style={forthColWidth}>
-                                {formatValue(item.Qnty)}
+                                {item.Qnty}
                               </td>
                               <td className="text-end" style={sixthColWidth}>
-                                {formatValue(item["Sale Amount"])}
+                                {item["Sale Amount"]}
                               </td>
                             </tr>
                           );

@@ -3,12 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import {
-  getUserData,
-  getOrganisationData,
-  getLocationnumber,
-  getYearDescription,
-} from "../../../Auth";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -25,11 +20,12 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Code, Collections, Description, Store } from "@mui/icons-material";
-import "../../../vardana/vardana";
-import "../../../vardana/verdana-bold";
+import { Description, Store } from "@mui/icons-material";
+import '../../../vardana/vardana';
+import '../../../vardana/verdana-bold'
 
-export default function EmployeeCommissionSummaryReport() {
+
+export default function EmployeeFixCommissionReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -42,27 +38,16 @@ export default function EmployeeCommissionSummaryReport() {
   const categoryRef = useRef(null);
   const capacityRef = useRef(null);
   const storeRef = useRef(null);
+  const employeeref = useRef(null);
   const typeRef = useRef(null);
   const searchRef = useRef(null);
-  const CommissionRef = useRef(null);
   const selectButtonRef = useRef(null);
+  const hasInitialized = useRef(false);
 
   const [saleType, setSaleType] = useState("");
 
-  const hasInitialized = useRef(false);
-  const employeeref = useRef(null);
-  const [GetEmployee, setGetEmployee] = useState([]);
-  
-  const [Employeeselectdata, setEmployeeselectdata] = useState("");
-  const [Employeeselectdatavalue, setEmployeeselectdatavalue] = useState("");
-
-  
-
   const [storeList, setStoreList] = useState([]);
   const [storeType, setStoreType] = useState("");
-   const [mobileNumber, setmobileNumber] = useState("");
-  const [tableData, setTableData] = useState([]);
-  
 
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -81,6 +66,10 @@ export default function EmployeeCommissionSummaryReport() {
   const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
 
   const [GetCapacity, setGetCapacity] = useState([]);
+  const [GetEmployee, setGetEmployee] = useState([]);
+  const [Employeeselectdata, setEmployeeselectdata] = useState("");
+  const [Employeeselectdatavalue, setEmployeeselectdatavalue] = useState("");
+
   const [GetCompany, setGetCompany] = useState([]);
   const [Categoryselectdata, setCategoryselectdata] = useState("");
   const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
@@ -95,10 +84,8 @@ export default function EmployeeCommissionSummaryReport() {
   const [sortData, setSortData] = useState("ASC");
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("P");
+  const [transectionType, settransectionType] = useState("A");
   const [transectionType2, settransectionType2] = useState("");
-
-  console.log('transectionType2',transectionType2)
 
   const [totalqnty, settotalqnty] = useState(0);
   const [totalexcel, settotalexcel] = useState(0);
@@ -107,8 +94,8 @@ export default function EmployeeCommissionSummaryReport() {
 
   const [totaldebit, settotaldebit] = useState(0);
   const [totalcredit, settotalcredit] = useState(0);
-  const [ClosingBalance, setClosingBalance] = useState(0);
-  const [commission,setcommission] = useState(0);
+  const [Commission, setCommission] = useState(0);
+
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -121,13 +108,6 @@ export default function EmployeeCommissionSummaryReport() {
 
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
-
- console.log("Employeeselectdata", Employeeselectdata);
-  console.log("mobile", mobileNumber);
-  console.log("Transection", transectionType);
-   console.log("transectionType2", transectionType2);
-    console.log("tabledta", tableData);
-
 
   const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
@@ -318,9 +298,9 @@ export default function EmployeeCommissionSummaryReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (employeeref.current) {
+        if (saleSelectRef.current) {
           e.preventDefault();
-          employeeref.current.focus();
+          saleSelectRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -439,7 +419,7 @@ export default function EmployeeCommissionSummaryReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeCommissionSummary.php";
+    const apiUrl = apiLinks + "/EmployeeFixCommissionReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -447,18 +427,18 @@ export default function EmployeeCommissionSummaryReport() {
 
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
+      FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
-      FRepRat: transectionType,
+      FStrCod: Typeselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      FRepTyp: transectionType2,
+      FTrnTyp: transectionType2,
       FEmpCod: Employeeselectdata,
-      FComPrc: mobileNumber,
-    
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+
+    //   code: 'NASIRTRD',
+    //   FLocCod: '001',
+    //   FYerDsc: '2024-2024',
     }).toString();
 
     axios
@@ -468,10 +448,9 @@ export default function EmployeeCommissionSummaryReport() {
 
         settotaldebit(response.data["Total Qnty"]);
         settotalcredit(response.data["Total Amount"]);
-        setClosingBalance(response.data["Total Margin"]);
-         setcommission(response.data["Total Comm"]);
+        setCommission(response.data["Comm"]);
 
-       if (response.data && Array.isArray(response.data.Detail)) {
+        if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
         } else {
           console.warn(
@@ -480,7 +459,7 @@ export default function EmployeeCommissionSummaryReport() {
           );
           setTableData([]);
         }
-})
+      })
       .catch((error) => {
         console.error("Error:", error);
         setIsLoading(false);
@@ -490,7 +469,10 @@ export default function EmployeeCommissionSummaryReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+    if (
+      !hasComponentMountedPreviously ||
+      (fromRef && fromRef.current)
+    ) {
       if (fromRef && fromRef.current) {
         setTimeout(() => {
           fromRef.current.focus();
@@ -518,10 +500,10 @@ export default function EmployeeCommissionSummaryReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveEmployee.php";
     const formData = new URLSearchParams({
-      //    code: organisation.code,
-      //     FLocCod: locationnumber || getLocationNumber,
-      code: "NASIRTRD",
-      FLocCod: "001",
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      code : 'NASIRTRD',
+      FLocCod:'001'
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -543,9 +525,6 @@ export default function EmployeeCommissionSummaryReport() {
   const employeeoptions = GetEmployee.map((item) => ({
     value: item.tempcod,
     label: `${item.tempcod}-${item.tempnam.trim()}`,
-    tcrtcom: item.tcrtcom,
-    tcshcom: item.tcshcom,
-    tinscom: item.tinscom,
   }));
 
   const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
@@ -714,7 +693,7 @@ export default function EmployeeCommissionSummaryReport() {
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 225,
+      width: 250,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -780,8 +759,10 @@ export default function EmployeeCommissionSummaryReport() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected || state.isFocused ? "white" : fontcolor,
-      "&:hover": {
+   color:
+  state.isSelected || state.isFocused
+    ? "white"
+    : fontcolor,      "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
         cursor: "pointer",
@@ -875,43 +856,53 @@ export default function EmployeeCommissionSummaryReport() {
   });
 
   const exportPDFHandler = () => {
+   
+
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-     
-      item.code,
+      item.Date,
+      item["Trn#"],
+      item.Type,
       item.Description,
+      item.Store,
+      formatValue(item.Rate),
       formatValue(item.Qnty),
-      formatValue(item.Amount),
-      formatValue(item.Margin),
-        formatValue(item.Comm),
+    formatValue(item["Sale Amount"]),
+     formatValue(item.Comm),
+
     ]);
 
     // Add summary row to the table
     rows.push([
-     
+      "",
+      "",
       "",
       "Total",
+      "",
+       "",
       String(formatValue(totaldebit)),
-      String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
-       String(formatValue(commission)),
+           String(formatValue(totalcredit)),
+            String(formatValue(Commission)),
     ]);
 
     // Define table column headers and individual column widths
 
     const headers = [
-    
-      "Code",
+      "Date",
+      "Trn#",
+      "Type",
       "Description",
-      "Qnty",
+      "Store",
+     
+      "Rate",
+       "Qnty",
       "Amount",
-       "Margin",
-       "Comm",
+      "Fix Comm"
     ];
-    const columnWidths = [40, 110,20,30, 30, 30];
+    const columnWidths = [24, 18, 12, 110, 15, 20, 20, 25,25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -921,14 +912,14 @@ export default function EmployeeCommissionSummaryReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont("verdana-regular", "normal");
+    doc.setFont('verdana-regular', 'normal');
     doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont("verdana", "bold");
-      doc.setFontSize(10);
+      doc.setFont('verdana', 'bold');
+    doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -1045,18 +1036,20 @@ export default function EmployeeCommissionSummaryReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 12) {
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
+          
             cellIndex === 4 ||
-            cellIndex === 5
-            
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7 ||
+            cellIndex === 8
+          
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1096,6 +1089,8 @@ export default function EmployeeCommissionSummaryReport() {
           doc.setFontSize(10);
         }
       }
+
+      
 
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
@@ -1156,8 +1151,8 @@ export default function EmployeeCommissionSummaryReport() {
         // }
 
         // Add page numbering
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+        doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
         doc.text(
           `Page ${pageNumber}`,
           rightX - 15,
@@ -1171,14 +1166,14 @@ export default function EmployeeCommissionSummaryReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-        doc.setFont("Times New Roman", "normal");
-        doc.setFontSize(10);
+      doc.setFont('Times New Roman', 'normal');
+    doc.setFontSize(10);
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+ doc.setFont('verdana-regular', 'normal');
+    doc.setFontSize(10);
         addTitle(
-          `Employee Commission Summary Report From ${fromInputDate} To ${toInputDate}`,
+          `Employee Fix Commission Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1190,7 +1185,8 @@ export default function EmployeeCommissionSummaryReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let ratedata =
+
+        let RATE =
           transectionType === "P"
             ? "PURCHASE RATE"
             : transectionType == "M"
@@ -1204,12 +1200,10 @@ export default function EmployeeCommissionSummaryReport() {
             : "";
 
         let transectionsts =
-          transectionType2 === "C"
-            ? "CASH"
-            : transectionType2 == "R"
-            ? "CREDIT"
-            : transectionType2 == "I"
-            ? "INSTALLMENT"
+          transectionType2 === "INV"
+            ? "SALE"
+            : transectionType2 == "SRN"
+            ? "SALE RETURN"
             : "ALL";
 
         let EMPLOYEEDATA = Employeeselectdatavalue.label
@@ -1224,45 +1218,42 @@ export default function EmployeeCommissionSummaryReport() {
         let category = categoryselectdatavalue.label
           ? categoryselectdatavalue.label
           : "ALL";
-        //  let typename = typeselectdatavalue.label
-        //    ? typeselectdatavalue.label
-        //    : "ALL";
+        let typename = typeselectdatavalue.label
+          ? typeselectdatavalue.label
+          : "ALL";
 
-        let search = mobileNumber ? mobileNumber : "";
+        let search = searchQuery ? searchQuery : "";
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
+     
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+                  
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+                doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Rate :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${ratedata}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Category :`, labelsX, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Employee :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+                doc.text(`${EMPLOYEEDATA}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Category :`, labelsX, labelsY + 8.3); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)       
         doc.text(`${category}`, labelsX + 25, labelsY + 8.3); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
+        doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
         doc.text(`Type :`, labelsX + 180, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
         doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.3); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
@@ -1270,25 +1261,28 @@ export default function EmployeeCommissionSummaryReport() {
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
         // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Capacity :`, labelsX, labelsY + 12.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+                doc.text(`Capacity :`, labelsX, labelsY + 12.5); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+                doc.text(`${typeText}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
         // doc.setFont(getfontstyle, "normal"); // Reset font to normal
         // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
 
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-          doc.text(`Commission :`, labelsX + 180, labelsY + 12.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-          doc.text(`${search}`, labelsX + 208, labelsY + 12.5); // Draw the value next to the label
-        
+        if (searchQuery) {
+doc.setFont('verdana', "bold");
+        doc.setFontSize(10)
+          doc.text(`Search :`, labelsX + 180, labelsY + 12.5); // Draw bold label
+doc.setFont('verdana-regular', "normal");
+        doc.setFontSize(10)
+          doc.text(`${search}`, labelsX + 205, labelsY + 12.5); // Draw the value next to the label
+        }
+
+       
 
         startY += 15; // Adjust vertical position for the labels
 
@@ -1333,22 +1327,25 @@ export default function EmployeeCommissionSummaryReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeCommissionSummaryReport As On ${date}.pdf`);
+    doc.save(`EmployeeFixCommReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 8; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
+      "center",
+      "center",
+      "center",
       "left",
-      "left",
       "right",
       "right",
       "right",
-      "right"
+      "right",
+        "right",
     ];
 
     // Define fonts for different sections
@@ -1378,26 +1375,26 @@ export default function EmployeeCommissionSummaryReport() {
 
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
-
+ 
     companyRow.eachCell((cell) => {
-      cell.font = {
-        name: "Times New Roman",
-        size: 16, // optional
-        bold: true, // optional
-      };
-      cell.alignment = { horizontal: "center" };
-    });
+  cell.font = {
+    name: "Times New Roman",
+    size: 16,       // optional
+    bold: true,     // optional
+  };
+  cell.alignment = { horizontal: "center" };
+});
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      `A${companyRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
         companyRow.number
       }`
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Commission Summary Report From ${fromInputDate} To ${toInputDate}`,
+      `Employee Fix Commission Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1405,7 +1402,7 @@ export default function EmployeeCommissionSummaryReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      `A${storeListRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
         storeListRow.number
       }`
     );
@@ -1426,11 +1423,11 @@ export default function EmployeeCommissionSummaryReport() {
     let typecategory = categoryselectdatavalue.label
       ? categoryselectdatavalue.label
       : "ALL";
-    //  let typetype = typeselectdatavalue.label
-    //    ? typeselectdatavalue.label
-    //    : "ALL ";
+    let typetype = typeselectdatavalue.label
+      ? typeselectdatavalue.label
+      : "ALL ";
 
-    let ratedata =
+    let RATE =
       transectionType === "P"
         ? "PURCHASE RATE"
         : transectionType == "M"
@@ -1444,40 +1441,26 @@ export default function EmployeeCommissionSummaryReport() {
         : "";
 
     let transectionsts =
-          transectionType2 === "C"
-            ? "CASH"
-            : transectionType2 == "R"
-            ? "CREDIT"
-            : transectionType2 == "I"
-            ? "INSTALLMENT"
-            : "ALL";
+      transectionType2 === "INV"
+        ? "SALE"
+        : transectionType2 == "SRN"
+        ? "SALE RETURN"
+        : "ALL";
 
-    let typesearch = mobileNumber ? mobileNumber : "";
+    let typesearch = searchQuery ? searchQuery : "";
 
-    const typeAndStoreRow5 = worksheet.addRow([
-      "Employee :",
-      employeedata,
-      "",
-      "",
-      "",
-    ]);
-
-    worksheet.mergeCells(
-      `B${typeAndStoreRow5.number}:D${typeAndStoreRow5.number}`
-    );
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
       "Company :",
       typecompany,
       "",
       "",
-       "Rate :",
-      ratedata,
+      "",
+      "Employee :",
+      employeedata,
     ]);
 
-    worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:C${typeAndStoreRow.number}`
-    );
+    worksheet.mergeCells(`B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`);
 
     // Add second row
     const typeAndStoreRow2 = worksheet.addRow([
@@ -1485,29 +1468,29 @@ export default function EmployeeCommissionSummaryReport() {
       typecategory,
       "",
       "",
-           "Type :",
+      "",
+
+      "Type :",
       transectionsts,
     ]);
 
-    worksheet.mergeCells(
-      `B${typeAndStoreRow2.number}:C${typeAndStoreRow2.number}`
-    );
-    // Add third row with conditional rendering for "SEARCH:"
+     worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
+      // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
-      ["Capacity :", typecapacity, "", "", , "Comm :", typesearch]
-      
+      searchQuery
+        ? ["Capacity :", typecapacity, "", "", "", "Search :", typesearch]
+        : ["Capacity :", typecapacity]
     );
 
-    worksheet.mergeCells(
-      `B${typeAndStoreRow4.number}:C${typeAndStoreRow4.number}`
-    );
+     worksheet.mergeCells(`B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`);
+    
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1515,32 +1498,16 @@ export default function EmployeeCommissionSummaryReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-    typeAndStoreRow5.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
+  
     typeAndStoreRow4.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1564,12 +1531,15 @@ export default function EmployeeCommissionSummaryReport() {
 
     // Add headers
     const headers = [
-      "Code",
+      "Date",
+      "Trn#",
+      "Type",
       "Description",
-      "Qnty",
+      "Store",
+       "Rate",
+      "Qnty",    
       "Amount",
-      "Margin",
-        "Comm",
+      "Fix Comm"
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1577,13 +1547,16 @@ export default function EmployeeCommissionSummaryReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-       
-        item.code,
-        item.Description,
-        formatValue(item.Qnty),
-        formatValue(item.Amount),
-        formatValue(item.Margin),
-         formatValue(item.Comm),
+          item.Date,
+      item["Trn#"],
+      item.Type,
+      item.Description,
+      item.Store,
+      formatValue(item.Rate),
+      formatValue(item.Qnty),
+    formatValue(item["Sale Amount"]),
+     formatValue(item.Comm),
+
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1602,17 +1575,20 @@ export default function EmployeeCommissionSummaryReport() {
     });
 
     // Set column widths
-    [20, 45,8, 15, 15,15].forEach((width, index) => {
+    [10, 8, 6, 50, 8, 10, 12, 12,12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
-           "",
-         "Total",
-           String(formatValue(totaldebit)),
-      String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
-      String(formatValue(commission)),
+      "",
+      "",
+      "",
+      "Total",
+      "",
+       "",
+      String(formatValue(totaldebit)),
+           String(formatValue(totalcredit)),
+            String(formatValue(Commission)),
     ]);
 
     // total row added
@@ -1627,7 +1603,7 @@ export default function EmployeeCommissionSummaryReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
+      if (colNumber === 6 || colNumber === 8 || colNumber === 9 ) {
         cell.alignment = { horizontal: "right" };
       }
     });
@@ -1695,7 +1671,7 @@ export default function EmployeeCommissionSummaryReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeCommissionSummaryReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `EmployeeFixCommReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1706,7 +1682,7 @@ export default function EmployeeCommissionSummaryReport() {
   const btnColor = "#3368B5";
   const textColor = "white";
 
-
+  const [tableData, setTableData] = useState([]);
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1720,7 +1696,7 @@ export default function EmployeeCommissionSummaryReport() {
     if (event.key === "Enter") {
       const selectedOption = saleSelectRef.current.state.selectValue;
       if (selectedOption && selectedOption.value) {
-        setEmployeeselectdata(selectedOption.value);
+        setCompanyselectdata(selectedOption.value);
       }
       // const nextInput = document.getElementById(inputId);
       const nextInput = inputId.current;
@@ -1805,6 +1781,37 @@ export default function EmployeeCommissionSummaryReport() {
     settransectionType2(selectedTransactionType);
   };
 
+  // const firstColWidth = {
+  //     width: "10%",
+  // };
+  // const secondColWidth = {
+  //     width: "30.6%",
+  // };
+  // const thirdColWidth = {
+  //     width: "9%",
+  // };
+  // const forthColWidth = {
+  //     width: "9%",
+  // };
+  // const fifthColWidth = {
+  //     width: "9%",
+  // };
+  // const sixthColWidth = {
+  //     width: "5%",
+  // };
+  // const seventhColWidth = {
+  //     width: "9%",
+  // };
+  // const eighthColWidth = {
+  //     width: "9%",
+  // };
+  // const ninthColWidth = {
+  //     width: "9%",
+  // };
+  // const tenthColWidth = {
+  //     width: "9%",
+  // };
+
   const firstColWidth = {
     width: "80px",
   };
@@ -1812,122 +1819,35 @@ export default function EmployeeCommissionSummaryReport() {
     width: "55px",
   };
   const thirdColWidth = {
-    width: "135px",
+    width: "45px",
   };
   const forthColWidth = {
     width: "360px",
   };
-   const forthColWidth1 = {
-    width: "80px",
+  const sixthColWidth = {
+    width: "40px",
   };
-  //   const sixthColWidth = {
-  //     width: "40px",
-  //   };
   const seventhColWidth = {
     width: "60px",
   };
   const eightColWidth = {
-    width: "70px",
+    width: "100px",
   };
   const ninthColWidth = {
-    width: "90px",
+    width: "100px",
   };
-  const tenthColWidth = {
-    width: "90px",
-  };
-  const elewenthColWidth = {
-    width: "90px",
+   const tenthColWidth = {
+    width: "100px",
   };
   const sixthcol = {
     width: "8px",
-  };
-
-  const [columns, setColumns] = useState({
-    code: [],
-    Description: [],
-    Rate: [],
-    Qnty: [],
-    ["Sale Amount"]: [],
-  });
-
-  const [columnSortOrders, setColumnSortOrders] = useState({
-    code: "",
-    Description: "",
-    Rate: "",
-    Qnty: "",
-    ["Sale Amount"]: "",
-  });
-
-  // When you receive your initial table data, transform it into column-oriented format
-  useEffect(() => {
-    if (tableData.length > 0) {
-      const newColumns = {
-        code: tableData.map((row) => row.code),
-        Description: tableData.map((row) => row.Description),
-        Rate: tableData.map((row) => row.Rate),
-        Qnty: tableData.map((row) => row.Qnty),
-        ["Sale Amount"]: tableData.map((row) => row["Sale Amount"]),
-      };
-      setColumns(newColumns);
-    }
-  }, [tableData]);
-
-  const getIconStyle = (colKey) => {
-    const order = columnSortOrders[colKey];
-    return {
-      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-      color: order === "ASC" || order === "DSC" ? "red" : "white",
-      transition: "transform 0.3s ease, color 0.3s ease",
-    };
-  };
-
-  const resetSorting = () => {
-    setColumnSortOrders({
-      code: null,
-      Description: null,
-      Rate: null,
-      Qnty: null,
-      ["Sale Amount"]: null,
-    });
-  };
-
-  const handleSorting = (col) => {
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-    const sortedData = [...tableData].sort((a, b) => {
-      const aVal =
-        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-      const bVal =
-        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
-
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      } else {
-        return newOrder === "ASC"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-    });
-
-    setTableData(sortedData);
-
-    setColumnSortOrders((prev) => ({
-      ...Object.keys(prev).reduce((acc, key) => {
-        acc[key] = key === col ? newOrder : null;
-        return acc;
-      }, {}),
-    }));
   };
 
   useHotkeys(
     "alt+s",
     () => {
       fetchDailyStatusReport();
-      resetSorting();
+      //    resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true }
   );
@@ -2120,82 +2040,6 @@ export default function EmployeeCommissionSummaryReport() {
     return Number(val) === 0 ? "" : val;
   };
 
- const handleMobilePress = (e, nextInputRef) => {
-  const inputEl = document.getElementById("phone");
-  const value = Number(e.target.value);
-
-  if (e.key === "Enter") {
-    e.preventDefault();
-
-    // empty validation
-    if (value === "" || value === null || isNaN(value)) {
-      toast.error("Commission cannot be empty");
-      inputEl.style.border = "2px solid red";
-      return;
-    }
-
-    // range validation
-    if (value < 0 || value > 50) {
-      toast.error("Commission must be between 0% and 50%");
-      inputEl.style.border = "2px solid red";
-      return;
-    }
-
-    inputEl.style.border = "1px solid black";
-
-    // move to next input
-    if (nextInputRef.current) {
-      nextInputRef.current.focus();
-    //   nextInputRef.current.select();
-    }
-  }
-};
-
-
-  const handleMobilenumberInputChange = (e) => {
-  let value = e.target.value;
-
-  // remove non-numeric characters
-  value = value.replace(/\D/g, "");
-
-  // limit to 2 digits only (max 50)
-  if (value.length > 2) {
-    value = value.slice(0, 2);
-  }
-
-  // convert to number
-  let num = Number(value);
-
-  // empty input → show 0
-  if (value === "") {
-    setmobileNumber("0");
-    return;
-  }
-
-  // if value > 50 → ignore
-  if (num > 50) {
-    return;
-  }
-
-  setmobileNumber(value);
-};
-useEffect(() => {
-  if (!Employeeselectdatavalue) return;
-
-  if (transectionType2 === "") {
-    setmobileNumber(0);
-  }
-  else if (transectionType2 === "R") {
-    setmobileNumber(Employeeselectdatavalue.tcrtcom);
-  } 
-  else if (transectionType2 === "C") {
-    setmobileNumber(Employeeselectdatavalue.tcshcom);
-  } 
-  else if (transectionType2 === "I") {
-    setmobileNumber(Employeeselectdatavalue.tinscom);
-  }
-}, [Employeeselectdatavalue, transectionType2]);
-
   return (
     <>
       <ToastContainer />
@@ -2209,7 +2053,7 @@ useEffect(() => {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Commission Summary Report" />
+          <NavComponent textdata="Employee Fix Commission Report" />
 
           {/* ------------1st row */}
           <div
@@ -2223,13 +2067,12 @@ useEffect(() => {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "5px" }}
-              >
+
+             
+              <div className="d-flex align-items-center" style={{marginLeft:'5px'}}>
                 <div
                   style={{
                     width: "90px",
@@ -2327,7 +2170,10 @@ useEffect(() => {
                   />
                 </div>
               </div>
-              <div className="d-flex align-items-center">
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft:'50px' }}
+              >
                 <div
                   style={{
                     width: "60px",
@@ -2384,7 +2230,7 @@ useEffect(() => {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, employeeref)}
+                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2426,93 +2272,12 @@ useEffect(() => {
                   />
                 </div>
               </div>
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Employee :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={employeeref}
-                    options={employeeoptions}
-                    value={
-                      employeeoptions.find(
-                        (opt) => opt.value === Employeeselectdata
-                      ) || null
-                    } // Ensure correct reference
-                    onKeyDown={(e) => handleEmployeeKeypress(e, saleSelectRef)}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-
-                        setEmployeeselectdata(selectedOption.value);
-                          setEmployeeselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                          tcrtcom: selectedOption.tcrtcom,
-                          tcshcom: selectedOption.tcshcom,
-                          tinscom: selectedOption.tinscom,
-                        });
-                      } else {
-                        setEmployeeselectdata("");
-                        setEmployeeselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Employeeselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    // isClearable
-                    // placeholder="ALL"
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
-          <div
+           <div
             className="row"
-            style={{ marginTop: "8px", marginBottom: "8px", margin: "0px" }}
+            style={{ marginTop: "8px", marginBottom: "8px" , margin:'0px'}}
           >
             <div
               style={{
@@ -2522,11 +2287,14 @@ useEffect(() => {
                 margin: "0px",
                 padding: "0px",
                 justifyContent: "start",
-                border: "1px solid lightgrey",
+                border:'1px solid lightgrey',
                 // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
               }}
             ></div>
-          </div>
+
+            
+
+            </div>
 
           {/* //////////////// second ROW ///////////////////////// */}
 
@@ -2616,6 +2384,7 @@ useEffect(() => {
                 </div>
               </div>
 
+              
               <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
@@ -2631,69 +2400,69 @@ useEffect(() => {
                   <label htmlFor="transactionType">
                     <span
                       style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         fontSize: getdatafontsize,
                         fontFamily: getfontstyle,
                         fontWeight: "bold",
                       }}
                     >
-                      Rate :
+                      Employee :
                     </span>
                   </label>
                 </div>
 
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Refrate}
-                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "225px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
-                    }}
-                  >
-                    <option value="P">PURCHASE RATE</option>
-                    <option value="A">AVERAGE RATE</option>
-                    <option value="M">LAST SM RATE</option>
-                    <option value="W">WEIGHTED AVERAGE</option>
-                    <option value="F">FIFO</option>
-                  </select>
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={employeeref}
+                    options={employeeoptions}
+                    value={
+                      employeeoptions.find(
+                        (opt) => opt.value === Employeeselectdata
+                      ) || null
+                    } // Ensure correct reference
+                    onKeyDown={(e) => handleEmployeeKeypress(e, input4Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                     if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
 
-                  {transectionType !== "P" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
+                        setEmployeeselectdata(selectedOption.value);
+                        setEmployeeselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Keep only the description
+                        });
+                      } else {
+                        setEmployeeselectdata("");
+                        setEmployeeselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Employeeselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
                         color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    // isClearable
+                    // placeholder="ALL"
+                  />
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -2805,10 +2574,40 @@ useEffect(() => {
                   </label>
                 </div>
 
+                {/* <select
+                                    ref={input4Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType2}
+                                    onChange={handleTransactionTypeChange2}
+                                    style={{
+                                        width: "250px",
+                                        height: "24px",
+                                        marginLeft: "3px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
+                                        color: fontcolor,
+                                        paddingLeft: "12px",
+                                    }}
+                                >
+                                      <option value="">ALL</option>
+                                    <option value="BIL">PURCHASE</option>
+                                    <option value="PRN">PURCHASE RETURN</option>
+                                </select> */}
+
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <select
                     ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, CommissionRef)}
+                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
                     id="submitButton"
                     name="type"
                     onFocus={(e) =>
@@ -2820,7 +2619,7 @@ useEffect(() => {
                     value={transectionType2}
                     onChange={handleTransactionTypeChange2}
                     style={{
-                      width: "225px",
+                      width: "250px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -2831,10 +2630,9 @@ useEffect(() => {
                       paddingLeft: "12px",
                     }}
                   >
-                    <option value="" >ALL</option>
-                    <option value="C" >CASH</option>
-                    <option value="R" >CREDIT</option>
-                    <option value="I">INSTALLMENT</option>
+                    <option value="">ALL</option>
+                    <option value="INV">SALE</option>
+                    <option value="SRN">SALE RETURN</option>
                   </select>
 
                   {transectionType2 !== "" && (
@@ -2905,7 +2703,7 @@ useEffect(() => {
                     className="List-select-class "
                     ref={input2Ref}
                     options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
+                    onKeyDown={(e) => handlecapacityKeypress(e, employeeref)}
                     id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2944,7 +2742,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* <div id="lastDiv" style={{ marginRight: "1px" }}>
+              <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "3px" }}>
                   <span
                     style={{
@@ -2967,7 +2765,7 @@ useEffect(() => {
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "225px",
+                      width: "250px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -3006,55 +2804,12 @@ useEffect(() => {
                     </span>
                   )}
                 </div>
-              </div> */}
-
-               <div className="d-flex align-items-center " style={{marginRight:'21px'}}>
-                                <div
-                                    style={{
-                                        width: "110px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="fromDatePicker">
-                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                            Commission % :
-                                        </span>{" "}
-                                        <br />
-                                    </label>
-                                </div>
-
-                               <input
-  ref={CommissionRef}
-  value={mobileNumber}
-  onKeyDown={(e) => handleMobilePress(e, selectButtonRef)}
-  onChange={handleMobilenumberInputChange}
-  autoComplete="off"
-  type="number"
-  id="phone"
-  name="phone"
-  placeholder="0"
-  style={{
-    color: fontcolor,
-    width: "225px",
-    height: "24px",
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-    border: `1px solid ${fontcolor}`,
-    backgroundColor: getcolor,
-    outline: "none",
-    paddingLeft: "10px",
-    marginLeft: "3px",
-  }}
-  onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-  onBlur={(e) => (e.currentTarget.style.border = `1px solid ${fontcolor}`)}
-/>
-
-                            </div>
+              </div>
             </div>
           </div>
 
           <div>
+            {/* Table Head */}
             <div
               style={{
                 overflowY: "auto",
@@ -3089,40 +2844,34 @@ useEffect(() => {
                       color: "white",
                     }}
                   >
-                    {/* <td className="border-dark" style={firstColWidth}>
+                    <td className="border-dark" style={firstColWidth}>
                       Date
                     </td>
                     <td className="border-dark" style={secondColWidth}>
                       Trn#
-                    </td> */}
+                    </td>
                     <td className="border-dark" style={thirdColWidth}>
-                      Code
+                      Type
                     </td>
                     <td className="border-dark" style={forthColWidth}>
                       Description
                     </td>
-                     {/* <td className="border-dark" style={forthColWidth1}>
-                      Cost Rate
-                    </td> */}
 
-                    {/* <td className="border-dark" style={sixthColWidth}>
-                                 Str
-                               </td> */}
-                    {/* <td className="border-dark" style={seventhColWidth}>
-                      Qnty
-                    </td> */}
-                    <td className="border-dark" style={eightColWidth}>
+                    <td className="border-dark" style={sixthColWidth}>
+                      Str
+                    </td>
+                     <td className="border-dark" style={eightColWidth}>
+                      Rate
+                    </td>
+                    <td className="border-dark" style={seventhColWidth}>
                       Qnty
                     </td>
+                   
                     <td className="border-dark" style={ninthColWidth}>
                       Amount
                     </td>
-
-                    <td className="border-dark" style={tenthColWidth}>
-                      Margin
-                    </td>
-                     <td className="border-dark" style={elewenthColWidth}>
-                      Comission
+                     <td className="border-dark" style={tenthColWidth}>
+                      Fix Comm
                     </td>
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
@@ -3136,7 +2885,7 @@ useEffect(() => {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "40vh",
+                height:'45vh',
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -3160,7 +2909,7 @@ useEffect(() => {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="6" className="text-center">
+                        <td colSpan="9" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3173,7 +2922,7 @@ useEffect(() => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 6 }).map((_, colIndex) => (
+                            {Array.from({ length: 9 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3182,17 +2931,16 @@ useEffect(() => {
                         )
                       )}
                       <tr>
-                        {/* <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td> */}
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                                                {/* <td style={forthColWidth1}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                                                <td style={eightColWidth}></td>
 
-                        <td style={seventhColWidth}></td> */}
-                        <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
-                        <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
 
                       </tr>
                     </>
@@ -3200,18 +2948,10 @@ useEffect(() => {
                     <>
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
-                        const nQnty = Number(
-                          String(item.Qnty).replace(/,/g, "")
-                        );
-                        const nRate = Number(
-                          String(item.Amount).replace(/,/g, "")
-                        );
-                        const nMargin = Number(
-                          String(item.Margin).replace(/,/g, "")
-                        );
-
                         const isNegative =
-                          nQnty < 0 || nRate < 0 || nMargin < 0;
+                          item.Qnty < 0 ||
+                          item.Rate < 0 ||
+                          item["Pur Amount"] < 0;
 
                         return (
                           <tr
@@ -3227,35 +2967,32 @@ useEffect(() => {
                               color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            {/* <td className="text-start" style={firstColWidth}>
+                            <td className="text-start" style={firstColWidth}>
                               {item.Date}
                             </td>
                             <td className="text-start" style={secondColWidth}>
                               {item["Trn#"]}
-                            </td> */}
-                            <td className="text-start" style={thirdColWidth}>
-                              {item.code}
+                            </td>
+                            <td className="text-center" style={thirdColWidth}>
+                              {item.Type}
                             </td>
                             <td className="text-start" style={forthColWidth}>
                               {item.Description}
                             </td>
-                            {/* <td className="text-end" style={forthColWidth1}>
-                              {formatValue(item['Cost Rate'])}
+                            <td className="text-end" style={sixthColWidth}>
+                              {item.Store}
                             </td>
-                          
+                             <td className="text-end" style={eightColWidth}>
+                              {formatValue(item.Rate)}
+                            </td>
                             <td className="text-end" style={seventhColWidth}>
                               {formatValue(item.Qnty)}
-                            </td> */}
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.Qnty)}
                             </td>
+                           
                             <td className="text-end" style={ninthColWidth}>
-                              {formatValue(item.Amount)}
+                              {formatValue(item["Sale Amount"])}
                             </td>
-                            <td className="text-end" style={tenthColWidth}>
-                              {formatValue(item.Margin)}
-                            </td>
-                             <td className="text-end" style={elewenthColWidth}>
+                             <td className="text-end" style={ninthColWidth}>
                               {formatValue(item.Comm)}
                             </td>
                           </tr>
@@ -3271,7 +3008,7 @@ useEffect(() => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 6 }).map((_, colIndex) => (
+                          {Array.from({ length: 9 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3279,17 +3016,15 @@ useEffect(() => {
                         </tr>
                       ))}
                       <tr>
-                        {/* <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td> */}
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                                                {/* <td style={forthColWidth1}></td>
-
-                        <td style={seventhColWidth}></td> */}
+                        <td style={sixthColWidth}></td>
                         <td style={eightColWidth}></td>
+                                           <td style={seventhColWidth}></td>
                         <td style={ninthColWidth}></td>
-                        <td style={tenthColWidth}></td>
-                                                <td style={elewenthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
 
                       </tr>
                     </>
@@ -3308,7 +3043,25 @@ useEffect(() => {
               paddingRight: "8px",
             }}
           >
-           
+            <div
+              style={{
+                ...firstColWidth,
+                background: getcolor,
+                marginLeft: "2px",
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>
+            </div>
+            <div
+              style={{
+                ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
             <div
               style={{
                 ...thirdColWidth,
@@ -3316,10 +3069,8 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
- <span className="mobileledger_total2">
-                {formatValue(tableData.length.toLocaleString())}
-              </span>  
-                        </div>
+              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+            </div>
             <div
               style={{
                 ...forthColWidth,
@@ -3327,20 +3078,39 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
+              {/* <span className="mobileledger_total">{totalexcel}</span> */}
             </div>
-           
-                   
             <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">{formatValue(totaldebit)}</span> */}
+            </div>
+              <div
               style={{
                 ...eightColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{ <span className="mobileledger_total">
-                {formatValue(totaldebit)}
-              </span>}</span>
+              {/* <span className="mobileledger_total">{totaltax}</span> */}
             </div>
+
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totaldebit)}
+              </span>
+            </div>
+          
             <div
               style={{
                 ...ninthColWidth,
@@ -3352,7 +3122,8 @@ useEffect(() => {
                 {formatValue(totalcredit)}
               </span>
             </div>
-            <div
+
+             <div
               style={{
                 ...tenthColWidth,
                 background: getcolor,
@@ -3360,19 +3131,7 @@ useEffect(() => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(ClosingBalance)}
-              </span>
-            </div>
-
-             <div
-              style={{
-                ...elewenthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(commission)}
+                {formatValue(Commission)}
               </span>
             </div>
           </div>
@@ -3413,7 +3172,7 @@ useEffect(() => {
               ref={selectButtonRef}
               onClick={() => {
                 fetchDailyStatusReport();
-                resetSorting();
+                // resetSorting();
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>

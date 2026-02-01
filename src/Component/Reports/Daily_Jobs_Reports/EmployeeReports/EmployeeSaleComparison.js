@@ -436,9 +436,9 @@ export default function EmployeeSaleComparisonReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-    //     code: "NASIRTRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -871,7 +871,7 @@ export default function EmployeeSaleComparisonReport() {
     // Define table column headers and individual column widths
 
     const headers = ["Code", "Employee",  "Qnty", "Amount"];
-    const columnWidths = [20, 110, 22, 25];
+    const columnWidths = [20, 110, 25, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1110,8 +1110,9 @@ export default function EmployeeSaleComparisonReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                  doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1402,8 +1403,8 @@ export default function EmployeeSaleComparisonReport() {
     const typeAndStoreRow = worksheet.addRow([
       "Company :",
       typecompany,
-      "Type :",
-      transectionsts,
+       "Capacity :", typecapacity,
+   
     ]);
 
     // Add second row
@@ -1411,7 +1412,8 @@ export default function EmployeeSaleComparisonReport() {
       "Category :",
       typecategory,
    
-    "Capacity :", typecapacity,
+       "Type :",
+      transectionsts,
     ]);
 
     // const typeAndStoreRow3 = worksheet.addRow([
@@ -2388,8 +2390,7 @@ export default function EmployeeSaleComparisonReport() {
                            />
                          </div>
                        </div>
-         
-                        <div
+                       <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
               >
@@ -2409,62 +2410,56 @@ export default function EmployeeSaleComparisonReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      Type :
+                      Capacity :
                     </span>
                   </label>
                 </div>
 
-                              <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType2}
-                    onChange={handleTransactionTypeChange2}
-                    style={{
-                      width: "225px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class "
+                    ref={input2Ref}
+                    options={capacityoptions}
+                    onKeyDown={(e) => handlecapacityKeypress(e, input4Ref)}
+                    id="selectedsale2"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCapacityselectdata(selectedOption.value);
+                        setcapacityselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Set only the 'NGS' part of the label
+                        });
+                      } else {
+                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setcapacityselectdatavalue("");
+                      }
                     }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="INV">SALE</option>
-                    <option value="SRN">SALE RETURN</option>
-                  </select>
-
-                  {transectionType2 !== "" && (
-                    <span
-                      onClick={() => settransectionType2("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
                         color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
                 </div>
               </div>
+         
+                     
          
                        {/* <div
                                          className="d-flex align-items-center"
@@ -2609,90 +2604,9 @@ export default function EmployeeSaleComparisonReport() {
                   />
                 </div>
               </div>
-            <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input5Ref}
-                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "225px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* //////////////// FORTH ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "start",
-              }}
-            >
-              <div
+               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
@@ -2710,58 +2624,67 @@ export default function EmployeeSaleComparisonReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      Capacity :
+                      Type :
                     </span>
                   </label>
                 </div>
 
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input2Ref}
-                    options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input4Ref)}
-                    id="selectedsale2"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCapacityselectdata(selectedOption.value);
-                        setcapacityselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcapacityselectdatavalue("");
-                      }
+                              <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input4Ref}
+                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType2}
+                    onChange={handleTransactionTypeChange2}
+                    style={{
+                      width: "225px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
                     }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
+                  >
+                    <option value="">ALL</option>
+                    <option value="INV">SALE</option>
+                    <option value="SRN">SALE RETURN</option>
+                  </select>
+
+                  {transectionType2 !== "" && (
+                    <span
+                      onClick={() => settransectionType2("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
                         color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
                 </div>
               </div>
-
-             
             </div>
           </div>
+
+          {/* //////////////// FORTH ROW ///////////////////////// */}
+         
 
           <div>
             {/* Table Head */}
