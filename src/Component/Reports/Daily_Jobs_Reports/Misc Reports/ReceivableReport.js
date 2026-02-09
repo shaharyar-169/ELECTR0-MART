@@ -1591,7 +1591,8 @@ export default function ReceivableReport() {
                       ...firstColWidth,
                       cursor: "pointer",
                       textDecoration: "underline",
-                      color: "blue",
+                      // color: "blue",
+                      color: selectedIndex === i ? (isNegative ? "white" : 'white') : "blue", // ✅ conditional color
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();

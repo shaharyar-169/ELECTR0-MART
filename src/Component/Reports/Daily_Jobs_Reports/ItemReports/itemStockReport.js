@@ -1636,7 +1636,8 @@ export default function ItemStockReport() {
   className="text-start"
   style={{...firstColWidth, cursor:'pointer',
                                 textDecoration:"underline",
-                                color:'blue'}}
+                      color: selectedIndex === i ? (isNegative ? "white" : 'white') : "blue", // ✅ conditional color
+                              }}
 
   onDoubleClick={(e) => {
     e.stopPropagation();

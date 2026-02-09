@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-
 import axios from "axios";
-
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
 import {
   getUserData,
@@ -23,19 +21,18 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-import { useHotkeys } from "react-hotkeys-hook";
 import { fetchGetUser } from "../../../Redux/action";
-import "./misc.css";
+import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Balance } from "@mui/icons-material";
+import "../../../vardana/vardana";
+import "../../../vardana/verdana-bold";
 
-export default function PayableReport() {
+export default function DailyCashBankReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
-  const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
+
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -55,6 +52,11 @@ export default function PayableReport() {
   const [totalCredit, setTotalCredit] = useState(0);
   const [closingBalance, setClosingBalance] = useState(0);
 
+  const [cashOpening, setcashOpening] = useState(0);
+  const [cashClosing, setcashClosing] = useState(0);
+  const [bankOpening, setbankOpening] = useState(0);
+  const [bankCloding, setbankCloding] = useState(0);
+
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
   const [fromInputDate, setfromInputDate] = useState("");
@@ -63,6 +65,9 @@ export default function PayableReport() {
   const [selectedToDate, setSelectedToDate] = useState(null);
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
 
   const {
     isSidebarVisible,
@@ -73,7 +78,6 @@ export default function PayableReport() {
     apiLinks,
     getLocationNumber,
     getyeardescription,
-    getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
@@ -109,9 +113,7 @@ export default function PayableReport() {
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
+
   const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
   };
@@ -121,11 +123,7 @@ export default function PayableReport() {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
+
   const handlefromInputChange = (e) => {
     setfromInputDate(e.target.value);
   };
@@ -186,6 +184,16 @@ export default function PayableReport() {
     }
   };
 
+  const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
+
   const handleToKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -240,9 +248,9 @@ export default function PayableReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input1Ref.current) {
+        if (input3Ref.current) {
           e.preventDefault();
-          input1Ref.current.focus();
+          input3Ref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -258,21 +266,7 @@ export default function PayableReport() {
   const handleToInputChange = (e) => {
     settoInputDate(e.target.value);
   };
-  const handleSaleKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setSaleType(selectedOption.value);
-      }
-      const nextInput = document.getElementById(inputId);
-      if (nextInput) {
-        nextInput.focus();
-        nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
+
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -282,7 +276,12 @@ export default function PayableReport() {
     }
   };
 
-  function fetchReceivableReport() {
+  const handleTransactionTypeChange = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType(selectedTransactionType);
+  };
+
+  function fetchDailyCashBankBalance() {
     const fromDateElement = document.getElementById("fromdatevalidation");
     const toDateElement = document.getElementById("todatevalidation");
 
@@ -377,35 +376,23 @@ export default function PayableReport() {
         break;
     }
 
-    const data = {
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
-      FAccCod: saleType,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-    };
     console.log(data);
     document.getElementById("fromdatevalidation").style.border =
       `1px solid ${fontcolor}`;
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/PayableReport.php";
+    const apiUrl = apiLinks + "/DailyCashBankReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
-      // code: "NASIRTRD",
-
+      code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      code: organisation.code,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      FRepTyp: transectionType,
-      FSchTxt: searchQuery,
+
+      // code: "NASIRTRD",
+      // FLocCod: "001",
     }).toString();
 
     axios
@@ -413,10 +400,14 @@ export default function PayableReport() {
       .then((response) => {
         setIsLoading(false);
         console.log("Response:", response.data);
-        setTotalOpening(response.data["Total Opening"]);
-        setTotalDebit(response.data["Total Debit"]);
-        setTotalCredit(response.data["Total Credit"]);
-        setClosingBalance(response.data["Total Balance"]);
+        setTotalOpening(response.data["Total CashRec"]);
+        setTotalDebit(response.data["Total CashPay"]);
+        setTotalCredit(response.data["Total BankRec"]);
+        setClosingBalance(response.data["Total BankPay"]);
+        setcashOpening(response.data["Cash Opening"]);
+        setcashClosing(response.data["Cash Closing"]);
+        setbankOpening(response.data["Bank Opening"]);
+        setbankCloding(response.data["Bank Closing"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -462,88 +453,180 @@ export default function PayableReport() {
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveAccounts.php";
+    const formData = new URLSearchParams({
+      FLocCod: getLocationNumber,
+      code: organisation.code,
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        setSupplierList(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+
+  const options = supplierList.map((item) => ({
+    value: item.tacccod,
+    label: `${item.tacccod}-${item.taccdsc.trim()}`,
+  }));
+
+  const DropdownOption = (props) => {
+    return (
+      <components.Option {...props}>
+        <div
+          style={{
+            fontSize: "12px",
+            paddingBottom: "5px",
+            lineHeight: "3px",
+            color: "black",
+            textAlign: "start",
+          }}
+        >
+          {props.data.label}
+        </div>
+      </components.Option>
+    );
   };
+  const customStyles1 = (hasError) => ({
+    control: (base, state) => ({
+      ...base,
+      height: "24px",
+      minHeight: "unset",
+      width: 418,
+      fontSize: "12px",
+      backgroundColor: getcolor,
+      color: fontcolor,
+      borderRadius: 0,
+      border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+      transition: "border-color 0.15s ease-in-out",
+      "&:hover": {
+        borderColor: state.isFocused ? base.borderColor : "black",
+      },
+      padding: "0 8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 0,
+      fontSize: "18px",
+      display: "flex",
+      textAlign: "center !important",
+    }),
+  });
 
- const exportPDFHandler = () => {
-    const globalfontsize = 10;
-    console.log("gobal font data", globalfontsize);
-
+  const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
-    // Define table data (rows)
-    const rows = tableData.map((item) => [
-      item.code,
-      item.Description,
-      item.Opening,
-      item.Debit,
-      item.Credit,
-      item.Balance,
+    // Flatten table data: main row + description row
+    const rows = tableData.flatMap((item) => [
+      [
+        item.No,
+        item.Date,
+        item.Type,
+        item.Account,
+        item.Rate,
+        item.Qnty,
+        item.CashRec,
+        item.CashPay,
+        item.BankRec,
+        item.BankPay,
+      ],
+      [
+        "", // No
+        "", // Date
+        "", // Type
+        item.Description, // show Description in Account column
+        "", // Rate
+        "", // Qnty
+        "", // CashRec
+        "", // CashPay
+        "", // BankRec
+        "", // BankPay
+      ],
     ]);
 
-    // Add summary row to the table
+    // Add summary (TOTAL) row
     rows.push([
+      String(formatValue(tableData.length.toLocaleString())),
       "",
-      "Total",
+      "",
+      "",
+      "",
+      "",
       String(totalOpening),
       String(totalDebit),
       String(totalCredit),
       String(closingBalance),
     ]);
 
-    // Define table column headers and individual column widths
+    // Column headers and widths
     const headers = [
-      "Code",
-      "Description",
-      "Opening",
-      "Debit",
-      "Credit",
-      "Balance",
+      "No",
+      "Date",
+      "Type",
+      "Account - Description",
+      "Rate",
+      "Qnty",
+      "CashRec",
+      "CashPay",
+      "BankRec",
+      "BankPay",
     ];
-    const columnWidths = [23, 80, 25, 25, 25, 25];
+    const columnWidths = [16, 23, 12, 90, 18, 18, 28, 28, 28, 28];
 
-    // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 
-    // Define page height and padding
     const pageHeight = doc.internal.pageSize.height;
     const paddingTop = 15;
 
-      doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-    // Function to add table headers
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
+
+    const getColumnX = (startX, colIndex) =>
+      startX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0);
+
+    // Function: add table headers
     const addTableHeaders = (startX, startY) => {
-      // Set font style and size for headers
-          doc.setFont("verdana", "bold");
-            doc.setFontSize(10);
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
-        const cellHeight = 6; // Height of the header row
-        const cellX = startX + cellWidth / 2; // Center the text horizontally
-        const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+        const cellHeight = 6;
+        const cellX = startX + cellWidth / 2;
+        const cellY = startY + cellHeight / 2 + 1.5;
 
-        // Draw the grey background for the header
-        doc.setFillColor(200, 200, 200); // Grey color
-        doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+        doc.setFillColor(200, 200, 200);
+        doc.rect(startX, startY, cellWidth, cellHeight, "F");
 
-        // Draw the outer border
-        doc.setLineWidth(0.2); // Set the width of the outer border
+        doc.setLineWidth(0.2);
         doc.rect(startX, startY, cellWidth, cellHeight);
 
-        // Set text alignment to center
-        doc.setTextColor(0); // Set text color to black
-        doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-        startX += columnWidths[index]; // Move to the next column
+        doc.setTextColor(0);
+        doc.text(header, cellX, cellY, { align: "center" });
+        startX += cellWidth;
       });
-
-    
     };
 
-   const addTableRows = (startX, startY, startIndex, endIndex) => {
+    // Function: get total table width
+    const getTotalTableWidth = () => columnWidths.reduce((a, b) => a + b, 0);
+
+    // Function: add new page
+    const addNewPage = (startY) => {
+      doc.addPage();
+      return paddingTop;
+    };
+
+    // Function: add table rows
+    const addTableRows = (startX, startY, startIndex, endIndex) => {
+      let totalRowBottomY = null;
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
@@ -556,11 +639,9 @@ export default function PayableReport() {
         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
         const isTotalRow = i === rows.length - 1;
         let textColor = [0, 0, 0];
-        let fontName = normalFont;
 
         if (isRedRow) {
           textColor = [255, 0, 0];
-          fontName = boldFont;
         }
 
         if (isTotalRow) {
@@ -575,7 +656,7 @@ export default function PayableReport() {
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F"
+            "F",
           );
         }
 
@@ -584,6 +665,7 @@ export default function PayableReport() {
         if (isTotalRow) {
           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
           const rowBottomY = rowTopY + rowHeight;
+          totalRowBottomY = rowBottomY; // ✅ Save bottom of total row
 
           doc.setLineWidth(0.3);
           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
@@ -594,7 +676,7 @@ export default function PayableReport() {
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5
+            rowBottomY - 0.5,
           );
 
           doc.setLineWidth(0.2);
@@ -603,7 +685,7 @@ export default function PayableReport() {
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY
+            rowBottomY,
           );
         } else {
           doc.setLineWidth(0.2);
@@ -611,15 +693,14 @@ export default function PayableReport() {
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
           );
         }
 
+        // Draw cell text
         row.forEach((cell, cellIndex) => {
-          // ⭐ NEW FIX — Perfect vertical centering
           const cellY =
             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
-
           const cellX = startX + 2;
 
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
@@ -631,18 +712,13 @@ export default function PayableReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0) {
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
-            cellIndex === 4 ||
-            cellIndex === 5
-          ) {
+          } else if ([4, 5, 6, 7, 8, 9].includes(cellIndex)) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -650,15 +726,12 @@ export default function PayableReport() {
             });
           } else {
             if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = startX + columnWidths[0] / 2;
-              doc.text("", totalLabelX, cellY, {
+              doc.text("", startX + columnWidths[0] / 2, cellY, {
                 align: "center",
                 baseline: "middle",
               });
             } else {
-              doc.text(cellValue, cellX, cellY, {
-                baseline: "middle",
-              });
+              doc.text(cellValue, cellX, cellY, { baseline: "middle" });
             }
           }
 
@@ -668,7 +741,7 @@ export default function PayableReport() {
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
+              startY + (i - startIndex + 3) * rowHeight,
             );
             startX += columnWidths[cellIndex];
           }
@@ -682,38 +755,54 @@ export default function PayableReport() {
         }
       }
 
-      const lineWidth = tableWidth;
+      /* ===== AUTO ALIGNED BOXES BELOW TOTAL ROW ===== */
+      if (totalRowBottomY) {
+        const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+        const boxY = totalRowBottomY + 4;
+        const boxHeight = 5;
+        const rightPadding = 3;
+
+        // CASH REC (index 6)
+        const cashX = getColumnX(tableStartX, 6);
+        const cashWidth = columnWidths[6];
+        doc.rect(cashX, boxY, cashWidth, boxHeight);
+        doc.text(
+          String(cashClosing),
+          cashX +
+            cashWidth -
+            doc.getTextWidth(String(cashClosing)) -
+            rightPadding,
+          boxY + 3.5,
+        );
+
+        // BANK REC (index 8)
+        const bankX = getColumnX(tableStartX, 8);
+        const bankWidth = columnWidths[8];
+        doc.rect(bankX, boxY, bankWidth, boxHeight);
+        doc.text(
+          String(bankCloding),
+          bankX +
+            bankWidth -
+            doc.getTextWidth(String(bankCloding)) -
+            rightPadding,
+          boxY + 3.5,
+        );
+      }
+
+      // Footer line
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
       doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 11;
-      const headingX = lineX + 2;
-      const headingY = lineY + 5;
+      doc.line(lineX, lineY, lineX + tableWidth, lineY);
       doc.setFont("verdana-regular", "normal");
       doc.setFontSize(10);
-      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+      doc.text(`Crystal Solution    ${date}    ${time}`, lineX + 2, lineY + 5);
+
+      return startY + (endIndex - startIndex + 2) * 5; // Return updated Y
     };
 
-    // Function to calculate total table width
-    const getTotalTableWidth = () => {
-      let totalWidth = 0;
-      columnWidths.forEach((width) => (totalWidth += width));
-      return totalWidth;
-    };
-
-    // Function to add a new page and reset startY
-    const addNewPage = (startY) => {
-      doc.addPage();
-      return paddingTop; // Set startY for each new page
-    };
-
-    // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
-
-    // Function to handle pagination
+    // Pagination and titles
     const handlePagination = () => {
-      // Define the addTitle function
       const addTitle = (
         title,
         date,
@@ -721,144 +810,133 @@ export default function PayableReport() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10
       ) => {
-        doc.setFontSize(titleFontSize); // Set the font size for the title
+        doc.setFontSize(titleFontSize);
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
           align: "center",
         });
 
-        // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
-
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
-        // Add page numbering
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(
           `Page ${pageNumber}`,
-          rightX - 10,
+          rightX - 30,
           doc.internal.pageSize.height - 10,
-          { align: "right" }
+          { align: "right" },
         );
       };
 
       let currentPageIndex = 0;
-      let startY = paddingTop; // Initialize startY
-      let pageNumber = 1; // Initialize page number
+      let startY = paddingTop;
+      let pageNumber = 1;
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-            doc.setFont("Times New Roman", "normal");
-        addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-        startY += 5; // Adjust vertical position for the company title
-     doc.setFont("verdana-regular", "normal");
+        // ===== TITLES =====
+        doc.setFont("Times New Roman", "normal");
+        addTitle(comapnyname, "", "", pageNumber, startY, 18);
+        startY += 5;
+
+        doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Payable Report From ${fromInputDate} To ${toInputDate}`,
+          `Daily Cash & Bank Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
           startY,
-          12
-        ); // Render sale report title with decreased font size, provide the time, and page number
+          12,
+        );
         startY += -5;
 
-        const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-        const labelsY = startY + 4; // Position the labels below the titles and above the table
+        // ===== LABEL POSITION =====
+        const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+        const labelsY = startY + 4;
 
-     
-        let status =
-          transectionType === "R"
-            ? "RECEIVABLE"
-            : transectionType === "P"
-            ? "PAYABLE"
-            : "ALL";
-        let search = searchQuery ? searchQuery : "";
+        // ===== AUTO ALIGNED BOXES ABOVE HEADER =====
+        const boxY = labelsY + 8;
+        const boxHeight = 5;
+        const rightPadding = 3;
 
-        // let accoount = Companyselectdatavalue.label
-        //   ? Companyselectdatavalue.label
-        //   : "ALL";
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
 
-  
-     doc.setFont("verdana", "bold");
-            doc.setFontSize(10); 
-                   doc.text(`Type :`, labelsX, labelsY + 8.5); // Draw bold label
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+        // CASH REC (column index 6)
+        const cashX = getColumnX(tableStartX, 6);
+        const cashWidth = columnWidths[6];
+        doc.rect(cashX, boxY, cashWidth, boxHeight);
+        doc.text(
+          String(cashOpening),
+          cashX +
+            cashWidth -
+            doc.getTextWidth(String(cashOpening)) -
+            rightPadding,
+          boxY + 3.5,
+        );
 
-                     if (searchQuery) {
-     doc.setFont("verdana", "bold");
-            doc.setFontSize(10);
-                    doc.text(`Search :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(`${search}`, labelsX + 138, labelsY + 8.5); // Draw the value next to the label
-}
+        // BANK REC (column index 8)
+        const bankX = getColumnX(tableStartX, 8);
+        const bankWidth = columnWidths[8];
+        doc.rect(bankX, boxY, bankWidth, boxHeight);
+        doc.text(
+          String(bankOpening),
+          bankX +
+            bankWidth -
+            doc.getTextWidth(String(bankOpening)) -
+            rightPadding,
+          boxY + 3.5,
+        );
 
-           
-        startY += 10; // Adjust vertical position for the labels
+        // ===== TABLE HEADER =====
+        startY += 15;
+        addTableHeaders(tableStartX, 34);
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+        // ===== TABLE ROWS =====
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-        startY = addTableRows(
-          (doc.internal.pageSize.width - totalWidth) / 2,
-          startY,
-          startIndex,
-          endIndex
-        );
+
+        startY = addTableRows(tableStartX, startY, startIndex, endIndex);
+
+        // ===== NEXT PAGE =====
         if (endIndex < rows.length) {
-          startY = addNewPage(startY); // Add new page and update startY
-          pageNumber++; // Increment page number
+          startY = addNewPage(startY);
+          pageNumber++;
         }
+
         currentPageIndex++;
       }
     };
 
     const getCurrentDate = () => {
       const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-      const yyyy = today.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
+      return `${String(today.getDate()).padStart(2, "0")}-${String(today.getMonth() + 1).padStart(2, "0")}-${today.getFullYear()}`;
     };
-
-    // Function to get current time in the format HH:MM:SS
     const getCurrentTime = () => {
       const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return hh + ":" + mm + ":" + ss;
+      return `${String(today.getHours()).padStart(2, "0")}:${String(today.getMinutes()).padStart(2, "0")}:${String(today.getSeconds()).padStart(2, "0")}`;
     };
 
-    const date = getCurrentDate(); // Get current date
-    const time = getCurrentTime(); // Get current time
+    const date = getCurrentDate();
+    const time = getCurrentTime();
+    const rowsPerPage = 29;
 
-    // Call function to handle pagination
     handlePagination();
 
-    // Save the PDF files
-    doc.save(`payableReport As On ${date}.pdf`);
+    doc.save(`DailyCash&BankReport As on ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 10; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
+      "center",
+      "center",
+      "center",
       "left",
-      "left",
+      "right",
+      "right",
       "right",
       "right",
       "right",
@@ -906,7 +984,7 @@ export default function PayableReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Payable Report From ${fromInputDate} To ${toInputDate}`,
+      `Daily Cash & Bank Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -922,40 +1000,29 @@ export default function PayableReport() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let typestatus = "";
-
-    if (transectionType === "R") {
-      typestatus = "RECEIABLE";
-    } else if (transectionType === "P") {
-      typestatus = "PAYABLE";
-    } else {
-      typestatus = "ALL"; // Default value
-    }
-
-    let typesearch = searchQuery || "";
-
-    // Apply styling for the status row
-
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["TYPE", typestatus, "", "", "SEARCH :", typesearch]
-        : ["TYPE", typestatus],
-    );
-
-    // Merge cells for Accountselect (columns B to D)
-    //  worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
-
-    // Apply styling for the status row
+    const typeAndStoreRow3 = worksheet.addRow([
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      cashOpening,
+      "",
+      bankOpening,
+    ]);
 
     typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 5].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
+      if (colIndex === 7 || colIndex === 9) {
+        cell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = { horizontal: "right", vertical: "middle" };
+      }
     });
-
     // Header style
     const headerStyle = {
       font: fontHeader,
@@ -975,45 +1042,84 @@ export default function PayableReport() {
 
     // Add headers
     const headers = [
-      "Code",
-      "Description",
-      "Opening",
-      "Debit",
-      "Credit",
-      "Balance",
+      "No",
+      "Date",
+      "Type",
+      "Account - Description",
+      "Rate",
+      "Qnty",
+      "CashRec",
+      "CashPay",
+      "BankRec",
+      "BankPay",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
     tableData.forEach((item) => {
-      const row = worksheet.addRow([
-        item.code,
-        item.Description,
-        item.Opening,
-        item.Debit,
-        item.Credit,
-        item.Balance,
+      // First row: main data (Description blank)
+      const mainRow = worksheet.addRow([
+        item.No,
+        item.Date,
+        item.Type,
+        item.Account,
+        item.Rate,
+        item.Qnty,
+        item.CashRec,
+        item.CashPay,
+        item.BankRec,
+        item.BankPay,
       ]);
 
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
+      // Second row: only Description (other columns blank)
+      const descRow = worksheet.addRow([
+        "", // No
+        "", // Date
+        "", // Type
+        item.Description, // show Description under Account column
+        "", // Rate
+        "", // Qnty
+        "", // CashRec
+        "", // CashPay
+        "", // BankRec
+        "", // BankPay
+      ]);
+
+      // Apply formatting to both rows
+      [mainRow, descRow].forEach((row) => {
+        row.eachCell((cell, colIndex) => {
+          cell.font = fontTableContent;
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+          cell.alignment = {
+            horizontal: columnAlignments[colIndex - 1] || "left",
+            vertical: "middle",
+          };
+
+          // Set grey background for odd-numbered rows
+          if (row.number % 2 !== 0) {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFEFEFEF" }, // light grey
+            };
+          }
+        });
       });
     });
 
     const totalRow = worksheet.addRow([
+      String(formatValue(tableData.length.toLocaleString())),
       "",
-      "Total",
+      "",
+      "",
+      "",
+      "",
       String(totalOpening),
       String(totalDebit),
       String(totalCredit),
@@ -1033,17 +1139,46 @@ export default function PayableReport() {
 
       // Align only the "Total" text to the right
       if (
-        colNumber === 3 ||
-        colNumber === 4 ||
         colNumber === 5 ||
-        colNumber === 6
+        colNumber === 6 ||
+        colNumber === 7 ||
+        colNumber === 8 ||
+        colNumber === 9 ||
+        colNumber === 10
       ) {
         cell.alignment = { horizontal: "right" };
+      }
+      if (colNumber === 1) {
+        cell.alignment = { horizontal: "center" };
+      }
+    });
+
+    const typeAndStoreRow2 = worksheet.addRow([
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      bankOpening,
+      "",
+      bankCloding,
+    ]);
+
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
+      if (colIndex === 7 || colIndex === 9) {
+        cell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = { horizontal: "right", vertical: "middle" };
       }
     });
 
     // Set column widths
-    [10, 45, 12, 12, 12, 12, 12].forEach((width, index) => {
+    [8, 10, 6, 45, 12, 12, 15, 15, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1095,10 +1230,14 @@ export default function PayableReport() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`,
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`,
     );
 
     // Generate and save the Excel file
@@ -1106,8 +1245,12 @@ export default function PayableReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `PayableReport  As on ${currentdate}.xlsx`);
+    saveAs(
+      blob,
+      `DailyCash&BankReport From ${fromInputDate} To ${toInputDate}.xlsx`,
+    );
   };
+
   const dispatch = useDispatch();
 
   const tableTopColor = "#3368B5";
@@ -1139,29 +1282,50 @@ export default function PayableReport() {
   };
 
   const firstColWidth = {
-    width: "80px",
+    width: "55px",
   };
   const secondColWidth = {
-    width: "360px",
+    width: "85px",
   };
   const thirdColWidth = {
-    width: "90px",
+    width: "50px",
   };
   const forthColWidth = {
-    width: "90px",
+    width: "300px",
   };
-  const fifthColWidth = {
-    width: "90px",
-  };
+  //   const fifthColWidth = {
+  //     width: "200px",
+  //   };
   const sixthColWidth = {
-    width: "90px",
+    width: "70px",
   };
+  const seventhColWidth = {
+    width: "80px",
+  };
+
+  const eightColWidth = {
+    width: "80px",
+  };
+  const ninthColWidth = {
+    width: "80px",
+  };
+  const tenthColWidth = {
+    width: "80px",
+  };
+  const elewenthColWidth = {
+    width: "80px",
+  };
+
   const sixthcol = {
     width: "8px",
   };
 
+  useEffect(() => {
+    document.documentElement.style.setProperty("--background-color", getcolor);
+  }, [getcolor]);
+
   const [columns, setColumns] = useState({
-    code: [],
+    Code: [],
     Description: [],
     Opening: [],
     Debit: [],
@@ -1169,7 +1333,7 @@ export default function PayableReport() {
     Balance: [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
-    code: "",
+    Code: "",
     Description: "",
     Opening: "",
     Debit: "",
@@ -1177,11 +1341,10 @@ export default function PayableReport() {
     Balance: "",
   });
 
-  // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        code: tableData.map((row) => row.code),
+        Code: tableData.map((row) => row.Code),
         Description: tableData.map((row) => row.Description),
         Opening: tableData.map((row) => row.Opening),
         Debit: tableData.map((row) => row.Debit),
@@ -1192,216 +1355,75 @@ export default function PayableReport() {
     }
   }, [tableData]);
 
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    // Determine the new sort order
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  const sortedData = [...tableData].sort((a, b) => {
-    let aVal = a[col] ?? "";
-    let bVal = b[col] ?? "";
+    // Create a copy of the table data to sort
+    const sortedData = [...tableData];
 
-    aVal = aVal.toString();
-    bVal = bVal.toString();
+    // Sort the data based on the column and order
+    sortedData.sort((a, b) => {
+      // Get the values to compare
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
 
-    // ⭐ CODE SORT (13-01-0005)
-    if (col === "code") {
-      const aParts = aVal.split("-").map(p => parseInt(p, 10));
-      const bParts = bVal.split("-").map(p => parseInt(p, 10));
+      // Special handling for code column
+      if (col === "Code" && aVal.includes("-") && bVal.includes("-")) {
+        // Split the codes into parts
+        const aParts = aVal.split("-");
+        const bParts = bVal.split("-");
 
-      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-        const diff = (aParts[i] || 0) - (bParts[i] || 0);
-        if (diff !== 0) {
-          return newOrder === "ASC" ? diff : -diff;
+        // Compare each part numerically
+        for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+          const aPart = parseInt(aParts[i] || "0", 10);
+          const bPart = parseInt(bParts[i] || "0", 10);
+
+          if (aPart !== bPart) {
+            return newOrder === "ASC" ? aPart - bPart : bPart - aPart;
+          }
         }
+        return 0;
       }
-      return 0;
-    }
 
-    // ⭐ Numeric sorting
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+      // Try to compare as numbers first
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    }
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
 
-    // ⭐ String sorting
-    return newOrder === "ASC"
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  });
+      // Fall back to string comparison
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
 
-  setTableData(sortedData);
+    // Update the table data with the sorted data
+    setTableData(sortedData);
 
-  setColumnSortOrders((prev) => ({
-    ...Object.keys(prev).reduce((acc, key) => {
+    // Reset all sort orders and set the new one for the clicked column
+    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
       acc[key] = key === col ? newOrder : null;
       return acc;
-    }, {}),
-  }));
-};
+    }, {});
+
+    setColumnSortOrders(resetSortOrders);
+  };
 
   const resetSorting = () => {
     setColumnSortOrders({
-      code: null,
+      Code: null,
       Description: null,
       Opening: null,
       Debit: null,
       Credit: null,
       Balance: null,
     });
-  };
-
-  const renderTableData = () => {
-    return (
-      <>
-        {isLoading ? (
-          <>
-            <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="6" className="text-center">
-                <Spinner animation="border" variant="primary" />
-              </td>
-            </tr>
-            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-
-              <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
-            </tr>
-          </>
-        ) : (
-          <>
-            {tableData.map((item, i) => {
-              totalEnteries += 1;
-
-              const openingNum = Number(
-                item.Opening?.toString().replace(/,/g, ""),
-              );
-              const balanceNum = Number(
-                item.Balance?.toString().replace(/,/g, ""),
-              );
-              const balancecre = Number(
-                item.Credit?.toString().replace(/,/g, ""),
-              );
-              const balancedeb = Number(
-                item.Debit?.toString().replace(/,/g, ""),
-              );
-
-              // Prepare values
-              const values = [openingNum, balancedeb, balancecre, balanceNum];
-
-              // Ignore zero values
-              const nonZeroValues = values.filter((v) => v !== 0);
-
-              // Red only if ALL non-zero values are positive
-              const isRed =
-                nonZeroValues.length > 0 && nonZeroValues.every((v) => v > 0);
-
-              return (
-                <tr
-                  key={`${i}-${selectedIndex}`}
-                  ref={(el) => (rowRefs.current[i] = el)}
-                  onClick={() => handleRowClick(i)}
-                  className={selectedIndex === i ? "selected-background" : ""}
-                  style={{
-                    backgroundColor: getcolor,
-                    // color: fontcolor,
-                    color: isRed ? "red" : fontcolor,
-                  }}
-                >
-                  {/* <td className="text-center" style={firstColWidth}>
-                      {item.code}
-                    </td> */}
-
-                  <td
-                    className="text-start"
-                    style={{
-                      ...firstColWidth,
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      color: selectedIndex === i ? (isRed ? "white" : 'white') : "blue", // ✅ conditional color
-
-                    }}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                        "SupplierLedgerData",
-                        JSON.stringify({
-                          code: item.code,
-                          fromInputDate: fromInputDate,
-                          toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/SupplierLedger", "_blank");
-                    }}
-                  >
-                    {item.code}
-                  </td>
-
-                  <td className="text-start" style={secondColWidth}>
-                    {item.Description}
-                  </td>
-                  <td className="text-end" style={thirdColWidth}>
-                    {formatValue(item.Opening)}
-                  </td>
-                  <td className="text-end" style={forthColWidth}>
-                    {formatValue(item.Debit)}
-                  </td>
-                  <td className="text-end" style={fifthColWidth}>
-                    {formatValue(item.Credit)}
-                  </td>
-                  <td className="text-end" style={sixthColWidth}>
-                    {formatValue(item.Balance)}
-                  </td>
-                </tr>
-              );
-            })}
-            {Array.from({
-              length: Math.max(0, 25 - tableData.length),
-            }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-              <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
-            </tr>
-          </>
-        )}
-      </>
-    );
   };
 
   const getIconStyle = (colKey) => {
@@ -1416,7 +1438,7 @@ export default function PayableReport() {
   useHotkeys(
     "alt+s",
     () => {
-      fetchReceivableReport();
+      fetchDailyCashBankBalance();
       resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true },
@@ -1435,6 +1457,10 @@ export default function PayableReport() {
     enableOnFormTags: true,
   });
 
+  const formatValue = (val) => {
+    return Number(val) === 0 ? "" : val;
+  };
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -1446,13 +1472,10 @@ export default function PayableReport() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  useEffect(() => {
-    document.documentElement.style.setProperty("--background-color", getcolor);
-  }, [getcolor]);
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "1000px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1530,6 +1553,7 @@ export default function PayableReport() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedIndex]);
+
   useEffect(() => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1538,43 +1562,6 @@ export default function PayableReport() {
       });
     }
   }, [selectedIndex]);
-
-  const parseDate = (dateString) => {
-    const [day, month, year] = dateString.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  };
-
-  const handleRadioChange = (days) => {
-    const toDate = parseDate(toInputDate);
-    const fromDate = new Date(toDate);
-    fromDate.setUTCDate(fromDate.getUTCDate() - days);
-
-    setSelectedfromDate(fromDate);
-    setfromInputDate(formatDate(fromDate));
-    setSelectedRadio(days === 0 ? "custom" : `${days}days`);
-  };
-
-  useEffect(() => {
-    if (selectedRadio === "custom") {
-      const currentDate = new Date();
-      const firstDateOfCurrentMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1,
-      );
-      setSelectedfromDate(firstDateOfCurrentMonth);
-      setfromInputDate(formatDate(firstDateOfCurrentMonth));
-      setSelectedToDate(currentDate);
-      settoInputDate(formatDate(currentDate));
-    } else {
-      const days = parseInt(selectedRadio.replace("days", ""));
-      handleRadioChange(days);
-    }
-  }, [selectedRadio]);
-
-  const formatValue = (val) => {
-    return Number(val) === 0 ? "" : val;
-  };
 
   return (
     <>
@@ -1589,7 +1576,8 @@ export default function PayableReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Payable Report" />
+          <NavComponent textdata="Daily Cash & Bank Report" />
+
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1601,13 +1589,13 @@ export default function PayableReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                // justifyContent: "start",
               }}
             >
               <div className="d-flex align-items-center">
                 <div
                   style={{
-                    width: "60px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -1615,7 +1603,8 @@ export default function PayableReport() {
                   <label htmlFor="fromDatePicker">
                     <span
                       style={{
-                        fontSize: parseInt(getdatafontsize),
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
                         fontWeight: "bold",
                       }}
                     >
@@ -1632,7 +1621,7 @@ export default function PayableReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
-                    marginLeft: "3px",
+                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -1649,7 +1638,8 @@ export default function PayableReport() {
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
-                      fontSize: parseInt(getdatafontsize),
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
                       backgroundColor: getcolor,
                       color: fontcolor,
                       opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1688,7 +1678,8 @@ export default function PayableReport() {
                                 ? "pointer"
                                 : "default",
                             marginLeft: "18px",
-                            fontSize: parseInt(getdatafontsize),
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
                             color: fontcolor,
                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                           }}
@@ -1700,7 +1691,10 @@ export default function PayableReport() {
                   />
                 </div>
               </div>
-              <div className="d-flex align-items-center">
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "100px" }}
+              >
                 <div
                   style={{
                     width: "60px",
@@ -1711,7 +1705,8 @@ export default function PayableReport() {
                   <label htmlFor="toDatePicker">
                     <span
                       style={{
-                        fontSize: parseInt(getdatafontsize),
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
                         fontWeight: "bold",
                       }}
                     >
@@ -1728,7 +1723,7 @@ export default function PayableReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
-                    marginLeft: "3px",
+                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -1746,7 +1741,8 @@ export default function PayableReport() {
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
-                      fontSize: parseInt(getdatafontsize),
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
                       backgroundColor: getcolor,
                       color: fontcolor,
                       opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1755,7 +1751,7 @@ export default function PayableReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                    onKeyDown={(e) => handleToKeyPress(e, input3Ref)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -1784,7 +1780,8 @@ export default function PayableReport() {
                                 ? "pointer"
                                 : "default",
                             marginLeft: "18px",
-                            fontSize: parseInt(getdatafontsize),
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
                             color: fontcolor,
                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                           }}
@@ -1797,159 +1794,30 @@ export default function PayableReport() {
                 </div>
               </div>
 
-              {/* ------ */}
               <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
+                style={{
+                  border: "1px solid grey",
+                  marginLeft: "132px",
+                  width: "80px",
+                  height: "24px",
+                }}
               >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: parseInt(getdatafontsize),
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "200px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="R">RECEIVABLE</option>
-                    <option value="P">PAYABLE</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
+                <span className="mobileledger_total">
+                  {formatValue(cashOpening)}
+                </span>
               </div>
-            </div>
-          </div>
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "end",
-              }}
-            >
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input2Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Item description"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "200px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
+
+              <div
+                style={{
+                  border: "1px solid grey",
+                  marginLeft: "80px",
+                  width: "80px",
+                  height: "24px",
+                }}
+              >
+                <span className="mobileledger_total">
+                  {formatValue(bankOpening)}
+                </span>
               </div>
             </div>
           </div>
@@ -1957,104 +1825,69 @@ export default function PayableReport() {
             <div
               style={{
                 overflowY: "auto",
-                // width: "98.3%",
+                // width: "98.8%",
               }}
             >
               <table
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: parseInt(getdatafontsize),
-                  //   width: "100%",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  // width: "100%",
                   position: "relative",
+                  // paddingRight: "2%",
                 }}
               >
                 <thead
                   style={{
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: getnavbarbackgroundcolor,
+                    backgroundColor: tableHeadColor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: getnavbarbackgroundcolor,
+                      backgroundColor: tableHeadColor,
                       color: "white",
                     }}
                   >
-                    <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      onClick={() => handleSorting("code")}
-                    >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
-                      ></i>
+                    <td className="border-dark" style={firstColWidth}>
+                      No
+                    </td>
+                    <td className="border-dark" style={secondColWidth}>
+                      Date
+                    </td>
+                    <td className="border-dark" style={thirdColWidth}>
+                      Type
+                    </td>
+                    <td className="border-dark" style={forthColWidth}>
+                      Account - Description
+                    </td>
+                    <td className="border-dark" style={sixthColWidth}>
+                      Rate
                     </td>
 
-                    <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
-                    >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
+                    <td className="border-dark" style={seventhColWidth}>
+                      Qnty
                     </td>
 
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Opening")}
-                    >
-                      Opening{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Opening")}
-                      ></i>
+                    <td className="border-dark" style={eightColWidth}>
+                      CashRec
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Debit")}
-                    >
-                      Debit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Debit")}
-                      ></i>
+                    <td className="border-dark" style={ninthColWidth}>
+                      CashPay
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={fifthColWidth}
-                      onClick={() => handleSorting("Credit")}
-                    >
-                      Credit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Credit")}
-                      ></i>
+                    <td className="border-dark" style={tenthColWidth}>
+                      BankRec
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Balance")}
-                    >
-                      Balance{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Balance")}
-                      ></i>
+                    <td className="border-dark" style={elewenthColWidth}>
+                      BankPay
                     </td>
 
                     <td className="border-dark" style={sixthcol}></td>
@@ -2079,13 +1912,181 @@ export default function PayableReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  //   width: "100%",
-                  tableLayout: "fixed", // FIXED!
-                  overflowY: "scroll",
+                  //  width: "100%",
+                  position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
-                <tbody id="tablebody" style={{ overflowY: "scroll" }}>
-                  {renderTableData()}
+                <tbody id="tablebody">
+                  {isLoading ? (
+                    <>
+                      <tr
+                        style={{
+                          backgroundColor: getcolor,
+                        }}
+                      >
+                        <td colSpan="10" className="text-center">
+                          <Spinner animation="border" variant="primary" />
+                        </td>
+                      </tr>
+                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                        (_, rowIndex) => (
+                          <tr
+                            key={`blank-${rowIndex}`}
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            {Array.from({ length: 10 }).map((_, colIndex) => (
+                              <td key={`blank-${rowIndex}-${colIndex}`}>
+                                &nbsp;
+                              </td>
+                            ))}
+                          </tr>
+                        ),
+                      )}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        {/* <td style={fifthColWidth}></td> */}
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                        <td style={elewenthColWidth}></td>
+                      </tr>
+                    </>
+                  ) : (
+                    <>
+                      {tableData.flatMap((item, i) => {
+                        totalEnteries += 1;
+
+                        return [
+                          // Main row (Account + data)
+                          <tr
+                            key={`row-${i}`}
+                            ref={(el) => (rowRefs.current[i] = el)}
+                            onClick={() => handleRowClick(i)}
+                            className={
+                              selectedIndex === i ? "selected-background" : ""
+                            }
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            <td className="text-center" style={firstColWidth}>
+                              {item.No}
+                            </td>
+                            <td className="text-center" style={secondColWidth}>
+                              {item.Date}
+                            </td>
+                            <td className="text-center" style={thirdColWidth}>
+                              {item.Type}
+                            </td>
+                            <td className="text-start" style={forthColWidth}>
+                              {item.Account}
+                            </td>
+                            <td className="text-end" style={sixthColWidth}>
+                              {item.Rate}
+                            </td>
+                            <td className="text-end" style={seventhColWidth}>
+                              {item.Qnty}
+                            </td>
+                            <td className="text-end" style={eightColWidth}>
+                              {item.CashRec}
+                            </td>
+                            <td className="text-end" style={ninthColWidth}>
+                              {item.CashPay}
+                            </td>
+                            <td className="text-end" style={tenthColWidth}>
+                              {item.BankRec}
+                            </td>
+                            <td className="text-end" style={elewenthColWidth}>
+                              {item.BankPay}
+                            </td>
+                          </tr>,
+
+                          // Description row (blank + Description)
+                          <tr
+                            key={`row-${i}`}
+                            ref={(el) => (rowRefs.current[i] = el)}
+                            onClick={() => handleRowClick(i)}
+                            className={
+                              selectedIndex === i ? "selected-background" : ""
+                            }
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            <td
+                              className="text-center"
+                              style={firstColWidth}
+                            ></td>
+                            <td
+                              className="text-center"
+                              style={secondColWidth}
+                            ></td>
+                            <td
+                              className="text-center"
+                              style={thirdColWidth}
+                            ></td>
+                            <td className="text-start" style={forthColWidth}>
+                              {item.Description}
+                            </td>
+                            <td className="text-end" style={sixthColWidth}></td>
+                            <td
+                              className="text-end"
+                              style={seventhColWidth}
+                            ></td>
+                            <td className="text-end" style={eightColWidth}></td>
+                            <td className="text-end" style={ninthColWidth}></td>
+                            <td className="text-end" style={tenthColWidth}></td>
+                            <td
+                              className="text-end"
+                              style={elewenthColWidth}
+                            ></td>
+                          </tr>,
+                        ];
+                      })}
+
+                      {Array.from({
+                        length: Math.max(0, 27 - tableData.length),
+                      }).map((_, rowIndex) => (
+                        <tr
+                          key={`blank-${rowIndex}`}
+                          style={{
+                            backgroundColor: getcolor,
+                            color: fontcolor,
+                          }}
+                        >
+                          {Array.from({ length: 10 }).map((_, colIndex) => (
+                            <td key={`blank-${rowIndex}-${colIndex}`}>
+                              &nbsp;
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        {/* <td style={fifthColWidth}></td> */}
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                        <td style={elewenthColWidth}></td>
+                      </tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -2123,6 +2124,36 @@ export default function PayableReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
+            ></div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+
+            <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
             >
               <span className="mobileledger_total">
                 {formatValue(totalOpening)}
@@ -2130,7 +2161,7 @@ export default function PayableReport() {
             </div>
             <div
               style={{
-                ...forthColWidth,
+                ...ninthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -2139,9 +2170,10 @@ export default function PayableReport() {
                 {formatValue(totalDebit)}
               </span>
             </div>
+
             <div
               style={{
-                ...fifthColWidth,
+                ...tenthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -2152,13 +2184,48 @@ export default function PayableReport() {
             </div>
             <div
               style={{
-                ...sixthColWidth,
+                ...elewenthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
               <span className="mobileledger_total">
                 {formatValue(closingBalance)}
+              </span>
+            </div>
+          </div>
+          <div
+            style={{
+              height: "24px",
+              display: "flex",
+              paddingRight: "8px",
+              marginTop: "5px",
+              justifyContent: "end",
+            }}
+          >
+            <div
+              style={{
+                border: "1px solid black",
+                width: "80px",
+                height: "24px",
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(cashClosing)}
+              </span>
+            </div>
+
+            <div
+              style={{
+                border: "1px solid black",
+                marginLeft: "80px",
+                marginRight: "80px",
+                width: "80px",
+                height: "24px",
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(bankCloding)}
               </span>
             </div>
           </div>
@@ -2196,8 +2263,9 @@ export default function PayableReport() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
+              // onClick={fetchDailyCashBankBalance}
               onClick={() => {
-                fetchReceivableReport();
+                fetchDailyCashBankBalance();
                 resetSorting();
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}

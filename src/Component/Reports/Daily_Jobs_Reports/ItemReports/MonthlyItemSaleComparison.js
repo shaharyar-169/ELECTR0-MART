@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Container, Spinner, Nav } from "react-bootstrap";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Modal, Spinner, Button } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
@@ -13,8 +13,8 @@ import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
-import { BsCalendar } from "react-icons/bs";
-import DatePicker from "react-datepicker";
+import Chart from "react-apexcharts";
+import ReactApexChart from "react-apexcharts";
 import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
@@ -25,10 +25,31 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Code, Description, Store } from "@mui/icons-material";
-import { isAction } from "redux";
+import "./itemstyle.css";
+import barlogo from "../../../../../src/image/barchart (2).png"
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-export default function ItemSaleSummaryReport() {
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+);
+
+export default function MonthlyItemSaleComparisonReport() {
+  const currentYear = new Date().getFullYear();
+
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -45,7 +66,7 @@ export default function ItemSaleSummaryReport() {
   const searchRef = useRef(null);
   const selectButtonRef = useRef(null);
 
-  const tabs = ["ITEM", "CATEGORY", "COMPANY"];
+  const tabs = ["ITEM SALE", "CATEGORY SALE", "COMPANY SALE"];
   const [activeIndex, setActiveIndex] = useState(0);
   const tabRefs = useRef([]);
   const lineRef = useRef(null);
@@ -54,9 +75,13 @@ export default function ItemSaleSummaryReport() {
 
   const [storeList, setStoreList] = useState([]);
   const [storeType, setStoreType] = useState("");
+
   const [tableData, setTableData] = useState([]);
   const [CategoryTableData, setCategoryTableData] = useState([]);
   const [CompantTableData, setCompantTableData] = useState([]);
+
+  console.log("table data", tableData);
+  console.log("Category table data", CategoryTableData);
 
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -96,11 +121,65 @@ export default function ItemSaleSummaryReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [CategorySearchQuery, setCategorySearchQuery] = useState("");
   const [CompanySearchQuery, setCompanySearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("A");
-  const [transectionType2, settransectionType2] = useState("");
+
+  const [transectionType, settransectionType] = useState(currentYear);
+  const [CategoryYear, setCategoryYear] = useState(currentYear);
+  const [CompanyYear, setCompanyYear] = useState(currentYear);
+
+  const [transectionType2, settransectionType2] = useState("A");
+
+  const [CategoryType, setCategoryType] = useState("A");
+  const [companyType, setcompanyType] = useState("A");
 
   const [totaldebit, settotaldebit] = useState(0);
   const [totalcredit, settotalcredit] = useState(0);
+
+  const [monthTotals, setMonthTotals] = useState({
+    Jan: 0,
+    Feb: 0,
+    Mar: 0,
+    Apr: 0,
+    May: 0,
+    Jun: 0,
+    Jul: 0,
+    Aug: 0,
+    Sep: 0,
+    Oct: 0,
+    Nov: 0,
+    Dec: 0,
+    Total: 0,
+  });
+
+  const [CategorymonthTotals, setCategorymonthTotals] = useState({
+    Jan: 0,
+    Feb: 0,
+    Mar: 0,
+    Apr: 0,
+    May: 0,
+    Jun: 0,
+    Jul: 0,
+    Aug: 0,
+    Sep: 0,
+    Oct: 0,
+    Nov: 0,
+    Dec: 0,
+    Total: 0,
+  });
+  const [CompanymonthTotals, setCompanymonthTotals] = useState({
+    Jan: 0,
+    Feb: 0,
+    Mar: 0,
+    Apr: 0,
+    May: 0,
+    Jun: 0,
+    Jul: 0,
+    Aug: 0,
+    Sep: 0,
+    Oct: 0,
+    Nov: 0,
+    Dec: 0,
+    Total: 0,
+  });
 
   const [categortQnty, setcategortQnty] = useState(0);
   const [categoryAmount, setcategoryAmount] = useState(0);
@@ -121,6 +200,18 @@ export default function ItemSaleSummaryReport() {
 
   const yeardescription = getYearDescription();
   const locationnumber = getLocationnumber();
+
+  //  MODLE CODE
+
+  const [show, setShow] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleClose = () => setShow(false);
+
+  const handleShow = (row) => {
+    setSelectedRow(row); // store clicked row data
+    setShow(true); // open modal
+  };
 
   const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
@@ -146,309 +237,24 @@ export default function ItemSaleSummaryReport() {
   const comapnyname = organisation.description;
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
-  const fromdatevalidate = getfromdate;
-  const todatevaliadete = gettodate;
-
-  const convertToDate = (dateString) => {
-    const [day, month, year] = dateString.split("-");
-    return new Date(year, month - 1, day);
-  };
-
-  const GlobalfromDate = convertToDate(fromdatevalidate);
-  const GlobaltoDate = convertToDate(todatevaliadete);
-
-  const formatDate1 = (date) => {
-    return `${String(date.getDate()).padStart(2, "0")}-${String(
-      date.getMonth() + 1,
-    ).padStart(2, "0")}-${date.getFullYear()}`;
-  };
-  const GlobaltoDate1 = formatDate1(GlobaltoDate);
-  const GlobalfromDate1 = formatDate1(GlobalfromDate);
-
-  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
-
-  // Toggle the ToDATE CalendarOpen state on each click
-  const toggleToCalendar = () => {
-    settoCalendarOpen((prevOpen) => !prevOpen);
-  };
-  const formatDate = (date) => {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
-  const handleToDateChange = (date) => {
-    setSelectedToDate(date);
-    settoInputDate(date ? formatDate(date) : "");
-    settoCalendarOpen(false);
-  };
-  const handleToInputChange = (e) => {
-    settoInputDate(e.target.value);
-  };
-
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleToKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const toDateElement = document.getElementById("todatevalidation");
-      const formattedInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobaltoDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        if (GlobaltoDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        if (fromInputDate) {
-          const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-"),
-          );
-          if (enteredDate <= fromDate) {
-            toast.error("To date must be after from date");
-            return;
-          }
-        }
-
-        toDateElement.style.border = `1px solid ${fontcolor}`;
-        settoInputDate(formattedInput);
-
-        if (saleSelectRef.current) {
-          e.preventDefault();
-          saleSelectRef.current.focus();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const datevalidation = () => {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
-
-    const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-
-    let hasError = false;
-    let errorType = "";
-
-    switch (true) {
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
-      case !toInputDate:
-        errorType = "toDate";
-        break;
-      default:
-        hasError = false;
-        break;
-    }
-
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
-      errorType = "toDateInvalid";
-    } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
-      const formattedToInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-      const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-        errorType = "toDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-        errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
-      }
-    }
-
-    switch (errorType) {
-      case "saleType":
-        toast.error("Please select a Account Code");
-        return;
-
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
-      case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
-        return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
-        return;
-
-      default:
-        break;
-    }
-
-    // console.log(data);
-    document.getElementById("fromdatevalidation").style.border =
-      `1px solid ${fontcolor}`;
-    document.getElementById("todatevalidation").style.border =
-      `1px solid ${fontcolor}`;
-  };
 
   function fetchDailyStatusReport() {
-    datevalidation();
-    const apiUrl = apiLinks + "/ItemSaleSummary.php";
+    const apiUrl = apiLinks + "/MonthlyItemSaleComparison.php";
 
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-
       FCtgCod: Categoryselectdata,
-      FCapCod: Capacityselectdata,
-      FSchTxt: searchQuery,
+      FRepTyp: transectionType2,
+      FRepYer: transectionType,
       FCmpCod: Companyselectdata,
-      FStrCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      FTrnTyp: transectionType2,
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+
+      code: "NASIRTRD",
+      FLocCod: "001",
+      FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -456,9 +262,25 @@ export default function ItemSaleSummaryReport() {
       .then((response) => {
         setIsLoading(false);
 
-        settotaldebit(response.data["Total Qnty"]);
-        settotalcredit(response.data["Total Amount"]);
-        //    setClosingBalance(response.data["Closing Bal "]);
+        axios.post(apiUrl, formData).then((response) => {
+          setIsLoading(false);
+
+          setMonthTotals({
+            Jan: Number(response.data["Total Jan"]?.replace(/,/g, "") || 0),
+            Feb: Number(response.data["Total Feb"]?.replace(/,/g, "") || 0),
+            Mar: Number(response.data["Total Mar"]?.replace(/,/g, "") || 0),
+            Apr: Number(response.data["Total Apr"]?.replace(/,/g, "") || 0),
+            May: Number(response.data["Total May"]?.replace(/,/g, "") || 0),
+            Jun: Number(response.data["Total Jun"]?.replace(/,/g, "") || 0),
+            Jul: Number(response.data["Total Jul"]?.replace(/,/g, "") || 0),
+            Aug: Number(response.data["Total Aug"]?.replace(/,/g, "") || 0),
+            Sep: Number(response.data["Total Sep"]?.replace(/,/g, "") || 0),
+            Oct: Number(response.data["Total Oct"]?.replace(/,/g, "") || 0),
+            Nov: Number(response.data["Total Nov"]?.replace(/,/g, "") || 0),
+            Dec: Number(response.data["Total Dec"]?.replace(/,/g, "") || 0),
+            Total: Number(response.data["Total"]?.replace(/,/g, "") || 0),
+          });
+        });
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -478,22 +300,20 @@ export default function ItemSaleSummaryReport() {
   }
 
   function fetchCategorySaleComparisonReport() {
-    datevalidation();
-    const apiUrl = apiLinks + "/CategorySaleComparison.php";
+    const apiUrl = apiLinks + "/MonthlyCategorySaleComparison.php";
 
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FSchTxt: CategorySearchQuery,
+      FRepTyp: CategoryType,
+      FRepYer: CategoryYear,
       FCmpCod: Companyselectdata1,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
 
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+
+      code: "NASIRTRD",
+      FLocCod: "001",
     }).toString();
 
     axios
@@ -501,9 +321,25 @@ export default function ItemSaleSummaryReport() {
       .then((response) => {
         setIsLoading(false);
 
-        setcategortQnty(response.data["Total Qnty"]);
-        setcategoryAmount(response.data["Total Amount"]);
-        setcategoryMargin(response.data["Total MArgin"]);
+        axios.post(apiUrl, formData).then((response) => {
+          setIsLoading(false);
+
+          setCategorymonthTotals({
+            Jan: Number(response.data["Total Jan"]?.replace(/,/g, "") || 0),
+            Feb: Number(response.data["Total Feb"]?.replace(/,/g, "") || 0),
+            Mar: Number(response.data["Total Mar"]?.replace(/,/g, "") || 0),
+            Apr: Number(response.data["Total Apr"]?.replace(/,/g, "") || 0),
+            May: Number(response.data["Total May"]?.replace(/,/g, "") || 0),
+            Jun: Number(response.data["Total Jun"]?.replace(/,/g, "") || 0),
+            Jul: Number(response.data["Total Jul"]?.replace(/,/g, "") || 0),
+            Aug: Number(response.data["Total Aug"]?.replace(/,/g, "") || 0),
+            Sep: Number(response.data["Total Sep"]?.replace(/,/g, "") || 0),
+            Oct: Number(response.data["Total Oct"]?.replace(/,/g, "") || 0),
+            Nov: Number(response.data["Total Nov"]?.replace(/,/g, "") || 0),
+            Dec: Number(response.data["Total Dec"]?.replace(/,/g, "") || 0),
+            Total: Number(response.data["Total"]?.replace(/,/g, "") || 0),
+          });
+        });
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setCategoryTableData(response.data.Detail);
@@ -523,32 +359,43 @@ export default function ItemSaleSummaryReport() {
   }
 
   function fetchCompanySaleComparisonReport() {
-    datevalidation();
-    const apiUrl = apiLinks + "/CompanySaleComparison.php";
+    const apiUrl = apiLinks + "/MonthlyCompanySaleComparison.php";
 
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
+      FRepTyp: companyType,
+      FRepYer: CompanyYear,
       FCtgCod: Categoryselectdata1,
-      FSchTxt: CompanySearchQuery,
 
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
 
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+      code: "NASIRTRD",
+      FLocCod: "001",
+        FYerDsc: "2024-2024",
     }).toString();
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
-        setCompanyQnty(response.data["Total Qnty"]);
-        setCompanyAmount(response.data["Total Amount"]);
-        setCompanyMargin(response.data["Total MArgin"]);
+
+        setCompanymonthTotals({
+          Jan: Number(response.data["Total Jan"]?.replace(/,/g, "") || 0),
+          Feb: Number(response.data["Total Feb"]?.replace(/,/g, "") || 0),
+          Mar: Number(response.data["Total Mar"]?.replace(/,/g, "") || 0),
+          Apr: Number(response.data["Total Apr"]?.replace(/,/g, "") || 0),
+          May: Number(response.data["Total May"]?.replace(/,/g, "") || 0),
+          Jun: Number(response.data["Total Jun"]?.replace(/,/g, "") || 0),
+          Jul: Number(response.data["Total Jul"]?.replace(/,/g, "") || 0),
+          Aug: Number(response.data["Total Aug"]?.replace(/,/g, "") || 0),
+          Sep: Number(response.data["Total Sep"]?.replace(/,/g, "") || 0),
+          Oct: Number(response.data["Total Oct"]?.replace(/,/g, "") || 0),
+          Nov: Number(response.data["Total Nov"]?.replace(/,/g, "") || 0),
+          Dec: Number(response.data["Total Dec"]?.replace(/,/g, "") || 0),
+          Total: Number(response.data["Total"]?.replace(/,/g, "") || 0),
+        });
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setCompantTableData(response.data.Detail);
@@ -567,15 +414,26 @@ export default function ItemSaleSummaryReport() {
       });
   }
 
-  useEffect(() => {
-    const currentTab = tabRefs.current[activeIndex];
-    const line = lineRef.current;
+  // useEffect(() => {
+  //   const currentTab = tabRefs.current[activeIndex];
+  //   const line = lineRef.current;
 
-    if (currentTab && line) {
-      line.style.width = `${currentTab.offsetWidth}px`;
-      line.style.left = `${currentTab.offsetLeft}px`;
-    }
-  }, [activeIndex]);
+  //   if (currentTab && line) {
+  //     line.style.width = `${currentTab.offsetWidth}px`;
+  //     line.style.left = `${currentTab.offsetLeft}px`;
+  //   }
+  // }, [activeIndex]);
+
+  useEffect(() => {
+  const currentTab = tabRefs.current[activeIndex];
+  const line = lineRef.current;
+
+  if (currentTab && line) {
+    line.style.width = `${currentTab.offsetWidth}px`;
+    line.style.left = `${currentTab.offsetLeft}px`;
+  }
+}, [activeIndex, isSidebarVisible]);
+
 
   useEffect(() => {
     const hasComponentMountedPreviously =
@@ -589,20 +447,6 @@ export default function ItemSaleSummaryReport() {
       }
       sessionStorage.setItem("componentMounted", "true");
     }
-  }, []);
-
-  useEffect(() => {
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
-
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1,
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
   useEffect(() => {
@@ -633,34 +477,6 @@ export default function ItemSaleSummaryReport() {
   }));
 
   useEffect(() => {
-    const apiUrl = apiLinks + "/GetCapacity.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetCapacity(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data,
-          );
-          setGetCapacity([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  const capacityoptions = GetCapacity.map((item) => ({
-    value: item.tcapcod,
-    label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
-  }));
-
-  useEffect(() => {
     const apiUrl = apiLinks + "/GetCatg.php";
     const formData = new URLSearchParams({
       code: organisation.code,
@@ -686,34 +502,6 @@ export default function ItemSaleSummaryReport() {
   const categoryoptions = GetCategory.map((item) => ({
     value: item.tctgcod,
     label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
-  }));
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveStore.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetType(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data,
-          );
-          setGetType([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  const typeoptions = GetType.map((item) => ({
-    value: item.tstrcod,
-    label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
   }));
 
   const DropdownOption = (props) => {
@@ -900,10 +688,35 @@ export default function ItemSaleSummaryReport() {
     }),
   });
 
+  const years = [currentYear, currentYear - 1, currentYear - 2];
+
+  const activeTableData =
+    activeIndex === 0
+      ? tableData
+      : activeIndex === 1
+        ? CategoryTableData
+        : activeIndex === 2
+          ? CompantTableData
+          : [];
+
   const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const sourceData =
       activeIndex === 1
         ? CategoryTableData
@@ -913,82 +726,59 @@ export default function ItemSaleSummaryReport() {
 
     // Define table data (rows)
     const rows = sourceData.map((item) => [
-      activeIndex === 1
-        ? item.tctgcod
-        : activeIndex === 2
-          ? item.tcmpcod
-          : item.code,
+      // item.Code ?? item.code ?? "", // Code
+      // item.Description ?? "", // Description
 
-      activeIndex === 1
-        ? item.Category
-        : activeIndex === 2
-          ? item.Company
-          : item.Description,
+      item.Jan ?? "0",
+      item.Feb ?? "0",
+      item.Mar ?? "0",
+      item.Apr ?? "0",
+      item.May ?? "0",
+      item.Jun ?? "0",
+      item.Jul ?? "0",
+      item.Aug ?? "0",
+      item.Sep ?? "0",
+      item.Oct ?? "0",
+      item.Nov ?? "0",
+      item.Dec ?? "0",
 
-      activeIndex === 1 ? item.Qnty : activeIndex === 2 ? item.Qnty : item.Rate,
-
-      activeIndex === 1
-        ? item.Amount
-        : activeIndex === 2
-          ? item.Amount
-          : item.Qnty,
-
-      activeIndex === 1
-        ? item.Margin
-        : activeIndex === 2
-          ? item.Margin
-          : item["Sale Amount"],
+      item.Total ?? "0",
     ]);
 
-    // Add summary row to the table
+    const summaryTotals =
+      activeIndex === 1
+        ? CategorymonthTotals
+        : activeIndex === 2
+          ? CompanymonthTotals
+          : monthTotals;
+
     rows.push([
-      activeIndex === 1
-        ? String(CategoryTableData.length.toLocaleString())
-        : activeIndex === 2
-          ? String(CompantTableData.length.toLocaleString())
-          : String(tableData.length.toLocaleString()),
-      "Total",
-      activeIndex === 1
-        ? String(categortQnty)
-        : activeIndex === 2
-          ? String(CompanyQnty)
-          : "",
+      // Code column → total rows count
+      // String(
+      //   activeIndex === 1
+      //     ? CategoryTableData.length.toLocaleString()
+      //     : activeIndex === 2
+      //       ? CompantTableData.length.toLocaleString()
+      //       : tableData.length.toLocaleString()
+      // ),
 
-      activeIndex === 1
-        ? String(categoryAmount)
-        : activeIndex === 2
-          ? String(CompanyAmount)
-          : String(totaldebit),
+      // // Description column
+      // "Total",
 
-      activeIndex === 1
-        ? String(categoryMargin)
-        : activeIndex === 2
-          ? String(CompanyMargin)
-          : String(totalcredit),
+      // Month columns (VERY IMPORTANT: spread here)
+      ...months.map((m) => (summaryTotals[m] ?? "0").toLocaleString()),
+
+      // Final Total column
+      summaryTotals.Total?.toLocaleString() ?? "0",
     ]);
 
     // Define table column headers and individual column widths
 
-    const headers = [
-      "Code",
-      activeIndex === 1
-        ? "Category"
-        : activeIndex === 2
-          ? "Company"
-          : "Description",
+    const headers = [...months, "Total"];
 
-      activeIndex === 1 ? "Qnty" : activeIndex === 2 ? "Qnty" : "Rate",
-
-      activeIndex === 1 ? "Amount" : activeIndex === 2 ? "Amount" : "Qnty",
-
-      activeIndex === 1 ? "Margin" : activeIndex === 2 ? "Margin" : "Amount",
-    ];
     const columnWidths = [
-      activeIndex === 1 || activeIndex === 2 ? 15 : 38,
-      95,
-      activeIndex === 1 || activeIndex === 2 ? 20 : 22,
-      activeIndex === 1 || activeIndex === 2 ? 28 : 18,
-      30,
+      ...months.map(() => 22), // 12 months
+      22,
     ];
 
     // Calculate total table width
@@ -1116,15 +906,23 @@ export default function ItemSaleSummaryReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 10) {
+          const monthStartIndex = 2;
+          const totalIndex = months.length;
+
+          if (cellIndex === 20) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+          } else if (
+            cellIndex <= totalIndex &&
+            cellValue !== "" && // skip empty cells
+            typeof cellValue !== "object" // skip merged cells
+          ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
+
+            doc.text(String(cellValue), rightAlignX, cellY, {
               align: "right",
               baseline: "middle",
             });
@@ -1189,7 +987,7 @@ export default function ItemSaleSummaryReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 46; // Adjust this value based on your requirements
+    const rowsPerPage = 28; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1232,10 +1030,10 @@ export default function ItemSaleSummaryReport() {
 
         addTitle(
           activeIndex === 1
-            ? `Category Sale Comparison Report From ${fromInputDate} To ${toInputDate}`
+            ? `Monthly Category Sale Comparison Report`
             : activeIndex === 2
-              ? `Company Sale Comparison Report From ${fromInputDate} To ${toInputDate}`
-              : `Item Sale Summary Report From ${fromInputDate} To ${toInputDate}`,
+              ? `Monthly Company Sale Comparison Report`
+              : `Monthly Item Sale Sale Comparison Report`,
           "",
           "",
           pageNumber,
@@ -1247,20 +1045,32 @@ export default function ItemSaleSummaryReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let transectionsts =
-          transectionType2 === "INV"
-            ? "SALE"
-            : transectionType2 == "SRN"
-              ? "SALE RETURN"
+        let itemCategory = categoryselectdatavalue?.label || "ALL";
+        let itemCompany = Companyselectdatavalue?.label || "ALL";
+
+        let itemType =
+          transectionType2 == "Q"
+            ? "QUNATITY"
+            : transectionType2 == "A"
+              ? "AMOUNT"
               : "ALL";
 
-        let typeText = capacityselectdatavalue?.label || "ALL";
-        let category = categoryselectdatavalue?.label || "ALL";
-        let typename = typeselectdatavalue?.label || "ALL";
-        let typeItem = Companyselectdatavalue?.label || "ALL";
-        let categorytabcomp = Companyselectdatavalue1?.label || "ALL";
-        let companytabcate = categoryselectdatavalue1?.label || "ALL";
-        let search = searchQuery ? searchQuery : "";
+        let itemYear = transectionType ? transectionType : "ALL";
+        let CateCompany = Companyselectdatavalue1?.label || "ALL";
+        let CateType =
+          CategoryType == "Q"
+            ? "QUNATITY"
+            : CategoryType == "A"
+              ? "AMOUNT"
+              : "ALL";
+
+        let ComCategory = categoryselectdatavalue1?.label || "ALL";
+        let ComType =
+          companyType == "Q"
+            ? "QUNATITY"
+            : companyType == "A"
+              ? "AMOUNT"
+              : "ALL";
 
         if (activeIndex === 0 || activeIndex === 1) {
           doc.setFont("verdana", "bold");
@@ -1269,7 +1079,7 @@ export default function ItemSaleSummaryReport() {
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
           doc.text(
-            `${activeIndex === 0 ? typeItem : categorytabcomp}`,
+            `${activeIndex === 0 ? itemCompany : CateCompany}`,
             labelsX + 25,
             labelsY,
           );
@@ -1278,10 +1088,10 @@ export default function ItemSaleSummaryReport() {
         if (activeIndex === 0) {
           doc.setFont("verdana", "bold");
           doc.setFontSize(10);
-          doc.text(`Store :`, labelsX + 120, labelsY); // Draw bold label
+          doc.text(`Year :`, labelsX + 200, labelsY); // Draw bold label
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
-          doc.text(`${typename}`, labelsX + 140, labelsY); // Draw the value next to the label
+          doc.text(`${itemYear}`, labelsX + 215, labelsY); // Draw the value next to the label
         }
 
         if (activeIndex === 0 || activeIndex === 2) {
@@ -1294,58 +1104,30 @@ export default function ItemSaleSummaryReport() {
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
           doc.text(
-            `${activeIndex === 0 ? category : companytabcate}`,
+            `${activeIndex === 0 ? itemCategory : ComCategory}`,
             labelsX + 25,
             labelsY + yOffset,
           );
         }
 
-        if (activeIndex === 0) {
+        if (activeIndex === 0 || activeIndex === 1 || activeIndex === 2) {
           doc.setFont("verdana", "bold");
           doc.setFontSize(10);
-          doc.text(`Type :`, labelsX + 120, labelsY + 4.3); // Draw bold label
-          doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-          doc.text(`${transectionsts}`, labelsX + 140, labelsY + 4.3); // Draw the value next to the label
-        }
-        if (activeIndex === 0) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-          doc.text(`Capacity :`, labelsX, labelsY + 8.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-          doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-        }
-        if (activeIndex === 0 && searchQuery) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-          doc.text(`Search :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-          doc.text(`${search}`, labelsX + 140, labelsY + 8.5); // Draw the value next to the label
-        }
-
-        if (
-          (activeIndex === 1 && CategorySearchQuery) ||
-          (activeIndex === 2 && CompanySearchQuery)
-        ) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-          doc.text(`Search :`, labelsX + 120, labelsY);
+          doc.text(`Type :`, labelsX + 200, labelsY + 4.3); // Draw bold label
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
           doc.text(
-            activeIndex === 1 ? CategorySearchQuery : CompanySearchQuery,
-            labelsX + 140,
-            labelsY,
-          );
+            `${activeIndex === 0 ? itemType : activeIndex === 1 ? CateType : ComType}`,
+            labelsX + 215,
+            labelsY + 4.3,
+          ); // Draw the value next to the label
         }
 
-        startY += activeIndex === 1 || activeIndex === 2 ? 1 : 10; // Adjust vertical position for the labels
+        startY += activeIndex === 1 || activeIndex === 2 ? 1 : 6; // Adjust vertical position for the labels
 
         addTableHeaders(
           (doc.internal.pageSize.width - totalWidth) / 2,
-          activeIndex === 1 || activeIndex === 2 ? 30 : 39,
+          activeIndex === 1 || activeIndex === 2 ? 30 : 35,
         );
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
@@ -1388,21 +1170,36 @@ export default function ItemSaleSummaryReport() {
 
     // Save the PDF files
     const pdfFileNames = {
-      0: "ItemSaleSummaryReportPos",
-      1: "CategorySaleComparisonReportPos",
-      2: "CompanySaleComparisonReportPos",
+      0: "MonthlyItemSaleComparison",
+      1: "MonthlyCategorySaleComparison",
+      2: "MonthlyCompanySaleComparison",
     };
 
     doc.save(`${pdfFileNames[activeIndex]} As On ${date}.pdf`);
   };
-
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 5; // Ensure this matches the actual number of columns
+    const numColumns = 15; // Ensure this matches the actual number of columns
 
-    const columnAlignments = ["left", "left", "right", "right", "right"];
+    const columnAlignments = [
+      "left", // Code
+      "left", // Description / Category / Company
+      "right", // Jan
+      "right", // Feb
+      "right", // Mar
+      "right", // Apr
+      "right", // May
+      "right", // Jun
+      "right", // Jul
+      "right", // Aug
+      "right", // Sep
+      "right", // Oct
+      "right", // Nov
+      "right", // Dec
+      "right", // Total
+    ];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -1446,10 +1243,10 @@ export default function ItemSaleSummaryReport() {
     // Add Store List row
     const reportTitle =
       activeIndex === 0
-        ? `Item Sale Summary Report From ${fromInputDate} To ${toInputDate}`
+        ? `Monthly Item Sale Comparison Report From ${fromInputDate} To ${toInputDate}`
         : activeIndex === 1
-          ? `Category Sale Comparison Report From ${fromInputDate} To ${toInputDate}`
-          : `Company Sale Comparison Report From ${fromInputDate} To ${toInputDate}`;
+          ? `Monthly Category Sale Comparison Report From ${fromInputDate} To ${toInputDate}`
+          : `Monthly Company Sale Comparison Report From ${fromInputDate} To ${toInputDate}`;
 
     const storeListRow = worksheet.addRow([reportTitle]);
 
@@ -1467,20 +1264,25 @@ export default function ItemSaleSummaryReport() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let typeText = capacityselectdatavalue?.label || "ALL";
-    let category = categoryselectdatavalue?.label || "ALL";
-    let typename = typeselectdatavalue?.label || "ALL";
-    let typeItem = Companyselectdatavalue?.label || "ALL";
-    let categorytabcomp = Companyselectdatavalue1?.label || "ALL";
-    let companytabcate = categoryselectdatavalue1?.label || "ALL";
-    let search = searchQuery ? searchQuery : "";
+    let itemCategory = categoryselectdatavalue?.label || "ALL";
+    let itemCompany = Companyselectdatavalue?.label || "ALL";
 
-    let transectionsts =
-      transectionType2 === "INV"
-        ? "SALE"
-        : transectionType2 == "SRN"
-          ? "SALE RETURN"
+    let itemType =
+      transectionType2 == "Q"
+        ? "QUNATITY"
+        : transectionType2 == "A"
+          ? "AMOUNT"
           : "ALL";
+
+    let itemYear = transectionType ? transectionType : "ALL";
+
+    let CateCompany = Companyselectdatavalue1?.label || "ALL";
+    let CateType =
+      CategoryType == "Q" ? "QUNATITY" : CategoryType == "A" ? "AMOUNT" : "ALL";
+
+    let ComCategory = categoryselectdatavalue1?.label || "ALL";
+    let ComType =
+      companyType == "Q" ? "QUNATITY" : companyType == "A" ? "AMOUNT" : "ALL";
 
     let typeAndStoreRow;
     let typeAndStoreRow2;
@@ -1493,7 +1295,7 @@ export default function ItemSaleSummaryReport() {
         cell.font = {
           name: "CustomFont",
           size: 10,
-          bold: colIndex === 1 || colIndex === 4,
+          bold: colIndex === 1 || colIndex === 12,
         };
         cell.alignment = {
           horizontal: "left",
@@ -1506,46 +1308,75 @@ export default function ItemSaleSummaryReport() {
       // First row
       typeAndStoreRow = worksheet.addRow([
         "Company :",
-        typeItem,
+        itemCompany,
         "",
-        "Store :",
-        typename,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Year :",
+        itemYear,
       ]);
 
       // Second row
       typeAndStoreRow2 = worksheet.addRow([
         "Category :",
-        category,
+        itemCategory,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
         "",
         "Type :",
-        transectionsts,
+        itemType,
       ]);
-
-      // Third row (Search conditional)
-      typeAndStoreRow4 = worksheet.addRow(
-        searchQuery
-          ? ["Capacity :", typeText, "", "Search :", search]
-          : ["Capacity :", typeText],
-      );
 
       styleRow(typeAndStoreRow);
       styleRow(typeAndStoreRow2);
-      styleRow(typeAndStoreRow4);
     }
+
     if (activeIndex === 1) {
-      typeAndStoreRow4 = worksheet.addRow(
-        CategorySearchQuery
-          ? ["Company :", categorytabcomp, "", "Search :", CategorySearchQuery]
-          : ["Company :", categorytabcomp],
-      );
+      typeAndStoreRow4 = worksheet.addRow([
+        "Company :",
+        CateCompany,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Type :",
+        CateType,
+      ]);
       styleRow(typeAndStoreRow4);
     }
     if (activeIndex === 2) {
-      typeAndStoreRow4 = worksheet.addRow(
-        CompanySearchQuery
-          ? ["Category :", companytabcate, "", "Search :", CompanySearchQuery]
-          : ["Category :", companytabcate],
-      );
+      typeAndStoreRow4 = worksheet.addRow([
+        "Category :",
+        ComCategory,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Type :",
+        ComType,
+      ]);
       styleRow(typeAndStoreRow4);
     }
 
@@ -1566,24 +1397,28 @@ export default function ItemSaleSummaryReport() {
       },
     };
 
-    // Add headers
-    const headers = [
-      "Code",
-      activeIndex === 1
-        ? "Category"
-        : activeIndex === 2
-          ? "Company"
-          : "Description",
-
-      activeIndex === 1 ? "Qnty" : activeIndex === 2 ? "Qnty" : "Rate",
-
-      activeIndex === 1 ? "Amount" : activeIndex === 2 ? "Amount" : "Qnty",
-
-      activeIndex === 1 ? "Margin" : activeIndex === 2 ? "Margin" : "Amount",
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
 
+    const headers = ["Code", "Description", ...months, "Total"];
+
     const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    headerRow.eachCell((cell) => {
+      Object.assign(cell, headerStyle);
+    });
 
     // Add data rows
     const dataToExport =
@@ -1594,36 +1429,14 @@ export default function ItemSaleSummaryReport() {
           : CompantTableData;
 
     dataToExport.forEach((item) => {
-      let rowValues = [];
-
-      if (activeIndex === 0) {
-        // Item Sale Summary
-        rowValues = [
-          item.code,
-          item.Description,
-          item.Rate,
-          item.Qnty,
-          item["Sale Amount"],
-        ];
-      } else if (activeIndex === 1) {
-        // Category Sale Comparison
-        rowValues = [
-          item.tctgcod,
-          item.Category,
-          item.Qnty,
-          item.Amount,
-          item.Margin,
-        ];
-      } else if (activeIndex === 2) {
-        // Company Sale Comparison
-        rowValues = [
-          item.tcmpcod,
-          item.Company,
-          item.Qnty,
-          item.Amount,
-          item.Margin,
-        ];
-      }
+      let rowValues = [
+        item.Code,
+        item.Description,
+        // Months Jan → Dec
+        ...months.map((m) => item[m] ?? "0"),
+        // Total
+        item.Total ?? "0",
+      ];
 
       const row = worksheet.addRow(rowValues);
 
@@ -1647,45 +1460,56 @@ export default function ItemSaleSummaryReport() {
     [
       activeIndex === 1 || activeIndex === 2 ? 10 : 20,
       45,
-      activeIndex === 1 || activeIndex === 2 ? 10 : 12,
-      activeIndex === 1 || activeIndex === 2 ? 12 : 10,
+      ...months.map(() => 12),
       12,
     ].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    let totalRowValues = [];
+    // Select correct totals object based on activeIndex
+    const summaryTotals =
+      activeIndex === 0
+        ? monthTotals
+        : activeIndex === 1
+          ? CategorymonthTotals
+          : CompanymonthTotals;
 
-    if (activeIndex === 0) {
-      // Item Sale Summary
-      totalRowValues = [
-        String(tableData.length.toLocaleString()),
-        "Total",
-        "",
-        String(totaldebit),
-        String(totalcredit),
-      ];
-    } else if (activeIndex === 1) {
-      // Category Sale Comparison
-      totalRowValues = [
-        String(CategoryTableData.length.toLocaleString()),
-        "Total",
-        String(categortQnty),
-        String(categoryAmount),
-        String(categoryMargin),
-      ];
-    } else if (activeIndex === 2) {
-      // Company Sale Comparison
-      totalRowValues = [
-        String(CompantTableData.length.toLocaleString()),
-        "Total",
-        String(CompanyQnty),
-        String(CompanyAmount),
-        String(CompanyMargin),
-      ];
-    }
+    // Build total row values
+    const totalRowValues = [
+      // Total rows count in Code column
+      activeIndex === 0
+        ? formatValue(tableData.length.toLocaleString())
+        : activeIndex === 1
+          ? formatValue(CategoryTableData.length.toLocaleString())
+          : formatValue(CompantTableData.length.toLocaleString()),
 
+      // Label
+      "Total",
+
+      // Months Jan → Dec
+      ...months.map((m) => formatValue(summaryTotals[m] ?? 0)),
+
+      // Grand Total
+      formatValue(summaryTotals.Total ?? "0"),
+    ];
+
+    // Add row to worksheet
     const totalRow = worksheet.addRow(totalRowValues);
+
+    // Apply same styling as other rows
+    totalRow.eachCell((cell, colIndex) => {
+      cell.font = fontTableContent;
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.alignment = {
+        horizontal: colIndex <= 2 ? "left" : "right", // Code + Label left, months + total right
+        vertical: "middle",
+      };
+    });
 
     // total row styling
 
@@ -1698,12 +1522,13 @@ export default function ItemSaleSummaryReport() {
         right: { style: "thin" },
       };
 
-      // Align only the "Total" text to the right
-      if (colNumber === 3 || colNumber === 4 || colNumber === 5) {
-        cell.alignment = { horizontal: "right" };
-      }
       if (colNumber === 1) {
-        cell.alignment = { horizontal: "center" };
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+      } else if (colNumber === 2) {
+        cell.alignment = { horizontal: "left", vertical: "middle" };
+      } else {
+        // All months + total (col 3 → last) align right
+        cell.alignment = { horizontal: "right", vertical: "middle" };
       }
     });
 
@@ -1768,13 +1593,22 @@ export default function ItemSaleSummaryReport() {
     });
 
     const fileNames = {
-      0: "ItemSaleSummaryReport",
-      1: "CategorySaleComparisonReport",
-      2: "CompanySaleComparisonReport",
+      0: "MonthlyItemSaleComparison",
+      1: "MonthlyCategorySaleComparison",
+      2: "MonthlyCompanySaleComparison",
     };
 
     saveAs(blob, `${fileNames[activeIndex]} As On ${currentdate}.xlsx`);
   };
+
+  const activeTotals =
+    activeIndex === 0
+      ? monthTotals
+      : activeIndex === 1
+        ? CategorymonthTotals
+        : activeIndex === 2
+          ? CompanymonthTotals
+          : monthTotals;
 
   const dispatch = useDispatch();
 
@@ -1787,10 +1621,6 @@ export default function ItemSaleSummaryReport() {
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
-
-  const handleSearch = (e) => {
-    setSelectedSearch(e.target.value);
-  };
 
   let totalEntries = 0;
   const handlecompanyKeypress = (event, inputId) => {
@@ -1827,23 +1657,6 @@ export default function ItemSaleSummaryReport() {
       }
     }
   };
-  const handlecapacityKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCapacityselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
 
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
@@ -1854,10 +1667,24 @@ export default function ItemSaleSummaryReport() {
     }
   };
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
+  const handleYearChange = (e) => {
+    const value = e.target.value;
+
+    if (activeIndex === 0) {
+      settransectionType(value);
+    } else if (activeIndex === 1) {
+      setCategoryYear(value);
+    } else if (activeIndex === 2) {
+      setCompanyYear(value);
+    }
   };
+
+  const selectedYear =
+    activeIndex === 0
+      ? transectionType
+      : activeIndex === 1
+        ? CategoryYear
+        : CompanyYear;
 
   const handleTransactionTypeChange2 = (event) => {
     const selectedTransactionType = event.target.value;
@@ -1865,24 +1692,20 @@ export default function ItemSaleSummaryReport() {
   };
 
   const firstColWidth = {
-    width:
-      activeIndex === 0
-        ? "135px"
-        : activeIndex === 1 || activeIndex === 2
-          ? "55px"
-          : "",
+    width: activeIndex === 1 || activeIndex === 2 ? "55px" : "85px",
   };
   const secondColWidth = {
-    width: "360px",
+    width: activeIndex === 1 || activeIndex === 2 ? "105px" : "100px",
   };
   const thirdColWidth = {
-    width: "80px",
+    width: isSidebarVisible ? "65px" : "80px",
   };
   const forthColWidth = {
-    width: "100px",
+    width: isSidebarVisible ? "65px" : "80px",
   };
-  const sixthColWidth = {
-    width: "100px",
+
+  const iconColwidth = {
+    width: "20px",
   };
 
   const sixthcol = {
@@ -1935,25 +1758,62 @@ export default function ItemSaleSummaryReport() {
   };
   const columnMap = {
     0: [
-      { label: "Code", key: "code", width: firstColWidth },
+      // { label: "Code", key: "Code", width: firstColWidth },
       { label: "Description", key: "Description", width: secondColWidth },
-      { label: "Rate", key: "Rate", width: thirdColWidth },
-      { label: "Qnty", key: "Qnty", width: forthColWidth },
-      { label: "Amount", key: "Sale Amount", width: sixthColWidth },
+      { label: "Total", key: "Total", width: forthColWidth },
+      { label: "Jan", key: "Jan", width: thirdColWidth },
+      { label: "Feb", key: "Feb", width: thirdColWidth },
+      { label: "Mar", key: "Mar", width: thirdColWidth },
+      { label: "Apr", key: "Apr", width: thirdColWidth },
+      { label: "May", key: "May", width: thirdColWidth },
+      { label: "Jun", key: "Jun", width: thirdColWidth },
+      { label: "Jul", key: "Jul", width: thirdColWidth },
+      { label: "Aug", key: "Aug", width: thirdColWidth },
+      { label: "Sep", key: "Sep", width: thirdColWidth },
+      { label: "Oct", key: "Oct", width: thirdColWidth },
+      { label: "Nov", key: "Nov", width: thirdColWidth },
+      { label: "Dec", key: "Dec", width: thirdColWidth },
+
+    
     ],
+
     1: [
-      { label: "Code", key: "tctgcod", width: firstColWidth },
-      { label: "Category", key: "Category", width: secondColWidth },
-      { label: "Qnty", key: "Qnty", width: thirdColWidth },
-      { label: "Amount", key: "Amount", width: forthColWidth },
-      { label: "Margin", key: "Margin", width: sixthColWidth },
+      // { label: "Code", key: "Code", width: firstColWidth },
+      { label: "Description", key: "Description", width: secondColWidth },
+      { label: "Total", key: "Total", width: forthColWidth },
+
+      { label: "Jan", key: "Jan", width: thirdColWidth },
+      { label: "Feb", key: "Feb", width: thirdColWidth },
+      { label: "Mar", key: "Mar", width: thirdColWidth },
+      { label: "Apr", key: "Apr", width: thirdColWidth },
+      { label: "May", key: "May", width: thirdColWidth },
+      { label: "Jun", key: "Jun", width: thirdColWidth },
+      { label: "Jul", key: "Jul", width: thirdColWidth },
+      { label: "Aug", key: "Aug", width: thirdColWidth },
+      { label: "Sep", key: "Sep", width: thirdColWidth },
+      { label: "Oct", key: "Oct", width: thirdColWidth },
+      { label: "Nov", key: "Nov", width: thirdColWidth },
+      { label: "Dec", key: "Dec", width: thirdColWidth },
+
     ],
     2: [
-      { label: "Code", key: "tcmpcod", width: firstColWidth },
-      { label: "Company", key: "Company", width: secondColWidth },
-      { label: "Qnty", key: "Qnty", width: thirdColWidth },
-      { label: "Amount", key: "Amount", width: forthColWidth },
-      { label: "Margin", key: "Margin", width: sixthColWidth },
+      // { label: "Code", key: "Code", width: firstColWidth },
+      { label: "Description", key: "Description", width: secondColWidth },
+      { label: "Total", key: "Total", width: forthColWidth },
+
+      { label: "Jan", key: "Jan", width: thirdColWidth },
+      { label: "Feb", key: "Feb", width: thirdColWidth },
+      { label: "Mar", key: "Mar", width: thirdColWidth },
+      { label: "Apr", key: "Apr", width: thirdColWidth },
+      { label: "May", key: "May", width: thirdColWidth },
+      { label: "Jun", key: "Jun", width: thirdColWidth },
+      { label: "Jul", key: "Jul", width: thirdColWidth },
+      { label: "Aug", key: "Aug", width: thirdColWidth },
+      { label: "Sep", key: "Sep", width: thirdColWidth },
+      { label: "Oct", key: "Oct", width: thirdColWidth },
+      { label: "Nov", key: "Nov", width: thirdColWidth },
+      { label: "Dec", key: "Dec", width: thirdColWidth },
+
     ],
   };
   const [columnSortOrders, setColumnSortOrders] = useState({});
@@ -2056,11 +1916,11 @@ export default function ItemSaleSummaryReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: isSidebarVisible ? "1000px" : "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "52vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -2157,48 +2017,6 @@ export default function ItemSaleSummaryReport() {
     }
   };
 
-  const handleToDateEnter = (e) => {
-    if (e.key === "Enter") {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-
-      const inputDate = e.target.value;
-      const formattedDate = inputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-
-      // Basic format validation (dd-mm-yyyy)
-      if (
-        !/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
-      ) {
-        toast.error("Date must be in the format dd-mm-yyyy");
-        return;
-      }
-
-      const [day, month, year] = formattedDate.split("-").map(Number);
-      const enteredDate = new Date(year, month - 1, day);
-      const daysInMonth = new Date(year, month, 0).getDate();
-
-      // Validate month, day, and date range
-      if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
-        toast.error("Invalid date. Please check the day and month.");
-        return;
-      }
-      if (enteredDate > GlobaltoDate) {
-        toast.error(`Date must be before ${GlobaltoDate1}`);
-        return;
-      }
-
-      // Update input value and state
-      e.target.value = formattedDate;
-      settoInputDate(formattedDate); // Update the state with formatted date
-
-      // Move focus to the next element
-      focusNextElement(toRef, saleSelectRef);
-    }
-  };
-
   const handleStoreEnter = (e) => {
     if (e.key === "Enter" && !menuStoreIsOpen) {
       e.preventDefault();
@@ -2213,8 +2031,11 @@ export default function ItemSaleSummaryReport() {
     }
   };
 
-  const formatValue = (val) => {
-    return Number(val) === 0 ? "" : val;
+  const formatValue = (value) => {
+    if (!value) return "0";
+
+    const number = Number(value.toString().replace(/,/g, ""));
+    return number.toLocaleString("en-IN"); // or en-US
   };
 
   const companyValue =
@@ -2226,8 +2047,147 @@ export default function ItemSaleSummaryReport() {
   const setCompanyValue =
     activeIndex === 1 ? setCompanyselectdatavalue1 : setCompanyselectdatavalue;
 
+  const monthLabels = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const barData = selectedRow
+    ? {
+        labels: monthLabels,
+        datasets: [
+          {
+            label: "Sales",
+            data: monthLabels.map(
+              (m) =>
+                Number((selectedRow[m] ?? 0).toString().replace(/,/g, "")) || 0,
+            ),
+            backgroundColor: "rgba(75, 192, 192, 0.6)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 2,
+          },
+        ],
+      }
+    : {};
+
+  const barOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            // format with commas
+            return context.raw.toLocaleString();
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => value.toLocaleString(),
+        },
+      },
+    },
+  };
+
   return (
     <>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        dialogClassName="custom-modal"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title style={{ fontSize: "18px" }}>
+            {activeIndex === 0
+              ? "Monthly Item Sale Comparison"
+              : activeIndex === 1
+                ? "Monthly Category Sale Comparison"
+                : activeIndex === 2
+                  ? "Monthly Company Sale Comparison"
+                  : "Details"}
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body style={{ marginLeft: "10px", marginRight: "20px" }}>
+          {selectedRow && (
+            <>
+              {/* If Code exists, show Code & Description above chart */}
+              {selectedRow.Code && selectedRow.Description ? (
+                <>
+                  <p style={{ fontSize: "12px", margin: "0px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: "bold" }}>
+                      Code :
+                    </span>{" "}
+                    {selectedRow.Code}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      marginTop: "0px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", fontWeight: "bold" }}>
+                      Description :
+                    </span>{" "}
+                    {selectedRow.Description}
+                  </p>
+                </>
+              ) : (
+                // If no Code/Description, show Total in this place
+                <p
+                  style={{
+                    fontSize: "12px",
+                    marginBottom: "20px",
+                    marginTop: "2px",
+                  }}
+                >
+                  <span style={{ fontSize: "12px", fontWeight: "bold" }}>
+                    Total :
+                  </span>{" "}
+                  {formatValue(selectedRow.Total)}
+                </p>
+              )}
+
+              {/* Chart */}
+              <div style={{ height: "250px", marginLeft: "20px" }}>
+                <Bar data={barData} options={barOptions} />
+              </div>
+
+              {/* If Code exists, show Total below chart */}
+              {selectedRow.Code && selectedRow.Description && (
+                <p
+                  style={{
+                    fontSize: "12px",
+                    marginTop: "0px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <span style={{ fontSize: "12px", fontWeight: "bold" }}>
+                    Total :
+                  </span>{" "}
+                  {formatValue(selectedRow.Total)}
+                </p>
+              )}
+            </>
+          )}
+        </Modal.Body>
+      </Modal>
       <ToastContainer />
       <div style={contentStyle}>
         <div
@@ -2242,11 +2202,11 @@ export default function ItemSaleSummaryReport() {
           <NavComponent
             textdata={
               activeIndex === 0
-                ? "Item Sale Summary Report"
+                ? "Monthly Item Sale Comparison Report"
                 : activeIndex === 1
-                  ? "Category Sale Comparison Report"
+                  ? "Monthly Category Sale Comparison Report"
                   : activeIndex === 2
-                    ? "Company Sale Comparison Report"
+                    ? "Monthly Company Sale Comparison Report"
                     : ""
             }
           />
@@ -2289,227 +2249,6 @@ export default function ItemSaleSummaryReport() {
                   transition: "all 0.35s ease",
                 }}
               />
-            </div>
-          </div>
-
-          {/* ------------1st row */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "start",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "15px" }}
-              >
-                <div
-                  style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: "12px",
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "50px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="toDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      To :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="todatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    ref={toRef}
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    value={toInputDate}
-                    onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
-                    id="toDatePicker"
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="To Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedToDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={toCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleToCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
@@ -2679,11 +2418,13 @@ export default function ItemSaleSummaryReport() {
                 </div>
               )}
 
-              {/* Store Show for ITEM tab & Hide for both Category & Company  */}
-              {activeIndex === 0 && (
+              {/* Year Show for all tab */}
+              {(activeIndex === 0 ||
+                activeIndex === 1 ||
+                activeIndex === 2) && (
                 <div
                   className="d-flex align-items-center"
-                  style={{ marginLeft: "7px" }}
+                  style={{ marginRight: "21px" }}
                 >
                   <div
                     style={{
@@ -2696,149 +2437,72 @@ export default function ItemSaleSummaryReport() {
                     <label htmlFor="transactionType">
                       <span
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
                           fontSize: getdatafontsize,
                           fontFamily: getfontstyle,
                           fontWeight: "bold",
-                          marginRight: "3px",
                         }}
                       >
-                        Store :
+                        Year :
                       </span>
                     </label>
                   </div>
 
-                  <div style={{ marginRight: "21px" }}>
-                    <Select
-                      className="List-select-class"
-                      ref={input6Ref}
-                      options={typeoptions}
-                      value={typeselectdatavalue}
-                      onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
-                      id="selectedsale"
-                      onChange={(selectedOption) => {
-                        if (selectedOption && selectedOption.value) {
-                          const labelPart = selectedOption.label.split("-")[1];
-                          setTypeselectdata(selectedOption.value);
-                          settypeselectdatavalue({
-                            value: selectedOption.value,
-                            label: labelPart,
-                          });
-                        } else {
-                          setTypeselectdata("");
-                          settypeselectdatavalue("");
-                        }
-                      }}
-                      onInputChange={(inputValue, { action }) => {
-                        if (action === "input-change") {
-                          return inputValue.toUpperCase();
-                        }
-                        return inputValue;
-                      }}
-                      components={{ Option: DropdownOption }}
-                      styles={{
-                        ...customStyles1(!Companyselectdata, 250),
-                        placeholder: (base) => ({
-                          ...base,
-                          textAlign: "left",
-                          marginLeft: "0",
-                          justifyContent: "flex-start",
-                          color: fontcolor,
-                          marginTop: "-5px",
-                        }),
-                      }}
-                      isClearable
-                      placeholder="ALL"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Search Show for both Category & Company Tab */}
-              {(activeIndex === 1 || activeIndex === 2) && (
-                <div id="lastDiv" style={{ marginRight: "1px" }}>
-                  <label htmlFor="searchInput" style={{ marginRight: "3px" }}>
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Search :
-                    </span>
-                  </label>
-
                   <div
                     style={{ position: "relative", display: "inline-block" }}
                   >
-                    <input
-                      ref={input5Ref}
-                      onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                      type="text"
-                      id="searchsubmit"
-                      placeholder={
-                        activeIndex === 1
-                          ? "Category description"
-                          : "Company description"
-                      }
-                      value={
-                        activeIndex === 1
-                          ? CategorySearchQuery
-                          : CompanySearchQuery
-                      }
-                      autoComplete="off"
-                      style={{
-                        marginRight: "20px",
-                        width: "200px",
-                        height: "24px",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        color: fontcolor,
-                        backgroundColor: getcolor,
-                        border: `1px solid ${fontcolor}`,
-                        outline: "none",
-                        paddingLeft: "10px",
-                        paddingRight: "25px",
-                      }}
+                    <select
+                      ref={input4Ref}
+                      onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                      id="submitButton"
+                      name="type"
                       onFocus={(e) =>
-                        (e.currentTarget.style.border = "2px solid red")
+                        (e.currentTarget.style.border = "4px solid red")
                       }
                       onBlur={(e) =>
                         (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                       }
-                      onChange={(e) => {
-                        const value = (e.target.value || "").toUpperCase();
-                        activeIndex === 1
-                          ? setCategorySearchQuery(value)
-                          : setCompanySearchQuery(value);
+                      value={selectedYear}
+                      onChange={handleYearChange}
+                      style={{
+                        width: "150px",
+                        height: "24px",
+                        marginLeft: "5px",
+                        backgroundColor: getcolor,
+                        border: `1px solid ${fontcolor}`,
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        color: fontcolor,
+                        paddingLeft: "12px",
                       }}
-                    />
+                    >
+                      {years.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
 
-                    {/* Clear (×) button */}
-                    {(activeIndex === 1
-                      ? CategorySearchQuery
-                      : CompanySearchQuery) && (
+                    {selectedYear && selectedYear !== currentYear && (
                       <span
                         onClick={() => {
-                          activeIndex === 1
-                            ? setCategorySearchQuery("")
-                            : setCompanySearchQuery("");
+                          if (activeIndex === 0)
+                            settransectionType(currentYear);
+                          if (activeIndex === 1) setCategoryYear(currentYear);
+                          if (activeIndex === 2) setCompanyYear(currentYear);
                         }}
                         style={{
                           position: "absolute",
-                          right: "30px",
+                          right: "25px",
                           top: "50%",
                           transform: "translateY(-50%)",
                           cursor: "pointer",
-                          fontSize: "20px",
+                          fontWeight: "bold",
                           color: fontcolor,
                           userSelect: "none",
+                          fontSize: "12px",
                         }}
                       >
-                        ×
+                        ✕
                       </span>
                     )}
                   </div>
@@ -2846,6 +2510,116 @@ export default function ItemSaleSummaryReport() {
               )}
             </div>
           </div>
+
+          {/* show type filter for category and sale   */}
+          {(activeIndex === 1 || activeIndex === 2) && (
+            <div
+              className="row"
+              style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  margin: "0px",
+                  padding: "0px",
+                  justifyContent: "end",
+                }}
+              >
+                <div
+                  className="d-flex align-items-center"
+                  style={{ marginRight: "21px" }}
+                >
+                  <div
+                    style={{
+                      marginLeft: "10px",
+                      width: "80px",
+                      display: "flex",
+                      justifyContent: "end",
+                    }}
+                  >
+                    <label htmlFor="transactionType">
+                      <span
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Type :
+                      </span>
+                    </label>
+                  </div>
+
+                  <div
+                    style={{ position: "relative", display: "inline-block" }}
+                  >
+                    <select
+                      ref={input4Ref}
+                      onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                      id="submitButton"
+                      name="type"
+                      onFocus={(e) =>
+                        (e.currentTarget.style.border = "4px solid red")
+                      }
+                      onBlur={(e) =>
+                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                      }
+                      value={activeIndex === 1 ? CategoryType : companyType}
+                      onChange={(e) => {
+                        if (activeIndex === 1) {
+                          setCategoryType(e.target.value);
+                        } else {
+                          setcompanyType(e.target.value);
+                        }
+                      }}
+                      style={{
+                        width: "150px",
+                        height: "24px",
+                        marginLeft: "5px",
+                        backgroundColor: getcolor,
+                        border: `1px solid ${fontcolor}`,
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        color: fontcolor,
+                        paddingLeft: "12px",
+                      }}
+                    >
+                      <option value="A">AMOUNT</option>
+                      <option value="Q">QUANTITY</option>
+                    </select>
+
+                    {(activeIndex === 1 ? CategoryType : companyType) !==
+                      "A" && (
+                      <span
+                        onClick={() => {
+                          if (activeIndex === 1) {
+                            setCategoryType("A");
+                          } else {
+                            setcompanyType("A");
+                          }
+                        }}
+                        style={{
+                          position: "absolute",
+                          right: "25px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          color: fontcolor,
+                          userSelect: "none",
+                          fontSize: "12px",
+                        }}
+                      >
+                        ✕
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
 
@@ -2934,6 +2708,7 @@ export default function ItemSaleSummaryReport() {
                     />
                   </div>
                 </div>
+
                 <div
                   className="d-flex align-items-center"
                   style={{ marginRight: "21px" }}
@@ -2976,7 +2751,7 @@ export default function ItemSaleSummaryReport() {
                       value={transectionType2}
                       onChange={handleTransactionTypeChange2}
                       style={{
-                        width: "250px",
+                        width: "150px",
                         height: "24px",
                         marginLeft: "5px",
                         backgroundColor: getcolor,
@@ -2987,14 +2762,13 @@ export default function ItemSaleSummaryReport() {
                         paddingLeft: "12px",
                       }}
                     >
-                      <option value="">ALL</option>
-                      <option value="INV">SALE</option>
-                      <option value="SRN">SALE RETURN</option>
+                      <option value="A">AMOUNT</option>
+                      <option value="Q">QUANTITY</option>
                     </select>
 
-                    {transectionType2 !== "" && (
+                    {transectionType2 !== "A" && (
                       <span
-                        onClick={() => settransectionType2("")}
+                        onClick={() => settransectionType2("A")}
                         style={{
                           position: "absolute",
                           right: "25px",
@@ -3008,160 +2782,6 @@ export default function ItemSaleSummaryReport() {
                         }}
                       >
                         ✕
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          {/* HIDE CAPACITY & SEARCH FOR BOTH  CATEGORY , COMPANY TAB SHOW IN ITEM */}
-          {/* //////////////// FORTH ROW ///////////////////////// */}
-          {activeIndex !== 1 && activeIndex !== 2 && (
-            <div
-              className="row"
-              style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  margin: "0px",
-                  padding: "0px",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  className="d-flex align-items-center"
-                  style={{ marginLeft: "7px" }}
-                >
-                  <div
-                    style={{
-                      marginLeft: "10px",
-                      width: "80px",
-                      display: "flex",
-                      justifyContent: "end",
-                    }}
-                  >
-                    <label htmlFor="transactionType">
-                      <span
-                        style={{
-                          fontSize: getdatafontsize,
-                          fontFamily: getfontstyle,
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Capacity :
-                      </span>
-                    </label>
-                  </div>
-
-                  <div style={{ marginLeft: "3px" }}>
-                    <Select
-                      className="List-select-class "
-                      ref={input2Ref}
-                      options={capacityoptions}
-                      onKeyDown={(e) => handlecapacityKeypress(e, input6Ref)}
-                      id="selectedsale2"
-                      onChange={(selectedOption) => {
-                        if (selectedOption && selectedOption.value) {
-                          const labelPart = selectedOption.label.split("-")[1];
-                          setCapacityselectdata(selectedOption.value);
-                          setcapacityselectdatavalue({
-                            value: selectedOption.value,
-                            label: labelPart, // Set only the 'NGS' part of the label
-                          });
-                        } else {
-                          setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                          setcapacityselectdatavalue("");
-                        }
-                      }}
-                      onInputChange={(inputValue, { action }) => {
-                        if (action === "input-change") {
-                          return inputValue.toUpperCase();
-                        }
-                        return inputValue;
-                      }}
-                      components={{ Option: DropdownOption }}
-                      styles={{
-                        ...customStyles1(!Companyselectdata, 270),
-                        placeholder: (base) => ({
-                          ...base,
-                          textAlign: "left",
-                          marginLeft: "0",
-                          justifyContent: "flex-start",
-                          color: fontcolor,
-                          marginTop: "-5px",
-                        }),
-                      }}
-                      isClearable
-                      placeholder="ALL"
-                    />
-                  </div>
-                </div>
-
-                <div id="lastDiv" style={{ marginRight: "1px" }}>
-                  <label for="searchInput" style={{ marginRight: "3px" }}>
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Search :
-                    </span>{" "}
-                  </label>
-                  <div
-                    style={{ position: "relative", display: "inline-block" }}
-                  >
-                    <input
-                      ref={input5Ref}
-                      onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                      type="text"
-                      id="searchsubmit"
-                      placeholder="Item description"
-                      value={searchQuery}
-                      autoComplete="off"
-                      style={{
-                        marginRight: "20px",
-                        width: "250px",
-                        height: "24px",
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        color: fontcolor,
-                        backgroundColor: getcolor,
-                        border: `1px solid ${fontcolor}`,
-                        outline: "none",
-                        paddingLeft: "10px",
-                        paddingRight: "25px", // space for the clear icon
-                      }}
-                      onFocus={(e) =>
-                        (e.currentTarget.style.border = "2px solid red")
-                      }
-                      onBlur={(e) =>
-                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                      }
-                      onChange={(e) =>
-                        setSearchQuery((e.target.value || "").toUpperCase())
-                      }
-                    />
-                    {searchQuery && (
-                      <span
-                        onClick={() => setSearchQuery("")}
-                        style={{
-                          position: "absolute",
-                          right: "30px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          cursor: "pointer",
-                          fontSize: "20px",
-                          color: fontcolor,
-                          userSelect: "none",
-                        }}
-                      >
-                        ×
                       </span>
                     )}
                   </div>
@@ -3206,6 +2826,17 @@ export default function ItemSaleSummaryReport() {
                       color: "white",
                     }}
                   >
+                      <td
+                      className="border-dark text-center "
+                      style={iconColwidth}
+                    >
+                      {/* <i
+                        className="fa fa-chart-bar"
+                        style={{ fontSize: "14px", color: "white" }}
+                      ></i> */}
+                      <img src={barlogo} style={{cursor:'pointer', width:'14px'}}/>
+                    </td>
+
                     {columnMap[activeIndex].map((col) => (
                       <td
                         key={col.key}
@@ -3220,7 +2851,7 @@ export default function ItemSaleSummaryReport() {
                         />
                       </td>
                     ))}
-
+                  
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
@@ -3233,10 +2864,7 @@ export default function ItemSaleSummaryReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "36vh",
-                // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                maxHeight: "45vh",
               }}
             >
               <table
@@ -3247,6 +2875,7 @@ export default function ItemSaleSummaryReport() {
                   fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -3257,7 +2886,7 @@ export default function ItemSaleSummaryReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="15" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3271,7 +2900,7 @@ export default function ItemSaleSummaryReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 5 }).map((_, colIndex) => (
+                            {Array.from({ length: 15 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3280,195 +2909,317 @@ export default function ItemSaleSummaryReport() {
                         ),
                       )}
                       <tr>
-                        <td style={firstColWidth}></td>
+                        {/* <td style={firstColWidth}></td> */}
+                        <td style={iconColwidth}></td>
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
+                     
                       </tr>
                     </>
                   ) : (
                     <>
-                      {/* {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        const isNegative =
-                          item.Rate < 0 ||
-                          item.Qnty < 0 ||
-                          item["Sale Amount"] < 0;
-
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              // color: fontcolor,
-                              color: isNegative ? "red" : fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.code}
-                            </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Description}
-                            </td>
-                            <td className="text-end" style={thirdColWidth}>
-                              {formatValue(item.Rate)}
-                            </td>
-                            <td className="text-end" style={forthColWidth}>
-                              {formatValue(item.Qnty)}
-                            </td>
-
-                            <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item["Sale Amount"])}
-                            </td>
-                          </tr>
-                        );
-                      })} */}
-
-                      {activeIndex == 0 &&
+                      {activeIndex === 0 &&
                         tableData.map((item, i) => {
                           totalEnteries += 1;
-                          const isNegative =
-                            item.Rate < 0 ||
-                            item.Qnty < 0 ||
-                            item["Sale Amount"] < 0;
+
+                          const totalValue = Number(item.Total ?? 0);
+                          const isNegative = totalValue < 0;
 
                           return (
                             <tr
-                              key={`${i}-${selectedIndex}`}
+                              key={i}
                               ref={(el) => (rowRefs.current[i] = el)}
-                              onClick={() => handleRowClick(i)}
+                              //   onClick={() => handleRowClick(i)}
+                              onClick={() => {
+                                handleRowClick(i);
+                              }}
                               className={
                                 selectedIndex === i ? "selected-background" : ""
                               }
                               style={{
                                 backgroundColor: getcolor,
-                                // color: fontcolor,
                                 color: isNegative ? "red" : fontcolor,
                               }}
                             >
-                              <td
-                                td
-                                className="text-start"
-                                style={firstColWidth}
+                              {/* Code */}
+                                <td
+                                onClick={() => handleShow(item)}
+                                className="border-dark text-center"
+                                style={iconColwidth}
                               >
-                                {item.code}
+                                {/* <i
+                                  className="fa fa-chart-bar"
+                                  style={{
+                                    fontSize: "16px",
+                                    color: fontcolor,
+                                    cursor: "pointer",
+                                  }}
+                                ></i> */}
+                                                      <img src={barlogo} style={{cursor:'pointer', width:'14px'}}/>
+
                               </td>
+
+                              {/* Description */}
                               <td
-                                td
                                 className="text-start"
-                                style={secondColWidth}
+                                title={item.Description}
+                                style={{
+                                  ...secondColWidth,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {item.Description}
+                              </td> 
+                              
+                              {/* Total */}
+                              <td
+                                className="text-end"
+                                title={item.Total}
+                                style={{
+                                  ...forthColWidth,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {item.Total}
+                              </td>
+
+                              {/* Months */}
+                              {[
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                              ].map((month) => (
+                                <td
+                                  key={month}
+                                  className="text-end"
+                                  title={item[month]}
+                                  style={{
+                                    ...thirdColWidth,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {item[month]}
+                                </td>
+                              ))}                            
+
+                            
+                            </tr>
+                          );
+                        })}
+
+                      {activeIndex === 1 &&
+                        CategoryTableData.map((item, i) => {
+                          totalEnteries += 1;
+
+                          const totalValue = Number(item.Total ?? 0);
+                          const isNegative = totalValue < 0;
+
+                          return (
+                            <tr
+                              key={i}
+                              ref={(el) => (rowRefs.current[i] = el)}
+                              // onClick={() => handleRowClick(i)}
+                              onClick={() => {
+                                handleRowClick(i);
+                              }}
+                              className={
+                                selectedIndex === i ? "selected-background" : ""
+                              }
+                              style={{
+                                backgroundColor: getcolor,
+                                color: isNegative ? "red" : fontcolor,
+                              }}
+                            >
+                              {/* Code */}
+                               <td
+                                onClick={() => handleShow(item)}
+                                className="border-dark text-center"
+                                style={iconColwidth}
+                              >
+                                                                                      <img src={barlogo} style={{cursor:'pointer', width:'14px'}}/>
+
+                              </td>
+
+                              {/* Description */}
+                              <td
+                                className="text-start"
+                                title={item.Description}
+                                style={{
+                                  ...secondColWidth,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
                               >
                                 {item.Description}
                               </td>
-                              <td className="text-end" style={thirdColWidth}>
-                                {item.Rate}
+  {/* Total */}
+                              <td
+                                className="text-end"
+                                title={item.Total}
+                                style={{
+                                  ...forthColWidth,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {item.Total}
                               </td>
-                              <td className="text-end" style={forthColWidth}>
-                                {item.Qnty}
-                              </td>
-                              <td className="text-end" style={sixthColWidth}>
-                                {item["Sale Amount"]}
-                              </td>
+
+                              {/* Months */}
+                              {[
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                              ].map((month) => (
+                                <td
+                                  key={month}
+                                  className="text-end"
+                                  title={item[month]}
+                                  style={{
+                                    ...thirdColWidth,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {item[month]}
+                                </td>
+                              ))}
+
+                            
+                             
                             </tr>
                           );
                         })}
 
-                      {activeIndex == 1 &&
-                        CategoryTableData.map((item, i) => {
-                          totalEnteries += 1;
-                          const isNegative =
-                            item.Margin < 0 || item.Qnty < 0 || item.Amount < 0;
-
-                          return (
-                            <tr
-                              key={`${i}-${selectedIndex}`}
-                              ref={(el) => (rowRefs.current[i] = el)}
-                              onClick={() => handleRowClick(i)}
-                              className={
-                                selectedIndex === i ? "selected-background" : ""
-                              }
-                              style={{
-                                backgroundColor: getcolor,
-                                // color: fontcolor,
-                                color: isNegative ? "red" : fontcolor,
-                              }}
-                            >
-                              <td
-                                td
-                                className="text-start"
-                                style={firstColWidth}
-                              >
-                                {item.tctgcod}
-                              </td>
-                              <td
-                                td
-                                className="text-start"
-                                style={secondColWidth}
-                              >
-                                {item.Category}
-                              </td>
-                              <td className="text-end" style={thirdColWidth}>
-                                {formatValue(item.Qnty)}
-                              </td>
-                              <td className="text-end" style={forthColWidth}>
-                                {formatValue(item.Amount)}
-                              </td>
-                              <td className="text-end" style={sixthColWidth}>
-                                {formatValue(item.Margin)}
-                              </td>
-                            </tr>
-                          );
-                        })}
-
-                      {activeIndex == 2 &&
+                      {activeIndex === 2 &&
                         CompantTableData.map((item, i) => {
                           totalEnteries += 1;
-                          const isNegative =
-                            item.Margin < 0 || item.Qnty < 0 || item.Amount < 0;
+
+                          const totalValue = Number(item.Total ?? 0);
+                          const isNegative = totalValue < 0;
 
                           return (
                             <tr
-                              key={`${i}-${selectedIndex}`}
+                              key={i}
                               ref={(el) => (rowRefs.current[i] = el)}
-                              onClick={() => handleRowClick(i)}
+                              // onClick={() => handleRowClick(i)}
+                              onClick={() => {
+                                handleRowClick(i);
+                              }}
                               className={
                                 selectedIndex === i ? "selected-background" : ""
                               }
                               style={{
                                 backgroundColor: getcolor,
-                                // color: fontcolor,
                                 color: isNegative ? "red" : fontcolor,
                               }}
                             >
+                              
                               <td
-                                td
-                                className="text-start"
-                                style={firstColWidth}
+                                onClick={() => handleShow(item)}
+                                className="border-dark text-center"
+                                style={iconColwidth}
                               >
-                                {item.tcmpcod}
+                              <img src={barlogo} style={{cursor:'pointer', width:'14px'}}/>
+
                               </td>
+
+                              {/* Description */}
                               <td
-                                td
                                 className="text-start"
-                                style={secondColWidth}
+                                title={item.Description}
+                                style={{
+                                  ...secondColWidth,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
                               >
-                                {item.Company}
+                                {item.Description}
                               </td>
-                              <td className="text-end" style={thirdColWidth}>
-                                {formatValue(item.Qnty)}
+  {/* Total */}
+                              <td
+                                className="text-end"
+                                title={item.Total}
+                                style={{
+                                  ...forthColWidth,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {item.Total}
                               </td>
-                              <td className="text-end" style={forthColWidth}>
-                                {formatValue(item.Amount)}
-                              </td>
-                              <td className="text-end" style={sixthColWidth}>
-                                {formatValue(item.Margin)}
-                              </td>
+
+                              {/* Months */}
+                              {[
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                              ].map((month) => (
+                                <td
+                                  key={month}
+                                  className="text-end"
+                                  title={item[month]}
+                                  style={{
+                                    ...thirdColWidth,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {item[month]}
+                                </td>
+                              ))}
+                             
                             </tr>
                           );
                         })}
@@ -3493,7 +3244,7 @@ export default function ItemSaleSummaryReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 5 }).map((_, colIndex) => (
+                          {Array.from({ length: 15 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3501,11 +3252,23 @@ export default function ItemSaleSummaryReport() {
                         </tr>
                       ))}
                       <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
+                        {/* <td style={firstColWidth}></td> */}
+                        <td style={iconColwidth}></td>
+                        <td style={secondColWidth}></td>   
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={thirdColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                        <td style={sixthColWidth}></td>
+                     
                       </tr>
                     </>
                   )}
@@ -3520,51 +3283,52 @@ export default function ItemSaleSummaryReport() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "8px",
+              paddingRight: "8px"
             }}
           >
-            <div
+
+ <div
               style={{
-                ...firstColWidth,
+                ...iconColwidth,
                 background: getcolor,
-                marginLeft: "2px",
                 borderRight: `1px solid ${fontcolor}`,
+                cursor:'pointer'
               }}
             >
-              <span className="mobileledger_total2">
-                {activeIndex == 0
-                  ? formatValue(tableData.length.toLocaleString())
-                  : activeIndex == 1
-                    ? formatValue(CategoryTableData.length.toLocaleString())
-                    : activeIndex == 2
-                      ? formatValue(CompantTableData.length.toLocaleString())
-                      : ""}
-              </span>
+              {activeTableData.length > 0 && (
+                // <i
+                //   onClick={() => handleShow(activeTotals)}
+                //   className="fa fa-chart-bar"
+                //   style={{
+                //     fontSize: "16px",
+                //     color: fontcolor,
+                //     cursor: "pointer",
+                //   }}
+                // ></i>
+            <img  onClick={() => handleShow(activeTotals)} src={barlogo} style={{fontSize:'14px', width:'14px'}}/>
+
+              )}
             </div>
+
             <div
               style={{
                 ...secondColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
-            <div
-              style={{
-                ...thirdColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
             >
-              <span className="mobileledger_total">
-                {activeIndex == 0
-                  ? ""
-                  : activeIndex == 1
-                    ? formatValue(categortQnty)
-                    : activeIndex == 2
-                      ? formatValue(CompanyQnty)
+              <span className="mobileledger_total2">
+                {activeIndex === 0
+                  ? formatValue(tableData.length.toLocaleString())
+                  : activeIndex === 1
+                    ? formatValue(CategoryTableData.length.toLocaleString())
+                    : activeIndex === 2
+                      ? formatValue(CompantTableData.length.toLocaleString())
                       : ""}
               </span>
             </div>
+
+            {/* Total */}
             <div
               style={{
                 ...forthColWidth,
@@ -3573,33 +3337,59 @@ export default function ItemSaleSummaryReport() {
               }}
             >
               <span className="mobileledger_total">
-                {activeIndex == 0
-                  ? formatValue(totaldebit)
-                  : activeIndex == 1
-                    ? formatValue(categoryAmount)
-                    : activeIndex == 2
-                      ? formatValue(CompanyAmount)
-                      : ""}
+                {formatValue(activeTotals.Total)}
               </span>
             </div>
-            <div
-              style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {activeIndex == 0
-                  ? formatValue(totalcredit)
-                  : activeIndex == 1
-                    ? formatValue(categoryMargin)
-                    : activeIndex == 2
-                      ? formatValue(CompanyMargin)
-                      : ""}
-              </span>
-            </div>
+            
+
+            {/* {[
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ].map((m) => (
+              <div
+                key={m}
+                style={{
+                  ...thirdColWidth,
+                  background: getcolor,
+                  borderRight: `1px solid ${fontcolor}`,
+                }}
+              >
+                <span className="mobileledger_total">
+                  {formatValue(activeTotals[m])}
+                </span>
+              </div>
+            ))} */}
+
+            {Object.keys(activeTotals)
+              .filter((m) => m !== "Total") // skip Total for now
+              .map((m) => (
+                <div
+                  key={m}
+                  style={{
+                    ...thirdColWidth,
+                    background: getcolor,
+                    borderRight: `1px solid ${fontcolor}`,
+                  }}
+                >
+                  <span className="mobileledger_total">
+                    {formatValue(activeTotals[m])}
+                  </span>
+                </div>
+              ))}
+
+            
           </div>
+
           {/* Action Buttons */}
           <div
             style={{

@@ -1143,7 +1143,7 @@ const handleSorting = (col) => {
                       ...firstColWidth,
                       cursor: "pointer",
                       textDecoration: "underline",
-                      color: "blue",
+                      color: selectedIndex === i ? "white" : "blue", // ✅ conditional color
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
