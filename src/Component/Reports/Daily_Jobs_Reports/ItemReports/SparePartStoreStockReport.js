@@ -26,7 +26,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function ItemStoreStockReport() {
+export default function SparePartsStoreStockReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -233,7 +233,7 @@ export default function ItemStoreStockReport() {
       toDateElement.style.border = `1px solid ${fontcolor}`;
     }
 
-    const apiMainUrl = apiLinks + "/StoreStockReport.php";
+    const apiMainUrl = apiLinks + "/SparePartsStoreStockReport.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
       FRepDat: toInputDate,
@@ -973,7 +973,7 @@ export default function ItemStoreStockReport() {
         startY += 5; // Adjust vertical position for the company title
         doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Item Store Stock Report As on ${toInputDate}`,
+          `Spare Parts Store Stock Report As on ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1114,7 +1114,7 @@ export default function ItemStoreStockReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`ItemStoreStockReport As On ${toInputDate}.pdf`);
+    doc.save(`SparePartsStoreStockReport As On ${toInputDate}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
@@ -1181,7 +1181,7 @@ export default function ItemStoreStockReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Item Store Stock Report As On ${toInputDate}`,
+      `Spare Parts Store Stock Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1448,7 +1448,7 @@ export default function ItemStoreStockReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ItemStoreStockReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `SparePartsStoreStockReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -2044,7 +2044,7 @@ export default function ItemStoreStockReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Item Store Stock Report" />
+          <NavComponent textdata="Spare Parts Store Stock Report" />
 
           {/* ------------1st row */}
           <div
@@ -2772,9 +2772,7 @@ export default function ItemStoreStockReport() {
               </table>
             </div>
           </div>
-          {/* Table Footer */}
          
-
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,

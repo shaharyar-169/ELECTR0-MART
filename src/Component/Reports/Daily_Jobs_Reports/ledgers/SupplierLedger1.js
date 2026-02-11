@@ -825,7 +825,7 @@ export default function SupplierLedger1() {
         const headers = [
             "Date",
             "Trn#",
-            "Type",
+            "Typ",
             "Description",
             "Qnty",
             "Rate",
@@ -833,7 +833,7 @@ export default function SupplierLedger1() {
             "Credit",
             "Balance",
         ];
-        const columnWidths = [23, 17, 13, 90, 20, 25, 30, 30, 30];
+        const columnWidths = [23, 17, 11, 100, 25, 22, 30, 30, 30];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1548,22 +1548,22 @@ export default function SupplierLedger1() {
         width: "32px",
     };
     const fifthColWidth = {
-        width: "360px",
+        width: isSidebarVisible ? "320px" : "360px",
     };
     const sixthColWidth = {
-        width: "70px",
+        width: "100px",
     };
     const seventhColWidth = {
-        width: "90px",
+        width: "100px",
     };
     const eightColWidth = {
-        width: "90px",
+        width: "100px",
     };
     const ninthColWidth = {
-        width: "90px",
+        width: "100px",
     };
     const tenthColWidth = {
-        width: "90px",
+        width: "100px",
     };
 
     const sixthcol = { width: "8px" };
@@ -1591,11 +1591,11 @@ export default function SupplierLedger1() {
 
    const contentStyle = {
         width: "100%", // 100vw ki jagah 100%
-        maxWidth: "1000px",
+        maxWidth: isSidebarVisible ? " 1000px" : "1040px",
         height: "calc(100vh - 100px)",
         position: "absolute",
         top: "70px",
-        left: isSidebarVisible ? "60vw" : "50vw",
+        left: isSidebarVisible ? "60vw" : "52vw",
         transform: "translateX(-50%)",
         display: "flex",
         flexDirection: "column",
@@ -2278,7 +2278,7 @@ const isMatchedRow = (item) => {
                                 style={{
                                     fontSize: getdatafontsize,
                                     fontFamily: getfontstyle,
-                                    // width: "100%",
+                                    width: "100%",
                                     position: "relative",
                                     ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
 
@@ -2355,9 +2355,18 @@ const isMatchedRow = (item) => {
                                                             {item.Type}
                                                         </td>
 
-                                                        <td className="text-start" style={fifthColWidth}>
-                                                            {item.Description}
-                                                        </td>
+                                                        <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...fifthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
                                                         <td className="text-end" style={sixthColWidth}>
                                                             {formatValue(item.Qnty) }
                                                         </td>

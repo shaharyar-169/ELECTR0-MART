@@ -41,6 +41,9 @@ export default function InstallmentLedger2() {
   const [CashBookSummaryData, setCashBookSummaryData] = useState([]);
   const [CashPaymentData, setCashPaymentData] = useState([]);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+  const [isItemInitialized, setIsItemInitialized] = useState(false);
+    const [isCodeReady, setIsCodeReady] = useState(false);
+  const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
@@ -59,6 +62,8 @@ export default function InstallmentLedger2() {
   const [selectedToDate, setSelectedToDate] = useState(null);
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+  
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -79,6 +84,9 @@ export default function InstallmentLedger2() {
   } = useTheme();
 
   console.log("select year: " + getyeardescription);
+
+   const yeardescription = getYearDescription();
+    const locationnumber = getLocationnumber();
 
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
@@ -142,9 +150,11 @@ export default function InstallmentLedger2() {
     setIsLoading(true);
 
     const formData = new URLSearchParams({
-      code: "USMANMTR",
-      FLocCod: "002",
-      FInsCod: "14-01-0010",
+    //   code: "USMANMTR",
+    //   FLocCod: "002",
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FInsCod: saleType,
     }).toString();
 
     axios
@@ -227,10 +237,10 @@ export default function InstallmentLedger2() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomers.php";
     const formData = new URLSearchParams({
-      //   FLocCod: getLocationNumber,
-      //   code: organisation.code,
-      FLocCod: "001",
-      code: "ABDULLAHTRD",
+         code: organisation.code,
+         FLocCod: locationnumber || getLocationNumber,
+    //   FLocCod: "001",
+    //   code: "ABDULLAHTRD",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -247,6 +257,56 @@ export default function InstallmentLedger2() {
     value: item.tcstcod,
     label: `${item.tcstcod}-${item.tcstnam.trim()}`,
   }));
+
+  
+  
+  useEffect(() => {
+    if (options.length === 0) return;
+    if (isItemInitialized) return;
+  
+    const storedData = sessionStorage.getItem("InstallmentLedger");
+    let selectedOption = null;
+  
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      const clickedCode = parsedData.code?.trim();
+   if (parsedData.code) {
+      setIsDoubleClickOpen(true); // ✅ ADD
+    }
+      selectedOption = options.find(
+        (opt) => opt.value?.trim() === clickedCode
+      );
+  
+      sessionStorage.removeItem("InstallmentLedger");
+    }
+  
+    if (!selectedOption) {
+      selectedOption = options[0];
+    }
+  
+    if (selectedOption) {
+      setSaleType(selectedOption.value);
+  
+      const description =
+        selectedOption.label.split("-").slice(1).join("-").trim();
+  
+      setCompanyselectdatavalue({
+        value: selectedOption.value,
+        label: description,
+      });
+  
+      setIsCodeReady(true); // ✅ IMPORTANT
+    }
+  
+    setIsItemInitialized(true);
+  }, [options, isItemInitialized]);
+  
+  useEffect(() => {
+    // 🔥 Dono cheezain ready hon
+    if (isDoubleClickOpen && isCodeReady) {
+      fetchGeneralLedger();
+    }
+  }, [isDoubleClickOpen, isCodeReady]);
 
   const DropdownOption = (props) => {
     return (
@@ -1256,8 +1316,8 @@ export default function InstallmentLedger2() {
             className="row "
             style={{
               display: "flex",
-              flexWrap: "wrap",
-              height: "330px",
+            //   flexWrap: "wrap",
+              height: "210px",
               marginTop: "5px",
               marginBottom: "2px",
               marginRight: "2px",
@@ -1339,8 +1399,10 @@ export default function InstallmentLedger2() {
                         className="List-select-class"
                         ref={saleSelectRef}
                         options={options}
-                        //   value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
-                        onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
+   value={
+                                            options.find((opt) => opt.value === saleType) || null
+                                        } 
+                                         isDisabled={isDoubleClickOpen}                        onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
                         id="selectedsale"
                         onChange={(selectedOption) => {
                           if (selectedOption && selectedOption.value) {
@@ -1406,7 +1468,7 @@ export default function InstallmentLedger2() {
                         color: fontcolor,
                       }}
                     >
-                      Father Name :
+                      Name :
                     </div>
                     <input
                       value={headerData.Name}
@@ -1439,7 +1501,7 @@ export default function InstallmentLedger2() {
                         fontWeight: "bold",
                       }}
                     >
-                      Net Amt :
+                      Ins Amt :
                     </div>
                     <div
                       style={{
@@ -1455,9 +1517,10 @@ export default function InstallmentLedger2() {
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
+                        paddingRight:'5px'
                       }}
                     >
-                      236,000
+                      {headerData.InsAmt}
                     </div>
                   </div>
                 </div>
@@ -1484,29 +1547,44 @@ export default function InstallmentLedger2() {
                         fontSize: "12px",
                         fontWeight: "bold",
                         color: fontcolor,
+                        marginRight:'-9px'
                       }}
                     >
                       Address :
                     </div>
-                    <div
+                    <div style={{display:'flex', flexDirection:'column', gap:'1px', }}>
+                    <input
+                      value={headerData.Address1}
+                      disabled
                       style={{
-                        fontSize: "12px",
-                        lineHeight: "13px",
-                        paddingTop: "2px",
-                        textAlign: "start",
                         paddingLeft: "3px",
                         color: fontcolor,
                         fontSize: "12px",
                         height: "100%",
                         backgroundColor: getcolor,
-                        width: "293px",
-                        marginLeft: "3px",
+                        width: "286px",
+                        marginLeft:"12px",
                         border: "2px solid grey",
                         borderRadius: "0px",
                       }}
                     >
-                      {/* GHULISTAN COLONY QARACHI AMAR SANDHU LAHORE */}
-                      {headerData.Address1}
+                    </input>
+                    <input
+                      value={headerData.Address2}
+                      disabled
+                      style={{
+                         paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "286px",
+                        marginLeft:"12px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    >
+                    </input>
                     </div>
                   </div>
                   <div
@@ -1540,7 +1618,7 @@ export default function InstallmentLedger2() {
                           fontWeight: "bold",
                         }}
                       >
-                        Rent :
+                        Ins Num :
                       </div>
                       <div
                         style={{
@@ -1556,9 +1634,10 @@ export default function InstallmentLedger2() {
                           display: "flex",
                           justifyContent: "end",
                           alignItems: "center",
+                          paddingRight:'5px'
                         }}
                       >
-                        236,000
+                    {headerData.InsNum}
                       </div>
 
                       <div
@@ -1573,7 +1652,7 @@ export default function InstallmentLedger2() {
                           fontWeight: "bold",
                         }}
                       >
-                        Total :
+                        InvDate :
                       </div>
                       <div
                         style={{
@@ -1589,9 +1668,10 @@ export default function InstallmentLedger2() {
                           display: "flex",
                           justifyContent: "end",
                           alignItems: "center",
+                          paddingRight:'5px'
                         }}
                       >
-                        236,000
+{headerData.InvDate}
                       </div>
                     </div>
                   </div>
@@ -1654,7 +1734,7 @@ export default function InstallmentLedger2() {
                         fontWeight: "bold",
                       }}
                     >
-                      Advance :
+                      PrmDate :
                     </div>
                     <div
                       style={{
@@ -1670,9 +1750,10 @@ export default function InstallmentLedger2() {
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
+                        paddingRight:'5px'
                       }}
                     >
-                      {headerData.Advance}
+                      {headerData.PrmDate}
                     </div>
                   </div>
                 </div>
@@ -1735,7 +1816,7 @@ export default function InstallmentLedger2() {
                         fontWeight: "bold",
                       }}
                     >
-                      Qist Amt :
+                      Advance :
                     </div>
                     <div
                       style={{
@@ -1751,10 +1832,11 @@ export default function InstallmentLedger2() {
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
+                        paddingRight:'5px'
                       }}
                     >
-                      236,000
-                    </div>
+{headerData.Advance}                  
+  </div>
                   </div>
                 </div>
                 <div
@@ -1767,13 +1849,13 @@ export default function InstallmentLedger2() {
                   }}
                 >
                   <div
-                    className="col-md-12"
+                    className="col-md-7"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
                       style={{
                         height: "100%",
-                        width: "104px",
+                        width: "100px",
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
@@ -1782,7 +1864,7 @@ export default function InstallmentLedger2() {
                         color: fontcolor,
                       }}
                     >
-                      Varify By :
+                      Verify By :
                     </div>
                     <input
                       value={headerData.verify}
@@ -1793,81 +1875,54 @@ export default function InstallmentLedger2() {
                         fontSize: "12px",
                         height: "100%",
                         backgroundColor: getcolor,
-                        width: "120px",
-                        marginLeft: "4px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                      }}
-                    ></input>
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                      }}
-                    >
-                      Delivered By :
-                    </div>
-                    <input
-                      value="14-01-708"
-                      disabled
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "120px",
+                        width: "293px",
                         marginLeft: "3px",
                         border: "2px solid grey",
                         borderRadius: "0px",
                       }}
-                    ></input>
-
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        marginLeft: "2px",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                      }}
                     >
-                      Profession :
-                    </div>
-                    <input
-                      value={headerData.Profession}
-                      disabled
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "129px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                      }}
-                    ></input>
+                    </input>
                   </div>
-                  {/* <div className="col-md-5" style={{ height: '100%', display: 'flex', padding: '0px' }}>
-                                        <div style={{ width: '150px', height: '100%',display: 'flex', alignItems: 'center', justifyContent: 'end', fontSize: '12px', fontWeight: 'bold' }}>Qist Amt :</div>
-                                        <div style={{ paddingLeft: '3px', color: fontcolor, fontSize: '12px', height: '100%', backgroundColor: getcolor, width: '131px', marginLeft: '3px', border: '2px solid grey', borderRadius: '0px', display: 'flex', justifyContent: 'end', alignItems:'center' }}>
-                                            236,000
-                                        </div>
-                                    </div> */}
+                  <div
+                    className="col-md-5"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Sale Amt :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight:'5px'
+                      }}
+                    >
+{headerData.SaleAmt}                  
+  </div>
+                  </div>
                 </div>
-                <div
+
+                 <div
                   className="row"
                   style={{
                     height: "100%",
@@ -1877,7 +1932,7 @@ export default function InstallmentLedger2() {
                   }}
                 >
                   <div
-                    className="col-md-12"
+                    className="col-md-7"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1892,26 +1947,226 @@ export default function InstallmentLedger2() {
                         color: fontcolor,
                       }}
                     >
-                      Remarks :
+                      OfficeAdd1 :
                     </div>
-                    <div
+                    <input
+                      value={headerData.OfficeAdd1}
+                      disabled
                       style={{
                         paddingLeft: "3px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
                         color: fontcolor,
                         fontSize: "12px",
                         height: "100%",
                         backgroundColor: getcolor,
-                        width: "580px",
+                        width: "293px",
                         marginLeft: "3px",
                         border: "2px solid grey",
                         borderRadius: "0px",
                       }}
                     >
-                      INSTALLMENT SALE
+                    </input>
+                  </div>
+                  <div
+                    className="col-md-5"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      OfficeContact :
                     </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight:'5px'
+                      }}
+                    >
+{headerData.OfficeContact}                  
+  </div>
+                  </div>
+                </div>
+
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-7"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      OfficeAdd2 :
+                    </div>
+                    <input
+                      value={headerData.OfficeAdd2}
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    >
+                    </input>
+                  </div>
+                  <div
+                    className="col-md-5"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Profession :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight:'5px'
+                      }}
+                    >
+{headerData.Profession}                  
+  </div>
+                  </div>
+                </div>
+                 <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-7"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Collector :
+                    </div>
+                    <input
+                      value={headerData.Collector}
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    >
+                    </input>
+                  </div>
+                  <div
+                    className="col-md-5"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      NicNum :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "2px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight:'5px'
+                      }}
+                    >
+{headerData.NicNum}                  
+  </div>
                   </div>
                 </div>
               </div>
@@ -1927,262 +2182,17 @@ export default function InstallmentLedger2() {
                   gap: "0px",
                 }}
               >
-                {/* hello dear */}
-                <div className="col-md-7" style={{ height: "100%" }}>
-                  <div
-                    className="col-md-12"
-                    style={{ display: "flex", height: "100%" }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Months :
-                    </div>
-                    <div
-                      style={{
-                        paddingRight: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "90px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "end",
-                      }}
-                    >
-                      12.00
-                    </div>
-                  </div>
-
-                  <div
-                    className="col-md-12"
-                    style={{
-                      display: "flex",
-                      height: "100%",
-                      marginTop: "1px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Inv Date :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "90px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    >
-                      30/07/2024
-                    </div>
-                  </div>
-
-                  <div
-                    className="col-md-12"
-                    style={{
-                      display: "flex",
-                      height: "100%",
-                      marginTop: "1px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      From Date :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "90px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    >
-                      10/09/2024
-                    </div>
-                  </div>
-
-                  <div
-                    className="col-md-12"
-                    style={{
-                      display: "flex",
-                      height: "100%",
-                      marginTop: "1px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Engine.# :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "90px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    ></div>
-                  </div>
-
-                  <div
-                    className="col-md-12"
-                    style={{
-                      display: "flex",
-                      height: "100%",
-                      marginTop: "1px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Chasis.# :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "90px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    ></div>
-                  </div>
-
-                  <div
-                    className="col-md-12"
-                    style={{
-                      display: "flex",
-                      height: "100%",
-                      marginTop: "1px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Eng.# : :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "90px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* <div className="col-md-5" style={{ height: '120px', border:'2px solid grey' }}></div> */}
-
-                <div
-                  className="col-md-5"
+               
+ <div
                   style={{
-                    height: "120px",
+                    height: "150px",
+                    width:'200px',
                     border: "2px solid grey",
                     position: "relative",
+                    marginLeft:'10px'
                   }}
                 >
-                  <div
+                  {/* <div
                     style={{
                       position: "absolute",
                       top: 0,
@@ -2205,284 +2215,47 @@ export default function InstallmentLedger2() {
                         "linear-gradient(-40deg, transparent 49%, grey 49%, grey 40%, transparent 51%)",
                       pointerEvents: "none", // So it doesn't interfere with clicks
                     }}
-                  ></div>
-                </div>
+                  ></div> */}
+<img 
+  src={headerData.Picture ? `https://crystalsolutions.pk/DI/MTSELEC/${headerData.Picture}` : ""}
+/>
 
+                </div>
+                
+              </div>
+
+             
+            </div>
+
+             {/* CENTER SECTION  */}
+              <div>
+                {/* line center */}
                 <div
                   className="col-md-12"
-                  style={{ height: "100%", display: "flex", marginTop: "6px" }}
-                >
-                  <div
-                    className="col-md-6"
-                    style={{ height: "100%", display: "flex" }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Actual Mths :
-                    </div>
-                    <div
-                      style={{
-                        paddingRight: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "65px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "end",
-                      }}
-                    >
-                      5.00
-                    </div>
-                  </div>
-                  <div
-                    className="col-md-6"
-                    style={{ height: "100%", display: "flex" }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "50px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Grade :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "120px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    ></div>
-                  </div>
-                </div>
+                  style={{ height: "1px", border: "1px solid grey" }}>
 
-                <div
-                  className="col-md-12"
-                  style={{ height: "100%", display: "flex", marginTop: "1px" }}
-                >
-                  <div
-                    className="col-md-6"
-                    style={{ height: "100%", display: "flex" }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "65px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Collector :
-                    </div>
-                    <div
-                      style={{
-                        paddingleft: "2px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "100px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    >
-                      {headerData.Collector}
-                    </div>
-                  </div>
-                  <div
-                    className="col-md-6"
-                    style={{ height: "100%", display: "flex" }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "50px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                      }}
-                    >
-                      Type :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "120px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                      }}
-                    >
-                      {headerData.ttypcod}
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* CENTER SECTION  */}
-              <div
-                className="row downrow"
-                style={{
-                  width: "100%",
-                  height: "20px",
-                  margin: "0px",
-                  padding: "0px",
-                }}
-              >
-                <div
-                  className="col-md-12"
-                  style={{ height: "1px", border: "1px solid grey" }}
-                ></div>
-                <div
-                  className="col-md-12"
-                  style={{
-                    height: "100%",
-                    marginTop: "2px",
-                    marginBottom: "2px",
-                    display: "flex",
-                    padding: "0px",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "100%",
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Off Address :
-                  </div>
-                  <input
-                    value={headerData.toffadd1}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "100%",
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                  <input
-                    value={headerData.toffadd1}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "100%",
-                      backgroundColor: getcolor,
-                      width: "350px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                  <div
-                    style={{
-                      height: "100%",
-                      width: "50px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Mobile :
-                  </div>
 
-                  <input
-                    value={headerData.toffcnt}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "100%",
-                      backgroundColor: getcolor,
-                      width: "132px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-                <div
-                  className="col-md-12"
-                  style={{ height: "1px", border: "1px solid grey" }}
-                ></div>
-                <div
+
+          </div>
+
+
+<div>
+ 
+<div
                   className="col-md-12"
                   style={{
-                    height: "100%",
                     marginTop: "2px",
                     marginBottom: "1px",
                     display: "flex",
                     padding: "0px",
+
                   }}
                 >
                   <div
                     style={{
-                      height: "100%",
                       width: "98px",
                       display: "flex",
                       justifyContent: "end",
@@ -2501,7 +2274,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                      height: "20px",
                       backgroundColor: getcolor,
                       width: "370px",
                       marginLeft: "3px",
@@ -2512,7 +2285,7 @@ export default function InstallmentLedger2() {
 
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "110px",
                       display: "flex",
                       justifyContent: "end",
@@ -2531,7 +2304,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                      height:'20px',
                       backgroundColor: getcolor,
                       width: "370px",
                       marginLeft: "3px",
@@ -2540,10 +2313,81 @@ export default function InstallmentLedger2() {
                     }}
                   ></input>
                 </div>
+                 <div
+                  className="col-md-12"
+                  style={{
+                    
+                    marginTop: "2px",
+                    marginBottom: "1px",
+                    display: "flex",
+                    padding: "0px",
+                  }}
+                >
+                  <div
+                    style={{
+                      
+                      width: "98px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Father Name :
+                  </div>
+                  <input
+                    value={headerData.GrnName}
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                       height:'20px',
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+
+                  <div
+                    style={{
+                      
+                      width: "110px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: fontcolor,
+                    }}
+                  >
+                    Father Name :
+                  </div>
+                  <input
+                    value={headerData.WitFather}
+                    disabled
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                       height:'20px',
+                      backgroundColor: getcolor,
+                      width: "370px",
+                      marginLeft: "3px",
+                      border: "2px solid grey",
+                      borderRadius: "0px",
+                    }}
+                  ></input>
+                </div>
+
                 <div
                   className="col-md-12"
                   style={{
-                    height: "100%",
+                    
                     marginTop: "1px",
                     marginBottom: "1px",
                     display: "flex",
@@ -2552,7 +2396,7 @@ export default function InstallmentLedger2() {
                 >
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "98px",
                       display: "flex",
                       justifyContent: "end",
@@ -2571,7 +2415,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "370px",
                       marginLeft: "3px",
@@ -2582,7 +2426,7 @@ export default function InstallmentLedger2() {
 
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "110px",
                       display: "flex",
                       justifyContent: "end",
@@ -2601,7 +2445,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "370px",
                       marginLeft: "3px",
@@ -2613,7 +2457,7 @@ export default function InstallmentLedger2() {
                 <div
                   className="col-md-12"
                   style={{
-                    height: "100%",
+                    
                     marginTop: "1px",
                     marginBottom: "1px",
                     display: "flex",
@@ -2622,7 +2466,7 @@ export default function InstallmentLedger2() {
                 >
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "98px",
                       display: "flex",
                       justifyContent: "end",
@@ -2639,7 +2483,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "370px",
                       marginLeft: "3px",
@@ -2650,7 +2494,7 @@ export default function InstallmentLedger2() {
 
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "110px",
                       display: "flex",
                       justifyContent: "end",
@@ -2667,7 +2511,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "370px",
                       marginLeft: "3px",
@@ -2679,7 +2523,7 @@ export default function InstallmentLedger2() {
                 <div
                   className="col-md-12"
                   style={{
-                    height: "100%",
+                    
                     marginTop: "1px",
                     marginBottom: "1px",
                     display: "flex",
@@ -2688,7 +2532,7 @@ export default function InstallmentLedger2() {
                 >
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "98px",
                       display: "flex",
                       justifyContent: "end",
@@ -2707,7 +2551,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "146px",
                       marginLeft: "3px",
@@ -2718,7 +2562,7 @@ export default function InstallmentLedger2() {
 
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "75px",
                       display: "flex",
                       justifyContent: "end",
@@ -2728,16 +2572,16 @@ export default function InstallmentLedger2() {
                       color: fontcolor,
                     }}
                   >
-                    Profession :
+                    CNIC :
                   </div>
                   <input
-                    value={headerData.Profession}
+                    value={headerData.GrnNic}
                     disabled
                     style={{
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "146px",
                       marginLeft: "3px",
@@ -2748,7 +2592,7 @@ export default function InstallmentLedger2() {
 
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "110px",
                       display: "flex",
                       justifyContent: "end",
@@ -2767,7 +2611,7 @@ export default function InstallmentLedger2() {
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "146px",
                       marginLeft: "3px",
@@ -2778,7 +2622,7 @@ export default function InstallmentLedger2() {
 
                   <div
                     style={{
-                      height: "100%",
+                      
                       width: "75px",
                       display: "flex",
                       justifyContent: "end",
@@ -2788,16 +2632,16 @@ export default function InstallmentLedger2() {
                       color: fontcolor,
                     }}
                   >
-                    Profession :
+                    CNIC :
                   </div>
                   <input
-                    value=""
+                    value={headerData.WitNic}
                     disabled
                     style={{
                       paddingLeft: "3px",
                       color: fontcolor,
                       fontSize: "12px",
-                      height: "100%",
+                       height:'20px',
                       backgroundColor: getcolor,
                       width: "146px",
                       marginLeft: "3px",
@@ -2806,146 +2650,8 @@ export default function InstallmentLedger2() {
                     }}
                   ></input>
                 </div>
-                <div
-                  className="col-md-12"
-                  style={{
-                    height: "100%",
-                    marginTop: "1px",
-                    marginBottom: "1px",
-                    display: "flex",
-                    padding: "0px",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "100%",
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Official :
-                  </div>
-                  <input
-                    value=""
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "100%",
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      height: "100%",
-                      width: "110px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Official :
-                  </div>
-                  <input
-                    value=""
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "100%",
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-                <div
-                  className="col-md-12"
-                  style={{
-                    height: "100%",
-                    marginTop: "1px",
-                    marginBottom: "1px",
-                    display: "flex",
-                    padding: "0px",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "100%",
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  ></div>
-                  <input
-                    value=""
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "100%",
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      height: "100%",
-                      width: "110px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  ></div>
-                  <input
-                    value=""
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "100%",
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-              </div>
-              {/* DRAW LINER AFTER FIRST SECTION OF HEADER */}
-            </div>
           </div>
+          
           {/* TABLE HEADER BODY DATA SECTION */}
           <div>
             <div

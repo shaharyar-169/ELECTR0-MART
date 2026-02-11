@@ -248,9 +248,9 @@ export default function InstallmentCollectReport() {
                 toDateElement.style.border = `1px solid ${fontcolor}`;
                 settoInputDate(formattedInput);
 
-                if (input1Reftype.current) {
+                if (saleSelectRef.current) {
                     e.preventDefault();
-                    input1Reftype.current.focus();
+                    saleSelectRef.current.focus();
                 }
             } else {
                 toast.error("Date must be in the format dd-mm-yyyy");
@@ -277,7 +277,7 @@ export default function InstallmentCollectReport() {
             const nextInput = document.getElementById(inputId);
             if (nextInput) {
                 nextInput.focus();
-                nextInput.select();
+                // nextInput.select();
             } else {
                 document.getElementById("submitButton").click();
             }
@@ -409,6 +409,7 @@ export default function InstallmentCollectReport() {
             FColCod: saleType,
             FRepTyp: transectionType,
             FCstTyp: transectionType2,
+             FSchTxt: searchQuery,
             code: organisation.code,
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
@@ -448,11 +449,11 @@ export default function InstallmentCollectReport() {
     useEffect(() => {
         const hasComponentMountedPreviously =
             sessionStorage.getItem("componentMounted");
-        if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
-            if (saleSelectRef && saleSelectRef.current) {
+        if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+            if (fromRef && fromRef.current) {
                 setTimeout(() => {
-                    saleSelectRef.current.focus();
-                    // saleSelectRef.current.select();
+                    fromRef.current.focus();
+                    fromRef.current.select();
                 }, 0);
             }
             sessionStorage.setItem("componentMounted", "true");
@@ -476,8 +477,10 @@ export default function InstallmentCollectReport() {
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveCollector.php";
         const formData = new URLSearchParams({
-            FLocCod: getLocationNumber,
-            // code: 'HAJVERY',
+          code: organisation.code,
+           FLocCod: getLocationNumber,
+            //  FLocCod: '001',
+            // code: 'MTSELEC',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -696,43 +699,46 @@ export default function InstallmentCollectReport() {
         const rows = tableData.map((item) => [
             item.Date,
             item['Trn#'],
-            item.Type,
+            // item.Type,
             item.Code,
             item['Manual #'],
             item.Customer,
-            item.Collector,
+           
             item['Ins Amt'],
             item.Collection,
             item.Diff,
+             item.Collector,
         ]);
 
         // Add summary row to the table
-        rows.push(["",
+        rows.push([
+            String(formatValue(tableData.length.toLocaleString())),
             "",
             "",
+            // "",
             "",
             "",
-            "",
-            String(formatValue(totalDebit)),
+            // String(formatValue(totalDebit)),
             String(formatValue(totalCredit)),
             String(formatValue(closingBalance)),
             String(formatValue(totalDif)),
+             "",
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
             "Date",
             "Trn#",
-            "Type",
+            // "Type",
             "Code",
             "Manual#",
             "Customer",
-            "Collector",
             "Ins Amt",
             "Collection",
-            "Diff"
+            "Diff",
+            "Col",
         ];
-        const columnWidths = [23, 16, 12, 23, 25, 90, 20, 25, 25, 25];
+        const columnWidths = [23, 16, 23, 25, 90, 20, 25, 25, 15];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -862,17 +868,17 @@ export default function InstallmentCollectReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 || cellIndex === 3) {
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 ) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
+            cellIndex === 5 ||
             cellIndex === 6 ||
             cellIndex === 7 ||
-            cellIndex === 8 ||
-            cellIndex === 9
+            cellIndex === 8
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1105,7 +1111,7 @@ doc.setFont("verdana-regular", "normal");
             "center",
             "center",
             "center",
-            "center",
+            // "center",
             "left",
             "left",
             "right",
@@ -1152,7 +1158,7 @@ doc.setFont("verdana-regular", "normal");
         let actype = transectionType2 === "001" ?
             "MONTHLY" : transectionType2 === "002"
                 ? "DAILY": transectionType2 === "003"
-                ? "WEEKLY" : "All"
+                ? "WEEKLY" : "ALL"
 
         let type = transectionType === "L" ?
             "LESS INS" : transectionType === "F"
@@ -1209,14 +1215,15 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         const headers = [
             "Date",
             "Trn#",
-            "Type",
+            // "Type",
             "Code",
             "Manual#",
             "Customer",
-            "Collector",
             "Ins Amt",
             "Collection",
-            "Diff"];
+            "Diff",
+             "Col",
+        ];
         const headerRow = worksheet.addRow(headers);
         headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
@@ -1225,14 +1232,16 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
             const row = worksheet.addRow([
                 item.Date,
                 item['Trn#'],
-                item.Type,
+                // item.Type,
                 item.Code,
                 item['Manual #'],
                 item.Customer,
-                item.Collector,
+              
                 item['Ins Amt'],
                 item.Collection,
-                item.Diff,]);
+                item.Diff,
+                  item.Collector,
+            ]);
 
             row.eachCell((cell, colIndex) => {
                 cell.font = fontTableContent;
@@ -1242,22 +1251,23 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         });
 
         // Set column widths
-        [11, 8, 7, 11, 10, 45, 12, 14, 14, 14].forEach((width, index) => {
+        [11, 8, 11, 10, 45, 12, 14, 14, 6].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
 
         const totalRow = worksheet.addRow([
+        String(formatValue(tableData.length.toLocaleString())),
             "",
             "",
             "",
             "",
-            "",
-            "",
-         String(formatValue(totalDebit)),
+           
+        //  String(formatValue(totalDebit)),
          String(formatValue(totalCredit)),
          String(formatValue(closingBalance)),
          String(formatValue(totalDif)),
+          "",
         ]);
 
         // total row added
@@ -1273,12 +1283,18 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
 
             // Align only the "Total" text to the right
             if (
+                colNumber === 6 ||
                 colNumber === 7 ||
-                colNumber === 8 ||
-                colNumber === 9 ||
-                colNumber === 10
+                colNumber === 8 
+               
             ) {
                 cell.alignment = { horizontal: "right" };
+            }
+            if (
+                colNumber === 1                
+               
+            ) {
+                cell.alignment = { horizontal: "center" };
             }
         });
 
@@ -1366,7 +1382,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         width: "300px",
     };
     const seventhColWidth = {
-        width: "85px",
+        width: "40px",
     };
     const eighthColWidth = {
         width: "85px",
@@ -1563,160 +1579,9 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                             alignItems: "center",
                             margin: "0px",
                             padding: "0px",
-                            justifyContent: "space-between",
+                            justifyContent: "start",
                         }}>
-
-                              <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
-                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Collector :</span>  <br /></label>
-                                </div>
-                                <div style={{ marginLeft: '5px' }} >
-                                    <Select
-                                        className="List-select-class"
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelPart = selectedOption.label.split("-")[1];
-                                                setSaleType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: labelPart, // Set only the 'NGS' part of the label
-                                                });
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                                setCompanyselectdatavalue("");
-                                            }
-                                        }}
-                                         onInputChange={(inputValue, { action }) => {
-                                                             if (action === "input-change") {
-                                                               return inputValue.toUpperCase();
-                                                             }
-                                                             return inputValue;
-                                                           }}
-                                                           components={{ Option: DropdownOption }}
-                                                           styles={{
-                                                             ...customStyles1(!saleType),
-                                                             placeholder: (base) => ({
-                                                               ...base,
-                                                               textAlign: "left",
-                                                               marginLeft: "0",
-                                                               justifyContent: "flex-start",
-                                                               color: fontcolor,
-                                                               marginTop: "-5px",
-                                                             }),
-                                                           }}
-                                                           isClearable
-                                                           placeholder="ALL"
-                                    />
-
-                                </div>
-
-
-                            </div>
-
-                            {/* CODE FOR SELECT */}
-
-                            <div
-                                className="d-flex align-items-center"
-                                style={{ marginRight: "21px" }}
-                            >
-                                <div
-                                    style={{
-                                        width: "75px",
-                                        display: "flex",
-                                        justifyContent: "end",
-                                    }}
-                                >
-                                    <label htmlFor="transactionType">
-                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
-                                            A/C Type :
-                                        </span>
-                                    </label>
-                                </div>
-
-
-
-                               <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Reftype}
-                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType2}
-                    onChange={handleTransactionTypeChange2}
-                    style={{
-                      width: "200px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="001">MONTHLY</option>
-                    <option value="002">DAILY</option>
-                                        <option value="003">WEEKLY</option>
-
-                  </select>
-
-                  {transectionType2 !== "" && (
-                    <span
-                      onClick={() => settransectionType2("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-                            </div>
-
-                        </div>
-
-
-
-                    </div>
-
-                    {/* CODE FOR CODE SELECT */}
-
-                    <div
-                        className="row"
-                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                    >
-                        <div
-                            style={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "0px",
-                                padding: "0px",
-                                justifyContent: "space-between",
-                            }}
-                        >
-
-                                <div className="d-flex align-items-center">
+                               <div className="d-flex align-items-center" style={{marginLeft:'10px'}}>
                                 <div
                                     style={{
                                         width: "80px",
@@ -1809,7 +1674,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                 </div>
                             </div>
                             <div
-                                className="d-flex align-items-center"
+                                className="d-flex align-items-center" style={{marginLeft:'50px'}}
                             >
                                 <div
                                     style={{
@@ -1860,7 +1725,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                         }}
                                         value={toInputDate}
                                         onChange={handleToInputChange}
-                                        onKeyDown={(e) => handleToKeyPress(e, 'firsttype')}
+                                        onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
                                         id="toDatePicker"
                                         autoComplete="off"
                                         placeholder="dd-mm-yyyy"
@@ -1901,6 +1766,87 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                     />
                                 </div>
                             </div>
+
+                              
+
+                            {/* CODE FOR SELECT */}
+
+                           
+
+                        </div>
+
+
+
+                    </div>
+
+                    {/* CODE FOR CODE SELECT */}
+
+                    <div
+                        className="row"
+                        style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                margin: "0px",
+                                padding: "0px",
+                                justifyContent: "space-between",
+                            }}
+                        >
+
+<div className="d-flex align-items-center  " style={{ marginLeft: '15px' }}>
+                                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
+                                    <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Collector :</span>  <br /></label>
+                                </div>
+                                <div style={{ marginLeft: '5px' }} >
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef}
+                                        options={options}
+                                        onKeyDown={(e) => handleSaleKeypress(e, 'AcountType')}
+                                        id="selectedsale"
+                                        onChange={(selectedOption) => {
+                                            if (selectedOption && selectedOption.value) {
+                                                const labelPart = selectedOption.label.split("-")[1];
+                                                setSaleType(selectedOption.value);
+                                                setCompanyselectdatavalue({
+                                                    value: selectedOption.value,
+                                                    label: labelPart, // Set only the 'NGS' part of the label
+                                                });
+                                            } else {
+                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                                                setCompanyselectdatavalue("");
+                                            }
+                                        }}
+                                         onInputChange={(inputValue, { action }) => {
+                                                             if (action === "input-change") {
+                                                               return inputValue.toUpperCase();
+                                                             }
+                                                             return inputValue;
+                                                           }}
+                                                           components={{ Option: DropdownOption }}
+                                                           styles={{
+                                                             ...customStyles1(!saleType),
+                                                             placeholder: (base) => ({
+                                                               ...base,
+                                                               textAlign: "left",
+                                                               marginLeft: "0",
+                                                               justifyContent: "flex-start",
+                                                               color: fontcolor,
+                                                               marginTop: "-5px",
+                                                             }),
+                                                           }}
+                                                           isClearable
+                                                           placeholder="ALL"
+                                    />
+
+                                </div>
+
+
+                            </div>
+                             
 
                             <div
                                 className="d-flex align-items-center"
@@ -1990,10 +1936,83 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                 alignItems: "center",
                                 margin: "0px",
                                 padding: "0px",
-                                justifyContent: "end",
+                                justifyContent: "space-between",
                             }}
                         >
                           
+                           <div
+                                className="d-flex align-items-center"
+                                style={{ marginLeft: "20px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "75px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="transactionType">
+                                        <span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: "bold" }}>
+                                            A/C Type :
+                                        </span>
+                                    </label>
+                                </div>
+
+
+
+                               <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Reftype}
+                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
+                    id="AcountType"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType2}
+                    onChange={handleTransactionTypeChange2}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="001">MONTHLY</option>
+                    <option value="002">DAILY</option>
+                                        <option value="003">WEEKLY</option>
+
+                  </select>
+
+                  {transectionType2 !== "" && (
+                    <span
+                      onClick={() => settransectionType2("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+                            </div>
 
                              <div id="lastDiv"style={{ marginRight: "1px" }} >
                 <label for="searchInput" style={{ marginRight: "5px" }}>
@@ -2013,7 +2032,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -2100,9 +2119,9 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                         <td className="border-dark" style={secondColWidth}>
                                             Trn#
                                         </td>
-                                        <td className="border-dark" style={thirdColWidth}>
+                                        {/* <td className="border-dark" style={thirdColWidth}>
                                             Type
-                                        </td>
+                                        </td> */}
                                         <td className="border-dark" style={forthColWidth}>
                                             Code
                                         </td>
@@ -2112,9 +2131,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                         <td className="border-dark" style={sixthColWidth}>
                                             Customer
                                         </td>
-                                        <td className="border-dark" style={seventhColWidth}>
-                                            Collector
-                                        </td>
+                                       
                                         <td className="border-dark" style={eighthColWidth}>
                                             Ins Amt
                                         </td>
@@ -2124,9 +2141,13 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                         <td className="border-dark" style={eighthColWidth}>
                                             Diff
                                         </td>
+                                         <td className="border-dark" style={seventhColWidth}>
+                                            Col
+                                        </td>
                                           <td className="border-dark" style={sixColWidth}>
                                             
                                         </td>
+                                        
 
                                     </tr>
                                 </thead>
@@ -2161,7 +2182,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="10" className="text-center">
+                                                <td colSpan="9" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2174,7 +2195,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 10 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2185,14 +2206,15 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
+                                                {/* <td style={thirdColWidth}></td> */}
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
+                                                
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
 
                                             </tr>
                                         </>
@@ -2219,9 +2241,9 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                         <td className="text-center" style={secondColWidth}>
                                                             {item['Trn#']}
                                                         </td>
-                                                        <td className="text-center" style={thirdColWidth}>
+                                                        {/* <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
-                                                        </td>
+                                                        </td> */}
                                                         <td className="text-center" style={forthColWidth}>
                                                             {item.Code}
                                                         </td>
@@ -2231,9 +2253,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                         <td className="text-start" style={sixthColWidth}>
                                                             {item.Customer}
                                                         </td>
-                                                        <td className="text-end" style={seventhColWidth}>
-                                                            {item.Collector}
-                                                        </td>
+                                                       
                                                         <td className="text-end" style={eighthColWidth}>
                                                             {item['Ins Amt']}
                                                         </td>
@@ -2242,6 +2262,9 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                         </td>
                                                         <td className="text-end" style={tenthColWidth}>
                                                             {item.Diff}
+                                                        </td>
+                                                         <td className="text-end" style={seventhColWidth}>
+                                                            {item.Collector}
                                                         </td>
 
                                                     </tr>
@@ -2257,7 +2280,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 10 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2267,14 +2290,14 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                <td style={thirdColWidth}></td>
+                                                {/* <td style={thirdColWidth}></td> */}
                                                 <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                <td style={seventhColWidth}></td>
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
+                                                <td style={seventhColWidth}></td>
 
 
                                             </tr>
@@ -2302,7 +2325,10 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
-                        ></div>
+                        >
+                        <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString())}</span>
+
+                        </div>
                         <div
                             style={{
                                 ...secondColWidth,
@@ -2310,14 +2336,14 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
-                        <div
+                        {/* <div
                             style={{
                                 ...thirdColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                        </div>
+                        </div> */}
                         <div
                             style={{
                                 ...forthColWidth,
@@ -2342,16 +2368,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                             }}
                         >
                         </div>
-                        <div
-                            style={{
-                                ...seventhColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            <span className="mobileledger_total">{formatValue(totalDebit)}</span>
-
-                        </div>
+                       
                         <div
                             style={{
                                 ...eighthColWidth,
@@ -2380,6 +2397,16 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                             }}
                         >
                             <span className="mobileledger_total">{formatValue(totalDif)}</span>
+
+                        </div>
+                         <div
+                            style={{
+                                ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                            {/* <span className="mobileledger_total">{formatValue(totalDebit)}</span> */}
 
                         </div>
 

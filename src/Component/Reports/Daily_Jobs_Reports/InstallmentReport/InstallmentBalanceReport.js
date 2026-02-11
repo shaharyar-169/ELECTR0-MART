@@ -14,18 +14,18 @@ import 'react-datepicker/dist/react-datepicker.css';
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { useNavigate } from "react-router-dom";
 import 'react-calendar/dist/Calendar.css';
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../../Redux/action";
 import './installment.css';
+import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import callAddFont from "../../../../vardana-normal";
-import { color } from "@mui/system";
 
 export default function InstallmentBalanceReport() {
 
-
+ const navigate = useNavigate();
     const saleSelectRef = useRef(null);
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
@@ -37,7 +37,7 @@ export default function InstallmentBalanceReport() {
     const [CashBookSummaryData, setCashBookSummaryData] = useState([]);
     const [CashPaymentData, setCashPaymentData] = useState([]);
 
-
+ const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
     const [saleType, setSaleType] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -71,7 +71,9 @@ export default function InstallmentBalanceReport() {
         getLocationNumber,
         getyeardescription,
         getfromdate,
-        gettodate
+        gettodate,
+         getfontstyle,
+    getdatafontsize,
 
     } = useTheme();
 
@@ -282,9 +284,9 @@ export default function InstallmentBalanceReport() {
         setIsLoading(true);
         const formData2 = new URLSearchParams({
             FRepDat: toInputDate,
-            code: 'HAJVERY',
+            code: 'MTSELEC',
             FLocCod: '001',
-            FColCod: '001'
+         
 
         }).toString();
 
@@ -347,10 +349,12 @@ export default function InstallmentBalanceReport() {
 
     useEffect(() => {
 
-        const apiUrl = apiLinks + "/GetCollector.php"
+        const apiUrl = apiLinks + "/GetCollectors.php"
         const formData = new URLSearchParams({
             // FLocCod: getLocationNumber,
-            code: 'HAJVERY',
+            code: 'MTSELEC',
+                        FLocCod: '001',
+
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -369,54 +373,195 @@ export default function InstallmentBalanceReport() {
         label: `${item.tcolcod}-${item.tcolnam.trim()}`
     }));
 
-    const DropdownOption = (props) => {
-        return (
-            <components.Option {...props}>
-                <div style={{
-                    fontSize: '12px',
-                    paddingBottom: '5px',
-                    lineHeight: '3px',
-                    color: 'black',
-                    textAlign: 'start',
+   const DropdownOption = (props) => {
+    return (
+      <components.Option {...props}>
+        <div
+          style={{
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            paddingBottom: "5px",
+            lineHeight: "3px",
+            // color: fontcolor,
+            textAlign: "start",
+          }}
+        >
+          {props.data.label}
+        </div>
+      </components.Option>
+    );
+  };
 
-                }}>
-                    {props.data.label}
-                </div>
-            </components.Option>
-        );
-    };
-    const customStyles1 = (hasError) => ({
-        control: (base, state) => ({
-            ...base,
-            height: '24px',
-            minHeight: 'unset',
-            width: 418,
-            fontSize: '12px',
-            backgroundColor: getcolor,
-            color: fontcolor,
-            borderRadius: 0,
-            border: hasError ? '2px solid red' : `1px solid ${fontcolor}`, // Conditionally change border color
-            transition: 'border-color 0.15s ease-in-out',
-            '&:hover': {
-                borderColor: state.isFocused ? base.borderColor : 'black',
-            },
-            padding: '0 8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+  const customStyles1 = (hasError) => ({
+    control: (base, state) => ({
+      ...base,
+      height: "24px",
+      minHeight: "unset",
+      width: 250,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: getcolor,
+      color: fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      borderRadius: 0,
+      border: `1px solid ${fontcolor}`,
+      transition: "border-color 0.15s ease-in-out",
+      "&:hover": {
+        borderColor: state.isFocused ? base.borderColor : fontcolor,
+      },
+      padding: "0 8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      boxShadow: "none",
+      "&:focus-within": {
+        borderColor: "#3368B5",
+        boxShadow: "0 0 0 1px #3368B5",
+      },
+    }),
 
-        }),
-        dropdownIndicator: base => ({
-            ...base,
-            padding: 0,
-            fontSize: '18px',
-            display: 'flex',
-            textAlign: 'center !important',
-        }),
-    });
+    menu: (base) => ({
+      ...base,
+      marginTop: "5px",
+      borderRadius: 0,
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      zIndex: 9999,
+    }),
+    menuList: (base) => ({
+      ...base,
+      padding: 0,
+      maxHeight: "200px",
+      // Scrollbar styling for Webkit browsers
+      "&::-webkit-scrollbar": {
+        width: "8px",
+        height: "8px",
+      },
+      "&::-webkit-scrollbar-track": {
+        background: getcolor,
+        borderRadius: "10px",
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: fontcolor,
+        borderRadius: "10px",
+        border: `2px solid ${getcolor}`,
+        "&:hover": {
+          backgroundColor: "#3368B5",
+        },
+      },
+      // Scrollbar styling for Firefox
+      scrollbarWidth: "thin",
+      scrollbarColor: `${fontcolor} ${getcolor}`,
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: state.isSelected
+        ? "#3368B5"
+        : state.isFocused
+        ? "#3368B5"
+        : getcolor,
+   color:
+  state.isSelected || state.isFocused
+    ? "white"
+    : fontcolor,      "&:hover": {
+        backgroundColor: "#3368B5",
+        color: "white",
+        cursor: "pointer",
+      },
+      "&:active": {
+        backgroundColor: "#1a66cc",
+      },
+      transition: "background-color 0.2s ease, color 0.2s ease",
+    }),
+    dropdownIndicator: (base, state) => ({
+      ...base,
+      padding: 0,
+      marginTop: "-5px",
+      fontSize: "18px",
+      display: "flex",
+      textAlign: "center",
+      color: fontcolor,
+      transition: "transform 0.2s ease",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
+      "&:hover": {
+        color: "#3368B5",
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      textAlign: "left",
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    input: (base) => ({
+      ...base,
+      color: getcolor === "white" ? "black" : fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      marginTop: "-5px",
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      padding: "0 4px",
+      color: fontcolor,
+      "&:hover": {
+        color: "#ff4444",
+      },
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: `${fontcolor}80`, // 50% opacity
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      marginTop: "-5px",
+    }),
+    noOptionsMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    loadingMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: `${fontcolor}20`, // Light background for tags
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      "&:hover": {
+        backgroundColor: "#ff4444",
+        color: "white",
+      },
+    }),
+  });
 
 
-    ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
+      ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
         // Create a new jsPDF instance with landscape orientation
         const doc = new jsPDF({ orientation: "landscape" });
@@ -953,6 +1098,26 @@ export default function InstallmentBalanceReport() {
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
+useHotkeys(
+       "alt+s",
+       () => {
+         fetchGeneralLedger();
+       },
+       { preventDefault: true, enableOnFormTags: true }
+     );
+   
+     useHotkeys("alt+p", exportPDFHandler, {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
+     useHotkeys("alt+e", handleDownloadCSV, {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
+     useHotkeys("alt+r", () => navigate("/MainPage"), {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1198,30 +1363,62 @@ export default function InstallmentBalanceReport() {
                             {/* SELECT TH CODE  */}
                             <div className="d-flex align-items-center  " style={{ marginLeft: '5px' }}>
                                 <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Code :</span>  <br /></label>
-                                </div>
+  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Code :
+                    </span>
+                  </label>                                </div>
                                 <div style={{ marginLeft: '3px' }} >
-                                    <Select
-
-                                        className="List-select-class "
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        onKeyDown={(e) => handleSaleKeypress(e, 'toDatePicker')}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                setSaleType(selectedOption.value);
-                                            } else {
-                                                setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                            }
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        // styles={customStyles1}
-                                        styles={customStyles1(!saleType)}
-                                        isClearable
-                                        placeholder="Search or select..."
-                                    />
-
+                                 
+<Select
+                    className="List-select-class"
+                    ref={saleSelectRef}
+                    options={options}
+                    onKeyDown={(e) => handleSaleKeypress(e, 'toDatePicker')}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setSaleType(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setSaleType("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!saleType),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
                                 </div>
 
 
@@ -1231,8 +1428,20 @@ export default function InstallmentBalanceReport() {
                             {/* To Date */}
                             <div className='d-flex align-items-center' style={{ marginLeft: '7px' }}>
                                 <div style={{ width: '72px', display: 'flex', justifyContent: 'end', }}>
-                                    <label htmlFor="fromDatePicker"><span style={{ fontSize: '15px', fontWeight: 'bold' }}>Date :</span>  <br /></label>
-                                </div>
+  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Date :
+                    </span>
+                  </label>                                </div>
                                 <div
                                     id="todatevalidation"
                                     style={{
@@ -1571,24 +1780,20 @@ export default function InstallmentBalanceReport() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
                         <SingleButton
                             text="EXCEL"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
                         <SingleButton
                             id="searchsubmit"
                             text="SELECT"
                             ref={input3Ref}
                             onClick={fetchGeneralLedger}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                         />
 
 

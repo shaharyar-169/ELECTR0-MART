@@ -155,6 +155,7 @@ import InstallmentCollectionDailyComparison from "./Component/Reports/Daily_Jobs
 import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCollectionMonthlyComparison.js";
 import InstallmentCustomerList from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCustomerList.js";
 import InstallmentLedger2 from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentLedger2.js";
+import InstallmentRecoveryReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentRecoveryReport.js";
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
@@ -179,6 +180,7 @@ import SparePartsPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/Ite
 import SparePartsPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsPurchaseSummary.js";
 import SparePartsStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsStockReports.js";
 import MonthlyItemSaleComparisonReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/MonthlyItemSaleComparison.js";
+import SparePartsStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartStoreStockReport.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -206,7 +208,7 @@ import PayableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/P
 import ReceivableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ReceiableAggingReport.js";
 import PayableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/PayableAggingReport.js";
 import AmericanReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableRepor.js";
-
+import MissingSerialNoReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/MissingSerialNo.js";
 
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
@@ -363,14 +365,15 @@ function App() {
 
 
                 {/* Rountes for Installments reports */}
-                <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} />
+                {/* <Route exact path="/InstallmentLedger" element={<InstallmentLedgerReport />} /> */}
                 <Route exact path="/InstallmentBalanceReport" element={<InstallmentBalanceReport />} />
                 <Route exact path="/InstallmentSaleReport" element={<InstallmentSaleReport />} />
                 <Route exact path="/InstallmentCollectionReport" element={<InstallmentCollectReport />} />
                 <Route exact path="/InstallmentCollectionDailyComparison" element={<InstallmentCollectionDailyComparison />} />
                 <Route exact path="/InstallmentCollectorMonthlyComparison" element={<InstallmentCollectionMonthlyComparison />} />
-                <Route exact path="/InstallmentRecveryReport" element={<InstallmentCustomerList />} />
-                <Route exact path="/InstalllmentCollectionSummary" element={<InstallmentLedger2 />} />
+                {/* <Route exact path="/InstallmentRecveryReport" element={<InstallmentCustomerList />} /> */}
+                <Route exact path="/InstallmentLedger" element={<InstallmentLedger2 />} />
+                <Route exact path="/InstallmentRecveryReport" element={<InstallmentRecoveryReport />} />
 
 
                 {/* Rountes for item reports */}
@@ -397,6 +400,7 @@ function App() {
                 <Route exact path="/SparePartsPurchaseSummary" element={<SparePartsPurchaseSummary />} />
                 <Route exact path="/SparePartsStockReport" element={<SparePartsStockReport />} />
                 <Route exact path="/ItemMarginDetailReport" element={<MonthlyItemSaleComparisonReport />} />
+                <Route exact path="/SparePartsStoreStockReport" element={<SparePartsStoreStockReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}
@@ -405,6 +409,7 @@ function App() {
                 <Route exact path="/ReceivableAggingReport" element={<ReceivableAggingReport />} />
                 <Route exact path="/PayableAggingReport" element={<PayableAggingReport />} />
                 <Route exact path="/AmericanReceiable" element={<AmericanReceivableReport />} />
+                <Route exact path="/MissingSerialNumber" element={<MissingSerialNoReport />} />
 
 
                 {/* ROUTES FOR EMPLOYEE REPORT */}
