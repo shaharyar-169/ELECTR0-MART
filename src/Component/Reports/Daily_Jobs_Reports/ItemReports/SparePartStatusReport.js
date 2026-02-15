@@ -25,19 +25,20 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Description, Store } from "@mui/icons-material";
 
-export default function SparePartsStoreStockReport() {
+
+export default function SparePartsStatusReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
-
   const saleSelectRef = useRef(null);
-
   const toRef = useRef(null);
   const fromRef = useRef(null);
   const companyRef = useRef(null);
   const categoryRef = useRef(null);
   const capacityRef = useRef(null);
+  const employeeref = useRef(null);
   const storeRef = useRef(null);
   const typeRef = useRef(null);
   const searchRef = useRef(null);
@@ -45,7 +46,6 @@ export default function SparePartsStoreStockReport() {
 
   const [saleType, setSaleType] = useState("");
 
-  const [storeList, setStoreList] = useState([]);
   const [storeType, setStoreType] = useState("");
 
   const input1Ref = useRef(null);
@@ -55,6 +55,7 @@ export default function SparePartsStoreStockReport() {
   const input5Ref = useRef(null);
   const input4Ref = useRef(null);
   const input6Ref = useRef(null);
+  const saleSelectRef1 = useRef(null)
 
   const [Companyselectdata, setCompanyselectdata] = useState("");
 
@@ -64,18 +65,20 @@ export default function SparePartsStoreStockReport() {
   const [Capacityselectdata, setCapacityselectdata] = useState("");
   const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
 
+   const [Storeselectdata, setStoreselectdata] = useState("");
+  const [Storeselectdatavalue, setStoreselectdatavalue] = useState("");
+
   const [GetCapacity, setGetCapacity] = useState([]);
   const [GetCompany, setGetCompany] = useState([]);
   const [Categoryselectdata, setCategoryselectdata] = useState("");
   const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
 
   const [GetCategory, setGetCategory] = useState([]);
-  const [GetHeading, setGetHeading] = useState([]);
 
   const [Typeselectdata, setTypeselectdata] = useState("");
   const [typeselectdatavalue, settypeselectdatavalue] = useState("");
 
-  const [GetType, setGetType] = useState([]);
+  const [storeList, setstoreList] = useState([]);
 
   const [sortData, setSortData] = useState("ASC");
 
@@ -88,13 +91,14 @@ export default function SparePartsStoreStockReport() {
   const [totaltax, settotaltax] = useState(0);
   const [totalincl, settotalincl] = useState(0);
 
-  const [Qnty1, setQnty1] = useState(0);
-  const [Qnty2, setQnty2] = useState(0);
-  const [Qnty3, setQnty3] = useState(0);
-  const [Qnty4, setQnty4] = useState(0);
-  const [Qnty5, setQnty5] = useState(0);
-
-  const [totals, setTotals] = useState({});
+  const [totalOpening, settotalOpening] = useState(0);
+  const [totalPurchase, settotalPurchase] = useState(0);
+  const [totalPurRet, settotalPurRet] = useState(0);
+  const [totalreceive, settotalreceive] = useState(0);
+  const [totalIssue, settotalIssue] = useState(0);
+  const [totalSale, settotalSale] = useState(0);
+  const [totalSaleRet, settotalSaleRet] = useState(0);
+  const [totalQnty, settotalQnty] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -145,7 +149,7 @@ export default function SparePartsStoreStockReport() {
 
   const formatDate1 = (date) => {
     return `${String(date.getDate()).padStart(2, "0")}-${String(
-      date.getMonth() + 1,
+      date.getMonth() + 1
     ).padStart(2, "0")}-${date.getFullYear()}`;
   };
   const GlobaltoDate1 = formatDate1(GlobaltoDate);
@@ -173,115 +177,289 @@ export default function SparePartsStoreStockReport() {
     settoInputDate(e.target.value);
   };
 
+  const handlefromInputChange = (e) => {
+    setfromInputDate(e.target.value);
+  };
+
+  const handlefromKeyPress = (e, inputId) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const fromDateElement = document.getElementById("fromdatevalidation");
+      const formattedInput = fromInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
+
+        if (month > 12 || month === 0) {
+          toast.error("Please enter a valid month (MM) between 01 and 12");
+          return;
+        }
+
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          return;
+        }
+
+        const currentDate = new Date();
+        const enteredDate = new Date(year, month - 1, day);
+
+        if (GlobalfromDate && enteredDate < GlobalfromDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+        if (GlobalfromDate && enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+
+        fromDateElement.style.border = `1px solid ${fontcolor}`;
+        setfromInputDate(formattedInput);
+
+        const nextInput = document.getElementById(inputId);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        } else {
+          document.getElementById("submitButton").click();
+        }
+      } else {
+        toast.error("Date must be in the format dd-mm-yyyy");
+      }
+    }
+  };
+
+  const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleToKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const toDateElement = document.getElementById("todatevalidation");
+      const formattedInput = toInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
+
+        if (month > 12 || month === 0) {
+          toast.error("Please enter a valid month (MM) between 01 and 12");
+          return;
+        }
+
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          return;
+        }
+
+        const currentDate = new Date();
+        const enteredDate = new Date(year, month - 1, day);
+
+        if (GlobaltoDate && enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+
+        if (GlobaltoDate && enteredDate < GlobalfromDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+
+        if (fromInputDate) {
+          const fromDate = new Date(
+            fromInputDate.split("-").reverse().join("-")
+          );
+          if (enteredDate <= fromDate) {
+            toast.error("To date must be after from date");
+            return;
+          }
+        }
+
+        toDateElement.style.border = `1px solid ${fontcolor}`;
+        settoInputDate(formattedInput);
+
+        if (saleSelectRef.current) {
+          e.preventDefault();
+          saleSelectRef.current.focus();
+        }
+      } else {
+        toast.error("Date must be in the format dd-mm-yyyy");
+      }
+    }
+  };
+
   function fetchDailyStatusReport() {
+    const fromDateElement = document.getElementById("fromdatevalidation");
+    const toDateElement = document.getElementById("todatevalidation");
+
     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
+    let hasError = false;
     let errorType = "";
 
     switch (true) {
+      //    case !saleType:
+      //        errorType = "saleType";
+      //        break;
+      case !fromInputDate:
+        errorType = "fromDate";
+        break;
       case !toInputDate:
         errorType = "toDate";
         break;
       default:
+        hasError = false;
         break;
     }
 
-    if (!dateRegex.test(toInputDate)) {
+    if (!dateRegex.test(fromInputDate)) {
+      errorType = "fromDateInvalid";
+    } else if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
     } else {
+      const formattedFromInput = fromInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const [fromDay, fromMonth, fromYear] = formattedFromInput
+        .split("-")
+        .map(Number);
+      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
+        "$1-$2-$3"
       );
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-      if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
+        errorType = "fromDateBeforeGlobal";
+      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
+        errorType = "fromDateAfterGlobal";
+      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
         errorType = "toDateAfterGlobal";
       } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
         errorType = "toDateBeforeGlobal";
+      } else if (enteredToDate < enteredFromDate) {
+        errorType = "toDateBeforeFromDate";
       }
     }
 
     switch (errorType) {
+      case "saleType":
+        toast.error("Please select a Account Code");
+        return;
+
+      case "fromDate":
+        toast.error("From date is required");
+        return;
       case "toDate":
-        toast.error("Rep Date is required");
+        toast.error("To date is required");
         return;
-
+      case "fromDateInvalid":
+        toast.error("From date must be in the format dd-mm-yyyy");
+        return;
       case "toDateInvalid":
-        toast.error("Rep Date must be in the format dd-mm-yyyy");
+        toast.error("To date must be in the format dd-mm-yyyy");
         return;
-
+      case "fromDateBeforeGlobal":
+        toast.error(
+          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
+        return;
+      case "fromDateAfterGlobal":
+        toast.error(
+          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
+        return;
       case "toDateAfterGlobal":
-        toast.error(`Rep Date must be before ${GlobaltoDate1}`);
+        toast.error(
+          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
         return;
       case "toDateBeforeGlobal":
-        toast.error(`Rep Date must be after ${GlobalfromDate1}`);
+        toast.error(
+          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+        );
+        return;
+      case "toDateBeforeFromDate":
+        toast.error("To date must be after from date");
         return;
 
       default:
         break;
     }
 
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
+    // console.log(data);
+    document.getElementById(
+      "fromdatevalidation"
+    ).style.border = `1px solid ${fontcolor}`;
+    document.getElementById(
+      "todatevalidation"
+    ).style.border = `1px solid ${fontcolor}`;
 
-    if (fromDateElement) {
-      fromDateElement.style.border = `1px solid ${fontcolor}`;
-    }
-    if (toDateElement) {
-      toDateElement.style.border = `1px solid ${fontcolor}`;
-    }
-
-    const apiMainUrl = apiLinks + "/SparePartsStoreStockReport.php";
+    const apiUrl = apiLinks + "/SparePartsStatusReport.php";
     setIsLoading(true);
-    const formMainData = new URLSearchParams({
-      FRepDat: toInputDate,
-      FRepRat: transectionType,
+    const formData = new URLSearchParams({
+      FIntDat: fromInputDate,
+      FFnlDat: toInputDate,
       FCtgCod: Categoryselectdata,
-      FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
+      FStrCod: Storeselectdata,
+      FCapCod: Capacityselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      FRepStk: transectionType2,
-
-      // code: "AGFACTORY",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+    //   code: "IZONETRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2025-2025",
     }).toString();
 
     axios
-      .post(apiMainUrl, formMainData)
+      .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
 
-        settotalqnty(response.data["Total Qnty"]);
-        // settotaltax(response.data["Total Amount"]);
-        //   setQnty1(response.data["Total001"]);
-        //    setQnty2(response.data["Total002"]);
-        //     setQnty3(response.data["Total003"]);
-        //      setQnty4(response.data["Total004"]);
-        //       setQnty5(response.data["Total005"]);
-
-        const dynamicTotals = {};
-
-        GetHeading.forEach((_, index) => {
-          const apiKey = `Total${String(index + 1).padStart(3, "0")}`;
-          const uiKey = `Qnt${String(index + 1).padStart(3, "0")}`;
-
-          dynamicTotals[uiKey] = response.data[apiKey] ?? 0;
-        });
-
-        setTotals(dynamicTotals);
+        settotalOpening(response.data["Total Opening"]);
+        settotalPurchase(response.data["Total Purchase"]);
+        settotalPurRet(response.data["Total Pur-Ret"]);
+        settotalreceive(response.data["Total Receive"]);
+        settotalIssue(response.data["Total Issue"]);
+        settotalSale(response.data["Total Sale"]);
+        settotalSaleRet(response.data["Total Sale-Ret"]);
+        settotalQnty(response.data["Total Qnty"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data.Detail,
+            response.data.Detail
           );
           setTableData([]);
         }
@@ -295,11 +473,11 @@ export default function SparePartsStoreStockReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
-      if (toRef && toRef.current) {
+    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+      if (fromRef && fromRef.current) {
         setTimeout(() => {
-          toRef.current.focus();
-          toRef.current.select();
+          fromRef.current.focus();
+          fromRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -314,35 +492,10 @@ export default function SparePartsStoreStockReport() {
     const firstDateOfCurrentMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      1,
+      1
     );
     setSelectedfromDate(firstDateOfCurrentMonth);
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
-  }, []);
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetStore.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-      // code: "AGFACTORY",
-      //       FYerDsc: "2024-2024",
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetHeading(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data,
-          );
-          setGetHeading([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
   }, []);
 
   useEffect(() => {
@@ -358,7 +511,7 @@ export default function SparePartsStoreStockReport() {
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data,
+            response.data
           );
           setGetCompany([]);
         }
@@ -370,34 +523,6 @@ export default function SparePartsStoreStockReport() {
   const options = GetCompany.map((item) => ({
     value: item.tcmpcod,
     label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
-  }));
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetCapacity.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetCapacity(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data,
-          );
-          setGetCapacity([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  const capacityoptions = GetCapacity.map((item) => ({
-    value: item.tcapcod,
-    label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
   }));
 
   useEffect(() => {
@@ -413,7 +538,7 @@ export default function SparePartsStoreStockReport() {
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data,
+            response.data
           );
           setGetCategory([]);
         }
@@ -428,8 +553,8 @@ export default function SparePartsStoreStockReport() {
     label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
   }));
 
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveStore.php";
+   useEffect(() => {
+    const apiUrl = apiLinks + "/GetCapacity.php";
     const formData = new URLSearchParams({
       code: organisation.code,
     }).toString();
@@ -437,13 +562,13 @@ export default function SparePartsStoreStockReport() {
       .post(apiUrl, formData)
       .then((response) => {
         if (response.data && Array.isArray(response.data)) {
-          setGetType(response.data);
+          setGetCapacity(response.data);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data,
+            response.data
           );
-          setGetType([]);
+          setGetCapacity([]);
         }
       })
       .catch((error) => {
@@ -451,10 +576,48 @@ export default function SparePartsStoreStockReport() {
       });
   }, []);
 
-  const typeoptions = GetType.map((item) => ({
-    value: item.tstrcod,
-    label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
+  const capacityoptions = GetCapacity.map((item) => ({
+    value: item.tcapcod,
+    label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
   }));
+
+   useEffect(() => {
+          const apiUrl = apiLinks + "/GetActiveStore.php";
+          const formData = new URLSearchParams({
+              FLocCod: getLocationNumber,
+              code: organisation.code,
+          }).toString();
+          axios
+              .post(apiUrl, formData)
+              .then((response) => {
+                  setstoreList(response.data);
+              })
+              .catch((error) => {
+                  console.error("Error fetching data:", error);
+              });
+      }, []);
+     
+      const storeoption = storeList.map((item) => ({
+          value: item.tstrcod,
+          label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
+      }));
+
+       const handleStoreKeypress = (event, inputId) => {
+        if (event.key === "Enter") {
+            const selectedOption = saleSelectRef.current.state.selectValue;
+            if (selectedOption && selectedOption.value) {
+                setSaleType(selectedOption.value);
+            }
+            const nextInput = document.getElementById(inputId);
+            if (nextInput) {
+                nextInput.focus();
+                // nextInput.select();
+            } else {
+                document.getElementById("submitButton").click();
+            }
+        }
+    };
+
 
   const DropdownOption = (props) => {
     return (
@@ -480,7 +643,7 @@ export default function SparePartsStoreStockReport() {
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 225,
+      width: 250,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -544,8 +707,8 @@ export default function SparePartsStoreStockReport() {
       backgroundColor: state.isSelected
         ? "#3368B5"
         : state.isFocused
-          ? "#3368B5"
-          : getcolor,
+        ? "#3368B5"
+        : getcolor,
       color: state.isSelected || state.isFocused ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
@@ -644,83 +807,48 @@ export default function SparePartsStoreStockReport() {
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
 
-    const length = GetHeading.length;
-    const hideDescription = length >= 9 && length <= 10;
-
     // Define table data (rows)
     const rows = tableData.map((item) => [
       item.Code,
-
-      // ❌ Description sirf tab add ho jab hide na karna ho
-      ...(!hideDescription ? [item.Description] : []),
-
-      item.Qnty,
-
-      // 🔹 dynamic Qnt columns
-      ...GetHeading.map((_, index) => {
-        const key = `Qnt${String(index + 1).padStart(3, "0")}`;
-        return item[key] ?? "";
-      }),
+      item.Description,
+      formatValue(item.Opening),
+      formatValue(item.Purchase),
+      formatValue(item["Pur-Ret"]),
+      formatValue(item.Receive),
+      formatValue(item.Issue),
+      formatValue(item.Sale),
+      formatValue(item["Sale-Ret"]),
+      formatValue(item.Balance),
     ]);
 
-    // 🔹 Summary Row
+    // Add summary row to the table
     rows.push([
       "",
-      ...(!hideDescription ? [""] : []),
-      String(totalqnty),
-
-      ...GetHeading.map((_, index) => {
-        const key = `Qnt${String(index + 1).padStart(3, "0")}`;
-        return String(totals[key] || "0");
-      }),
+      "Total",
+      String(formatValue(totalOpening)),
+      String(formatValue(totalPurchase)),
+      String(formatValue(totalPurRet)),
+      String(formatValue(totalreceive)),
+      String(formatValue(totalIssue)),
+      String(formatValue(totalSale)),
+      String(formatValue(totalSaleRet)),
+      String(formatValue(totalQnty)),
     ]);
 
-    // 🔹 Summary Row
+    // Define table column headers and individual column widths
     const headers = [
       "Code",
-
-      // ❌ Description hide condition
-      ...(!hideDescription ? ["Description"] : []),
-
-      "Qnty",
-
-      ...GetHeading.map((heading, index) =>
-        heading.tstrabb?.trim()
-          ? heading.tstrabb.slice(0, 5)
-          : `GD-${index + 1}`,
-      ),
+      "Description",
+      "Opening",
+      "Purchase",
+      "Pur Rate",
+      "Rece",
+      "Issue",
+      "Sale",
+      "Sl-Rate",
+      "Bal",
     ];
-
-    let columnWidths = [];
-
-    if (length === 0) {
-      columnWidths = [
-        35, // Code
-        110, // Description
-        30, // Qnty
-      ];
-    } else if (length <= 6) {
-      columnWidths = [
-        35, // Code
-        100, // Description
-        20, // Qnty
-        ...Array(length).fill(20),
-      ];
-    } else if (length >= 7 && length <= 8) {
-      columnWidths = [
-        35, // Code
-        70, // Description
-        20, // Qnty
-        ...Array(length).fill(20),
-      ];
-    } else if (length >= 9 && length <= 10) {
-      columnWidths = [
-        100, // Code
-        // 130, // Description
-        20, // Qnty
-        ...Array(length).fill(20),
-      ];
-    }
+    const columnWidths = [16, 100, 22, 22, 22, 22, 22, 22, 22, 22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -730,14 +858,14 @@ export default function SparePartsStoreStockReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
+    doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont("verdana", "bold");
-      doc.setFontSize(10);
+      doc.setFont("verdana", "bold"); // Set font to bold
+      doc.setFontSize(10); // Set font size for headers
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -767,6 +895,8 @@ export default function SparePartsStoreStockReport() {
       const normalFont = getfontstyle;
       const tableWidth = getTotalTableWidth();
 
+      doc.setFontSize(11);
+
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
         const isOddRow = i % 2 !== 0;
@@ -792,7 +922,7 @@ export default function SparePartsStoreStockReport() {
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F",
+            "F"
           );
         }
 
@@ -811,7 +941,7 @@ export default function SparePartsStoreStockReport() {
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5,
+            rowBottomY - 0.5
           );
 
           doc.setLineWidth(0.2);
@@ -820,7 +950,7 @@ export default function SparePartsStoreStockReport() {
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY,
+            rowBottomY
           );
         } else {
           doc.setLineWidth(0.2);
@@ -828,7 +958,7 @@ export default function SparePartsStoreStockReport() {
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight,
+            rowHeight
           );
         }
 
@@ -848,13 +978,22 @@ export default function SparePartsStoreStockReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 20) {
+          if (cellIndex === 0) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex >= 2) {
+          } else if (
+            cellIndex === 2 ||
+            cellIndex === 3 ||
+            cellIndex === 4 ||
+            cellIndex === 5 ||
+            cellIndex === 6 ||
+            cellIndex === 7 ||
+            cellIndex === 8 ||
+            cellIndex === 9
+          ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -880,7 +1019,7 @@ export default function SparePartsStoreStockReport() {
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight,
+              startY + (i - startIndex + 3) * rowHeight
             );
             startX += columnWidths[cellIndex];
           }
@@ -904,10 +1043,9 @@ export default function SparePartsStoreStockReport() {
       const headingY = lineY + 5;
       doc.setFont("verdana-regular", "normal");
       doc.setFontSize(10);
-      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
     };
 
-    // Function to calculate total table width
     const getTotalTableWidth = () => {
       let totalWidth = 0;
       columnWidths.forEach((width) => (totalWidth += width));
@@ -921,7 +1059,7 @@ export default function SparePartsStoreStockReport() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 27; // Adjust this value based on your requirements
+    const rowsPerPage = 29; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -932,9 +1070,9 @@ export default function SparePartsStoreStockReport() {
         time,
         pageNumber,
         startY,
-        titleFontSize = 18,
-        pageNumberFontSize = 10,
+        titleFontSize = 18
       ) => {
+        doc.setFont("verdana-regular", "normal");
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
           align: "center",
@@ -955,13 +1093,11 @@ export default function SparePartsStoreStockReport() {
         // Add page numbering
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        const pageX = GetHeading.length <= 3 ? rightX - 40 : rightX - 10;
-
         doc.text(
           `Page ${pageNumber}`,
-          pageX,
+          rightX - 5,
           doc.internal.pageSize.height - 10,
-          { align: "right" },
+          { align: "right" }
         );
       };
 
@@ -970,121 +1106,90 @@ export default function SparePartsStoreStockReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-        doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-        doc.setFont("verdana-regular", "normal");
+
         addTitle(
-          `Spare Parts Store Stock Report As on ${toInputDate}`,
+          `Spare Part Status Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
           startY,
-          12,
+          12
         ); // Render sale report title with decreased font size, provide the time, and page number
-        startY += 5;
+        startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let RATE =
-          transectionType === "P"
-            ? "PURCHASE RATE"
-            : transectionType == "M"
-              ? "SM RATE"
-              : transectionType == "A"
-                ? "AVERAGE RATE"
-                : transectionType == "W"
-                  ? "WEIGHTRD AVERAGE"
-                  : transectionType == "F"
-                    ? "FIFP"
-                    : "";
-
-        let transectionsts =
-          transectionType === "P"
-            ? "POSITIVE"
-            : transectionType == "N"
-              ? "NEGATIVE"
-              : transectionType == "Z"
-                ? "ZERO"
-                : "ALL";
-
-        let typeText = capacityselectdatavalue.label
-          ? capacityselectdatavalue.label
-          : "ALL";
-        let typeItem = Companyselectdatavalue.label
+        let companydata = Companyselectdatavalue.label
           ? Companyselectdatavalue.label
           : "ALL";
-        let category = categoryselectdatavalue.label
+
+        let categoydata = categoryselectdatavalue.label
           ? categoryselectdatavalue.label
           : "ALL";
-        let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label
+           let Capacitydata = capacityselectdatavalue.label
+          ? capacityselectdatavalue.label
+          : "ALL";
+
+           let Storedata = Storeselectdatavalue.label
+          ? Storeselectdatavalue.label
           : "ALL";
 
         let search = searchQuery ? searchQuery : "";
 
-        doc.setFont("verdana", "bold");
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Company :`, labelsX, labelsY); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
+        doc.text(`Company :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Reset font to normal
         doc.setFontSize(10);
-        doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+        doc.text(`${companydata}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold");
+        doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Category :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
+        doc.text(`Capacity :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Reset font to normal
         doc.setFontSize(10);
-        doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${Capacitydata}`, labelsX + 225, labelsY + 8.5); // Draw the value next to the label
 
-        const rateLabelX =
-          GetHeading.length <= 3 ? labelsX + 100 : labelsX + 180;
+   doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Category :`, labelsX, labelsY + 12.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Reset font to normal
+        doc.setFontSize(10);
+        doc.text(`${categoydata}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
-        const rateValueX =
-          GetHeading.length <= 3 ? labelsX + 120 : labelsX + 200;
+        doc.setFont("verdana", "bold"); // Set font to bold
+        doc.setFontSize(10);
+        doc.text(`Store :`, labelsX + 200, labelsY + 12.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal"); // Reset font to normal
+        doc.setFontSize(10);
+        doc.text(`${Storedata}`, labelsX + 225, labelsY + 12.5); // Draw the value next to the label
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text("Rate :", rateLabelX, labelsY);
-
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(String(RATE), rateValueX, labelsY);
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Capacity :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Status :`, rateLabelX, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${transectionsts}`, rateValueX, labelsY + 4.3); // Draw the value next to the label
 
         if (searchQuery) {
-          doc.setFont("verdana", "bold");
+          doc.setFont("verdana", "bold"); // Set font to bold
           doc.setFontSize(10);
-          doc.text(`Search :`, rateLabelX, labelsY + 8.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal");
+          doc.text(`Search :`, labelsX + 200, labelsY + 16.8); // Draw bold label
+          doc.setFont("verdana-regular", "normal"); // Reset font to normal
           doc.setFontSize(10);
-          doc.text(`${search}`, rateValueX, labelsY + 8.5); // Draw the value next to the label
+          doc.text(`${search}`, labelsX + 225, labelsY + 16.8); // Draw the value next to the label
         }
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += searchQuery ? 20 : 15; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+        addTableHeaders(
+          (doc.internal.pageSize.width - totalWidth) / 2,
+          searchQuery ? 39 : 34
+        );
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
           (doc.internal.pageSize.width - totalWidth) / 2,
           startY,
           startIndex,
-          endIndex,
+          endIndex
         );
         if (endIndex < rows.length) {
           startY = addNewPage(startY); // Add new page and update startY
@@ -1097,9 +1202,9 @@ export default function SparePartsStoreStockReport() {
     const getCurrentDate = () => {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
       const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
+      return dd + "/" + mm + "/" + yyyy;
     };
 
     // Function to get current time in the format HH:MM:SS
@@ -1118,19 +1223,27 @@ export default function SparePartsStoreStockReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`SparePartsStoreStockReport As On ${toInputDate}.pdf`);
+    doc.save(`SparePartStatusReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 3 + GetHeading.length;
+    const numColumns = 10; // Ensure this matches the actual number of columns
 
-    const columnAlignments = Array.from({ length: numColumns }, (_, index) => {
-      if (index === 0 || index === 1) return "left"; // Code, Description
-      return "right"; // Qnty + dynamic GD
-    });
+    const columnAlignments = [
+      "left",
+      "left",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
+    ];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -1157,20 +1270,6 @@ export default function SparePartsStoreStockReport() {
     // Add an empty row at the start
     worksheet.addRow([]);
 
-    // Helper function to convert column number to letter
-    function getExcelColumnLetter(colNumber) {
-      let letter = "";
-      while (colNumber > 0) {
-        const modulo = (colNumber - 1) % 26;
-        letter = String.fromCharCode(65 + modulo) + letter; // 65 = 'A'
-        colNumber = Math.floor((colNumber - 1) / 26);
-      }
-      return letter;
-    }
-
-    // Example usage:
-    const lastColLetter = getExcelColumnLetter(numColumns);
-
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
     companyRow.eachCell((cell) => {
@@ -1180,12 +1279,14 @@ export default function SparePartsStoreStockReport() {
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${lastColLetter}${companyRow.number}`,
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        companyRow.number
+      }`
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Spare Parts Store Stock Report As On ${toInputDate}`,
+      `Item Status Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1193,7 +1294,9 @@ export default function SparePartsStoreStockReport() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${lastColLetter}${storeListRow.number}`,
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        storeListRow.number
+      }`
     );
 
     // Add an empty row after the title section
@@ -1208,92 +1311,106 @@ export default function SparePartsStoreStockReport() {
     let typecategory = categoryselectdatavalue.label
       ? categoryselectdatavalue.label
       : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
+    let Storedata = Storeselectdatavalue.label
+      ? Storeselectdatavalue.label
       : "ALL ";
 
     let RATE =
       transectionType === "P"
         ? "PURCHASE RATE"
         : transectionType == "M"
-          ? "SM RATE"
-          : transectionType == "A"
-            ? "AVERAGE RATE"
-            : transectionType == "W"
-              ? "WEIGHTRD AVERAGE"
-              : transectionType == "F"
-                ? "FIFP"
-                : "";
+        ? "SM RATE"
+        : transectionType == "A"
+        ? "AVERAGE RATE"
+        : transectionType == "W"
+        ? "WEIGHTRD AVERAGE"
+        : transectionType == "F"
+        ? "FIFP"
+        : "";
 
     let transectionsts =
-      transectionType === "P"
-        ? "POSITIVE"
-        : transectionType == "N"
-          ? "NEGATIVE"
-          : transectionType == "Z"
-            ? "ZERO"
-            : "ALL";
+      transectionType === "BIL"
+        ? "PURCHASE"
+        : transectionType == "SRN"
+        ? "PURCHASE RETURN"
+        : "PRN";
 
     let typesearch = searchQuery ? searchQuery : "";
 
-    const isShortHeader = GetHeading.length <= 3;
-
     // Add first row
-    const rowData = isShortHeader
-      ? ["Company :", typecompany, "Rate :", RATE]
-      : ["Company :", typecompany, ",", "", "", "", "Rate :", RATE];
+    const typeAndStoreRow = worksheet.addRow([
+      "Company :",
+      typecompany,
+      "",
+      "",
+      "",
+      "",
 
-    const typeAndStoreRow = worksheet.addRow(rowData);
+      "Capacity :",
+      typecapacity,
+    ]);
 
     // Add second row
-    const typeAndStoreRow2 = worksheet.addRow(
-      isShortHeader
-        ? ["Category :", typecategory, "Status :", transectionsts]
-        : [
-            "Category :",
-            typecategory,
-            "",
-            "",
-            "",
-            "",
-            "Status :",
-            transectionsts,
-          ],
-    );
+    const typeAndStoreRow2 = worksheet.addRow([
+      "Category :",
+      typecategory,
+      "",
+      "",
+      "",
+      "",
+      "Store :",
+      Storedata,
+    ]);
+
+    // const typeAndStoreRow3 = worksheet.addRow([
+    //     "CAPACITY :",
+    //     typecapacity,
+    //    "",
+    //      "",
+    //       "",
+    //        "",
+    //     "STATUS :",
+    //     transectionsts,
+    // ]);
 
     // Add third row with conditional rendering for "SEARCH:"
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? isShortHeader
-          ? ["Capacity :", typecapacity, "Search :", typesearch]
-          : ["Capacity :", typecapacity, "", "", "", "", "Search :", typesearch]
-        : ["Capacity :", typecapacity],
+    const typeAndStoreRow4 = worksheet.addRow(
+      searchQuery ? ["", "", "", "", "", "", "Search :", typesearch] : [""]
     );
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
-        name: "CustomFont",
+        name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: isShortHeader
-          ? [1, 3].includes(colIndex) // Company & Rate
-          : [1, 7].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
-
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 7].includes(colIndex),
+      };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
-    [typeAndStoreRow2, typeAndStoreRow3].forEach((row) => {
-      row.eachCell((cell, colIndex) => {
-        cell.font = {
-          name: "CustomFont",
-          size: 10,
-          bold: isShortHeader
-            ? [1, 3].includes(colIndex)
-            : [1, 7].includes(colIndex),
-        };
-        cell.alignment = { horizontal: "left", vertical: "middle" };
-      });
+    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
+    //     cell.font = {
+    //         name: "CustomFont" || "CustomFont",
+    //         size: 10,
+    //         bold: [1, 7].includes(colIndex),
+    //     };
+    //     cell.alignment = { horizontal: "left", vertical: "middle" };
+    // });
+    typeAndStoreRow4.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 7].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
     // Header style
@@ -1317,15 +1434,15 @@ export default function SparePartsStoreStockReport() {
     const headers = [
       "Code",
       "Description",
-      "Qnty",
-
-      ...GetHeading.map((heading, index) =>
-        heading.tstrabb?.trim()
-          ? heading.tstrabb.slice(0, 5) // ✅ max 5 characters
-          : `GD-${index + 1}`,
-      ),
+      "Opening",
+      "Purchase",
+      "Pur Rate",
+      "Rece",
+      "Issue",
+      "Sale",
+      "Sl-Rate",
+      "Bal",
     ];
-
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
@@ -1334,16 +1451,16 @@ export default function SparePartsStoreStockReport() {
       const row = worksheet.addRow([
         item.Code,
         item.Description,
-        item.Qnty,
-
-        // 🔹 dynamic Qnt columns
-        ...GetHeading.map((_, index) => {
-          const key = `Qnt${String(index + 1).padStart(3, "0")}`;
-          return item[key] ?? "";
-        }),
+        formatValue(item.Opening),
+        formatValue(item.Purchase),
+        formatValue(item["Pur-Ret"]),
+        formatValue(item.Receive),
+        formatValue(item.Issue),
+        formatValue(item.Sale),
+        formatValue(item["Sale-Ret"]),
+        formatValue(item.Balance),
       ]);
 
-      // 🔹 Apply styles & alignment
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
         cell.border = {
@@ -1353,28 +1470,28 @@ export default function SparePartsStoreStockReport() {
           right: { style: "thin" },
         };
         cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "right",
+          horizontal: columnAlignments[colIndex - 1] || "left",
           vertical: "middle",
         };
       });
     });
 
-    const baseWidths = [20, 45, 12];
-    const widths = [...baseWidths, ...Array(GetHeading.length).fill(12)];
-
-    widths.forEach((width, index) => {
+    // Set column widths
+    [10, 45, 12, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
       "",
-      "",
-      String(totalqnty),
-
-      ...GetHeading.map((_, index) => {
-        const key = `Qnt${String(index + 1).padStart(3, "0")}`;
-        return String(totals[key] || "0");
-      }),
+      "Total",
+      String(totalOpening),
+      String(totalPurchase),
+      String(totalPurRet),
+      String(totalreceive),
+      String(totalIssue),
+      String(totalSale),
+      String(totalSaleRet),
+      String(totalQnty),
     ]);
 
     // total row added
@@ -1389,14 +1506,23 @@ export default function SparePartsStoreStockReport() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber > 2) {
-        cell.alignment = { horizontal: "right", vertical: "middle" };
-      } else {
-        cell.alignment = { horizontal: "left", vertical: "middle" }; // optional
+      if (
+     
+        colNumber === 3 ||
+        colNumber === 4 ||
+        colNumber === 5 ||
+        colNumber === 6 ||
+        colNumber === 7 ||
+        colNumber === 8 ||
+        colNumber === 9 ||
+        colNumber === 10
+      ) {
+        cell.alignment = { horizontal: "right" };
       }
     });
 
     // Add a blank row
+
     worksheet.addRow([]);
     // Get current date and time
     const getCurrentTime = () => {
@@ -1444,10 +1570,14 @@ export default function SparePartsStoreStockReport() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`
     );
 
     // Generate and save the Excel file
@@ -1455,7 +1585,7 @@ export default function SparePartsStoreStockReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `SparePartsStoreStockReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `ItemStatusReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1547,52 +1677,67 @@ export default function SparePartsStoreStockReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  //     const firstColWidth = {
-  //         width: "135px",
-  //     };
-  //     const secondColWidth = {
-  //         width: "360px",
-  //     };
+  // const firstColWidth = {
+  //     width: "10%",
+  // };
+  // const secondColWidth = {
+  //     width: "30.6%",
+  // };
   // const thirdColWidth = {
-  //         width: "80px",
-  //     };
+  //     width: "9%",
+  // };
+  // const forthColWidth = {
+  //     width: "9%",
+  // };
+  // const fifthColWidth = {
+  //     width: "9%",
+  // };
+  // const sixthColWidth = {
+  //     width: "5%",
+  // };
+  // const seventhColWidth = {
+  //     width: "9%",
+  // };
+  // const eighthColWidth = {
+  //     width: "9%",
+  // };
+  // const ninthColWidth = {
+  //     width: "9%",
+  // };
+  // const tenthColWidth = {
+  //     width: "9%",
+  // };
 
-  // const CommonColWidth = {
-  //         width: "80px",
-  //     };
-
-  const length = GetHeading.length;
-
-  let firstColWidth = {};
-  let secondColWidth = {};
-  let thirdColWidth = {};
-  let CommonColWidth = {};
-
-  if (length === 0) {
-    // 🔹 Case 1
-    firstColWidth = { width: "135px" };
-    secondColWidth = { width: "440px" };
-    thirdColWidth = { width: "80px" };
-    CommonColWidth = {}; // no dynamic columns
-  } else if (length <= 6) {
-    // 🔹 Case 2
-    firstColWidth = { width: "135px" };
-    secondColWidth = { width: "360px" };
-    thirdColWidth = { width: "75px" };
-    CommonColWidth = { width: "75px" };
-  } else if (length >= 7 && length <= 8) {
-    // 🔹 Case 3
-    firstColWidth = { width: isSidebarVisible ? "100px" : "135px" };
-    secondColWidth = { width: isSidebarVisible ? "200px" : "360px" };
-    thirdColWidth = { width: "75px" };
-    CommonColWidth = { width: "75px" };
-  } else if (length >= 9 && length <= 10) {
-    // 🔹 Case 4
-    firstColWidth = { width: isSidebarVisible ? "100px" : "135px" };
-    secondColWidth = { width: isSidebarVisible ? "130px" : "290px" };
-    thirdColWidth = { width: "70px" };
-    CommonColWidth = { width: "70px" };
-  }
+  const firstColWidth = {
+    width: "60px",
+  };
+  const secondColWidth = {
+    width: "360px",
+  };
+  const thirdColWidth = {
+    width: "70px",
+  };
+  const forthColWidth = {
+    width: "70px",
+  };
+  const fifthColWidth = {
+    width: "70px",
+  };
+  const sixthColWidth = {
+    width: "70px",
+  };
+  const seventhColWidth = {
+    width: "70px",
+  };
+  const eightColWidth = {
+    width: "70px",
+  };
+  const ninthColWidth = {
+    width: "70px",
+  };
+  const tenthColWidth = {
+    width: "70px",
+  };
 
   const sixthcol = {
     width: "8px",
@@ -1601,27 +1746,27 @@ export default function SparePartsStoreStockReport() {
   const [columns, setColumns] = useState({
     Code: [],
     Description: [],
-    Rate: [],
-    Amount: [],
-    Qnty: [],
-    Qnt001: [],
-    Qnt002: [],
-    Qnt003: [],
-    Qnt004: [],
-    Qnt005: [],
+    Opening: [],
+    Purchase: [],
+    ["Pur-Ret"]: [],
+    Receive: [],
+    Issue: [],
+    Sale: [],
+    ["Sale-Ret"]: [],
+    Balance: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
     Code: "",
     Description: "",
-    Rate: "",
-    Amount: "",
-    Qnty: "",
-    Qnt001: "",
-    Qnt002: "",
-    Qnt003: "",
-    Qnt004: "",
-    Qnt005: "",
+    Opening: "",
+    Purchase: "",
+    ["Pur-Ret"]: "",
+    Receive: "",
+    Issue: "",
+    Sale: "",
+    ["Sale-Ret"]: "",
+    Balance: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -1630,14 +1775,15 @@ export default function SparePartsStoreStockReport() {
       const newColumns = {
         Code: tableData.map((row) => row.Code),
         Description: tableData.map((row) => row.Description),
-        Rate: tableData.map((row) => row.Rate),
-        Amount: tableData.map((row) => row.Amount),
-        Qnty: tableData.map((row) => row.Qnty),
-        Qnt001: tableData.map((row) => row.Qnt001),
-        Qnt002: tableData.map((row) => row.Qnt002),
-        Qnt003: tableData.map((row) => row.Qnt003),
-        Qnt004: tableData.map((row) => row.Qnt004),
-        Qnt005: tableData.map((row) => row.Qnt005),
+        Opening: tableData.map((row) => row.Opening),
+        Purchase: tableData.map((row) => row.Purchase),
+
+        ["Pur-Ret"]: tableData.map((row) => row["Pur-Ret"]),
+        Receive: tableData.map((row) => row.Receive),
+        Issue: tableData.map((row) => row.Issue),
+        Sale: tableData.map((row) => row.Sale),
+        ["Sale-Ret"]: tableData.map((row) => row["Sale-Ret"]),
+        Balance: tableData.map((row) => row.Balance),
       };
       setColumns(newColumns);
     }
@@ -1656,14 +1802,14 @@ export default function SparePartsStoreStockReport() {
     setColumnSortOrders({
       Code: null,
       Description: null,
-      Rate: null,
-      Amount: null,
-      Qnty: null,
-      Qnt001: null,
-      Qnt002: null,
-      Qnt003: null,
-      Qnt004: null,
-      Qnt005: null,
+      Opening: null,
+      Purchase: null,
+      ["Pur-Ret"]: null,
+      Receive: null,
+      Issue: null,
+      Sale: null,
+      ["Sale-Ret"]: null,
+      Balance: null,
     });
   };
 
@@ -1708,138 +1854,6 @@ export default function SparePartsStoreStockReport() {
       }, {}),
     }));
   };
-  const totalColumns = 3 + GetHeading.length;
-
-  const renderTableData = () => {
-    return (
-      <>
-        {isLoading ? (
-          <>
-            <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan={totalColumns} className="text-center">
-                <Spinner animation="border" variant="primary" />
-              </td>
-            </tr>
-            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: totalColumns }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              {/* Fixed columns */}
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td> {/* Qnty */}
-              {/* Dynamic columns from GetHeading */}
-              {GetHeading.map((_, index) => (
-                <td key={index} style={CommonColWidth}></td>
-              ))}
-            </tr>
-          </>
-        ) : (
-          <>
-            {tableData.map((item, i) => {
-              totalEnteries += 1;
-              const isNegative = item.Qnty < 0 || item.Amount < 0;
-              return (
-                <tr
-                  key={`${i}-${selectedIndex}`}
-                  ref={(el) => (rowRefs.current[i] = el)}
-                  onClick={() => handleRowClick(i)}
-                  className={selectedIndex === i ? "selected-background" : ""}
-                  style={{
-                    backgroundColor: getcolor,
-                    color: isNegative ? "red" : fontcolor,
-                  }}
-                >
-                  <td
-                    className="text-start"
-                    title={item.Code}
-                    style={{
-                      ...firstColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Code}
-                  </td>
-                  <td
-                    className="text-start"
-                    title={item.Description}
-                    style={{
-                      ...secondColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Description}
-                  </td>
-                  <td
-                    className="text-end"
-                    title={item.Qnty}
-                    style={{
-                      ...thirdColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Qnty}
-                  </td>
-
-                  {/* Dynamic GD columns (header driven) */}
-                  {GetHeading.map((_, index) => {
-                    const key = `Qnt${String(index + 1).padStart(3, "0")}`;
-
-                    return (
-                      <td key={key} className="text-end" style={CommonColWidth}>
-                        {formatValue(item[key])}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-            {Array.from({
-              length: Math.max(0, 25 - tableData.length),
-            }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: totalColumns }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              {/* Fixed columns */}
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td> {/* Qnty */}
-              {/* Dynamic columns from GetHeading */}
-              {GetHeading.map((_, index) => (
-                <td key={index} style={CommonColWidth}></td>
-              ))}
-            </tr>
-          </>
-        )}
-      </>
-    );
-  };
 
   useHotkeys(
     "alt+s",
@@ -1847,7 +1861,7 @@ export default function SparePartsStoreStockReport() {
       fetchDailyStatusReport();
       resetSorting();
     },
-    { preventDefault: true, enableOnFormTags: true },
+    { preventDefault: true, enableOnFormTags: true }
   );
 
   useHotkeys("alt+p", exportPDFHandler, {
@@ -1877,11 +1891,11 @@ export default function SparePartsStoreStockReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: isSidebarVisible ? "1000px" : "1200px",
+    maxWidth: "1000px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "52vw",
+    left: isSidebarVisible ? "60vw" : "50vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -1889,7 +1903,7 @@ export default function SparePartsStoreStockReport() {
     alignItems: "center",
     overflow: "hidden",
     textAlign: "center",
-    fontSize: "15px",
+    fontSize: "10px",
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: "23px",
@@ -1923,7 +1937,7 @@ export default function SparePartsStoreStockReport() {
   useEffect(() => {
     if (selectedRowId !== null) {
       const newIndex = tableData.findIndex(
-        (item) => item.tcmpcod === selectedRowId,
+        (item) => item.tcmpcod === selectedRowId
       );
       setSelectedIndex(newIndex);
     }
@@ -1938,7 +1952,7 @@ export default function SparePartsStoreStockReport() {
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prevIndex) =>
-        Math.min(prevIndex + 1, tableData.length - 1),
+        Math.min(prevIndex + 1, tableData.length - 1)
       );
       scrollToSelectedRow();
     }
@@ -1986,7 +2000,7 @@ export default function SparePartsStoreStockReport() {
       const inputDate = e.target.value;
       const formattedDate = inputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
+        "$1-$2-$3"
       );
 
       // Basic format validation (dd-mm-yyyy)
@@ -2051,7 +2065,7 @@ export default function SparePartsStoreStockReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Spare Parts Store Stock Report" />
+          <NavComponent textdata="Spare Part Status Report" />
 
           {/* ------------1st row */}
           <div
@@ -2065,14 +2079,114 @@ export default function SparePartsStoreStockReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
-              {/* To Date */}
-              <div className="d-flex align-items-center">
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "15px" }}
+              >
                 <div
                   style={{
-                    width: "100px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      From :
+                    </span>
+                  </label>
+                </div>
+                <div
+                  id="fromdatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontSize: "12px",
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                      opacity: selectedRadio === "custom" ? 1 : 0.5,
+                      pointerEvents:
+                        selectedRadio === "custom" ? "auto" : "none",
+                    }}
+                    id="frominputid"
+                    value={fromInputDate}
+                    ref={fromRef}
+                    onChange={handlefromInputChange}
+                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="Date Input"
+                    disabled={selectedRadio !== "custom"}
+                  />
+                  <DatePicker
+                    selected={selectedfromDate}
+                    onChange={handlefromDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={fromCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={
+                            selectedRadio === "custom"
+                              ? toggleFromCalendar
+                              : undefined
+                          }
+                          style={{
+                            cursor:
+                              selectedRadio === "custom"
+                                ? "pointer"
+                                : "default",
+                            marginLeft: "18px",
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
+                            color: fontcolor,
+                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                          }}
+                          disabled={selectedRadio !== "custom"}
+                        />
+                      </div>
+                    }
+                    disabled={selectedRadio !== "custom"}
+                  />
+                </div>
+              </div>
+              <div className="d-flex align-items-center" >
+                <div
+                  style={{
+                    width: "60px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2085,7 +2199,7 @@ export default function SparePartsStoreStockReport() {
                         fontWeight: "bold",
                       }}
                     >
-                      Rep Date :&nbsp;
+                      To :
                     </span>
                   </label>
                 </div>
@@ -2098,6 +2212,7 @@ export default function SparePartsStoreStockReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
+                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -2125,7 +2240,7 @@ export default function SparePartsStoreStockReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={handleToDateEnter}
+                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2167,9 +2282,81 @@ export default function SparePartsStoreStockReport() {
                   />
                 </div>
               </div>
+
+   <div
+                  className="d-flex align-items-center"
+                  style={{ marginRight: "21px" }}
+                >
+                  <div
+                    style={{
+                      marginLeft: "10px",
+                      width: "80px",
+                      display: "flex",
+                      justifyContent: "end",
+                    }}
+                  >
+                    <label htmlFor="transactionType">
+                      <span
+                        style={{
+                          fontSize: getdatafontsize,
+                          fontFamily: getfontstyle,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Capacity :
+                      </span>
+                    </label>
+                  </div>
+  
+                  <div style={{ marginLeft: "3px" }}>
+                    <Select
+                      className="List-select-class "
+                      ref={input2Ref}
+                      options={capacityoptions}
+                      onKeyDown={(e) => handlecapacityKeypress(e, saleSelectRef1)}
+                      id="selectedsale2"
+                      onChange={(selectedOption) => {
+                        if (selectedOption && selectedOption.value) {
+                          const labelPart = selectedOption.label.split("-")[1];
+                          setCapacityselectdata(selectedOption.value);
+                          setcapacityselectdatavalue({
+                            value: selectedOption.value,
+                            label: labelPart, // Set only the 'NGS' part of the label
+                          });
+                        } else {
+                          setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                          setcapacityselectdatavalue("");
+                        }
+                      }}
+                      onInputChange={(inputValue, { action }) => {
+                        if (action === "input-change") {
+                          return inputValue.toUpperCase();
+                        }
+                        return inputValue;
+                      }}
+                      components={{ Option: DropdownOption }}
+                      styles={{
+                        ...customStyles1(!Companyselectdata),
+                        placeholder: (base) => ({
+                          ...base,
+                          textAlign: "left",
+                          marginLeft: "0",
+                          justifyContent: "flex-start",
+                          color: fontcolor,
+                          marginTop: "-5px",
+                        }),
+                      }}
+                      isClearable
+                      placeholder="ALL"
+                    />
+                  </div>
+                </div>
+            
             </div>
           </div>
+
           {/* //////////////// second ROW ///////////////////////// */}
+
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -2256,87 +2443,86 @@ export default function SparePartsStoreStockReport() {
                 </div>
               </div>
 
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Rate :
-                    </span>
-                  </label>
-                </div>
+               <div
+                                className="d-flex align-items-center  "
+                                style={{ marginRight: "21px" }}
+                            >
+                                <div
+                                    style={{
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span
+                                            style={{
+                                                fontSize: getdatafontsize,
+                                                fontFamily: getfontstyle,
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            Store :
+                                        </span>{" "}
+                                        <br />
+                                    </label>
+                                </div>
+                                <div style={{ marginLeft: "5px" }}>
+                                    <Select
+                                        className="List-select-class"
+                                        ref={saleSelectRef1}
+                                        options={storeoption}
+                                        onKeyDown={(e) => handleStoreKeypress(e, 'searchsubmit')}
+                                        id="selectedsale"
+                                      
+                                        onChange={(selectedOption) => {
+  if (selectedOption && selectedOption.value) {
 
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Refrate}
-                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "230px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
-                    }}
-                  >
-                    <option value="A">AVERAGE RATE</option>
-                    <option value="P">PURCHASE RATE</option>
-                    <option value="M">LAST SM RATE</option>
-                    <option value="W">WEIGHTED AVERAGE</option>
-                    <option value="F">FIFO</option>
-                  </select>
+    // Split only once and remove the numeric prefix
+    const description = selectedOption.label.split("-").slice(1).join("-");
 
-                  {transectionType !== "A" && (
-                    <span
-                      onClick={() => settransectionType("A")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
+    setStoreselectdata(selectedOption.value);
+
+    setStoreselectdatavalue({
+      value: selectedOption.value,
+      label: description, // FG-STOCK / FG-HOLD
+    });
+
+  } else {
+    setStoreselectdata("");
+    setStoreselectdatavalue("");
+  }
+}}
+
+                                        onInputChange={(inputValue, { action }) => {
+                                            if (action === "input-change") {
+                                                return inputValue.toUpperCase();
+                                            }
+                                            return inputValue;
+                                        }}
+                                        components={{ Option: DropdownOption }}
+                                        styles={{
+                                            ...customStyles1(!Storeselectdata),
+                                            placeholder: (base) => ({
+                                                ...base,
+                                                textAlign: "left",
+                                                marginLeft: "0",
+                                                justifyContent: "flex-start",
+                                                color: fontcolor,
+                                                marginTop: '-5px',
+                                                
+                                            })
+                                        }}
+                                        isClearable
+                                        placeholder="ALL"
+                                    />
+                                </div>
+                            </div>
             </div>
           </div>
-          {/* //////////////// THIRD ROW ///////////////////////// */}
+
+           {/* //////////////// third ROW ///////////////////////// */}
+
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -2351,7 +2537,7 @@ export default function SparePartsStoreStockReport() {
                 justifyContent: "space-between",
               }}
             >
-              <div
+               <div
                 className="d-flex align-items-center"
                 style={{ marginLeft: "7px" }}
               >
@@ -2419,168 +2605,6 @@ export default function SparePartsStoreStockReport() {
                   />
                 </div>
               </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Status :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType2}
-                    onChange={handleTransactionTypeChange2}
-                    style={{
-                      width: "230px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "13px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="P">POSITIVE</option>
-                    <option value="N">NEGATIVE</option>
-                    <option value="Z">ZERO</option>
-                  </select>
-
-                  {transectionType2 !== "" && (
-                    <span
-                      onClick={() => settransectionType2("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* //////////////// FORTH ROW ///////////////////////// */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Capacity :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ marginLeft: "3px" }}>
-                  <Select
-                    className="List-select-class "
-                    ref={input2Ref}
-                    options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
-                    id="selectedsale2"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCapacityselectdata(selectedOption.value);
-                        setcapacityselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcapacityselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!Companyselectdata),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    isClearable
-                    placeholder="ALL"
-                  />
-                </div>
-              </div>
 
               <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "3px" }}>
@@ -2600,12 +2624,12 @@ export default function SparePartsStoreStockReport() {
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "230px",
+                      width: "250px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2648,6 +2672,7 @@ export default function SparePartsStoreStockReport() {
             </div>
           </div>
 
+
           <div>
             {/* Table Head */}
             <div
@@ -2662,7 +2687,7 @@ export default function SparePartsStoreStockReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  // width: "100%",
                   position: "relative",
                 }}
               >
@@ -2684,17 +2709,17 @@ export default function SparePartsStoreStockReport() {
                       color: "white",
                     }}
                   >
-                    {/* Fixed columns */}
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("Code")}
+                      // onClick={() => handleSorting("Code")}
                     >
-                      Code{" "}
+                      Code
+                      {/* {" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Code")}
-                      ></i>
+                      ></i> */}
                     </td>
                     <td
                       className="border-dark"
@@ -2707,47 +2732,103 @@ export default function SparePartsStoreStockReport() {
                         style={getIconStyle("Description")}
                       ></i>
                     </td>
-
                     <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("Qnty")}
+                      // onClick={() => handleSorting("Opening")}
                     >
-                      Qnty{" "}
+                      Open
+                      {/* {" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
-                      ></i>
+                        style={getIconStyle("Opening")}
+                      ></i> */}
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      // onClick={() => handleSorting("Purchase")}
+                    >
+                      Pur
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Purchase")}
+                      ></i> */}
                     </td>
 
-                    {GetHeading.map((heading, index) => {
-                      const sortKey = `Qnt${String(index + 1).padStart(3, "0")}`;
-
-                      const rawText = heading.tstrabb?.trim()
-                        ? heading.tstrabb
-                        : heading.tstrdsc || `GD-${index + 1}`;
-
-                      const displayText =
-                        rawText.length > 5 ? rawText.slice(0, 5) : rawText;
-
-                      return (
-                        <td
-                          key={heading.id}
-                          className="border-dark"
-                          style={CommonColWidth}
-                          onClick={() => handleSorting(sortKey)}
-                          title={rawText} // 👈 hover pe full text
-                        >
-                          {displayText}{" "}
-                          <i
-                            className="fa-solid fa-caret-down caretIconStyle"
-                            style={getIconStyle(sortKey)}
-                          />
-                        </td>
-                      );
-                    })}
-
-                    {/* Empty column remains */}
+                    <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                      // onClick={() => handleSorting("Pur-Ret")}
+                    >
+                      P Rat
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Pur-Ret")}
+                      ></i> */}
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      // onClick={() => handleSorting("Receive")}
+                    >
+                      Rece
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Receive")}
+                      ></i> */}
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      // onClick={() => handleSorting("Issue")}
+                    >
+                      Issue
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Issue")}
+                      ></i> */}
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={eightColWidth}
+                      // onClick={() => handleSorting("Sale")}
+                    >
+                      Sale
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Sale")}
+                      ></i> */}
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      // onClick={() => handleSorting("Saleb-Rate")}
+                    >
+                      S Rat
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Sale-Ret")}
+                      ></i> */}
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      // onClick={() => handleSorting("Balance")}
+                    >
+                      Bal
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i> */}
+                    </td>
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
                 </thead>
@@ -2760,7 +2841,10 @@ export default function SparePartsStoreStockReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "43vh",
+                maxHeight: "45vh",
+                //    width: "100%",
+                position: "relative",
+                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
               }}
             >
               <table
@@ -2769,17 +2853,166 @@ export default function SparePartsStoreStockReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  ...(GetHeading.length > 6 ? { width: "100%" } : {}), // width: "100%",
+                  width: "100%",
                   position: "relative",
-                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
-                <tbody id="tablebody">{renderTableData()}</tbody>
+                <tbody id="tablebody">
+                  {isLoading ? (
+                    <>
+                      <tr
+                        style={{
+                          backgroundColor: getcolor,
+                        }}
+                      >
+                        <td colSpan="10" className="text-center">
+                          <Spinner animation="border" variant="primary" />
+                        </td>
+                      </tr>
+                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                        (_, rowIndex) => (
+                          <tr
+                            key={`blank-${rowIndex}`}
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            {Array.from({ length: 10 }).map((_, colIndex) => (
+                              <td key={`blank-${rowIndex}-${colIndex}`}>
+                                &nbsp;
+                              </td>
+                            ))}
+                          </tr>
+                        )
+                      )}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                      </tr>
+                    </>
+                  ) : (
+                    <>
+                      {tableData.map((item, i) => {
+                        totalEnteries += 1;
+                        const isNegative =
+                          item.Opening < 0 ||
+                          item.Sale < 0 ||
+                          item.Balance < 0 ||
+                          item.Purchase < 0 ||
+                          item.Receive < 0 ||
+                          item["Pur-Ret"] < 0 ||
+                          item["Sale-Ret"] < 0;
+
+                        return (
+                          <tr
+                            key={`${i}-${selectedIndex}`}
+                            ref={(el) => (rowRefs.current[i] = el)}
+                            onClick={() => handleRowClick(i)}
+                            className={
+                              selectedIndex === i ? "selected-background" : ""
+                            }
+                            style={{
+                              backgroundColor: getcolor,
+                              // color: fontcolor,
+                              color: isNegative ? "red" : fontcolor,
+                            }}
+                          >
+                            <td
+                              className="text-center"
+                              title={item.Code}
+                              style={{
+                                ...firstColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.Code}
+                            </td>
+                            <td
+                              className="text-start"
+                              title={item.Description}
+                              style={{
+                                ...secondColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.Description}
+                            </td>
+                            <td className="text-end" style={thirdColWidth}>
+                              {formatValue(item.Opening)}
+                            </td>
+                            <td className="text-end" style={forthColWidth}>
+                              {formatValue(item.Purchase)}
+                            </td>
+                            <td className="text-end" style={fifthColWidth}>
+                              {formatValue(item["Pur-Ret"])}
+                            </td>
+                            <td className="text-end" style={sixthColWidth}>
+                              {formatValue(item["Receive"])}
+                            </td>
+                            <td className="text-end" style={seventhColWidth}>
+                              {formatValue(item["Issue"])}
+                            </td>
+                            <td className="text-end" style={eightColWidth}>
+                              {formatValue(item["Sale"])}
+                            </td>
+                            <td className="text-end" style={ninthColWidth}>
+                              {formatValue(item["Sale-Ret"])}
+                            </td>
+                            <td className="text-end" style={tenthColWidth}>
+                              {formatValue(item["Balance"])}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {Array.from({
+                        length: Math.max(0, 27 - tableData.length),
+                      }).map((_, rowIndex) => (
+                        <tr
+                          key={`blank-${rowIndex}`}
+                          style={{
+                            backgroundColor: getcolor,
+                            color: fontcolor,
+                          }}
+                        >
+                          {Array.from({ length: 10 }).map((_, colIndex) => (
+                            <td key={`blank-${rowIndex}-${colIndex}`}>
+                              &nbsp;
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
               </table>
             </div>
           </div>
           {/* Table Footer */}
-
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,
@@ -2789,7 +3022,6 @@ export default function SparePartsStoreStockReport() {
               paddingRight: "8px",
             }}
           >
-            {/* Code / Count */}
             <div
               style={{
                 ...firstColWidth,
@@ -2799,11 +3031,9 @@ export default function SparePartsStoreStockReport() {
               }}
             >
               <span className="mobileledger_total2">
-                {formatValue(tableData.length)}
+                {formatValue(tableData.length.toLocaleString())}
               </span>
             </div>
-
-            {/* Description (empty) */}
             <div
               style={{
                 ...secondColWidth,
@@ -2811,8 +3041,6 @@ export default function SparePartsStoreStockReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-
-            {/* Total Quantity */}
             <div
               style={{
                 ...thirdColWidth,
@@ -2821,30 +3049,88 @@ export default function SparePartsStoreStockReport() {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalqnty)}
+                {formatValue(totalOpening)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...forthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalPurchase)}
               </span>
             </div>
 
-            {GetHeading.map((_, index) => {
-              const key = `Qnt${String(index + 1).padStart(3, "0")}`;
-
-              return (
-                <div
-                  key={key}
-                  style={{
-                    ...CommonColWidth,
-                    background: getcolor,
-                    borderRight: `1px solid ${fontcolor}`,
-                  }}
-                >
-                  <span className="mobileledger_total">
-                    {formatValue(totals[key])}
-                  </span>
-                </div>
-              );
-            })}
+            <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalPurRet)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...sixthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalreceive)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalIssue)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalSale)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...ninthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalSaleRet)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalQnty)}
+              </span>
+            </div>
           </div>
-
           {/* Action Buttons */}
           <div
             style={{

@@ -441,9 +441,9 @@ export default function InstallmentRecoveryReport() {
       FYerDsc: yeardescription || getyeardescription,
         
 
-    //   code: 'MTSELEC',
-    //   FLocCod: '002',
-    //   FYerDsc: '2025-2025',
+      // code: 'MTSELEC',
+      // FLocCod: '002',
+      // FYerDsc: '2025-2025',
     }).toString();
 
     axios

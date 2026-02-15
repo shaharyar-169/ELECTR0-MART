@@ -242,15 +242,14 @@ export default function ItemStoreStockReport() {
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
-
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
       FRepStk: transectionType2,
 
-    //   code: "AGFACTORY",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+      code: "MTSELEC",
+      FLocCod: "002",
+      FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -325,7 +324,8 @@ export default function ItemStoreStockReport() {
     const apiUrl = apiLinks + "/GetStore.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-    //   code: "AGFACTORY",
+      code: "MTSELEC",
+      //       FYerDsc: "2024-2024",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -670,8 +670,8 @@ export default function ItemStoreStockReport() {
       String(totalqnty),
 
       ...GetHeading.map((_, index) => {
-        const key = `Total${String(index + 1).padStart(3, "0")}`;
-        return String(totals[key] ?? "");
+        const key = `Qnt${String(index + 1).padStart(3, "0")}`;
+        return String(totals[key] || "0");
       }),
     ]);
 
@@ -955,9 +955,11 @@ export default function ItemStoreStockReport() {
         // Add page numbering
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
+        const pageX = GetHeading.length <= 3 ? rightX - 40 : rightX - 10;
+
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 5,
+          pageX,
           doc.internal.pageSize.height - 10,
           { align: "right" },
         );
@@ -1029,11 +1031,6 @@ export default function ItemStoreStockReport() {
         doc.setFontSize(10);
         doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`Store :`, labelsX + 180, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
-
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
         doc.text(`Category :`, labelsX, labelsY + 4.3); // Draw bold label
@@ -1041,12 +1038,19 @@ export default function ItemStoreStockReport() {
         doc.setFontSize(10);
         doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
+        const rateLabelX =
+          GetHeading.length <= 3 ? labelsX + 100 : labelsX + 180;
+
+        const rateValueX =
+          GetHeading.length <= 3 ? labelsX + 120 : labelsX + 200;
+
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Rate :`, labelsX + 180, labelsY); // Draw bold label
+        doc.text("Rate :", rateLabelX, labelsY);
+
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${RATE}`, labelsX + 200, labelsY); // Draw the value next to the label
+        doc.text(String(RATE), rateValueX, labelsY);
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
@@ -1057,18 +1061,18 @@ export default function ItemStoreStockReport() {
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Status :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+        doc.text(`Status :`, rateLabelX, labelsY + 4.3); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${transectionsts}`, labelsX + 200, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${transectionsts}`, rateValueX, labelsY + 4.3); // Draw the value next to the label
 
         if (searchQuery) {
           doc.setFont("verdana", "bold");
           doc.setFontSize(10);
-          doc.text(`Search :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+          doc.text(`Search :`, rateLabelX, labelsY + 8.5); // Draw bold label
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
-          doc.text(`${search}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
+          doc.text(`${search}`, rateValueX, labelsY + 8.5); // Draw the value next to the label
         }
 
         startY += 10; // Adjust vertical position for the labels
@@ -1232,62 +1236,64 @@ export default function ItemStoreStockReport() {
 
     let typesearch = searchQuery ? searchQuery : "";
 
+    const isShortHeader = GetHeading.length <= 3;
+
     // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "Company :",
-      typecompany,
-      "",
-      "",
-      "",
-      "",
-      "Rate :",
-      RATE,
-    ]);
+    const rowData = isShortHeader
+      ? ["Company :", typecompany, "Rate :", RATE]
+      : ["Company :", typecompany, ",", "", "", "", "Rate :", RATE];
+
+    const typeAndStoreRow = worksheet.addRow(rowData);
 
     // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "Category :",
-      typecategory,
-      "",
-      "",
-      "",
-      "",
-      "Status :",
-      transectionsts,
-    ]);
+    const typeAndStoreRow2 = worksheet.addRow(
+      isShortHeader
+        ? ["Category :", typecategory, "Status :", transectionsts]
+        : [
+            "Category :",
+            typecategory,
+            "",
+            "",
+            "",
+            "",
+            "Status :",
+            transectionsts,
+          ],
+    );
 
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
-        ? ["Capacity :", typecapacity, "", "", "", "", "Search :", typesearch]
+        ? isShortHeader
+          ? ["Capacity :", typecapacity, "Search :", typesearch]
+          : ["Capacity :", typecapacity, "", "", "", "", "Search :", typesearch]
         : ["Capacity :", typecapacity],
     );
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
       cell.font = {
-        name: "CustomFont" || "CustomFont",
+        name: "CustomFont",
         size: 10,
-        bold: [1, 7].includes(colIndex),
+        bold: isShortHeader
+          ? [1, 3].includes(colIndex) // Company & Rate
+          : [1, 7].includes(colIndex),
       };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 7].includes(colIndex),
-      };
+
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
 
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 7].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
+    [typeAndStoreRow2, typeAndStoreRow3].forEach((row) => {
+      row.eachCell((cell, colIndex) => {
+        cell.font = {
+          name: "CustomFont",
+          size: 10,
+          bold: isShortHeader
+            ? [1, 3].includes(colIndex)
+            : [1, 7].includes(colIndex),
+        };
+        cell.alignment = { horizontal: "left", vertical: "middle" };
+      });
     });
 
     // Header style
@@ -1364,9 +1370,10 @@ export default function ItemStoreStockReport() {
       "",
       "",
       String(totalqnty),
+
       ...GetHeading.map((_, index) => {
-        const key = `Total${String(index + 1).padStart(3, "0")}`;
-        return String(totals[key] ?? "");
+        const key = `Qnt${String(index + 1).padStart(3, "0")}`;
+        return String(totals[key] || "0");
       }),
     ]);
 
@@ -1778,7 +1785,7 @@ export default function ItemStoreStockReport() {
                     {item.Description}
                   </td>
                   <td
-                    className="text-start"
+                    className="text-end"
                     title={item.Qnty}
                     style={{
                       ...thirdColWidth,
@@ -2160,7 +2167,6 @@ export default function ItemStoreStockReport() {
                   />
                 </div>
               </div>
-             
             </div>
           </div>
           {/* //////////////// second ROW ///////////////////////// */}
@@ -2656,7 +2662,7 @@ export default function ItemStoreStockReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                 }}
               >
@@ -2763,7 +2769,8 @@ export default function ItemStoreStockReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  ...(GetHeading.length > 6 ? { width: "100%" } : {}), 
+                  // width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
@@ -2773,7 +2780,6 @@ export default function ItemStoreStockReport() {
             </div>
           </div>
           {/* Table Footer */}
-         
 
           <div
             style={{

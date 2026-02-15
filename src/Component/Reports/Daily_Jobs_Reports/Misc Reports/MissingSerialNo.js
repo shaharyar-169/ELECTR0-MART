@@ -27,6 +27,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import "./misc.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Code } from "@mui/icons-material";
 
 export default function MissingSerialNoReport() {
   const navigate = useNavigate();
@@ -424,15 +425,15 @@ export default function MissingSerialNoReport() {
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-        code: organisation.code,
-        FLocCod: locationnumber || getLocationNumber,
-        FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType,
       FRepTyp: transectionType2,
 
-    //   code: "AGFACTORY",
-    //   FLocCod: "001",
-    //   FYerDsc: "2025-2025",
+      // code: "AGFACTORY",
+      // FLocCod: "001",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -442,14 +443,14 @@ export default function MissingSerialNoReport() {
 
         settotalQnty(response.data["Total Qnty"]);
         settotalSerial(response.data["Total Serial"]);
-            settotalDiff(response.data["Total Difference"]);
+        settotalDiff(response.data["Total Difference"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data
+            response.data,
           );
           setTableData([]);
         }
@@ -458,8 +459,6 @@ export default function MissingSerialNoReport() {
         console.error("Error:", error);
         setIsLoading(false);
       });
-
-   
   }
 
   useEffect(() => {
@@ -869,11 +868,9 @@ export default function MissingSerialNoReport() {
       "",
       "",
       "",
-          String(formatValue(totalQnty)),
-                String(formatValue(totalSerial)),
-                     String(formatValue(totalDiff)),
-
-
+      String(formatValue(totalQnty)),
+      String(formatValue(totalSerial)),
+      String(formatValue(totalDiff)),
     ]);
 
     const headers = [
@@ -886,7 +883,7 @@ export default function MissingSerialNoReport() {
       "Serial",
       "Diff",
     ];
-    const columnWidths = [17, 24, 12, 22, 100, 25, 25, 25];
+    const columnWidths = [19, 26, 14, 26, 100, 30, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -897,13 +894,13 @@ export default function MissingSerialNoReport() {
 
     // Set font properties for the table
     doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(11);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
       doc.setFont("verdana", "bold");
-      doc.setFontSize(10);
+      doc.setFontSize(11);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -948,7 +945,7 @@ export default function MissingSerialNoReport() {
 
         if (isTotalRow) {
           doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
+          doc.setFontSize(11);
         }
 
         if (isOddRow) {
@@ -1009,7 +1006,7 @@ export default function MissingSerialNoReport() {
 
           if (!isTotalRow) {
             doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
+            doc.setFontSize(11);
           }
 
           const cellValue = String(cell);
@@ -1061,7 +1058,7 @@ export default function MissingSerialNoReport() {
 
         if (isTotalRow) {
           doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
+          doc.setFontSize(11);
         }
       }
 
@@ -1114,21 +1111,12 @@ export default function MissingSerialNoReport() {
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
         // Add page numbering
         doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+        doc.setFontSize(11);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 40,
+          rightX - 10,
           doc.internal.pageSize.height - 10,
           { align: "right" },
         );
@@ -1156,10 +1144,6 @@ export default function MissingSerialNoReport() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-        doc.setFontSize(12);
-        doc.setFont(getfontstyle, "300");
-
         let status =
           transectionType === "INV"
             ? "SALE"
@@ -1182,19 +1166,19 @@ export default function MissingSerialNoReport() {
 
         // Set font style, size, and family
         doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
+        doc.setFontSize(11);
         doc.text(`Transection :`, labelsX, labelsY + 8.5); // Draw bold label
         doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
+        doc.setFontSize(11);
         doc.text(`${status}`, labelsX + 30, labelsY + 8.5); // Draw the value next to the label
 
         // Set font style, size, and family
         doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
+        doc.setFontSize(11);
         doc.text(`Type :`, labelsX + 180, labelsY + 8.5); // Draw bold label
         doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${typefilter}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
+        doc.setFontSize(11);
+        doc.text(`${typefilter}`, labelsX + 195, labelsY + 8.5); // Draw the value next to the label
 
         startY += 10; // Adjust vertical position for the labels
 
@@ -1430,15 +1414,14 @@ export default function MissingSerialNoReport() {
     });
 
     const totalRow = worksheet.addRow([
-       String(formatValue(tableData.length.toLocaleString())),
+      String(formatValue(tableData.length.toLocaleString())),
       "",
       "",
       "",
       "",
-          String(formatValue(totalQnty)),
-                String(formatValue(totalSerial)),
-                     String(formatValue(totalDiff)),
-
+      String(formatValue(totalQnty)),
+      String(formatValue(totalSerial)),
+      String(formatValue(totalDiff)),
     ]);
 
     // total row added
@@ -1454,7 +1437,7 @@ export default function MissingSerialNoReport() {
 
       // Align only the "Total" text to the right
 
-      if (colNumber === 6 ||colNumber === 7 || colNumber === 8) {
+      if (colNumber === 6 || colNumber === 7 || colNumber === 8) {
         cell.alignment = { horizontal: "right" };
       }
       if (colNumber === 1) {
@@ -1641,7 +1624,7 @@ export default function MissingSerialNoReport() {
     width: "80px",
   };
   const thirdColWidth = {
-    width: "45px",
+    width: "50px",
   };
   const forthColWidth = {
     width: "80px",
@@ -1653,7 +1636,7 @@ export default function MissingSerialNoReport() {
     width: "80px",
   };
   const eightColWidth = {
-    width: "70px",
+    width: "80px",
   };
   const ninthColWidth = {
     width: "80px",
@@ -1666,7 +1649,7 @@ export default function MissingSerialNoReport() {
     "alt+s",
     () => {
       fetchDailyStatusReport();
-      //    resetSorting();
+      resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true },
   );
@@ -1683,6 +1666,113 @@ export default function MissingSerialNoReport() {
     preventDefault: true,
     enableOnFormTags: true,
   });
+
+  const [columns, setColumns] = useState({
+    TrnNo: [],
+    Date: [],
+    Type: [],
+    Code: [],
+    Supplier: [],
+    Qnty: [],
+    Serial: [],
+    Diff: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    TrnNo: "",
+    Date: "",
+    Type: "",
+    Code: "",
+    Supplier: "",
+    Qnty: "",
+    Serial: "",
+    Diff: "",
+  });
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        TrnNo: tableData.map((row) => row.TrnNo),
+        Date: tableData.map((row) => row.Date),
+        Type: tableData.map((row) => row.Type),
+        Code: tableData.map((row) => row.Code),
+        Supplier: tableData.map((row) => row.Supplier),
+        Qnty: tableData.map((row) => row.Qnty),
+        Serial: tableData.map((row) => row.Serial),
+        Diff: tableData.map((row) => row.Diff),
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      let aVal = a[col] ?? "";
+      let bVal = b[col] ?? "";
+
+      aVal = aVal.toString();
+      bVal = bVal.toString();
+
+      // ⭐ CODE SORT (13-01-0005)
+      if (col === "Code") {
+        const aParts = aVal.split("-").map((p) => parseInt(p, 10));
+        const bParts = bVal.split("-").map((p) => parseInt(p, 10));
+
+        for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+          const diff = (aParts[i] || 0) - (bParts[i] || 0);
+          if (diff !== 0) {
+            return newOrder === "ASC" ? diff : -diff;
+          }
+        }
+        return 0;
+      }
+
+      // ⭐ Numeric sorting
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // ⭐ String sorting
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+  const resetSorting = () => {
+    setColumnSortOrders({
+      TrnNo: null,
+      Date: null,
+      Type: null,
+      Code: null,
+      Supplier: null,
+      Qnty: null,
+      Serial: null,
+      Diff: null,
+    });
+  };
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -2303,29 +2393,93 @@ export default function MissingSerialNoReport() {
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      TrnNo
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("TrnNo")}
+                    >
+                      TrnNo{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("TrnNo")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Date
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Date")}
+                    >
+                      Date{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Date")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Type
+                    <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Type")}
+                    >
+                      Type{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Type")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Code
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={sixthColWidth}>
-                      Supplier
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Supplier")}
+                    >
+                      Supplier{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Supplier")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={eightColWidth}>
-                      Qnty
+                    <td
+                      className="border-dark"
+                      style={eightColWidth}
+                      onClick={() => handleSorting("Qnty")}
+                    >
+                      Qnty{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnty")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={seventhColWidth}>
-                      Serial
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Serial")}
+                    >
+                      Serial{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Serial")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={ninthColWidth}>
-                      Diff
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("Diff")}
+                    >
+                      Diff{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Diff")}
+                      ></i>
                     </td>
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
@@ -2605,7 +2759,7 @@ export default function MissingSerialNoReport() {
               ref={selectButtonRef}
               onClick={() => {
                 fetchDailyStatusReport();
-                // resetSorting();
+                resetSorting();
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>

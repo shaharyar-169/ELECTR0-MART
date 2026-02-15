@@ -477,10 +477,10 @@ export default function InstallmentCollectReport() {
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveCollector.php";
         const formData = new URLSearchParams({
-          code: organisation.code,
-           FLocCod: getLocationNumber,
-            //  FLocCod: '001',
-            // code: 'MTSELEC',
+        //   code: organisation.code,
+        //    FLocCod: getLocationNumber,
+             FLocCod: '001',
+            code: 'MTSELEC',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -700,10 +700,10 @@ export default function InstallmentCollectReport() {
             item.Date,
             item['Trn#'],
             // item.Type,
-            item.Code,
+            
             item['Manual #'],
             item.Customer,
-           
+           item.Mobile,
             item['Ins Amt'],
             item.Collection,
             item.Diff,
@@ -730,15 +730,16 @@ export default function InstallmentCollectReport() {
             "Date",
             "Trn#",
             // "Type",
-            "Code",
+           
             "Manual#",
             "Customer",
+             "Mobile",
             "Ins Amt",
             "Collection",
             "Diff",
             "Col",
         ];
-        const columnWidths = [23, 16, 23, 25, 90, 20, 25, 25, 15];
+        const columnWidths = [23, 16,  25, 90,26, 20, 25, 25, 15];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -868,7 +869,7 @@ export default function InstallmentCollectReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 ) {
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 4 ) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
@@ -1105,15 +1106,15 @@ doc.setFont("verdana-regular", "normal");
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 10; // Ensure this matches the actual number of columns
+        const numColumns = 9; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
             "center",
             "center",
-            "center",
+            "left",
             // "center",
             "left",
-            "left",
+            "center",
             "right",
             "right",
             "right",
@@ -1216,9 +1217,10 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
             "Date",
             "Trn#",
             // "Type",
-            "Code",
+           
             "Manual#",
             "Customer",
+             "Mobile",
             "Ins Amt",
             "Collection",
             "Diff",
@@ -1233,10 +1235,10 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                 item.Date,
                 item['Trn#'],
                 // item.Type,
-                item.Code,
+               
                 item['Manual #'],
                 item.Customer,
-              
+               item.Mobile,
                 item['Ins Amt'],
                 item.Collection,
                 item.Diff,
@@ -1251,7 +1253,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         });
 
         // Set column widths
-        [11, 8, 11, 10, 45, 12, 14, 14, 6].forEach((width, index) => {
+        [11, 8, 10, 45, 12,12, 14, 14, 6].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1373,7 +1375,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         width: "40px",
     };
     const forthColWidth = {
-        width: "80px",
+        width: "90px",
     };
     const fifthColWidth = {
         width: "70px",
@@ -2122,14 +2124,15 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                         {/* <td className="border-dark" style={thirdColWidth}>
                                             Type
                                         </td> */}
-                                        <td className="border-dark" style={forthColWidth}>
-                                            Code
-                                        </td>
+                                       
                                         <td className="border-dark" style={fifthColWidth}>
                                             Manual #
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
                                             Customer
+                                        </td>
+                                         <td className="border-dark" style={forthColWidth}>
+                                            Mobile
                                         </td>
                                        
                                         <td className="border-dark" style={eighthColWidth}>
@@ -2207,10 +2210,10 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 {/* <td style={thirdColWidth}></td> */}
-                                                <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                
+                                                                                                <td style={forthColWidth}></td>
+
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
@@ -2244,14 +2247,15 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                         {/* <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
                                                         </td> */}
-                                                        <td className="text-center" style={forthColWidth}>
-                                                            {item.Code}
-                                                        </td>
+                                                       
                                                         <td className="text-start" style={fifthColWidth}>
                                                             {item['Manual #']}
                                                         </td>
                                                         <td className="text-start" style={sixthColWidth}>
                                                             {item.Customer}
+                                                        </td>
+                                                         <td className="text-center" style={forthColWidth}>
+                                                            {item.Mobile}
                                                         </td>
                                                        
                                                         <td className="text-end" style={eighthColWidth}>
@@ -2291,9 +2295,10 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
                                                 {/* <td style={thirdColWidth}></td> */}
-                                                <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
+                                                                                                <td style={forthColWidth}></td>
+
                                                 <td style={eighthColWidth}></td>
                                                 <td style={ninhthColWidth}></td>
                                                 <td style={tenthColWidth}></td>
@@ -2344,14 +2349,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                             }}
                         >
                         </div> */}
-                        <div
-                            style={{
-                                ...forthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                        </div>
+                       
                         <div
                             style={{
                                 ...fifthColWidth,
@@ -2363,6 +2361,14 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                         <div
                             style={{
                                 ...sixthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
+                         <div
+                            style={{
+                                ...forthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}

@@ -42,7 +42,7 @@ export default function InstallmentLedger2() {
   const [CashPaymentData, setCashPaymentData] = useState([]);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
   const [isItemInitialized, setIsItemInitialized] = useState(false);
-    const [isCodeReady, setIsCodeReady] = useState(false);
+  const [isCodeReady, setIsCodeReady] = useState(false);
   const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,8 +62,6 @@ export default function InstallmentLedger2() {
   const [selectedToDate, setSelectedToDate] = useState(null);
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
-
-  
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -85,8 +83,8 @@ export default function InstallmentLedger2() {
 
   console.log("select year: " + getyeardescription);
 
-   const yeardescription = getYearDescription();
-    const locationnumber = getLocationnumber();
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
 
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
@@ -109,7 +107,7 @@ export default function InstallmentLedger2() {
   // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
   const formatDate1 = (date) => {
     return `${String(date.getDate()).padStart(2, "0")}-${String(
-      date.getMonth() + 1
+      date.getMonth() + 1,
     ).padStart(2, "0")}-${date.getFullYear()}`;
   };
 
@@ -127,7 +125,6 @@ export default function InstallmentLedger2() {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
-
 
   function closeAlert(errorType) {
     const alertElement = document.getElementById("someElementId");
@@ -150,8 +147,8 @@ export default function InstallmentLedger2() {
     setIsLoading(true);
 
     const formData = new URLSearchParams({
-    //   code: "USMANMTR",
-    //   FLocCod: "002",
+      // code: "MTSELEC",
+      // FLocCod: "002",
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FInsCod: saleType,
@@ -169,7 +166,7 @@ export default function InstallmentLedger2() {
           } else {
             console.warn(
               "Response data 'Profit' is not an array:",
-              response.data.Detail
+              response.data.Detail,
             );
             setTableData([]); // Fallback to an empty array
           }
@@ -179,7 +176,7 @@ export default function InstallmentLedger2() {
           } else {
             console.warn(
               "Response data 'Expense' is not an array:",
-              response.data.Header
+              response.data.Header,
             );
             setheaderData([]); // Fallback to an empty array
           }
@@ -228,7 +225,7 @@ export default function InstallmentLedger2() {
     const firstDateOfCurrentMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      1
+      1,
     );
     setSelectedfromDate(firstDateOfCurrentMonth);
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
@@ -237,10 +234,10 @@ export default function InstallmentLedger2() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomers.php";
     const formData = new URLSearchParams({
-         code: organisation.code,
-         FLocCod: locationnumber || getLocationNumber,
-    //   FLocCod: "001",
-    //   code: "ABDULLAHTRD",
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      // FLocCod: "001",
+      // code: "ABDULLAHTRD",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -258,49 +255,48 @@ export default function InstallmentLedger2() {
     label: `${item.tcstcod}-${item.tcstnam.trim()}`,
   }));
 
-  
-  
   useEffect(() => {
     if (options.length === 0) return;
     if (isItemInitialized) return;
-  
+
     const storedData = sessionStorage.getItem("InstallmentLedger");
     let selectedOption = null;
-  
+
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       const clickedCode = parsedData.code?.trim();
-   if (parsedData.code) {
-      setIsDoubleClickOpen(true); // ✅ ADD
-    }
-      selectedOption = options.find(
-        (opt) => opt.value?.trim() === clickedCode
-      );
-  
+      if (parsedData.code) {
+        setIsDoubleClickOpen(true); // ✅ ADD
+      }
+      selectedOption = options.find((opt) => opt.value?.trim() === clickedCode);
+
       sessionStorage.removeItem("InstallmentLedger");
     }
-  
+
     if (!selectedOption) {
       selectedOption = options[0];
     }
-  
+
     if (selectedOption) {
       setSaleType(selectedOption.value);
-  
-      const description =
-        selectedOption.label.split("-").slice(1).join("-").trim();
-  
+
+      const description = selectedOption.label
+        .split("-")
+        .slice(1)
+        .join("-")
+        .trim();
+
       setCompanyselectdatavalue({
         value: selectedOption.value,
         label: description,
       });
-  
+
       setIsCodeReady(true); // ✅ IMPORTANT
     }
-  
+
     setIsItemInitialized(true);
   }, [options, isItemInitialized]);
-  
+
   useEffect(() => {
     // 🔥 Dono cheezain ready hon
     if (isDoubleClickOpen && isCodeReady) {
@@ -332,7 +328,7 @@ export default function InstallmentLedger2() {
       ...base,
       height: "20px",
       minHeight: "unset",
-      width: 360,
+      width: 350,
       marginLeft: "5px",
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
@@ -341,12 +337,12 @@ export default function InstallmentLedger2() {
       caretColor: getcolor === "white" ? "black" : "white",
       borderRadius: 0,
       //   border: `1px solid ${fontcolor}`,
-      border: `2px solid grey`,
+      border: `1px solid grey`,
       transition: "border-color 0.15s ease-in-out",
       "&:hover": {
         borderColor: state.isFocused ? base.borderColor : fontcolor,
       },
-      padding: "0 8px", 
+      padding: "0 8px",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
@@ -406,8 +402,8 @@ export default function InstallmentLedger2() {
       backgroundColor: state.isSelected
         ? "#3368B5"
         : state.isFocused
-        ? "#3368B5"
-        : getcolor,
+          ? "#3368B5"
+          : getcolor,
       color: state.isSelected || state.isFocused ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
@@ -534,19 +530,7 @@ export default function InstallmentLedger2() {
       formatValue(item.Balance),
     ]);
 
-    // Add summary row to the table
-    //  rows.push([
-
-    //    "",
-    //    "Total",
-
-    //    String(totalopening),
-    //        String(totaldebit),
-    //    String(totalcredit),
-    //    String(ClosingBalance),
-    //  ]);
-
-    // Define table column headers and individual column widths
+       // Define table column headers and individual column widths
 
     const headers = [
       "Date",
@@ -566,11 +550,109 @@ export default function InstallmentLedger2() {
     const pageHeight = doc.internal.pageSize.height;
     const paddingTop = 15;
 
-    // Set font properties for the table
-    // doc.setFont("verdana-regular", "normal");
-    // doc.setFontSize(10);
+const drawFormHeader = (doc, startY) => {
+  const pageWidth = doc.internal.pageSize.width;
+  const formWidth = 300;
+  const startX = (pageWidth - formWidth) / 2;
 
-    // Function to add table headers
+  // Left column (for A/C, Name, Address, Profession)
+  const leftX = startX;
+
+  // Right column (Sale Date, Sale Amt, Rent Amt, Balance, Ins Num)
+  const rightX = startX + formWidth / 2; // shift more to right
+
+  // Middle-right / third column (Ins Amt, center between officeContact and right)
+  const thirdColX = rightX + 60; // adjust width so Ins Amt aligns in middle
+
+  const centerFieldWidth = 50;
+  const rightFieldWidth = 50;
+  const labelWidth = 28;
+  const fieldHeight = 6;
+  const gapY = 2;
+
+  doc.setFont("verdana-regular", "normal");
+  doc.setFontSize(10);
+
+  const drawField = (label, value, x, y, fieldWidth, alignRight = false, valueColor = [0, 0, 0]) => {
+    const fieldX = x + labelWidth + 2;
+
+    if (label) doc.text(`${label} :`, x + labelWidth, y + 4, { align: "right" });
+    doc.rect(fieldX, y, fieldWidth, fieldHeight);
+
+    if (value) {
+      doc.setTextColor(...valueColor);
+      doc.text(
+        String(value),
+        alignRight ? fieldX + fieldWidth - 2 : fieldX + 2,
+        y + 4,
+        { align: alignRight ? "right" : "left" }
+      );
+    }
+    doc.setTextColor(0, 0, 0);
+  };
+
+  let y = startY;
+
+  // ───────────── ROW 1 ─────────────
+  drawField("A/C", "14-01-0001-ADIL MASIH", leftX, y, 90);
+  drawField("Sale Date", "", rightX, y, 50, true);
+  y += fieldHeight + gapY;
+
+  // ───────────── ROW 2 ─────────────
+  drawField("Name", "AFTAB AHMAD ( AFTAB AHMAD )", leftX, y, 90);
+  drawField("Sale Amt", "", rightX, y, 50, true);
+  y += fieldHeight + gapY;
+
+  // ───────────── ROW 3 ─────────────
+  drawField("Address", "", leftX, y, 90);
+  drawField("Rent Amt", "", rightX, y, 50, true);
+  y += fieldHeight + gapY;
+
+  // ───────────── ROW 4 ─────────────
+  drawField("", "", leftX, y, 90);
+  drawField("Total Amount", "", rightX, y, 50, true);
+  y += fieldHeight + gapY;
+
+  // ───────────── ROW 5 ─────────────
+  drawField("Sales Man", "AFTAB AHMAD", leftX, y, 90);
+  drawField("Balance", "", rightX, y, 50, true, [255, 0, 0]);
+  y += fieldHeight + gapY;
+
+  // ───────────── ROW 6 ─────────────
+  drawField("Collector", "ZUBAIR", leftX, y, 90);
+  drawField("PrmDate", "", rightX, y, 50, true);
+  y += fieldHeight + gapY;
+
+  // ───────────── ROW 7 ─────────────
+  drawField("Verify By", "", leftX, y, 90);
+  drawField("Ins Num", "", rightX, y, 50, true); // stay under Balance
+  y += fieldHeight + gapY;
+
+  // ───────────── PARTIAL LINE ─────────────
+  doc.setLineWidth(0.4);
+  doc.line(startX, y + 4, rightX + 50, y + 4); // line ends at Ins Num
+  y += 8;
+
+  // ───────────── PROFESSION / OFFICE CONTACT / INS AMT ─────────────
+  drawField("Profession", "", leftX, y, 90); // left
+  drawField("officeContact", "", rightX + 10, y, centerFieldWidth); // center between Prof & Ins Amt
+  drawField("Ins Amt", "", thirdColX, y, rightFieldWidth, true); // Ins Amt aligned in middle-right
+  y += fieldHeight + gapY;
+
+  drawField("OfficeAdd1", "", leftX, y, 90);
+  y += fieldHeight + gapY;
+
+  drawField("officeAdd2", "", leftX, y, 90);
+  y += fieldHeight + gapY;
+
+  // ───────────── FINAL LINE ─────────────
+  doc.setLineWidth(0.4);
+  doc.line(startX, y + 4, startX + formWidth, y + 4);
+
+  return y + 10;
+};
+
+
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
       doc.setFont("verdana", "bold"); // Set font to bold
@@ -619,10 +701,7 @@ export default function InstallmentLedger2() {
           fontName = boldFont;
         }
 
-        //  if (isTotalRow) {
-        //    doc.setFont("verdana", "bold");
-        //    doc.setFontSize(10);
-        //  }
+     
 
         if (isOddRow) {
           doc.setFillColor(240);
@@ -631,7 +710,7 @@ export default function InstallmentLedger2() {
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F"
+            "F",
           );
         }
 
@@ -642,7 +721,7 @@ export default function InstallmentLedger2() {
           startX,
           startY + (i - startIndex + 2) * rowHeight,
           tableWidth,
-          rowHeight
+          rowHeight,
         );
 
         row.forEach((cell, cellIndex) => {
@@ -674,19 +753,7 @@ export default function InstallmentLedger2() {
               baseline: "middle",
             });
           }
-          //  else {
-          //    if (isTotalRow && cellIndex === 0 && cell === "") {
-          //      const totalLabelX = startX + columnWidths[0] / 2;
-          //      doc.text("", totalLabelX, cellY, {
-          //        align: "center",
-          //        baseline: "middle",
-          //      });
-          //    } else {
-          //      doc.text(cellValue, cellX, cellY, {
-          //        baseline: "middle",
-          //      });
-          //    }
-          //  }
+          
 
           if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
@@ -694,7 +761,7 @@ export default function InstallmentLedger2() {
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
+              startY + (i - startIndex + 3) * rowHeight,
             );
             startX += columnWidths[cellIndex];
           }
@@ -702,10 +769,7 @@ export default function InstallmentLedger2() {
 
         startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
-        //  if (isTotalRow) {
-        //    doc.setFont("verdana-regular", "normal");
-        //    doc.setFontSize(10);
-        //  }
+     
       }
 
       const lineWidth = tableWidth;
@@ -747,7 +811,7 @@ export default function InstallmentLedger2() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10
+        pageNumberFontSize = 10,
       ) => {
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -757,22 +821,13 @@ export default function InstallmentLedger2() {
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
-        // Add page numbering
+               // Add page numbering
         doc.setFontSize(pageNumberFontSize);
         doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
-          { align: "right" }
+          { align: "right" },
         );
       };
 
@@ -780,86 +835,92 @@ export default function InstallmentLedger2() {
       let startY = paddingTop; // Initialize startY
       let pageNumber = 1; // Initialize page number
 
+      // while (currentPageIndex * rowsPerPage < rows.length) {
+      //   doc.setFontSize(10);
+      //   doc.setFont("helvetica", "300");
+      //   addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+      //   startY += 5; // Adjust vertical position for the company title
+
+      //   doc.setFont("verdana-regular", "normal");
+      //   doc.setFontSize(10);
+      //   addTitle(
+      //     `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
+      //     "",
+      //     "",
+      //     pageNumber,
+      //     startY,
+      //     12,
+      //   ); // Render sale report title with decreased font size, provide the time, and page number
+      //   startY += 5;
+      //   startY += 1; // Adjust vertical position for the labels
+
+      //   addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
+      //   const startIndex = currentPageIndex * rowsPerPage;
+      //   const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+      //   startY = addTableRows(
+      //     (doc.internal.pageSize.width - totalWidth) / 2,
+      //     startY,
+      //     startIndex,
+      //     endIndex,
+      //   );
+      //   if (endIndex < rows.length) {
+      //     startY = addNewPage(startY); // Add new page and update startY
+      //     pageNumber++; // Increment page number
+      //   }
+      //   currentPageIndex++;
+      // }
+
       while (currentPageIndex * rowsPerPage < rows.length) {
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "300");
-        addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-        startY += 5; // Adjust vertical position for the company title
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "300");
 
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        addTitle(
-          `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
-          "",
-          "",
-          pageNumber,
-          startY,
-          12
-        ); // Render sale report title with decreased font size, provide the time, and page number
-        startY += 5;
+  // Company Name
+  addTitle(comapnyname, 12, 12, pageNumber, startY, 18);
+  startY += 5;
 
-        const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-        const labelsY = startY + 4; // Position the labels below the titles and above the table
+  // Report Title
+  doc.setFont("verdana-regular", "normal");
+  doc.setFontSize(10);
 
-        // Set font size and weight for the labels
+  addTitle(
+    `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
+    "",
+    "",
+    pageNumber,
+    startY,
+    12
+  );
 
-        let search = searchQuery ? searchQuery : "";
+  startY += 8;
 
-        // Set font style, size, and family
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10); // Font size
+  // 🟢 1️⃣ DRAW FORM HEADER (YOUR IMAGE LAYOUT)
+  let currentY = drawFormHeader(doc, startY);
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+  // 🟢 2️⃣ TABLE HEADERS BELOW FORM
+  addTableHeaders(
+    (doc.internal.pageSize.width - totalWidth) / 2,
+    currentY
+  );
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+  const startIndex = currentPageIndex * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+  // 🟢 3️⃣ TABLE ROWS
+  startY = addTableRows(
+    (doc.internal.pageSize.width - totalWidth) / 2,
+    currentY,
+    startIndex,
+    endIndex
+  );
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+  if (endIndex < rows.length) {
+    startY = addNewPage(startY);
+    pageNumber++;
+  }
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+  currentPageIndex++;
+}
 
-        // if (searchQuery) {
-        //   doc.setFont(getfontstyle, "bold"); // Set font to bold
-        //   doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        //   doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-        // }
-
-        // // Reset font weight to normal if necessary for subsequent text
-
-        startY += 1; // Adjust vertical position for the labels
-
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
-        const startIndex = currentPageIndex * rowsPerPage;
-        const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-        startY = addTableRows(
-          (doc.internal.pageSize.width - totalWidth) / 2,
-          startY,
-          startIndex,
-          endIndex
-        );
-        if (endIndex < rows.length) {
-          startY = addNewPage(startY); // Add new page and update startY
-          pageNumber++; // Increment page number
-        }
-        currentPageIndex++;
-      }
     };
 
     const getCurrentDate = () => {
@@ -888,6 +949,7 @@ export default function InstallmentLedger2() {
     // Save the PDF files
     doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
   };
+
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -947,13 +1009,11 @@ export default function InstallmentLedger2() {
     worksheet.mergeCells(
       `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         companyRow.number
-      }`
+      }`,
     );
 
     // Add Store List row
-    const storeListRow = worksheet.addRow([
-      `Installment Ledger Report`,
-    ]);
+    const storeListRow = worksheet.addRow([`Installment Ledger Report`]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
@@ -962,7 +1022,7 @@ export default function InstallmentLedger2() {
     worksheet.mergeCells(
       `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         storeListRow.number
-      }`
+      }`,
     );
 
     // Add an empty row after the title section
@@ -992,7 +1052,7 @@ export default function InstallmentLedger2() {
       "Description",
       "Sale",
       "Collection",
-      "Balance"
+      "Balance",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1000,13 +1060,13 @@ export default function InstallmentLedger2() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-          item.Date,
-      item["Trn#"],
-      item.Type,
-      item.Description,
-      formatValue(item.Sale),
-      formatValue(item.Collection),
-      formatValue(item.Balance),
+        item.Date,
+        item["Trn#"],
+        item.Type,
+        item.Description,
+        formatValue(item.Sale),
+        formatValue(item.Collection),
+        formatValue(item.Balance),
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1025,7 +1085,7 @@ export default function InstallmentLedger2() {
     });
 
     // Set column widths
-    [10, 8, 7,45, 12, 12, 12].forEach((width, index) => {
+    [10, 8, 7, 45, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1079,12 +1139,12 @@ export default function InstallmentLedger2() {
     worksheet.mergeCells(
       `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         dateTimeRow.number
-      }`
+      }`,
     );
     worksheet.mergeCells(
       `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
         dateTimeRow1.number
-      }`
+      }`,
     );
 
     // Generate and save the Excel file
@@ -1101,7 +1161,7 @@ export default function InstallmentLedger2() {
       fetchGeneralLedger();
       // resetSorting();
     },
-    { preventDefault: true, enableOnFormTags: true }
+    { preventDefault: true, enableOnFormTags: true },
   );
 
   useHotkeys("alt+p", exportPDFHandler, {
@@ -1151,7 +1211,7 @@ export default function InstallmentLedger2() {
     if (selectedSearch.trim() !== "") {
       const query = selectedSearch.trim().toLowerCase();
       filteredData = filteredData.filter(
-        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
+        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query),
       );
     }
 
@@ -1249,7 +1309,7 @@ export default function InstallmentLedger2() {
   useEffect(() => {
     if (selectedRowId !== null) {
       const newIndex = tableData.findIndex(
-        (item) => item.tcmpcod === selectedRowId
+        (item) => item.tcmpcod === selectedRowId,
       );
       setSelectedIndex(newIndex);
     }
@@ -1263,7 +1323,7 @@ export default function InstallmentLedger2() {
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prevIndex) =>
-        Math.min(prevIndex + 1, tableData.length - 1)
+        Math.min(prevIndex + 1, tableData.length - 1),
       );
       scrollToSelectedRow();
     }
@@ -1316,8 +1376,8 @@ export default function InstallmentLedger2() {
             className="row "
             style={{
               display: "flex",
-            //   flexWrap: "wrap",
-              height: "210px",
+              //   flexWrap: "wrap",
+              height: "220px",
               marginTop: "5px",
               marginBottom: "2px",
               marginRight: "2px",
@@ -1335,74 +1395,47 @@ export default function InstallmentLedger2() {
             >
               {/* LEFT PART OF THE HEADER FIRST SECTION  */}
               <div
-                className="col-md-8"
+                className="col-md-10"
                 style={{ height: "20px", padding: "0px" }}
               >
                 <div
                   className="row"
-                  style={{ height: "100%", width: "100%", margin: "0px" }}
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "2px",
+                  }}
                 >
                   <div
-                    className="col-md-4"
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
                       style={{
-                        width: "60px",
                         height: "100%",
-                        color: fontcolor,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "end",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Code :
-                    </div>
-                    <input
-                      value={saleType}
-                      disabled
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "163px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                      }}
-                    ></input>
-                  </div>
-                  <div
-                    className="col-md-8"
-                    style={{ height: "100%", padding: "0px", display: "flex" }}
-                  >
-                    <div
-                      style={{
-                        width: "40px",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        height: "100%",
+                        width: "98px",
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
                         color: fontcolor,
                       }}
                     >
                       A/C :
                     </div>
+
                     <div>
                       <Select
                         className="List-select-class"
                         ref={saleSelectRef}
                         options={options}
-   value={
-                                            options.find((opt) => opt.value === saleType) || null
-                                        } 
-                                         isDisabled={isDoubleClickOpen}                        onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
+                        value={
+                          options.find((opt) => opt.value === saleType) || null
+                        }
+                        isDisabled={isDoubleClickOpen}
+                        onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
                         id="selectedsale"
                         onChange={(selectedOption) => {
                           if (selectedOption && selectedOption.value) {
@@ -1442,7 +1475,45 @@ export default function InstallmentLedger2() {
                       />
                     </div>
                   </div>
+                  <div
+                    className="col-md-4"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Sale Date :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight: "5px",
+                      }}
+                    >
+                      {headerData.InvDate}
+                    </div>
+                  </div>
                 </div>
+
                 <div
                   className="row"
                   style={{
@@ -1453,13 +1524,13 @@ export default function InstallmentLedger2() {
                   }}
                 >
                   <div
-                    className="col-md-7"
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
                       style={{
                         height: "100%",
-                        width: "99px",
+                        width: "100px",
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
@@ -1479,15 +1550,15 @@ export default function InstallmentLedger2() {
                         fontSize: "12px",
                         height: "100%",
                         backgroundColor: getcolor,
-                        width: "290px",
+                        width: "293px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                       }}
                     ></input>
                   </div>
                   <div
-                    className="col-md-5"
+                    className="col-md-4"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1501,7 +1572,7 @@ export default function InstallmentLedger2() {
                         fontWeight: "bold",
                       }}
                     >
-                      Ins Amt :
+                      Sale Amt :
                     </div>
                     <div
                       style={{
@@ -1512,29 +1583,30 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "132px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
-                        paddingRight:'5px'
+                        paddingRight: "5px",
                       }}
                     >
-                      {headerData.InsAmt}
+                      {headerData.SaleAmt}
                     </div>
                   </div>
                 </div>
+
                 <div
                   className="row"
                   style={{
-                    height: "40px",
+                    height: "100%",
                     width: "100%",
                     margin: "0px",
-                    marginTop: "1px",
+                    marginTop: "2px",
                   }}
                 >
                   <div
-                    className="col-md-7"
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1547,12 +1619,10 @@ export default function InstallmentLedger2() {
                         fontSize: "12px",
                         fontWeight: "bold",
                         color: fontcolor,
-                        marginRight:'-9px'
                       }}
                     >
                       Address :
                     </div>
-                    <div style={{display:'flex', flexDirection:'column', gap:'1px', }}>
                     <input
                       value={headerData.Address1}
                       disabled
@@ -1562,131 +1632,62 @@ export default function InstallmentLedger2() {
                         fontSize: "12px",
                         height: "100%",
                         backgroundColor: getcolor,
-                        width: "286px",
-                        marginLeft:"12px",
-                        border: "2px solid grey",
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                       }}
-                    >
-                    </input>
-                    <input
-                      value={headerData.Address2}
-                      disabled
+                    ></input>
+                  </div>
+                  <div
+                    className="col-md-4"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
                       style={{
-                         paddingLeft: "3px",
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Rent Amt :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
                         color: fontcolor,
                         fontSize: "12px",
                         height: "100%",
                         backgroundColor: getcolor,
-                        width: "286px",
-                        marginLeft:"12px",
-                        border: "2px solid grey",
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
                         borderRadius: "0px",
-                      }}
-                    >
-                    </input>
-                    </div>
-                  </div>
-                  <div
-                    className="col-md-5"
-                    style={{
-                      height: "100%",
-                      display: "flex",
-                      padding: "0px",
-                      margin: "0px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        padding: "0px",
                         display: "flex",
-                        flexWrap: "wrap",
-                        margin: "0px",
-                        rowGap: "0.5px",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight: "5px",
                       }}
                     >
-                      <div
-                        style={{
-                          width: "144px",
-                          //   paddingRight: "px",
-                          height: "20px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "end",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Ins Num :
-                      </div>
-                      <div
-                        style={{
-                          paddingLeft: "3px",
-                          color: fontcolor,
-                          fontSize: "12px",
-                          height: "20px",
-                          backgroundColor: getcolor,
-                          width: "128px",
-                          marginLeft: "3px",
-                          border: "2px solid grey",
-                          borderRadius: "0px",
-                          display: "flex",
-                          justifyContent: "end",
-                          alignItems: "center",
-                          paddingRight:'5px'
-                        }}
-                      >
-                    {headerData.InsNum}
-                      </div>
-
-                      <div
-                        style={{
-                          width: "144px",
-                          height: "20px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "end",
-                          fontSize: "12px",
-                          //   paddingRight: "2px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        InvDate :
-                      </div>
-                      <div
-                        style={{
-                          paddingLeft: "3px",
-                          color: fontcolor,
-                          fontSize: "12px",
-                          height: "20px",
-                          backgroundColor: getcolor,
-                          width: "128px",
-                          marginLeft: "3px",
-                          border: "2px solid grey",
-                          borderRadius: "0px",
-                          display: "flex",
-                          justifyContent: "end",
-                          alignItems: "center",
-                          paddingRight:'5px'
-                        }}
-                      >
-{headerData.InvDate}
-                      </div>
+                      {headerData.RentAmt}
                     </div>
                   </div>
                 </div>
-                <div
+                 <div
                   className="row"
                   style={{
                     height: "100%",
                     width: "100%",
                     margin: "0px",
-                    marginTop: "1px",
+                    marginTop: "2px",
                   }}
                 >
                   <div
-                    className="col-md-7"
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1701,10 +1702,10 @@ export default function InstallmentLedger2() {
                         color: fontcolor,
                       }}
                     >
-                      Phone No :
+                    
                     </div>
                     <input
-                      value={headerData.Mobile}
+                      value={headerData.Name}
                       disabled
                       style={{
                         paddingLeft: "3px",
@@ -1714,13 +1715,13 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "293px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                       }}
                     ></input>
                   </div>
                   <div
-                    className="col-md-5"
+                    className="col-md-4"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1734,7 +1735,7 @@ export default function InstallmentLedger2() {
                         fontWeight: "bold",
                       }}
                     >
-                      PrmDate :
+                      Total Amount :
                     </div>
                     <div
                       style={{
@@ -1745,15 +1746,15 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "132px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
-                        paddingRight:'5px'
+                        paddingRight: "5px",
                       }}
                     >
-                      {headerData.PrmDate}
+                      {headerData.TotalAmt}
                     </div>
                   </div>
                 </div>
@@ -1767,7 +1768,7 @@ export default function InstallmentLedger2() {
                   }}
                 >
                   <div
-                    className="col-md-7"
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1795,14 +1796,13 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "293px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                       }}
-                    >
-                    </input>
+                    ></input>
                   </div>
                   <div
-                    className="col-md-5"
+                    className="col-md-4"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1816,27 +1816,32 @@ export default function InstallmentLedger2() {
                         fontWeight: "bold",
                       }}
                     >
-                      Advance :
+                      Balance :
                     </div>
                     <div
                       style={{
                         paddingLeft: "3px",
-                        color: fontcolor,
+                        color: "red",
                         fontSize: "12px",
                         height: "100%",
                         backgroundColor: getcolor,
                         width: "132px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
-                        paddingRight:'5px'
+                        paddingRight: "5px",
                       }}
                     >
-{headerData.Advance}                  
-  </div>
+                      {(
+                        parseFloat(
+                          headerData?.TotalAmt?.replace(/,/g, "") || 0,
+                        ) -
+                        parseFloat(headerData?.Advance?.replace(/,/g, "") || 0)
+                      ).toLocaleString()}
+                    </div>
                   </div>
                 </div>
                 <div
@@ -1849,7 +1854,89 @@ export default function InstallmentLedger2() {
                   }}
                 >
                   <div
-                    className="col-md-7"
+                    className="col-md-8"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Collector:
+                    </div>
+                    <input
+                      value={headerData.Collector}
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                  </div>
+                  <div
+                    className="col-md-4"
+                    style={{ height: "100%", display: "flex", padding: "0px" }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      PrmDate :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight: "5px",
+                      }}
+                    >
+                      {headerData.PrmDate}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                  }}
+                >
+                  <div
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1877,14 +1964,13 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "293px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                       }}
-                    >
-                    </input>
+                    ></input>
                   </div>
                   <div
-                    className="col-md-5"
+                    className="col-md-4"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1898,7 +1984,7 @@ export default function InstallmentLedger2() {
                         fontWeight: "bold",
                       }}
                     >
-                      Sale Amt :
+                      Ins Num :
                     </div>
                     <div
                       style={{
@@ -1909,20 +1995,162 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "132px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                         display: "flex",
                         justifyContent: "end",
                         alignItems: "center",
-                        paddingRight:'5px'
+                        paddingRight: "5px",
                       }}
                     >
-{headerData.SaleAmt}                  
-  </div>
+                      {headerData.InsNum}
+                    </div>
                   </div>
                 </div>
+                <div
+                  style={{
+                    width: "75%",
+                    border: "1px solid grey",
+                    margin: "2px 0px",
+                  }}
+                ></div>
 
-                 <div
+                <div
+                  className="row"
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    margin: "0px",
+                    marginTop: "1px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div
+                    // className="col-md-6"
+                    style={{
+                      width: "50%",
+                      height: "100%",
+                      display: "flex",
+                      padding: "0px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: "100px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                      }}
+                    >
+                      Profession :
+                    </div>
+                    <input
+                      value={headerData.Profession}
+                      disabled
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "293px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
+                        borderRadius: "0px",
+                      }}
+                    ></input>
+                  </div>
+                  <div
+                    // className="col-md-3"
+                    style={{
+                      width: "24%",
+                      height: "100%",
+                      display: "flex",
+                      padding: "0px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      OfficeContact :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "132px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight: "5px",
+                      }}
+                    >
+                      {headerData.OfficeContact}
+                    </div>
+                  </div>
+                  <div
+                    // className="col-md-3"
+                    style={{
+                      width: "24%",
+                      height: "100%",
+                      display: "flex",
+                      padding: "0px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "147px",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Ins Amt :
+                    </div>
+                    <div
+                      style={{
+                        paddingLeft: "3px",
+                        color: fontcolor,
+                        fontSize: "12px",
+                        height: "100%",
+                        backgroundColor: getcolor,
+                        width: "270px",
+                        marginLeft: "3px",
+                        border: "1px solid grey",
+                        borderRadius: "0px",
+                        display: "flex",
+                        justifyContent: "end",
+                        alignItems: "center",
+                        paddingRight: "5px",
+                      }}
+                    >
+                      {headerData.InsAmt}
+                    </div>
+                  </div>
+                </div>
+                <div
                   className="row"
                   style={{
                     height: "100%",
@@ -1932,7 +2160,7 @@ export default function InstallmentLedger2() {
                   }}
                 >
                   <div
-                    className="col-md-7"
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -1960,96 +2188,12 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "293px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                       }}
-                    >
-                    </input>
+                    ></input>
                   </div>
-                  <div
-                    className="col-md-5"
-                    style={{ height: "100%", display: "flex", padding: "0px" }}
-                  >
-                    <div
-                      style={{
-                        width: "147px",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "end",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      OfficeContact :
-                    </div>
-                    <div
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "132px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                        paddingRight:'5px'
-                      }}
-                    >
-{headerData.OfficeContact}                  
-  </div>
-                  </div>
-                </div>
-
-                <div
-                  className="row"
-                  style={{
-                    height: "100%",
-                    width: "100%",
-                    margin: "0px",
-                    marginTop: "1px",
-                  }}
-                >
-                  <div
-                    className="col-md-7"
-                    style={{ height: "100%", display: "flex", padding: "0px" }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: "100px",
-                        display: "flex",
-                        justifyContent: "end",
-                        alignItems: "center",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                      }}
-                    >
-                      OfficeAdd2 :
-                    </div>
-                    <input
-                      value={headerData.OfficeAdd2}
-                      disabled
-                      style={{
-                        paddingLeft: "3px",
-                        color: fontcolor,
-                        fontSize: "12px",
-                        height: "100%",
-                        backgroundColor: getcolor,
-                        width: "293px",
-                        marginLeft: "3px",
-                        border: "2px solid grey",
-                        borderRadius: "0px",
-                      }}
-                    >
-                    </input>
-                  </div>
-                  <div
+                  {/* <div
                     className="col-md-5"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
@@ -2085,9 +2229,9 @@ export default function InstallmentLedger2() {
                     >
 {headerData.Profession}                  
   </div>
-                  </div>
+                  </div> */}
                 </div>
-                 <div
+                <div
                   className="row"
                   style={{
                     height: "100%",
@@ -2097,7 +2241,7 @@ export default function InstallmentLedger2() {
                   }}
                 >
                   <div
-                    className="col-md-7"
+                    className="col-md-8"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
                     <div
@@ -2112,10 +2256,10 @@ export default function InstallmentLedger2() {
                         color: fontcolor,
                       }}
                     >
-                      Collector :
+                      OfficeAdd2 :
                     </div>
                     <input
-                      value={headerData.Collector}
+                      value={headerData.OfficeAdd2}
                       disabled
                       style={{
                         paddingLeft: "3px",
@@ -2125,13 +2269,12 @@ export default function InstallmentLedger2() {
                         backgroundColor: getcolor,
                         width: "293px",
                         marginLeft: "3px",
-                        border: "2px solid grey",
+                        border: "1px solid grey",
                         borderRadius: "0px",
                       }}
-                    >
-                    </input>
+                    ></input>
                   </div>
-                  <div
+                  {/* <div
                     className="col-md-5"
                     style={{ height: "100%", display: "flex", padding: "0px" }}
                   >
@@ -2167,13 +2310,13 @@ export default function InstallmentLedger2() {
                     >
 {headerData.NicNum}                  
   </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
               {/* RIGHT PART OF THE HEADER FIRST SECTION  */}
               <div
-                className="col-md-4"
+                className="col-md-2"
                 style={{
                   flexWrap: "wrap",
                   height: "20px",
@@ -2182,14 +2325,13 @@ export default function InstallmentLedger2() {
                   gap: "0px",
                 }}
               >
-               
- <div
+                <div
                   style={{
                     height: "150px",
-                    width:'200px',
-                    border: "2px solid grey",
+                    width: "200px",
+                    border: "1px solid grey",
                     position: "relative",
-                    marginLeft:'10px'
+                    marginLeft: "10px",
                   }}
                 >
                   {/* <div
@@ -2216,442 +2358,469 @@ export default function InstallmentLedger2() {
                       pointerEvents: "none", // So it doesn't interfere with clicks
                     }}
                   ></div> */}
-<img 
-  src={headerData.Picture ? `https://crystalsolutions.pk/DI/MTSELEC/${headerData.Picture}` : ""}
-/>
-
+                  <img
+                  style={{
+                    width:"100%",
+                    height:"100%",
+                  backgroundRepeat:"no-repeat",
+                 backgroundSize:'auto'
+                  }}
+                    src={
+                      headerData.Picture
+                        ? `https://crystalsolutions.pk/DI/${organisation.code}/${headerData.Picture}`
+                        : ""
+                    }
+                  />
                 </div>
-                
-              </div>
 
-             
+                <div
+                  style={{
+                    display: "flex",
+                    height: "20px",
+                    marginTop: "2px",
+                    marginLeft: "2px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "end",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Expiry Date :
+                  </div>
+                  <div
+                    style={{
+                      paddingLeft: "3px",
+                      color: fontcolor,
+                      fontSize: "12px",
+                      height: "100%",
+                      backgroundColor: getcolor,
+                      width: "80px",
+                      marginLeft: "3px",
+                      border: "1px solid grey",
+                      borderRadius: "0px",
+                      display: "flex",
+                      justifyContent: "end",
+                      alignItems: "center",
+                      paddingRight: "5px",
+                    }}
+                  >
+                    {headerData.ExpiryDate}
+                  </div>
+                </div>
+              </div>
             </div>
 
-             {/* CENTER SECTION  */}
-              <div>
-                {/* line center */}
-                <div
-                  className="col-md-12"
-                  style={{ height: "1px", border: "1px solid grey" }}>
+            {/* CENTER SECTION  */}
+            <div style={{padding:'0px'}}>
+              {/* line center */}
+              <div
+                className="col-md-12"
+                style={{ height: "1px", border: "1px solid grey" }}
+              ></div>
+            </div>
+          </div>
 
-                </div>
+          <div>
+            <div
+              className="col-md-12"
+              style={{
+                marginTop: "2px",
+                marginBottom: "1px",
+                display: "flex",
+                padding: "0px",
+                marginTop:'4px'
+              }}
+            >
+              <div
+                style={{
+                  width: "98px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Guaranter :
               </div>
+              <input
+                value={headerData.GrnName}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
 
+              <div
+                style={{
+                  width: "110px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Witness Name :
+              </div>
+              <input
+                value={headerData.WitName}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+            </div>
+            <div
+              className="col-md-12"
+              style={{
+                marginTop: "2px",
+                marginBottom: "1px",
+                display: "flex",
+                padding: "0px",
+              }}
+            >
+              <div
+                style={{
+                  width: "98px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Father Name :
+              </div>
+              <input
+                value={headerData.GrnName}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
 
+              <div
+                style={{
+                  width: "110px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Father Name :
+              </div>
+              <input
+                value={headerData.WitFather}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+            </div>
 
+            <div
+              className="col-md-12"
+              style={{
+                marginTop: "1px",
+                marginBottom: "1px",
+                display: "flex",
+                padding: "0px",
+              }}
+            >
+              <div
+                style={{
+                  width: "98px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Address :
+              </div>
+              <input
+                value={headerData.GrnAdd1}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+
+              <div
+                style={{
+                  width: "110px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Address :
+              </div>
+              <input
+                value={headerData.WitAdd1}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+            </div>
+            <div
+              className="col-md-12"
+              style={{
+                marginTop: "1px",
+                marginBottom: "1px",
+                display: "flex",
+                padding: "0px",
+              }}
+            >
+              <div
+                style={{
+                  width: "98px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              ></div>
+              <input
+                value={headerData.GrnAdd2}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+
+              <div
+                style={{
+                  width: "110px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              ></div>
+              <input
+                value={headerData.WitAdd2}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "370px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+            </div>
+            <div
+              className="col-md-12"
+              style={{
+                marginTop: "1px",
+                marginBottom: "1px",
+                display: "flex",
+                padding: "0px",
+              }}
+            >
+              <div
+                style={{
+                  width: "98px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Mobile :
+              </div>
+              <input
+                value={headerData.GrnMobile}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "146px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+
+              <div
+                style={{
+                  width: "75px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                CNIC :
+              </div>
+              <input
+                value={headerData.GrnNic}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "146px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+
+              <div
+                style={{
+                  width: "110px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                Mobile :
+              </div>
+              <input
+                value={headerData.WitMobile}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "146px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+
+              <div
+                style={{
+                  width: "75px",
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: fontcolor,
+                }}
+              >
+                CNIC :
+              </div>
+              <input
+                value={headerData.WitNic}
+                disabled
+                style={{
+                  paddingLeft: "3px",
+                  color: fontcolor,
+                  fontSize: "12px",
+                  height: "20px",
+                  backgroundColor: getcolor,
+                  width: "146px",
+                  marginLeft: "3px",
+                  border: "1px solid grey",
+                  borderRadius: "0px",
+                }}
+              ></input>
+            </div>
           </div>
 
-
-<div>
- 
-<div
-                  className="col-md-12"
-                  style={{
-                    marginTop: "2px",
-                    marginBottom: "1px",
-                    display: "flex",
-                    padding: "0px",
-
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Guaranter :
-                  </div>
-                  <input
-                    value={headerData.GrnName}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height: "20px",
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      
-                      width: "110px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Witness Name :
-                  </div>
-                  <input
-                    value={headerData.WitName}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                      height:'20px',
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-                 <div
-                  className="col-md-12"
-                  style={{
-                    
-                    marginTop: "2px",
-                    marginBottom: "1px",
-                    display: "flex",
-                    padding: "0px",
-                  }}
-                >
-                  <div
-                    style={{
-                      
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Father Name :
-                  </div>
-                  <input
-                    value={headerData.GrnName}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      
-                      width: "110px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Father Name :
-                  </div>
-                  <input
-                    value={headerData.WitFather}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-
-                <div
-                  className="col-md-12"
-                  style={{
-                    
-                    marginTop: "1px",
-                    marginBottom: "1px",
-                    display: "flex",
-                    padding: "0px",
-                  }}
-                >
-                  <div
-                    style={{
-                      
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Address :
-                  </div>
-                  <input
-                    value={headerData.GrnAdd1}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      
-                      width: "110px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Address :
-                  </div>
-                  <input
-                    value={headerData.WitAdd1}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-                <div
-                  className="col-md-12"
-                  style={{
-                    
-                    marginTop: "1px",
-                    marginBottom: "1px",
-                    display: "flex",
-                    padding: "0px",
-                  }}
-                >
-                  <div
-                    style={{
-                      
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  ></div>
-                  <input
-                    value={headerData.GrnAdd2}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      
-                      width: "110px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  ></div>
-                  <input
-                    value={headerData.WitAdd2}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "370px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-                <div
-                  className="col-md-12"
-                  style={{
-                    
-                    marginTop: "1px",
-                    marginBottom: "1px",
-                    display: "flex",
-                    padding: "0px",
-                  }}
-                >
-                  <div
-                    style={{
-                      
-                      width: "98px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Mobile :
-                  </div>
-                  <input
-                    value={headerData.GrnMobile}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "146px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      
-                      width: "75px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    CNIC :
-                  </div>
-                  <input
-                    value={headerData.GrnNic}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "146px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      
-                      width: "110px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    Mobile :
-                  </div>
-                  <input
-                    value={headerData.WitMobile}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "146px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-
-                  <div
-                    style={{
-                      
-                      width: "75px",
-                      display: "flex",
-                      justifyContent: "end",
-                      alignItems: "center",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: fontcolor,
-                    }}
-                  >
-                    CNIC :
-                  </div>
-                  <input
-                    value={headerData.WitNic}
-                    disabled
-                    style={{
-                      paddingLeft: "3px",
-                      color: fontcolor,
-                      fontSize: "12px",
-                       height:'20px',
-                      backgroundColor: getcolor,
-                      width: "146px",
-                      marginLeft: "3px",
-                      border: "2px solid grey",
-                      borderRadius: "0px",
-                    }}
-                  ></input>
-                </div>
-          </div>
-          
           {/* TABLE HEADER BODY DATA SECTION */}
           <div>
             <div
@@ -2761,7 +2930,7 @@ export default function InstallmentLedger2() {
                               </td>
                             ))}
                           </tr>
-                        )
+                        ),
                       )}
                       <tr>
                         <td style={firstColWidth}></td>

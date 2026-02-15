@@ -180,7 +180,9 @@ import SparePartsPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/Ite
 import SparePartsPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsPurchaseSummary.js";
 import SparePartsStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsStockReports.js";
 import MonthlyItemSaleComparisonReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/MonthlyItemSaleComparison.js";
+import MonthlyItemPurchaseComparisonReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/MonthlyItemPurchaseComparison.js";
 import SparePartsStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartStoreStockReport.js";
+import SparePartsStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartStatusReport.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -399,8 +401,10 @@ function App() {
                 <Route exact path="/SparePartsPurchaseReport" element={<SparePartsPurchaseReport />} />
                 <Route exact path="/SparePartsPurchaseSummary" element={<SparePartsPurchaseSummary />} />
                 <Route exact path="/SparePartsStockReport" element={<SparePartsStockReport />} />
-                <Route exact path="/ItemMarginDetailReport" element={<MonthlyItemSaleComparisonReport />} />
+                <Route exact path="/ItemMonthlySaleComparison" element={<MonthlyItemSaleComparisonReport />} />
+                <Route exact path="/ItemMonthlyPurchaseComparison" element={<MonthlyItemPurchaseComparisonReport />} />
                 <Route exact path="/SparePartsStoreStockReport" element={<SparePartsStoreStockReport />} />
+                <Route exact path="/SparePartsStatus" element={<SparePartsStatusReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}
