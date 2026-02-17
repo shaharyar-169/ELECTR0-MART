@@ -739,7 +739,7 @@ export default function InstallmentCollectReport() {
             "Diff",
             "Col",
         ];
-        const columnWidths = [23, 16,  25, 90,26, 20, 25, 25, 15];
+        const columnWidths = [23, 16,  25, 90,26, 30, 30, 30, 15];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);

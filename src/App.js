@@ -212,6 +212,11 @@ import PayableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Rep
 import AmericanReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableRepor.js";
 import MissingSerialNoReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/MissingSerialNo.js";
 
+/////////////////////////////// FINANCIAL REPORT /////////////////////////////
+import TrailBalanceReport from "./Component/Reports/FinancialReports/TrailBalanceREport.js";
+import InstallmentExpiredAccountReport from "./Component/Reports/FinancialReports/InstallmentexpiredAccount.js";
+import InstallmentClosedAccountReport from "./Component/Reports/FinancialReports/InstallmentClosedAccount.js";
+
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
 import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/TaxsaleRegister.js";
@@ -432,6 +437,11 @@ function App() {
                 <Route exact path="/FixCommissionSummaryReport" element={<EmployeeFixCommissionSummary />} />
                 <Route exact path="/EmployeePerformanceReport" element={<EmployeeFixCommissionComparison />} />
 
+
+                {/* Rountes for Financial reports */}
+                    <Route exact path="/TrialBalance" element={<TrailBalanceReport />} />
+                    <Route exact path="/IncomeStatement" element={<InstallmentExpiredAccountReport />} />
+                    <Route exact path="/BalanceSheet" element={<InstallmentClosedAccountReport />} />
 
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />

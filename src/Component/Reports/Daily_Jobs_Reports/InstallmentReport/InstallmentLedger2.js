@@ -147,10 +147,10 @@ export default function InstallmentLedger2() {
     setIsLoading(true);
 
     const formData = new URLSearchParams({
-      // code: "MTSELEC",
-      // FLocCod: "002",
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
+      code: "MTSELEC",
+      FLocCod: "002",
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
       FInsCod: saleType,
     }).toString();
 
@@ -234,10 +234,10 @@ export default function InstallmentLedger2() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomers.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      // FLocCod: "001",
-      // code: "ABDULLAHTRD",
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      FLocCod: "002",
+      code: "MTSELEC",
     }).toString();
     axios
       .post(apiUrl, formData)

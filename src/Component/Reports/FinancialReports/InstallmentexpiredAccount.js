@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { useTheme } from "../../../../ThemeContext";
+
+import axios from "axios";
+
+import { useTheme } from "../../../ThemeContext";
 import {
   getUserData,
   getOrganisationData,
   getLocationnumber,
   getYearDescription,
-} from "../../../Auth";
-import NavComponent from "../../../MainComponent/Navform/navbarform";
-import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
+} from "../../Auth";
+
+import NavComponent from "../../MainComponent/Navform/navbarform";
+import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
 import { BsCalendar } from "react-icons/bs";
@@ -21,17 +24,14 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-// import { fetchGetUser } from "../../Redux/action";
-import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { formHelperTextClasses } from "@mui/material";
+import { Balance } from "@mui/icons-material";
 
-export default function GeneralLedger() {
+export default function InstallmentExpiredAccountReport() {
   const navigate = useNavigate();
-  const user = getUserData();
-  const organisation = getOrganisationData();
-
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -39,29 +39,22 @@ export default function GeneralLedger() {
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
-  const hasInitialized = useRef(false);
+
+  const [CashBookSummaryData, setCashBookSummaryData] = useState([]);
+  const [CashPaymentData, setCashPaymentData] = useState([]);
+
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
 
-  // DOUBLE STATE HANDLE
-  const [isItemInitialized, setIsItemInitialized] = useState(false);
-  const [isCodeReady, setIsCodeReady] = useState(false);
-  const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
-
-  const [tableData, setTableData] = useState([]);
-
-  const [totalQnty, setTotalQnty] = useState(0);
-  const [totalOpening, setTotalOpening] = useState(0);
-  const [totalDebit, setTotalDebit] = useState(0);
-  const [totalCredit, setTotalCredit] = useState(0);
-  const [closingBalance, setClosingBalance] = useState(0);
-
-  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-
-  console.log("Companyselectdatavalue", Companyselectdatavalue.label);
+  const [TotalSale, setTotalSale] = useState(0);
+  const [TotalAdvance, setTotalAdvance] = useState(0);
+  const [TotalIns, setTotalIns] = useState(0);
+  const [TotalaBalance, setTotalaBalance] = useState(0);
+  const [TotalCollection, setTotalCollection] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -72,8 +65,7 @@ export default function GeneralLedger() {
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-  const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
+  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   const {
     isSidebarVisible,
@@ -88,46 +80,44 @@ export default function GeneralLedger() {
     gettodate,
     getfontstyle,
     getdatafontsize,
-    getnavbarbackgroundcolor,
   } = useTheme();
+
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
+
+  console.log("select year: " + getyeardescription);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
-    document.documentElement.style.setProperty("--font-color", fontcolor);
-  }, [getcolor, fontcolor]);
+  }, [getcolor]);
 
-  const comapnyname = organisation.description;
+  // Assume getfromdate and gettodate are dynamic and fetched from context or state
+  const fromdatevalidate = getfromdate; // e.g., "01-01-2023"
+  const todatevaliadete = gettodate; // e.g., "31-12-2023"
 
-  const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
-
-  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
-
-  const fromdatevalidate = getfromdate;
-  const todatevaliadete = gettodate;
-
+  // Function to convert "DD-MM-YYYY" string to Date object
   const convertToDate = (dateString) => {
-    const [day, month, year] = dateString.split("-");
-    return new Date(year, month - 1, day);
+    const [day, month, year] = dateString.split("-"); // Split string into day, month, year
+    return new Date(year, month - 1, day); // Create Date object (Month is zero-indexed)
   };
 
-  const GlobalfromDate = convertToDate(fromdatevalidate);
-  const GlobaltoDate = convertToDate(todatevaliadete);
+  // Convert dynamic date strings to Date objects
+  const GlobalfromDate = convertToDate(fromdatevalidate); // "01-01-2023" -> Date object
+  const GlobaltoDate = convertToDate(todatevaliadete); // "31-12-2023" -> Date object
 
+  // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
   const formatDate1 = (date) => {
-    return `${String(date.getDate()).padStart(2, "0")}-${String(
-      date.getMonth() + 1,
-    ).padStart(2, "0")}-${date.getFullYear()}`;
+    return `${String(date.getDate()).padStart(2, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getFullYear()}`;
   };
 
-  const GlobalfromDate1 = formatDate1(GlobalfromDate);
-  const GlobaltoDate1 = formatDate1(GlobaltoDate);
+  // Optionally format the Date objects back to string if needed
+  const GlobalfromDate1 = formatDate1(GlobalfromDate); // '01-01-2023'
+  const GlobaltoDate1 = formatDate1(GlobaltoDate); // '31-12-2023'
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
+
   const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
   };
@@ -137,72 +127,7 @@ export default function GeneralLedger() {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handleToKeyPress = (e) => {
+  const handleToKeyPress = (e, inputref) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const toDateElement = document.getElementById("todatevalidation");
@@ -216,56 +141,43 @@ export default function GeneralLedger() {
         const [day, month, year] = formattedInput.split("-").map(Number);
 
         if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
+          alert("Please enter a valid month (MM) between 01 and 12");
           return;
         }
 
         const daysInMonth = new Date(year, month, 0).getDate();
         if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          alert(`Please enter a valid day (DD) for month ${month}`);
           return;
         }
 
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
+        const enteredDate = new Date(year, month - 1, day); // Month is zero-based
 
-        if (GlobaltoDate && enteredDate > GlobaltoDate) {
+        // Convert GlobalfromDate and GlobaltoDate to Date objects for comparison
+        // const fromDate = new Date(GlobalfromDate.split('-').reverse().join('-'));
+        // const toDate = new Date(GlobaltoDate.split('-').reverse().join('-'));
+
+        if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
           toast.error(
             `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
           );
           return;
         }
 
-        if (GlobaltoDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-          );
-          return;
-        }
-
-        if (fromInputDate) {
-          const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-"),
-          );
-          if (enteredDate <= fromDate) {
-            toast.error("To date must be after from date");
-            return;
-          }
-        }
-
-        toDateElement.style.border = `1px solid ${fontcolor}`;
+        toDateElement.style.border = `1px solid ${fontcolor}`; // Add border color
         settoInputDate(formattedInput);
 
-        if (input1Ref.current) {
+        if (saleSelectRef.current) {
           e.preventDefault();
-          input1Ref.current.focus();
+          saleSelectRef.current.focus(); // Move focus to React Select
         }
       } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
+        toast.error(
+          `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+        );
       }
     }
   };
-
   const handleToDateChange = (date) => {
     setSelectedToDate(date);
     settoInputDate(date ? formatDate(date) : "");
@@ -274,33 +186,33 @@ export default function GeneralLedger() {
   const handleToInputChange = (e) => {
     settoInputDate(e.target.value);
   };
-
-  const handleSaleKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setSaleType(selectedOption.value);
-      }
-      const nextInput = document.getElementById(inputId);
-      if (nextInput) {
-        nextInput.focus();
-        nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-
+  // Function to handle keypress and move focus
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
-      e.preventDefault();
+      e.preventDefault(); // Prevent form submission
       if (nextInputRef.current) {
-        nextInputRef.current.focus();
+        nextInputRef.current.focus(); // Move focus to next input
       }
     }
   };
 
-  function fetchReceivableReport() {
+  function closeAlert(errorType) {
+    const alertElement = document.getElementById("someElementId");
+    alertElement.innerHTML = ""; // Clears the alert content
+    // if (errorType === 'saleType') {
+    //     saleSelectRef.current.focus();
+    // }
+    if (errorType === "formvalidation") {
+      fromRef.current.select();
+    }
+    if (errorType === "todatevalidation") {
+      toRef.current.select();
+    }
+  }
+  // Bind to window
+  window.closeAlert = closeAlert;
+
+  function fetchGeneralLedger() {
     const fromDateElement = document.getElementById("fromdatevalidation");
     const toDateElement = document.getElementById("todatevalidation");
 
@@ -309,13 +221,12 @@ export default function GeneralLedger() {
     let hasError = false;
     let errorType = "";
 
+    // Handle saleType, fromInputDate, and toInputDate errors first
     switch (true) {
-      case !saleType:
-        errorType = "saleType";
-        break;
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
+      //   case !saleType:
+      //     errorType = "saleType";
+      //     break;
+
       case !toInputDate:
         errorType = "toDate";
         break;
@@ -324,20 +235,14 @@ export default function GeneralLedger() {
         break;
     }
 
+    // Handle date format validation separately
     if (!dateRegex.test(fromInputDate)) {
       errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
+    }
+
+    if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
     } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
         "$1-$2-$3",
@@ -345,101 +250,65 @@ export default function GeneralLedger() {
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+      if (enteredToDate < GlobalfromDate || enteredToDate > GlobaltoDate) {
         errorType = "toDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-        errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
       }
     }
 
+    // Handle errors using a separate switch based on errorType
     switch (errorType) {
-      case "saleType":
-        toast.error("Please select a Account Code");
+      //   case "saleType":
+      //     toast.error("Please select a Account Code");
+      //     return;
+      case "toDate":
+        toast.error(
+          `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+        );
         return;
 
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
-      case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
-        return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
       case "toDateAfterGlobal":
         toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+          `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
         );
-        return;
-      case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
         return;
 
       default:
         break;
     }
+    ////////////////////////////////////////////
 
-    // console.log(data);
-    document.getElementById("fromdatevalidation").style.border =
-      `1px solid ${fontcolor}`;
+    // document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/GeneralLedger.php";
+    const apiUrl2 = apiLinks + "/InstallmentExpiredAccount.php";
     setIsLoading(true);
-    const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
-      FAccCod: saleType,
+    const formData2 = new URLSearchParams({
+      FRepDat: toInputDate,
+      FColCod: saleType,
+      FSchTxt: searchQuery,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
 
-    //   code: 'NASIRTRD',
-    //   FLocCod: '001',
-    //   FYerDsc: '2025-2025'
+    //   code: "MTSELEC",
+    //   FLocCod: "002",
     }).toString();
 
     axios
-      .post(apiUrl, formData)
+      .post(apiUrl2, formData2)
       .then((response) => {
-        setIsLoading(false);
-
-        setTotalDebit(response.data["Total Debit "]);
-        setTotalCredit(response.data["Total Credit"]);
-        setClosingBalance(response.data["Closing Bal "]);
+        setTotalSale(response.data["Total Sale "]);
+        setTotalIns(response.data["Total Ins "]);
+        setTotalaBalance(response.data["Total Balance "]);
+       
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
+          setIsLoading(false);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data.Detail,
+            response.data,
           );
           setTableData([]);
         }
@@ -453,63 +322,39 @@ export default function GeneralLedger() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (
-      !hasComponentMountedPreviously ||
-      (saleSelectRef && saleSelectRef.current)
-    ) {
-      if (saleSelectRef && saleSelectRef.current) {
+    // If it hasn't mounted before or on refresh, select the 'from date' input
+    if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+      if (toRef && toRef.current) {
         setTimeout(() => {
-          saleSelectRef.current.focus();
-          // saleSelectRef.current.select();
+          toRef.current.focus(); // Focus on the input field
+          toRef.current.select(); // Select the text within the input field
         }, 0);
       }
-      sessionStorage.setItem("componentMounted", "true");
+      sessionStorage.setItem("componentMounted", "true"); // Set the flag indicating mount
     }
   }, []);
 
+  useEffect(() => {
+    const currentDate = new Date();
+    setSelectedToDate(currentDate);
+    settoInputDate(formatDate(currentDate));
 
-     useEffect(() => {
-      const storedData = sessionStorage.getItem("GeneralLedgerData");
-    
-      let toDate = new Date(); // default today
-      let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
-    
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-    
-        // ✅ TO DATE
-        if (parsedData.toInputDate) {
-          const [day, month, year] = parsedData.toInputDate.split("-").map(Number);
-          toDate = new Date(year, month - 1, day);
-        }
-    
-        // ✅ FROM DATE
-        if (parsedData.fromInputDate) {
-          // Case: Payable Report (both dates)
-          const [day, month, year] = parsedData.fromInputDate.split("-").map(Number);
-          fromDate = new Date(year, month - 1, day);
-        } else {
-          // Case: Payable Aging (only toDate)
-          fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
-        }
-      }
-    
-      // ✅ Apply states
-      setSelectedToDate(toDate);
-      settoInputDate(formatDate(toDate));
-    
-      setSelectedfromDate(fromDate);
-      setfromInputDate(formatDate(fromDate));
-    
-    }, []);
+    const firstDateOfCurrentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1,
+    );
+    setSelectedfromDate(firstDateOfCurrentMonth);
+    setfromInputDate(formatDate(firstDateOfCurrentMonth));
+  }, []);
 
   useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveAccounts.php";
+    const apiUrl = apiLinks + "/GetCollectors.php";
     const formData = new URLSearchParams({
-      FLocCod: getLocationNumber,
-      code: organisation.code,
-      FLocCod: '001',
-      code: 'NASIRTRD',
+ code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+    //         code: "MTSELEC",
+    //   FLocCod: "002",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -521,59 +366,11 @@ export default function GeneralLedger() {
       });
   }, []);
 
+  // Transforming fetched data into options array
   const options = supplierList.map((item) => ({
-    value: item.tacccod,
-    label: `${item.tacccod}-${item.taccdsc.trim()}`,
+    value: item.tcolcod,
+    label: `${item.tcolcod}-${item.tcolnam.trim()}`,
   }));
-
-  useEffect(() => {
-    if (options.length === 0) return;
-    if (isItemInitialized) return;
-
-    const storedData = sessionStorage.getItem("GeneralLedgerData");
-    let selectedOption = null;
-
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      const clickedCode = parsedData.code?.trim();
-      if (parsedData.code) {
-        setIsDoubleClickOpen(true); // ✅ ADD
-      }
-      selectedOption = options.find((opt) => opt.value?.trim() === clickedCode);
-
-      sessionStorage.removeItem("GeneralLedgerData");
-    }
-
-    if (!selectedOption) {
-      selectedOption = options[0];
-    }
-
-    if (selectedOption) {
-      setSaleType(selectedOption.value);
-
-      const description = selectedOption.label
-        .split("-")
-        .slice(1)
-        .join("-")
-        .trim();
-
-      setCompanyselectdatavalue({
-        value: selectedOption.value,
-        label: description,
-      });
-
-      setIsCodeReady(true); // ✅ IMPORTANT
-    }
-
-    setIsItemInitialized(true);
-  }, [options, isItemInitialized]);
-
-  useEffect(() => {
-    // 🔥 Dono cheezain ready hon
-    if (isDoubleClickOpen && isCodeReady) {
-      fetchReceivableReport();
-    }
-  }, [isDoubleClickOpen, isCodeReady]);
 
   const DropdownOption = (props) => {
     return (
@@ -599,7 +396,7 @@ export default function GeneralLedger() {
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 360,
+      width: 250,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -759,51 +556,56 @@ export default function GeneralLedger() {
     }),
   });
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
-
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-
   const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
-      item.Description,
-      item.Debit,
-      item.Credit,
+      item.code,
+      item.Customer,
+      item.SaleDate,
+      item.SaleAmt,
+      item.PrmDate,
+      item.InsNum,
+      item.InsAmt,
+      item.LastDate,
       item.Balance,
+      item.ExpiryDate,
+      item.Col,
     ]);
 
     // Add summary row to the table
-
     rows.push([
+      String(formatValue(tableData.length.toLocaleString())),
       "",
       "",
+      String(formatValue(TotalSale)),
       "",
-      "Total",
-      String(formatValue(totalDebit)),
-      String(formatValue(totalCredit)),
-      String(formatValue(closingBalance)),
+      "",
+      String(formatValue(TotalIns)),
+      "",
+      String(formatValue(TotalaBalance)),
+"",
+      "",
     ]);
 
     // Define table column headers and individual column widths
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
-      "Description",
-      "Debit",
-      "Credit",
+      "Code",
+      "Customer",
+      "SaleDate",
+      "SaleAmt",
+      "PrmDate",
+      "Ins#",
+      "Ins Amt",
+      "Last Date",
       "Balance",
+      "Expiry",
+      "Col",
     ];
-    const columnWidths = [24, 17, 15, 110, 30, 30, 30];
+    const columnWidths = [24, 80, 23, 23, 23, 14, 23, 24, 23, 23, 10];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -864,7 +666,7 @@ export default function GeneralLedger() {
         }
 
         if (isTotalRow) {
-          doc.setFont("verdana", "bold");
+          doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
         }
 
@@ -931,13 +733,13 @@ export default function GeneralLedger() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+          if (cellIndex === 0 || cellIndex == 2 || cellIndex ==4 || cellIndex == 9) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+          } else if (cellIndex == 3 || cellIndex == 5 || cellIndex == 6 || cellIndex == 8 || cellIndex == 10) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1004,7 +806,7 @@ export default function GeneralLedger() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 29; // Adjust this value based on your requirements
+    const rowsPerPage = 27; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1015,8 +817,9 @@ export default function GeneralLedger() {
         time,
         pageNumber,
         startY,
-        titleFontSize = 18,
-        pageNumberFontSize = 10,
+        titleFontSize = 16,
+        dateTimeFontSize = 8,
+        pageNumberFontSize = 8,
       ) => {
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -1026,21 +829,21 @@ export default function GeneralLedger() {
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
+        if (date) {
+          doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+          if (time) {
+            doc.text(date + " " + time, rightX, startY, { align: "right" });
+          } else {
+            doc.text(date, rightX - 10, startY, { align: "right" });
+          }
+        }
 
         // Add page numbering
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         doc.text(
           `Page ${pageNumber}`,
-          rightX - 10,
+          rightX - 20,
           doc.internal.pageSize.height - 10,
           { align: "right" },
         );
@@ -1052,72 +855,41 @@ export default function GeneralLedger() {
 
       while (currentPageIndex * rowsPerPage < rows.length) {
         doc.setFont("Times New Roman", "normal");
-        addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-        startY += 5; // Adjust vertical position for the company title
+        doc.setFontSize(10);
+        addTitle(comapnyname, "", "", pageNumber, startY, 20, 10); // Render company title with default font size, only date, and page number
+        startY += 7; // Adjust vertical position for the company title
         doc.setFont("verdana-regular", "normal");
-        addTitle(
-          `General Ledger From: ${fromInputDate} To: ${toInputDate}`,
-          "",
-          "",
-          pageNumber,
-          startY,
-          12,
-        ); // Render sale report title with decreased font size, provide the time, and page number
-        startY += -5;
+        addTitle(`Installment Expired Account Report`, "", "", pageNumber, startY, 14); // Render sale report title with decreased font size, provide the time, and page number
+        startY += 13;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-        const labelsY = startY + 4; // Position the labels below the titles and above the table
+        const labelsY = startY + 2; // Position the labels below the titles and above the table
 
-        let status =
-          transectionType === "A"
-            ? "ALL"
-            : transectionType === "CRV"
-              ? "Cash Receive Voucher"
-              : transectionType === "CPV"
-                ? "Cash Payment Voucher"
-                : transectionType === "BRV"
-                  ? "Bank Receive Voucher"
-                  : transectionType === "BPV"
-                    ? "Bank Payment Voucher"
-                    : transectionType === "JRV"
-                      ? "Journal Voucher"
-                      : transectionType === "INV"
-                        ? "Item Sale"
-                        : transectionType === "SRN"
-                          ? "Sale Return"
-                          : transectionType === "BIL"
-                            ? "Purchase"
-                            : transectionType === "PRN"
-                              ? "Purchase Return"
-                              : transectionType === "ISS"
-                                ? "Issue"
-                                : transectionType === "REC"
-                                  ? "Received"
-                                  : transectionType === "SLY"
-                                    ? "Salary"
-                                    : "ALL";
-
-        let search = Companyselectdatavalue.label
+        let typename = Companyselectdatavalue.label
           ? Companyselectdatavalue.label
           : "ALL";
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Account :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+        let searchdata = searchQuery ? searchQuery : "";
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Type :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+        doc.text(`Collector :`, labelsX, labelsY); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
+        doc.text(`${typename}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-        startY += 10; // Adjust vertical position for the labels
+        if (searchQuery) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+          doc.text(`Search :`, labelsX + 200, labelsY); // Draw bold label
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+          doc.text(`${searchdata}`, labelsX + 220, labelsY); // Draw the value next to the label
+        }
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+        startY += 0; // Adjust vertical position for the labels
+
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1157,10 +929,16 @@ export default function GeneralLedger() {
     // Call function to handle pagination
     handlePagination();
 
-    // Save the PDF files
-    doc.save(`GeneralLedger Form ${fromInputDate} To ${toInputDate}.pdf`);
-  };
+    // Save the PDF file
+    doc.save("InstallmentExpiredAccountReport.pdf");
 
+    const pdfBlob = doc.output("blob");
+    const pdfFile = new File([pdfBlob], "table_data.pdf", {
+      type: "application/pdf",
+    });
+    // setPdfFile(pdfFile);
+    // setShowMailModal(true); // Show the mail modal after downloading PDF
+  };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
@@ -1168,13 +946,17 @@ export default function GeneralLedger() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 11; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "left",
-      "left",
       "center",
       "left",
+      "center",
+      "right",
+      "center",
+      "right",
+      "right",
+      "center",
       "right",
       "right",
       "right",
@@ -1207,21 +989,26 @@ export default function GeneralLedger() {
 
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
+
     companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
+      cell.font = {
+        name: "Times New Roman",
+        size: 16, // optional
+        bold: true, // optional
+      };
       cell.alignment = { horizontal: "center" };
     });
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         companyRow.number
       }`,
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `General Ledger From ${fromInputDate} To ${toInputDate}`,
+      `Installment Expired Account Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1229,7 +1016,7 @@ export default function GeneralLedger() {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(66 + numColumns - 1)}${
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         storeListRow.number
       }`,
     );
@@ -1237,81 +1024,35 @@ export default function GeneralLedger() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let typestatus = "";
-
-    if (transectionType === "A") {
-      typestatus = "ALL";
-    } else if (transectionType === "CRV") {
-      typestatus = "CASH RECEIVE VOUCHER";
-    } else if (transectionType === "CPV") {
-      typestatus = "CASH PAYMENT VOUCHER";
-    } else if (transectionType === "BRV") {
-      typestatus = "BANK RECEIVE VOUCHER";
-    } else if (transectionType === "BPV") {
-      typestatus = "BANK PAYMENT VOUCHER";
-    } else if (transectionType === "JRV") {
-      typestatus = "JOURNAL VOUCHER";
-    } else if (transectionType === "INV") {
-      typestatus = "ITEM SALE";
-    } else if (transectionType === "SRN") {
-      typestatus = "SALE RETURN";
-    } else if (transectionType === "BIL") {
-      typestatus = "PURCHASE";
-    } else if (transectionType === "PRN") {
-      typestatus = "PURCHASE RETURN";
-    } else if (transectionType === "ISS") {
-      typestatus = "ISSUE";
-    } else if (transectionType === "REC") {
-      typestatus = "RECEIVE";
-    } else if (transectionType === "SLY") {
-      typestatus = "SALARY";
-    } else {
-      typestatus = "ALL"; // Default value
-    }
-
-    let Accountselect = Companyselectdatavalue.label
+    let collectordata = Companyselectdatavalue.label
       ? Companyselectdatavalue.label
       : "ALL";
 
-    let typesearch = searchQuery || "";
+    let typesearch = searchQuery ? searchQuery : "";
 
-    // Apply styling for the status row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "ACCOUNT :",
-      Accountselect,
-      "",
-      "",
-      "TYPE :",
-      typestatus,
-    ]);
-
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery ? ["", "", "", "", "SEARCH :", typesearch] : [""],
+    const typeAndStoreRow4 = worksheet.addRow(
+      searchQuery
+        ? [
+            "Collector :",
+            collectordata,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Search :",
+            typesearch,
+          ]
+        : ["Collector :", collectordata],
     );
 
-    // Merge cells for Accountselect (columns B to D)
-    worksheet.mergeCells(
-      `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`,
-    );
+    //   worksheet.mergeCells(`B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`);
 
-    // Apply styling for the status row
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
+    typeAndStoreRow4.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5].includes(colIndex),
-      };
-      cell.alignment = {
-        horizontal: colIndex === 2 ? "left" : "left", // Left align the account name
-        vertical: "middle",
-      };
-    });
-
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [5].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1335,13 +1076,17 @@ export default function GeneralLedger() {
 
     // Add headers
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
-      "Description",
-      "Debit",
-      "Credit",
+      "Code",
+      "Customer",
+      "SaleDate",
+      "SaleAmt",
+      "PrmDate",
+      "Ins#",
+      "Ins Amt",
+      "Last Date",
       "Balance",
+      "Expiry",
+      "Col",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1349,13 +1094,17 @@ export default function GeneralLedger() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
-        item.Description,
-        item.Debit,
-        item.Credit,
-        item.Balance,
+        item.code,
+      item.Customer,
+      item.SaleDate,
+      item.SaleAmt,
+      item.PrmDate,
+      item.InsNum,
+      item.InsAmt,
+      item.LastDate,
+      item.Balance,
+      item.ExpiryDate,
+      item.Col,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1373,14 +1122,23 @@ export default function GeneralLedger() {
       });
     });
 
+    // Set column widths
+    [11, 45, 11, 14, 11, 7, 14, 11, 11, 14, 7].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
     const totalRow = worksheet.addRow([
+      String(formatValue(tableData.length.toLocaleString())),
       "",
       "",
+      String(formatValue(TotalSale)),
       "",
-      "Total",
-      totalDebit,
-      totalCredit,
-      closingBalance,
+      "",
+      String(formatValue(TotalIns)),
+      "",
+      String(formatValue(TotalaBalance)),
+"",
+      "",
     ]);
 
     // total row added
@@ -1395,14 +1153,9 @@ export default function GeneralLedger() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 5 || colNumber === 6 || colNumber === 7) {
+      if (colNumber >= 4) {
         cell.alignment = { horizontal: "right" };
       }
-    });
-
-    // Set column widths
-    [10, 7, 7, 45, 15, 15, 15].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
     });
 
     // Add a blank row
@@ -1453,10 +1206,14 @@ export default function GeneralLedger() {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`,
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`,
     );
 
     // Generate and save the Excel file
@@ -1464,90 +1221,15 @@ export default function GeneralLedger() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `GeneralLedger  From ${fromInputDate} To ${toInputDate}.xlsx`);
+    saveAs(blob, `InstallmentExpiredAccountReport As On ${currentdate}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
-  const dispatch = useDispatch();
-
-  const tableTopColor = "#3368B5";
-  const tableHeadColor = "#3368b5";
-  const secondaryColor = "white";
-  const btnColor = "#3368B5";
-  const textColor = "white";
-
-  const [selectedSearch, setSelectedSearch] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { data, loading, error } = useSelector((state) => state.getuser);
-
-  const handleSearch = (e) => {
-    setSelectedSearch(e.target.value);
-  };
-
-  let totalEntries = 0;
-
-  const getFilteredTableData = () => {
-    let filteredData = tableData;
-    if (selectedSearch.trim() !== "") {
-      const query = selectedSearch.trim().toLowerCase();
-      filteredData = filteredData.filter(
-        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query),
-      );
-    }
-    return filteredData;
-  };
-
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "7.1%",
-  // };
-  // const thirdColWidth = {
-  //     width: "4%",
-  // };
-  // const forthColWidth = {
-  //     width: "41.7%",
-  // };
-  // const fifthColWidth = {
-  //     width: "12%",
-  // };
-  // const sixthColWidth = {
-  //     width: "12%",
-  // };
-  // const seventhColWidth = {
-  //     width: "12%",
-  // };
-
-  const firstColWidth = {
-    width: "90px",
-  };
-  const secondColWidth = {
-    width: "54px",
-  };
-  const thirdColWidth = {
-    width: "32px",
-  };
-  const forthColWidth = {
-    width: "360px",
-  };
-  const fifthColWidth = {
-    width: "90px",
-  };
-  const sixthColWidth = {
-    width: "90px",
-  };
-  const seventhColWidth = {
-    width: "90px",
-  };
-
-  const sixthcol = { width: "8px" };
 
   useHotkeys(
     "alt+s",
     () => {
-      fetchReceivableReport();
-      //    resetSorting();
+      fetchGeneralLedger();
+      resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true },
   );
@@ -1565,12 +1247,234 @@ export default function GeneralLedger() {
     enableOnFormTags: true,
   });
 
+  ///////////////////////////////////////////////////////////////////////////
+
+  const dispatch = useDispatch();
+  const user = getUserData();
+  const organisation = getOrganisationData();
+  const tableTopColor = "#3368B5";
+  const tableHeadColor = "#3368b5";
+  const secondaryColor = "white";
+  const btnColor = "#3368B5";
+  const textColor = "white";
+
+  const [tableData, setTableData] = useState([]);
+
+  console.log("HAJVARY DATE", tableData);
+
+  const [selectedSearch, setSelectedSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { data, loading, error } = useSelector((state) => state.getuser);
+
+  // useEffect(() => {
+  //     setTableData(data);
+  //     dispatch(fetchGetUser(organisation && organisation.code));
+  // }, [dispatch, organisation.code]);
+
+  const comapnyname = organisation.description;
+
+  const handleSearch = (e) => {
+    setSelectedSearch(e.target.value);
+  };
+
+  let totalEntries = 0;
+
+  const getFilteredTableData = () => {
+    let filteredData = tableData;
+
+    if (selectedSearch.trim() !== "") {
+      const query = selectedSearch.trim().toLowerCase();
+      filteredData = filteredData.filter(
+        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query),
+      );
+    }
+
+    return filteredData;
+  };
+
+  const handleSaleKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = saleSelectRef.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setSaleType(selectedOption.value);
+      }
+      const nextInput = document.getElementById(inputId);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+
+  const firstColWidth = {
+    width: "80px",
+  };
+  const secondColWidth = {
+    width: isSidebarVisible ? "240px" : "360px",
+  };
+  const thirdColWidth = {
+    width: "80px",
+  };
+  const forthColWidth = {
+    width: isSidebarVisible ? "80px" : "100px",
+  };
+  const fifthColWidth = {
+    width: "80px" ,
+  };
+  const sixthColWidth = {
+    width: isSidebarVisible ? "80px" : "100px",
+  };
+  const seventhColWidth = {
+    width: "55px",
+  };
+  const eighthColWidth = {
+    width: isSidebarVisible ? "80px" : "100px",
+  };
+  const ninthColWidth = {
+    width: "80px",
+  };
+  const tenthColWidth = {
+    width:  "80px" ,
+  };
+  const elewenthColWidth = {
+    width: "40px",
+  };
+
+  const sixCol = {
+    width: "8px",
+  };
+
+  const [columns, setColumns] = useState({
+    code: [],
+    Customer: [],
+    SaleDate: [],
+    SaleAmt: [],
+    PrmDate: [],
+    InsNum: [],
+    InsAmt: [],
+    LastDate: [],
+    Balance: [],
+    ExpiryDate: [],
+    Col: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    code: "",
+    Customer: "",
+    SaleDate: "",
+    SaleAmt: "",
+    PrmDate: "",
+    InsNum: "",
+    InsAmt: "",
+    LastDate: "",
+    Balance: "",
+    ExpiryDate: "",
+    Col: "",
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        code: tableData.map((row) => row.code),
+        Customer: tableData.map((row) => row.Customer),
+        SaleDate: tableData.map((row) => row.SaleDate),
+        SaleAmt: tableData.map((row) => row.SaleAmt),
+        PrmDate: tableData.map((row) => row.PrmDate),
+        InsNum: tableData.map((row) => row.InsNum),
+        InsAmt: tableData.map((row) => row.InsAmt),
+        LastDate: tableData.map((row) => row.LastDate),
+        Balance: tableData.map((row) => row.Balance),
+        ExpiryDate: tableData.map((row) => row.ExpiryDate),
+        Col: tableData.map((row) => row.Col),
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      let aVal = a[col] ?? "";
+      let bVal = b[col] ?? "";
+
+      aVal = aVal.toString();
+      bVal = bVal.toString();
+
+      // ⭐ CODE SORT (13-01-0005)
+      if (col === "code") {
+        const aParts = aVal.split("-").map((p) => parseInt(p, 10));
+        const bParts = bVal.split("-").map((p) => parseInt(p, 10));
+
+        for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+          const diff = (aParts[i] || 0) - (bParts[i] || 0);
+          if (diff !== 0) {
+            return newOrder === "ASC" ? diff : -diff;
+          }
+        }
+        return 0;
+      }
+
+      // ⭐ Numeric sorting
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // ⭐ String sorting
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      code: null,
+      Customer: null,
+      SaleDate: null,
+      SaleAmt: null,
+      PrmDate: null,
+      InsNum: null,
+      InsAmt: null,
+      LastDate: null,
+      Balance: null,
+      ExpiryDate: null,
+      Col: null,
+    });
+  };
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+  // Adjust the content width based on sidebar state
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
+
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -1579,11 +1483,11 @@ export default function GeneralLedger() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: isSidebarVisible ? "1000px" : "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "52vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -1601,25 +1505,29 @@ export default function GeneralLedger() {
     boxSizing: "border-box", // Padding ko width mein include kare
   };
 
+  //////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
     if (isFilterApplied || tableData.length > 0) {
-      setSelectedIndex(0);
+      setSelectedIndex(0); // Set the selected index to the first row
       rowRefs.current[0]?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     } else {
-      setSelectedIndex(-1);
+      setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
     }
   }, [tableData, isFilterApplied]);
 
   let totalEnteries = 0;
-  const [selectedRowId, setSelectedRowId] = useState(null);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const rowRefs = useRef([]);
+  const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
+
+  // state initialize for table row highlight
+  const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
+  const rowRefs = useRef([]); // Array of refs for rows
   const handleRowClick = (index) => {
     setSelectedIndex(index);
+    // setSelectedRowId(getFilteredTableData[index].tcmpdsc); // Save the selected row's tctgcod
   };
   useEffect(() => {
     if (selectedRowId !== null) {
@@ -1630,7 +1538,7 @@ export default function GeneralLedger() {
     }
   }, [tableData, selectedRowId]);
   const handleKeyDown = (e) => {
-    if (selectedIndex === -1 || e.target.id === "searchInput") return;
+    if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
     if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
@@ -1653,58 +1561,37 @@ export default function GeneralLedger() {
   };
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedIndex]);
+  }, [selectedIndex]); // Add selectedIndex as a dependency
   useEffect(() => {
+    // Scroll the selected row into view
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
     }
-  }, [selectedIndex]);
+  }, [selectedIndex]); // Add selectedIndex as a dependency
+  //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
 
-  const parseDate = (dateString) => {
-    const [day, month, year] = dateString.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  };
+const parseDDMMYYYY = (dateStr) => {
+  if (!dateStr) return null;
+  const [dd, mm, yyyy] = dateStr.split("-");
+  return new Date(`${yyyy}-${mm}-${dd}`);
+};
 
-  const handleRadioChange = (days) => {
-    const toDate = parseDate(toInputDate);
-    const fromDate = new Date(toDate);
-    fromDate.setUTCDate(fromDate.getUTCDate() - days);
-
-    setSelectedfromDate(fromDate);
-    setfromInputDate(formatDate(fromDate));
-    setSelectedRadio(days === 0 ? "custom" : `${days}days`);
-  };
-
- 
-
-  // this function for hide the 0 value figure from the table data
 
   const formatValue = (val) => {
     return Number(val) === 0 ? "" : val;
   };
 
-  const isMatchedRow = (item) => {
-    if (!searchQuery) return false; // no highlight if search is empty
-
-    const query = searchQuery.toUpperCase();
-
-    // you can match anything you want:
-    return (
-      item.Description?.toUpperCase().includes(query) ||
-      item.Type?.toUpperCase().includes(query) ||
-      item.Date?.toUpperCase().includes(query) ||
-      String(item["Trn#"])?.includes(query)
-    );
-  };
-
   return (
     <>
+      {/* <div id="someElementId"></div> */}
       <ToastContainer />
       <div style={contentStyle}>
         <div
@@ -1716,10 +1603,127 @@ export default function GeneralLedger() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="General Ledger" />
+          <NavComponent textdata="Installment Expired Account Report" />
 
           <div
-            className="row"
+            className="row "
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "97.5%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "start",
+              }}
+            >
+              {/* To Date */}
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "10px" }}
+              >
+                <div
+                  style={{
+                    width: "72px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Date :
+                    </span>
+                  </label>{" "}
+                </div>
+                <div
+                  id="todatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: " 24px",
+                    justifycontent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    ref={toRef}
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      alignItems: "center",
+                      // marginTop: '5.5px',
+                      border: "none",
+                      fontSize: "12px",
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                    }}
+                    value={toInputDate}
+                    onChange={handleToInputChange}
+                    // onKeyPress={handleToKeyPress}
+                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                    // onKeyDown={(e) => handleKeyPressBoth(e, 'submitButton')}
+                    id="toDatePicker"
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="To Date Input"
+                    aria-describedby="todatepicker"
+                  />
+                  <DatePicker
+                    selected={selectedToDate}
+                    onChange={handleToDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    // showMonthDropdown
+                    // showYearDropdown
+                    open={toCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <span>
+                          <BsCalendar
+                            onClick={toggleToCalendar}
+                            style={{
+                              cursor: "pointer",
+                              alignItems: "center",
+                              marginLeft: "18px",
+                              // marginTop: '5px',
+                              fontSize: "12px",
+                            }}
+                          />
+                        </span>
+                      </div>
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="row "
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
           >
             <div
@@ -1732,11 +1736,10 @@ export default function GeneralLedger() {
                 justifyContent: "space-between",
               }}
             >
-              {/* ------ */}
-
+              {/* SELECT TH CODE  */}
               <div
                 className="d-flex align-items-center  "
-                style={{ marginRight: "1px" }}
+                style={{ marginLeft: "5px" }}
               >
                 <div
                   style={{
@@ -1745,39 +1748,35 @@ export default function GeneralLedger() {
                     justifyContent: "end",
                   }}
                 >
-                  <label htmlFor="fromDatePicker">
+                  <label htmlFor="transactionType">
                     <span
                       style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         fontSize: getdatafontsize,
                         fontFamily: getfontstyle,
                         fontWeight: "bold",
                       }}
                     >
-                      Account :
-                    </span>{" "}
-                    <br />
-                  </label>
+                      Collector :
+                    </span>
+                  </label>{" "}
                 </div>
-                <div style={{ marginLeft: "5px" }}>
+                <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
                     ref={saleSelectRef}
                     options={options}
-                    value={
-                      options.find((opt) => opt.value === saleType) || null
-                    } // Ensure correct reference
-                    isDisabled={isDoubleClickOpen}
-                    onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                    onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
-                        const labelParts = selectedOption.label.split("-"); // Split by "-"
-                        const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
-
+                        const labelPart = selectedOption.label.split("-")[1];
                         setSaleType(selectedOption.value);
                         setCompanyselectdatavalue({
                           value: selectedOption.value,
-                          label: description, // Keep only the description
+                          label: labelPart,
                         });
                       } else {
                         setSaleType("");
@@ -1802,316 +1801,12 @@ export default function GeneralLedger() {
                         marginTop: "-5px",
                       }),
                     }}
-                    // isClearable
-                    // placeholder="ALL"
+                    isClearable
+                    placeholder="ALL"
                   />
                 </div>
               </div>
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "200px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="CRV">CASH RECEIVE VORCHER</option>
-                    <option value="CPV">Cash PAYMENT VORCHER</option>
-                    <option value="BRV">Bank RECEIVE VORCHER</option>
-                    <option value="BPV">BANK PAYMENT VORCHER</option>
-                    <option value="JRV">JOURNAL VORCHER</option>
-                    <option value="INV">ITEM SALE</option>
-                    <option value="SRN">SALE RETURN</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
-                    <option value="ISS">ISSUE</option>
-                    <option value="REC">RECEIVED</option>
-                    <option value="SLY">SALARY</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div className="d-flex align-items-center">
-                <div
-                  style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: "12px",
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "15px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="toDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      To :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="todatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    ref={toRef}
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    value={toInputDate}
-                    onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
-                    id="toDatePicker"
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="To Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedToDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={toCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleToCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
+              <div id="lastDiv">
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
                     style={{
@@ -2176,6 +1871,7 @@ export default function GeneralLedger() {
               </div>
             </div>
           </div>
+
           <div>
             <div
               style={{
@@ -2187,65 +1883,165 @@ export default function GeneralLedger() {
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  // width: "100%",
+                  fontSize: "12px",
+                  width: "100%",
                   position: "relative",
                   paddingRight: "2%",
                 }}
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: getnavbarbackgroundcolor,
+                    backgroundColor: tableHeadColor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: getnavbarbackgroundcolor,
+                      backgroundColor: tableHeadColor,
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      Date
-                    </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Trn#
-                    </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Typ
-                    </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Description
-                    </td>
-                    <td className="border-dark" style={fifthColWidth}>
-                      Debit
-                    </td>
-                    <td className="border-dark" style={sixthColWidth}>
-                      Credit
-                    </td>
-                    <td className="border-dark" style={seventhColWidth}>
-                      Balance
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("code")}
+                      ></i>
                     </td>
 
-                    <td className="border-dark" style={sixthcol}></td>
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Customer")}
+                    >
+                      Customer{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Customer")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("SaleDate")}
+                    >
+                      SaleDate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("SaleDate")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("SaleAmt")}
+                    >
+                      SaleAmt{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("SaleAmt")}
+                      ></i>
+                    </td>
+
+                    <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                      onClick={() => handleSorting("PrmDate")}
+                    >
+                      PrmDate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("PrmDate")}
+                      ></i>
+                    </td>
+
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("InsNum")}
+                    >
+                      Ins#{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("InsNum")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={eighthColWidth}
+                      onClick={() => handleSorting("InsAmt")}
+                    >
+                      InsAmt{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("InsAmt")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("LastDate")}
+                    >
+                      LastDate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("LastDate")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Balance")}
+                    >
+                      Balance{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      onClick={() => handleSorting("ExpiryDate")}
+                    >
+                      Expiry {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("ExpiryDate")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={elewenthColWidth}
+                      onClick={() => handleSorting("Col")}
+                    >
+                      Col{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Col")}
+                      ></i>
+                    </td>
+                    <td className="border-dark" style={sixCol}></td>
                   </tr>
                 </thead>
               </table>
             </div>
+
             <div
               className="table-scroll"
               style={{
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "48vh",
+                maxHeight: "50vh",
                 // width: "100%",
                 wordBreak: "break-word",
               }}
@@ -2254,9 +2050,8 @@ export default function GeneralLedger() {
                 className="myTable"
                 id="tableBody"
                 style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  // width: "100%",
+                  fontSize: "12px",
+                  width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
@@ -2269,7 +2064,7 @@ export default function GeneralLedger() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="7" className="text-center">
+                        <td colSpan="11" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -2282,7 +2077,7 @@ export default function GeneralLedger() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 7 }).map((_, colIndex) => (
+                            {Array.from({ length: 11 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2295,14 +2090,28 @@ export default function GeneralLedger() {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
+
                         <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
+
                         <td style={seventhColWidth}></td>
+                        <td style={eighthColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                        <td style={elewenthColWidth}></td>
                       </tr>
                     </>
                   ) : (
                     <>
                       {tableData.map((item, i) => {
+                    const lastDate = parseDDMMYYYY(item.LastDate);
+const expiryDate = parseDDMMYYYY(item.ExpiryDate);
+
+const isNegative = lastDate < expiryDate;
+
+
+              
+              
                         totalEnteries += 1;
                         return (
                           <tr
@@ -2314,35 +2123,86 @@ export default function GeneralLedger() {
                             }
                             style={{
                               backgroundColor: getcolor,
-                              color: fontcolor,
-                              color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
-                              //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
+                            //   color: fontcolor,
+                             color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            <td className="text-center" style={firstColWidth}>
-                              {item.Date}
+                            {/* <td className="text-start" style={firstColWidth}>
+                              {item.tinscod}
+                            </td> */}
+                            <td
+                              className="text-start"
+                              style={{
+                                ...firstColWidth,
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                color: selectedIndex === i ? "white" : "blue", // ✅ conditional color
+                              }}
+                              onDoubleClick={(e) => {
+                                e.stopPropagation();
+                                // code temporarily store karo
+                                sessionStorage.setItem(
+                                  "InstallmentLedger",
+                                  JSON.stringify({
+                                    code: item.code,
+                                  }),
+                                );
+
+                                // fixed URL open karo
+                                window.open(
+                                  "/crystalsol/InstallmentLedger",
+                                  "_blank",
+                                );
+                              }}
+                            >
+                              {item.code}
                             </td>
-                            <td className="text-center" style={secondColWidth}>
-                              {item["Trn#"]}
+
+                            <td
+                              className="text-start"
+                              title={item.Customer}
+                              style={{
+                                ...secondColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.Customer}
                             </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
+                            <td className="text-start" style={thirdColWidth}>
+                              {item.SaleDate}
                             </td>
-                            <td className="text-start" style={forthColWidth}>
-                              {item.Description}
+                            <td className="text-end" style={forthColWidth}>
+                              {item.SaleAmt}
                             </td>
+
                             <td className="text-end" style={fifthColWidth}>
-                              {formatValue(item.Debit)}
+                              {item.PrmDate}
+                            </td>
+
+                            <td className="text-end" style={seventhColWidth}>
+                              {item.InsNum}
+                            </td>
+                            <td className="text-end" style={eighthColWidth}>
+                              {item.InsAmt}
+                            </td>
+                            <td className="text-end" style={ninthColWidth}>
+                              {item.LastDate}
                             </td>
                             <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item.Credit)}
+                              {item.Balance}
                             </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Balance)}
+                            <td className="text-end" style={tenthColWidth}>
+                              {item.ExpiryDate}
+                            </td>
+                            <td className="text-end" style={elewenthColWidth}>
+                              {item.Col}
                             </td>
                           </tr>
                         );
                       })}
+
                       {Array.from({
                         length: Math.max(0, 27 - tableData.length),
                       }).map((_, rowIndex) => (
@@ -2353,7 +2213,7 @@ export default function GeneralLedger() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 7 }).map((_, colIndex) => (
+                          {Array.from({ length: 11 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2366,8 +2226,13 @@ export default function GeneralLedger() {
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
+                        <td style={eighthColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+
+                        <td style={tenthColWidth}></td>
+                        <td style={elewenthColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -2378,12 +2243,11 @@ export default function GeneralLedger() {
 
           <div
             style={{
-              borderBottom: `1px solid ${fontcolor}`,
+              paddingRight: "8px",
               borderTop: `1px solid ${fontcolor}`,
+              borderBottom: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "8px",
-              // width: "101.2%",
             }}
           >
             <div
@@ -2392,7 +2256,11 @@ export default function GeneralLedger() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+                 <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>
+            </div>
             <div
               style={{
                 ...secondColWidth,
@@ -2413,7 +2281,12 @@ export default function GeneralLedger() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+              <span className="mobileledger_total">
+                {formatValue(TotalSale)}
+              </span>
+            </div>
+
             <div
               style={{
                 ...fifthColWidth,
@@ -2421,10 +2294,33 @@ export default function GeneralLedger() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
+             
+            </div>
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+            <div
+              style={{
+                ...eighthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
               <span className="mobileledger_total">
-                {formatValue(totalDebit)}
+                {formatValue(TotalIns)}
               </span>
             </div>
+            <div
+              style={{
+                ...ninthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
             <div
               style={{
                 ...sixthColWidth,
@@ -2433,20 +2329,26 @@ export default function GeneralLedger() {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalCredit)}
+                {formatValue(TotalaBalance)}
               </span>
             </div>
             <div
               style={{
-                ...seventhColWidth,
+                ...tenthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(closingBalance)}
-              </span>
+              {" "}
+            
             </div>
+            <div
+              style={{
+                ...elewenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
           </div>
 
           <div
@@ -2455,39 +2357,17 @@ export default function GeneralLedger() {
               marginBottom: "2px",
             }}
           >
-            <SingleButton
-              to="/MainPage"
-              text="Return"
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            />
-            <SingleButton
-              text="PDF"
-              onClick={exportPDFHandler}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            />
-            <SingleButton
-              text="Excel"
-              onClick={handleDownloadCSV}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            />
+            <SingleButton to="/MainPage" text="Return" />
+            <SingleButton text="PDF" onClick={exportPDFHandler} />
+            <SingleButton text="EXCEL" onClick={handleDownloadCSV} />
             <SingleButton
               id="searchsubmit"
-              text="Select"
+              text="SELECT"
               ref={input3Ref}
-              onClick={fetchReceivableReport}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
+              onClick={() => {
+                fetchGeneralLedger();
+                resetSorting();
+              }}
             />
           </div>
         </div>

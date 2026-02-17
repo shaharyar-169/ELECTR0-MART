@@ -1,11 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+
 import axios from "axios";
-import { Link } from "react-router-dom";
-import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData , getYearDescription, getLocationnumber} from "../../../Auth";
-import NavComponent from "../../../MainComponent/Navform/navbarform";
-import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
+
+import { useTheme } from "../../../ThemeContext";
+import {
+  getUserData,
+  getOrganisationData,
+  getLocationnumber,
+  getYearDescription,
+} from "../../Auth";
+
+import NavComponent from "../../MainComponent/Navform/navbarform";
+import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
 import { BsCalendar } from "react-icons/bs";
@@ -14,16 +22,15 @@ import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { useNavigate } from "react-router-dom";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchGetUser } from "../../../Redux/action";
-import "./installment.css";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { formHelperTextClasses } from "@mui/material";
+import { Balance } from "@mui/icons-material";
 
-export default function InstallmentBalanceReport() {
+export default function InstallmentClosedAccountReport() {
   const navigate = useNavigate();
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
@@ -42,13 +49,12 @@ export default function InstallmentBalanceReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
- 
 
   const [TotalSale, setTotalSale] = useState(0);
   const [TotalAdvance, setTotalAdvance] = useState(0);
   const [TotalIns, setTotalIns] = useState(0);
   const [TotalaBalance, setTotalaBalance] = useState(0);
-   const [TotalCollection, setTotalCollection] = useState(0);
+  const [TotalCollection, setTotalCollection] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -75,9 +81,10 @@ export default function InstallmentBalanceReport() {
     getfontstyle,
     getdatafontsize,
   } = useTheme();
+  const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
   const yeardescription = getYearDescription();
-    const locationnumber = getLocationnumber();
+  const locationnumber = getLocationnumber();
 
   console.log("select year: " + getyeardescription);
 
@@ -111,6 +118,76 @@ export default function InstallmentBalanceReport() {
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
+ const handlefromInputChange = (e) => {
+    setfromInputDate(e.target.value);
+  };
+
+  const handlefromKeyPress = (e, inputId) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const fromDateElement = document.getElementById("fromdatevalidation");
+      const formattedInput = fromInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
+
+        if (month > 12 || month === 0) {
+          toast.error("Please enter a valid month (MM) between 01 and 12");
+          return;
+        }
+
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          return;
+        }
+
+        const currentDate = new Date();
+        const enteredDate = new Date(year, month - 1, day);
+
+        if (GlobalfromDate && enteredDate < GlobalfromDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+        if (GlobalfromDate && enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+
+        fromDateElement.style.border = `1px solid ${fontcolor}`;
+        setfromInputDate(formattedInput);
+
+        const nextInput = document.getElementById(inputId);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        } else {
+          document.getElementById("submitButton").click();
+        }
+      } else {
+        toast.error("Date must be in the format dd-mm-yyyy");
+      }
+    }
+  };
+
+  const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
+
 
   const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
@@ -206,132 +283,171 @@ export default function InstallmentBalanceReport() {
   // Bind to window
   window.closeAlert = closeAlert;
 
+ 
+
   function fetchGeneralLedger() {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
-
-    const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-
-    let hasError = false;
-    let errorType = "";
-
-    // Handle saleType, fromInputDate, and toInputDate errors first
-    switch (true) {
-    //   case !saleType:
-    //     errorType = "saleType";
-    //     break;
-
-      case !toInputDate:
-        errorType = "toDate";
-        break;
-      default:
-        hasError = false;
-        break;
-    }
-
-    // Handle date format validation separately
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    }
-
-    if (!dateRegex.test(toInputDate)) {
-      errorType = "toDateInvalid";
-    } else {
-      const formattedToInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-      const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-      if (enteredToDate < GlobalfromDate || enteredToDate > GlobaltoDate) {
-        errorType = "toDateAfterGlobal";
+      const fromDateElement = document.getElementById("fromdatevalidation");
+      const toDateElement = document.getElementById("todatevalidation");
+  
+      const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+  
+      let hasError = false;
+      let errorType = "";
+  
+      switch (true) {
+        //    case !saleType:
+        //        errorType = "saleType";
+        //        break;
+        case !fromInputDate:
+          errorType = "fromDate";
+          break;
+        case !toInputDate:
+          errorType = "toDate";
+          break;
+        default:
+          hasError = false;
+          break;
       }
-    }
-
-    // Handle errors using a separate switch based on errorType
-    switch (errorType) {
-    //   case "saleType":
-    //     toast.error("Please select a Account Code");
-    //     return;
-      case "toDate":
-        toast.error(
-          `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+  
+      if (!dateRegex.test(fromInputDate)) {
+        errorType = "fromDateInvalid";
+      } else if (!dateRegex.test(toInputDate)) {
+        errorType = "toDateInvalid";
+      } else {
+        const formattedFromInput = fromInputDate.replace(
+          /^(\d{2})(\d{2})(\d{4})$/,
+          "$1-$2-$3"
         );
-        return;
-
-      case "toDateAfterGlobal":
-        toast.error(
-          `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+        const [fromDay, fromMonth, fromYear] = formattedFromInput
+          .split("-")
+          .map(Number);
+        const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+  
+        const formattedToInput = toInputDate.replace(
+          /^(\d{2})(\d{2})(\d{4})$/,
+          "$1-$2-$3"
         );
-        return;
-
-      default:
-        break;
-    }
-    ////////////////////////////////////////////
-
-    // document.getElementById('fromdatevalidation').style.border = `1px solid ${fontcolor}`;
-    document.getElementById("todatevalidation").style.border =
-      `1px solid ${fontcolor}`;
-
-    const apiUrl2 = apiLinks + "/InstallmentBalanceReport.php";
-    setIsLoading(true);
-    const formData2 = new URLSearchParams({
-      FRepDat: toInputDate,
-      FColCod: saleType,
-      FSchTxt: searchQuery,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-
-      code: "MTSELEC",
-      FLocCod: "002",
-    }).toString();
-
-    axios
-      .post(apiUrl2, formData2)
-      .then((response) => {
-         
-         
-        setTotalSale(response.data["Total Sale"]);
-        setTotalAdvance(response.data["Total Advance"]);
-        setTotalIns(response.data["Total Ins"]);
-        setTotalaBalance(response.data["Total Balance"]);
-              setTotalCollection(response.data["Total Collection"]);
-
-        if (response.data && Array.isArray(response.data.Detail)) {
-          setTableData(response.data.Detail);
-          setIsLoading(false);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data,
-          );
-          setTableData([]);
+        const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
+        const enteredToDate = new Date(toYear, toMonth - 1, toDay);
+  
+        if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
+          errorType = "fromDateBeforeGlobal";
+        } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
+          errorType = "fromDateAfterGlobal";
+        } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+          errorType = "toDateAfterGlobal";
+        } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
+          errorType = "toDateBeforeGlobal";
+        } else if (enteredToDate < enteredFromDate) {
+          errorType = "toDateBeforeFromDate";
         }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setIsLoading(false);
-      });
-  }
+      }
+  
+      switch (errorType) {
+        case "saleType":
+          toast.error("Please select a Account Code");
+          return;
+  
+        case "fromDate":
+          toast.error("From date is required");
+          return;
+        case "toDate":
+          toast.error("To date is required");
+          return;
+        case "fromDateInvalid":
+          toast.error("From date must be in the format dd-mm-yyyy");
+          return;
+        case "toDateInvalid":
+          toast.error("To date must be in the format dd-mm-yyyy");
+          return;
+        case "fromDateBeforeGlobal":
+          toast.error(
+            `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "fromDateAfterGlobal":
+          toast.error(
+            `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "toDateAfterGlobal":
+          toast.error(
+            `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "toDateBeforeGlobal":
+          toast.error(
+            `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "toDateBeforeFromDate":
+          toast.error("To date must be after from date");
+          return;
+  
+        default:
+          break;
+      }
+  
+      // console.log(data);
+      document.getElementById(
+        "fromdatevalidation"
+      ).style.border = `1px solid ${fontcolor}`;
+      document.getElementById(
+        "todatevalidation"
+      ).style.border = `1px solid ${fontcolor}`;
+  
+      const apiUrl = apiLinks + "/InstallmentClosedAccount.php";
+      setIsLoading(true);
+      const formData = new URLSearchParams({
+        FIntDat: fromInputDate,
+        FFnlDat: toInputDate,
+        FColCod:saleType,
+        FSchTxt: searchQuery,
+
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+
+    //   code: "MTSELEC",
+    //   FLocCod: "002",
+      }).toString();
+  
+      axios
+        .post(apiUrl, formData)
+        .then((response) => {
+          setIsLoading(false);
+  
+            setTotalSale(response.data["Total Sale "]);
+        setTotalIns(response.data["Total Ins "]);
+        setTotalaBalance(response.data["Total Balance "]);
+  
+          if (response.data && Array.isArray(response.data.Detail)) {
+            setTableData(response.data.Detail);
+          } else {
+            console.warn(
+              "Response data structure is not as expected:",
+              response.data.Detail
+            );
+            setTableData([]);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setIsLoading(false);
+        });
+    }
 
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
     // If it hasn't mounted before or on refresh, select the 'from date' input
-    if (
-      !hasComponentMountedPreviously ||
-      (toRef && toRef.current)
-    ) {
-      if (toRef && toRef.current) {
+    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+      if (fromRef && fromRef.current) {
         setTimeout(() => {
-          toRef.current.focus(); // Focus on the input field
-          toRef.current.select(); // Select the text within the input field
+          fromRef.current.focus(); // Focus on the input field
+          fromRef.current.select(); // Select the text within the input field
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true"); // Set the flag indicating mount
-
     }
   }, []);
 
@@ -352,9 +468,10 @@ export default function InstallmentBalanceReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCollectors.php";
     const formData = new URLSearchParams({
-      // FLocCod: getLocationNumber,
-      code: "MTSELEC",
-      FLocCod: "001",
+              code: organisation.code,
+      FLocCod: getLocationNumber,
+    //   code: "MTSELEC",
+    //   FLocCod: "002",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -565,44 +682,44 @@ export default function InstallmentBalanceReport() {
     const rows = tableData.map((item) => [
       item.code,
       item.Customer,
-      item["Sale Date"],
-      item.Sale,
-      
-      item.Advance,
-      item["Ins #"],
-      item["Ins Amt"],
-      item["Last Date"],
-       item.Collection,
+      item.SaleDate,
+      item.SaleAmt,
+      item.PrmDate,
+      item.InsNum,
+      item.InsAmt,
+      item.LastDate,
       item.Balance,
-      item.Collector,
+      item.ExpiryDate,
+      item.Col,
     ]);
 
     // Add summary row to the table
     rows.push([
-        "", "", "", String(formatValue(TotalSale)), 
-                String(formatValue(TotalAdvance))  ,
-         "", 
-         String(formatValue(TotalIns))  ,
-         "",
-         String(formatValue(TotalCollection))  ,
-          String(formatValue(TotalaBalance))  ,
-          "", 
+      String(formatValue(tableData.length.toLocaleString())),
+      "",
+      "",
+      String(formatValue(TotalSale)),
+      "",
+      "",
+      String(formatValue(TotalIns)),
+      "",
+      String(formatValue(TotalaBalance)),
+"",
+      "",
     ]);
 
     // Define table column headers and individual column widths
     const headers = [
       "Code",
       "Customer",
-      "Sale Date",
-      "Sale",
-      
-      "Advance",
-    
-      "Ins #",
+      "SaleDate",
+      "SaleAmt",
+      "PrmDate",
+      "Ins#",
       "Ins Amt",
       "Last Date",
-        "Collection",
       "Balance",
+      "Expiry",
       "Col",
     ];
     const columnWidths = [24, 80, 23, 23, 23, 14, 23, 24, 23, 23, 10];
@@ -615,14 +732,14 @@ export default function InstallmentBalanceReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-     doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -643,8 +760,6 @@ doc.setFont("verdana-regular", "normal");
         doc.text(header, cellX, cellY, { align: "center" }); // Center the text
         startX += columnWidths[index]; // Move to the next column
       });
-
-     
     };
 
     const addTableRows = (startX, startY, startIndex, endIndex) => {
@@ -679,7 +794,7 @@ doc.setFont("verdana-regular", "normal");
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F"
+            "F",
           );
         }
 
@@ -698,7 +813,7 @@ doc.setFont("verdana-regular", "normal");
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5
+            rowBottomY - 0.5,
           );
 
           doc.setLineWidth(0.2);
@@ -707,7 +822,7 @@ doc.setFont("verdana-regular", "normal");
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY
+            rowBottomY,
           );
         } else {
           doc.setLineWidth(0.2);
@@ -715,7 +830,7 @@ doc.setFont("verdana-regular", "normal");
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
           );
         }
 
@@ -735,16 +850,13 @@ doc.setFont("verdana-regular", "normal");
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex == 2) {
+          if (cellIndex === 0 || cellIndex == 2 || cellIndex ==4 || cellIndex == 9) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (
-            cellIndex >=3
-           
-          ) {
+          } else if (cellIndex == 3 || cellIndex == 5 || cellIndex == 6 || cellIndex == 8 || cellIndex == 10) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -770,7 +882,7 @@ doc.setFont("verdana-regular", "normal");
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
+              startY + (i - startIndex + 3) * rowHeight,
             );
             startX += columnWidths[cellIndex];
           }
@@ -844,9 +956,9 @@ doc.setFont("verdana-regular", "normal");
         }
 
         // Add page numbering
- doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-                  doc.text(
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(
           `Page ${pageNumber}`,
           rightX - 20,
           doc.internal.pageSize.height - 10,
@@ -859,42 +971,38 @@ doc.setFont("verdana-regular", "normal");
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-       doc.setFont("Times New Roman", "normal");
-          doc.setFontSize(10);
+        doc.setFont("Times New Roman", "normal");
+        doc.setFontSize(10);
         addTitle(comapnyname, "", "", pageNumber, startY, 20, 10); // Render company title with default font size, only date, and page number
         startY += 7; // Adjust vertical position for the company title
-       doc.setFont("verdana-regular", "normal");
-        addTitle(`Installment Balance Report`, "", "", pageNumber, startY, 14); // Render sale report title with decreased font size, provide the time, and page number
+        doc.setFont("verdana-regular", "normal");
+        addTitle(`Installment Closed Account Report From ${fromInputDate} To ${toInputDate}`, "", "", pageNumber, startY, 14); // Render sale report title with decreased font size, provide the time, and page number
         startY += 13;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 2; // Position the labels below the titles and above the table
 
-       
-
-      let typename = Companyselectdatavalue.label
+        let typename = Companyselectdatavalue.label
           ? Companyselectdatavalue.label
           : "ALL";
 
-          let searchdata= searchQuery ? searchQuery :""
+        let searchdata = searchQuery ? searchQuery : "";
 
-       doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
-                doc.text(`Collector :`, labelsX, labelsY ); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
-                doc.text(`${typename}`, labelsX + 25, labelsY ); // Draw the value next to the label
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Collector :`, labelsX, labelsY); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${typename}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-
-if(searchQuery){
-     doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
-                doc.text(`Search :`, labelsX+ 200, labelsY ); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
-                doc.text(`${searchdata}`, labelsX + 220, labelsY ); // Draw the value next to the label
-
-}
+        if (searchQuery) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+          doc.text(`Search :`, labelsX + 200, labelsY); // Draw bold label
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+          doc.text(`${searchdata}`, labelsX + 220, labelsY); // Draw the value next to the label
+        }
 
         startY += 0; // Adjust vertical position for the labels
 
@@ -939,7 +1047,7 @@ doc.setFont('verdana-regular', "normal");
     handlePagination();
 
     // Save the PDF file
-    doc.save("InstallmentBalanceReport.pdf");
+    doc.save(`InstallmentClosedAccountReport As On ${date}.pdf`);
 
     const pdfBlob = doc.output("blob");
     const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -951,283 +1059,294 @@ doc.setFont('verdana-regular', "normal");
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
-   const handleDownloadCSV = async () => {
-     const workbook = new ExcelJS.Workbook();
-     const worksheet = workbook.addWorksheet("Sheet1");
- 
-     const numColumns = 11; // Ensure this matches the actual number of columns
- 
-     const columnAlignments = [
-       "center",
-       "left",
-       "center",
-       "right",
-       "right",
-       "right",
-       "right",
-       "right",
-       "right",
-       "right",
-       "right",
-     ];
- 
-     // Define fonts for different sections
-     const fontCompanyName = {
-       name: "CustomFont" || "CustomFont",
-       size: 18,
-       bold: true,
-     };
-     const fontStoreList = {
-       name: "CustomFont" || "CustomFont",
-       size: 10,
-       bold: false,
-     };
-     const fontHeader = {
-       name: "CustomFont" || "CustomFont",
-       size: 10,
-       bold: true,
-     };
-     const fontTableContent = {
-       name: "CustomFont" || "CustomFont",
-       size: 10,
-       bold: false,
-     };
- 
-     // Add an empty row at the start
-     worksheet.addRow([]);
- 
-     // Add company name
-     const companyRow = worksheet.addRow([comapnyname]);
-  
-     companyRow.eachCell((cell) => {
-   cell.font = {
-     name: "Times New Roman",
-     size: 16,       // optional
-     bold: true,     // optional
-   };
-   cell.alignment = { horizontal: "center" };
- });
- 
-     worksheet.getRow(companyRow.number).height = 30;
-     worksheet.mergeCells(
-       `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-         companyRow.number
-       }`
-     );
- 
-     // Add Store List row
-     const storeListRow = worksheet.addRow([
-       `Installment Balance Report As On ${toInputDate}`,
-     ]);
-     storeListRow.eachCell((cell) => {
-       cell.font = fontStoreList;
-       cell.alignment = { horizontal: "center" };
-     });
- 
-     worksheet.mergeCells(
-       `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-         storeListRow.number
-       }`
-     );
- 
-     // Add an empty row after the title section
-     worksheet.addRow([]);
- 
-     let collectordata = Companyselectdatavalue.label
-       ? Companyselectdatavalue.label
-       : "ALL";
-  
-     let typesearch = searchQuery ? searchQuery : "";
- 
-     const typeAndStoreRow4 = worksheet.addRow(
-       searchQuery
-         ? ["Collector :", collectordata, "", "", "","", "", "Search :", typesearch]
-         : ["Collector :", collectordata]
-     );
- 
+  const handleDownloadCSV = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    const numColumns = 11; // Ensure this matches the actual number of columns
+
+    const columnAlignments = [
+      "center",
+      "left",
+      "center",
+      "right",
+      "center",
+      "right",
+      "right",
+      "center",
+      "right",
+      "right",
+      "right",
+    ];
+
+    // Define fonts for different sections
+    const fontCompanyName = {
+      name: "CustomFont" || "CustomFont",
+      size: 18,
+      bold: true,
+    };
+    const fontStoreList = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+    const fontHeader = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: true,
+    };
+    const fontTableContent = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: false,
+    };
+
+    // Add an empty row at the start
+    worksheet.addRow([]);
+
+    // Add company name
+    const companyRow = worksheet.addRow([comapnyname]);
+
+    companyRow.eachCell((cell) => {
+      cell.font = {
+        name: "Times New Roman",
+        size: 16, // optional
+        bold: true, // optional
+      };
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.getRow(companyRow.number).height = 30;
+    worksheet.mergeCells(
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        companyRow.number
+      }`,
+    );
+
+    // Add Store List row
+    const storeListRow = worksheet.addRow([
+      `Installment Closed Account Report From ${fromInputDate} To ${toInputDate}`,
+    ]);
+    storeListRow.eachCell((cell) => {
+      cell.font = fontStoreList;
+      cell.alignment = { horizontal: "center" };
+    });
+
+    worksheet.mergeCells(
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        storeListRow.number
+      }`,
+    );
+
+    // Add an empty row after the title section
+    worksheet.addRow([]);
+
+    let collectordata = Companyselectdatavalue.label
+      ? Companyselectdatavalue.label
+      : "ALL";
+
+    let typesearch = searchQuery ? searchQuery : "";
+
+    const typeAndStoreRow4 = worksheet.addRow(
+      searchQuery
+        ? [
+            "Collector :",
+            collectordata,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Search :",
+            typesearch,
+          ]
+        : ["Collector :", collectordata],
+    );
+
     //   worksheet.mergeCells(`B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`);
-     
- 
-   
-      typeAndStoreRow4.eachCell((cell, colIndex) => {
-       cell.font = {
-         name: "CustomFont" || "CustomFont",
-         size: 10,
-         bold: [1, 6].includes(colIndex),
-       };
-       cell.alignment = { horizontal: "left", vertical: "middle" };
-     });
- 
-     // Header style
-     const headerStyle = {
-       font: fontHeader,
-       alignment: { horizontal: "center", vertical: "middle" },
-       fill: {
-         type: "pattern",
-         pattern: "solid",
-         fgColor: { argb: "FFC6D9F7" },
-       },
-       border: {
-         top: { style: "thin" },
-         left: { style: "thin" },
-         bottom: { style: "thin" },
-         right: { style: "thin" },
-       },
-     };
- 
-     // Add headers
-     const headers = [
-       "Code",
+
+    typeAndStoreRow4.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 6].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+
+    // Header style
+    const headerStyle = {
+      font: fontHeader,
+      alignment: { horizontal: "center", vertical: "middle" },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC6D9F7" },
+      },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    // Add headers
+    const headers = [
+      "Code",
       "Customer",
-      "Sale Date",
-      "Sale",
-        "Collection",
-      "Advance",
-    
-      "Ins #",
+      "SaleDate",
+      "SaleAmt",
+      "PrmDate",
+      "Ins#",
       "Ins Amt",
       "Last Date",
       "Balance",
+      "Expiry",
       "Col",
-     ];
-     const headerRow = worksheet.addRow(headers);
-     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
- 
-     // Add data rows
-     tableData.forEach((item) => {
-       const row = worksheet.addRow([
-       item.code,
+    ];
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+    // Add data rows
+    tableData.forEach((item) => {
+      const row = worksheet.addRow([
+        item.code,
       item.Customer,
-      item["Sale Date"],
-      item.Sale,
-       item.Collection,
-      item.Advance,
-      item["Ins #"],
-      item["Ins Amt"],
-      item["Last Date"],
+      item.SaleDate,
+      item.SaleAmt,
+      item.PrmDate,
+      item.InsNum,
+      item.InsAmt,
+      item.LastDate,
       item.Balance,
-      item.Collector,
-       ]);
- 
-       row.eachCell((cell, colIndex) => {
-         cell.font = fontTableContent;
-         cell.border = {
-           top: { style: "thin" },
-           left: { style: "thin" },
-           bottom: { style: "thin" },
-           right: { style: "thin" },
-         };
-         cell.alignment = {
-           horizontal: columnAlignments[colIndex - 1] || "left",
-           vertical: "middle",
-         };
-       });
-     });
- 
-     // Set column widths
-     [11, 45, 11, 14, 14, 14, 14, 14, 11, 14,14].forEach((width, index) => {
-       worksheet.getColumn(index + 1).width = width;
-     });
- 
-     const totalRow = worksheet.addRow([
-        "", "", "", String(formatValue(TotalSale)), 
-        String(formatValue(TotalCollection))  ,
-        String(formatValue(TotalAdvance))  ,
-         "", 
-         String(formatValue(TotalIns))  ,
-         "",
-          String(formatValue(TotalaBalance))  ,
-          "", 
-     ]);
- 
-     // total row added
- 
-     totalRow.eachCell((cell, colNumber) => {
-       cell.font = { bold: true };
-       cell.border = {
-         top: { style: "double" },
-         left: { style: "thin" },
-         bottom: { style: "double" },
-         right: { style: "thin" },
-       };
- 
-       // Align only the "Total" text to the right
-       if (colNumber >=4 ) {
-         cell.alignment = { horizontal: "right" };
-       }
-     });
- 
-     // Add a blank row
-     worksheet.addRow([]);
-     // Get current date and time
-     const getCurrentTime = () => {
-       const today = new Date();
-       const hh = String(today.getHours()).padStart(2, "0");
-       const mm = String(today.getMinutes()).padStart(2, "0");
-       const ss = String(today.getSeconds()).padStart(2, "0");
-       return `${hh}:${mm}:${ss}`;
-     };
-     // Get current date
-     const getCurrentDate = () => {
-       const today = new Date();
-       const day = String(today.getDate()).padStart(2, "0");
-       const month = String(today.getMonth() + 1).padStart(2, "0");
-       const year = today.getFullYear();
-       return `${day}-${month}-${year}`;
-     };
-     const currentTime = getCurrentTime();
-     const currentdate = getCurrentDate();
-     const userid = user.tusrid;
- 
-     // Add date and time row
-     const dateTimeRow = worksheet.addRow([
-       `DATE:   ${currentdate}  TIME:   ${currentTime}`,
-     ]);
-     dateTimeRow.eachCell((cell) => {
-       cell.font = {
-         name: "CustomFont" || "CustomFont",
-         size: 10,
-         // bold: true
-         // italic: true,
-       };
-       cell.alignment = { horizontal: "left" };
-     });
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-     dateTimeRow.eachCell((cell) => {
-       cell.font = {
-         name: "CustomFont" || "CustomFont",
-         size: 10,
-         // bold: true
-         // italic: true,
-       };
-       cell.alignment = { horizontal: "left" };
-     });
- 
-     // Merge across all columns
-     worksheet.mergeCells(
-       `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-         dateTimeRow.number
-       }`
-     );
-     worksheet.mergeCells(
-       `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-         dateTimeRow1.number
-       }`
-     );
- 
-     // Generate and save the Excel file
-     const buffer = await workbook.xlsx.writeBuffer();
-     const blob = new Blob([buffer], {
-       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-     });
-     saveAs(blob, `InstallmentBalanceReport As On ${currentdate}.xlsx`);
-   };
+      item.ExpiryDate,
+      item.Col,
+      ]);
+
+      row.eachCell((cell, colIndex) => {
+        cell.font = fontTableContent;
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = {
+          horizontal: columnAlignments[colIndex - 1] || "left",
+          vertical: "middle",
+        };
+      });
+    });
+
+    // Set column widths
+    [11, 45, 11, 14, 11, 7, 14, 11, 11, 14, 7].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
+    const totalRow = worksheet.addRow([
+      String(formatValue(tableData.length.toLocaleString())),
+      "",
+      "",
+      String(formatValue(TotalSale)),
+      "",
+      "",
+      String(formatValue(TotalIns)),
+      "",
+      String(formatValue(TotalaBalance)),
+"",
+      "",
+    ]);
+
+    // total row added
+
+    totalRow.eachCell((cell, colNumber) => {
+      cell.font = { bold: true };
+      cell.border = {
+        top: { style: "double" },
+        left: { style: "thin" },
+        bottom: { style: "double" },
+        right: { style: "thin" },
+      };
+
+      // Align only the "Total" text to the right
+      if (colNumber >= 4) {
+        cell.alignment = { horizontal: "right" };
+      }
+    });
+
+    // Add a blank row
+    worksheet.addRow([]);
+    // Get current date and time
+    const getCurrentTime = () => {
+      const today = new Date();
+      const hh = String(today.getHours()).padStart(2, "0");
+      const mm = String(today.getMinutes()).padStart(2, "0");
+      const ss = String(today.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    };
+    // Get current date
+    const getCurrentDate = () => {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+    const currentTime = getCurrentTime();
+    const currentdate = getCurrentDate();
+    const userid = user.tusrid;
+
+    // Add date and time row
+    const dateTimeRow = worksheet.addRow([
+      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+    ]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+    dateTimeRow.eachCell((cell) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        // bold: true
+        // italic: true,
+      };
+      cell.alignment = { horizontal: "left" };
+    });
+
+    // Merge across all columns
+    worksheet.mergeCells(
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow.number
+      }`,
+    );
+    worksheet.mergeCells(
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+        dateTimeRow1.number
+      }`,
+    );
+
+    // Generate and save the Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `InstallmentClosedAccountReport As On ${currentdate}.xlsx`);
+  };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   useHotkeys(
     "alt+s",
     () => {
       fetchGeneralLedger();
+      resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true },
   );
@@ -1310,38 +1429,159 @@ doc.setFont('verdana-regular', "normal");
     width: "80px",
   };
   const secondColWidth = {
-    width: isSidebarVisible ? "240px" :'360px',
+    width: isSidebarVisible ? "240px" : "360px",
   };
   const thirdColWidth = {
     width: "80px",
   };
   const forthColWidth = {
-   width: isSidebarVisible ? "80px" :'100px',
+    width: isSidebarVisible ? "80px" : "100px",
   };
   const fifthColWidth = {
-     width: isSidebarVisible ? "80px" :'100px',
+    width: "80px" ,
   };
   const sixthColWidth = {
-     width: isSidebarVisible ? "80px" :'100px',
+    width: isSidebarVisible ? "80px" : "100px",
   };
   const seventhColWidth = {
-      width:"40px",
+    width: "55px",
   };
   const eighthColWidth = {
-     width: isSidebarVisible ? "80px" :'100px',
+    width: isSidebarVisible ? "80px" : "100px",
   };
   const ninthColWidth = {
     width: "80px",
   };
   const tenthColWidth = {
-     width: isSidebarVisible ? "80px" :'100px',
+    width:  "80px" ,
   };
   const elewenthColWidth = {
-      width: "40px"
+    width: "40px",
   };
 
   const sixCol = {
     width: "8px",
+  };
+
+  const [columns, setColumns] = useState({
+    code: [],
+    Customer: [],
+    SaleDate: [],
+    SaleAmt: [],
+    PrmDate: [],
+    InsNum: [],
+    InsAmt: [],
+    LastDate: [],
+    Balance: [],
+    ExpiryDate: [],
+    Col: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    code: "",
+    Customer: "",
+    SaleDate: "",
+    SaleAmt: "",
+    PrmDate: "",
+    InsNum: "",
+    InsAmt: "",
+    LastDate: "",
+    Balance: "",
+    ExpiryDate: "",
+    Col: "",
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        code: tableData.map((row) => row.code),
+        Customer: tableData.map((row) => row.Customer),
+        SaleDate: tableData.map((row) => row.SaleDate),
+        SaleAmt: tableData.map((row) => row.SaleAmt),
+        PrmDate: tableData.map((row) => row.PrmDate),
+        InsNum: tableData.map((row) => row.InsNum),
+        InsAmt: tableData.map((row) => row.InsAmt),
+        LastDate: tableData.map((row) => row.LastDate),
+        Balance: tableData.map((row) => row.Balance),
+        ExpiryDate: tableData.map((row) => row.ExpiryDate),
+        Col: tableData.map((row) => row.Col),
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      let aVal = a[col] ?? "";
+      let bVal = b[col] ?? "";
+
+      aVal = aVal.toString();
+      bVal = bVal.toString();
+
+      // ⭐ CODE SORT (13-01-0005)
+      if (col === "code") {
+        const aParts = aVal.split("-").map((p) => parseInt(p, 10));
+        const bParts = bVal.split("-").map((p) => parseInt(p, 10));
+
+        for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+          const diff = (aParts[i] || 0) - (bParts[i] || 0);
+          if (diff !== 0) {
+            return newOrder === "ASC" ? diff : -diff;
+          }
+        }
+        return 0;
+      }
+
+      // ⭐ Numeric sorting
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // ⭐ String sorting
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      code: null,
+      Customer: null,
+      SaleDate: null,
+      SaleAmt: null,
+      PrmDate: null,
+      InsNum: null,
+      InsAmt: null,
+      LastDate: null,
+      Balance: null,
+      ExpiryDate: null,
+      Col: null,
+    });
+  };
+
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
   };
 
   // Adjust the content width based on sidebar state
@@ -1360,7 +1600,7 @@ doc.setFont('verdana-regular', "normal");
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: isSidebarVisible ? "1000px" :'1200px',
+    maxWidth: isSidebarVisible ? "1000px" : "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1455,7 +1695,14 @@ doc.setFont('verdana-regular', "normal");
   }, [selectedIndex]); // Add selectedIndex as a dependency
   //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
 
- const formatValue = (val) => {
+const parseDDMMYYYY = (dateStr) => {
+  if (!dateStr) return null;
+  const [dd, mm, yyyy] = dateStr.split("-");
+  return new Date(`${yyyy}-${mm}-${dd}`);
+};
+
+
+  const formatValue = (val) => {
     return Number(val) === 0 ? "" : val;
   };
 
@@ -1473,7 +1720,7 @@ doc.setFont('verdana-regular', "normal");
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Installment Balance Report" />
+          <NavComponent textdata="Installment Closed Account Report" />
 
           <div
             className="row "
@@ -1489,10 +1736,110 @@ doc.setFont('verdana-regular', "normal");
                 justifyContent: "start",
               }}
             >
+                  <div className="d-flex align-items-center" style={{marginLeft:'2px'}} >
+                                <div
+                                  style={{
+                                    width: "80px",
+                                    display: "flex",
+                                    justifyContent: "end",
+                                  }}
+                                >
+                                  <label htmlFor="fromDatePicker">
+                                    <span
+                                      style={{
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
+                                        fontWeight: "bold",
+                                      }}
+                                    >
+                                      From :
+                                    </span>
+                                  </label>
+                                </div>
+                                <div
+                                  id="fromdatevalidation"
+                                  style={{
+                                    width: "135px",
+                                    border: `1px solid ${fontcolor}`,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    height: "24px",
+                                    justifyContent: "center",
+                                    marginLeft: "5px",
+                                    background: getcolor,
+                                  }}
+                                  onFocus={(e) =>
+                                    (e.currentTarget.style.border = "2px solid red")
+                                  }
+                                  onBlur={(e) =>
+                                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                  }
+                                >
+                                  <input
+                                    style={{
+                                      height: "20px",
+                                      width: "90px",
+                                      paddingLeft: "5px",
+                                      outline: "none",
+                                      border: "none",
+                                      fontSize: "12px",
+                                      backgroundColor: getcolor,
+                                      color: fontcolor,
+                                    //   opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                      pointerEvents:
+                                        selectedRadio === "custom" ? "auto" : "none",
+                                    }}
+                                    id="frominputid"
+                                    value={fromInputDate}
+                                    ref={fromRef}
+                                    onChange={handlefromInputChange}
+                                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                                    autoComplete="off"
+                                    placeholder="dd-mm-yyyy"
+                                    aria-label="Date Input"
+                                    disabled={selectedRadio !== "custom"}
+                                  />
+                                  <DatePicker
+                                    selected={selectedfromDate}
+                                    onChange={handlefromDateChange}
+                                    dateFormat="dd-MM-yyyy"
+                                    popperPlacement="bottom"
+                                    showPopperArrow={false}
+                                    open={fromCalendarOpen}
+                                    dropdownMode="select"
+                                    customInput={
+                                      <div>
+                                        <BsCalendar
+                                          onClick={
+                                            selectedRadio === "custom"
+                                              ? toggleFromCalendar
+                                              : undefined
+                                          }
+                                          style={{
+                                            cursor:
+                                              selectedRadio === "custom"
+                                                ? "pointer"
+                                                : "default",
+                                            marginLeft: "18px",
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            color: fontcolor,
+                                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                          }}
+                                          disabled={selectedRadio !== "custom"}
+                                        />
+                                      </div>
+                                    }
+                                    disabled={selectedRadio !== "custom"}
+                                  />
+                                </div>
+                              </div>
+
+
               {/* To Date */}
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "10px" }}
+                style={{ marginLeft: "50px" }}
               >
                 <div
                   style={{
@@ -1512,7 +1859,7 @@ doc.setFont('verdana-regular', "normal");
                         fontWeight: "bold",
                       }}
                     >
-                      Date :
+                      To :
                     </span>
                   </label>{" "}
                 </div>
@@ -1589,6 +1936,7 @@ doc.setFont('verdana-regular', "normal");
                   />
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -1676,7 +2024,7 @@ doc.setFont('verdana-regular', "normal");
                   />
                 </div>
               </div>
-              <div id="lastDiv" >
+              <div id="lastDiv">
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
                     style={{
@@ -1775,40 +2123,129 @@ doc.setFont('verdana-regular', "normal");
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      Code
-                    </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Customer
-                    </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Sale Date
-                    </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Sale
-                    </td>
-                    
-                    <td className="border-dark" style={fifthColWidth}>
-                      Advance
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("code")}
+                      ></i>
                     </td>
 
-                    <td className="border-dark" style={seventhColWidth}>
-                      Ins#
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Customer")}
+                    >
+                      Customer{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Customer")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={eighthColWidth}>
-                      Ins Amt
+                    <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("SaleDate")}
+                    >
+                      SaleDate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("SaleDate")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={ninthColWidth}>
-                      Last Date
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("SaleAmt")}
+                    >
+                      SaleAmt{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("SaleAmt")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={sixthColWidth}>
-                      Collection
+
+                    <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                      onClick={() => handleSorting("PrmDate")}
+                    >
+                      PrmDate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("PrmDate")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={tenthColWidth}>
-                      Balance
+
+                    <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("InsNum")}
+                    >
+                      Ins#{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("InsNum")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={elewenthColWidth}>
-                      Col
+                    <td
+                      className="border-dark"
+                      style={eighthColWidth}
+                      onClick={() => handleSorting("InsAmt")}
+                    >
+                      InsAmt{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("InsAmt")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("LastDate")}
+                    >
+                      LastDate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("LastDate")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Balance")}
+                    >
+                      Balance{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      onClick={() => handleSorting("ExpiryDate")}
+                    >
+                      Expiry {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("ExpiryDate")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={elewenthColWidth}
+                      onClick={() => handleSorting("Col")}
+                    >
+                      Col{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Col")}
+                      ></i>
                     </td>
                     <td className="border-dark" style={sixCol}></td>
                   </tr>
@@ -1871,13 +2308,13 @@ doc.setFont('verdana-regular', "normal");
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                     
+
                         <td style={fifthColWidth}></td>
 
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
                         <td style={ninthColWidth}></td>
-                           <td style={sixthColWidth}></td>
+                        <td style={sixthColWidth}></td>
                         <td style={tenthColWidth}></td>
                         <td style={elewenthColWidth}></td>
                       </tr>
@@ -1885,6 +2322,14 @@ doc.setFont('verdana-regular', "normal");
                   ) : (
                     <>
                       {tableData.map((item, i) => {
+                    const lastDate = parseDDMMYYYY(item.LastDate);
+const expiryDate = parseDDMMYYYY(item.ExpiryDate);
+
+const isNegative = lastDate < expiryDate;
+
+
+              
+              
                         totalEnteries += 1;
                         return (
                           <tr
@@ -1896,77 +2341,81 @@ doc.setFont('verdana-regular', "normal");
                             }
                             style={{
                               backgroundColor: getcolor,
-                              color: fontcolor,
+                            //   color: fontcolor,
+                             color: isNegative ? "red" : fontcolor,
                             }}
                           >
                             {/* <td className="text-start" style={firstColWidth}>
                               {item.tinscod}
                             </td> */}
-      <td
-                    className="text-start"
-                    style={{
-                      ...firstColWidth,
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      color: selectedIndex === i   ? "white"     : "blue", // ✅ conditional color
-                    }}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                        "InstallmentLedger",
-                        JSON.stringify({
-                          code: item.code,
-                        }),
-                      );
+                            <td
+                              className="text-start"
+                              style={{
+                                ...firstColWidth,
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                color: selectedIndex === i ? "white" : "blue", // ✅ conditional color
+                              }}
+                              onDoubleClick={(e) => {
+                                e.stopPropagation();
+                                // code temporarily store karo
+                                sessionStorage.setItem(
+                                  "InstallmentLedger",
+                                  JSON.stringify({
+                                    code: item.code,
+                                  }),
+                                );
 
-                      // fixed URL open karo
-                      window.open("/crystalsol/InstallmentLedger", "_blank");
-                    }}
-                  >
-                    {item.code}
-                  </td>
+                                // fixed URL open karo
+                                window.open(
+                                  "/crystalsol/InstallmentLedger",
+                                  "_blank",
+                                );
+                              }}
+                            >
+                              {item.code}
+                            </td>
 
                             <td
-                    className="text-start"
-                    title={item.Customer}
-                    style={{
-                      ...secondColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Customer}
-                  </td>
+                              className="text-start"
+                              title={item.Customer}
+                              style={{
+                                ...secondColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.Customer}
+                            </td>
                             <td className="text-start" style={thirdColWidth}>
-                              {item["Sale Date"]}
+                              {item.SaleDate}
                             </td>
                             <td className="text-end" style={forthColWidth}>
-                              {item.Sale}
+                              {item.SaleAmt}
                             </td>
-                            
+
                             <td className="text-end" style={fifthColWidth}>
-                              {item.Advance}
+                              {item.PrmDate}
                             </td>
 
                             <td className="text-end" style={seventhColWidth}>
-                              {item["Ins #"]}
+                              {item.InsNum}
                             </td>
                             <td className="text-end" style={eighthColWidth}>
-                              {item["Ins Amt"]}
+                              {item.InsAmt}
                             </td>
                             <td className="text-end" style={ninthColWidth}>
-                              {item["Last Date"]}
+                              {item.LastDate}
                             </td>
                             <td className="text-end" style={sixthColWidth}>
-                              {item.Collection}
-                            </td>
-                            <td className="text-end" style={tenthColWidth}>
                               {item.Balance}
                             </td>
+                            <td className="text-end" style={tenthColWidth}>
+                              {item.ExpiryDate}
+                            </td>
                             <td className="text-end" style={elewenthColWidth}>
-                              {item.Collector}
+                              {item.Col}
                             </td>
                           </tr>
                         );
@@ -1998,7 +2447,7 @@ doc.setFont('verdana-regular', "normal");
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
                         <td style={ninthColWidth}></td>
-                                                <td style={sixthColWidth}></td>
+                        <td style={sixthColWidth}></td>
 
                         <td style={tenthColWidth}></td>
                         <td style={elewenthColWidth}></td>
@@ -2025,7 +2474,11 @@ doc.setFont('verdana-regular', "normal");
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+                 <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>
+            </div>
             <div
               style={{
                 ...secondColWidth,
@@ -2047,11 +2500,11 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-                 <span className="mobileledger_total">
+              <span className="mobileledger_total">
                 {formatValue(TotalSale)}
               </span>
             </div>
-           
+
             <div
               style={{
                 ...fifthColWidth,
@@ -2059,9 +2512,7 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-                 <span className="mobileledger_total">
-                {formatValue(TotalAdvance)}
-              </span>
+             
             </div>
             <div
               style={{
@@ -2077,7 +2528,7 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-                 <span className="mobileledger_total">
+              <span className="mobileledger_total">
                 {formatValue(TotalIns)}
               </span>
             </div>
@@ -2088,15 +2539,15 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-             <div
+            <div
               style={{
                 ...sixthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-                 <span className="mobileledger_total">
-                {formatValue(TotalCollection)}
+              <span className="mobileledger_total">
+                {formatValue(TotalaBalance)}
               </span>
             </div>
             <div
@@ -2105,10 +2556,9 @@ doc.setFont('verdana-regular', "normal");
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            > <span className="mobileledger_total">
-                {formatValue(TotalaBalance)}
-              </span>
-
+            >
+              {" "}
+            
             </div>
             <div
               style={{
@@ -2132,7 +2582,10 @@ doc.setFont('verdana-regular', "normal");
               id="searchsubmit"
               text="SELECT"
               ref={input3Ref}
-              onClick={fetchGeneralLedger}
+              onClick={() => {
+                fetchGeneralLedger();
+                resetSorting();
+              }}
             />
           </div>
         </div>

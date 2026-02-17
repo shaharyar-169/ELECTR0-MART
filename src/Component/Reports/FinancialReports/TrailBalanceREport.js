@@ -4,15 +4,17 @@ import { Link, useNavigate } from "react-router-dom";
 
 import axios from "axios";
 
-import { useTheme } from "../../../../ThemeContext";
+import { useTheme } from "../../../ThemeContext";
 import {
   getUserData,
   getOrganisationData,
   getLocationnumber,
   getYearDescription,
-} from "../../../Auth";
-import NavComponent from "../../../MainComponent/Navform/navbarform";
-import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
+} from "../../Auth";
+
+
+import NavComponent from "../../MainComponent/Navform/navbarform";
+import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
 import { BsCalendar } from "react-icons/bs";
@@ -24,13 +26,10 @@ import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useHotkeys } from "react-hotkeys-hook";
-import { fetchGetUser } from "../../../Redux/action";
-import "./misc.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Balance } from "@mui/icons-material";
 
-export default function PayableReport() {
+export default function TrailBalanceReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -43,7 +42,6 @@ export default function PayableReport() {
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
-
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
@@ -240,9 +238,9 @@ export default function PayableReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input1Ref.current) {
+        if (input2Ref.current) {
           e.preventDefault();
-          input1Ref.current.focus();
+          input2Ref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -392,16 +390,16 @@ export default function PayableReport() {
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/PayableReport.php";
+    const apiUrl = apiLinks + "/TrialBalance.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
-      code: "NASIRTRD",
+    //   FYerDsc: "2025-2025",
+    //   code: "NASIRTRD",
+    //   FLocCod:'001',
 
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
-      // code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FRepTyp: transectionType,
@@ -413,10 +411,10 @@ export default function PayableReport() {
       .then((response) => {
         setIsLoading(false);
         console.log("Response:", response.data);
-        setTotalOpening(response.data["Total Opening"]);
-        setTotalDebit(response.data["Total Debit"]);
-        setTotalCredit(response.data["Total Credit"]);
-        setClosingBalance(response.data["Total Balance"]);
+        setTotalOpening(response.data["OpeningBal "]);
+        setTotalDebit(response.data["TotalDebit "]);
+        setTotalCredit(response.data["TotalCredit"]);
+        setClosingBalance(response.data["ClosingBal "]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -481,7 +479,7 @@ export default function PayableReport() {
       item.Opening,
       item.Debit,
       item.Credit,
-      item.Balance,
+      item.Closing,
     ]);
 
     // Add summary row to the table
@@ -501,7 +499,7 @@ export default function PayableReport() {
       "Opening",
       "Debit",
       "Credit",
-      "Balance",
+      "Closing",
     ];
     const columnWidths = [23, 100, 30, 30, 30, 30];
 
@@ -761,7 +759,7 @@ export default function PayableReport() {
         startY += 5; // Adjust vertical position for the company title
      doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Payable Report From ${fromInputDate} To ${toInputDate}`,
+          `Trial Balance From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -782,17 +780,15 @@ export default function PayableReport() {
             : "ALL";
         let search = searchQuery ? searchQuery : "";
 
-        // let accoount = Companyselectdatavalue.label
-        //   ? Companyselectdatavalue.label
-        //   : "ALL";
+       
 
   
-     doc.setFont("verdana", "bold");
-            doc.setFontSize(10); 
-                   doc.text(`Type :`, labelsX, labelsY + 8.5); // Draw bold label
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+    //  doc.setFont("verdana", "bold");
+    //         doc.setFontSize(10); 
+    //                doc.text(`Type :`, labelsX, labelsY + 8.5); // Draw bold label
+    //  doc.setFont("verdana-regular", "normal");
+    //         doc.setFontSize(10);
+    //                 doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
                      if (searchQuery) {
      doc.setFont("verdana", "bold");
@@ -847,7 +843,7 @@ export default function PayableReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`payableReport As On ${date}.pdf`);
+    doc.save(`TrilaBalance As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
@@ -906,7 +902,7 @@ export default function PayableReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Payable Report From ${fromInputDate} To ${toInputDate}`,
+      `Trial Balance From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -938,8 +934,8 @@ export default function PayableReport() {
 
     const typeAndStoreRow3 = worksheet.addRow(
       searchQuery
-        ? ["TYPE", typestatus, "", "", "SEARCH :", typesearch]
-        : ["TYPE", typestatus],
+        ? ["", "", "", "", "Search :", typesearch]
+        : ["" ],
     );
 
     // Merge cells for Accountselect (columns B to D)
@@ -980,7 +976,7 @@ export default function PayableReport() {
       "Opening",
       "Debit",
       "Credit",
-      "Balance",
+      "Closing",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -993,7 +989,7 @@ export default function PayableReport() {
         item.Opening,
         item.Debit,
         item.Credit,
-        item.Balance,
+        item.Closing,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1106,7 +1102,7 @@ export default function PayableReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `PayableReport  As on ${currentdate}.xlsx`);
+    saveAs(blob, `TrialBalance  As on ${currentdate}.xlsx`);
   };
   const dispatch = useDispatch();
 
@@ -1166,7 +1162,7 @@ export default function PayableReport() {
     Opening: [],
     Debit: [],
     Credit: [],
-    Balance: [],
+    Closing: [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
     code: "",
@@ -1174,7 +1170,7 @@ export default function PayableReport() {
     Opening: "",
     Debit: "",
     Credit: "",
-    Balance: "",
+    Closing: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -1186,7 +1182,7 @@ export default function PayableReport() {
         Opening: tableData.map((row) => row.Opening),
         Debit: tableData.map((row) => row.Debit),
         Credit: tableData.map((row) => row.Credit),
-        Balance: tableData.map((row) => row.Balance),
+        Closing: tableData.map((row) => row.Closing),
       };
       setColumns(newColumns);
     }
@@ -1248,7 +1244,7 @@ export default function PayableReport() {
       Opening: null,
       Debit: null,
       Credit: null,
-      Balance: null,
+      Closing: null,
     });
   };
 
@@ -1342,7 +1338,7 @@ export default function PayableReport() {
                       e.stopPropagation();
                       // code temporarily store karo
                       sessionStorage.setItem(
-                        "SupplierLedgerData",
+                         "GeneralLedgerData",
                         JSON.stringify({
                           code: item.code,
                           fromInputDate: fromInputDate,
@@ -1351,7 +1347,7 @@ export default function PayableReport() {
                       );
 
                       // fixed URL open karo
-                      window.open("/crystalsol/SupplierLedger", "_blank");
+                      window.open("/crystalsol/GeneralLedger1", "_blank");
                     }}
                   >
                     {item.code}
@@ -1370,7 +1366,7 @@ export default function PayableReport() {
                     {formatValue(item.Credit)}
                   </td>
                   <td className="text-end" style={sixthColWidth}>
-                    {formatValue(item.Balance)}
+                    {formatValue(item.Closing)}
                   </td>
                 </tr>
               );
@@ -1589,7 +1585,7 @@ export default function PayableReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Payable Report" />
+          <NavComponent textdata="Trial Balance" />
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1755,7 +1751,7 @@ export default function PayableReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                    onKeyDown={(e) => handleToKeyPress(e, input2Ref)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -1797,98 +1793,7 @@ export default function PayableReport() {
                 </div>
               </div>
 
-              {/* ------ */}
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: parseInt(getdatafontsize),
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "200px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="R">RECEIVABLE</option>
-                    <option value="P">PAYABLE</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "end",
-              }}
-            >
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
+<div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
                     style={{
@@ -1951,8 +1856,10 @@ export default function PayableReport() {
                   )}
                 </div>
               </div>
+             
             </div>
           </div>
+        
           <div>
             <div
               style={{
@@ -2048,12 +1955,12 @@ export default function PayableReport() {
                     <td
                       className="border-dark"
                       style={sixthColWidth}
-                      onClick={() => handleSorting("Balance")}
+                      onClick={() => handleSorting("Closing")}
                     >
-                      Balance{" "}
+                      Closing{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Balance")}
+                        style={getIconStyle("Closing")}
                       ></i>
                     </td>
 
