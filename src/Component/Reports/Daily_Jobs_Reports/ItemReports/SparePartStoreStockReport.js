@@ -242,14 +242,14 @@ export default function SparePartsStoreStockReport() {
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
       FRepStk: transectionType2,
 
-      // code: "AGFACTORY",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+      code: "AGCOMP",
+      FLocCod: "001",
+      FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -323,9 +323,9 @@ export default function SparePartsStoreStockReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetStore.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      // code: "AGFACTORY",
-      //       FYerDsc: "2024-2024",
+      // code: organisation.code,
+      code: "AGCOMP",
+            FYerDsc: "2025-2025",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -1590,8 +1590,8 @@ export default function SparePartsStoreStockReport() {
     // 🔹 Case 4
     firstColWidth = { width: isSidebarVisible ? "100px" : "135px" };
     secondColWidth = { width: isSidebarVisible ? "130px" : "290px" };
-    thirdColWidth = { width: "70px" };
-    CommonColWidth = { width: "70px" };
+    thirdColWidth = { width: "75px" };
+    CommonColWidth = { width: "75px" };
   }
 
   const sixthcol = {

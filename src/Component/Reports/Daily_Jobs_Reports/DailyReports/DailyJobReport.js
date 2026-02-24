@@ -53,7 +53,7 @@ export default function DailyJobReport() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
-  const [transectionType2, settransectionType2] = useState("Y");
+  const [transectionType2, settransectionType2] = useState("");
   const [transectionType3, settransectionType3] = useState("H");
 
   // STATE FOR DROPDOWN SELECTION
@@ -754,22 +754,24 @@ export default function DailyJobReport() {
       // OTHER POST VARIABLES
       FWrnSts: transectionType2,
       FJobNat: transectionType3,
-      FCptCod: Complainselectdata,
-      FTchCod: Technicianselectdatavalue,
-      FJobTyp: Typeselectdatavalue,
       FJobSts: transectionType,
-      FRefCod: Referenceselectdatavalue,
-      FCmpCod: Companyselectdatavalue,
-      FCtgCod: Categoryselectdatavalue,
-      FAreCod: Areaselectdatavalue,
-      FCtyCod: Cityselectdatavalue,
+       
+      FCptCod: Complainselectdata,
+      FTchCod: Technicianselectdata,
+      FJobTyp: Typeselectdata,
+    
+      FRefCod: Referenceselectdata,
+      FCmpCod: Companyselectdata,
+      FCtgCod: Categoryselectdata,
+      FAreCod: Areaselectdata,
+      FCtyCod: Cityselectdata,
       FSchTxt: searchQuery,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-      code: "IZONECOMP",
-      FLocCod: "001",
+      // code: "AGCOMP",
+      // FLocCod: "001",
     }).toString();
 
     axios
@@ -2771,7 +2773,7 @@ export default function DailyJobReport() {
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    value={transectionType}
+                    value={transectionType2}
                     onChange={handleTransactionTypeChange2}
                     style={{
                       width: "230px",
@@ -2790,7 +2792,7 @@ export default function DailyJobReport() {
                     <option value="N">NO</option>
                   </select>
 
-                  {transectionType2 !== "Y" && (
+                  {transectionType2 !== "" && (
                     <span
                       onClick={() => settransectionType2("")}
                       style={{
@@ -3181,7 +3183,7 @@ export default function DailyJobReport() {
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    value={transectionType}
+                    value={transectionType3}
                     onChange={handleTransactionTypeChange3}
                     style={{
                       width: "230px",
@@ -3203,7 +3205,7 @@ export default function DailyJobReport() {
 
                   {transectionType3 !== "H" && (
                     <span
-                      onClick={() => settransectionType3("")}
+                      onClick={() => settransectionType3("H")}
                       style={{
                         position: "absolute",
                         right: "25px",
@@ -3871,7 +3873,7 @@ export default function DailyJobReport() {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{

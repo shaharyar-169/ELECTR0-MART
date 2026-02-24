@@ -422,13 +422,14 @@ export default function DailySparePartsIssueReport() {
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FSchTxt: searchQuery,
+      FStrCod: Companyselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-    //   code: "IZONECOMP",
-    //   FLocCod: "001",
-    //   FYerDsc: "2025-2025",
+      // code: "IZONECOMP",
+      // FLocCod: "001",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -1467,7 +1468,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
   let totalEntries = 0;
   const handlecompanyKeypress = (event, inputId) => {
     if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
+      const selectedOption = input5Ref.current.state.selectValue;
       if (selectedOption && selectedOption.value) {
         setCompanyselectdata(selectedOption.value);
       }
@@ -1549,16 +1550,19 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
     width: "50px",
   };
   const sixthColWidth = {
-    width: "300px",
+    width: "275px",
   };
   const seventhColWidth = {
-    width: "300px",
+    width: "275px",
   };
   const eightColWidth = {
     width: "60px",
   };
   const ninthColWidth = {
     width: "100px",
+  };
+   const tenthColWidth = {
+    width: "50px",
   };
   const sixthcol = {
     width: "8px",
@@ -2091,6 +2095,95 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                   />
                 </div>
               </div>
+   <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Store :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={input5Ref}
+                    options={typeoptions}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input3Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCompanyselectdata(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setCompanyselectdata("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "end",
+              }}
+            >
+             
 
               <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "3px" }}>
@@ -2106,16 +2199,16 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                 </label>
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <input
-                    ref={input5Ref}
+                    ref={input3Ref}
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "200px",
+                      width: "250px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2267,6 +2360,19 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                       ></i> */}
                     </td>
 
+                     <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      //   onClick={() => handleSorting("Item")}
+                    >
+                      Str
+                      {/* {" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Item")}
+                      ></i> */}
+                    </td>
+
                     <td
                       className="border-dark"
                       style={eightColWidth}
@@ -2305,7 +2411,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "55vh",
+                maxHeight: "50vh",
                 // width: "100%",
                 position: "relative",
                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -2329,7 +2435,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="8" className="text-center">
+                        <td colSpan="9" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -2342,7 +2448,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 8 }).map((_, colIndex) => (
+                            {Array.from({ length:9 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2357,6 +2463,8 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
+                                               <td style={tenthColWidth}></td>
+
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                       </tr>
@@ -2400,6 +2508,9 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                             <td className="text-start" style={seventhColWidth}>
                               {item.Item}
                             </td>
+                            <td className="text-start" style={seventhColWidth}>
+                              {item.Str}
+                            </td>
                             <td className="text-end" style={eightColWidth}>
                               {formatValue(item.Qnty)}
                             </td>
@@ -2419,7 +2530,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 8 }).map((_, colIndex) => (
+                          {Array.from({ length:9 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2433,6 +2544,8 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                       </tr>
@@ -2515,6 +2628,15 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
               {/* <span className="mobileledger_total">
                 {formatValue(ClosingBalance)}
               </span> */}
+            </div>
+             <div
+              style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+             
             </div>
             <div
               style={{

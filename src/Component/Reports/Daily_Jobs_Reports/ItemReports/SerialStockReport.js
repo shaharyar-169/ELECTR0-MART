@@ -81,7 +81,7 @@ export default function SerialStockReport() {
   const [sortData, setSortData] = useState("ASC");
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("A");
+  const [transectionType, settransectionType] = useState("1");
 
   console.log("transectionType", transectionType);
   const [transectionType2, settransectionType2] = useState("");
@@ -237,11 +237,12 @@ export default function SerialStockReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
+      FRepTyp: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
    
-      // code: "USMANMTR",
+      // code: "AGFACTORY",
       // FLocCod: "002",
       // FYerDsc: "2025-2025",
     }).toString();
@@ -1377,10 +1378,6 @@ export default function SerialStockReport() {
     }
   };
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
 
   const handleTransactionTypeChange2 = (event) => {
     const selectedTransactionType = event.target.value;
@@ -1440,6 +1437,11 @@ export default function SerialStockReport() {
 
   const sixthcol = {
     width: "8px",
+  };
+
+  const handleTransactionTypeChange = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType(selectedTransactionType);
   };
 
   const [columns, setColumns] = useState({
@@ -2184,7 +2186,7 @@ export default function SerialStockReport() {
                     className="List-select-class"
                     ref={typeRef}
                     options={typeoptions}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input5Ref)}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2308,7 +2310,101 @@ export default function SerialStockReport() {
                   />
                 </div>
               </div>
-                <div id="lastDiv" style={{ marginRight: "1px" }}>
+               <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Type :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input4Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "270px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "13px",
+                    }}
+                  >
+                    <option value="1">ALL</option>
+                    <option value="2">GREATER THEN 1</option>
+                    <option value="3">NEGATIVE</option>
+                  </select>
+
+                  {transectionType !== "1" && (
+                    <span
+                      onClick={() => settransectionType("1")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+            {/* //////////////// FORTH ROW ///////////////////////// */}
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "end",
+              }}
+            >
+              <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "3px" }}>
                   <span
                     style={{
@@ -2326,7 +2422,7 @@ export default function SerialStockReport() {
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{

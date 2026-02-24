@@ -25,10 +25,9 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Balance, Description, Store } from "@mui/icons-material";
+import { Balance, Collections, Description, Store } from "@mui/icons-material";
 import "../../../vardana/vardana";
 import "../../../vardana/verdana-bold";
-
 
 export default function InstallmentRecoveryReport() {
   const navigate = useNavigate();
@@ -36,6 +35,7 @@ export default function InstallmentRecoveryReport() {
   const organisation = getOrganisationData();
 
   const saleSelectRef = useRef(null);
+    const collectorRef = useRef(null);
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
@@ -50,6 +50,9 @@ export default function InstallmentRecoveryReport() {
   const hasInitialized = useRef(false);
 
   const [saleType, setSaleType] = useState("");
+
+  const [Collector, setCollector] = useState("");
+  const [CollectorDataValue, setCollectorDataValue] = useState("");
 
   const [storeList, setStoreList] = useState([]);
   const [storeType, setStoreType] = useState("");
@@ -72,6 +75,8 @@ export default function InstallmentRecoveryReport() {
 
   const [GetCapacity, setGetCapacity] = useState([]);
   const [GetEmployee, setGetEmployee] = useState([]);
+  const [CollectorData, setCollectorData] = useState([]);
+
   const [Employeeselectdata, setEmployeeselectdata] = useState("");
   const [Employeeselectdatavalue, setEmployeeselectdatavalue] = useState("");
 
@@ -99,10 +104,10 @@ export default function InstallmentRecoveryReport() {
 
   const [totalSale, settotalSale] = useState(0);
   const [totalIns, settotalIns] = useState(0);
-   const [totalReceive, settotalReceive] = useState(0);
-    const [totalCollection, settotalCollection] = useState(0);
-     const [totalOutstan, settotalOutstan] = useState(0);
-       const [totalBalance, settotalBalance] = useState(0);
+  const [totalReceive, settotalReceive] = useState(0);
+  const [totalCollection, settotalCollection] = useState(0);
+  const [totalOutstan, settotalOutstan] = useState(0);
+  const [totalBalance, settotalBalance] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -153,7 +158,7 @@ export default function InstallmentRecoveryReport() {
 
   const formatDate1 = (date) => {
     return `${String(date.getDate()).padStart(2, "0")}-${String(
-      date.getMonth() + 1
+      date.getMonth() + 1,
     ).padStart(2, "0")}-${date.getFullYear()}`;
   };
   const GlobaltoDate1 = formatDate1(GlobaltoDate);
@@ -191,7 +196,7 @@ export default function InstallmentRecoveryReport() {
       const fromDateElement = document.getElementById("fromdatevalidation");
       const formattedInput = fromInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
+        "$1-$2-$3",
       );
       const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
@@ -214,13 +219,13 @@ export default function InstallmentRecoveryReport() {
 
         if (GlobalfromDate && enteredDate < GlobalfromDate) {
           toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
           );
           return;
         }
         if (GlobalfromDate && enteredDate > GlobaltoDate) {
           toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
           );
           return;
         }
@@ -257,7 +262,7 @@ export default function InstallmentRecoveryReport() {
       const toDateElement = document.getElementById("todatevalidation");
       const formattedInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
+        "$1-$2-$3",
       );
       const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
@@ -280,21 +285,21 @@ export default function InstallmentRecoveryReport() {
 
         if (GlobaltoDate && enteredDate > GlobaltoDate) {
           toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
           );
           return;
         }
 
         if (GlobaltoDate && enteredDate < GlobalfromDate) {
           toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
           );
           return;
         }
 
         if (fromInputDate) {
           const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-")
+            fromInputDate.split("-").reverse().join("-"),
           );
           if (enteredDate <= fromDate) {
             toast.error("To date must be after from date");
@@ -305,9 +310,9 @@ export default function InstallmentRecoveryReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (saleSelectRef.current) {
+        if (collectorRef.current) {
           e.preventDefault();
-          saleSelectRef.current.focus();
+          collectorRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -346,7 +351,7 @@ export default function InstallmentRecoveryReport() {
     } else {
       const formattedFromInput = fromInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
+        "$1-$2-$3",
       );
       const [fromDay, fromMonth, fromYear] = formattedFromInput
         .split("-")
@@ -355,7 +360,7 @@ export default function InstallmentRecoveryReport() {
 
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
+        "$1-$2-$3",
       );
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
@@ -392,22 +397,22 @@ export default function InstallmentRecoveryReport() {
         return;
       case "fromDateBeforeGlobal":
         toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
         );
         return;
       case "fromDateAfterGlobal":
         toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
         );
         return;
       case "toDateAfterGlobal":
         toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
         );
         return;
       case "toDateBeforeGlobal":
         toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
         );
         return;
       case "toDateBeforeFromDate":
@@ -419,31 +424,29 @@ export default function InstallmentRecoveryReport() {
     }
 
     // console.log(data);
-    document.getElementById(
-      "fromdatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-    document.getElementById(
-      "todatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
+    document.getElementById("fromdatevalidation").style.border =
+      `1px solid ${fontcolor}`;
+    document.getElementById("todatevalidation").style.border =
+      `1px solid ${fontcolor}`;
 
     const apiUrl = apiLinks + "/InstallmentRecoveryReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-     FIntDat: fromInputDate,
-     FFnlDat: toInputDate,
-     FGrpCod: Employeeselectdata,
-     FVrfCod: Companyselectdata,
-     FAreCod: Categoryselectdata,
-     FRepTyp: transectionType2,
-     
+      FIntDat: fromInputDate,
+      FFnlDat: toInputDate,
+      FGrpCod: Employeeselectdata,
+      FVrfCod: Companyselectdata,
+      FAreCod: Categoryselectdata,
+      FRepTyp: transectionType2,
+      FColCod: Collector,
+
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-        
 
-      // code: 'MTSELEC',
-      // FLocCod: '002',
-      // FYerDsc: '2025-2025',
+      // code: "MTSELEC",
+      // FLocCod: "002",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -457,14 +460,13 @@ export default function InstallmentRecoveryReport() {
         settotalCollection(response.data["Total Collection "]);
         settotalOutstan(response.data["Total Outstanding "]);
         settotalBalance(response.data["Total Balance "]);
-      
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data.Detail
+            response.data.Detail,
           );
           setTableData([]);
         }
@@ -478,10 +480,7 @@ export default function InstallmentRecoveryReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (
-      !hasComponentMountedPreviously ||
-      (fromRef && fromRef.current)
-    ) {
+    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
       if (fromRef && fromRef.current) {
         setTimeout(() => {
           fromRef.current.focus();
@@ -500,7 +499,7 @@ export default function InstallmentRecoveryReport() {
     const firstDateOfCurrentMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      1
+      1,
     );
     setSelectedfromDate(firstDateOfCurrentMonth);
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
@@ -511,8 +510,8 @@ export default function InstallmentRecoveryReport() {
     const formData = new URLSearchParams({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-    //   code : 'NASIRTRD',
-    //   FLocCod:'001'
+      //   code : 'NASIRTRD',
+      //   FLocCod:'001'
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -522,7 +521,7 @@ export default function InstallmentRecoveryReport() {
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data
+            response.data,
           );
           setGetEmployee([]);
         }
@@ -536,14 +535,13 @@ export default function InstallmentRecoveryReport() {
     label: `${item.tgrpcod}-${item.tgrpdsc}`,
   }));
 
- 
   useEffect(() => {
     const apiUrl = apiLinks + "/GetVerifys.php";
     const formData = new URLSearchParams({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-    //  code: 'MTSELEC',
-    //   FLocCod: '001',
+      //  code: 'MTSELEC',
+      //   FLocCod: '001',
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -553,7 +551,7 @@ export default function InstallmentRecoveryReport() {
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data
+            response.data,
           );
           setGetCompany([]);
         }
@@ -563,11 +561,9 @@ export default function InstallmentRecoveryReport() {
       });
   }, []);
   const options = GetCompany.map((item) => ({
-    value: item.tvrfcod ,
-    label: `${item.tvrfcod }-${item.tvrfnam}`,
+    value: item.tvrfcod,
+    label: `${item.tvrfcod}-${item.tvrfnam}`,
   }));
-
-  
 
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveAreas.php";
@@ -583,7 +579,7 @@ export default function InstallmentRecoveryReport() {
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data
+            response.data,
           );
           setGetCategory([]);
         }
@@ -594,10 +590,32 @@ export default function InstallmentRecoveryReport() {
   }, []);
 
   const categoryoptions = GetCategory.map((item) => ({
-      value: item.tarecod,
+    value: item.tarecod,
     label: `${item.tarecod}-${item.taredsc}`,
   }));
 
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveCollector.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      // FLocCod: "001",
+      // code: "MTSELEC",
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        setCollectorData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+
+  const Collectoroption = CollectorData.map((item) => ({
+    value: item.tcolcod,
+    label: `${item.tcolcod}-${item.tcolnam.trim()}`,
+  }));
 
   const DropdownOption = (props) => {
     return (
@@ -687,12 +705,10 @@ export default function InstallmentRecoveryReport() {
       backgroundColor: state.isSelected
         ? "#3368B5"
         : state.isFocused
-        ? "#3368B5"
-        : getcolor,
-   color:
-  state.isSelected || state.isFocused
-    ? "white"
-    : fontcolor,      "&:hover": {
+          ? "#3368B5"
+          : getcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
+      "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
         cursor: "pointer",
@@ -786,8 +802,6 @@ export default function InstallmentRecoveryReport() {
   });
 
   const exportPDFHandler = () => {
-   
-
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
 
@@ -795,35 +809,33 @@ export default function InstallmentRecoveryReport() {
     const rows = tableData.map((item) => [
       item.Code,
       item.Customer,
-    //   item.Mobile,
-    //   item.SaleDate,
+      //   item.Mobile,
+      //   item.SaleDate,
       item.SaleAmt,
       item.Day,
       item.InsAmt,
       item.Receiavable,
       item.Collection,
-        item.Outstanding,
+      item.Outstanding,
       item.Balance,
-        item.Collector,
-      
-
+      item.Collector,
     ]);
 
     // Add summary row to the table
     rows.push([
       String(formatValue(tableData.length.toLocaleString())),
       "",
-    //   "",
-    //   "",
+      //   "",
+      //   "",
       String(formatValue(totalSale)),
-           "",
-             String(formatValue(totalIns)),
-               String(formatValue(totalReceive)),
-                 String(formatValue(totalCollection)),
-                   String(formatValue(totalOutstan)),  
-                   String(formatValue(totalBalance)),
+      "",
+      String(formatValue(totalIns)),
+      String(formatValue(totalReceive)),
+      String(formatValue(totalCollection)),
+      String(formatValue(totalOutstan)),
+      String(formatValue(totalBalance)),
 
-      ""
+      "",
     ]);
 
     // Define table column headers and individual column widths
@@ -831,18 +843,18 @@ export default function InstallmentRecoveryReport() {
     const headers = [
       "Code",
       "Customer",
-    //   "Mobile",
-    //   "InvDate",
+      //   "Mobile",
+      //   "InvDate",
       "Sale Amt",
       "Day",
       "Ins Amt",
       "Recei",
-       "Collec",
+      "Collec",
       "Outsta",
       "Balance",
-      "Code"
+      "Code",
     ];
-    const columnWidths = [22, 70, 27, 15, 27,27, 27,27,27,15];
+    const columnWidths = [22, 70, 27, 15, 27, 27, 27, 27, 27, 15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -852,14 +864,14 @@ export default function InstallmentRecoveryReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont('verdana-regular', 'normal');
+    doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont('verdana', 'bold');
-    doc.setFontSize(10);
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -920,7 +932,7 @@ export default function InstallmentRecoveryReport() {
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F"
+            "F",
           );
         }
 
@@ -939,7 +951,7 @@ export default function InstallmentRecoveryReport() {
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5
+            rowBottomY - 0.5,
           );
 
           doc.setLineWidth(0.2);
@@ -948,7 +960,7 @@ export default function InstallmentRecoveryReport() {
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY
+            rowBottomY,
           );
         } else {
           doc.setLineWidth(0.2);
@@ -956,7 +968,7 @@ export default function InstallmentRecoveryReport() {
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
           );
         }
 
@@ -976,14 +988,13 @@ export default function InstallmentRecoveryReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 ) {
+          if (cellIndex === 0) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-          
             cellIndex === 2 ||
             cellIndex === 3 ||
             cellIndex === 4 ||
@@ -992,7 +1003,6 @@ export default function InstallmentRecoveryReport() {
             cellIndex === 7 ||
             cellIndex === 8 ||
             cellIndex === 9
-          
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1019,7 +1029,7 @@ export default function InstallmentRecoveryReport() {
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
+              startY + (i - startIndex + 3) * rowHeight,
             );
             startX += columnWidths[cellIndex];
           }
@@ -1032,8 +1042,6 @@ export default function InstallmentRecoveryReport() {
           doc.setFontSize(10);
         }
       }
-
-      
 
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
@@ -1074,7 +1082,7 @@ export default function InstallmentRecoveryReport() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10
+        pageNumberFontSize = 10,
       ) => {
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -1094,13 +1102,13 @@ export default function InstallmentRecoveryReport() {
         // }
 
         // Add page numbering
-        doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
         doc.text(
           `Page ${pageNumber}`,
           rightX - 15,
           doc.internal.pageSize.height - 10,
-          { align: "right" }
+          { align: "right" },
         );
       };
 
@@ -1109,46 +1117,46 @@ export default function InstallmentRecoveryReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-      doc.setFont('Times New Roman', 'normal');
-    doc.setFontSize(10);
+        doc.setFont("Times New Roman", "normal");
+        doc.setFontSize(10);
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
- doc.setFont('verdana-regular', 'normal');
-    doc.setFontSize(10);
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
         addTitle(
           `Installment Recovery Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
           startY,
-          12
+          12,
         ); // Render sale report title with decreased font size, provide the time, and page number
         startY += 5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-
         let RATE =
           transectionType === "P"
             ? "PURCHASE RATE"
             : transectionType == "M"
-            ? "SM RATE"
-            : transectionType == "A"
-            ? "AVERAGE RATE"
-            : transectionType == "W"
-            ? "WEIGHTRD AVERAGE"
-            : transectionType == "F"
-            ? "FIFP"
-            : "";
+              ? "SM RATE"
+              : transectionType == "A"
+                ? "AVERAGE RATE"
+                : transectionType == "W"
+                  ? "WEIGHTRD AVERAGE"
+                  : transectionType == "F"
+                    ? "FIFP"
+                    : "";
 
         let transectionsts =
           transectionType2 === "A"
             ? "ALL"
             : transectionType2 == "N"
-            ? "NILL"
-             : transectionType2 == "O"
-            ? "OUTSTANDING" : ""
+              ? "NILL"
+              : transectionType2 == "O"
+                ? "OUTSTANDING"
+                : "";
 
         let EMPLOYEEDATA = Employeeselectdatavalue.label
           ? Employeeselectdatavalue.label
@@ -1168,38 +1176,33 @@ export default function InstallmentRecoveryReport() {
 
         let search = searchQuery ? searchQuery : "";
 
-     
-                
-doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
-                doc.text(`Verify :`, labelsX, labelsY + 4.3); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
-                doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Verify :`, labelsX, labelsY + 4.3); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${typeItem}`, labelsX + 20, labelsY + 4.3); // Draw the value next to the label
 
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Group :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${EMPLOYEEDATA}`, labelsX + 200, labelsY + 4.3); // Draw the value next to the label
 
-doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
-                doc.text(`Group :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
-                doc.text(`${EMPLOYEEDATA}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Area :`, labelsX, labelsY + 8.3); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${category}`, labelsX + 20, labelsY + 8.3); // Draw the value next to the label
 
-doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
-                doc.text(`Area :`, labelsX, labelsY + 8.3); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)       
-        doc.text(`${category}`, labelsX + 25, labelsY + 8.3); // Draw the value next to the label
-
-        doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
         doc.text(`Type :`, labelsX + 180, labelsY + 8.3); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
-        doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.3); // Draw the value next to the label
-
-           
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${transectionsts}`, labelsX + 200, labelsY + 8.3); // Draw the value next to the label
 
         startY += 10; // Adjust vertical position for the labels
 
@@ -1210,7 +1213,7 @@ doc.setFont('verdana-regular', "normal");
           (doc.internal.pageSize.width - totalWidth) / 2,
           startY,
           startIndex,
-          endIndex
+          endIndex,
         );
         if (endIndex < rows.length) {
           startY = addNewPage(startY); // Add new page and update startY
@@ -1295,21 +1298,21 @@ doc.setFont('verdana-regular', "normal");
 
     // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
- 
+
     companyRow.eachCell((cell) => {
-  cell.font = {
-    name: "Times New Roman",
-    size: 16,       // optional
-    bold: true,     // optional
-  };
-  cell.alignment = { horizontal: "center" };
-});
+      cell.font = {
+        name: "Times New Roman",
+        size: 16, // optional
+        bold: true, // optional
+      };
+      cell.alignment = { horizontal: "center" };
+    });
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
       `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         companyRow.number
-      }`
+      }`,
     );
 
     // Add Store List row
@@ -1324,7 +1327,7 @@ doc.setFont('verdana-regular', "normal");
     worksheet.mergeCells(
       `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         storeListRow.number
-      }`
+      }`,
     );
 
     // Add an empty row after the title section
@@ -1351,25 +1354,25 @@ doc.setFont('verdana-regular', "normal");
       transectionType === "P"
         ? "PURCHASE RATE"
         : transectionType == "M"
-        ? "SM RATE"
-        : transectionType == "A"
-        ? "AVERAGE RATE"
-        : transectionType == "W"
-        ? "WEIGHTRD AVERAGE"
-        : transectionType == "F"
-        ? "FIFP"
-        : "";
+          ? "SM RATE"
+          : transectionType == "A"
+            ? "AVERAGE RATE"
+            : transectionType == "W"
+              ? "WEIGHTRD AVERAGE"
+              : transectionType == "F"
+                ? "FIFP"
+                : "";
 
     let transectionsts =
       transectionType2 === "A"
         ? "ALL"
         : transectionType2 == "N"
-        ? "NILL"
-        : transectionType2 == "O"
-        ? "OUTSTANDING" : ""
+          ? "NILL"
+          : transectionType2 == "O"
+            ? "OUTSTANDING"
+            : "";
 
     let typesearch = searchQuery ? searchQuery : "";
-
 
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
@@ -1378,7 +1381,7 @@ doc.setFont('verdana-regular', "normal");
       "",
       "",
       "",
-       "",
+      "",
       "",
       "",
       "Group :",
@@ -1389,12 +1392,12 @@ doc.setFont('verdana-regular', "normal");
 
     // Add second row
     const typeAndStoreRow2 = worksheet.addRow([
-       "Area :",
+      "Area :",
       typecategory,
       "",
       "",
       "",
-       "",
+      "",
       "",
       "",
       "Type :",
@@ -1402,8 +1405,7 @@ doc.setFont('verdana-regular', "normal");
     ]);
 
     //  worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
-      // Add third row with conditional rendering for "SEARCH:"
-  
+    // Add third row with conditional rendering for "SEARCH:"
 
     // Apply styling for the status row
     typeAndStoreRow.eachCell((cell, colIndex) => {
@@ -1422,8 +1424,6 @@ doc.setFont('verdana-regular', "normal");
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-  
-    
 
     // Header style
     const headerStyle = {
@@ -1444,7 +1444,7 @@ doc.setFont('verdana-regular', "normal");
 
     // Add headers
     const headers = [
-     "Code",
+      "Code",
       "Customer",
       "Mobile",
       "InvDate",
@@ -1452,10 +1452,10 @@ doc.setFont('verdana-regular', "normal");
       "Day",
       "Ins Amt",
       "Recei",
-       "Collection",
+      "Collection",
       "Outstanding",
       "Balance",
-      "Code"
+      "Code",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1463,17 +1463,17 @@ doc.setFont('verdana-regular', "normal");
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-      item.Code,
-      item.Customer,
-      item.Mobile,
-      item.SaleDate,
-      item.SaleAmt,
-      item.Day,
-      item.InsAmt,
-      item.Receiavable,
-      item.Collection,
+        item.Code,
+        item.Customer,
+        item.Mobile,
+        item.SaleDate,
+        item.SaleAmt,
+        item.Day,
+        item.InsAmt,
+        item.Receiavable,
+        item.Collection,
         item.Outstanding,
-      item.Balance,
+        item.Balance,
         item.Collector,
       ]);
 
@@ -1493,25 +1493,24 @@ doc.setFont('verdana-regular', "normal");
     });
 
     // Set column widths
-    [10, 40, 11,10, 12,7, 12,12, 12, 12,12,8].forEach((width, index) => {
+    [10, 40, 12, 10, 12, 7, 12, 12, 12, 12, 12, 6].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
-   
- String(formatValue(tableData.length.toLocaleString())),
+      String(formatValue(tableData.length.toLocaleString())),
       "",
       "",
       "",
       String(formatValue(totalSale)),
-           "",
-             String(formatValue(totalIns)),
-               String(formatValue(totalReceive)),
-                 String(formatValue(totalCollection)),
-                   String(formatValue(totalOutstan)),  
-                   String(formatValue(totalBalance)),
+      "",
+      String(formatValue(totalIns)),
+      String(formatValue(totalReceive)),
+      String(formatValue(totalCollection)),
+      String(formatValue(totalOutstan)),
+      String(formatValue(totalBalance)),
 
-      ""
+      "",
     ]);
 
     // total row added
@@ -1526,11 +1525,18 @@ doc.setFont('verdana-regular', "normal");
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 5 || colNumber === 7 || colNumber === 8 || colNumber === 9 || colNumber === 10 || colNumber === 11) {
+      if (
+        colNumber === 5 ||
+        colNumber === 7 ||
+        colNumber === 8 ||
+        colNumber === 9 ||
+        colNumber === 10 ||
+        colNumber === 11
+      ) {
         cell.alignment = { horizontal: "right" };
       }
 
-      if (colNumber === 1 ) {
+      if (colNumber === 1) {
         cell.alignment = { horizontal: "center" };
       }
     });
@@ -1585,12 +1591,12 @@ doc.setFont('verdana-regular', "normal");
     worksheet.mergeCells(
       `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         dateTimeRow.number
-      }`
+      }`,
     );
     worksheet.mergeCells(
       `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
         dateTimeRow1.number
-      }`
+      }`,
     );
 
     // Generate and save the Excel file
@@ -1671,9 +1677,9 @@ doc.setFont('verdana-regular', "normal");
       }
     }
   };
-  const handlecapacityKeypress = (event, inputId) => {
+  const handleSaleKeypress = (event, inputId) => {
     if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
+      const selectedOption = collectorRef.current.state.selectValue;
       if (selectedOption && selectedOption.value) {
         setCapacityselectdata(selectedOption.value);
       }
@@ -1708,12 +1714,11 @@ doc.setFont('verdana-regular', "normal");
     settransectionType2(selectedTransactionType);
   };
 
-
   const firstColWidth = {
     width: "80px",
   };
   const secondColWidth = {
-    width: isSidebarVisible ? "200px" : "360px",
+    width: isSidebarVisible ? "160px" : "360px",
   };
   const thirdColWidth = {
     width: "90px",
@@ -1722,29 +1727,29 @@ doc.setFont('verdana-regular', "normal");
     width: "80px",
   };
   const sixthColWidth = {
-    width: isSidebarVisible ? "70px" : "80px",
+    width: "80px" ,
   };
   const seventhColWidth = {
-    width: "40px",
+    width: "45px",
   };
   const eightColWidth = {
-    width: isSidebarVisible ? "70px" : "80px",
+    width: "80px",
   };
   const ninthColWidth = {
-    width: isSidebarVisible ? "70px" : "80px",
+    width:  "80px",
   };
   const tenthColWidth = {
-    width: isSidebarVisible ? "70px" : "80px",
+    width:  "85px",
   };
-    const elewenthColWidth = {
-    width: isSidebarVisible ? "70px" : "80px",
+  const elewenthColWidth = {
+    width: "85px",
   };
 
-    const tewelthColWidth = {
-    width: isSidebarVisible ? "70px" : "80px",
+  const tewelthColWidth = {
+    width:  "80px",
   };
-    const thirteenColWidth = {
-   width: isSidebarVisible ? "40px" : "40px",
+  const thirteenColWidth = {
+    width:  "40px",
   };
 
   const sixthcol = {
@@ -1755,9 +1760,9 @@ doc.setFont('verdana-regular', "normal");
     "alt+s",
     () => {
       fetchDailyStatusReport();
-      //    resetSorting();
+         resetSorting();
     },
-    { preventDefault: true, enableOnFormTags: true }
+    { preventDefault: true, enableOnFormTags: true },
   );
 
   useHotkeys("alt+p", exportPDFHandler, {
@@ -1773,6 +1778,130 @@ doc.setFont('verdana-regular', "normal");
     enableOnFormTags: true,
   });
 
+   const [columns, setColumns] = useState({
+     Code: [],
+      Customer: [],
+      Mobile: [],
+      SaleDate: [],
+      SaleAmt: [],
+      Day: [],
+      InsAmt: [],
+      Receiavable: [],
+      Collection: [],
+      Outstanding: [],
+      Balance: [],
+      Collector: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+      Code: "",
+      Customer: "",
+      Mobile: "",
+      SaleDate: "",
+      SaleAmt: "",
+      Day: "",
+      InsAmt: "",
+      Receiavable: "",
+      Collection: "",
+      Outstanding: "",
+      Balance: "",
+      Collector: "",
+  });
+
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Code: tableData.map((row) => row.Code),
+        Customer: tableData.map((row) => row.Customer),
+        Mobile: tableData.map((row) => row.Mobile),
+        SaleDate: tableData.map((row) => row.SaleDate),
+        SaleAmt: tableData.map((row) => row.SaleAmt),
+        Day: tableData.map((row) => row.Day),
+        InsAmt: tableData.map((row) => row.InsAmt),
+        Receiavable: tableData.map((row) => row.Receiavable),
+        Collection: tableData.map((row) => row.Collection),
+        Outstanding: tableData.map((row) => row.Outstanding),
+        Balance: tableData.map((row) => row.Balance),
+        Collector: tableData.map((row) => row.Collector),
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+ const handleSorting = (col) => {
+  const currentOrder = columnSortOrders[col];
+  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+  const sortedData = [...tableData].sort((a, b) => {
+    let aVal = a[col] ?? "";
+    let bVal = b[col] ?? "";
+
+    aVal = aVal.toString();
+    bVal = bVal.toString();
+
+    // ⭐ CODE SORT (13-01-0005)
+    if (col === "code") {
+      const aParts = aVal.split("-").map(p => parseInt(p, 10));
+      const bParts = bVal.split("-").map(p => parseInt(p, 10));
+
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const diff = (aParts[i] || 0) - (bParts[i] || 0);
+        if (diff !== 0) {
+          return newOrder === "ASC" ? diff : -diff;
+        }
+      }
+      return 0;
+    }
+
+    // ⭐ Numeric sorting
+    const numA = parseFloat(aVal.replace(/,/g, ""));
+    const numB = parseFloat(bVal.replace(/,/g, ""));
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return newOrder === "ASC" ? numA - numB : numB - numA;
+    }
+
+    // ⭐ String sorting
+    return newOrder === "ASC"
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
+
+  setTableData(sortedData);
+
+  setColumnSortOrders((prev) => ({
+    ...Object.keys(prev).reduce((acc, key) => {
+      acc[key] = key === col ? newOrder : null;
+      return acc;
+    }, {}),
+  }));
+};
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Code: null,
+      Customer: null,
+      Mobile: null,
+      SaleDate: null,
+      SaleAmt: null,
+      Day: null,
+      InsAmt: null,
+      Receiavable: null,
+      Collection: null,
+      Outstanding: null,
+      Balance: null,
+      Collector: null,
+    });
+  };
+
+   const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -1787,7 +1916,7 @@ doc.setFont('verdana-regular', "normal");
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: isSidebarVisible ? "1000px": "1200px",
+    maxWidth: isSidebarVisible ? "1000px" : "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1833,7 +1962,7 @@ doc.setFont('verdana-regular', "normal");
   useEffect(() => {
     if (selectedRowId !== null) {
       const newIndex = tableData.findIndex(
-        (item) => item.tcmpcod === selectedRowId
+        (item) => item.tcmpcod === selectedRowId,
       );
       setSelectedIndex(newIndex);
     }
@@ -1848,7 +1977,7 @@ doc.setFont('verdana-regular', "normal");
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prevIndex) =>
-        Math.min(prevIndex + 1, tableData.length - 1)
+        Math.min(prevIndex + 1, tableData.length - 1),
       );
       scrollToSelectedRow();
     }
@@ -1896,7 +2025,7 @@ doc.setFont('verdana-regular', "normal");
       const inputDate = e.target.value;
       const formattedDate = inputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
+        "$1-$2-$3",
       );
 
       // Basic format validation (dd-mm-yyyy)
@@ -1975,12 +2104,13 @@ doc.setFont('verdana-regular', "normal");
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
-
-             
-              <div className="d-flex align-items-center" style={{marginLeft:'5px'}}>
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "5px" }}
+              >
                 <div
                   style={{
                     width: "90px",
@@ -2080,7 +2210,7 @@ doc.setFont('verdana-regular', "normal");
               </div>
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft:'50px' }}
+                // style={{ marginLeft:'50px' }}
               >
                 <div
                   style={{
@@ -2138,7 +2268,7 @@ doc.setFont('verdana-regular', "normal");
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                    onKeyDown={(e) => handleToKeyPress(e, collectorRef)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2180,29 +2310,10 @@ doc.setFont('verdana-regular', "normal");
                   />
                 </div>
               </div>
-            </div>
-          </div>
 
-          
-          {/* //////////////// second ROW ///////////////////////// */}
-
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
+                <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
@@ -2233,8 +2344,8 @@ doc.setFont('verdana-regular', "normal");
                     className="List-select-class"
                     ref={saleSelectRef}
                     options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
-                    id="selectedsale"
+                    onKeyDown={(e) => handlecompanyKeypress(e, employeeref)}
+                    id="verifyselection"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
@@ -2271,8 +2382,95 @@ doc.setFont('verdana-regular', "normal");
                   />
                 </div>
               </div>
+            </div>
+          </div>
 
-              
+          {/* //////////////// second ROW ///////////////////////// */}
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+
+              <div
+                className="d-flex align-items-center  "
+                style={{ marginLeft: "15px" }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontFamily: getfontstyle,
+                        fontSize: getdatafontsize,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Collector :
+                    </span>{" "}
+                    <br />
+                  </label>
+                </div>
+                <div style={{ marginLeft: "5px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={collectorRef}
+                    options={Collectoroption}
+                    onKeyDown={(e) => handleSaleKeypress(e, input1Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCollector(selectedOption.value);
+                        setCollectorDataValue({
+                          value: selectedOption.value,
+                          label: labelPart, // Set only the 'NGS' part of the label
+                        });
+                      } else {
+                        setCollector(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setCollectorDataValue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!saleType),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+           
+
               <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
@@ -2309,7 +2507,7 @@ doc.setFont('verdana-regular', "normal");
                     onKeyDown={(e) => handleEmployeeKeypress(e, input4Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
-                     if (selectedOption && selectedOption.value) {
+                      if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
 
                         setEmployeeselectdata(selectedOption.value);
@@ -2345,8 +2543,7 @@ doc.setFont('verdana-regular', "normal");
                   />
                 </div>
               </div>
-
-                        </div>
+            </div>
           </div>
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
@@ -2394,7 +2591,7 @@ doc.setFont('verdana-regular', "normal");
                     className="List-select-class "
                     ref={input1Ref}
                     options={categoryoptions}
-                    onKeyDown={(e) => handlecategoryKeypress(e, employeeref)}
+                    onKeyDown={(e) => handlecategoryKeypress(e, saleSelectRef)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2541,8 +2738,6 @@ doc.setFont('verdana-regular', "normal");
             </div>
           </div>
 
-       
-
           <div>
             {/* Table Head */}
             <div
@@ -2579,42 +2774,140 @@ doc.setFont('verdana-regular', "normal");
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      Code
-                    </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Customer
-                    </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Mobile
-                    </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Inv Date
+                  
+ <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("Code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Code")}
+                      ></i>
                     </td>
 
-                    <td className="border-dark" style={sixthColWidth}>
-                      Sale Amt
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Customer")}
+                    >
+                      Customer{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Customer")}
+                      ></i>
                     </td>
-                     <td className="border-dark" style={seventhColWidth}>
-                      Day
+                   <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Mobile")}
+                    >
+                      Mobile{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Mobile")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={eightColWidth}>
-                      Ins Amt
-                    </td>                   
-                    <td className="border-dark" style={ninthColWidth}>
-                      Rec-Abl
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("SaleDate")}
+                    >
+                      Inv Date{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("SaleDate")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={tenthColWidth}>
-                      Collection
+
+                     <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("SaleAmt")}
+                    >
+                      SaleAmt{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("SaleAmt")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={elewenthColWidth}>
-                      O/S Amt
+                   <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Day")}
+                    >
+                      Day{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Day")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={tewelthColWidth}>
-                      Balance
+                     <td
+                      className="border-dark"
+                      style={eightColWidth}
+                      onClick={() => handleSorting("InsAmt")}
+                    >
+                      Ins Amt{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("InsAmt")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={thirteenColWidth}>
-                      Col
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("Receiavable")}
+                    >
+                      Rec-Abl{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Receiavable")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      onClick={() => handleSorting("Collection")}
+                    >
+                      Collection{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Collection")}
+                      ></i>
+                    </td>
+                     <td
+                      className="border-dark"
+                      style={elewenthColWidth}
+                      onClick={() => handleSorting("Outstanding")}
+                    >
+                      O/S Amt{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Outstanding")}
+                      ></i>
+                    </td>
+                      <td
+                      className="border-dark"
+                      style={tewelthColWidth}
+                      onClick={() => handleSorting("Balance")}
+                    >
+                      Balance{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={thirteenColWidth}
+                      onClick={() => handleSorting("Collector")}
+                    >
+                      Col{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Collector")}
+                      ></i>
                     </td>
 
                     <td className="border-dark" style={sixthcol}></td>
@@ -2629,7 +2922,7 @@ doc.setFont('verdana-regular', "normal");
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                height:'45vh',
+                height: "45vh",
                 // width: "100%",
                 // position: "relative",
                 // ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
@@ -2641,7 +2934,7 @@ doc.setFont('verdana-regular', "normal");
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                    width: "100%",
+                  width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
@@ -2673,7 +2966,7 @@ doc.setFont('verdana-regular', "normal");
                               </td>
                             ))}
                           </tr>
-                        )
+                        ),
                       )}
                       <tr>
                         <td style={firstColWidth}></td>
@@ -2681,13 +2974,13 @@ doc.setFont('verdana-regular', "normal");
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
-                       <td style={seventhColWidth}></td>
-                         <td style={eightColWidth}></td>
-                       <td style={ninthColWidth}></td>
-                         <td style={tenthColWidth}></td>
-                       <td style={elewenthColWidth}></td>
-                         <td style={tewelthColWidth}></td>
-                       <td style={thirteenColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                        <td style={elewenthColWidth}></td>
+                        <td style={tewelthColWidth}></td>
+                        <td style={thirteenColWidth}></td>
                       </tr>
                     </>
                   ) : (
@@ -2710,45 +3003,48 @@ doc.setFont('verdana-regular', "normal");
                             style={{
                               backgroundColor: getcolor,
                               color: fontcolor,
-                            //   color: isNegative ? "red" : fontcolor,
+                              //   color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                               <td
-                    className="text-start"
-                    style={{
-                      ...firstColWidth,
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      color: selectedIndex === i   ? "white"     : "blue", // ✅ conditional color
-                    }}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                        "InstallmentLedger",
-                        JSON.stringify({
-                          code: item.Code,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/InstallmentLedger", "_blank");
-                    }}
-                  >
-                    {item.Code}
-                  </td>
                             <td
-                    className="text-start"
-                    title={item.Customer}
-                    style={{
-                      ...secondColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Customer}
-                  </td>
+                              className="text-start"
+                              style={{
+                                ...firstColWidth,
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                color: selectedIndex === i ? "white" : "blue", // ✅ conditional color
+                              }}
+                              onDoubleClick={(e) => {
+                                e.stopPropagation();
+                                // code temporarily store karo
+                                sessionStorage.setItem(
+                                  "InstallmentLedger",
+                                  JSON.stringify({
+                                    code: item.Code,
+                                  }),
+                                );
+
+                                // fixed URL open karo
+                                window.open(
+                                  "/crystalsol/InstallmentLedger",
+                                  "_blank",
+                                );
+                              }}
+                            >
+                              {item.Code}
+                            </td>
+                            <td
+                              className="text-start"
+                              title={item.Customer}
+                              style={{
+                                ...secondColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.Customer}
+                            </td>
                             <td className="text-center" style={thirdColWidth}>
                               {item.Mobile}
                             </td>
@@ -2761,22 +3057,23 @@ doc.setFont('verdana-regular', "normal");
                             <td className="text-end" style={seventhColWidth}>
                               {item.Day}
                             </td>
-                             <td className="text-end" style={eightColWidth}>
+                            <td className="text-end" style={eightColWidth}>
                               {item.InsAmt}
                             </td>
                             <td className="text-end" style={ninthColWidth}>
-                              {item.Receiavable}                            </td>
-                           
+                              {item.Receiavable}{" "}
+                            </td>
+
                             <td className="text-end" style={tenthColWidth}>
                               {item.Collection}
                             </td>
                             <td className="text-end" style={elewenthColWidth}>
                               {item.Outstanding}
                             </td>
-                             <td className="text-end" style={tewelthColWidth}>
+                            <td className="text-end" style={tewelthColWidth}>
                               {item.Balance}
                             </td>
-                             <td className="text-end" style={thirteenColWidth}>
+                            <td className="text-end" style={thirteenColWidth}>
                               {item.Collector}
                             </td>
                           </tr>
@@ -2805,13 +3102,13 @@ doc.setFont('verdana-regular', "normal");
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
-                       <td style={seventhColWidth}></td>
-                         <td style={eightColWidth}></td>
-                       <td style={ninthColWidth}></td>
-                         <td style={tenthColWidth}></td>
-                       <td style={elewenthColWidth}></td>
-                         <td style={tewelthColWidth}></td>
-                       <td style={thirteenColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eightColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
+                        <td style={elewenthColWidth}></td>
+                        <td style={tewelthColWidth}></td>
+                        <td style={thirteenColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -2873,9 +3170,11 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{formatValue(totalSale)}</span>
+              <span className="mobileledger_total">
+                {formatValue(totalSale)}
+              </span>
             </div>
-              <div
+            <div
               style={{
                 ...seventhColWidth,
                 background: getcolor,
@@ -2896,7 +3195,7 @@ doc.setFont('verdana-regular', "normal");
                 {formatValue(totalIns)}
               </span>
             </div>
-          
+
             <div
               style={{
                 ...ninthColWidth,
@@ -2916,7 +3215,7 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-             <span className="mobileledger_total">
+              <span className="mobileledger_total">
                 {formatValue(totalCollection)}
               </span>
             </div>
@@ -2927,7 +3226,7 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-             <span className="mobileledger_total">
+              <span className="mobileledger_total">
                 {formatValue(totalOutstan)}
               </span>
             </div>
@@ -2938,7 +3237,7 @@ doc.setFont('verdana-regular', "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-             <span className="mobileledger_total">
+              <span className="mobileledger_total">
                 {formatValue(totalBalance)}
               </span>
             </div>
@@ -2948,9 +3247,7 @@ doc.setFont('verdana-regular', "normal");
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-             
-            </div>
+            ></div>
           </div>
           {/* Action Buttons */}
           <div
@@ -2989,7 +3286,7 @@ doc.setFont('verdana-regular', "normal");
               ref={input5Ref}
               onClick={() => {
                 fetchDailyStatusReport();
-                // resetSorting();
+                resetSorting();
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
