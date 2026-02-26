@@ -237,15 +237,15 @@ export default function SparePartsStockReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepStk: transectionType2,
       FRepRat: transectionType,
 
-      code: "IZONETRD",
-      FLocCod: "001",
-      FYerDsc: "2025-2025",
+      // code: "IZONETRD",
+      // FLocCod: "001",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -388,6 +388,8 @@ export default function SparePartsStockReport() {
     const apiUrl = apiLinks + "/GetActiveStore.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+            // code: 'NASIRTRD',
+
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -615,7 +617,7 @@ export default function SparePartsStockReport() {
     rows.push([
       String(formatValue(tableData.length.toLocaleString())),
       "Total",
-      "",
+      String(formatValue(totalexcel)),
       String(formatValue(totalqnty)),
       String(formatValue(totaltax)),
     ]);
@@ -882,7 +884,7 @@ export default function SparePartsStockReport() {
         startY += 5; // Adjust vertical position for the company title
         doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Item Stock Report As on ${toInputDate}`,
+          `Spare Parts Stock Report As on ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1625,7 +1627,8 @@ export default function SparePartsStockReport() {
                       ...firstColWidth,
                       cursor: "pointer",
                       textDecoration: "underline",
-                      color: "blue",
+                     color: selectedIndex === i ? (isNegative ? "white" : 'white') : "blue", // ✅ conditional color
+
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
@@ -2056,19 +2059,16 @@ export default function SparePartsStockReport() {
                     options={typeoptions}
                     onKeyDown={(e) => handlecompanyKeypress(e, input4Refrate)}
                     id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setTypeselectdata(selectedOption.value);
-                        settypeselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setTypeselectdata("");
-                        settypeselectdatavalue("");
-                      }
-                    }}
+           onChange={(selectedOption) => {
+  if (selectedOption) {
+    settypeselectdatavalue({
+      value: selectedOption.label,   // 👈 value bhi label
+      label: selectedOption.label,
+    });
+  } else {
+    settypeselectdatavalue(null);
+  }
+}}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();
@@ -2530,7 +2530,7 @@ export default function SparePartsStockReport() {
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -2763,7 +2763,7 @@ export default function SparePartsStockReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              <span className="mobileledger_total">{totalexcel}</span>
             </div>
 
             <div
