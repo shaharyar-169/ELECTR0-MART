@@ -211,7 +211,7 @@ import ReceivableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc 
 import PayableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/PayableAggingReport.js";
 import AmericanReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableRepor.js";
 import MissingSerialNoReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/MissingSerialNo.js";
-
+import ExpenseReport2 from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ExpenseReport2.js";
 /////////////////////////////// FINANCIAL REPORT /////////////////////////////
 import TrailBalanceReport from "./Component/Reports/FinancialReports/TrailBalanceREport.js";
 import InstallmentExpiredAccountReport from "./Component/Reports/FinancialReports/InstallmentexpiredAccount.js";
@@ -446,6 +446,7 @@ function App() {
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />
                 <Route exact path="/SalesTaxRegister" element={<TaxSaleRegisterReport />} />
+                <Route exact path="/ExpenseReport" element={<ExpenseReport2 />} />
 
 
                 {/* Rountes for Transection reports */}
