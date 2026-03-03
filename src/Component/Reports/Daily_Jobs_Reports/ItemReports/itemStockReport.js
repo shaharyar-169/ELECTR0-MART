@@ -2876,7 +2876,6 @@ import "react-toastify/dist/ReactToastify.css";
 //   );
 // }
 
-
 export default function SparePartsStockReport() {
   const navigate = useNavigate();
   const user = getUserData();
@@ -2911,7 +2910,8 @@ export default function SparePartsStockReport() {
 
   const [Companyselectdata, setCompanyselectdata] = useState("");
 
-  console.log("Companyselectdata", Companyselectdata);
+  
+
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
   const [Capacityselectdata, setCapacityselectdata] = useState("");
@@ -2956,6 +2956,7 @@ export default function SparePartsStockReport() {
 
   const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
+console.log('storedata', Typeselectdata)
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -3088,15 +3089,15 @@ export default function SparePartsStockReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepStk: transectionType2,
       FRepRat: transectionType,
 
-      code: "IZONETRD",
-      FLocCod: "001",
-      FYerDsc: "2025-2025",
+      // code: "IZONETRD",
+      // FLocCod: "001",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -3155,7 +3156,8 @@ export default function SparePartsStockReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCompany.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
+      // code: organisation.code,
+           code: 'NASIRTRD',
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -3183,6 +3185,8 @@ export default function SparePartsStockReport() {
     const apiUrl = apiLinks + "/GetCapacity.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+       
+
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -3210,7 +3214,8 @@ export default function SparePartsStockReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCatg.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
+      // code: organisation.code,
+           code: 'NASIRTRD',
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -3468,7 +3473,8 @@ export default function SparePartsStockReport() {
     rows.push([
       String(formatValue(tableData.length.toLocaleString())),
       "Total",
-      String(formatValue(totalexcel)),
+      "",
+      // String(formatValue(totalexcel)),
       String(formatValue(totalqnty)),
       String(formatValue(totaltax)),
     ]);
@@ -3886,7 +3892,7 @@ export default function SparePartsStockReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`ItemStockReport As On ${toInputDate}.pdf`);
+    doc.save(`sparePartStockReport As On ${toInputDate}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
@@ -3945,7 +3951,7 @@ export default function SparePartsStockReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Item Stock Report As On ${toInputDate}`,
+      `Spare Part Stock Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -4213,7 +4219,7 @@ export default function SparePartsStockReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ItemStockReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `SparePartStockReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -4910,14 +4916,25 @@ export default function SparePartsStockReport() {
                     options={typeoptions}
                     onKeyDown={(e) => handlecompanyKeypress(e, input4Refrate)}
                     id="selectedsale"
-           onChange={(selectedOption) => {
-  if (selectedOption) {
+
+
+
+
+onChange={(selectedOption) => {
+  if (selectedOption && selectedOption.value) {
+    const labelPart = selectedOption.label.substring(
+      selectedOption.label.indexOf("-") + 1
+    );
+
+    setTypeselectdata(selectedOption.value);
+
     settypeselectdatavalue({
-      value: selectedOption.label,   // 👈 value bhi label
-      label: selectedOption.label,
+      value: selectedOption.value,
+      label: labelPart.trim(),
     });
   } else {
-    settypeselectdatavalue(null);
+    setTypeselectdata("");
+    settypeselectdatavalue("");
   }
 }}
                     onInputChange={(inputValue, { action }) => {
@@ -4997,29 +5014,19 @@ export default function SparePartsStockReport() {
                     options={options}
                     onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
                     id="selectedsale"
-                    // onChange={(selectedOption) => {
-                    //   if (selectedOption && selectedOption.value) {
-                    //     const labelPart = selectedOption.label.split("-")[1];
-                    //     setCompanyselectdata(selectedOption.value);
-                    //     setCompanyselectdatavalue({
-                    //       value: selectedOption.value,
-                    //       label: labelPart,
-                    //     });
-                    //   } else {
-                    //     setCompanyselectdata("");
-                    //     setCompanyselectdatavalue("");
-                    //   }
-                    // }}
-                     onChange={(selectedOption) => {
-  if (selectedOption) {
-    settypeselectdatavalue({
-      value: selectedOption.label,   // 👈 value bhi label
-      label: selectedOption.label,
-    });
-  } else {
-    settypeselectdatavalue(null);
-  }
-}}
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCompanyselectdata(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setCompanyselectdata("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();
@@ -5700,3 +5707,4 @@ export default function SparePartsStockReport() {
     </>
   );
 }
+

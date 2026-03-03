@@ -77,6 +77,7 @@ import SparePartsList from "./Component/Reports/Daily_Jobs_Reports/List/SparePar
 import ItemPriceList2 from "./Component/Reports/Daily_Jobs_Reports/List/ItempriceList2.js";
 import HelperList from "./Component/Reports/Daily_Jobs_Reports/List/HelperList.js";
 import ReceipItemList from "./Component/Reports/Daily_Jobs_Reports/List/ReceipeList.js";
+import CustomerSearch from "./Component/Reports/Daily_Jobs_Reports/List/CustomerSearch.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -298,6 +299,8 @@ function App() {
                 <Route exact path="/CategoryListPOS" element={< CategoryListPos />} />
                 <Route exact path="/HelperList" element={< HelperList />} />
                 <Route exact path="/ReceipeReport" element={< ReceipItemList />} />
+                <Route exact path="/CustomerSearch" element={< CustomerSearch />} />
+
 
                 {/* Rountes for ledgers reports */}
                 <Route exact path="/GeneralLedger1" element={<GeneralLedger1 />} />

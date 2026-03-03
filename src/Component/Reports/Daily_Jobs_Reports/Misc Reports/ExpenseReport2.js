@@ -374,9 +374,9 @@ export default function ExpenseReport2() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getyeardescription,
 
             code: "FITNESSGYM",
             FLocCod: '001',
@@ -928,7 +928,7 @@ export default function ExpenseReport2() {
         });
 
         // Set column widths
-        [11, 40, 12].forEach((width, index) => {
+        [11, 40, 14].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1818,18 +1818,34 @@ export default function ExpenseReport2() {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {/* <td className="text-start" style={firstColWidth}>
-                                                            {item["Trn#"]}
-                                                        </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Date}
-                                                        </td> */}
-                                                        {/* <td className="text-start" style={thirdColWidth}>
-                                                            {item.Date}
-                                                        </td> */}
-                                                        <td className="text-start" style={forthColWidth}>
-                                                            {item.code}
-                                                        </td>
+                                                     
+                                                        <td
+                    className="text-start"
+                    style={{
+                      ...forthColWidth,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      color: selectedIndex === i ? 'white' : "blue", // ✅ conditional color
+
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      // code temporarily store karo
+                      sessionStorage.setItem(
+                        "GeneralLedgerData",
+                        JSON.stringify({
+                          code: item.code,
+                          fromInputDate: fromInputDate,
+                          toInputDate: toInputDate,
+                        }),
+                      );
+
+                      // fixed URL open karo
+                      window.open("/crystalsol/GeneralLedger1", "_blank");
+                    }}
+                  >
+                    {item.code}
+                  </td>
                                                         <td className="text-start" style={fifthColWidth}>
                                                             {item.Description}
                                                         </td>

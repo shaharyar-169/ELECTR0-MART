@@ -420,9 +420,9 @@ export default function GeneralLedger() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
 
-    //   code: 'NASIRTRD',
-    //   FLocCod: '001',
-    //   FYerDsc: '2025-2025'
+      // code: 'NASIRTRD',
+      // FLocCod: '001',
+      // FYerDsc: '2025-2025'
     }).toString();
 
     axios
