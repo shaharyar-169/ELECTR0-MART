@@ -770,8 +770,8 @@ export default function DailyJobReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-      // code: "AGCOMP",
-      // FLocCod: "001",
+    //   code: "AGCOMP",
+    //   FLocCod: "001",
     }).toString();
 
     axios
@@ -829,11 +829,11 @@ export default function DailyJobReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveTechnicians.php";
     const formData = new URLSearchParams({
-      //   FLocCod: locationnumber || getLocationNumber,
-      //   code: organisation.code,
+        FLocCod: locationnumber || getLocationNumber,
+        code: organisation.code,
 
-      FLocCod: "001",
-      code: "IZONECOMP",
+    //   FLocCod: "001",
+    //   code: "IZONECOMP",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -850,25 +850,28 @@ export default function DailyJobReport() {
   }));
   /////////////// api for Reference code ////////////////////
 
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveReference.php";
-    const formData = new URLSearchParams({
-      FLocCod: locationnumber || getLocationNumber,
+   useEffect(() => {
+  const apiUrl = apiLinks + "/GetActiveReference.php";
+  const formData = new URLSearchParams({
+       FLocCod: locationnumber || getLocationNumber,
       code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setReferenceapidata(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
-  const refoptions = Referenceapidata.map((item) => ({
-    value: item.trefcod,
-    label: `${item.trefcod}-${item.trefdsc.trim()}`,
-  }));
+//    FLocCod: "001",
+//       code: "IZONECOMP",
+  }).toString();
+
+  axios.post(apiUrl, formData)
+    .then((response) => {
+      setReferenceapidata(response.data.data || []);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}, []);
+
+const refoptions = Referenceapidata.map((item) => ({
+  value: item.trefcod,
+  label: `${item.trefcod}-${item.trefdsc.trim()}`,
+}));
   /////////////// api for Comany code ////////////////////
 
   useEffect(() => {
@@ -1027,6 +1030,8 @@ export default function DailyJobReport() {
     const formData = new URLSearchParams({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
+    //  FLocCod: "001",
+    //   code: "NASIRTRD",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -2195,6 +2200,34 @@ export default function DailyJobReport() {
     return filteredData;
   };
 
+  const isLargeScreen = window.innerWidth > 1500;
+
+  const contentStyle = {
+ width: "100%",
+  maxWidth: isSidebarVisible
+    ? (isLargeScreen ? "1250px" : "1000px")
+    : (isLargeScreen ? "1500px" : "1200px"),
+  height: "calc(100vh - 100px)",
+  position: "absolute",
+  top: "70px",
+  left: isSidebarVisible ? "60vw" : "53vw",
+  transform: "translateX(-50%)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden",
+  textAlign: "center",
+  fontSize: "15px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "23px",
+  fontFamily: "verdana",
+  zIndex: 1,
+  padding: "0 20px",
+  boxSizing: "border-box",
+};
+
   const firstColWidth = {
     width: "80px",
   };
@@ -2203,16 +2236,28 @@ export default function DailyJobReport() {
     width: "55px",
   };
   const thirdColWidth = {
-    width: isSidebarVisible ? "100px" : "150px",
+  width: isSidebarVisible
+    ? (isLargeScreen ? "120px" : "80px")
+    : (isLargeScreen ? "160px" : "110px"),
   };
   const forthColWidth = {
     width: "90px",
   };
   const fifthColWidth = {
-    width: "100px",
+   width: isSidebarVisible
+    ? (isLargeScreen ? "120px" : "80px")
+    : (isLargeScreen ? "160px" : "110px"),
+  };
+
+   const forteenColWidth = {
+   width: isSidebarVisible
+    ? (isLargeScreen ? "120px" : "80px")
+    : (isLargeScreen ? "160px" : "110px"),
   };
   const sixthColWidth = {
-    width: isSidebarVisible ? "100px" : "150px",
+   width: isSidebarVisible
+    ? (isLargeScreen ? "120px" : "80px")
+    : (isLargeScreen ? "160px" : "110px"),
   };
   const seventhColWidth = {
     width: "100px",
@@ -2221,19 +2266,28 @@ export default function DailyJobReport() {
     width: "100px",
   };
   const ninhthColWidth = {
-    width: "60px",
+    width: "40px",
   };
 
   const tenthColWidth = {
-    width: isSidebarVisible ? "100px" : "150px",
+    width: isSidebarVisible
+    ? (isLargeScreen ? "120px" : "80px")
+    : (isLargeScreen ? "160px" : "110px"),
   };
 
   const companyColWidth = {
-    width: isSidebarVisible ? "100px" : "150px",
-  };
+ width: isSidebarVisible
+    ?(isLargeScreen ? "120px" : "80px")
+    : (isLargeScreen ? "160px" : "110px"),  };
   const sixthcol = {
     width: "8px",
   };
+
+  const thirteenColWidth = {
+    width: "40px",
+  };
+
+
 
   useHotkeys(
     "alt+s",
@@ -2269,29 +2323,32 @@ export default function DailyJobReport() {
     };
   }, []);
 
-  const contentStyle = {
-    width: "100%", // 100vw ki jagah 100%
-    maxWidth: isSidebarVisible ? "1000px" : "1200px",
-    height: "calc(100vh - 100px)",
-    position: "absolute",
-    top: "70px",
-    left: isSidebarVisible ? "60vw" : "53vw",
-    transform: "translateX(-50%)",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    textAlign: "center",
-    fontSize: "15px",
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "23px",
-    fontFamily: "verdana",
-    zIndex: 1,
-    padding: "0 20px", // Side padding for small screens
-    boxSizing: "border-box", // Padding ko width mein include kare
-  };
+//   const contentStyle = {
+//     width: "100%", // 100vw ki jagah 100%
+//     maxWidth: isSidebarVisible ? "1000px" : "1200px",
+//     height: "calc(100vh - 100px)",
+//     position: "absolute",
+//     top: "70px",
+//     left: isSidebarVisible ? "60vw" : "53vw",
+//     transform: "translateX(-50%)",
+//     display: "flex",
+//     flexDirection: "column",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     overflow: "hidden",
+//     textAlign: "center",
+//     fontSize: "15px",
+//     fontStyle: "normal",
+//     fontWeight: "400",
+//     lineHeight: "23px",
+//     fontFamily: "verdana",
+//     zIndex: 1,
+//     padding: "0 20px", // Side padding for small screens
+//     boxSizing: "border-box", // Padding ko width mein include kare
+//   };
+
+
+
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
@@ -3374,7 +3431,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Categoryselectdata, 230),
+                      ...customStyles1(!Categoryselectdata, isSidebarVisible ? (isLargeScreen ? 350 : 230): 350),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3601,7 +3658,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Complainselectdata, 230),
+                      ...customStyles1(!Complainselectdata, isSidebarVisible ? (isLargeScreen ? 350 : 230): 350),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3839,7 +3896,7 @@ export default function DailyJobReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Areaselectdata, 230),
+                      ...customStyles1(!Areaselectdata, isSidebarVisible ? (isLargeScreen ? 350 : 230): 350),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -4068,6 +4125,9 @@ export default function DailyJobReport() {
                     <td className="border-dark" style={fifthColWidth}>
                       Item
                     </td>
+                    <td className="border-dark" style={forteenColWidth}>
+                      Compalint
+                    </td>
                     <td className="border-dark" style={sixthColWidth}>
                       Technician
                     </td>
@@ -4082,6 +4142,9 @@ export default function DailyJobReport() {
                     </td>
                     <td className="border-dark" style={ninhthColWidth}>
                       Day
+                    </td>
+                    <td className="border-dark" style={thirteenColWidth}>
+                      Wrt
                     </td>
 
                     <td className="border-dark" style={sixthcol}></td>
@@ -4119,7 +4182,7 @@ export default function DailyJobReport() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="11" className="text-center">
+                        <td colSpan="13" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -4132,7 +4195,7 @@ export default function DailyJobReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 11 }).map((_, colIndex) => (
+                            {Array.from({ length: 13 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -4147,11 +4210,15 @@ export default function DailyJobReport() {
                         <td style={forthColWidth}></td>
                         <td style={companyColWidth}></td>
                         <td style={fifthColWidth}></td>
+                                                <td style={forteenColWidth}></td>
+
                         <td style={sixthColWidth}></td>
                         <td style={tenthColWidth}></td>
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
                         <td style={ninhthColWidth}></td>
+                                                <td style={thirteenColWidth}></td>
+
                       </tr>
                     </>
                   ) : (
@@ -4218,6 +4285,19 @@ export default function DailyJobReport() {
                             >
                               {item.Item}
                             </td>
+
+                            <td
+                              className="text-start"
+                              title={item.Compalint}
+                              style={{
+                                ...forteenColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.Compalint}
+                            </td>
                             <td
                               className="text-start"
                               title={item.Technician}
@@ -4269,6 +4349,9 @@ export default function DailyJobReport() {
                             <td className="text-end" style={ninhthColWidth}>
                               {formatValue(item.Day)}
                             </td>
+                               <td className="text-end" style={thirteenColWidth}>
+                              {item.Warranty}
+                            </td>
                           </tr>
                         );
                       })}
@@ -4282,7 +4365,7 @@ export default function DailyJobReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 11 }).map((_, colIndex) => (
+                          {Array.from({ length: 13 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -4296,11 +4379,14 @@ export default function DailyJobReport() {
                         <td style={forthColWidth}></td>
                         <td style={companyColWidth}></td>
                         <td style={fifthColWidth}></td>
+                        <td style={forteenColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={tenthColWidth}></td>
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
                         <td style={ninhthColWidth}></td>
+                        <td style={thirteenColWidth}></td>
+
                       </tr>
                     </>
                   )}
@@ -4364,6 +4450,13 @@ export default function DailyJobReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
+             <div
+              style={{
+                ...forteenColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
             <div
               style={{
                 ...sixthColWidth,
@@ -4392,18 +4485,25 @@ export default function DailyJobReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-            <div
+               <div
               style={{
                 ...ninhthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {" "}
-              <span className="mobileledger_total2">
-                {formatValue(totalDebit)}
-              </span>
+              
             </div>
+            <div
+              style={{
+                ...thirteenColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              
+            </div>
+
           </div>
           <div
             style={{

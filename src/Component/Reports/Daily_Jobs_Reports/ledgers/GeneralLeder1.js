@@ -2495,3 +2495,4 @@ export default function GeneralLedger() {
     </>
   );
 }
+
