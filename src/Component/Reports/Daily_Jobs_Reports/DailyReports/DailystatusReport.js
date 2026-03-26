@@ -594,11 +594,11 @@ export default function DailyStatusReport() {
       item.Description,
       formatValue(item["Opening"]),
       formatValue(item["Purchase"]),
-      formatValue(item["Pur-Ret"]),
+      formatValue(item.PurRet),
       formatValue(item["Receive"]),
       formatValue(item["Issue"]),
       formatValue(item["Sale"]),
-      formatValue(item["Sale-Ret"]),
+      formatValue(item.SaleRet),
       formatValue(item["Balance"]),
     ]);
 
@@ -871,8 +871,9 @@ export default function DailyStatusReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 20,
           doc.internal.pageSize.height - 10,
@@ -1582,7 +1583,7 @@ export default function DailyStatusReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Daily Status Report" />
+          <NavComponent textdata="hello Status Report" />
 
           {/* ------------1st row */}
           <div
@@ -2125,19 +2126,7 @@ export default function DailyStatusReport() {
                               color: isNegative() ? "red" : fontcolor,
                             }}
                           >
-                            {/* <td
-                              className="text-start"
-                              title={item.Code}
-                              style={{
-                                ...firstColWidth,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.Code}
-                            </td> */}
-
+                           
 <td
   className="text-start"
    title={item.Code}
@@ -2148,7 +2137,13 @@ export default function DailyStatusReport() {
                                 textOverflow: "ellipsis",
                                 cursor:'pointer',
                                 textDecoration:"underline",
-                                color:'blue'
+                                // color:'blue'
+                                 color:
+                        selectedIndex === i
+                          ? isNegative
+                            ? "white"
+                            : "white"
+                          : "blue", // ✅ conditional color
                               }}
   onDoubleClick={(e) => {
     e.stopPropagation();

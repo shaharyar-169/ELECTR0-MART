@@ -78,6 +78,7 @@ import ItemPriceList2 from "./Component/Reports/Daily_Jobs_Reports/List/Itempric
 import HelperList from "./Component/Reports/Daily_Jobs_Reports/List/HelperList.js";
 import ReceipItemList from "./Component/Reports/Daily_Jobs_Reports/List/ReceipeList.js";
 import CustomerSearch from "./Component/Reports/Daily_Jobs_Reports/List/CustomerSearch.js";
+import LocationList from "./Component/Reports/Daily_Jobs_Reports/List/LocationList.js";
 
 //////////////////////////// JOb reports //////////////////////////////
 import SparePartProfitReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/SparePartProfitreport.js";
@@ -117,6 +118,7 @@ import SupplierLedgerpos from "./Component/Reports/Daily_Jobs_Reports/ledgers/Su
 import ProductionOrderLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/ProductionorderLedger.js";
 import SparePartsLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/SparePartsLedger.js";
 import SerialNoLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SerialNoLedgerReport.js";
+import ProjectLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/ProjectLedger.js";
 
 //////////////////////////// Daily reports //////////////////////////////
 import DailyCashBook from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBook.js";
@@ -160,7 +162,7 @@ import InstallmentRecoveryReport from "./Component/Reports/Daily_Jobs_Reports/In
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
-import ItemStockReportPos from "./Component/Reports/Daily_Jobs_Reports/ItemReports/Itemstockreportpos.js";
+// import ItemStockReportPos from "./Component/Reports/Daily_Jobs_Reports/ItemReports/Itemstockreportpos.js";
 import ItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/itemStockReport.js";
 import ItemStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemstorestockRrport.js";
 import ItemSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleReport.js";
@@ -214,6 +216,8 @@ import PayableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Rep
 import AmericanReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableRepor.js";
 import MissingSerialNoReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/MissingSerialNo.js";
 import ExpenseReport2 from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ExpenseReport2.js";
+import ProjectComparisonReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ProjectComparisonReport.js";
+
 /////////////////////////////// FINANCIAL REPORT /////////////////////////////
 import TrailBalanceReport from "./Component/Reports/FinancialReports/TrailBalanceREport.js";
 import InstallmentExpiredAccountReport from "./Component/Reports/FinancialReports/InstallmentexpiredAccount.js";
@@ -301,6 +305,7 @@ function App() {
                 <Route exact path="/HelperList" element={< HelperList />} />
                 <Route exact path="/ReceipeReport" element={< ReceipItemList />} />
                 <Route exact path="/CustomerSearch" element={< CustomerSearch />} />
+                <Route exact path="/LocationList" element={< LocationList />} />
 
 
                 {/* Rountes for ledgers reports */}
@@ -319,6 +324,7 @@ function App() {
                 <Route exact path="/ProductionOrderLedger" element={<ProductionOrderLedger />} />
                 <Route exact path="/SparePartsLedger" element={<SparePartsLedger />} />
                 <Route exact path="/SerialLedger" element={<SerialNoLedgerReport />} />
+                <Route exact path="/ProjectLedger" element={<ProjectLedger />} />
 
 
                 {/* Rountes for Job reports */}s
@@ -424,6 +430,7 @@ function App() {
                 <Route exact path="/PayableAggingReport" element={<PayableAggingReport />} />
                 <Route exact path="/AmericanReceiable" element={<AmericanReceivableReport />} />
                 <Route exact path="/MissingSerialNumber" element={<MissingSerialNoReport />} />
+                <Route exact path="/ProjectComparison" element={<ProjectComparisonReport />} />
 
 
                 {/* ROUTES FOR EMPLOYEE REPORT */}

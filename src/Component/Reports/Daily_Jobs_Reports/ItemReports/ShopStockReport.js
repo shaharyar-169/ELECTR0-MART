@@ -243,15 +243,15 @@ export default function ShopStockReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepStk: transectionType2,
       FRepRat: transectionType,
 
-      code: "BGH",
-      FLocCod: "001",
-      FYerDsc: "2025-2026",
+      // code: "BGH",
+      // FLocCod: "001",
+      // FYerDsc: "2025-2026",
     }).toString();
 
     axios
@@ -615,8 +615,8 @@ export default function ShopStockReport() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Code,
-      item.Description,
+ item.Code ? item.Code.substring(0, 6) : "",
+       item.Description,
       item["Pur Rate"],
         item.Qnt001,
          item.Qnt002,
@@ -1069,7 +1069,7 @@ export default function ShopStockReport() {
     const numColumns = 10; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "center",
+      "left",
       "left",
       "right",
       "right",
@@ -1318,7 +1318,7 @@ export default function ShopStockReport() {
     });
 
     // Set column widths
-    [10, 45, 10, 10, 10, 10,10,10,8,12].forEach((width, index) => {
+    [15, 45, 10, 10, 10, 10,10,10,8,12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1511,7 +1511,8 @@ export default function ShopStockReport() {
   };
 
   const firstColWidth = {
-    width: "55px",
+      width: isSidebarVisible ? "55px" :'135px',
+
   };
   const secondColWidth = {
     width: isSidebarVisible ? "230px" :'360px',
@@ -1687,7 +1688,7 @@ export default function ShopStockReport() {
             <tr>
               <td style={firstColWidth}></td>
               <td style={secondColWidth}></td>
-                 <td style={tenthColWidth}></td>
+              <td style={tenthColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
               <td style={fifthColWidth}></td>
@@ -1743,7 +1744,18 @@ export default function ShopStockReport() {
                   >
                     {item.Code}
                   </td> */}
-                   <td className="text-center" style={firstColWidth}>
+                 
+
+                  <td
+                    className="text-start"
+                    title={item.Code}
+                    style={{
+                      ...firstColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {item.Code}
                   </td>
 
@@ -1856,7 +1868,7 @@ export default function ShopStockReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: isSidebarVisible ? "1000px" :'1130px',
+    maxWidth: isSidebarVisible ? "1000px" :'1200px',
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2950,7 +2962,7 @@ export default function ShopStockReport() {
             ></div>
             <div
               style={{
-                ...thirdColWidth,
+                ...tenthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -2958,7 +2970,7 @@ export default function ShopStockReport() {
             </div>
             <div
               style={{
-                ...forthColWidth,
+                ...thirdColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -2968,7 +2980,7 @@ export default function ShopStockReport() {
 
             <div
               style={{
-                ...fifthColWidth,
+                ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -2978,7 +2990,7 @@ export default function ShopStockReport() {
             </div>
             <div
               style={{
-                ...sixthColWidth,
+                ...fifthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -2989,7 +3001,7 @@ export default function ShopStockReport() {
             </div>
              <div
               style={{
-                ...seventhColWidth,
+                ...sixthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -3000,7 +3012,7 @@ export default function ShopStockReport() {
             </div>
              <div
               style={{
-                ...eightColWidth,
+                ...seventhColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -3011,7 +3023,7 @@ export default function ShopStockReport() {
             </div>
              <div
               style={{
-                ...ninthColWidth,
+                ...eightColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -3022,7 +3034,7 @@ export default function ShopStockReport() {
             </div>
              <div
               style={{
-                ...tenthColWidth,
+                ...ninthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}

@@ -3006,7 +3006,7 @@ export default function ItemStatusReport() {
                               color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            <td
+                            {/* <td
                               className="text-start"
                               title={item.Code}
                               style={{
@@ -3017,7 +3017,38 @@ export default function ItemStatusReport() {
                               }}
                             >
                               {item.Code}
-                            </td>
+                            </td> */}
+
+                             <td
+                    className="text-start"
+                    style={{
+                      ...firstColWidth,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      color:
+                        selectedIndex === i
+                          ? isNegative
+                            ? "white"
+                            : "white"
+                          : "blue", // ✅ conditional color
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      // code temporarily store karo
+                      sessionStorage.setItem(
+                        "itemLedgerData",
+                        JSON.stringify({
+                          code: item.Code,
+                          toInputDate: toInputDate,
+                        }),
+                      );
+
+                      // fixed URL open karo
+                      window.open("/crystalsol/ItemLedger", "_blank");
+                    }}
+                  >
+                    {item.Code}
+                  </td>
                             <td
                               className="text-start"
                               title={item.Description}

@@ -237,15 +237,15 @@ import "react-toastify/dist/ReactToastify.css";
 //       FSchTxt: searchQuery,
 //       FCmpCod: Companyselectdata,
 //       FStrCod: Typeselectdata,
-//       // code: organisation.code,
-//       // FLocCod: locationnumber || getLocationNumber,
-//       // FYerDsc: yeardescription || getyeardescription,
+//       code: organisation.code,
+//       FLocCod: locationnumber || getLocationNumber,
+//       FYerDsc: yeardescription || getyeardescription,
 //       FRepStk: transectionType2,
 //       FRepRat: transectionType,
 
-//       code: "NASIRTRD",
-//       FLocCod: "001",
-//       FYerDsc: "2024-2024",
+//       // code: "NASIRTD",
+//       // FLocCod: "001",
+//       // FYerDsc: "2024-2024",
 //     }).toString();
 
 //     axios
@@ -305,6 +305,8 @@ import "react-toastify/dist/ReactToastify.css";
 //     const apiUrl = apiLinks + "/GetCompany.php";
 //     const formData = new URLSearchParams({
 //       code: organisation.code,
+           
+
 //     }).toString();
 //     axios
 //       .post(apiUrl, formData)
@@ -388,6 +390,8 @@ import "react-toastify/dist/ReactToastify.css";
 //     const apiUrl = apiLinks + "/GetActiveStore.php";
 //     const formData = new URLSearchParams({
 //       code: organisation.code,
+//             //  code: "AGCOMP",
+
 //     }).toString();
 //     axios
 //       .post(apiUrl, formData)
@@ -502,7 +506,7 @@ import "react-toastify/dist/ReactToastify.css";
 //         : state.isFocused
 //           ? "#3368B5"
 //           : getcolor,
-//       color: state.isSelected ? "white" : fontcolor,
+//       color: state.isSelected || state.isFocused ? "white" : fontcolor,
 //       "&:hover": {
 //         backgroundColor: "#3368B5",
 //         color: "white",
@@ -927,9 +931,16 @@ import "react-toastify/dist/ReactToastify.css";
 //         let category = categoryselectdatavalue.label
 //           ? categoryselectdatavalue.label
 //           : "ALL";
+
+//         // let typename = typeselectdatavalue.label
+//         //   ? typeselectdatavalue.label + "-" + "Stock"
+//         //   : "ALL";
+
 //         let typename = typeselectdatavalue.label
-//           ? typeselectdatavalue.label + "-" + "Stock"
-//           : "ALL";
+//   ? typeselectdatavalue.label.toUpperCase().endsWith("STOCK")
+//     ? typeselectdatavalue.label
+//     : typeselectdatavalue.label + "-STOCK"
+//   : "ALL";
 
 //         let search = searchQuery ? searchQuery : "";
 
@@ -942,10 +953,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 //         doc.setFont("verdana", "bold");
 //         doc.setFontSize(10);
-//         doc.text(`Store :`, labelsX + 140, labelsY); // Draw bold label
+//         doc.text(`Store :`, labelsX + 110, labelsY); // Draw bold label
 //         doc.setFont("verdana-regular", "normal");
 //         doc.setFontSize(10);
-//         doc.text(`${typename}`, labelsX + 160, labelsY); // Draw the value next to the label
+//         doc.text(`${typename}`, labelsX + 125, labelsY); // Draw the value next to the label
 
 //         doc.setFont("verdana", "bold");
 //         doc.setFontSize(10);
@@ -956,10 +967,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 //         doc.setFont("verdana", "bold");
 //         doc.setFontSize(10);
-//         doc.text(`Rate :`, labelsX + 140, labelsY + 4.3); // Draw bold label
+//         doc.text(`Rate :`, labelsX + 110, labelsY + 4.3); // Draw bold label
 //         doc.setFont("verdana-regular", "normal");
 //         doc.setFontSize(10);
-//         doc.text(`${RATE}`, labelsX + 160, labelsY + 4.3); // Draw the value next to the label
+//         doc.text(`${RATE}`, labelsX + 125, labelsY + 4.3); // Draw the value next to the label
 
 //         // doc.setFont(getfontstyle, "bold"); // Set font to bold
 //         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
@@ -975,10 +986,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 //         doc.setFont("verdana", "bold");
 //         doc.setFontSize(10);
-//         doc.text(`Status :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+//         doc.text(`Status :`, labelsX + 110, labelsY + 8.5); // Draw bold label
 //         doc.setFont("verdana-regular", "normal");
 //         doc.setFontSize(10);
-//         doc.text(`${transectionsts}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
+//         doc.text(`${transectionsts}`, labelsX + 128, labelsY + 8.5); // Draw the value next to the label
 
 //         if (searchQuery) {
 //           doc.setFont("verdana", "bold");
@@ -1119,9 +1130,12 @@ import "react-toastify/dist/ReactToastify.css";
 //     let typecategory = categoryselectdatavalue.label
 //       ? categoryselectdatavalue.label
 //       : "ALL";
-//     let typetype = typeselectdatavalue.label
-//       ? typeselectdatavalue.label
-//       : "ALL ";
+   
+//        let typetype = typeselectdatavalue.label
+//   ? typeselectdatavalue.label.toUpperCase().endsWith("STOCK")
+//     ? typeselectdatavalue.label
+//     : typeselectdatavalue.label + "-STOCK"
+//   : "ALL";
 
 //     let RATE =
 //       transectionType === "P"
@@ -1269,7 +1283,7 @@ import "react-toastify/dist/ReactToastify.css";
 //     });
 
 //     // Set column widths
-//     [20, 45, 10, 12, 12, 12].forEach((width, index) => {
+//     [20, 45, 10, 12, 12, 14].forEach((width, index) => {
 //       worksheet.getColumn(index + 1).width = width;
 //     });
 
@@ -1287,9 +1301,9 @@ import "react-toastify/dist/ReactToastify.css";
 //     totalRow.eachCell((cell, colNumber) => {
 //       cell.font = { bold: true };
 //       cell.border = {
-//         top: { style: "thin" },
+//         top: { style: "double" },
 //         left: { style: "thin" },
-//         bottom: { style: "thin" },
+//         bottom: { style: "double" },
 //         right: { style: "thin" },
 //       };
 
@@ -2062,19 +2076,22 @@ import "react-toastify/dist/ReactToastify.css";
 //                     options={typeoptions}
 //                     onKeyDown={(e) => handlecompanyKeypress(e, input4Refrate)}
 //                     id="selectedsale"
-//                     onChange={(selectedOption) => {
-//                       if (selectedOption && selectedOption.value) {
-//                         const labelPart = selectedOption.label.split("-")[1];
-//                         setTypeselectdata(selectedOption.value);
-//                         settypeselectdatavalue({
-//                           value: selectedOption.value,
-//                           label: labelPart,
-//                         });
-//                       } else {
-//                         setTypeselectdata("");
-//                         settypeselectdatavalue("");
-//                       }
-//                     }}
+                   
+//                  onChange={(selectedOption) => {
+//   if (selectedOption && selectedOption.value) {
+//     setTypeselectdata(selectedOption.value);
+
+//     const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+//     settypeselectdatavalue({
+//       value: selectedOption.value,
+//       label: labelWithoutCode,
+//     });
+//   } else {
+//     setTypeselectdata("");
+//     settypeselectdatavalue("");
+//   }
+// }}
 //                     onInputChange={(inputValue, { action }) => {
 //                       if (action === "input-change") {
 //                         return inputValue.toUpperCase();
@@ -2247,9 +2264,9 @@ import "react-toastify/dist/ReactToastify.css";
 //                     <option value="F">FIFO</option>
 //                   </select>
 
-//                   {transectionType !== "" && (
+//                   {transectionType !== "A" && (
 //                     <span
-//                       onClick={() => settransectionType("")}
+//                       onClick={() => settransectionType("A")}
 //                       style={{
 //                         position: "absolute",
 //                         right: "25px",
@@ -2566,7 +2583,7 @@ import "react-toastify/dist/ReactToastify.css";
 //                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
 //                     type="text"
 //                     id="searchsubmit"
-//                     placeholder="Item description"
+//                     placeholder="Search"
 //                     value={searchQuery}
 //                     autoComplete="off"
 //                     style={{
@@ -2876,7 +2893,9 @@ import "react-toastify/dist/ReactToastify.css";
 //   );
 // }
 
-export default function SparePartsStockReport() {
+
+
+export default function ShopStockReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -2910,8 +2929,7 @@ export default function SparePartsStockReport() {
 
   const [Companyselectdata, setCompanyselectdata] = useState("");
 
-  
-
+  console.log("Companyselectdata", Companyselectdata);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
   const [Capacityselectdata, setCapacityselectdata] = useState("");
@@ -2937,10 +2955,16 @@ export default function SparePartsStockReport() {
   console.log("transectionType", transectionType);
   const [transectionType2, settransectionType2] = useState("");
 
-  const [totalqnty, settotalqnty] = useState(0);
-  const [totalexcel, settotalexcel] = useState(0);
-  const [totaltax, settotaltax] = useState(0);
-  const [totalincl, settotalincl] = useState(0);
+  const [tottal1, settottal1] = useState(0);
+   const [tottal2, settottal2] = useState(0);
+     const [tottal3, settottal3] = useState(0);
+       const [tottal4, settottal4] = useState(0);
+         const [tottal5, settottal5] = useState(0);
+           const [totalQnty, settotalQnty] = useState(0);
+           const [tottalAmount, settottalAmount] = useState(0);
+
+
+
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -2956,7 +2980,6 @@ export default function SparePartsStockReport() {
 
   const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
-console.log('storedata', Typeselectdata)
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -3080,7 +3103,7 @@ console.log('storedata', Typeselectdata)
       toDateElement.style.border = `1px solid ${fontcolor}`;
     }
 
-    const apiMainUrl = apiLinks + "/SparePartsStockReport.php";
+    const apiMainUrl = apiLinks + "/ShopStockReport.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
       FRepDat: toInputDate,
@@ -3095,19 +3118,23 @@ console.log('storedata', Typeselectdata)
       FRepStk: transectionType2,
       FRepRat: transectionType,
 
-      // code: "IZONETRD",
+      // code: "BGH",
       // FLocCod: "001",
-      // FYerDsc: "2025-2025",
+      // FYerDsc: "2025-2026",
     }).toString();
 
     axios
       .post(apiMainUrl, formMainData)
       .then((response) => {
         setIsLoading(false);
-        settotalqnty(response.data["Total Qnty"]);
-        settotalexcel(response.data["Total Rate"]);
-        settotaltax(response.data["Total Amount"]);
-        // settotalincl(response.data["Total Incl"]);
+        settottal1(response.data["Total001"]);
+        settottal2(response.data["Total002"]);
+        settottal3(response.data["Total003"]);
+        settottal4(response.data["Total004"]);
+        settottal5(response.data["Total005"]);
+        settotalQnty(response.data["Total Qnty"]);
+        settottalAmount(response.data["Total Amount"]);
+
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -3156,8 +3183,7 @@ console.log('storedata', Typeselectdata)
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCompany.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-           code: 'NASIRTRD',
+      code: organisation.code,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -3185,8 +3211,6 @@ console.log('storedata', Typeselectdata)
     const apiUrl = apiLinks + "/GetCapacity.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-       
-
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -3214,8 +3238,7 @@ console.log('storedata', Typeselectdata)
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCatg.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-           code: 'NASIRTRD',
+      code: organisation.code,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -3243,9 +3266,7 @@ console.log('storedata', Typeselectdata)
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveStore.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-            code: 'NASIRTRD',
-
+      code: organisation.code,
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -3289,12 +3310,12 @@ console.log('storedata', Typeselectdata)
     );
   };
 
-  const customStyles1 = (hasError, width) => ({
+  const customStyles1 = (hasError) => ({
     control: (base, state) => ({
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: width,
+      width: 250,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -3455,16 +3476,22 @@ console.log('storedata', Typeselectdata)
   });
 
   const exportPDFHandler = () => {
-   
+    const globalfontsize = 10;
+    console.log("gobal font data", globalfontsize);
+
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Code,
-      item.Description,
-      // item['Last Date'],
+ item.Code ? item.Code.substring(0, 6) : "",
+       item.Description,
       item["Pur Rate"],
+        item.Qnt001,
+         item.Qnt002,
+          item.Qnt003,
+           item.Qnt004,
+            item.Qnt005,
       item.Qnty,
       item.Amount,
     ]);
@@ -3474,9 +3501,14 @@ console.log('storedata', Typeselectdata)
       String(formatValue(tableData.length.toLocaleString())),
       "Total",
       "",
-      // String(formatValue(totalexcel)),
-      String(formatValue(totalqnty)),
-      String(formatValue(totaltax)),
+      String(formatValue(tottal1)),
+      String(formatValue(tottal2)),
+      String(formatValue(tottal3)),
+      String(formatValue(tottal4)),
+      String(formatValue(tottal5)),
+      String(formatValue(totalQnty)),
+            String(formatValue(tottalAmount)),
+
     ]);
 
     // Define table column headers and individual column widths
@@ -3484,12 +3516,16 @@ console.log('storedata', Typeselectdata)
     const headers = [
       "Code",
       "Description",
-      // "Last Date",
-      "Rate",
+      "Pur Rate",
+      "L1",
+        "L2",
+          "L3",
+            "L4",
+              "L5",
       "Qnty",
       "Amount",
     ];
-    const columnWidths = [18, 100, 25, 28, 30];
+    const columnWidths = [16, 90, 22, 22, 22,22,22,22,18,30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -3616,13 +3652,13 @@ console.log('storedata', Typeselectdata)
 
           const cellValue = String(cell);
 
-          if (cellIndex === 10) {
+          if (cellIndex === 0) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+          } else if (cellIndex >= 2 ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -3689,7 +3725,7 @@ console.log('storedata', Typeselectdata)
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 45; // Adjust this value based on your requirements
+    const rowsPerPage = 27; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -3741,7 +3777,7 @@ console.log('storedata', Typeselectdata)
         startY += 5; // Adjust vertical position for the company title
         doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Spare Parts Stock Report As on ${toInputDate}`,
+          `Shop Stock Report As on ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -3799,10 +3835,10 @@ console.log('storedata', Typeselectdata)
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Store :`, labelsX + 140, labelsY); // Draw bold label
+        doc.text(`Store :`, labelsX + 180, labelsY); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${typename}`, labelsX + 160, labelsY); // Draw the value next to the label
+        doc.text(`${typename}`, labelsX + 200, labelsY); // Draw the value next to the label
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
@@ -3813,10 +3849,10 @@ console.log('storedata', Typeselectdata)
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Rate :`, labelsX + 140, labelsY + 4.3); // Draw bold label
+        doc.text(`Rate :`, labelsX + 180, labelsY + 4.3); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${RATE}`, labelsX + 160, labelsY + 4.3); // Draw the value next to the label
+        doc.text(`${RATE}`, labelsX + 200, labelsY + 4.3); // Draw the value next to the label
 
         // doc.setFont(getfontstyle, "bold"); // Set font to bold
         // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
@@ -3832,10 +3868,10 @@ console.log('storedata', Typeselectdata)
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Status :`, labelsX + 140, labelsY + 8.5); // Draw bold label
+        doc.text(`Status :`, labelsX + 180, labelsY + 8.5); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${transectionsts}`, labelsX + 160, labelsY + 8.5); // Draw the value next to the label
+        doc.text(`${transectionsts}`, labelsX + 200, labelsY + 8.5); // Draw the value next to the label
 
         if (searchQuery) {
           doc.setFont("verdana", "bold");
@@ -3892,19 +3928,24 @@ console.log('storedata', Typeselectdata)
     handlePagination();
 
     // Save the PDF files
-    doc.save(`sparePartStockReport As On ${toInputDate}.pdf`);
+    doc.save(`ShopStockReport As On ${toInputDate}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 10; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
       "left",
-      "left",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
+      "right",
       "right",
       "right",
       "right",
@@ -3951,7 +3992,7 @@ console.log('storedata', Typeselectdata)
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Spare Part Stock Report As On ${toInputDate}`,
+      `Shop Stock Report As On ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -4006,33 +4047,45 @@ console.log('storedata', Typeselectdata)
 
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
-      "COMPANY :",
+      "Company :",
       typecompany,
       "",
-      "STORE :",
+       "",
+        "",
+         "",
+      "Store :",
       typetype,
     ]);
 
     // Add second row
     const typeAndStoreRow2 = worksheet.addRow([
-      "CATEGORY :",
+      "Category :",
       typecategory,
-      "",
-      "RATE :",
+   "",
+       "",
+        "",
+         "",
+      "Rate :",
       RATE,
     ]);
 
     const typeAndStoreRow3 = worksheet.addRow([
-      "CAPACITY :",
+      "Capacity :",
       typecapacity,
-      "",
-      "STATUS :",
+     "",
+       "",
+        "",
+         "",
+      "Status :",
       transectionsts,
     ]);
 
     // Add third row with conditional rendering for "SEARCH:"
     const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery ? ["", "", "", "SEARCH :", typesearch] : [""],
+      searchQuery ? ["", "", "", "",
+       "",
+        "",
+         "", "Search :", typesearch] : [""],
     );
 
     // Apply styling for the status row
@@ -4040,7 +4093,7 @@ console.log('storedata', Typeselectdata)
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -4048,7 +4101,7 @@ console.log('storedata', Typeselectdata)
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -4057,7 +4110,7 @@ console.log('storedata', Typeselectdata)
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -4065,7 +4118,7 @@ console.log('storedata', Typeselectdata)
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 4].includes(colIndex),
+        bold: [1, 7].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -4089,10 +4142,14 @@ console.log('storedata', Typeselectdata)
 
     // Add headers
     const headers = [
-      "Code",
+    "Code",
       "Description",
-      "Last Date",
-      "Rate",
+      "Pur Rate",
+      "L1",
+        "L2",
+          "L3",
+            "L4",
+              "L5",
       "Qnty",
       "Amount",
     ];
@@ -4103,11 +4160,15 @@ console.log('storedata', Typeselectdata)
     tableData.forEach((item) => {
       const row = worksheet.addRow([
         item.Code,
-        item.Description,
-        item["Last Date"],
-        item["Pur Rate"],
-        item.Qnty,
-        item.Amount,
+      item.Description,
+      item["Pur Rate"],
+        item.Qnt001,
+         item.Qnt002,
+          item.Qnt003,
+           item.Qnt004,
+            item.Qnt005,
+      item.Qnty,
+      item.Amount,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -4126,17 +4187,21 @@ console.log('storedata', Typeselectdata)
     });
 
     // Set column widths
-    [20, 45, 10, 12, 12, 12].forEach((width, index) => {
+    [15, 45, 10, 10, 10, 10,10,10,8,12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
-      "",
+   String(formatValue(tableData.length.toLocaleString())),
       "Total",
       "",
-      "",
-      String(totalqnty),
-      String(totaltax),
+      String(formatValue(tottal1)),
+      String(formatValue(tottal2)),
+      String(formatValue(tottal3)),
+      String(formatValue(tottal4)),
+      String(formatValue(tottal5)),
+      String(formatValue(totalQnty)),
+            String(formatValue(tottalAmount)),
     ]);
 
     // total row added
@@ -4151,8 +4216,11 @@ console.log('storedata', Typeselectdata)
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 5 || colNumber === 6) {
+      if (colNumber >3) {
         cell.alignment = { horizontal: "right" };
+      }
+      if (colNumber === 1) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
@@ -4219,7 +4287,7 @@ console.log('storedata', Typeselectdata)
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `SparePartStockReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `ShopStockReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -4312,10 +4380,11 @@ console.log('storedata', Typeselectdata)
   };
 
   const firstColWidth = {
-    width: "55px",
+      width: isSidebarVisible ? "55px" :'135px',
+
   };
   const secondColWidth = {
-    width: "360px",
+    width: isSidebarVisible ? "230px" :'360px',
   };
   const thirdColWidth = {
     width: "90px",
@@ -4323,12 +4392,28 @@ console.log('storedata', Typeselectdata)
   const forthColWidth = {
     width: "90px",
   };
+  
+  const fifthColWidth = {
+    width: "90px",
+  };
 
   const sixthColWidth = {
     width: "90px",
   };
   const seventhColWidth = {
-    width: "110px",
+    width: "90px",
+  };
+  
+  const eightColWidth = {
+    width: "60px",
+  };
+  
+  const ninthColWidth = {
+    width: "90px",
+  };
+  
+  const tenthColWidth = {
+    width: "90px",
   };
 
   const sixthcol = {
@@ -4336,21 +4421,29 @@ console.log('storedata', Typeselectdata)
   };
 
   const [columns, setColumns] = useState({
-    Code: [],
-    Description: [],
-    ["Last Date"]: [],
-    ["Pur Rate"]: [], // ✔ Corrected key
-    Qnty: [],
-    Amount: [],
+     Code: [],
+      Description: [],
+      ["Pur Rate"]: [],
+        Qnt001: [],
+         Qnt002: [],
+          Qnt003: [],
+           Qnt004: [],
+          Qnt005: [],
+      Qnty: [],
+      Amount: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-    Code: "",
-    Description: "",
-    ["Last Date"]: "",
-    ["Pur Rate"]: "", // ✔ Corrected key
-    Qnty: "",
-    Amount: "",
+     Code: "",
+      Description: "",
+      ["Pur Rate"]: "",
+        Qnt001: "",
+         Qnt002: "",
+          Qnt003: "",
+           Qnt004: "",
+          Qnt005: "",
+      Qnty: "",
+      Amount: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -4359,8 +4452,12 @@ console.log('storedata', Typeselectdata)
       const newColumns = {
         Code: tableData.map((row) => row.Code),
         Description: tableData.map((row) => row.Description),
-        ["Last Date"]: tableData.map((row) => row["Last Date"]),
         ["Pur Rate"]: tableData.map((row) => row["Pur Rate"]),
+        Qnt001: tableData.map((row) => row.Qnt001),
+        Qnt002: tableData.map((row) => row.Qnt002),
+        Qnt003: tableData.map((row) => row.Qnt003),
+        Qnt004: tableData.map((row) => row.Qnt004),
+        Qnt005: tableData.map((row) => row.Qnt005),
         Qnty: tableData.map((row) => row.Qnty),
         Amount: tableData.map((row) => row.Amount),
       };
@@ -4381,8 +4478,12 @@ console.log('storedata', Typeselectdata)
     setColumnSortOrders({
       Code: null,
       Description: null,
-      ["Last Date"]: null,
       ["Pur Rate"]: null,
+        Qnt001: null,
+         Qnt002: null,
+          Qnt003: null,
+           Qnt004: null,
+          Qnt005: null,
       Qnty: null,
       Amount: null,
     });
@@ -4436,7 +4537,7 @@ console.log('storedata', Typeselectdata)
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="6" className="text-center">
+              <td colSpan="10" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -4448,7 +4549,7 @@ console.log('storedata', Typeselectdata)
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
+                {Array.from({ length: 10 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -4456,10 +4557,14 @@ console.log('storedata', Typeselectdata)
             <tr>
               <td style={firstColWidth}></td>
               <td style={secondColWidth}></td>
+              <td style={tenthColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
               <td style={sixthColWidth}></td>
               <td style={seventhColWidth}></td>
+              <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
             </tr>
           </>
         ) : (
@@ -4478,47 +4583,86 @@ console.log('storedata', Typeselectdata)
                     color: isNegative ? "red" : fontcolor,
                   }}
                 >
-                  <td
+                  {/* <td
                     className="text-start"
                     style={{
                       ...firstColWidth,
                       cursor: "pointer",
                       textDecoration: "underline",
-                     color: selectedIndex === i ? (isNegative ? "white" : 'white') : "blue", // ✅ conditional color
-
+                      color:
+                        selectedIndex === i
+                          ? isNegative
+                            ? "white"
+                            : "white"
+                          : "blue", // ✅ conditional color
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
                       // code temporarily store karo
                       sessionStorage.setItem(
-                        "SparePartsLedgerData",
+                        "itemLedgerData",
                         JSON.stringify({
                           code: item.Code,
                           toInputDate: toInputDate,
-                          fromInputDate: fromInputDate
                         }),
                       );
 
                       // fixed URL open karo
-                      window.open("/crystalsol/SparePartsLedger", "_blank");
+                      window.open("/crystalsol/ItemLedger", "_blank");
+                    }}
+                  >
+                    {item.Code}
+                  </td> */}
+                 
+
+                  <td
+                    className="text-start"
+                    title={item.Code}
+                    style={{
+                      ...firstColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                   >
                     {item.Code}
                   </td>
 
-                  <td className="text-start" style={secondColWidth}>
+                 <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {item.Description}
                   </td>
-                  <td className="text-center" style={thirdColWidth}>
-                    {item["Last Date"]}
+                  <td className="text-end" style={tenthColWidth}>
+                    {item['Pur Rate']}
+                  </td>
+                  <td className="text-end" style={thirdColWidth}>
+                     {formatValue(item.Qnt001)}
                   </td>
                   <td className="text-end" style={forthColWidth}>
-                    {formatValue(item['Pur Rate'])}
+  {formatValue(item.Qnt002)}  
                   </td>
+                  <td className="text-end" style={fifthColWidth}>
+  {formatValue(item.Qnt003)}
+                    </td>
                   <td className="text-end" style={sixthColWidth}>
+  {formatValue(item.Qnt004)}
+                    </td>
+                   <td className="text-end" style={seventhColWidth}>
+  {formatValue(item.Qnt005)}
+                    </td>
+                 
+                   <td className="text-end" style={eightColWidth}>
                     {formatValue(item.Qnty)}
                   </td>
-                  <td className="text-end" style={seventhColWidth}>
+                  <td className="text-end" style={ninthColWidth}>
                     {formatValue(item.Amount)}
                   </td>
                 </tr>
@@ -4534,7 +4678,7 @@ console.log('storedata', Typeselectdata)
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
+                {Array.from({ length: 10 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -4542,10 +4686,14 @@ console.log('storedata', Typeselectdata)
             <tr>
               <td style={firstColWidth}></td>
               <td style={secondColWidth}></td>
+                 <td style={tenthColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
+              <td style={fifthColWidth}></td>
               <td style={sixthColWidth}></td>
               <td style={seventhColWidth}></td>
+              <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
             </tr>
           </>
         )}
@@ -4589,11 +4737,11 @@ console.log('storedata', Typeselectdata)
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: isSidebarVisible ? "1000px" :'1200px',
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "53vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -4763,7 +4911,7 @@ console.log('storedata', Typeselectdata)
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Spare Parts Stock Report" />
+          <NavComponent textdata="Shop Stock Report" />
 
           {/* ------------1st row */}
           <div
@@ -4916,27 +5064,19 @@ console.log('storedata', Typeselectdata)
                     options={typeoptions}
                     onKeyDown={(e) => handlecompanyKeypress(e, input4Refrate)}
                     id="selectedsale"
-
-
-
-
-onChange={(selectedOption) => {
-  if (selectedOption && selectedOption.value) {
-    const labelPart = selectedOption.label.substring(
-      selectedOption.label.indexOf("-") + 1
-    );
-
-    setTypeselectdata(selectedOption.value);
-
-    settypeselectdatavalue({
-      value: selectedOption.value,
-      label: labelPart.trim(),
-    });
-  } else {
-    setTypeselectdata("");
-    settypeselectdatavalue("");
-  }
-}}
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setTypeselectdata(selectedOption.value);
+                        settypeselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setTypeselectdata("");
+                        settypeselectdatavalue("");
+                      }
+                    }}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();
@@ -4945,7 +5085,7 @@ onChange={(selectedOption) => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata, 250),
+                      ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -5035,7 +5175,7 @@ onChange={(selectedOption) => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata,300),
+                      ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -5200,7 +5340,7 @@ onChange={(selectedOption) => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata, 300),
+                      ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -5240,7 +5380,37 @@ onChange={(selectedOption) => {
                   </label>
                 </div>
 
-               
+                {/* <select
+                                    ref={input4Ref}
+                                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                                    id="submitButton"
+                                    name="type"
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "4px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                    value={transectionType2}
+                                    onChange={handleTransactionTypeChange2}
+                                    style={{
+                                        width: "250px",
+                                        height: "24px",
+                                        marginLeft: "3px",
+                                        backgroundColor: getcolor,
+                                        border: `1px solid ${fontcolor}`,
+                                        fontSize: getdatafontsize,
+                                        fontFamily: getfontstyle,
+                                        color: fontcolor,
+                                        paddingLeft: "12px",
+                                    }}
+                                >
+                                      <option value="">ALL</option>
+                                    <option value="P">POSITIVE</option>
+                                    <option value="N">NEGATIVE</option>
+                                      <option value="Z">ZERO</option>
+                                </select> */}
+
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <select
                     ref={input4Ref}
@@ -5364,7 +5534,7 @@ onChange={(selectedOption) => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata, 300),
+                      ...customStyles1(!Companyselectdata),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -5505,34 +5675,79 @@ onChange={(selectedOption) => {
                         style={getIconStyle("Description")}
                       ></i>
                     </td>
-
+                    <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      onClick={() => handleSorting("Pur Rate")}
+                    >
+                      Pur Rate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Pur Rate")}
+                      ></i>
+                    </td>
+                    
                     <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("Last Date")}
+                      onClick={() => handleSorting("Qnt001")}
                     >
-                      Last Date{" "}
+                      L1{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Last Date")}
+                        style={getIconStyle("Qnt001")}
                       ></i>
                     </td>
 
                     <td
                       className="border-dark"
                       style={forthColWidth}
-                      onClick={() => handleSorting("Pur Rate")}
+                      onClick={() => handleSorting("Qnt002")}
                     >
-                      Rate{" "}
+                      L2{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Pur Rate")}
+                        style={getIconStyle("Qnt002")}
                       ></i>
                     </td>
-
+                    <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                      onClick={() => handleSorting("Qnt003")}
+                    >
+                      L3{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt003")}
+                      ></i>
+                    </td>
                     <td
                       className="border-dark"
                       style={sixthColWidth}
+                      onClick={() => handleSorting("Qnt004")}
+                    >
+                      L4{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt004")}
+                      ></i>
+                    </td>
+                      <td
+                      className="border-dark"
+                      style={seventhColWidth}
+                      onClick={() => handleSorting("Qnt005")}
+                    >
+                      L5{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnt005")}
+                      ></i>
+                    </td>
+                 
+
+                    <td
+                      className="border-dark"
+                      style={eightColWidth}
                       onClick={() => handleSorting("Qnty")}
                     >
                       Qnty{" "}
@@ -5544,7 +5759,7 @@ onChange={(selectedOption) => {
 
                     <td
                       className="border-dark"
-                      style={seventhColWidth}
+                      style={ninthColWidth}
                       onClick={() => handleSorting("Amount")}
                     >
                       Amount{" "}
@@ -5567,9 +5782,7 @@ onChange={(selectedOption) => {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "43vh",
-                // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+               
               }}
             >
               <table
@@ -5579,7 +5792,8 @@ onChange={(selectedOption) => {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   width: "100%",
-                  // position: "relative",
+                position: "relative",
+                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">{renderTableData()}</tbody>
@@ -5617,13 +5831,22 @@ onChange={(selectedOption) => {
             ></div>
             <div
               style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+            </div>
+            <div
+              style={{
                 ...thirdColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              <span className="mobileledger_total">{formatValue(tottal1)}</span>
             </div>
+
             <div
               style={{
                 ...forthColWidth,
@@ -5631,10 +5854,21 @@ onChange={(selectedOption) => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalexcel}</span>
-            </div>
+              <span className="mobileledger_total">{formatValue(tottal2)}</span>
 
+            </div>
             <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(tottal3)}
+              </span>
+            </div>
+             <div
               style={{
                 ...sixthColWidth,
                 background: getcolor,
@@ -5642,10 +5876,10 @@ onChange={(selectedOption) => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalqnty)}
+                {formatValue(tottal4)}
               </span>
             </div>
-            <div
+             <div
               style={{
                 ...seventhColWidth,
                 background: getcolor,
@@ -5653,7 +5887,29 @@ onChange={(selectedOption) => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totaltax)}
+                {formatValue(tottal5)}
+              </span>
+            </div>
+             <div
+              style={{
+                ...eightColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalQnty)}
+              </span>
+            </div>
+             <div
+              style={{
+                ...ninthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(tottalAmount)}
               </span>
             </div>
           </div>
@@ -5707,4 +5963,5 @@ onChange={(selectedOption) => {
     </>
   );
 }
+
 

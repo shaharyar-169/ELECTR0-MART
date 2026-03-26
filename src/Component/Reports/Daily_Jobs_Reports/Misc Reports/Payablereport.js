@@ -395,13 +395,13 @@ export default function PayableReport() {
     const apiUrl = apiLinks + "/PayableReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
-      code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
 
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
-      // code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FRepTyp: transectionType,
@@ -1240,7 +1240,6 @@ export default function PayableReport() {
     }, {}),
   }));
 };
-
   const resetSorting = () => {
     setColumnSortOrders({
       code: null,

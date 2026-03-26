@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+
+import axios from "axios";
 import { useTheme } from "../../../../ThemeContext";
 import {
   getUserData,
@@ -21,14 +22,15 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
+import { fetchGetUser } from "../../../Redux/action";
+import "./misc.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../../../vardana/vardana";
-import "../../../vardana/verdana-bold";
 
-export default function DailyCashBankBalance() {
+
+
+export default function ProjectComparisonReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -40,17 +42,30 @@ export default function DailyCashBankBalance() {
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
+  const hasInitialized = useRef(false);
 
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
 
-  const [totalQnty, setTotalQnty] = useState(0);
-  const [totalOpening, setTotalOpening] = useState(0);
-  const [totalDebit, setTotalDebit] = useState(0);
-  const [totalCredit, setTotalCredit] = useState(0);
-  const [closingBalance, setClosingBalance] = useState(0);
+  // DOUBLE STATE HANDLE
+  const [isItemInitialized, setIsItemInitialized] = useState(false);
+  const [isCodeReady, setIsCodeReady] = useState(false);
+  const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
+
+  const [tableData, setTableData] = useState([]);
+
+  const [totalcost, settotalcost] = useState(0);
+  const [totalsale, settotalsale] = useState(0);
+  const [totalcollection, settotalcollection] = useState(0);
+  const [totalpayments, settotalpayments] = useState(0);
+  const [totalothers, settotalothers] = useState(0);
+    const [totalmargin, settotalmargin] = useState(0);
+
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+
+  console.log("Companyselectdatavalue", Companyselectdatavalue.label);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -77,7 +92,13 @@ export default function DailyCashBankBalance() {
     gettodate,
     getfontstyle,
     getdatafontsize,
+    getnavbarbackgroundcolor,
   } = useTheme();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--background-color", getcolor);
+    document.documentElement.style.setProperty("--font-color", fontcolor);
+  }, [getcolor, fontcolor]);
 
   const comapnyname = organisation.description;
 
@@ -98,7 +119,7 @@ export default function DailyCashBankBalance() {
 
   const formatDate1 = (date) => {
     return `${String(date.getDate()).padStart(2, "0")}-${String(
-      date.getMonth() + 1
+      date.getMonth() + 1,
     ).padStart(2, "0")}-${date.getFullYear()}`;
   };
 
@@ -108,159 +129,16 @@ export default function DailyCashBankBalance() {
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-
-  const toggleToCalendar = () => {
-    settoCalendarOpen((prevOpen) => !prevOpen);
-  };
+  
   const formatDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
+  
 
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleToKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const toDateElement = document.getElementById("todatevalidation");
-      const formattedInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobaltoDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        if (GlobaltoDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        if (fromInputDate) {
-          const fromDate = new Date(
-            fromInputDate.split("-").reverse().join("-")
-          );
-          if (enteredDate <= fromDate) {
-            toast.error("To date must be after from date");
-            return;
-          }
-        }
-
-        toDateElement.style.border = `1px solid ${fontcolor}`;
-        settoInputDate(formattedInput);
-
-        if (input1Ref.current) {
-          e.preventDefault();
-          input1Ref.current.focus();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handleToDateChange = (date) => {
-    setSelectedToDate(date);
-    settoInputDate(date ? formatDate(date) : "");
-    settoCalendarOpen(false);
-  };
-  const handleToInputChange = (e) => {
-    settoInputDate(e.target.value);
-  };
+ 
 
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
@@ -271,145 +149,35 @@ export default function DailyCashBankBalance() {
     }
   };
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
-
-  function fetchDailyCashBankBalance() {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
-
-    const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-
-    let hasError = false;
-    let errorType = "";
-
-    switch (true) {
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
-      case !toInputDate:
-        errorType = "toDate";
-        break;
-      default:
-        hasError = false;
-        break;
-    }
-
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
-      errorType = "toDateInvalid";
-    } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
-      const formattedToInput = toInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
-      const enteredToDate = new Date(toYear, toMonth - 1, toDay);
-
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
-        errorType = "toDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
-        errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
-      }
-    }
-
-    switch (errorType) {
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
-      case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
-        return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
-        return;
-      default:
-        break;
-    }
-
-    console.log(data);
-    document.getElementById(
-      "fromdatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-    document.getElementById(
-      "todatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-
-    const apiUrl = apiLinks + "/DailyCashBankBalance.php";
+  function fetchReceivableReport() {
+        
+    const apiUrl = apiLinks + "/ProjectComparisonReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FSchTxt: searchQuery,
-      FRepTyp: transectionType,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+       FSchTxt: searchQuery,
+       code: organisation.code,
+         // code: 'FOUTURA',
+     
     }).toString();
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
-        console.log("Response:", response.data);
-        setTotalOpening(response.data["Total Opening"]);
-        setTotalDebit(response.data["Total Debit"]);
-        setTotalCredit(response.data["Total Credit"]);
-        setClosingBalance(response.data["Total Balance"]);
+
+        settotalcost(response.data["Total Cost"]);
+        settotalsale(response.data["Total Sale"]);
+        settotalcollection(response.data["Total Collection"]);
+        settotalpayments(response.data["Total Payments"]);
+        settotalothers(response.data["Total Others"]);
+        settotalmargin(response.data["Total Margin"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data
+            response.data.Detail,
           );
           setTableData([]);
         }
@@ -423,97 +191,24 @@ export default function DailyCashBankBalance() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-      if (fromRef && fromRef.current) {
+    if (
+      !hasComponentMountedPreviously ||
+      (input3Ref && input3Ref.current)
+    ) {
+      if (input3Ref && input3Ref.current) {
         setTimeout(() => {
-          fromRef.current.focus();
-          fromRef.current.select();
+          input3Ref.current.focus();
+          // input3Ref.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
     }
   }, []);
 
-  useEffect(() => {
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
-  }, []);
 
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveAccounts.php";
-    const formData = new URLSearchParams({
-      FLocCod: getLocationNumber,
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setSupplierList(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
 
-  const options = supplierList.map((item) => ({
-    value: item.tacccod,
-    label: `${item.tacccod}-${item.taccdsc.trim()}`,
-  }));
-
-  const DropdownOption = (props) => {
-    return (
-      <components.Option {...props}>
-        <div
-          style={{
-            fontSize: "12px",
-            paddingBottom: "5px",
-            lineHeight: "3px",
-            color: "black",
-            textAlign: "start",
-          }}
-        >
-          {props.data.label}
-        </div>
-      </components.Option>
-    );
-  };
-  const customStyles1 = (hasError) => ({
-    control: (base, state) => ({
-      ...base,
-      height: "24px",
-      minHeight: "unset",
-      width: 418,
-      fontSize: "12px",
-      backgroundColor: getcolor,
-      color: fontcolor,
-      borderRadius: 0,
-      border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-      transition: "border-color 0.15s ease-in-out",
-      "&:hover": {
-        borderColor: state.isFocused ? base.borderColor : "black",
-      },
-      padding: "0 8px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-    }),
-    dropdownIndicator: (base) => ({
-      ...base,
-      padding: 0,
-      fontSize: "18px",
-      display: "flex",
-      textAlign: "center !important",
-    }),
-  });
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
@@ -521,34 +216,46 @@ export default function DailyCashBankBalance() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Code,
-      item.Description,
-      item.Opening,
-      item.Debit,
-      item.Credit,
-      item.Balance,
+   
+        item.Code,
+        item.Description,
+        item.Reference,
+        item.Cost,
+        item.Sale,
+        item.Collection,
+        item.Payments,
+        item.Other,
+        item.Margin,
     ]);
 
     // Add summary row to the table
+
     rows.push([
-      String(formatValue(tableData.length.toLocaleString())),
+         "",
       "",
-      String(formatValue(totalOpening)),
-      String(formatValue(totalDebit)),
-      String(formatValue(totalCredit)),
-      String(formatValue(closingBalance)),
+      "Total",
+    String(totalcost)   ,
+       String(totalsale)   ,
+         String(totalcollection)   ,
+           String(totalpayments)   ,
+             String(totalothers)   ,
+               String(totalmargin)   ,
     ]);
 
     // Define table column headers and individual column widths
     const headers = [
+     
       "Code",
       "Description",
-      "Opening",
-      "Debit",
-      "Credit",
-      "Balance",
+      "Reference",
+      "Cost",
+      "Sale",
+      "Collection",
+      "Payments",
+      "Others",
+      "Margin",
     ];
-    const columnWidths = [24, 110, 30, 30, 30, 30];
+    const columnWidths = [24, 65, 65, 22, 22, 22,22,22,22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -620,7 +327,7 @@ export default function DailyCashBankBalance() {
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F"
+            "F",
           );
         }
 
@@ -639,7 +346,7 @@ export default function DailyCashBankBalance() {
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5
+            rowBottomY - 0.5,
           );
 
           doc.setLineWidth(0.2);
@@ -648,7 +355,7 @@ export default function DailyCashBankBalance() {
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY
+            rowBottomY,
           );
         } else {
           doc.setLineWidth(0.2);
@@ -656,7 +363,7 @@ export default function DailyCashBankBalance() {
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
           );
         }
 
@@ -676,18 +383,13 @@ export default function DailyCashBankBalance() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0) {
+          if (cellIndex === 0 ) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
-            cellIndex === 4 ||
-            cellIndex === 5
-          ) {
+          } else if (cellIndex > 2) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -713,7 +415,7 @@ export default function DailyCashBankBalance() {
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
+              startY + (i - startIndex + 3) * rowHeight,
             );
             startX += columnWidths[cellIndex];
           }
@@ -754,7 +456,7 @@ export default function DailyCashBankBalance() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 28; // Adjust this value based on your requirements
+    const rowsPerPage = 29; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -766,7 +468,7 @@ export default function DailyCashBankBalance() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10
+        pageNumberFontSize = 10,
       ) => {
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -786,13 +488,13 @@ export default function DailyCashBankBalance() {
         // }
 
         // Add page numbering
-doc.setFont("verdana-regular", "normal");
-           doc.setFontSize(10);
-                   doc.text(
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(
           `Page ${pageNumber}`,
-          rightX - 35,
+          rightX - 10,
           doc.internal.pageSize.height - 10,
-          { align: "right" }
+          { align: "right" },
         );
       };
 
@@ -806,43 +508,40 @@ doc.setFont("verdana-regular", "normal");
         startY += 5; // Adjust vertical position for the company title
         doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Cash & Bank Balance Report From ${fromInputDate} To ${toInputDate}`,
+          `Project Comparison Report`,
           "",
           "",
           pageNumber,
           startY,
-          12
+          12,
         ); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
+                      
 
-        let status =
-          transectionType === "C"
-            ? "CASH"
-            : transectionType === "B"
-            ? "BANK"
-            : "ALL";
-        // let search = searchQuery ? searchQuery : "";
+        // let search = Companyselectdatavalue.label
+        //   ? Companyselectdatavalue.label
+        //   : "ALL";
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Type :`, labelsX, labelsY + 4.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${status}`, labelsX + 20, labelsY + 4.5); // Draw the value next to the label
+        // doc.setFont("verdana", "bold");
+        // doc.setFontSize(10);
+        // doc.text(`Account :`, labelsX, labelsY + 8.5); // Draw bold label
+        // doc.setFont("verdana-regular", "normal");
+        // doc.setFontSize(10);
+        // doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        startY += 6; // Adjust vertical position for the labels
+             startY += 10; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 25);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
           (doc.internal.pageSize.width - totalWidth) / 2,
           startY,
           startIndex,
-          endIndex
+          endIndex,
         );
         if (endIndex < rows.length) {
           startY = addNewPage(startY); // Add new page and update startY
@@ -876,20 +575,25 @@ doc.setFont("verdana-regular", "normal");
     handlePagination();
 
     // Save the PDF files
-    doc.save(
-      `Cash&BankBalanceReport From ${fromInputDate} To ${toInputDate}.pdf`
-    );
+    doc.save(`ProjectComparisonReport As On ${date}.pdf`);
   };
 
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
+  ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 9; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
+     
       "center",
       "left",
+      "left",
+      "right",
+      "right",
       "right",
       "right",
       "right",
@@ -932,12 +636,12 @@ doc.setFont("verdana-regular", "normal");
     worksheet.mergeCells(
       `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         companyRow.number
-      }`
+      }`,
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Cash & Bank Balance Report From ${fromInputDate} To ${toInputDate}`,
+      `Project Comparison Report `,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -947,37 +651,14 @@ doc.setFont("verdana-regular", "normal");
     worksheet.mergeCells(
       `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
         storeListRow.number
-      }`
+      }`,
     );
 
     // Add an empty row after the title section
     worksheet.addRow([]);
-
-    let typestatus =
-      transectionType === "C"
-        ? "CASH"
-        : transectionType === "B"
-        ? "BANK"
-        : "ALL";
-    let typesearch = searchQuery || "";
-
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["Type :", typestatus, "Search :", typesearch]
-        : ["Type :", typestatus, ""]
-    );
-
-    // Apply styling for the status row
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 3].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
+   
+    
+      // Header style
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
@@ -996,12 +677,16 @@ doc.setFont("verdana-regular", "normal");
 
     // Add headers
     const headers = [
+     
       "Code",
       "Description",
-      "Opening",
-      "Debit",
-      "Credit",
-      "Balance",
+      "Reference",
+      "Cost",
+      "Sale",
+      "Collection",
+      "Payments",
+      "Others",
+      "Margin",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1009,12 +694,16 @@ doc.setFont("verdana-regular", "normal");
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
+       
         item.Code,
         item.Description,
-        item.Opening,
-        item.Debit,
-        item.Credit,
-        item.Balance,
+        item.Reference,
+        item.Cost,
+        item.Sale,
+        item.Collection,
+        item.Payments,
+        item.Other,
+        item.Margin,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1033,12 +722,16 @@ doc.setFont("verdana-regular", "normal");
     });
 
     const totalRow = worksheet.addRow([
-      String(formatValue(tableData.length.toLocaleString())),
+     
       "",
-      String(formatValue(totalOpening)),
-      String(formatValue(totalDebit)),
-      String(formatValue(totalCredit)),
-      String(formatValue(closingBalance)),
+      "",
+      "Total",
+    String(totalcost)   ,
+       String(totalsale)   ,
+         String(totalcollection)   ,
+           String(totalpayments)   ,
+             String(totalothers)   ,
+               String(totalmargin)   ,
     ]);
 
     // total row added
@@ -1053,24 +746,13 @@ doc.setFont("verdana-regular", "normal");
       };
 
       // Align only the "Total" text to the right
-      if (
-        colNumber === 3 ||
-        colNumber === 4 ||
-        colNumber === 5 ||
-        colNumber === 6
-      ) {
+      if (colNumber > 3) {
         cell.alignment = { horizontal: "right" };
-      }
-       if (
-        colNumber === 1 
-     
-      ) {
-        cell.alignment = { horizontal: "center" };
       }
     });
 
     // Set column widths
-    [10, 45, 15, 15, 15, 15].forEach((width, index) => {
+    [10, 45, 45, 12, 12, 12,12,12,12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1122,14 +804,10 @@ doc.setFont("verdana-regular", "normal");
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
-      }`
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
-      }`
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
     );
 
     // Generate and save the Excel file
@@ -1137,13 +815,9 @@ doc.setFont("verdana-regular", "normal");
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(
-      blob,
-      `Cash&BankBalanceReport From ${fromInputDate} To ${toInputDate}.xlsx`
-    );
+    saveAs(blob, `ProjectComparisonReport As On ${currentdate}.xlsx`);
   };
-
-  const dispatch = useDispatch();
+  ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const tableTopColor = "#3368B5";
   const tableHeadColor = "#3368b5";
@@ -1151,7 +825,6 @@ doc.setFont("verdana-regular", "normal");
   const btnColor = "#3368B5";
   const textColor = "white";
 
-  const [tableData, setTableData] = useState([]);
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1162,162 +835,50 @@ doc.setFont("verdana-regular", "normal");
 
   let totalEntries = 0;
 
-  const getFilteredTableData = () => {
-    let filteredData = tableData;
-    if (selectedSearch.trim() !== "") {
-      const query = selectedSearch.trim().toLowerCase();
-      filteredData = filteredData.filter(
-        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-      );
-    }
-    return filteredData;
-  };
+ 
 
-  const firstColWidth = {
-    width: "80px",
-  };
-  const secondColWidth = {
-    width: "360px",
+   const secondColWidth = {
+    width: "60px",
   };
   const thirdColWidth = {
-    width: "90px",
+    width: isSidebarVisible ? "230px":'300px',
   };
   const forthColWidth = {
-    width: "90px",
+    width: isSidebarVisible ? "230px":'300px',
   };
   const fifthColWidth = {
-    width: "90px",
+    width: isSidebarVisible ? "75px":'80px',
   };
   const sixthColWidth = {
-    width: "90px",
+       width: isSidebarVisible ? "75px":'80px',
+
+  };
+  const seventhColWidth = {
+       width: isSidebarVisible ? "78px":'85px',
+
+  };
+   const eigthColWidth = {
+       width: isSidebarVisible ? "78px":'85px',
+
+  };
+   const ninthColWidth = {
+      width: isSidebarVisible ? "78px":'85px',
+
+  };
+   const tenthColWidth = {
+      width: isSidebarVisible ? "78px":'85px',
+
   };
 
-  const sixthcol = {
-    width: "8px",
-  };
-
-  useEffect(() => {
-    document.documentElement.style.setProperty("--background-color", getcolor);
-  }, [getcolor]);
-
-  const [columns, setColumns] = useState({
-    Code: [],
-    Description: [],
-    Opening: [],
-    Debit: [],
-    Credit: [],
-    Balance: [],
-  });
-  const [columnSortOrders, setColumnSortOrders] = useState({
-    Code: "",
-    Description: "",
-    Opening: "",
-    Debit: "",
-    Credit: "",
-    Balance: "",
-  });
-
-  useEffect(() => {
-    if (tableData.length > 0) {
-      const newColumns = {
-        Code: tableData.map((row) => row.Code),
-        Description: tableData.map((row) => row.Description),
-        Opening: tableData.map((row) => row.Opening),
-        Debit: tableData.map((row) => row.Debit),
-        Credit: tableData.map((row) => row.Credit),
-        Balance: tableData.map((row) => row.Balance),
-      };
-      setColumns(newColumns);
-    }
-  }, [tableData]);
-
-  const handleSorting = (col) => {
-    // Determine the new sort order
-    const currentOrder = columnSortOrders[col];
-    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-    // Create a copy of the table data to sort
-    const sortedData = [...tableData];
-
-    // Sort the data based on the column and order
-    sortedData.sort((a, b) => {
-      // Get the values to compare
-      const aVal =
-        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
-      const bVal =
-        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
-
-      // Special handling for code column
-      if (col === "Code" && aVal.includes("-") && bVal.includes("-")) {
-        // Split the codes into parts
-        const aParts = aVal.split("-");
-        const bParts = bVal.split("-");
-
-        // Compare each part numerically
-        for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-          const aPart = parseInt(aParts[i] || "0", 10);
-          const bPart = parseInt(bParts[i] || "0", 10);
-
-          if (aPart !== bPart) {
-            return newOrder === "ASC" ? aPart - bPart : bPart - aPart;
-          }
-        }
-        return 0;
-      }
-
-      // Try to compare as numbers first
-      const numA = parseFloat(aVal.replace(/,/g, ""));
-      const numB = parseFloat(bVal.replace(/,/g, ""));
-
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return newOrder === "ASC" ? numA - numB : numB - numA;
-      }
-
-      // Fall back to string comparison
-      return newOrder === "ASC"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    });
-
-    // Update the table data with the sorted data
-    setTableData(sortedData);
-
-    // Reset all sort orders and set the new one for the clicked column
-    const resetSortOrders = Object.keys(columnSortOrders).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {});
-
-    setColumnSortOrders(resetSortOrders);
-  };
-
-  const resetSorting = () => {
-    setColumnSortOrders({
-      Code: null,
-      Description: null,
-      Opening: null,
-      Debit: null,
-      Credit: null,
-      Balance: null,
-    });
-  };
-
-  const getIconStyle = (colKey) => {
-    const order = columnSortOrders[colKey];
-    return {
-      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-      color: order === "ASC" || order === "DSC" ? "red" : "white",
-      transition: "transform 0.3s ease, color 0.3s ease",
-    };
-  };
+  const sixthcol = { width: "8px" };
 
   useHotkeys(
     "alt+s",
     () => {
-      fetchDailyCashBankBalance();
-      resetSorting();
+      fetchReceivableReport();
+      //    resetSorting();
     },
-    { preventDefault: true, enableOnFormTags: true }
+    { preventDefault: true, enableOnFormTags: true },
   );
 
   useHotkeys("alt+p", exportPDFHandler, {
@@ -1333,10 +894,6 @@ doc.setFont("verdana-regular", "normal");
     enableOnFormTags: true,
   });
 
-  const formatValue = (val) => {
-    return Number(val) === 0 ? "" : val;
-  };
-
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -1351,11 +908,11 @@ doc.setFont("verdana-regular", "normal");
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: isSidebarVisible ? "1000px":'1200px',
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "52vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -1396,7 +953,7 @@ doc.setFont("verdana-regular", "normal");
   useEffect(() => {
     if (selectedRowId !== null) {
       const newIndex = tableData.findIndex(
-        (item) => item.tcmpcod === selectedRowId
+        (item) => item.tcmpcod === selectedRowId,
       );
       setSelectedIndex(newIndex);
     }
@@ -1410,7 +967,7 @@ doc.setFont("verdana-regular", "normal");
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prevIndex) =>
-        Math.min(prevIndex + 1, tableData.length - 1)
+        Math.min(prevIndex + 1, tableData.length - 1),
       );
       scrollToSelectedRow();
     }
@@ -1429,7 +986,6 @@ doc.setFont("verdana-regular", "normal");
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedIndex]);
-
   useEffect(() => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1438,6 +994,43 @@ doc.setFont("verdana-regular", "normal");
       });
     }
   }, [selectedIndex]);
+
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const handleRadioChange = (days) => {
+    const toDate = parseDate(toInputDate);
+    const fromDate = new Date(toDate);
+    fromDate.setUTCDate(fromDate.getUTCDate() - days);
+
+    setSelectedfromDate(fromDate);
+    setfromInputDate(formatDate(fromDate));
+    setSelectedRadio(days === 0 ? "custom" : `${days}days`);
+  };
+
+ 
+
+  // this function for hide the 0 value figure from the table data
+
+  const formatValue = (val) => {
+    return Number(val) === 0 ? "" : val;
+  };
+
+  const isMatchedRow = (item) => {
+    if (!searchQuery) return false; // no highlight if search is empty
+
+    const query = searchQuery.toUpperCase();
+
+    // you can match anything you want:
+    return (
+      item.Description?.toUpperCase().includes(query) ||
+      item.Type?.toUpperCase().includes(query) ||
+      item.Date?.toUpperCase().includes(query) ||
+      String(item["Trn#"])?.includes(query)
+    );
+  };
 
   return (
     <>
@@ -1452,7 +1045,7 @@ doc.setFont("verdana-regular", "normal");
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Cash & Bank Balance Report" />
+          <NavComponent textdata="Project Comparison Report" />
 
           <div
             className="row"
@@ -1465,286 +1058,80 @@ doc.setFont("verdana-regular", "normal");
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "end",
               }}
             >
-              <div className="d-flex align-items-center">
-                <div
-                  style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
+              {/* ------ */}
+
+             <div id="lastDiv" style={{ marginRight: "1px" }}>
+                <label for="searchInput" style={{ marginRight: "5px" }}>
+                  <span
                     style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
+                      fontWeight: "bold",
                     }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="toDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      To :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="todatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    ref={toRef}
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    value={toInputDate}
-                    onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, input1Ref)}
-                    id="toDatePicker"
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="To Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedToDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={toCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleToCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "25px" }}
-              >
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
                 <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Ref}
+                  <input
+                    ref={input2Ref}
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                    id="submitButton"
-                    name="type"
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Search"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "200px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
                     onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
+                      (e.currentTarget.style.border = "2px solid red")
                     }
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "150px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="C">CASH</option>
-                    <option value="B">BANK</option>
-                  </select>
-
-                  {transectionType !== "" && (
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
                     <span
-                      onClick={() => settransectionType("")}
+                      onClick={() => setSearchQuery("")}
                       style={{
                         position: "absolute",
-                        right: "25px",
+                        right: "30px",
                         top: "50%",
                         transform: "translateY(-50%)",
                         cursor: "pointer",
-                        fontWeight: "bold",
+                        fontSize: "20px",
                         color: fontcolor,
                         userSelect: "none",
-                        fontSize: "12px",
                       }}
                     >
-                      ✕
+                      ×
                     </span>
                   )}
                 </div>
               </div>
+
+             
             </div>
           </div>
+
+        
           <div>
             <div
               style={{
@@ -1760,7 +1147,7 @@ doc.setFont("verdana-regular", "normal");
                   fontFamily: getfontstyle,
                   // width: "100%",
                   position: "relative",
-                  // paddingRight: "2%",
+                  paddingRight: "2%",
                 }}
               >
                 <thead
@@ -1772,80 +1159,42 @@ doc.setFont("verdana-regular", "normal");
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
-                    <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      onClick={() => handleSorting("Code")}
-                    >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Code")}
-                      ></i>
+                   
+                    <td className="border-dark" style={secondColWidth}>
+                      Code
                     </td>
-                    <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
-                    >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
+                    <td className="border-dark" style={thirdColWidth}>
+                      Description
                     </td>
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Opening")}
-                    >
-                      Opening{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Opening")}
-                      ></i>
+                    <td className="border-dark" style={forthColWidth}>
+                      Reference
                     </td>
-                    <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Debit")}
-                    >
-                      Debit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Debit")}
-                      ></i>
+                    <td className="border-dark" style={fifthColWidth}>
+                      Cost
                     </td>
-                    <td
-                      className="border-dark"
-                      style={fifthColWidth}
-                      onClick={() => handleSorting("Credit")}
-                    >
-                      Credit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Credit")}
-                      ></i>
+                    <td className="border-dark" style={sixthColWidth}>
+                      Sale
                     </td>
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Balance")}
-                    >
-                      Balance{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Balance")}
-                      ></i>
+                    <td className="border-dark" style={seventhColWidth}>
+                      Collection
+                    </td>
+                    <td className="border-dark" style={eigthColWidth}>
+                      Payments
+                    </td>
+                    <td className="border-dark" style={ninthColWidth}>
+                      Other
+                    </td>
+                    <td className="border-dark" style={tenthColWidth}>
+                      Margin
                     </td>
 
                     <td className="border-dark" style={sixthcol}></td>
@@ -1859,7 +1208,7 @@ doc.setFont("verdana-regular", "normal");
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "52vh",
+                maxHeight: "48vh",
                 // width: "100%",
                 wordBreak: "break-word",
               }}
@@ -1870,7 +1219,7 @@ doc.setFont("verdana-regular", "normal");
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  //  width: "100%",
+                  width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
@@ -1883,7 +1232,7 @@ doc.setFont("verdana-regular", "normal");
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="6" className="text-center">
+                        <td colSpan="9" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -1896,21 +1245,24 @@ doc.setFont("verdana-regular", "normal");
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 6 }).map((_, colIndex) => (
+                            {Array.from({ length: 9 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
                             ))}
                           </tr>
-                        )
+                        ),
                       )}
                       <tr>
-                        <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
                         <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                         <td style={eigthColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
                       </tr>
                     </>
                   ) : (
@@ -1928,25 +1280,57 @@ doc.setFont("verdana-regular", "normal");
                             style={{
                               backgroundColor: getcolor,
                               color: fontcolor,
+                              color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
+                              //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
                             }}
                           >
-                            <td className="text-center" style={firstColWidth}>
+                          
+                            <td className="text-center" style={secondColWidth}>
                               {item.Code}
                             </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Description}
-                            </td>
-                            <td className="text-end" style={thirdColWidth}>
-                              {item.Opening}
-                            </td>
-                            <td className="text-end" style={forthColWidth}>
-                              {item.Debit}
-                            </td>
+                           
+                             <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...thirdColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
+                   <td
+                    className="text-start"
+                    title={item.Reference}
+                    style={{
+                      ...forthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Reference}
+                  </td>
+                           
                             <td className="text-end" style={fifthColWidth}>
-                              {item.Credit}
+                              {item.Cost}
                             </td>
                             <td className="text-end" style={sixthColWidth}>
-                              {item.Balance}
+                              {item.Sale}
+                            </td>
+                            <td className="text-end" style={seventhColWidth}>
+                              {item.Collection}
+                            </td>
+                             <td className="text-end" style={eigthColWidth}>
+                              {item.Payments}
+                            </td>
+                             <td className="text-end" style={ninthColWidth}>
+                              {item.Other}
+                            </td>
+                             <td className="text-end" style={tenthColWidth}>
+                              {item.Margin}
                             </td>
                           </tr>
                         );
@@ -1961,7 +1345,7 @@ doc.setFont("verdana-regular", "normal");
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 6 }).map((_, colIndex) => (
+                          {Array.from({ length: 9 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -1969,12 +1353,15 @@ doc.setFont("verdana-regular", "normal");
                         </tr>
                       ))}
                       <tr>
-                        <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
                         <td style={sixthColWidth}></td>
+                        <td style={seventhColWidth}></td>
+                        <td style={eigthColWidth}></td>
+                        <td style={ninthColWidth}></td>
+                        <td style={tenthColWidth}></td>
                       </tr>
                     </>
                   )}
@@ -1982,6 +1369,7 @@ doc.setFont("verdana-regular", "normal");
               </table>
             </div>
           </div>
+
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,
@@ -1989,19 +1377,10 @@ doc.setFont("verdana-regular", "normal");
               height: "24px",
               display: "flex",
               paddingRight: "8px",
+              // width: "101.2%",
             }}
           >
-            <div
-              style={{
-                ...firstColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total2">
-                {formatValue(tableData.length.toLocaleString())}
-              </span>
-            </div>
+            
             <div
               style={{
                 ...secondColWidth,
@@ -2015,22 +1394,14 @@ doc.setFont("verdana-regular", "normal");
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalOpening)}
-              </span>
-            </div>
+            ></div>
             <div
               style={{
                 ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalDebit)}
-              </span>
-            </div>
+            ></div>
             <div
               style={{
                 ...fifthColWidth,
@@ -2039,7 +1410,7 @@ doc.setFont("verdana-regular", "normal");
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalCredit)}
+                {formatValue(totalcost)}
               </span>
             </div>
             <div
@@ -2050,10 +1421,57 @@ doc.setFont("verdana-regular", "normal");
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(closingBalance)}
+                {formatValue(totalsale)}
+              </span>
+            </div>
+            <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalcollection)}
+              </span>
+            </div>
+
+              <div
+              style={{
+                ...eigthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalpayments)}
+              </span>
+               </div>
+
+                <div
+              style={{
+                ...ninthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalothers)}
+              </span>
+            </div>
+              <div
+              style={{
+                ...tenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalmargin)}
               </span>
             </div>
           </div>
+
           <div
             style={{
               margin: "5px",
@@ -2088,11 +1506,7 @@ doc.setFont("verdana-regular", "normal");
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              // onClick={fetchDailyCashBankBalance}
-              onClick={() => {
-                fetchDailyCashBankBalance();
-                resetSorting();
-              }}
+              onClick={fetchReceivableReport}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2101,13 +1515,7 @@ doc.setFont("verdana-regular", "normal");
           </div>
         </div>
       </div>
+      
     </>
   );
 }
-
-
-
-
-
-
-
