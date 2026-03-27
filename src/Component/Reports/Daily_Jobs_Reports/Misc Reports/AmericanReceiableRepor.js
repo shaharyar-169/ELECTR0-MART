@@ -41,13 +41,20 @@ export default function AmericanReceivableReport() {
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
   const input4Ref = useRef(null);
+    const AreaRef = useRef(null);
+  const TypeRef = useRef(null);
+  const SearchRef = useRef(null);
+  const Type2Ref = useRef(null);
+
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
 
+  const [GetAreaData,setGetAreaData]= useState([])
+  const [GetTypeData,setGetTypeData]= useState([])
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("");
+  const [transectionType, settransectionType] = useState("A");
   const [supplierList, setSupplierList] = useState([]);
 
   const [totalQnty, setTotalQnty] = useState(0);
@@ -66,6 +73,12 @@ export default function AmericanReceivableReport() {
 
   const [Regionselectdata, setRegionselectdata] = useState("");
   const [Regionselectdatavalue, setRegionselectdatavalue] = useState("");
+
+    const [Typeselectdata, setTypeselectdata] = useState("");
+  const [Typeselectdatavalue, setTypeselectdatavalue] = useState("");
+
+   const [Areaselectdata, setAreaselectdata] = useState("");
+  const [Areaselectdatavalue, setAreaselectdatavalue] = useState("");
 
   const [GetCompany, setGetCompany] = useState([]);
     const [GetCity, setGetCity] = useState([]);
@@ -395,16 +408,7 @@ export default function AmericanReceivableReport() {
         break;
     }
 
-    const data = {
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
-      FAccCod: saleType,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-    };
-    console.log(data);
+      console.log(data);
     document.getElementById(
       "fromdatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
@@ -415,21 +419,24 @@ export default function AmericanReceivableReport() {
     const apiUrl = apiLinks + "/AmericanReceivableReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-    //   FLocCod: "001",
-    //   FYerDsc: "2019-2025",
-    //   code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2019-2025",
+      // code: "AMRELEC",
+   FIntDat: fromInputDate,
+      FFnlDat: toInputDate,
       FSalCod : saleType,
       FCtyCod: Cityselectdata,
       FRegCod: Regionselectdata,
+FTypCod: Typeselectdata,
+FAreCod: Areaselectdata,
+         FRepTyp: transectionType,
+      FSchTxt: searchQuery,
 
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       code: organisation.code,
-      FIntDat: fromInputDate,
-
-      FFnlDat: toInputDate,
-    //   FRepTyp: transectionType,
-    //   FSchTxt: searchQuery,
+   
+   
     }).toString();
 
     axios
@@ -490,6 +497,8 @@ export default function AmericanReceivableReport() {
     const apiUrl = apiLinks + "/GetActiveSalesman.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+            // code: 'AMRELEC',
+
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -517,6 +526,8 @@ export default function AmericanReceivableReport() {
     const apiUrl = apiLinks + "/GetActiveCity.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+                  // code: 'AMRELEC',
+
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -545,6 +556,7 @@ export default function AmericanReceivableReport() {
     const apiUrl = apiLinks + "/GetActiveRegion.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+                  // code: 'AMRELEC',
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -567,6 +579,64 @@ export default function AmericanReceivableReport() {
     value: item.tregcod,
     label: `${item.tregcod}-${item.tregdsc.trim()}`,
   }));
+
+   useEffect(() => {
+      const apiUrl = apiLinks + "/GetActiveArea.php";
+      const formData = new URLSearchParams({
+        code: organisation.code,
+        FLocCod: locationnumber || getLocationNumber,
+
+      }).toString();
+      axios
+        .post(apiUrl, formData)
+        .then((response) => {
+          if (response.data && Array.isArray(response.data)) {
+            setGetAreaData(response.data);
+          } else {
+            console.warn(
+              "Response data structure is not as expected:",
+              response.data
+            );
+            setGetAreaData([]);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }, []);
+    const AreaDataoption = GetAreaData.map((item) => ({
+      value: item.tarecod,
+      label: `${item.tarecod}-${item.taredsc.trim()}`,
+    }));
+
+     useEffect(() => {
+      const apiUrl = apiLinks + "/GetCustType.php";
+      const formData = new URLSearchParams({
+        code: organisation.code,
+        FLocCod: locationnumber || getLocationNumber,
+
+      }).toString();
+      axios
+        .post(apiUrl, formData)
+        .then((response) => {
+          if (response.data && Array.isArray(response.data)) {
+            setGetTypeData(response.data);
+          } else {
+            console.warn(
+              "Response data structure is not as expected:",
+              response.data
+            );
+            setGetTypeData([]);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }, []);
+    const TypeDataoption = GetTypeData.map((item) => ({
+      value: item.tarecod,
+      label: `${item.tarecod}-${item.taredsc.trim()}`,
+    }));
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
@@ -681,7 +751,7 @@ export default function AmericanReceivableReport() {
         : state.isFocused
         ? "#3368B5"
         : getcolor,
-      color: state.isSelected ? "white" : fontcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
       "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
@@ -784,12 +854,12 @@ export default function AmericanReceivableReport() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.tcstcod,
-          (item.tcstdsc?.substring(0, 20) || "") ,
-       (item.SalesMan?.substring(0, 10) || "") ,
+      item.tacccod,
+          (item.tcstdsc?.substring(0, 28) || "") ,
+       (item.SalesMan?.substring(0, 20) || "") ,
       item.SalesManMobile,
-         (item.Area?.substring(0, 10) || "") ,
-           (item.Region?.substring(0, 20) || "") ,
+        //  (item.Area?.substring(0, 10) || "") ,
+        //    (item.Region?.substring(0, 20) || "") ,
           item.Opening,
       item.Debit,
       item.Credit,
@@ -802,8 +872,8 @@ export default function AmericanReceivableReport() {
       "Total",
        "",
         "",
-         "",
-          "",
+        //  "",
+        //   "",
       String(formatValue(totalOpening)),
        String(formatValue(totalDebit)),
        String(formatValue(totalCredit)),
@@ -816,14 +886,14 @@ export default function AmericanReceivableReport() {
       "Description",
  "SalMan",
       "Mobile", 
-      "Area",
-      "Region",
+      // "Area",
+      // "Region",
       "Opening",
       "Debit",
       "Credit",
       "Balance",
     ];
-    const columnWidths = [21,50,30,22,20,50,25, 25, 25, 25];
+    const columnWidths = [23,70,50,27,30, 30, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -833,14 +903,14 @@ export default function AmericanReceivableReport() {
     const paddingTop = 15;
 
     // Set font properties for the table
-    doc.setFont(getfontstyle);
-    doc.setFontSize(10);
+  doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont(getfontstyle, "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
+       doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -867,18 +937,16 @@ export default function AmericanReceivableReport() {
       doc.setFontSize(10);
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
+     const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
       const normalFont = getfontstyle;
       const tableWidth = getTotalTableWidth();
 
-      doc.setFontSize(10);
-
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
-        const isOddRow = i % 2 !== 0; // Check if the row index is odd
+        const isOddRow = i % 2 !== 0;
         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
         const isTotalRow = i === rows.length - 1;
         let textColor = [0, 0, 0];
@@ -890,12 +958,12 @@ export default function AmericanReceivableReport() {
         }
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "bold");
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
         }
 
-        // Set background color for odd-numbered rows
         if (isOddRow) {
-          doc.setFillColor(240); // Light background color
+          doc.setFillColor(240);
           doc.rect(
             startX,
             startY + (i - startIndex + 2) * rowHeight,
@@ -907,17 +975,14 @@ export default function AmericanReceivableReport() {
 
         doc.setDrawColor(0);
 
-        // For total row - special border handling
         if (isTotalRow) {
           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
           const rowBottomY = rowTopY + rowHeight;
 
-          // Draw double top border
           doc.setLineWidth(0.3);
           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-          // Draw double bottom border
           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
           doc.line(
             startX,
@@ -926,17 +991,15 @@ export default function AmericanReceivableReport() {
             rowBottomY - 0.5
           );
 
-          // Draw single vertical borders
           doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY); // Left border
+          doc.line(startX, rowTopY, startX, rowBottomY);
           doc.line(
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
             rowBottomY
-          ); // Right border
+          );
         } else {
-          // Normal border for other rows
           doc.setLineWidth(0.2);
           doc.rect(
             startX,
@@ -947,39 +1010,36 @@ export default function AmericanReceivableReport() {
         }
 
         row.forEach((cell, cellIndex) => {
-          const cellY = isTotalRow
-            ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-            : startY + (i - startIndex + 2) * rowHeight + 3;
+          // ⭐ NEW FIX — Perfect vertical centering
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
           const cellX = startX + 2;
 
           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
           if (!isTotalRow) {
-            doc.setFont(fontName, "normal");
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
           }
 
           const cellValue = String(cell);
 
-          if (cellIndex === 12) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2; // Adjust for right alignment
+          if (cellIndex === 0 || cellIndex===3) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8 ||
-            cellIndex === 9
+            cellIndex > 3
           ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
-              baseline: "middle", // This centers vertically
+              baseline: "middle",
             });
           } else {
-            // For empty cells in total row, add "Total" label centered
             if (isTotalRow && cellIndex === 0 && cell === "") {
               const totalLabelX = startX + columnWidths[0] / 2;
               doc.text("", totalLabelX, cellY, {
@@ -988,12 +1048,11 @@ export default function AmericanReceivableReport() {
               });
             } else {
               doc.text(cellValue, cellX, cellY, {
-                baseline: "middle", // This centers vertically
+                baseline: "middle",
               });
             }
           }
 
-          // Draw column borders
           if (cellIndex < row.length - 1) {
             doc.setLineWidth(0.2);
             doc.line(
@@ -1009,11 +1068,11 @@ export default function AmericanReceivableReport() {
         startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
         if (isTotalRow) {
-          doc.setFont(getfontstyle, "normal");
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
         }
       }
 
-      // Footer section
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
@@ -1022,9 +1081,9 @@ export default function AmericanReceivableReport() {
       const headingFontSize = 11;
       const headingX = lineX + 2;
       const headingY = lineY + 5;
-      doc.setFontSize(headingFontSize);
-      doc.setTextColor(0);
-      doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
     };
 
     // Function to calculate total table width
@@ -1073,8 +1132,9 @@ export default function AmericanReceivableReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                  doc.text(
           `Page ${pageNumber}`,
           rightX - 10,
           doc.internal.pageSize.height - 10,
@@ -1087,9 +1147,10 @@ export default function AmericanReceivableReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
+  doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-
+  doc.setFont("verdana-regular", "normal");
         addTitle(
           `American Receivable Report From ${fromInputDate} To ${toInputDate}`,
           "",
@@ -1127,34 +1188,60 @@ export default function AmericanReceivableReport() {
           ? Regionselectdatavalue.label
           : "ALL";
 
+           let Typecode = Typeselectdatavalue.label
+          ? Typeselectdatavalue.label
+          : "ALL";
+
+           let Areacode = Areaselectdatavalue.label
+          ? Areaselectdatavalue.label
+          : "ALL";
+
         // Set font style, size, and family
-        doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-        doc.setFontSize(10); // Font size
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`SALESMAN :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${accoount}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.text(`CITY :`, labelsX + 200, labelsY + 8.5); // Draw bold label
-        doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        doc.text(`${Citycode}`, labelsX + 220, labelsY + 8.5); // Draw the value next to the label
-
-      
-          doc.setFont(getfontstyle, "bold"); // Set font to bold
-          doc.text(`REGION :`, labelsX , labelsY + 12.5); // Draw bold label
-          doc.setFont(getfontstyle, "normal"); // Reset font to normal
-          doc.text(`${Regioncode}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
       
 
-        // // Reset font weight to normal if necessary for subsequent text
-        doc.setFont(getfontstyle, "bold"); // Set font to bold
-        doc.setFontSize(12);
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Saleman :`, labelsX, labelsY + 8.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(`${accoount}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-        startY +=  14 ; // Adjust vertical position for the labels
+  doc.setFont("verdana", "bold");
+            doc.setFontSize(10);  
+                  doc.text(`City :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(`${Citycode}`, labelsX + 220, labelsY + 8.5); // Draw the value next to the label
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 33);
+      
+  doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                      doc.text(`Type :`, labelsX , labelsY + 12.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                      doc.text(`${Typecode}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
+      
+  doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                      doc.text(`Region :`, labelsX+200 , labelsY + 12.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                      doc.text(`${Regioncode}`, labelsX + 220, labelsY + 12.5); // Draw the value next to the label
+      
+
+  doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                      doc.text(`Area :`, labelsX+200 , labelsY + 16.5); // Draw bold label
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                      doc.text(`${Areacode}`, labelsX + 220, labelsY + 16.5); // Draw the value next to the label
+      
+
+     
+
+        startY +=  19 ; // Adjust vertical position for the labels
+
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 38);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1298,18 +1385,25 @@ export default function AmericanReceivableReport() {
      ? Regionselectdatavalue.label :
      "ALL";
 
+      let Typecode = Typeselectdatavalue.label
+     ? Typeselectdatavalue.label :
+     "ALL";
+
+      let Areacode = Areaselectdatavalue.label
+     ? Areaselectdatavalue.label :
+     "ALL";
+
     // Apply styling for the status row
      const typeAndStoreRow2 = worksheet.addRow(
-    
-        ["SALEMAN :", account, "", "", "", "", "","CITY :", Citycode]
-       
+            ["Saleman :", account, "", "", "", "", "","City :", Citycode]
     );
 
     const typeAndStoreRow3 = worksheet.addRow(
-     
-        ["REGION :", Regioncode]
-       
-    );
+             ["Type :", Typecode, "", "", "", "", "","Region :", Regioncode]
+ );
+   const typeAndStoreRow4 = worksheet.addRow(
+             ["", "", "", "", "", "", "","Area :", Areacode]
+ );
 
     // Merge cells for Accountselect (columns B to D)
     //  worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
@@ -1327,7 +1421,15 @@ export default function AmericanReceivableReport() {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1].includes(colIndex),
+        bold: [1,8].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+     typeAndStoreRow4.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1,8].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1368,7 +1470,7 @@ export default function AmericanReceivableReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-       item.tcstcod,
+       item.tacccod,
         item.tcstdsc ,
       item.SalesMan ,
       item.SalesManMobile,
@@ -1534,19 +1636,19 @@ export default function AmericanReceivableReport() {
     width: "80px",
   };
   const secondColWidth = {
-    width: isSidebarVisible ? "220px" : "270",
+    width: isSidebarVisible ? "115px" : "165px",
   };
   const thirdColWidth = {
-  width: isSidebarVisible ? "80px" : "130",
+  width: isSidebarVisible ? "115px" : "165px",
   };
   const forthColWidth = {
     width: "90px",
   };
   const fifthColWidth = {
-  width: isSidebarVisible ? "80px" : "130",
+  width: isSidebarVisible ? "115px" : "165px",
   };
   const sixthColWidth = {
-   width: isSidebarVisible ? "80px" : "130",
+   width: isSidebarVisible ? "115px" : "165px",
   };
     const seventhColWidth = {
     width: "90px",
@@ -1565,7 +1667,7 @@ export default function AmericanReceivableReport() {
   };
 
   const [columns, setColumns] = useState({
-    tcstcod: [],
+    tacccod: [],
       tcstdsc: [],
       SalesMan: [],
       SalesManMobile: [],
@@ -1577,7 +1679,7 @@ export default function AmericanReceivableReport() {
       Balance: [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
-   tcstcod: "",
+   tacccod: "",
       tcstdsc: "",
       SalesMan: "",
       SalesManMobile: "",
@@ -1592,7 +1694,7 @@ export default function AmericanReceivableReport() {
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        tcstcod: tableData.map((row) => row.tcstcod),
+        tacccod: tableData.map((row) => row.tacccod),
         tcstdsc: tableData.map((row) => row.tcstdsc),
         SalesMan: tableData.map((row) => row.SalesMan),
         SalesManMobile: tableData.map((row) => row.SalesManMobile),
@@ -1655,7 +1757,7 @@ export default function AmericanReceivableReport() {
 
   const resetSorting = () => {
     setColumnSortOrders({
-      tcstcod: null,
+      tacccod: null,
       tcstdsc: null,
       SalesMan: null,
       SalesManMobile: null,
@@ -1738,8 +1840,36 @@ export default function AmericanReceivableReport() {
                     color: isNegative ? "red" : fontcolor,
                   }}
                 >
-                  <td className="text-start" style={firstColWidth}>
-                    {item.tcstcod}
+                  {/* <td className="text-start" style={firstColWidth}>
+                    {item.tacccod}
+                  </td> */}
+
+                  <td
+                    className="text-start"
+                    style={{
+                      ...firstColWidth,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      // color: "blue",
+                      color: selectedIndex === i ? (isNegative ? "white" : 'white') : "blue", // ✅ conditional color
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      // code temporarily store karo
+                      sessionStorage.setItem(
+                        "AmericanReeciableData",
+                        JSON.stringify({
+                          code: item.tacccod,
+                          fromInputDate: fromInputDate,
+                          toInputDate: toInputDate,
+                        }),
+                      );
+
+                      // fixed URL open karo
+                      window.open("/crystalsol/AmericanCustomerLedger", "_blank");
+                    }}
+                  >
+                    {item.tacccod}
                   </td>
                  <td
                               className="text-start"
@@ -1817,7 +1947,7 @@ export default function AmericanReceivableReport() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
+                {Array.from({ length: 10 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1888,8 +2018,8 @@ export default function AmericanReceivableReport() {
 
   const contentStyle = {
      width: "100%", // 100vw ki jagah 100%
-    // maxWidth: isSidebarVisible ? "1000px" : "1200px",
-        maxWidth: "1000px",
+    maxWidth: isSidebarVisible ? "1000px" : "1200px",
+        // maxWidth: "1000px",
 
     height: "calc(100vh - 100px)",
     position: "absolute",
@@ -2360,7 +2490,7 @@ export default function AmericanReceivableReport() {
                     className="List-select-class"
                     ref={input1Ref}
                     options={options}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input3Ref)}
+                    onKeyDown={(e) => handlecompanyKeypress(e, AreaRef)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                      if (selectedOption && selectedOption.value) {
@@ -2432,7 +2562,7 @@ export default function AmericanReceivableReport() {
                     className="List-select-class"
                     ref={input2Ref}
                     options={Regionoptions}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
+                    onKeyDown={(e) => handlecompanyKeypress(e, TypeRef)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                      if (selectedOption && selectedOption.value) {
@@ -2473,6 +2603,323 @@ export default function AmericanReceivableReport() {
               </div>
             </div>
           </div>
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Aera :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={AreaRef}
+                    options={AreaDataoption}
+                    onKeyDown={(e) => handleKeyPress(e, Type2Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                     if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setAreaselectdata(selectedOption.value);
+                        setAreaselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Keep only the description
+                        });
+                      } else {
+                        setAreaselectdata("");
+                        setAreaselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!saleType),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+            <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      CustType :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={TypeRef}
+                    options={TypeDataoption}
+                    onKeyDown={(e) => handlecompanyKeypress(e, SearchRef)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                     if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+
+                        setTypeselectdata(selectedOption.value);
+                        setTypeselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Keep only the description
+                        });
+                      } else {
+                        setTypeselectdata("");
+                        setTypeselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Regionselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "8px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "70px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Type :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={Type2Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "250px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
+                    }}
+                  >
+                    <option value="A">ALL</option>
+                    <option value="R">Receiable</option>
+                    <option value="A">Advance</option>
+                  </select>
+
+                  {transectionType !== "A" && (
+                    <span
+                      onClick={() => settransectionType("A")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div id="lastDiv"  style={{marginRight:'1px'}}>
+                <label for="searchInput" style={{ marginRight: "5px" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={SearchRef}
+                    onKeyDown={(e) => handleKeyPress(e, input4Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Search"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "250px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
           <div>
             <div
               style={{
@@ -2508,12 +2955,12 @@ export default function AmericanReceivableReport() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("tcstcod")}
+                      onClick={() => handleSorting("tacccod")}
                     >
-                      Date{" "}
+                      Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("tcstcod")}
+                        style={getIconStyle("tacccod")}
                       ></i>
                     </td>
 
@@ -2635,7 +3082,7 @@ export default function AmericanReceivableReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "50vh",
+                maxHeight: "40vh",
                 // width: "100%",
                 wordBreak: "break-word",
               }}

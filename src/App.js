@@ -119,6 +119,8 @@ import ProductionOrderLedger from "./Component/Reports/Daily_Jobs_Reports/ledger
 import SparePartsLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/SparePartsLedger.js";
 import SerialNoLedgerReport from "./Component/Reports/Daily_Jobs_Reports/ledgers/SerialNoLedgerReport.js";
 import ProjectLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/ProjectLedger.js";
+import AmericanCustomerLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/AmericanCustomerLedger.js";
+
 
 //////////////////////////// Daily reports //////////////////////////////
 import DailyCashBook from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCashBook.js";
@@ -187,6 +189,7 @@ import MonthlyItemPurchaseComparisonReport from "./Component/Reports/Daily_Jobs_
 import SparePartsStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartStoreStockReport.js";
 import SparePartsStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartStatusReport.js";
 import ShopStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ShopStockReport.js";
+import SupplierPurchaseComparison from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SupplierPurchaseComparisonReport.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -325,6 +328,7 @@ function App() {
                 <Route exact path="/SparePartsLedger" element={<SparePartsLedger />} />
                 <Route exact path="/SerialLedger" element={<SerialNoLedgerReport />} />
                 <Route exact path="/ProjectLedger" element={<ProjectLedger />} />
+                <Route exact path="/AmericanCustomerLedger" element={<AmericanCustomerLedger />} />
 
 
                 {/* Rountes for Job reports */}s
@@ -421,6 +425,7 @@ function App() {
                 <Route exact path="/SparePartsStoreStockReport" element={<SparePartsStoreStockReport />} />
                 <Route exact path="/SparePartsStatus" element={<SparePartsStatusReport />} />
                 <Route exact path="/ShopStockReport" element={<ShopStockReport />} />
+                <Route exact path="/SupplierPurchaseComparison" element={<SupplierPurchaseComparison />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}
