@@ -94,7 +94,7 @@ export default function CustomerSearch() {
       FSchTxt: searchQuery,
 
       // FYerDsc:'2025-2025',
-      //   code: 'NOMANELEC',
+      //   code: 'USMANMTR',
       //   FLocCod: '002',
     }).toString();
 
@@ -499,14 +499,28 @@ export default function CustomerSearch() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 20; // Ensure this matches the actual number of columns
     const columnAlignments = [
       "center",
+      "center",
       "left",
       "center",
       "left",
+      "center",
       "left",
-      "right",
+      "center",
+      "left",
+      "center",
+       "right",
+        "right",
+         "right",
+          "right",
+           "right",
+            "right",
+             "right",
+              "right",
+               "right",
+                "left",
     ];
 
     // Define fonts
@@ -543,22 +557,10 @@ export default function CustomerSearch() {
     worksheet.addRow([]);
 
     // Filter data
-    let typestatus =
-      transectionType === "N"
-        ? "NON-ACTIVE"
-        : transectionType === "A"
-          ? "ACTIVE"
-          : "ALL";
+   
     let typesearch = searchQuery || "";
 
-    //  const typeAndStoreRow3 = worksheet.addRow(
-    //    searchQuery ? ["Status :", typestatus, "Search :", typesearch] : ["Status :", typestatus, ""]
-    //  );
-
-    //  typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //    cell.font = { name: "CustomFont", size: 10, bold: [1, 3].includes(colIndex) };
-    //    cell.alignment = { horizontal: "left", vertical: "middle" };
-    //  });
+  
 
     // Header style
     const headerStyle = {
@@ -579,12 +581,26 @@ export default function CustomerSearch() {
 
     // Headers
     const headers = [
-      "Code",
-      "Customer",
-      "Sts",
-      "Guaranter Name",
-      "Witness Name",
-      "Balace",
+      "Inv Date",
+  "Code",
+  "Customer",
+  "Mobile",
+  "Guaranter Name",
+  "Grn Mob",
+  "Witness Name",
+  "Wit Mob",
+  "Item",
+  "Sts",
+  "Sale Amt",
+  "Advance",
+  "Ins Mth",
+  "Ins Amt",
+  "Collection",
+  "Last Date",
+  "Last Amt",
+  "Balance",
+  "Receivable",
+  "Collector",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -592,12 +608,26 @@ export default function CustomerSearch() {
     // ✅ Add data rows with alternating light grey background
     tableData.forEach((item, index) => {
       const row = worksheet.addRow([
-        item.Code,
-        item.Customer,
-        item.Sts,
-        item["Guaranter Name"],
-        item["Witness Name"],
-        item.Balance,
+         item["Inv Date"],
+    item.Code,
+    item.Customer,
+    item.Mobile,
+    item["Guaranter Name"],
+    item["Grn Mobile"],
+    item["Witness Name"],
+    item["Wit Mobile"],
+    item.Item,
+    item.Sts,
+    item["Sale Amt"],
+    item.Advance,
+    item["Ins Mth"],
+    item["Ins Amt"],
+    item.Collection,
+    item["Last Date"],
+    item["Last Amt"],
+    item.Balance,
+    item.Receivable,
+    item.Collector,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -625,7 +655,7 @@ export default function CustomerSearch() {
     });
 
     // Column widths
-    [10, 45, 7, 45, 45, 14].forEach((width, index) => {
+    [10,10, 40,13, 40,13, 45,13,40,8, 12,12,12,12,12,12,12,12,12,40].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -636,6 +666,21 @@ export default function CustomerSearch() {
       "",
       "",
       "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      
     ]);
 
     // total row added
@@ -643,9 +688,9 @@ export default function CustomerSearch() {
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
@@ -716,35 +761,132 @@ export default function CustomerSearch() {
 
   let totalEntries = 0;
 
-  const [columns, setColumns] = useState({
-    Code: [],
-    Customer: [],
-    Sts: [],
-    ["Guaranter Name"]: [],
-    ["Witness Name"]: [],
-    Balance: [],
+  // State for column data
+const [columns, setColumns] = useState({
+  "Inv Date": [],
+  Code: [],
+  Customer: [],
+  Mobile: [],
+  "Guaranter Name": [],
+  "Grn Mob": [],
+  "Witness Name": [],
+  "Wit Mob": [],
+  Item: [],
+  Sts: [],
+  "Sale Amt": [],
+  Advance: [],
+  "Ins Mth": [],
+  "Ins Amt": [],
+  Collection: [],
+  "Last Date": [],
+  "Last Amt": [],
+  Balance: [],
+  Receivable: [],
+  Collector: [],
+});
+
+// State for column sorting order: 'asc', 'desc', or null
+const [columnSortOrders, setColumnSortOrders] = useState({
+  "Inv Date": null,
+  Code: null,
+  Customer: null,
+  Mobile: null,
+  "Guaranter Name": null,
+  "Grn Mob": null,
+  "Witness Name": null,
+  "Wit Mob": null,
+  Item: null,
+  Sts: null,
+  "Sale Amt": null,
+  Advance: null,
+  "Ins Mth": null,
+  "Ins Amt": null,
+  Collection: null,
+  "Last Date": null,
+  "Last Amt": null,
+  Balance: null,
+  Receivable: null,
+  Collector: null,
+});
+
+// Reset sorting
+const resetSorting = () => {
+  setColumnSortOrders({
+    "Inv Date": null,
+    Code: null,
+    Customer: null,
+    Mobile: null,
+    "Guaranter Name": null,
+    "Grn Mob": null,
+    "Witness Name": null,
+    "Wit Mob": null,
+    Item: null,
+    Sts: null,
+    "Sale Amt": null,
+    Advance: null,
+    "Ins Mth": null,
+    "Ins Amt": null,
+    Collection: null,
+    "Last Date": null,
+    "Last Amt": null,
+    Balance: null,
+    Receivable: null,
+    Collector: null,
   });
-  const [columnSortOrders, setColumnSortOrders] = useState({
-    Code: "",
-    Customer: "",
-    Sts: "",
-    ["Guaranter Name"]: "",
-    ["Witness Name"]: "",
-    Balance: "",
-  });
-  useEffect(() => {
-    if (tableData.length > 0) {
-      const newColumns = {
-        Code: tableData.map((row) => row.Code),
-        Customer: tableData.map((row) => row.Customer),
-        Sts: tableData.map((row) => row.Sts),
-        ["Guaranter Name"]: tableData.map((row) => row["Guaranter Name"]),
-        ["Witness Name"]: tableData.map((row) => row["witness Name"]),
-        Balance: tableData.map((row) => row.Balance),
-      };
-      setColumns(newColumns);
-    }
-  }, [tableData]);
+};
+
+// Update columns whenever tableData changes
+useEffect(() => {
+  if (tableData.length > 0) {
+    const newColumns = {
+      "Inv Date": tableData.map((row) => row["Inv Date"]),
+      Code: tableData.map((row) => row.Code),
+      Customer: tableData.map((row) => row.Customer),
+      Mobile: tableData.map((row) => row.Mobile),
+      "Guaranter Name": tableData.map((row) => row["Guaranter Name"]),
+      "Grn Mob": tableData.map((row) => row["Grn Mob"]),
+      "Witness Name": tableData.map((row) => row["Witness Name"]),
+      "Wit Mob": tableData.map((row) => row["Wit Mob"]),
+      Item: tableData.map((row) => row.Item),
+      Sts: tableData.map((row) => row.Sts),
+      "Sale Amt": tableData.map((row) => row["Sale Amt"]),
+      Advance: tableData.map((row) => row.Advance),
+      "Ins Mth": tableData.map((row) => row["Ins Mth"]),
+      "Ins Amt": tableData.map((row) => row["Ins Amt"]),
+      Collection: tableData.map((row) => row.Collection),
+      "Last Date": tableData.map((row) => row["Last Date"]),
+      "Last Amt": tableData.map((row) => row["Last Amt"]),
+      Balance: tableData.map((row) => row.Balance),
+      Receivable: tableData.map((row) => row.Receivable),
+      Collector: tableData.map((row) => row.Collector),
+    };
+    setColumns(newColumns);
+  } else {
+    // Clear columns if no data
+    setColumns({
+      "Inv Date": [],
+      Code: [],
+      Customer: [],
+      Mobile: [],
+      "Guaranter Name": [],
+      "Grn Mob": [],
+      "Witness Name": [],
+      "Wit Mob": [],
+      Item: [],
+      Sts: [],
+      "Sale Amt": [],
+      Advance: [],
+      "Ins Mth": [],
+      "Ins Amt": [],
+      Collection: [],
+      "Last Date": [],
+      "Last Amt": [],
+      Balance: [],
+      Receivable: [],
+      Collector: [],
+    });
+  }
+}, [tableData]);
 
   const handleSorting = (col) => {
     const currentOrder = columnSortOrders[col];
@@ -778,16 +920,7 @@ export default function CustomerSearch() {
     }));
   };
 
-  const resetSorting = () => {
-    setColumnSortOrders({
-      Code: null,
-      Customer: null,
-      Sts: null,
-      ["Guaranter Name"]: null,
-      ["Witness Name"]: null,
-      Balance: null,
-    });
-  };
+ 
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
@@ -802,7 +935,7 @@ export default function CustomerSearch() {
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="6" className="text-center">
+              <td colSpan="20" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -814,7 +947,7 @@ export default function CustomerSearch() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
+                {Array.from({ length: 9 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -826,6 +959,9 @@ export default function CustomerSearch() {
               <td style={forthColWidth}></td>
               <td style={fifthColWidth}></td>
               <td style={sixthColWidth}></td>
+                <td style={seventhColWidth}></td>
+              <td style={eighthColWidth}></td>
+              <td style={ninthColWidth}></td>
             </tr>
           </>
         ) : (
@@ -844,11 +980,11 @@ export default function CustomerSearch() {
                   }}
                 >
                   <td className="text-center" style={firstColWidth}>
-                    {item.Code}
+                    {item['Inv Date']}
                   </td>
                   <td
                     className="text-start"
-                    title={item.Customer}
+                    title={item.Code}
                     style={{
                       ...secondColWidth,
                       whiteSpace: "nowrap",
@@ -856,14 +992,23 @@ export default function CustomerSearch() {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {item.Customer}
+                    {item.Code}
                   </td>
-                  <td className="text-center" style={thirdColWidth}>
-                    {item.Sts}
+                   <td
+                    className="text-start"
+                    title={item.Customer}
+                    style={{
+                      ...thirdColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Customer}
                   </td>
                   <td
                     className="text-start"
-                    title={item["Guaranter Name"]}
+                    title={item.Mobile}
                     style={{
                       ...forthColWidth,
                       whiteSpace: "nowrap",
@@ -871,11 +1016,11 @@ export default function CustomerSearch() {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {item["Guaranter Name"]}
+                    {item.Mobile}
                   </td>
                   <td
                     className="text-start"
-                    title={item["Witness Name"]}
+                    title={item["Guaranter Name"]}
                     style={{
                       ...fifthColWidth,
                       whiteSpace: "nowrap",
@@ -883,10 +1028,39 @@ export default function CustomerSearch() {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {item["Witness Name"]}
+                    {item["Guaranter Name"]}
                   </td>
                   <td className="text-end" style={sixthColWidth}>
-                    {item.Balance}
+                    {item["Grn Mobile"]}
+                  </td>
+
+                  <td
+                    className="text-start"
+                    title={item["Witness Name"]}
+                    style={{
+                      ...seventhColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item["Witness Name"]}
+                  </td>
+                  <td className="text-end" style={eighthColWidth}>
+                    {item["Wit Mobile"]}
+                  </td>
+
+                   <td
+                    className="text-start"
+                    title={item["Item"]}
+                    style={{
+                      ...eighthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item["Item"]}
                   </td>
                 </tr>
               );
@@ -901,18 +1075,21 @@ export default function CustomerSearch() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
+                {Array.from({ length: 9 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
             ))}
             <tr>
-              <td style={firstColWidth}></td>
+             <td style={firstColWidth}></td>
               <td style={secondColWidth}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
               <td style={fifthColWidth}></td>
               <td style={sixthColWidth}></td>
+                <td style={seventhColWidth}></td>
+              <td style={eighthColWidth}></td>
+              <td style={ninthColWidth}></td>
             </tr>
           </>
         )}
@@ -942,12 +1119,28 @@ export default function CustomerSearch() {
     enableOnFormTags: true,
   });
 
-  const firstColWidth = { width: "80px" };
-  const secondColWidth = { width: isSidebarVisible ? "250px" : "320px" };
-  const thirdColWidth = { width: "50px" };
-  const forthColWidth = { width: isSidebarVisible ? "250px" : "320px" };
-  const fifthColWidth = { width: isSidebarVisible ? "250px" : "320px" };
-  const sixthColWidth = { width: "80px" };
+  const firstColWidth = { width: isSidebarVisible ? "80px" : "80px" };
+  const secondColWidth = { width: isSidebarVisible ? "80px" : "80px"};
+  const thirdColWidth = { width: isSidebarVisible ? "200px" : "360px" };
+  const forthColWidth = { width: isSidebarVisible ? "90px" : "90px"};
+  const fifthColWidth = { width: isSidebarVisible ? "200px" : "360px" };
+  const sixthColWidth = { width: isSidebarVisible ? "90px" : "90px" };
+  const seventhColWidth = { width: isSidebarVisible ? "200px" : "360px" };
+  const eighthColWidth = { width: isSidebarVisible ? "90px" : "90px" };
+  const ninthColWidth = { width: isSidebarVisible ? "200px" : "360px" };
+
+
+  const tenthColWidth = { width: isSidebarVisible ? "50px" : "50px" };
+  const ColWidth11 = { width: isSidebarVisible ? "90px" : "90px"};
+  const ColWidth12 = { width: isSidebarVisible ? "90px" : "90px" };
+  const ColWidth13 = { width: isSidebarVisible ? "90px" : "90px"};
+  const ColWidth14 = { width: isSidebarVisible ? "90px" : "90px" };
+  const ColWidth15 = { width: isSidebarVisible ? "90px" : "90px" };
+  const ColWidth16 = { width: isSidebarVisible ? "90px" : "90px" };
+  const ColWidth17 = { width: isSidebarVisible ? "90px" : "90px" };
+  const ColWidth18 = { width: isSidebarVisible ? "90px" : "90px" };
+  const ColWidth19 = { width: isSidebarVisible ? "90px" : "90px" };
+  const ColWidth20 = { width: isSidebarVisible ? "200px" : "360px" };
 
   const sixthcol = { width: "8px" };
 
@@ -978,7 +1171,8 @@ export default function CustomerSearch() {
     overflow: "hidden",
     textAlign: "center",
     fontSize: "15px",
-    fontStyle: "normal",
+   
+        fontStyle: "normal",
     fontWeight: "400",
     lineHeight: "23px",
     fontFamily: '"Poppins", sans-serif',
@@ -1055,15 +1249,41 @@ export default function CustomerSearch() {
   const formatValue = (val) => {
     return Number(val) === 0 ? "" : val;
   };
+  const totalRows = 20; // fixed number of rows
+  
+   const colWidths = [
+    firstColWidth.width,
+    secondColWidth.width,
+    thirdColWidth.width,
+    forthColWidth.width,
+    fifthColWidth.width,
+    sixthColWidth.width,
+    seventhColWidth.width,
+    eighthColWidth.width,
+    ninthColWidth.width,
+     tenthColWidth.width,
+    ColWidth11.width,
+     ColWidth12.width,
+      ColWidth13.width,
+       ColWidth14.width,
+        ColWidth15.width,
+         ColWidth16.width,
+          ColWidth17.width,
+           ColWidth18.width,
+            ColWidth19.width,
+             ColWidth20.width,
+
+  ];
 
   return (
-    <>
-      <div style={contentStyle}>
-        <div
+    <div
+      style={contentStyle}
+    >
+      <div
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            // width: "100%",
+            width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
@@ -1226,232 +1446,544 @@ export default function CustomerSearch() {
               </div>
             </div>
           </div>
-          <div>
-            <div
+        {/* Horizontal scroll container */}
+        <div
+          style={{
+            overflowX: "auto",
+            border: `1px solid ${fontcolor}`,
+            background: getcolor,
+          }}
+        >
+          {/* Vertical scroll + fixed height */}
+          <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
+            <table
               style={{
-                overflowY: "auto",
-                // width: "98.8%",
-              }}
-            >
-              <table
-                className="myTable"
-                id="table"
-                style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  // width: "98%",
-                  position: "relative",
-                  paddingRight: "2%",
-                }}
-              >
-                <thead
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    height: "24px",
-                    position: "sticky",
-                    top: 0,
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
-                  }}
-                >
-                  <tr
-                    style={{ backgroundColor: tableHeadColor, color: "white" }}
-                  >
-                    <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      onClick={() => handleSorting("Code")}
-                    >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Code")}
-                      ></i>
-                    </td>
-
-                    <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Customer")}
-                    >
-                      Customer{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Customer")}
-                      ></i>
-                    </td>
-
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Sts")}
-                    >
-                      Sts{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Sts")}
-                      ></i>
-                    </td>
-
-                    <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Guaranter Name")}
-                    >
-                      Guaranter Name{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Guaranter Name")}
-                      ></i>
-                    </td>
-
-                    <td
-                      className="border-dark"
-                      style={fifthColWidth}
-                      onClick={() => handleSorting("Witness Name")}
-                    >
-                      Witness Name{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Witness Name")}
-                      ></i>
-                    </td>
-
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Balance")}
-                    >
-                      Balance{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Balance")}
-                      ></i>
-                    </td>
-
-                    <td className="border-dark" style={sixthcol}></td>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-            {/* <div
-              className="table-scroll"
-              style={{
-                backgroundColor: textColor,
-                borderBottom: `1px solid ${fontcolor}`,
-                overflowY: "auto",
-                maxHeight: "55vh",
                 width: "100%",
-                wordBreak: "break-word",
+                minWidth: "1400px",
+                borderCollapse: "collapse",
+                tableLayout: "fixed",
+                color: fontcolor,
               }}
             >
-              <table
-                className="myTable"
-                id="tableBody"
+              {/* Column widths */}
+              <colgroup>
+                {colWidths.map((w, i) => (
+                  <col key={i} style={{ width: w }} />
+                ))}
+              </colgroup>
+
+              {/* Sticky Header */}
+             {/* 🔥 TABLE HEADER WITH SORTING */}
+<thead
+  style={{
+    position: "sticky",
+    top: 0,
+    zIndex: 2,
+    backgroundColor: tableHeadColor,
+    color: "#fff",
+  }}
+>
+  <tr>
+    <th
+      className="border-dark"
+      style={{ ...firstColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Inv Date")}
+    >
+      Inv Date{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Inv Date")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...secondColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Code")}
+    >
+      Code{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Code")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...thirdColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Customer")}
+    >
+      Customer{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Customer")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...forthColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Mobile")}
+    >
+      Mobile{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Mobile")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...fifthColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Guaranter Name")}
+    >
+      Guaranter Name{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Guaranter Name")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...sixthColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Grn Mob")}
+    >
+      Grn Mob{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Grn Mob")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...seventhColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Witness Name")}
+    >
+      Witness Name{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Witness Name")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...eighthColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Wit Mob")}
+    >
+      Wit Mob{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Wit Mob")}
+      ></i>
+    </th>
+
+    <th
+      className="border-dark"
+      style={{ ...ninthColWidth, cursor: "pointer" }}
+      onClick={() => handleSorting("Item")}
+    >
+      Item{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle("Item")}
+      ></i>
+    </th>
+
+    {/* Additional columns */}
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Sts")}>
+      Sts <i className="fa-solid fa-caret-down" style={getIconStyle("Sts")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Sale Amt")}>
+      Sale Amt <i className="fa-solid fa-caret-down" style={getIconStyle("Sale Amt")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Advance")}>
+      Advance <i className="fa-solid fa-caret-down" style={getIconStyle("Advance")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Ins Mth")}>
+      Ins Mth <i className="fa-solid fa-caret-down" style={getIconStyle("Ins Mth")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Ins Amt")}>
+      Ins Amt <i className="fa-solid fa-caret-down" style={getIconStyle("Ins Amt")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Collection")}>
+      Collection <i className="fa-solid fa-caret-down" style={getIconStyle("Collection")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Last Date")}>
+      Last Date <i className="fa-solid fa-caret-down" style={getIconStyle("Last Date")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Last Amt")}>
+      Last Amt <i className="fa-solid fa-caret-down" style={getIconStyle("Last Amt")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Balance")}>
+      Balance <i className="fa-solid fa-caret-down" style={getIconStyle("Balance")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Receivable")}>
+      Receivable <i className="fa-solid fa-caret-down" style={getIconStyle("Receivable")}></i>
+    </th>
+
+    <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Collector")}>
+      Collector <i className="fa-solid fa-caret-down" style={getIconStyle("Collector")}></i>
+    </th>
+  </tr>
+</thead>
+
+              {/* Table Body */}
+              <tbody>
+                {isLoading ? (
+                  <>
+                    <tr style={{ backgroundColor: getcolor }}>
+                      <td colSpan={9} className="text-center">
+                        <Spinner animation="border" variant="primary" />
+                      </td>
+                    </tr>
+                    {Array.from({ length: totalRows - 5 }).map((_, rowIndex) => (
+                      <tr
+                        key={`blank-${rowIndex}`}
+                        style={{ backgroundColor: getcolor, color: fontcolor }}
+                      >
+                        {Array.from({ length: 20 }).map((_, colIndex) => (
+                          <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                        ))}
+                      </tr>
+                    ))}
+                    <tr>
+                      <td style={firstColWidth}></td>
+                      <td style={secondColWidth}></td>
+                      <td style={thirdColWidth}></td>
+                      <td style={forthColWidth}></td>
+                      <td style={fifthColWidth}></td>
+                      <td style={sixthColWidth}></td>
+                      <td style={seventhColWidth}></td>
+                      <td style={eighthColWidth}></td>
+                      <td style={ninthColWidth}></td>
+                      <td style={tenthColWidth}></td>
+                      <td style={ColWidth11}></td>
+                      <td style={ColWidth12}></td>
+                      <td style={ColWidth13}></td>
+                      <td style={ColWidth14}></td>
+                      <td style={ColWidth15}></td>
+                      <td style={ColWidth16}></td>
+                      <td style={ColWidth17}></td>
+                      <td style={ColWidth18}></td>
+                      <td style={ColWidth19}></td>
+                      <td style={ColWidth20}></td>
+                    </tr>
+                  </>
+                ) : (
+                  <>
+                    {tableData.map((item, i) => (
+                      <tr
+                        key={i}
+                        ref={(el) => (rowRefs.current[i] = el)}
+                        onClick={() => handleRowClick(i)}
+                        className={selectedIndex === i ? "selected-background" : ""}
+                        style={{ backgroundColor: getcolor, color: fontcolor }}
+                      >
+                       
+                        <td
+                          className="text-ceter"
+                          title={item.Code}
+                          style={{
+                            ...secondColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Code}
+                        </td>
+                         <td className="text-center" style={firstColWidth}>
+                          {item["Inv Date"]}
+                        </td>
+                        <td
+                          className="text-start"
+                          title={item.Customer}
+                          style={{
+                            ...thirdColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Customer}
+                        </td>
+                        <td
+                          className="text-center"
+                          title={item.Mobile}
+                          style={{
+                            ...forthColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Mobile}
+                        </td>
+                        <td
+                          className="text-start"
+                          title={item["Guaranter Name"]}
+                          style={{
+                            ...fifthColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Guaranter Name"]}
+                        </td>
+                        <td className="text-center" style={sixthColWidth}>
+                          {item["Grn Mobile"]}
+                        </td>
+                        <td
+                          className="text-start"
+                          title={item["Witness Name"]}
+                          style={{
+                            ...seventhColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Witness Name"]}
+                        </td>
+                        <td className="text-center" style={eighthColWidth}>
+                          {item["Wit Mobile"]}
+                        </td>
+                        <td
+                          className="text-start"
+                          title={item["Item"]}
+                          style={{
+                            ...ninthColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Item"]}
+                        </td>
+                         <td className="text-center" style={tenthColWidth}>
+                          {item.Sts}
+                        </td>
+
+                         <td
+                          className="text-end"
+                          title={item["Sale Amt"]}
+                          style={{
+                            ...ColWidth11,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Sale Amt"]}
+                        </td>
+
+                        <td
+                          className="text-end"
+                          title={item.Advance}
+                          style={{
+                            ...ColWidth12,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Advance}
+                        </td>
+
+                          <td
+                          className="text-end"
+                          title={item["Ins Mth"]}
+                          style={{
+                            ...ColWidth13,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Ins Mth"]}
+                        </td>
+
+                          <td
+                          className="text-end"
+                          title={item["Ins Amt"]}
+                          style={{
+                            ...ColWidth14,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Ins Amt"]}
+                        </td>
+
+                         <td
+                          className="text-end"
+                          title={item.Collection}
+                          style={{
+                            ...ColWidth15,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Collection}
+                        </td>
+
+                        <td
+                          className="text-end"
+                          title={item["Last Date"]}
+                          style={{
+                            ...ColWidth16,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Last Date"]}
+                        </td>
+
+                         <td
+                          className="text-end"
+                          title={item["Last Amt"]}
+                          style={{
+                            ...ColWidth17,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["Last Amt"]}
+                        </td>
+
+                        <td
+                          className="text-end"
+                          title={item.Balance}
+                          style={{
+                            ...ColWidth18,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Balance}
+                        </td>
+
+                         <td
+                          className="text-end"
+                          title={item.Receivable}
+                          style={{
+                            ...ColWidth19,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Receivable}
+                        </td>
+
+                         <td
+                          className="text-start"
+                          title={item.Collector}
+                          style={{
+                            ...ColWidth20,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Collector}
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Empty rows if data less than totalRows */}
+                    {Array.from({ length: Math.max(0, totalRows - tableData.length) }).map(
+                      (_, rowIndex) => (
+                        <tr
+                          key={`blank-${rowIndex}`}
+                          style={{ backgroundColor: getcolor, color: fontcolor }}
+                        >
+                          {Array.from({ length: 20 }).map((_, colIndex) => (
+                            <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                          ))}
+                        </tr>
+                      )
+                    )}
+                    <tr>
+                      <td style={secondColWidth}></td>
+                                            <td style={firstColWidth}></td>
+
+                      <td style={thirdColWidth}></td>
+                      <td style={forthColWidth}></td>
+                      <td style={fifthColWidth}></td>
+                      <td style={sixthColWidth}></td>
+                      <td style={seventhColWidth}></td>
+                      <td style={eighthColWidth}></td>
+                      <td style={ninthColWidth}></td>
+                      <td style={tenthColWidth}></td>
+                      <td style={ColWidth11}></td>
+                      <td style={ColWidth12}></td>
+                      <td style={ColWidth13}></td>
+                      <td style={ColWidth14}></td>
+                      <td style={ColWidth15}></td>
+                      <td style={ColWidth16}></td>
+                      <td style={ColWidth17}></td>
+                      <td style={ColWidth18}></td>
+                      <td style={ColWidth19}></td>
+                      <td style={ColWidth20}></td>
+                    </tr>
+                  </>
+                )}
+              </tbody>
+
+              {/* Sticky Footer */}
+              <tfoot
                 style={{
-                  fontSize: "12px",
-                  width: "100%",
-                  position: "relative",
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
+                  position: "sticky",
+                  bottom: 0,
+                  zIndex: 2,
+                  background: getcolor,
+                  borderTop: `1px solid ${fontcolor}`,
                 }}
               >
-                <tbody id="tablebody">
-                  {renderTableData()}
-                </tbody>
-              </table>
-            </div> */}
-
-            <div
-              className="table-scroll"
-              style={{
-                // maxHeight: "370px",
-                "--scrollbar-track-color": getcolor,
-                backgroundColor: textColor,
-                // '--selected-bg-color': getnavbarbackgroundcolor,
-                borderBottom: `1px solid ${fontcolor}`,
-                overflowY: "auto",
-                maxHeight: "55vh",
-                wordBreak: "break-word",
-              }}
-            >
-              <table
-                className="myTable"
-                id="tableBody"
-                style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  width: "100%",
-                  position: "relative",
-                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
-                }}
-              >
-                <tbody id="tablebody" style={{ overflowY: "scroll" }}>
-                  {renderTableData()}
-                </tbody>
-              </table>
-            </div>
+                <tr >
+                  <td>{tableData.length}</td>
+                  <td style={{  borderRight: `1px solid ${fontcolor}`,}}></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                   <td></td>
+                    <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                   <td></td>
+                    <td></td>
+                   <td></td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
-
-          <div
-            style={{
-              borderBottom: `1px solid ${fontcolor}`,
-              borderTop: `1px solid ${fontcolor}`,
-              height: "24px",
-              display: "flex",
-              paddingRight: "8px",
-              // width: "101.2%",
-            }}
-          >
-            <div
-              style={{
-                ...firstColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total2">
-                {formatValue(tableData.length.toLocaleString())}
-              </span>
-            </div>
-            <div
-              style={{
-                ...secondColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...thirdColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...forthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...fifthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-          </div>
+        </div>
 
           <div
             style={{
@@ -1498,8 +2030,13 @@ export default function CustomerSearch() {
               }
             />
           </div>
-        </div>
       </div>
-    </>
+
+      
+    </div>
+
+
+
+    
   );
 }

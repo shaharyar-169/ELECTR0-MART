@@ -83,8 +83,7 @@ export default function SparePartsStockReport() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("A");
-
-  console.log("transectionType", transectionType);
+ 
   const [transectionType2, settransectionType2] = useState("");
 
   const [totalqnty, settotalqnty] = useState(0);
@@ -233,7 +232,9 @@ console.log('storedata', Typeselectdata)
     const apiMainUrl = apiLinks + "/SparePartsStockReport.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
+      // DATE VAIABLE
       FRepDat: toInputDate,
+      // FILTER VAIABLE 
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
@@ -245,9 +246,9 @@ console.log('storedata', Typeselectdata)
       FRepStk: transectionType2,
       FRepRat: transectionType,
 
-      // code: "IZONETRD",
-      // FLocCod: "001",
-      // FYerDsc: "2025-2025",
+    //   code: "IZONETRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -307,7 +308,7 @@ console.log('storedata', Typeselectdata)
     const apiUrl = apiLinks + "/GetCompany.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-          //  code: 'NASIRTRD',
+      // code: 'NASIRTRD',
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -393,8 +394,8 @@ console.log('storedata', Typeselectdata)
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveStore.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-            code: 'NASIRTRD',
+      code: organisation.code,
+            // code: 'AMRELEC',
 
     }).toString();
     axios
@@ -2164,19 +2165,21 @@ onChange={(selectedOption) => {
                     options={options}
                     onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
                     id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCompanyselectdata(selectedOption.value);
-                        setCompanyselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setCompanyselectdata("");
-                        setCompanyselectdatavalue("");
-                      }
-                    }}
+                   onChange={(selectedOption) => {
+  if (selectedOption && selectedOption.value) {
+    setCompanyselectdata(selectedOption.value);
+
+    const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+    setCompanyselectdatavalue({
+      value: selectedOption.value,
+      label: labelWithoutCode,
+    });
+  } else {
+    setCompanyselectdata("");
+    setCompanyselectdatavalue("");
+  }
+}}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();
@@ -2329,19 +2332,21 @@ onChange={(selectedOption) => {
                     options={categoryoptions}
                     onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
                     id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCategoryselectdata(selectedOption.value);
-                        setcategoryselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcategoryselectdatavalue("");
-                      }
-                    }}
+                                     onChange={(selectedOption) => {
+  if (selectedOption && selectedOption.value) {
+    setCategoryselectdata(selectedOption.value);
+
+    const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+    setcategoryselectdatavalue({
+      value: selectedOption.value,
+      label: labelWithoutCode,
+    });
+  } else {
+    setCategoryselectdata("");
+    setcategoryselectdatavalue("");
+  }
+}}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();
@@ -2493,19 +2498,21 @@ onChange={(selectedOption) => {
                     options={capacityoptions}
                     onKeyDown={(e) => handlecapacityKeypress(e, typeRef)}
                     id="selectedsale2"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setCapacityselectdata(selectedOption.value);
-                        setcapacityselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart, // Set only the 'NGS' part of the label
-                        });
-                      } else {
-                        setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                        setcapacityselectdatavalue("");
-                      }
-                    }}
+                                                 onChange={(selectedOption) => {
+  if (selectedOption && selectedOption.value) {
+    setCapacityselectdata(selectedOption.value);
+
+    const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+    setcapacityselectdatavalue({
+      value: selectedOption.value,
+      label: labelWithoutCode,
+    });
+  } else {
+    setCapacityselectdata("");
+    setcapacityselectdatavalue("");
+  }
+}}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();

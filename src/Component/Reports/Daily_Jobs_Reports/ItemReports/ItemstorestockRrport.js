@@ -242,14 +242,14 @@ export default function ItemStoreStockReport() {
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepStk: transectionType2,
 
-      code: "MTSELEC",
-      FLocCod: "002",
-      FYerDsc: "2025-2025",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -324,7 +324,7 @@ export default function ItemStoreStockReport() {
     const apiUrl = apiLinks + "/GetStore.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      code: "MTSELEC",
+      // code: "NASIRTRD",
       //       FYerDsc: "2024-2024",
     }).toString();
     axios
@@ -1876,7 +1876,6 @@ export default function ItemStoreStockReport() {
   }, []);
 
   const contentStyle = {
-    width: "100%", // 100vw ki jagah 100%
     maxWidth: isSidebarVisible ? "1000px" : "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
@@ -2657,7 +2656,6 @@ export default function ItemStoreStockReport() {
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: getdatafontsize,
@@ -2764,7 +2762,7 @@ export default function ItemStoreStockReport() {
               }}
             >
               <table
-                className="myTable"
+              
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,

@@ -37,14 +37,17 @@ export default function InstallmentLedger2() {
   const navigate = useNavigate();
   const toRef = useRef(null);
   const fromRef = useRef(null);
-
+  const hasFetchedForSession = useRef(false);
+  
   const [CashBookSummaryData, setCashBookSummaryData] = useState([]);
   const [CashPaymentData, setCashPaymentData] = useState([]);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
   const [isItemInitialized, setIsItemInitialized] = useState(false);
   const [isCodeReady, setIsCodeReady] = useState(false);
+  const [sessionCode, setSessionCode] = useState(null);
   const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
   const [saleType, setSaleType] = useState("");
+  console.log('saleTypeData', saleType)
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
@@ -142,55 +145,41 @@ export default function InstallmentLedger2() {
   // Bind to window
   window.closeAlert = closeAlert;
 
-  function fetchGeneralLedger() {
-    const apiUrl = apiLinks + "/InstallmentLedger.php";
-    setIsLoading(true);
+ 
 
-    const formData = new URLSearchParams({
-      code: "MTSELEC",
-      FLocCod: "002",
+  function fetchGeneralLedger(codeParam) {
+  const apiUrl = apiLinks + "/InstallmentLedger.php";
+  setIsLoading(true);
+
+  const formData = new URLSearchParams({
+    code: "MTSELEC",
+    FLocCod: "002",
       // code: organisation.code,
       // FLocCod: locationnumber || getLocationNumber,
-      FInsCod: saleType,
-    }).toString();
+    FInsCod: codeParam, // 👈 dynamic
+  }).toString();
 
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setIsLoading(false);
+  axios.post(apiUrl, formData)
+    .then((response) => {
+      setIsLoading(false);
 
-        // Store Profit and Expense data into separate states
-        if (response.data) {
-          if (Array.isArray(response.data.Detail)) {
-            setTableData(response.data.Detail); // Store Profit array in profits state
-          } else {
-            console.warn(
-              "Response data 'Profit' is not an array:",
-              response.data.Detail,
-            );
-            setTableData([]); // Fallback to an empty array
-          }
+      if (Array.isArray(response.data?.Detail)) {
+        setTableData(response.data.Detail);
+      } else {
+        setTableData([]);
+      }
 
-          if (response.data.Header) {
-            setheaderData(response.data.Header); // Store Expense array in expenses state
-          } else {
-            console.warn(
-              "Response data 'Expense' is not an array:",
-              response.data.Header,
-            );
-            setheaderData([]); // Fallback to an empty array
-          }
-        } else {
-          console.warn("Response data is null or undefined:", response.data);
-          setTableData([]);
-          setheaderData([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setIsLoading(false);
-      });
-  }
+      if (response.data?.Header) {
+        setheaderData(response.data.Header);
+      } else {
+        setheaderData([]);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      setIsLoading(false);
+    });
+}
 
   useEffect(() => {
     const hasComponentMountedPreviously =
@@ -231,7 +220,26 @@ export default function InstallmentLedger2() {
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
-  useEffect(() => {
+  
+
+useEffect(() => {
+  const storedData = sessionStorage.getItem("InstallmentLedger");
+
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+    const code = parsedData.code?.trim();
+
+    if (code) {
+      setSessionCode(code);
+      setSaleType(code); //  direct set
+      setIsDoubleClickOpen(true);
+    }
+
+    sessionStorage.removeItem("InstallmentLedger");
+  }
+}, []);
+
+useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomers.php";
     const formData = new URLSearchParams({
       // code: organisation.code,
@@ -255,54 +263,55 @@ export default function InstallmentLedger2() {
     label: `${item.tcstcod}-${item.tcstnam.trim()}`,
   }));
 
-  useEffect(() => {
-    if (options.length === 0) return;
-    if (isItemInitialized) return;
 
-    const storedData = sessionStorage.getItem("InstallmentLedger");
-    let selectedOption = null;
+useEffect(() => {
+  if (options.length === 0) return;
+  if (isItemInitialized) return;
 
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      const clickedCode = parsedData.code?.trim();
-      if (parsedData.code) {
-        setIsDoubleClickOpen(true); // ✅ ADD
-      }
-      selectedOption = options.find((opt) => opt.value?.trim() === clickedCode);
+  let selectedOption = null;
 
-      sessionStorage.removeItem("InstallmentLedger");
+  // ❌ Agar sessionCode hai to find NA karo
+  if (!sessionCode) {
+    selectedOption = options[0]; // normal flow
+  }
+
+  if (selectedOption) {
+    setSaleType(selectedOption.value);
+
+    const description = selectedOption.label
+      .split("-")
+      .slice(1)
+      .join("-")
+      .trim();
+
+    setCompanyselectdatavalue({
+      value: selectedOption.value,
+      label: description,
+    });
+  }
+
+  setIsCodeReady(true);
+  setIsItemInitialized(true);
+}, [options, isItemInitialized, sessionCode]);
+
+useEffect(() => {
+  // ✅ Session mode: fetch only once
+  if (sessionCode) {
+    if (!hasFetchedForSession.current) {
+      fetchGeneralLedger(sessionCode);
+      hasFetchedForSession.current = true;
     }
+    return;
+  }
 
-    if (!selectedOption) {
-      selectedOption = options[0];
-    }
+  // Reset ref when sessionCode becomes falsy (normal mode)
+  hasFetchedForSession.current = false;
 
-    if (selectedOption) {
-      setSaleType(selectedOption.value);
-
-      const description = selectedOption.label
-        .split("-")
-        .slice(1)
-        .join("-")
-        .trim();
-
-      setCompanyselectdatavalue({
-        value: selectedOption.value,
-        label: description,
-      });
-
-      setIsCodeReady(true); // ✅ IMPORTANT
-    }
-
-    setIsItemInitialized(true);
-  }, [options, isItemInitialized]);
-
-  useEffect(() => {
-    // 🔥 Dono cheezain ready hon
-    if (isDoubleClickOpen && isCodeReady) {
-      fetchGeneralLedger();
-    }
-  }, [isDoubleClickOpen, isCodeReady]);
+  // ✅ Normal flow: fetch only when both conditions are ready
+  if (isCodeReady && saleType) {
+    fetchGeneralLedger(saleType);
+  }
+}, [sessionCode, isCodeReady, saleType]);
 
   const DropdownOption = (props) => {
     return (
@@ -1427,52 +1436,66 @@ const drawFormHeader = (doc, startY) => {
                     </div>
 
                     <div>
+                   
                       <Select
-                        className="List-select-class"
-                        ref={saleSelectRef}
-                        options={options}
-                        value={
-                          options.find((opt) => opt.value === saleType) || null
-                        }
-                        isDisabled={isDoubleClickOpen}
-                        onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
-                        id="selectedsale"
-                        onChange={(selectedOption) => {
-                          if (selectedOption && selectedOption.value) {
-                            const labelParts = selectedOption.label.split("-"); // Split by "-"
-                            const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+  className="List-select-class"
+  ref={saleSelectRef}
+  options={options}
+    // 🔥 Optimized value (no heavy find if sessionCode exists)
+  value={
+    sessionCode
+      ? { value: sessionCode, label: sessionCode } // 👈 direct (fast)
+      : options.find((opt) => opt.value === saleType) || null
+  }
+  isDisabled={isDoubleClickOpen}
+  onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
+  id="selectedsale"
 
-                            setSaleType(selectedOption.value);
-                            setCompanyselectdatavalue({
-                              value: selectedOption.value,
-                              label: description, // Keep only the description
-                            });
-                          } else {
-                            setSaleType("");
-                            setCompanyselectdatavalue("");
-                          }
-                        }}
-                        onInputChange={(inputValue, { action }) => {
-                          if (action === "input-change") {
-                            return inputValue.toUpperCase();
-                          }
-                          return inputValue;
-                        }}
-                        components={{ Option: DropdownOption }}
-                        styles={{
-                          ...customStyles1(!saleType),
-                          placeholder: (base) => ({
-                            ...base,
-                            textAlign: "left",
-                            marginLeft: "0",
-                            justifyContent: "flex-start",
-                            color: fontcolor,
-                            marginTop: "-5px",
-                          }),
-                        }}
-                        isClearable
-                        placeholder="ALL"
-                      />
+  onChange={(selectedOption) => {
+    if (selectedOption && selectedOption.value) {
+      const labelParts = selectedOption.label.split("-");
+      const description = labelParts.slice(3).join("-");
+
+      setSaleType(selectedOption.value);
+
+      setCompanyselectdatavalue({
+        value: selectedOption.value,
+        label: description,
+      });
+
+      // 🔥 agar user manually change kare to session mode off
+      setSessionCode(null);
+    } else {
+      setSaleType("");
+      setCompanyselectdatavalue("");
+      setSessionCode(null);
+    }
+  }}
+
+  onInputChange={(inputValue, { action }) => {
+    if (action === "input-change") {
+      return inputValue.toUpperCase();
+    }
+    return inputValue;
+  }}
+
+  components={{ Option: DropdownOption }}
+
+  styles={{
+    ...customStyles1(!saleType),
+    placeholder: (base) => ({
+      ...base,
+      textAlign: "left",
+      marginLeft: "0",
+      justifyContent: "flex-start",
+      color: fontcolor,
+      marginTop: "-5px",
+    }),
+  }}
+
+  isClearable
+  placeholder="ALL"
+/>
                     </div>
                   </div>
                   <div

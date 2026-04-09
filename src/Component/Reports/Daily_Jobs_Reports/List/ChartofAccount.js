@@ -844,15 +844,6 @@ doc.setFont("verdana-regular", "normal");
       useHotkeys("alt+r", () => navigate("/MainPage"),  { preventDefault: true, enableOnFormTags: true });
 
 
-  // const firstColWidth = {
-  //   width: "20.2%",
-  // };
-  // const secondColWidth = {
-  //   width: "62%",
-  // };
-  // const thirdColWidth = {
-  //   width: "15%",
-  // };
 
   const firstColWidth = { width: "80px" };
   const secondColWidth = { width: "360px" };
@@ -901,7 +892,7 @@ doc.setFont("verdana-regular", "normal");
 
 const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "700px",
+    maxWidth: "510px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1167,7 +1158,6 @@ const contentStyle = {
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: getdatafontsize,
@@ -1306,8 +1296,8 @@ const contentStyle = {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
-              // width: "101.2%",
+              paddingRight: "8px",
+            
             }}
           >
             <div

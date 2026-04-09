@@ -409,12 +409,12 @@ export default function SupplierLedger1() {
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
             FAccCod: saleType,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
-            // code: 'NASIRTRD',
-            // FLocCod: '001',
-            // FYerDsc: '2024-2024',
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getyeardescription,
+            code: 'NASIRTRD',
+            FLocCod: '001',
+            FYerDsc: '2024-2024',
             FSchTxt: searchQuery
         }).toString();
 
@@ -502,10 +502,10 @@ export default function SupplierLedger1() {
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveSupplier.php";
         const formData = new URLSearchParams({
-            FLocCod: locationnumber || getLocationNumber,
-            code: organisation.code,
-            //   code: 'NASIRTRD',
-            // FLocCod: '001',
+            // FLocCod: locationnumber || getLocationNumber,
+            // code: organisation.code,
+              code: 'NASIRTRD',
+            FLocCod: '001',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -572,6 +572,8 @@ export default function SupplierLedger1() {
         fetchReceivableReport();
       }
     }, [isDoubleClickOpen, isCodeReady]);
+
+
 
     // useEffect(() => {
     //     if (isOptionsLoaded && options.length > 0 && !saleType && !hasInitialized.current) {
@@ -2550,3 +2552,5 @@ const isMatchedRow = (item) => {
         </>
     );
 }
+
+

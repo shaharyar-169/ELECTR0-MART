@@ -100,9 +100,11 @@ import CategoryMonthlyJobComparison from "./Component/Reports/Daily_Jobs_Reports
 import CompanyJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyJobSummary.js";
 import CategoryJobSummary from "./Component/Reports/Daily_Jobs_Reports/JobReports/CategoryJobSummary.js";
 import CompanyJobStatusReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/CompanyjobStatus.js";
+import TechnicianCommisionComparison from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianCommisionComparison.js";
+import TechnicianCommissionReport from "./Component/Reports/Daily_Jobs_Reports/JobReports/TechnicianCommissionReport.js";
 
 //////////////////////////// ledger reports //////////////////////////////
-import GeneralLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder1.js";
+import GeneralLedger from "./Component/Reports/Daily_Jobs_Reports/ledgers/GeneralLeder.js";
 import SupplierLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/SupplierLedger1.js";
 import CustomerLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/CustomerLedger1.js";
 import BankRegisterLedger1 from "./Component/Reports/Daily_Jobs_Reports/ledgers/BankRegisterLedger1.js";
@@ -190,6 +192,7 @@ import SparePartsStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/I
 import SparePartsStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartStatusReport.js";
 import ShopStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ShopStockReport.js";
 import SupplierPurchaseComparison from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SupplierPurchaseComparisonReport.js";
+import SupplierPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SupplierPurchaseReport.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -312,7 +315,8 @@ function App() {
 
 
                 {/* Rountes for ledgers reports */}
-                <Route exact path="/GeneralLedger1" element={<GeneralLedger1 />} />
+               
+                <Route exact path="/GeneralLedger1" element={<GeneralLedger />} />
                 <Route exact path="/SupplierLedger" element={<SupplierLedger1 />} />
                 <Route exact path="/CustomerLedger" element={<CustomerLedger1 />} />
                 <Route exact path="/BankRegister" element={<BankRegisterLedger1 />} />
@@ -351,7 +355,8 @@ function App() {
                 <Route exact path="/CompanyJobSummary" element={<CompanyJobSummary />} />
                 <Route exact path="/CategoryJobSummary" element={<CategoryJobSummary />} />
                 <Route exact path="/JobLedger" element={<CompanyJobStatusReport />} />
-
+                <Route exact path="/TechnicianCommissionComparison" element={<TechnicianCommisionComparison />} />
+                <Route exact path="/TechnicianCommissionReport" element={<TechnicianCommissionReport />} />
 
 
                 {/* Rountes for Daily reports */}
@@ -426,6 +431,7 @@ function App() {
                 <Route exact path="/SparePartsStatus" element={<SparePartsStatusReport />} />
                 <Route exact path="/ShopStockReport" element={<ShopStockReport />} />
                 <Route exact path="/SupplierPurchaseComparison" element={<SupplierPurchaseComparison />} />
+                <Route exact path="/SupplierPurchaseReport" element={<SupplierPurchaseReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}

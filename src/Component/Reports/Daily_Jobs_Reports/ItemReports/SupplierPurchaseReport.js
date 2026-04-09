@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
@@ -25,9 +26,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-
-export default function SupplierPurchaseComparison() {
+export default function SupplierPurchaseReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -265,7 +264,7 @@ export default function SupplierPurchaseComparison() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiMainUrl = apiLinks + "/SupplierPurchaseComparison.php";
+    const apiMainUrl = apiLinks + "/SupplierPurchaseReport.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
       code: organisation.code,
@@ -280,9 +279,9 @@ export default function SupplierPurchaseComparison() {
       FRepTyp: transectionType,
       FSchTxt: searchQuery,
 
-    //    code: 'NASIRTRD',
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+       code: 'AGFACTORY',
+      FLocCod: "001",
+      FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -342,10 +341,10 @@ export default function SupplierPurchaseComparison() {
     useEffect(() => {
       const apiUrl = apiLinks + "/GetActiveSupplier.php";
       const formData = new URLSearchParams({
-        FLocCod: getLocationNumber,
-        code: organisation.code,
-        // FLocCod: '001',
-        // code: 'NASIRTRD',
+        // FLocCod: getLocationNumber,
+        // code: organisation.code,
+        FLocCod: '001',
+        code: 'AGFACTORY',
       }).toString();
       axios
         .post(apiUrl, formData)
@@ -638,6 +637,15 @@ export default function SupplierPurchaseComparison() {
     }),
   });
 
+  const handleKeyPress = (e, nextInputRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextInputRef.current) {
+        nextInputRef.current.focus();
+      }
+    }
+  };
+
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
@@ -654,6 +662,7 @@ export default function SupplierPurchaseComparison() {
       const rows = tableData.map((item) => [
         item.code,
         item.Description,
+         item.Rate,
         item.Qnty,
         item.Amount,    
       ]);
@@ -663,6 +672,7 @@ export default function SupplierPurchaseComparison() {
       rows.push([
         "",
         "",
+         "",
                String(formatValue(totalQnty)),
         String(formatValue(totalAmount)),
       ]);
@@ -671,10 +681,11 @@ export default function SupplierPurchaseComparison() {
       const headers = [
         "Code",
         "Description",
+          "Rate",
         "Qnty",
         "Amount",
       ];
-      const columnWidths = [24, 110, 20, 30];
+      const columnWidths = [38, 95,20 ,15, 30];
   
       // Calculate total table width
       const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -802,13 +813,13 @@ export default function SupplierPurchaseComparison() {
   
             const cellValue = String(cell);
   
-            if (cellIndex === 0 ) {
+            if (cellIndex === 10 ) {
               const rightAlignX = startX + columnWidths[cellIndex] / 2;
               doc.text(cellValue, rightAlignX, cellY, {
                 align: "center",
                 baseline: "middle",
               });
-            } else if (cellIndex === 2 || cellIndex === 3) {
+            } else if (cellIndex >= 2) {
               const rightAlignX = startX + columnWidths[cellIndex] - 2;
               doc.text(cellValue, rightAlignX, cellY, {
                 align: "right",
@@ -875,7 +886,7 @@ export default function SupplierPurchaseComparison() {
       };
   
       // Define the number of rows per page
-      const rowsPerPage = 29; // Adjust this value based on your requirements
+      const rowsPerPage = 47; // Adjust this value based on your requirements
   
       // Function to handle pagination
       const handlePagination = () => {
@@ -939,11 +950,13 @@ export default function SupplierPurchaseComparison() {
           const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
           const labelsY = startY + 4; // Position the labels below the titles and above the table
   
-          let status =
+            let searchdata = searchQuery ? searchQuery : "";
+
+          let typecode =
              transectionType === "BIL"
-                ? "PURCHASE"
-                : transectionType === "PRN"
-                  ? "PURCHASE RETURN"
+                ? "PRUCHASE"
+                : transectionType === "PN"
+                  ? "PRUCHASE RETURN"
                  
                                       : "ALL";
   
@@ -980,12 +993,13 @@ export default function SupplierPurchaseComparison() {
           doc.setFontSize(10);
           doc.text(`${Categorycode}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
   
-           doc.setFont("verdana", "bold");
+        
+          doc.setFont("verdana", "bold");
           doc.setFontSize(10);
           doc.text(`Type :`, labelsX + 130, labelsY + 12.5); // Draw bold label
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
-          doc.text(`${status}`, labelsX + 150, labelsY + 12.5); // Draw the value next to the label
+          doc.text(`${typecode}`, labelsX + 150, labelsY + 12.5); // Draw the value next to the label
   
 
           startY += 16; // Adjust vertical position for the labels
@@ -1039,13 +1053,14 @@ export default function SupplierPurchaseComparison() {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Sheet1");
   
-      const numColumns = 4; // Ensure this matches the actual number of columns
+      const numColumns = 5; // Ensure this matches the actual number of columns
   
       const columnAlignments = [
-        "center",
+        "left",
         "left",
         "right",
         "right",
+          "right",
       ];
   
       // Define fonts for different sections
@@ -1089,7 +1104,7 @@ export default function SupplierPurchaseComparison() {
   
       // Add Store List row
       const storeListRow = worksheet.addRow([
-        `Supplier Purchase Comparison From ${fromInputDate} To ${toInputDate}`,
+        `Supplier Purchase Report From ${fromInputDate} To ${toInputDate}`,
       ]);
       storeListRow.eachCell((cell) => {
         cell.font = fontStoreList;
@@ -1105,12 +1120,15 @@ export default function SupplierPurchaseComparison() {
       // Add an empty row after the title section
       worksheet.addRow([]);
   
+
+            let searchdata = searchQuery ? searchQuery : "";
+
       let typestatus = "";
   
       if (transectionType === "BIL") {
-        typestatus = "PURCHASE";
+        typestatus = "PRUCHASE";
       } else if (transectionType === "PRN") {
-        typestatus = "PURCHASE RETURN";
+        typestatus = "PRUCHASE RETURN";
       } else {
         typestatus = "ALL"; // Default value
       }
@@ -1142,6 +1160,7 @@ export default function SupplierPurchaseComparison() {
         Categorycode,
         "Type :",
         typestatus,
+       
       ]);
 
   
@@ -1197,6 +1216,7 @@ export default function SupplierPurchaseComparison() {
       const headers = [
         "Code",
         "Description",
+         "Rate",
         "Qnty",
         "Amount",
      
@@ -1209,6 +1229,7 @@ export default function SupplierPurchaseComparison() {
         const row = worksheet.addRow([
           item.code,        
           item.Description,
+           item.Rate,
           item.Qnty,
           item.Amount,
         ]);
@@ -1231,6 +1252,7 @@ export default function SupplierPurchaseComparison() {
       const totalRow = worksheet.addRow([
        "",
         "",
+          "",
                String(formatValue(totalQnty)),
         String(formatValue(totalAmount)),
       ]);
@@ -1247,13 +1269,13 @@ export default function SupplierPurchaseComparison() {
         };
   
         // Align only the "Total" text to the right
-        if (colNumber === 3 || colNumber === 4) {
+        if (colNumber === 4 || colNumber === 5) {
           cell.alignment = { horizontal: "right" };
         }
       });
   
       // Set column widths
-      [10, 45, 10, 14].forEach((width, index) => {
+      [20, 45,12, 10, 14].forEach((width, index) => {
         worksheet.getColumn(index + 1).width = width;
       });
   
@@ -1316,7 +1338,7 @@ export default function SupplierPurchaseComparison() {
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      saveAs(blob, `SupplierPurchaseComparisonReport  From ${fromInputDate} To ${toInputDate}.xlsx`);
+      saveAs(blob, `SupplierPurchaseReport  From ${fromInputDate} To ${toInputDate}.xlsx`);
     };
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
   
@@ -1335,13 +1357,16 @@ export default function SupplierPurchaseComparison() {
   const { data, loading, error } = useSelector((state) => state.getuser);
 
   const firstColWidth = {
-    width: "80px",
+    width: "135px",
   };
   const secondColWidth = {
-    width: "530px",
+    width: "385px",
+  };
+  const fifthColWidth = {
+    width: "90px",
   };
   const thirdColWidth = {
-    width: "70px",
+    width: "80px",
   };
   const forthColWidth = {
     width: "90px",
@@ -1386,7 +1411,6 @@ export default function SupplierPurchaseComparison() {
   }, []);
 
  const contentStyle = {
-    width: "100%", // 100vw ki jagah 100%
     maxWidth: "900px",
     height: "calc(100vh - 100px)",
     position: "absolute",
@@ -1408,7 +1432,6 @@ export default function SupplierPurchaseComparison() {
     padding: "0 20px", // Side padding for small screens
     boxSizing: "border-box", // Padding ko width mein include kare
   };
-
 
 
 
@@ -1619,7 +1642,7 @@ export default function SupplierPurchaseComparison() {
   const handleAccountEnter = (e) => {
     if (e.key === "Enter" && !menuAccountIsOpen) {
       e.preventDefault();
-      focusNextElement(accountRef, companyRef);
+      focusNextElement(saleSelectRef, companyRef);
     }
   };
 
@@ -1633,7 +1656,7 @@ export default function SupplierPurchaseComparison() {
   const handleCategoryEnter = (e) => {
     if (e.key === "Enter" && !menuCategoryIsOpen) {
       e.preventDefault();
-      focusNextElement(categoryRef, typeRef);
+      focusNextElement(categoryRef, input1Ref);
     }
   };
 
@@ -1677,7 +1700,7 @@ export default function SupplierPurchaseComparison() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Supplier Purchase Comparison Report" />
+          <NavComponent textdata="Supplier Purchase Report" />
 
           {/* ------------1st row */}
           <div
@@ -1794,7 +1817,7 @@ export default function SupplierPurchaseComparison() {
               </div>
 
               {/* To Date */}
-              <div className="d-flex align-items-center" >
+              <div className="d-flex align-items-center"  >
                 <div
                   style={{
                     width: "60px",
@@ -1889,7 +1912,7 @@ export default function SupplierPurchaseComparison() {
                 </div>
               </div>
 
- {/* Category Select  */}
+              {/* Category Select  */}
               <div
                 className="d-flex align-items-center  "
                 style={{ marginRight: "20px" }}
@@ -1961,6 +1984,8 @@ export default function SupplierPurchaseComparison() {
                   />
                 </div>
               </div>
+
+
               
             </div>
           </div>
@@ -2052,35 +2077,36 @@ export default function SupplierPurchaseComparison() {
                 </div>
               </div>
 
-              {/* Type */}
+               {/* Type Select  */}
               <div
                 className="d-flex align-items-center"
-                style={{ marginRight: "20px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
+                    marginLeft: "10px",
                     width: "60px",
                     display: "flex",
                     justifyContent: "end",
                   }}
                 >
                   <label htmlFor="transactionType">
-                    <span style={{  fontSize: getdatafontsize,
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
                         fontFamily: getfontstyle,
                         fontWeight: "bold",
- }}>
-                      Type :&nbsp;
+                      }}
+                    >
+                      Type :
                     </span>
                   </label>
                 </div>
-               
 
-
-
-<div style={{ position: "relative", display: "inline-block" }}>
+                <div style={{ position: "relative", display: "inline-block" }}>
                   <select
-                    ref={typeRef}
-                    onKeyDown={(e) => handleTypeEnter(e)}
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, searchRef)}
                     id="submitButton"
                     name="type"
                     onFocus={(e) =>
@@ -2105,8 +2131,7 @@ export default function SupplierPurchaseComparison() {
                   >
                     <option value="">ALL</option>
                     <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
-                    
+                    <option value="PRN">PURCHASE RETURN </option>
                   </select>
 
                   {transectionType !== "" && (
@@ -2327,6 +2352,9 @@ export default function SupplierPurchaseComparison() {
                     <td className="border-dark" style={secondColWidth}>
                       Description
                     </td>
+                      <td className="border-dark" style={fifthColWidth}>
+                      Rate
+                    </td>
                     <td className="border-dark" style={thirdColWidth}>
                       Qnty
                     </td>
@@ -2353,7 +2381,6 @@ export default function SupplierPurchaseComparison() {
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: "12px",
@@ -2370,7 +2397,7 @@ export default function SupplierPurchaseComparison() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="4" className="text-center">
+                        <td colSpan="5" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -2383,7 +2410,7 @@ export default function SupplierPurchaseComparison() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 4 }).map((_, colIndex) => (
+                            {Array.from({ length: 5 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2394,6 +2421,7 @@ export default function SupplierPurchaseComparison() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
+                          <td style={fifthColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                       </tr>
@@ -2415,39 +2443,15 @@ export default function SupplierPurchaseComparison() {
                               color: item.Qnty?.[0] === "-" ? "red" : fontcolor,
                             }}
                           >
-                            {/* <td className="text-start" style={firstColWidth}>
+                            <td className="text-start" style={firstColWidth}>
                               {item.code}
-                            </td> */}
-
-                            <td
-                    className="text-start"
-                    style={{
-                      ...firstColWidth,
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      // color: "blue",
-                      color: selectedIndex === i ? 'white' : "blue", // ✅ conditional color
-                    }}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                        "SupplierLedgerData",
-                        JSON.stringify({
-                          code: item.code,
-                          fromInputDate: fromInputDate,
-                          toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/SupplierLedger", "_blank");
-                    }}
-                  >
-                    {item.code}
-                  </td>
+                            </td>
+                       
                             <td className="text-start" style={secondColWidth}>
                               {item.Description}
+                            </td>
+                            <td className="text-end" style={fifthColWidth}>
+                              {item.Rate}
                             </td>
                             <td className="text-end" style={thirdColWidth}>
                               {item.Qnty}
@@ -2468,7 +2472,7 @@ export default function SupplierPurchaseComparison() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 4 }).map((_, colIndex) => (
+                          {Array.from({ length: 5 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2478,6 +2482,7 @@ export default function SupplierPurchaseComparison() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
+                        <td style={fifthColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
                       </tr>
@@ -2510,6 +2515,15 @@ export default function SupplierPurchaseComparison() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
+              
+            ></div>
+             <div
+              style={{
+                ...fifthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+              
             ></div>
             <div
               style={{
@@ -2527,7 +2541,8 @@ export default function SupplierPurchaseComparison() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalAmount}</span>
+                            <span className="mobileledger_total">{totalAmount}</span>
+
             </div>
           </div>
           {/* Action Buttons */}
