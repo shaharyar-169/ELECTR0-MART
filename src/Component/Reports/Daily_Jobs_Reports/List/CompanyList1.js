@@ -74,11 +74,11 @@ export default function CompanyList() {
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
 
-  const handleKeyPress = (e, nextInputRef) => {
+  const handleKeyPress = (e, nextInputRef) => {s
     if (e.key === "Enter") {
       e.preventDefault();
       if (nextInputRef.current) {
-        nextInputRef.current.focus();
+        nextInputRefs.current.focus();
       }
     }
   };
@@ -91,8 +91,7 @@ export default function CompanyList() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
 
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
+    
       FSchTxt: searchQuery,
     }).toString();
 
@@ -697,8 +696,6 @@ export default function CompanyList() {
     Description: "",
     Status: "",
   });
-
-  // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
@@ -749,7 +746,6 @@ export default function CompanyList() {
       Status: null,
     });
   };
-
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
     return {
@@ -891,7 +887,6 @@ export default function CompanyList() {
   }, []);
 
   const contentStyle = {
-    width: "100%", // 100vw ki jagah 100%
     maxWidth: "700px",
     height: "calc(100vh - 100px)",
     position: "absolute",
@@ -1227,33 +1222,7 @@ export default function CompanyList() {
                 </thead>
               </table>
             </div>
-            {/* <div
-              className="table-scroll"
-              style={{
-                backgroundColor: textColor,
-                borderBottom: `1px solid ${fontcolor}`,
-                overflowY: "auto",
-                maxHeight: "55vh",
-                width: "100%",
-                wordBreak: "break-word",
-              }}
-            >
-              <table
-                className="myTable"
-                id="tableBody"
-                style={{
-                  fontSize: "12px",
-                  width: "100%",
-                  position: "relative",
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                }}
-              >
-                <tbody id="tablebody">
-                  {renderTableData()}
-                </tbody>
-              </table>
-            </div> */}
+           
 
             <div
               className="table-scroll"
@@ -1269,7 +1238,6 @@ export default function CompanyList() {
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
