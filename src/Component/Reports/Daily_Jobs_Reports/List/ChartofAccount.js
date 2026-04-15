@@ -865,34 +865,9 @@ doc.setFont("verdana-regular", "normal");
     };
   }, []);
 
-  // const contentStyle = {
-  //   backgroundColor: getcolor,
-  //   // width: isSidebarVisible ? "calc(35vw - 0%)" : "35vw",
-  //   position: "relative",
-  //   top: "40%",
-  //   left: isSidebarVisible ? "50%" : "50%",
-  //   transform: "translate(-50%, -50%)",
-  //   transition: isSidebarVisible
-  //     ? "left 3s ease-in-out, width 2s ease-in-out"
-  //     : "left 3s ease-in-out, width 2s ease-in-out",
-  //   display: "flex",
-  //   justifyContent: "center",
-  //   alignItems: "start",
-  //   overflowX: "hidden",
-  //   overflowY: "hidden",
-  //   wordBreak: "break-word",
-  //   textAlign: "center",
-  //   maxWidth: "1000px",
-  //   fontSize: "15px",
-  //   fontStyle: "normal",
-  //   fontWeight: "400",
-  //   lineHeight: "23px",
-  //   fontFamily: '"Poppins", sans-serif',
-  // };
-
 const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "510px",
+    maxWidth: "515px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1103,7 +1078,7 @@ const contentStyle = {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -1229,33 +1204,7 @@ const contentStyle = {
                 </thead>
               </table>
             </div>
-            {/* <div
-              className="table-scroll"
-              style={{
-                backgroundColor: textColor,
-                borderBottom: `1px solid ${fontcolor}`,
-                overflowY: "auto",
-                maxHeight: "55vh",
-                width: "100%",
-                wordBreak: "break-word",
-              }}
-            >
-              <table
-                className="myTable"
-                id="tableBody"
-                style={{
-                  fontSize: "12px",
-                  width: "100%",
-                  position: "relative",
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                }}
-              >
-                <tbody id="tablebody">
-                  {renderTableData()} 
-                </tbody>
-              </table>
-            </div> */}
+       
 
             <div
               className="table-scroll"
@@ -1273,14 +1222,13 @@ const contentStyle = {
 
 
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "98%",
-                  tableLayout: "fixed",   // FIXED!
-                  overflowY: "scroll",
+                 width: "100%",
+                                    position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody" style={{ overflowY: 'scroll' }}>{renderTableData()}</tbody>

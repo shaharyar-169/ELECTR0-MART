@@ -393,9 +393,9 @@ export default function TrailBalanceReport() {
     const apiUrl = apiLinks + "/TrialBalance.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-    //   FYerDsc: "2025-2025",
-    //   code: "NASIRTRD",
-    //   FLocCod:'001',
+    //  code: "MULTITRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2025-2026",
 
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
@@ -1326,7 +1326,7 @@ export default function TrailBalanceReport() {
                     </td> */}
 
                   <td
-                    className="text-start"
+                    className="text-center"
                     style={{
                       ...firstColWidth,
                       cursor: "pointer",
@@ -1353,7 +1353,16 @@ export default function TrailBalanceReport() {
                     {item.code}
                   </td>
 
-                  <td className="text-start" style={secondColWidth}>
+                 <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {item.Description}
                   </td>
                   <td className="text-end" style={thirdColWidth}>
@@ -1448,7 +1457,7 @@ export default function TrailBalanceReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "855px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1793,7 +1802,7 @@ export default function TrailBalanceReport() {
                 </div>
               </div>
 
-<div id="lastDiv" style={{ marginRight: "1px" }}>
+              <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
                     style={{
@@ -1976,19 +1985,16 @@ export default function TrailBalanceReport() {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "50vh",
-                // width: "100%",
-                wordBreak: "break-word",
-              }}
+            }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  //   width: "100%",
-                  tableLayout: "fixed", // FIXED!
-                  overflowY: "scroll",
+                    width: "100%",
+                  position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody" style={{ overflowY: "scroll" }}>

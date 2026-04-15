@@ -424,13 +424,13 @@ export default function ItemPurchaseSummaryReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-    //   code: 'NASIRTRD',
-    //   FLocCod: '001',
-    //   FYerDsc: '2024-2024',
+     code: 'MULTITRD',
+      FLocCod: '001',
+      FYerDsc: '2025-2026',
     }).toString();
 
     axios
@@ -1611,13 +1611,13 @@ const exportPDFHandler = () => {
     width: "360px",
   };
   const thirdColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const forthColWidth = {
     width: "80px",
   };
   const sixthColWidth = {
-    width: "80px",
+    width: "100px",
   };
 
   const sixthcol = {
@@ -1753,7 +1753,7 @@ const exportPDFHandler = () => {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "790px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2611,7 +2611,7 @@ const exportPDFHandler = () => {
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -2765,19 +2765,17 @@ const exportPDFHandler = () => {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "36vh",
-                // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+              
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
-                  position: "relative",
+                    width: "100%",
+                position: "relative",
+                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -2843,9 +2841,18 @@ const exportPDFHandler = () => {
                             <td className="text-start" style={firstColWidth}>
                               {item.code}
                             </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Description}
-                            </td>
+                             <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
                             <td className="text-end" style={thirdColWidth}>
                               {formatValue(item.Rate)}
                             </td>

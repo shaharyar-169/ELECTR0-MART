@@ -242,14 +242,18 @@ export default function ItemStoreStockReport() {
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
+       FRepStk: transectionType2,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      FRepStk: transectionType2,
 
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+
+      // code: 'MULTITRD',
+      // FLocCod: '001',
+      // FYerDsc: '2025-2026',
+     
+
+     
     }).toString();
 
     axios
@@ -324,8 +328,8 @@ export default function ItemStoreStockReport() {
     const apiUrl = apiLinks + "/GetStore.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      // code: "NASIRTRD",
-      //       FYerDsc: "2024-2024",
+      // code: "MULTITRD",
+      //       FYerDsc: "2025-2026",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -2768,7 +2772,7 @@ export default function ItemStoreStockReport() {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   ...(GetHeading.length > 6 ? { width: "100%" } : {}), 
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}

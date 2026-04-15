@@ -898,7 +898,7 @@ const formatValue = (val) => {
 
  const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "700px",
+    maxWidth: "495px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1109,7 +1109,7 @@ const formatValue = (val) => {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -1164,7 +1164,6 @@ const formatValue = (val) => {
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: getdatafontsize,
@@ -1236,33 +1235,7 @@ const formatValue = (val) => {
                 </thead>
               </table>
             </div>
-            {/* <div
-              className="table-scroll"
-              style={{
-                backgroundColor: textColor,
-                borderBottom: `1px solid ${fontcolor}`,
-                overflowY: "auto",
-                maxHeight: "55vh",
-                width: "100%",
-                wordBreak: "break-word",
-              }}
-            >
-              <table
-                className="myTable"
-                id="tableBody"
-                style={{
-                  fontSize: "12px",
-                  width: "100%",
-                  position: "relative",
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                }}
-              >
-                <tbody id="tablebody">
-                  {renderTableData()} 
-                </tbody>
-              </table>
-            </div> */}
+         
 
             <div
               className="table-scroll"
@@ -1285,9 +1258,9 @@ const formatValue = (val) => {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "98%",
-                  tableLayout: "fixed",   // FIXED!
-                  overflowY: "scroll",
+                 width: "100%",
+                                    position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody" style={{ overflowY: 'scroll' }}>{renderTableData()}</tbody>
@@ -1303,8 +1276,7 @@ const formatValue = (val) => {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
-              // width: "101.2%",
+              paddingRight: "8px",
             }}
           >
             <div

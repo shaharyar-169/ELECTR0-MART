@@ -434,9 +434,10 @@ export default function ItemStatusReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType,
-    //   code: "NASIRTRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2024-2024",
+
+    //  code: 'MULTITRD',
+    //   FLocCod: '001',
+    //   FYerDsc: '2025-2026',
     }).toString();
 
     axios
@@ -528,6 +529,8 @@ export default function ItemStatusReport() {
     const apiUrl = apiLinks + "/GetCapacity.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+        // code: 'MULTITRD',
+  
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -1714,36 +1717,7 @@ export default function ItemStatusReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
+  
 
   const firstColWidth = {
     width: "135px",
@@ -1752,28 +1726,28 @@ export default function ItemStatusReport() {
     width: "360px",
   };
   const thirdColWidth = {
-    width: "60px",
+    width: isSidebarVisible ? "60px" :"82px",
   };
   const forthColWidth = {
-    width: "60px",
+   width: isSidebarVisible ? "60px" :"82px",
   };
   const fifthColWidth = {
-    width: "60px",
+  width: isSidebarVisible ? "60px" :"82px",
   };
   const sixthColWidth = {
-    width: "60px",
+   width: isSidebarVisible ? "60px" :"82px",
   };
   const seventhColWidth = {
-    width: "60px",
+   width: isSidebarVisible ? "60px" :"82px",
   };
   const eightColWidth = {
-    width: "60px",
+  width: isSidebarVisible ? "60px" :"82px",
   };
   const ninthColWidth = {
-    width: "60px",
+   width: isSidebarVisible ? "60px" :"82px",
   };
   const tenthColWidth = {
-    width: "60px",
+   width: isSidebarVisible ? "60px" :"82px",
   };
 
   const sixthcol = {
@@ -1928,11 +1902,11 @@ export default function ItemStatusReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: isSidebarVisible ? "1000px": "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "52vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -2714,7 +2688,7 @@ export default function ItemStatusReport() {
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -2890,7 +2864,7 @@ export default function ItemStatusReport() {
                     <td
                       className="border-dark"
                       style={ninthColWidth}
-                      onClick={() => handleSorting("Saleb-Rate")}
+                      onClick={() => handleSorting("Sale-Ret")}
                     >
                       S Ret{" "}
                       <i
@@ -2922,19 +2896,17 @@ export default function ItemStatusReport() {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "48vh",
-                //    width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                  
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
-                  position: "relative",
+                width: "100%",
+                position: "relative",
+                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">

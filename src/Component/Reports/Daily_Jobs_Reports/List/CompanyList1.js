@@ -74,11 +74,11 @@ export default function CompanyList() {
 
   // Toggle the ToDATE && FromDATE CalendarOpen state on each click
 
-  const handleKeyPress = (e, nextInputRef) => {s
+  const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (nextInputRef.current) {
-        nextInputRefs.current.focus();
+        nextInputRef.current.focus();
       }
     }
   };
@@ -858,16 +858,7 @@ export default function CompanyList() {
     enableOnFormTags: true,
   });
 
-  // const firstColWidth = {
-  //   width: "20.2%",
-  // };
-  // const secondColWidth = {
-  //   width: "62%",
-  // };
-  // const thirdColWidth = {
-  //   width: "15%",
-  // };
-
+  
   const firstColWidth = { width: "60px" };
   const secondColWidth = { width: "360px" };
   const thirdColWidth = { width: "60px" };
@@ -886,8 +877,9 @@ export default function CompanyList() {
     };
   }, []);
 
-  const contentStyle = {
-    maxWidth: "700px",
+const contentStyle = {
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: "495px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -907,7 +899,7 @@ export default function CompanyList() {
     zIndex: 1,
     padding: "0 20px", // Side padding for small screens
     boxSizing: "border-box", // Padding ko width mein include kare
-  };
+};
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
@@ -1101,7 +1093,7 @@ export default function CompanyList() {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -1156,7 +1148,6 @@ export default function CompanyList() {
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: getdatafontsize,
@@ -1242,9 +1233,9 @@ export default function CompanyList() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "98%",
-                  tableLayout: "fixed", // FIXED!
-                  overflowY: "scroll",
+                    width: "100%",
+                                    position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody" style={{ overflowY: "scroll" }}>
@@ -1260,8 +1251,7 @@ export default function CompanyList() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
-              // width: "101.2%",
+              paddingRight: "8px",
             }}
           >
             <div

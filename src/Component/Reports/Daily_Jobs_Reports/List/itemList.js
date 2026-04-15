@@ -419,63 +419,7 @@ export default function ItemList() {
     label: `${item.ttypcod}-${item.ttypdsc.trim()}`,
   }));
 
-  // const DropdownOption = (props) => {
-  //   return (
-  //     <components.Option {...props}>
-  //       <div
-  //         style={{
-  //          fontSize: getdatafontsize, fontFamily:getfontstyle,
-  //           paddingBottom: "5px",
-  //           lineHeight: "3px",
-  //           color: "black",
-  //           textAlign: "start",
-  //         }}
-  //       >
-  //         {props.data.label}
-  //       </div>
-  //     </components.Option>
-  //   );
-  // };
-  // const customStyles1 = (hasError) => ({
-  //   control: (base, state) => ({
-  //     ...base,
-  //     height: "24px",
-  //     minHeight: "unset",
-  //     width: 250,
-  //     fontSize: getdatafontsize,fontFamily:getfontstyle,
-  //     backgroundColor: getcolor,
-  //     color: fontcolor,
-  //     borderRadius: 0,
-  //     border: `1px solid ${fontcolor}`,
-  //     transition: "border-color 0.15s ease-in-out",
-  //     "&:hover": {
-  //       borderColor: state.isFocused ? base.borderColor : "black",
-  //     },
-  //     padding: "0 8px",
-  //     display: "flex",
-  //     alignItems: "center",
-  //     justifyContent: "space-between",
-  //   }),
-  //   dropdownIndicator: (base) => ({
-  //     ...base,
-  //     padding: 0,
-  //     marginTop: "-5px",
-  //     fontSize: "18px",
-  //     display: "flex",
-  //     textAlign: "center !important",
-  //   }),
-  //   singleValue: (base) => ({
-  //     ...base,
-  //     marginTop: "-5px",
-  //     textAlign: "left",
-  //     color: fontcolor,
-  //   }),
-  //   clearIndicator: (base) => ({
-  //     ...base,
-  //     marginTop: "-5px",
-  //   }),
-  // });
-
+ 
   const DropdownOption = (props) => {
     return (
       <components.Option {...props}>
@@ -500,7 +444,7 @@ export default function ItemList() {
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 250,
+      width: 280,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -2251,7 +2195,7 @@ doc.setFont("verdana-regular", "normal");
                     onKeyDown={(e) => handleKeyPress(e, input6Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{

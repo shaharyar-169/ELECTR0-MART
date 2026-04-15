@@ -446,9 +446,10 @@ export default function ItemSaleSummaryReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-      // code: "NASIRTRD",
+
+      // code: "MULTITRD",
       // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+      // FYerDsc: "2025-2026",
     }).toString();
 
     axios
@@ -491,9 +492,9 @@ export default function ItemSaleSummaryReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+    //  code: "MULTITRD",
+    //   FLocCod: "001",
+    //   FYerDsc: "2025-2026",
     }).toString();
 
     axios
@@ -537,9 +538,9 @@ export default function ItemSaleSummaryReport() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-      // code: "NASIRTRD",
+      //  code: "MULTITRD",
       // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+      // FYerDsc: "2025-2026",
     }).toString();
 
     axios
@@ -1872,9 +1873,16 @@ export default function ItemSaleSummaryReport() {
           ? "55px"
           : "",
   };
-  const secondColWidth = {
-    width: "360px",
+
+   const secondColWidth = {
+    width:
+      activeIndex === 0
+        ? "360px"
+        : activeIndex === 1 || activeIndex === 2
+          ? "415px"
+          : "",
   };
+ 
   const thirdColWidth = {
     width: "80px",
   };
@@ -2056,7 +2064,7 @@ export default function ItemSaleSummaryReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "790px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2781,8 +2789,8 @@ export default function ItemSaleSummaryReport() {
                       id="searchsubmit"
                       placeholder={
                         activeIndex === 1
-                          ? "Category description"
-                          : "Company description"
+                          ? "Search"
+                          : "Search"
                       }
                       value={
                         activeIndex === 1
@@ -3121,7 +3129,7 @@ export default function ItemSaleSummaryReport() {
                       onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                       type="text"
                       id="searchsubmit"
-                      placeholder="Item description"
+                      placeholder="Search"
                       value={searchQuery}
                       autoComplete="off"
                       style={{
@@ -3179,7 +3187,6 @@ export default function ItemSaleSummaryReport() {
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: getdatafontsize,
@@ -3234,19 +3241,17 @@ export default function ItemSaleSummaryReport() {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "36vh",
-                // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+               
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
-                  position: "relative",
+                width: "100%",
+                position: "relative",
+                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -3359,13 +3364,19 @@ export default function ItemSaleSummaryReport() {
                               >
                                 {item.code}
                               </td>
-                              <td
-                                td
-                                className="text-start"
-                                style={secondColWidth}
-                              >
-                                {item.Description}
-                              </td>
+                              
+                            <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
                               <td className="text-end" style={thirdColWidth}>
                                 {item.Rate}
                               </td>

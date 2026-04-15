@@ -1356,7 +1356,16 @@ export default function PayableReport() {
                     {item.code}
                   </td>
 
-                  <td className="text-start" style={secondColWidth}>
+                  <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {item.Description}
                   </td>
                   <td className="text-end" style={thirdColWidth}>
@@ -1451,7 +1460,7 @@ export default function PayableReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "855px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2078,9 +2087,9 @@ export default function PayableReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  //   width: "100%",
-                  tableLayout: "fixed", // FIXED!
-                  overflowY: "scroll",
+                  width: "100%",
+                                    position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody" style={{ overflowY: "scroll" }}>

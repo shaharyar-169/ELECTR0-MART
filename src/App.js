@@ -223,6 +223,7 @@ import AmericanReceivableReport from "./Component/Reports/Daily_Jobs_Reports/Mis
 import MissingSerialNoReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/MissingSerialNo.js";
 import ExpenseReport2 from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ExpenseReport2.js";
 import ProjectComparisonReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ProjectComparisonReport.js";
+import AmericanReceivableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableAgging.js";
 
 /////////////////////////////// FINANCIAL REPORT /////////////////////////////
 import TrailBalanceReport from "./Component/Reports/FinancialReports/TrailBalanceREport.js";
@@ -442,6 +443,7 @@ function App() {
                 <Route exact path="/AmericanReceiable" element={<AmericanReceivableReport />} />
                 <Route exact path="/MissingSerialNumber" element={<MissingSerialNoReport />} />
                 <Route exact path="/ProjectComparison" element={<ProjectComparisonReport />} />
+                <Route exact path="/AmericanReceivableAgging" element={<AmericanReceivableAggingReport />} />
 
 
                 {/* ROUTES FOR EMPLOYEE REPORT */}

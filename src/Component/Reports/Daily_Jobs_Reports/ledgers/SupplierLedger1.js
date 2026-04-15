@@ -30,6 +30,7 @@ export default function SupplierLedger1() {
     const input1Ref = useRef(null);
     const input2Ref = useRef(null);
     const input3Ref = useRef(null);
+     const hasFetchedForSession = useRef(false);
 
     // Add this at the top of your component
     const hasInitialized = useRef(false);
@@ -42,7 +43,7 @@ export default function SupplierLedger1() {
 
       const [isCodeReady, setIsCodeReady] = useState(false);
     const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
-
+     const [sessionCode, setSessionCode] = useState(null);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [transectionType, settransectionType] = useState("");
@@ -290,7 +291,7 @@ export default function SupplierLedger1() {
         }
     };
 
-    function fetchReceivableReport() {
+    function fetchReceivableReport(codeParam) {
         const fromDateElement = document.getElementById("fromdatevalidation");
         const toDateElement = document.getElementById("todatevalidation");
 
@@ -408,13 +409,14 @@ export default function SupplierLedger1() {
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
             FTrnTyp: transectionType,
-            FAccCod: saleType,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
-            code: 'NASIRTRD',
-            FLocCod: '001',
-            FYerDsc: '2024-2024',
+            FAccCod: codeParam,
+            // FAccCod: saleType,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
+            // code: 'NASIRTRD',
+            // FLocCod: '001',
+            // FYerDsc: '2024-2024',
             FSchTxt: searchQuery
         }).toString();
 
@@ -502,10 +504,10 @@ export default function SupplierLedger1() {
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveSupplier.php";
         const formData = new URLSearchParams({
-            // FLocCod: locationnumber || getLocationNumber,
-            // code: organisation.code,
-              code: 'NASIRTRD',
-            FLocCod: '001',
+            FLocCod: locationnumber || getLocationNumber,
+            code: organisation.code,
+            //   code: 'NASIRTRD',
+            // FLocCod: '001',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -523,78 +525,73 @@ export default function SupplierLedger1() {
         label: `${item.tacccod}-${item.taccdsc.trim()}`,
     }));
 
-    
-    
-    useEffect(() => {
-      if (options.length === 0) return;
-      if (isItemInitialized) return;
-    
-      const storedData = sessionStorage.getItem("SupplierLedgerData");
-      let selectedOption = null;
-    
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        const clickedCode = parsedData.code?.trim();
-     if (parsedData.code) {
-        setIsDoubleClickOpen(true); // ✅ ADD
-      }
-        selectedOption = options.find(
-          (opt) => opt.value?.trim() === clickedCode
-        );
-    
-        sessionStorage.removeItem("SupplierLedgerData");
-      }
-    
-      if (!selectedOption) {
-        selectedOption = options[0];
-      }
-    
-      if (selectedOption) {
-        setSaleType(selectedOption.value);
-    
-        const description =
-          selectedOption.label.split("-").slice(1).join("-").trim();
-    
-        setCompanyselectdatavalue({
-          value: selectedOption.value,
-          label: description,
-        });
-    
-        setIsCodeReady(true); // ✅ IMPORTANT
-      }
-    
-      setIsItemInitialized(true);
-    }, [options, isItemInitialized]);
-    
-    useEffect(() => {
-      // 🔥 Dono cheezain ready hon
-      if (isDoubleClickOpen && isCodeReady) {
-        fetchReceivableReport();
-      }
-    }, [isDoubleClickOpen, isCodeReady]);
+  
+        useEffect(() => {
+  const storedData = sessionStorage.getItem("SupplierLedgerData");
+
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+    const code = parsedData.code?.trim();
+
+    if (code) {
+      setSessionCode(code);
+      setSaleType(code); //  direct set
+      setIsDoubleClickOpen(true);
+    }
+
+    sessionStorage.removeItem("SupplierLedgerData");
+  }
+}, []);
 
 
+useEffect(() => {
+  if (options.length === 0) return;
+  if (isItemInitialized) return;
 
-    // useEffect(() => {
-    //     if (isOptionsLoaded && options.length > 0 && !saleType && !hasInitialized.current) {
-    //         const firstOption = options[0];
-    //         setSaleType(firstOption.value);
+  let selectedOption = null;
 
-    //         const fullLabel = firstOption.label;
-    //         const description = fullLabel.split('-').pop()?.trim();
+  // ❌ Agar sessionCode hai to find NA karo
+  if (!sessionCode) {
+    selectedOption = options[0]; // normal flow
+  }
 
-    //         setCompanyselectdatavalue({
-    //             value: firstOption.value,
-    //             label: description,
-    //             fullLabel: fullLabel
-    //         });
+  if (selectedOption) {
+    setSaleType(selectedOption.value);
 
-    //         // Mark as initialized
-    //         hasInitialized.current = true;
-    //     }
-    // }, [isOptionsLoaded, options, saleType]);
+    const description = selectedOption.label
+      .split("-")
+      .slice(1)
+      .join("-")
+      .trim();
 
+    setCompanyselectdatavalue({
+      value: selectedOption.value,
+      label: description,
+    });
+  }
 
+  setIsCodeReady(true);
+  setIsItemInitialized(true);
+}, [options, isItemInitialized, sessionCode]);
+
+useEffect(() => {
+  // ✅ Session mode: fetch only once
+  if (sessionCode) {
+    if (!hasFetchedForSession.current) {
+      fetchReceivableReport(sessionCode);
+      hasFetchedForSession.current = true;
+    }
+    return;
+  }
+
+  // Reset ref when sessionCode becomes falsy (normal mode)
+  hasFetchedForSession.current = false;
+
+  // ✅ Normal flow: fetch only when both conditions are ready
+  if (isCodeReady && saleType) {
+    fetchReceivableReport(saleType);
+  }
+}, [sessionCode, isCodeReady, saleType]);
 
     const DropdownOption = (props) => {
         return (
@@ -1770,50 +1767,65 @@ const isMatchedRow = (item) => {
                                     </label>
                                 </div>
                                 <div style={{ marginLeft: "5px" }}>
-                                    <Select
-                                        className="List-select-class"
-                                        ref={saleSelectRef}
-                                        options={options}
-                                        value={options.find(opt => opt.value === saleType) || null} // Ensure correct reference
-                                        isDisabled={isDoubleClickOpen}
-                                        onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                                        id="selectedsale"
-                                        onChange={(selectedOption) => {
-                                            if (selectedOption && selectedOption.value) {
-                                                const labelParts = selectedOption.label.split("-"); // Split by "-"
-                                                const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
-
-                                                setSaleType(selectedOption.value);
-                                                setCompanyselectdatavalue({
-                                                    value: selectedOption.value,
-                                                    label: description, // Keep only the description
-
-                                                });
-                                            } else {
-                                                setSaleType("");
-                                                setCompanyselectdatavalue('')
-                                            }
-                                        }}
-                                        onInputChange={(inputValue, { action }) => {
-                                            if (action === "input-change") {
-                                                return inputValue.toUpperCase();
-                                            }
-                                            return inputValue;
-                                        }}
-                                        components={{ Option: DropdownOption }}
-                                        styles={{
-                                            ...customStyles1(!saleType),
-                                            placeholder: (base) => ({
-                                                ...base,
-                                                textAlign: "left",
-                                                marginLeft: "0",
-                                                justifyContent: "flex-start",
-                                                color: fontcolor,
-                                                marginTop: '-5px'
-                                            })
-                                        }}
-                                        // isClearable
-                                        // placeholder="ALL"
+                                   
+                                             <Select
+                                      className="List-select-class"
+                                      ref={saleSelectRef}
+                                      options={options}
+                                        // 🔥 Optimized value (no heavy find if sessionCode exists)
+                                      value={
+                                        sessionCode
+                                          ? { value: sessionCode, label: sessionCode } // 👈 direct (fast)
+                                          : options.find((opt) => opt.value === saleType) || null
+                                      }
+                                      isDisabled={isDoubleClickOpen}
+                                      onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
+                                      id="selectedsale"
+                                    
+                                      onChange={(selectedOption) => {
+                                        if (selectedOption && selectedOption.value) {
+                                          const labelParts = selectedOption.label.split("-");
+                                          const description = labelParts.slice(3).join("-");
+                                    
+                                          setSaleType(selectedOption.value);
+                                    
+                                          setCompanyselectdatavalue({
+                                            value: selectedOption.value,
+                                            label: description,
+                                          });
+                                    
+                                          // 🔥 agar user manually change kare to session mode off
+                                          setSessionCode(null);
+                                        } else {
+                                          setSaleType("");
+                                          setCompanyselectdatavalue("");
+                                          setSessionCode(null);
+                                        }
+                                      }}
+                                    
+                                      onInputChange={(inputValue, { action }) => {
+                                        if (action === "input-change") {
+                                          return inputValue.toUpperCase();
+                                        }
+                                        return inputValue;
+                                      }}
+                                    
+                                      components={{ Option: DropdownOption }}
+                                    
+                                      styles={{
+                                        ...customStyles1(!saleType),
+                                        placeholder: (base) => ({
+                                          ...base,
+                                          textAlign: "left",
+                                          marginLeft: "0",
+                                          justifyContent: "flex-start",
+                                          color: fontcolor,
+                                          marginTop: "-5px",
+                                        }),
+                                      }}
+                                    
+                                    //   isClearable
+                                    //   placeholder="ALL"
                                     />
                                 </div>
                             </div>

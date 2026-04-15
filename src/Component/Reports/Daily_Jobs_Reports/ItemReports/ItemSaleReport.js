@@ -427,9 +427,9 @@ export default function ItemSaleReport() {
       // FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
 
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+       code: 'MULTITRD',
+      FLocCod: '001',
+      FYerDsc: '2025-2026',
     }).toString();
 
     axios
@@ -1644,36 +1644,6 @@ export default function ItemSaleReport() {
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
 
   const firstColWidth = {
     width: "80px",
@@ -1691,10 +1661,10 @@ export default function ItemSaleReport() {
     width: "40px",
   };
   const seventhColWidth = {
-    width: "60px",
+    width: "70px",
   };
   const eightColWidth = {
-    width: "100px",
+    width: "80px",
   };
   const ninthColWidth = {
     width: "100px",
@@ -1740,7 +1710,7 @@ export default function ItemSaleReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "855px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2652,7 +2622,7 @@ export default function ItemSaleReport() {
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -2775,19 +2745,17 @@ export default function ItemSaleReport() {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "40vh",
-                // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+               
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
-                  position: "relative",
+                width: "100%",
+                position: "relative",
+                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -2855,18 +2823,27 @@ export default function ItemSaleReport() {
                               color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            <td className="text-start" style={firstColWidth}>
+                            <td className="text-center" style={firstColWidth}>
                               {item.Date}
                             </td>
-                            <td className="text-start" style={secondColWidth}>
+                            <td className="text-center" style={secondColWidth}>
                               {item["Trn#"]}
                             </td>
                             <td className="text-center" style={thirdColWidth}>
                               {item.Type}
                             </td>
-                            <td className="text-start" style={forthColWidth}>
-                              {item.Description}
-                            </td>
+                            <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...forthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
                             <td className="text-end" style={sixthColWidth}>
                               {item.Store}
                             </td>

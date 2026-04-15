@@ -408,12 +408,12 @@ export default function CustomerLedgerReport() {
              FFnlDat: toInputDate,
              FTrnTyp: transectionType,
              FAccCod: codeParam,
-            //  code: organisation.code,
-            //  FLocCod: locationnumber || getLocationNumber,
-            //  FYerDsc: yeardescription || getyeardescription,
-             code: 'NASIRTRD',
-             FLocCod: '001',
-             FYerDsc: '2024-2024',
+             code: organisation.code,
+             FLocCod: locationnumber || getLocationNumber,
+             FYerDsc: yeardescription || getyeardescription,
+            //  code: 'NASIRTRD',
+            //  FLocCod: '001',
+            //  FYerDsc: '2024-2024',
              FSchTxt: searchQuery
          }).toString();
  
@@ -501,10 +501,10 @@ export default function CustomerLedgerReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomer.php";
     const formData = new URLSearchParams({
-      // FLocCod: getLocationNumber,
-      // code: organisation.code,
-      FLocCod: "001",
-      code: "NASIRTRD",
+      FLocCod: getLocationNumber,
+      code: organisation.code,
+      // FLocCod: "001",
+      // code: "NASIRTRD",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -521,102 +521,55 @@ export default function CustomerLedgerReport() {
   }));
 
 
-  useEffect(() => {
-  if (options.length === 0) return;
-  if (isItemInitialized) return;
 
-  let selectedOption = null;
-
-  // ❌ Agar sessionCode hai to find NA karo
-  if (!sessionCode) {
-    selectedOption = options[0]; // normal flow
-  }
-
-  if (selectedOption) {
-    setSaleType(selectedOption.value);
-
-    const description = selectedOption.label
-      .split("-")
-      .slice(1)
-      .join("-")
-      .trim();
-
-    setCompanyselectdatavalue({
-      value: selectedOption.value,
-      label: description,
-    });
-  }
-
-  setIsCodeReady(true);
-  setIsItemInitialized(true);
-}, [options, isItemInitialized, sessionCode]);
-
-useEffect(() => {
-  // ✅ Session mode: fetch only once
-  if (sessionCode) {
-    if (!hasFetchedForSession.current) {
-      fetchReceivableReport(sessionCode);
-      hasFetchedForSession.current = true;
-    }
-    return;
-  }
-
-  // Reset ref when sessionCode becomes falsy (normal mode)
-  hasFetchedForSession.current = false;
-
-  // ✅ Normal flow: fetch only when both conditions are ready
-  if (isCodeReady && saleType) {
-    fetchReceivableReport(saleType);
-  }
-}, [sessionCode, isCodeReady, saleType]);
   
-//  useEffect(() => {
-//         if (options.length === 0) return;
-//         if (isItemInitialized) return;
+ useEffect(() => {
+        if (options.length === 0) return;
+        if (isItemInitialized) return;
       
-//         const storedData = sessionStorage.getItem("CustomerLedgerData");
-//         let selectedOption = null;
+        const storedData = sessionStorage.getItem("CustomerLedgerData");
+        let selectedOption = null;
       
-//         if (storedData) {
-//           const parsedData = JSON.parse(storedData);
-//           const clickedCode = parsedData.code?.trim();
-//        if (parsedData.code) {
-//           setIsDoubleClickOpen(true); // ✅ ADD
-//         }
-//           selectedOption = options.find(
-//             (opt) => opt.value?.trim() === clickedCode
-//           );
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          const clickedCode = parsedData.code?.trim();
+       if (parsedData.code) {
+          setIsDoubleClickOpen(true); // ✅ ADD
+        }
+          selectedOption = options.find(
+            (opt) => opt.value?.trim() === clickedCode
+          );
       
-//           sessionStorage.removeItem("CustomerLedgerData");
-//         }
+          sessionStorage.removeItem("CustomerLedgerData");
+        }
       
-//         if (!selectedOption) {
-//           selectedOption = options[0];
-//         }
+        if (!selectedOption) {
+          selectedOption = options[0];
+        }
       
-//         if (selectedOption) {
-//           setSaleType(selectedOption.value);
+        if (selectedOption) {
+          setSaleType(selectedOption.value);
       
-//           const description =
-//             selectedOption.label.split("-").slice(1).join("-").trim();
+          const description =
+            selectedOption.label.split("-").slice(1).join("-").trim();
       
-//           setCompanyselectdatavalue({
-//             value: selectedOption.value,
-//             label: description,
-//           });
+          setCompanyselectdatavalue({
+            value: selectedOption.value,
+            label: description,
+          });
       
-//           setIsCodeReady(true); // ✅ IMPORTANT
-//         }
+          setIsCodeReady(true); // ✅ IMPORTANT
+        }
       
-//         setIsItemInitialized(true);
-//     }, [options, isItemInitialized]);
+        setIsItemInitialized(true);
+    }, [options, isItemInitialized]);
    
-//       useEffect(() => {
-//         // 🔥 Dono cheezain ready hon
-//         if (isDoubleClickOpen && isCodeReady) {
-//           fetchReceivableReport();
-//         }
-//       }, [isDoubleClickOpen, isCodeReady]);
+      useEffect(() => {
+        // 🔥 Dono cheezain ready hon
+        if (isDoubleClickOpen && isCodeReady) {
+          fetchReceivableReport();
+        }
+      }, [isDoubleClickOpen, isCodeReady]);
       
      
 
@@ -2188,7 +2141,7 @@ const formatValue = (val) => {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
