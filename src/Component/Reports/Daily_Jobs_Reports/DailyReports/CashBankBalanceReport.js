@@ -389,9 +389,9 @@ export default function DailyCashBankBalance() {
       FFnlDat: toInputDate,
       FSchTxt: searchQuery,
       FRepTyp: transectionType,
-      code: "NASIRTRD",
-      FLocCod: "001",
-      FYerDsc: "2024-2024",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+      // FYerDsc: "2024-2024",
     }).toString();
 
     axios
@@ -1180,16 +1180,16 @@ doc.setFont("verdana-regular", "normal");
     width: "360px",
   };
   const thirdColWidth = {
-    width: "90px",
+    width: "100px",
   };
   const forthColWidth = {
-    width: "90px",
+    width: "100px",
   };
   const fifthColWidth = {
-    width: "90px",
+    width: "100px",
   };
   const sixthColWidth = {
-    width: "90px",
+    width: "100px",
   };
 
   const sixthcol = {
@@ -1351,7 +1351,7 @@ doc.setFont("verdana-regular", "normal");
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "815px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1753,7 +1753,6 @@ doc.setFont("verdana-regular", "normal");
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: getdatafontsize,
@@ -1860,7 +1859,6 @@ doc.setFont("verdana-regular", "normal");
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "52vh",
-                // width: "100%",
                 wordBreak: "break-word",
               }}
             >
@@ -1870,7 +1868,7 @@ doc.setFont("verdana-regular", "normal");
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  //  width: "100%",
+                   width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}

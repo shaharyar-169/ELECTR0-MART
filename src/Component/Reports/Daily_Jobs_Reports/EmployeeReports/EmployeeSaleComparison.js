@@ -500,10 +500,10 @@ export default function EmployeeSaleComparisonReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveEmployee.php";
     const formData = new URLSearchParams({
-      //    code: organisation.code,
-      //     FLocCod: locationnumber || getLocationNumber,
-      code: "NASIRTRD",
-      FLocCod: "001",
+         code: organisation.code,
+          FLocCod: locationnumber || getLocationNumber,
+      // code: "NASIRTRD",
+      // FLocCod: "001",
     }).toString();
     axios
       .post(apiUrl, formData)

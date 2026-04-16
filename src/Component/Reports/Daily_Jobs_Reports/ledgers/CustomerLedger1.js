@@ -289,7 +289,7 @@ export default function CustomerLedgerReport() {
     }
   };
 
- function fetchReceivableReport(codeParam) {
+ function fetchReceivableReport() {
          const fromDateElement = document.getElementById("fromdatevalidation");
          const toDateElement = document.getElementById("todatevalidation");
  
@@ -407,13 +407,13 @@ export default function CustomerLedgerReport() {
              FIntDat: fromInputDate,
              FFnlDat: toInputDate,
              FTrnTyp: transectionType,
-             FAccCod: codeParam,
-             code: organisation.code,
-             FLocCod: locationnumber || getLocationNumber,
-             FYerDsc: yeardescription || getyeardescription,
-            //  code: 'NASIRTRD',
-            //  FLocCod: '001',
-            //  FYerDsc: '2024-2024',
+             FAccCod: saleType,
+            //  code: organisation.code,
+            //  FLocCod: locationnumber || getLocationNumber,
+            //  FYerDsc: yeardescription || getyeardescription,
+             code: 'NASIRTRD',
+             FLocCod: '001',
+             FYerDsc: '2024-2024',
              FSchTxt: searchQuery
          }).toString();
  
@@ -501,10 +501,10 @@ export default function CustomerLedgerReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomer.php";
     const formData = new URLSearchParams({
-      FLocCod: getLocationNumber,
-      code: organisation.code,
-      // FLocCod: "001",
-      // code: "NASIRTRD",
+      // FLocCod: getLocationNumber,
+      // code: organisation.code,
+      FLocCod: "001",
+      code: "NASIRTRD",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -519,7 +519,6 @@ export default function CustomerLedgerReport() {
     value: item.tacccod,
     label: `${item.tacccod}-${item.taccdsc.trim()}`,
   }));
-
 
 
   

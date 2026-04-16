@@ -498,10 +498,10 @@ export default function EmployeeSaleReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveEmployee.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      code : 'NASIRTRD',
-      FLocCod:'001'
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      // code : 'NASIRTRD',
+      // FLocCod:'001'
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -2752,7 +2752,7 @@ doc.setFont('verdana-regular', "normal");
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{

@@ -404,13 +404,13 @@ export default function ReceivableReport() {
     const apiUrl = apiLinks + "/ReceivableReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-         FLocCod: "001",
-      FYerDsc: "2024-2024",
-      code: 'NASIRTRD',
+      //    FLocCod: "001",
+      // FYerDsc: "2024-2024",
+      // code: 'NASIRTRD',
      
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
-      // code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
       FAccCod:saleType,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
@@ -1613,7 +1613,16 @@ export default function ReceivableReport() {
                     {item.code}
                   </td>
 
-                  <td className="text-start" style={secondColWidth}>
+                   <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {item.Description}
                   </td>
                   <td className="text-end" style={thirdColWidth}>
@@ -1708,7 +1717,7 @@ export default function ReceivableReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "855px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2294,7 +2303,6 @@ export default function ReceivableReport() {
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: parseInt(getdatafontsize),
@@ -2407,14 +2415,13 @@ export default function ReceivableReport() {
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  //   width: "100%",
-                  tableLayout: "fixed", // FIXED!
-                  overflowY: "scroll",
+                  width: "100%",
+                                    position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody" style={{ overflowY: "scroll" }}>

@@ -444,7 +444,7 @@ export default function ItemList() {
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 280,
+      width: 300,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -2053,7 +2053,7 @@ doc.setFont("verdana-regular", "normal");
     value={transectionType}
     onChange={handleTransactionTypeChange}
     style={{
-      width: "250px",
+      width: "300px",
       height: "24px",
       marginLeft: "5px",
       backgroundColor: getcolor,
@@ -2200,7 +2200,7 @@ doc.setFont("verdana-regular", "normal");
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "250px",
+                      width: "330px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
