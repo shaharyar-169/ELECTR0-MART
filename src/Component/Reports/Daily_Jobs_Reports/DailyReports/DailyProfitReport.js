@@ -40,9 +40,10 @@ export default function DailyProfitReport() {
     const [Profits, setProfits] = useState([]);
     const [Expenses, setExpenses] = useState([]);
 
-    console.log('Profits array data', Profits)
-    console.log('Expenses array data', Expenses)
+   
 
+        const [isCodeReady, setIsCodeReady] = useState(false);
+          const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
@@ -418,9 +419,9 @@ export default function DailyProfitReport() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
 
-            // code: 'NASIRTRD',
+            // code: 'SATZTRD',
             // FLocCod: '001',
-            // FYerDsc: '2024-2024',
+            // FYerDsc: '2025-2026',
 
             FSchTxt: searchQuery
         }).toString();
@@ -489,21 +490,60 @@ export default function DailyProfitReport() {
         }
     }, []);
 
-    useEffect(() => {
-        const currentDate = new Date();
-        setSelectedToDate(currentDate);
-        settoInputDate(formatDate(currentDate));
-
-        const firstDateOfCurrentMonth = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            1
-        );
-        setSelectedfromDate(firstDateOfCurrentMonth);
-        setfromInputDate(formatDate(firstDateOfCurrentMonth));
-    }, []);
+   
 
 
+useEffect(() => {
+
+  // Get date from URL query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const dateParam = urlParams.get("date");
+
+  let toDate;
+  let isDoubleClick = false;   // local flag
+
+  if (dateParam) {
+    const parts = dateParam.split("-");
+    if (parts.length === 3) {
+      toDate = new Date(parts[2], parts[1] - 1, parts[0]);
+      isDoubleClick = true;    // ✅ opened via double-click
+    }
+  }
+
+  // Fallback to current date
+  if (!toDate || isNaN(toDate.getTime())) {
+    toDate = new Date();
+    isDoubleClick = false;     // normal load, not from double-click
+  }
+
+  // Set the to-date
+  setSelectedToDate(toDate);
+  settoInputDate(formatDate(toDate));
+
+  // Set from-date as first day of the same month
+  const firstDateOfMonth = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+  setSelectedfromDate(firstDateOfMonth);
+  setfromInputDate(formatDate(firstDateOfMonth));
+
+  // ✅ Set the double-click flag AFTER all state updates are scheduled
+  setIsDoubleClickOpen(isDoubleClick);
+
+  // ✅ Mark that the code (dates) is ready
+  //    Use setTimeout to ensure React finishes updating state before marking ready
+  setTimeout(() => {
+    setIsCodeReady(true);
+  }, 0);
+}, []);
+
+
+const hasFetched = useRef(false);
+
+useEffect(() => {
+  if (isDoubleClickOpen && isCodeReady && !hasFetched.current) {
+    hasFetched.current = true;
+    fetchReceivableReport();
+  }
+}, [isDoubleClickOpen, isCodeReady]);
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -1528,24 +1568,7 @@ export default function DailyProfitReport() {
         setSelectedRadio(days === 0 ? "custom" : `${days}days`);
     };
 
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(formatDate(firstDateOfCurrentMonth));
-            setSelectedToDate(currentDate);
-            settoInputDate(formatDate(currentDate));
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
-            handleRadioChange(days);
-        }
-    }, [selectedRadio]);
-
+  
     return (
         <>
             <ToastContainer />
