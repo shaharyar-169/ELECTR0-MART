@@ -1371,9 +1371,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
     const secondColWidth = {
         width: "55px",
     };
-    const thirdColWidth = {
-        width: "40px",
-    };
+  
     const forthColWidth = {
         width: "90px",
     };
@@ -1381,19 +1379,19 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         width: "70px",
     };
     const sixthColWidth = {
-        width: "300px",
+        width: "350px",
     };
     const seventhColWidth = {
         width: "40px",
     };
     const eighthColWidth = {
-        width: "85px",
+        width: "100px",
     };
     const ninhthColWidth = {
-        width: "85px",
+        width: "100px",
     };
     const tenthColWidth = {
-        width: "85px",
+        width: "100px",
     };
         const sixColWidth = {
         width: "8px",

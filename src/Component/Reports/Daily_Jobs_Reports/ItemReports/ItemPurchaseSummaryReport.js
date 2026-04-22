@@ -852,156 +852,180 @@ const exportPDFHandler = () => {
       });
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5;
-      const fontSize = 10;
-      const boldFont = 400;
-      const normalFont = getfontstyle;
-      const tableWidth = getTotalTableWidth();
+      const addTableRows = (startX, startY, startIndex, endIndex) => {
+  const lineHeight = 4;
+  const tableWidth = getTotalTableWidth();
+  const pageHeight = doc.internal.pageSize.height;
 
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0;
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-        const isTotalRow = i === rows.length - 1;
-        let textColor = [0, 0, 0];
-        let fontName = normalFont;
+  const footerReserve = 30;
 
-        if (isRedRow) {
-          textColor = [255, 0, 0];
-          fontName = boldFont;
-        }
+  let currentY = startY;
 
-        if (isTotalRow) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-        }
+  for (let i = startIndex; i < endIndex; i++) {
+    let row = [...rows[i]];
 
-        if (isOddRow) {
-          doc.setFillColor(240);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F",
-          );
-        }
+    const isOddRow = i % 2 !== 0;
+    const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+    const isTotalRow = i === rows.length - 1;
 
-        doc.setDrawColor(0);
+    let textColor = [0, 0, 0];
 
-        if (isTotalRow) {
-          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-          const rowBottomY = rowTopY + rowHeight;
+    if (isRedRow) {
+      textColor = [255, 0, 0];
+    }
 
-          doc.setLineWidth(0.3);
-          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+    // ✅ SMART WRAP FIX
+    const splitRow = row.map((cell, idx) => {
+      const text = String(cell).trim();
+      const maxWidth = columnWidths[idx] - 4;
 
-          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-          doc.line(
-            startX,
-            rowBottomY - 0.5,
-            startX + tableWidth,
-            rowBottomY - 0.5,
-          );
+      const textWidth =
+        (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
+        doc.internal.scaleFactor;
 
-          doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY);
-          doc.line(
-            startX + tableWidth,
-            rowTopY,
-            startX + tableWidth,
-            rowBottomY,
-          );
-        } else {
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-          );
-        }
-
-        row.forEach((cell, cellIndex) => {
-          // ⭐ NEW FIX — Perfect vertical centering
-          const cellY =
-            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
-
-          const cellX = startX + 2;
-
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-          if (!isTotalRow) {
-            doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-          }
-
-          const cellValue = String(cell);
-
-          if (cellIndex === 10 ) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
-            cellIndex === 4
-          ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = startX + columnWidths[0] / 2;
-              doc.text("", totalLabelX, cellY, {
-                align: "center",
-                baseline: "middle",
-              });
-            } else {
-              doc.text(cellValue, cellX, cellY, {
-                baseline: "middle",
-              });
-            }
-          }
-
-          if (cellIndex < row.length - 1) {
-            doc.setLineWidth(0.2);
-            doc.line(
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 2) * rowHeight,
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight,
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
-
-        startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
-        if (isTotalRow) {
-          doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-        }
+      if (textWidth <= maxWidth) {
+        return [text];
       }
 
+      return doc.splitTextToSize(text, maxWidth);
+    });
+
+    const maxLines = Math.max(...splitRow.map((c) => c.length));
+    const rowHeight = maxLines * lineHeight + 2;
+
+    // 🔥 PAGE BREAK CHECK
+    if (currentY + rowHeight > pageHeight - footerReserve) {
+      // footer
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
+
       doc.setLineWidth(0.3);
       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 11;
+
       const headingX = lineX + 2;
       const headingY = lineY + 5;
+
       doc.setFont("verdana-regular", "normal");
       doc.setFontSize(10);
       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-    };
+
+      // 🔥 FIX: total row ko next page pe force render
+      if (isTotalRow) {
+        doc.addPage();
+        currentY = paddingTop;
+        i--; // 🔥 reprocess same row
+        continue;
+      }
+
+      return {
+        startX,
+        startY: currentY,
+        breakPage: true,
+      };
+    }
+
+    // row background
+    if (isOddRow) {
+      doc.setFillColor(240);
+      doc.rect(startX, currentY, tableWidth, rowHeight, "F");
+    }
+
+    doc.setDrawColor(0);
+
+    // total row styling
+    if (isTotalRow) {
+      const topY = currentY;
+      const bottomY = currentY + rowHeight;
+
+      doc.setFont("verdana", "bold");
+
+      doc.setLineWidth(0.3);
+      doc.line(startX, topY, startX + tableWidth, topY);
+      doc.line(startX, topY + 0.5, startX + tableWidth, topY + 0.5);
+
+      doc.line(startX, bottomY, startX + tableWidth, bottomY);
+      doc.line(startX, bottomY - 0.5, startX + tableWidth, bottomY - 0.5);
+
+      doc.setLineWidth(0.2);
+      doc.line(startX, topY, startX, bottomY);
+      doc.line(startX + tableWidth, topY, startX + tableWidth, bottomY);
+    } else {
+      doc.setLineWidth(0.2);
+      doc.rect(startX, currentY, tableWidth, rowHeight);
+      doc.setFont("verdana-regular", "normal");
+    }
+
+    let currentX = startX;
+
+    splitRow.forEach((textArray, cellIndex) => {
+      const cellWidth = columnWidths[cellIndex];
+
+      doc.setTextColor(...textColor);
+      doc.setFontSize(10);
+
+      const textY =
+        currentY +
+        (rowHeight - textArray.length * lineHeight) / 2 +
+        lineHeight - 1;
+
+     if (cellIndex > 1) {
+  // 🔥 RIGHT ALIGN
+  doc.text(textArray, currentX + cellWidth - 2, textY, {
+    align: "right",
+  });
+
+} else if (cellIndex === 10) {
+  // 🔥 CENTER ALIGN
+  doc.text(textArray, currentX + cellWidth / 2, textY, {
+    align: "center",
+  });
+
+} else {
+  // 🔥 LEFT ALIGN (default)
+  doc.text(textArray, currentX + 2, textY);
+}
+
+      if (cellIndex < splitRow.length - 1) {
+        doc.line(
+          currentX + cellWidth,
+          currentY,
+          currentX + cellWidth,
+          currentY + rowHeight
+        );
+      }
+
+      currentX += cellWidth;
+    });
+
+    currentY += rowHeight;
+
+    if (isTotalRow) {
+      doc.setFont("verdana-regular", "normal");
+    }
+  }
+
+  // 🔥 LAST PAGE FOOTER
+  const lineWidth = tableWidth;
+  const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+  const lineY = pageHeight - 15;
+
+  doc.setLineWidth(0.3);
+  doc.line(lineX, lineY, lineX + lineWidth, lineY);
+
+  const headingX = lineX + 2;
+  const headingY = lineY + 5;
+
+  doc.setFont("verdana-regular", "normal");
+  doc.setFontSize(10);
+  doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+
+  return {
+    startX,
+    startY: currentY,
+    breakPage: false,
+  };
+};
 
     // Function to calculate total table width
     const getTotalTableWidth = () => {
@@ -1151,7 +1175,7 @@ const exportPDFHandler = () => {
           doc.text(`${search}`, labelsX + 180, labelsY + 8.5); // Draw the value next to the label
         }
 
-        startY += 10; // Adjust vertical position for the labels
+        startY += 20; // Adjust vertical position for the labels
 
         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
         const startIndex = currentPageIndex * rowsPerPage;
@@ -1614,7 +1638,7 @@ const exportPDFHandler = () => {
     width: "100px",
   };
   const forthColWidth = {
-    width: "80px",
+    width: "90px",
   };
   const sixthColWidth = {
     width: "100px",
@@ -1753,7 +1777,7 @@ const exportPDFHandler = () => {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "790px",
+    maxWidth: "800px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2223,7 +2247,7 @@ const exportPDFHandler = () => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata, 300),
+                      ...customStyles1(!Companyselectdata, 320),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2297,7 +2321,7 @@ const exportPDFHandler = () => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata,250),
+                      ...customStyles1(!Companyselectdata,280),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2385,7 +2409,7 @@ const exportPDFHandler = () => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata, 300),
+                      ...customStyles1(!Companyselectdata, 320),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2470,7 +2494,7 @@ const exportPDFHandler = () => {
                     value={transectionType2}
                     onChange={handleTransactionTypeChange2}
                     style={{
-                      width: "250px",
+                      width: "280px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -2577,7 +2601,7 @@ const exportPDFHandler = () => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata, 300),
+                      ...customStyles1(!Companyselectdata, 320),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2616,7 +2640,7 @@ const exportPDFHandler = () => {
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "250px",
+                      width: "280px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,

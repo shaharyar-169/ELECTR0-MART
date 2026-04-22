@@ -281,11 +281,11 @@ export default function InstallmentBalanceReport() {
       FRepDat: toInputDate,
       FColCod: saleType,
       FSchTxt: searchQuery,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
 
-      code: "MTSELEC",
-      FLocCod: "002",
+      // code: "MTSELEC",
+      // FLocCod: "002",
     }).toString();
 
     axios
@@ -352,9 +352,10 @@ export default function InstallmentBalanceReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCollectors.php";
     const formData = new URLSearchParams({
-      // FLocCod: getLocationNumber,
-      code: "MTSELEC",
-      FLocCod: "001",
+  code: organisation.code,
+          FLocCod: locationnumber || getLocationNumber,
+      // code: "MTSELEC",
+      // FLocCod: "001",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -1228,6 +1229,7 @@ doc.setFont('verdana-regular', "normal");
     "alt+s",
     () => {
       fetchGeneralLedger();
+      resetSorting()
     },
     { preventDefault: true, enableOnFormTags: true },
   );
@@ -1343,6 +1345,93 @@ doc.setFont('verdana-regular', "normal");
   const sixCol = {
     width: "8px",
   };
+
+ const [columns, setColumns] = useState({
+    Balance: [],
+
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Balance: "",
+   
+  });
+  // When you receive your initial table data, transform it into column-oriented format
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Balance: tableData.map((row) => row.Balance),
+      
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      let aVal = a[col] ?? "";
+      let bVal = b[col] ?? "";
+
+      aVal = aVal.toString();
+      bVal = bVal.toString();
+
+      // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
+      if (col === "code" || col === "code") {
+        // Reverse strings → compare from right side
+        const revA = aVal.split("").reverse().join("");
+        const revB = bVal.split("").reverse().join("");
+
+        return newOrder === "ASC"
+          ? revA.localeCompare(revB)
+          : revB.localeCompare(revA);
+      }
+
+      // ⭐ Numeric sorting
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // Default → normal string sorting
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Balance: null,
+      Description: null,
+  
+    });
+  };
+
+    const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
+
+
+                     
+
 
   // Adjust the content width based on sidebar state
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1804,8 +1893,16 @@ doc.setFont('verdana-regular', "normal");
                     <td className="border-dark" style={sixthColWidth}>
                       Collection
                     </td>
-                    <td className="border-dark" style={tenthColWidth}>
-                      Balance
+                   <td
+                      className="border-dark"
+                      style={tenthColWidth}
+                      onClick={() => handleSorting("Balance")}
+                    >
+                      Balance{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Balance")}
+                      ></i>
                     </td>
                     <td className="border-dark" style={elewenthColWidth}>
                       Col
@@ -2132,8 +2229,10 @@ doc.setFont('verdana-regular', "normal");
               id="searchsubmit"
               text="SELECT"
               ref={input3Ref}
-              onClick={fetchGeneralLedger}
-            />
+ onClick={() => {
+                fetchGeneralLedger();
+                resetSorting();
+              }}            />
           </div>
         </div>
       </div>
