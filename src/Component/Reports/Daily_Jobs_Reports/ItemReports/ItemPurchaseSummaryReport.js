@@ -424,13 +424,13 @@ export default function ItemPurchaseSummaryReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
-     code: 'MULTITRD',
-      FLocCod: '001',
-      FYerDsc: '2025-2026',
+    //  code: 'MULTITRD',
+    //   FLocCod: '001',
+    //   FYerDsc: '2025-2026',
     }).toString();
 
     axios
@@ -812,7 +812,7 @@ const exportPDFHandler = () => {
       "Qnty",
       "Amount",
     ];
-    const columnWidths = [40, 110,30, 20, 30];
+    const columnWidths = [40, 110,30, 25, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1221,321 +1221,310 @@ const exportPDFHandler = () => {
     doc.save(`ItemPurchaseSummaryReport As On ${date}.pdf`);
   };
 
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
-
-    const numColumns = 5; // Ensure this matches the actual number of columns
-
-    const columnAlignments = ["left", "left", "right", "right", "right"];
-
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-
-    // Add an empty row at the start
-    worksheet.addRow([]);
-
-    // Add company name
-    const companyRow = worksheet.addRow([comapnyname]);
-    companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
-      }`,
-    );
-
-    // Add Store List row
-    const storeListRow = worksheet.addRow([
-      `Item Purchase Summary Report From ${fromInputDate} To ${toInputDate}`,
-    ]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
-      }`,
-    );
-
-    // Add an empty row after the title section
-    worksheet.addRow([]);
-
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
-    let typecapacity = capacityselectdatavalue.label
-      ? capacityselectdatavalue.label
-      : "ALL";
-    let typecategory = categoryselectdatavalue.label
-      ? categoryselectdatavalue.label
-      : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
-      : "ALL ";
-
-    let RATE =
-      transectionType === "P"
-        ? "PURCHASE RATE"
-        : transectionType == "M"
-          ? "SM RATE"
-          : transectionType == "A"
-            ? "AVERAGE RATE"
-            : transectionType == "W"
-              ? "WEIGHTRD AVERAGE"
-              : transectionType == "F"
-                ? "FIFP"
-                : "";
-
-    let transectionsts =
-      transectionType2 === "BIL"
-        ? "PURCHASE"
-        : transectionType2 == "PRN"
-          ? "PURCHASE RETURN"
-          : "ALL";
-
-    let typesearch = searchQuery ? searchQuery : "";
-
-    // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "Company :",
-      typecompany,
-      "",
-
-      "Store :",
-      typetype,
-    ]);
-
-    // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "Category :",
-      typecategory,
-      "",
-
-      "Type :",
-      transectionsts,
-    ]);
-
-    // const typeAndStoreRow3 = worksheet.addRow([
-    //     "CAPACITY :",
-    //     typecapacity,
-    //    "",
-    //      "",
-    //       "",
-    //        "",
-    //     "STATUS :",
-    //     transectionsts,
-    // ]);
-
-    // Add third row with conditional rendering for "SEARCH:"
-    const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery
-        ? ["Capacity :", typecapacity, "", "Search :", typesearch]
-        : ["Capacity :", typecapacity],
-    );
-
-    // Apply styling for the status row
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
-    typeAndStoreRow4.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([
-        item.code,
-
-        item.Description,
-        item.Rate,
-        item.Qnty,
-        item["Pur Amount"],
+ const handleDownloadCSV = async () => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Sheet1");
+    
+      const numColumns = 5;
+    
+      const columnAlignments = [
+     "left",
+        "left",
+        "right",
+        "right",
+        "right",
+      ];
+    
+      const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
+      const fontStoreList = { name: "CustomFont", size: 10, bold: false };
+      const fontHeader = { name: "CustomFont", size: 10, bold: true };
+      const fontTableContent = { name: "CustomFont", size: 10, bold: false };
+    
+      worksheet.addRow([]);
+    
+      const companyRow = worksheet.addRow([comapnyname]);
+      companyRow.eachCell((cell) => {
+        cell.font = fontCompanyName;
+        cell.alignment = { horizontal: "center" };
+      });
+    
+      worksheet.getRow(companyRow.number).height = 30;
+      worksheet.mergeCells(
+        `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`
+      );
+    
+      const storeListRow = worksheet.addRow([
+        `Item Purchase Summary Report From ${toInputDate} To ${toInputDate}`,
       ]);
-
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
+      storeListRow.eachCell((cell) => {
+        cell.font = fontStoreList;
+        cell.alignment = { horizontal: "center" };
+      });
+    
+      worksheet.mergeCells(
+        `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`
+      );
+    
+      worksheet.addRow([]);
+    
+    
+   
+   
+     
+  let typecompany = Companyselectdatavalue.label
+        ? Companyselectdatavalue.label
+        : "ALL";
+      let typecapacity = capacityselectdatavalue.label
+        ? capacityselectdatavalue.label
+        : "ALL";
+      let typecategory = categoryselectdatavalue.label
+        ? categoryselectdatavalue.label
+        : "ALL";
+      let typetype = typeselectdatavalue.label
+        ? typeselectdatavalue.label
+        : "ALL ";
+  
+    
+  
+      let transectionsts =
+        transectionType2 === "BIL"
+          ? "PURCHASE"
+          : transectionType2 == "PRN"
+            ? "PURCHASE RETURN"
+            : "ALL";
+  
+      let typesearch = searchQuery ? searchQuery : "";
+    
+     
+  // Add first row
+      const typeAndStoreRow = worksheet.addRow([
+        "Company :",
+        typecompany,
+       
+        "Store :",
+        typetype,
+      ]);
+    
+      // worksheet.mergeCells(
+      //   `B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`,
+      // );
+  
+      // Add second row
+      const typeAndStoreRow2 = worksheet.addRow([
+        "Category :",
+        typecategory,
+ 
+        "Type :",
+        transectionsts,
+      ]);
+      // worksheet.mergeCells(
+      //   `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`,
+      // );
+  
+      // Add third row with conditional rendering for "SEARCH:"
+      const typeAndStoreRow4 = worksheet.addRow(
+        searchQuery
+          ? ["Capacity :", typecapacity,  "Search :", typesearch]
+          : ["Capacity :", typecapacity],
+      );
+      // worksheet.mergeCells(
+      //   `B${typeAndStoreRow4.number}:D${typeAndStoreRow4.number}`,
+      // );
+    
+      [typeAndStoreRow, typeAndStoreRow2, typeAndStoreRow4].forEach(
+        (row) => {
+          row.eachCell((cell, colIndex) => {
+            cell.font = {
+              name: "CustomFont",
+              size: 10,
+              bold: [1, 3].includes(colIndex),
+            };
+            cell.alignment = { horizontal: "left", vertical: "middle" };
+          });
+        }
+      );
+    
+      const headerStyle = {
+        font: fontHeader,
+        alignment: { horizontal: "center", vertical: "middle" },
+        fill: {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFC6D9F7" },
+        },
+        border: {
           top: { style: "thin" },
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
+        },
+      };
+    
+      const headers = [
+       "Code",
+       "Description",
+        "Rate",
+        "Qnty",
+        "Amount",
+      ];
+    
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+    
+      tableData.forEach((item) => {
+        const row = worksheet.addRow([
+         item.code,
+                item.Description,
+          item.Rate,
+          item.Qnty,
+           item["Pur Amount"],
+        ]);
+    
+        row.eachCell((cell, colIndex) => {
+          cell.font = fontTableContent;
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+          cell.alignment = {
+            horizontal: columnAlignments[colIndex - 1] || "left",
+            vertical: "middle",
+          };
+        });
       });
-    });
-
-    // Set column widths
-    [18, 50, 12, 8, 12].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    const totalRow = worksheet.addRow([
-      String(formatValue(tableData.length.toLocaleString())),
-      "Total",
-      "",
-      String(formatValue(totaldebit)),
-      String(formatValue(totalcredit)),
-    ]);
-
-    // total row added
-
-    totalRow.eachCell((cell, colNumber) => {
-      cell.font = { bold: true };
-      cell.border = {
-        top: { style: "double" },
-        left: { style: "thin" },
-        bottom: { style: "double" },
-        right: { style: "thin" },
+    
+      // =====================================================================
+      // FINAL, RELIABLE DYNAMIC WIDTH FOR DESCRIPTION COLUMN
+      // - Uses canvas with the font Excel will actually render (Calibri)
+      // - Adds generous but not excessive padding (15px)
+      // - Falls back to character-based width if canvas fails
+      // - Disables text wrap to prevent hidden clipping
+      // =====================================================================
+      // Disable text wrap for column 2
+      worksheet.getColumn(2).eachCell({ includeEmpty: true }, (cell) => {
+        if (cell.alignment) cell.alignment.wrapText = false;
+        else cell.alignment = { wrapText: false };
+      });
+    
+      // Use Calibri 10pt – the most common fallback for 'CustomFont'
+      const fontForMeasurement = "10px Calibri";
+      const boldFontForMeasurement = "bold 10px Calibri";
+    
+      const getTextPixelWidth = (text, fontStyle) => {
+        if (!text) return 0;
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        context.font = fontStyle;
+        return context.measureText(text.toString()).width;
       };
-
-      // Align only the "Total" text to the right
-      if (colNumber === 4 || colNumber === 5) {
-        cell.alignment = { horizontal: "right" };
+    
+      // Convert pixel width to Excel column width (1 unit ≈ 7 pixels for 10pt font)
+      // Add 15px padding to account for Excel's internal cell margins
+      const pixelsToExcelWidth = (pixels) => {
+        const paddingPx = 15;
+        const pixelsPerUnit = 7;
+        return (pixels + paddingPx) / pixelsPerUnit;
+      };
+    
+      // Find the longest pixel width among descriptions + header
+      let maxPixels = getTextPixelWidth("Description", boldFontForMeasurement);
+      let longestDescLength = "Description".length;
+    
+      tableData.forEach((item) => {
+        const desc = item.Description ? item.Description.toString() : "";
+        const w = getTextPixelWidth(desc, fontForMeasurement);
+        if (w > maxPixels) maxPixels = w;
+        if (desc.length > longestDescLength) longestDescLength = desc.length;
+      });
+    
+      let descriptionWidth = pixelsToExcelWidth(maxPixels);
+    
+      // Fallback: if canvas gives a width that is obviously too small (less than 0.8 units per character),
+      // use character-based width with multiplier 1.1 (proven for Calibri 10pt)
+      const minExpectedWidth = longestDescLength * 0.8;
+      if (descriptionWidth < minExpectedWidth) {
+        descriptionWidth = longestDescLength * 1.1 + 2; // 1.1 units per char + small safety
       }
-       if (colNumber === 1) {
-        cell.alignment = { horizontal: "center" };
-      }
-    });
-
-    // Add a blank row
-    worksheet.addRow([]);
-    // Get current date and time
-    const getCurrentTime = () => {
+    
+      // No upper cap – allow column to be as wide as needed (Excel max is 255)
+      descriptionWidth = Math.max(descriptionWidth, 45); // only minimum
+    
+      worksheet.getColumn(1).width = 14;
+      worksheet.getColumn(2).width = descriptionWidth;   // exactly fits the longest text
+      worksheet.getColumn(3).width = 12;
+      worksheet.getColumn(4).width = 14;
+      worksheet.getColumn(5).width = 14;
+      
+     
+      // =====================================================================
+    
+      const totalRow = worksheet.addRow([
+          String(formatValue(tableData.length.toLocaleString())),
+        "",
+       "",
+        String(formatValue(formatValue(totaldebit))),
+        String(formatValue(formatValue(totalcredit))),
+      ]);
+    
+      totalRow.eachCell((cell, colNumber) => {
+        cell.font = { bold: true };
+        cell.border = {
+          top: { style: "double" },
+          left: { style: "thin" },
+          bottom: { style: "double" },
+          right: { style: "thin" },
+        };
+    
+        if (colNumber >= 3 ) {
+          cell.alignment = { horizontal: "right" };
+        }
+         if (colNumber === 1 ) {
+          cell.alignment = { horizontal: "center" };
+        }
+      });
+    
+      worksheet.addRow([]);
+    
       const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
+      const currentTime = `${String(today.getHours()).padStart(2, "0")}:${String(
+        today.getMinutes()
+      ).padStart(2, "0")}:${String(today.getSeconds()).padStart(2, "0")}`;
+      const currentdate = `${String(today.getDate()).padStart(2, "0")}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${today.getFullYear()}`;
+    
+      const userid = user.tusrid;
+    
+      const dateTimeRow = worksheet.addRow([
+        `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+      ]);
+      dateTimeRow.eachCell((cell) => {
+        cell.font = { name: "CustomFont", size: 10 };
+        cell.alignment = { horizontal: "left" };
+      });
+    
+      const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+      dateTimeRow1.eachCell((cell) => {
+        cell.font = { name: "CustomFont", size: 10 };
+        cell.alignment = { horizontal: "left" };
+      });
+    
+      worksheet.mergeCells(
+        `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+      );
+      worksheet.mergeCells(
+        `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+      );
+    
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+    
+      saveAs(blob, `ItemPurchaseSummaryReport As On ${currentdate}.xlsx`);
     };
-    // Get current date
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-    const currentTime = getCurrentTime();
-    const currentdate = getCurrentDate();
-    const userid = user.tusrid;
-
-    // Add date and time row
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
-
-    // Merge across all columns
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
-    );
-
-    // Generate and save the Excel file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `ItemPurchaseSummaryReport As On ${currentdate}.xlsx`);
-  };
 
   const dispatch = useDispatch();
 

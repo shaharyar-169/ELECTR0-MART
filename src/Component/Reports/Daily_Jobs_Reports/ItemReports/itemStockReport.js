@@ -1057,9 +1057,6 @@ const addTableRows = (startX, startY, startIndex, endIndex) => {
     doc.save(`ItemStockReport As On ${toInputDate}.pdf`);
   };
 
-
-
-
 const handleDownloadCSV = async () => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet1");
@@ -1295,7 +1292,7 @@ const handleDownloadCSV = async () => {
   }
 
   // No upper cap – allow column to be as wide as needed (Excel max is 255)
-  descriptionWidth = Math.max(descriptionWidth, 20); // only minimum
+  descriptionWidth = Math.max(descriptionWidth, 45); // only minimum
 
   worksheet.getColumn(1).width = 20;
   worksheet.getColumn(2).width = descriptionWidth;   // exactly fits the longest text

@@ -424,14 +424,14 @@ export default function ItemPurchaseReport() {
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FStrCod: Typeselectdata,
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
-      // FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
 
-      code: 'MULTITRD',
-      FLocCod: '001',
-      FYerDsc: '2025-2026',
+      // code: 'MULTITRD',
+      // FLocCod: '001',
+      // FYerDsc: '2025-2026',
     }).toString();
 
     axios
@@ -1481,7 +1481,7 @@ export default function ItemPurchaseReport() {
       }
     
       // No upper cap – allow column to be as wide as needed (Excel max is 255)
-      descriptionWidth = Math.max(descriptionWidth, 20); // only minimum
+      descriptionWidth = Math.max(descriptionWidth, 45); // only minimum
     
       worksheet.getColumn(1).width = 11;
       worksheet.getColumn(2).width = 8;

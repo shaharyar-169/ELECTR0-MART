@@ -1029,154 +1029,330 @@ export default function ItemSaleSummaryReport() {
       });
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5;
-      const fontSize = 10;
-      const boldFont = 400;
-      const normalFont = getfontstyle;
-      const tableWidth = getTotalTableWidth();
+    // const addTableRows = (startX, startY, startIndex, endIndex) => {
+    //   const rowHeight = 5;
+    //   const fontSize = 10;
+    //   const boldFont = 400;
+    //   const normalFont = getfontstyle;
+    //   const tableWidth = getTotalTableWidth();
 
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0;
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-        const isTotalRow = i === rows.length - 1;
-        let textColor = [0, 0, 0];
-        let fontName = normalFont;
+    //   for (let i = startIndex; i < endIndex; i++) {
+    //     const row = rows[i];
+    //     const isOddRow = i % 2 !== 0;
+    //     const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+    //     const isTotalRow = i === rows.length - 1;
+    //     let textColor = [0, 0, 0];
+    //     let fontName = normalFont;
 
-        if (isRedRow) {
-          textColor = [255, 0, 0];
-          fontName = boldFont;
-        }
+    //     if (isRedRow) {
+    //       textColor = [255, 0, 0];
+    //       fontName = boldFont;
+    //     }
 
-        if (isTotalRow) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-        }
+    //     if (isTotalRow) {
+    //       doc.setFont("verdana", "bold");
+    //       doc.setFontSize(10);
+    //     }
 
-        if (isOddRow) {
-          doc.setFillColor(240);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F",
-          );
-        }
+    //     if (isOddRow) {
+    //       doc.setFillColor(240);
+    //       doc.rect(
+    //         startX,
+    //         startY + (i - startIndex + 2) * rowHeight,
+    //         tableWidth,
+    //         rowHeight,
+    //         "F",
+    //       );
+    //     }
 
-        doc.setDrawColor(0);
+    //     doc.setDrawColor(0);
 
-        if (isTotalRow) {
-          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-          const rowBottomY = rowTopY + rowHeight;
+    //     if (isTotalRow) {
+    //       const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+    //       const rowBottomY = rowTopY + rowHeight;
 
-          doc.setLineWidth(0.3);
-          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+    //       doc.setLineWidth(0.3);
+    //       doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+    //       doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-          doc.line(
-            startX,
-            rowBottomY - 0.5,
-            startX + tableWidth,
-            rowBottomY - 0.5,
-          );
+    //       doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+    //       doc.line(
+    //         startX,
+    //         rowBottomY - 0.5,
+    //         startX + tableWidth,
+    //         rowBottomY - 0.5,
+    //       );
 
-          doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY);
-          doc.line(
-            startX + tableWidth,
-            rowTopY,
-            startX + tableWidth,
-            rowBottomY,
-          );
-        } else {
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-          );
-        }
+    //       doc.setLineWidth(0.2);
+    //       doc.line(startX, rowTopY, startX, rowBottomY);
+    //       doc.line(
+    //         startX + tableWidth,
+    //         rowTopY,
+    //         startX + tableWidth,
+    //         rowBottomY,
+    //       );
+    //     } else {
+    //       doc.setLineWidth(0.2);
+    //       doc.rect(
+    //         startX,
+    //         startY + (i - startIndex + 2) * rowHeight,
+    //         tableWidth,
+    //         rowHeight,
+    //       );
+    //     }
 
-        row.forEach((cell, cellIndex) => {
-          // ⭐ NEW FIX — Perfect vertical centering
-          const cellY =
-            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+    //     row.forEach((cell, cellIndex) => {
+    //       // ⭐ NEW FIX — Perfect vertical centering
+    //       const cellY =
+    //         startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
 
-          const cellX = startX + 2;
+    //       const cellX = startX + 2;
 
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+    //       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-          if (!isTotalRow) {
-            doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-          }
+    //       if (!isTotalRow) {
+    //         doc.setFont("verdana-regular", "normal");
+    //         doc.setFontSize(10);
+    //       }
 
-          const cellValue = String(cell);
+    //       const cellValue = String(cell);
 
-          if (cellIndex === 10) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = startX + columnWidths[0] / 2;
-              doc.text("", totalLabelX, cellY, {
-                align: "center",
-                baseline: "middle",
-              });
-            } else {
-              doc.text(cellValue, cellX, cellY, {
-                baseline: "middle",
-              });
-            }
-          }
+    //       if (cellIndex === 10) {
+    //         const rightAlignX = startX + columnWidths[cellIndex] / 2;
+    //         doc.text(cellValue, rightAlignX, cellY, {
+    //           align: "center",
+    //           baseline: "middle",
+    //         });
+    //       } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+    //         const rightAlignX = startX + columnWidths[cellIndex] - 2;
+    //         doc.text(cellValue, rightAlignX, cellY, {
+    //           align: "right",
+    //           baseline: "middle",
+    //         });
+    //       } else {
+    //         if (isTotalRow && cellIndex === 0 && cell === "") {
+    //           const totalLabelX = startX + columnWidths[0] / 2;
+    //           doc.text("", totalLabelX, cellY, {
+    //             align: "center",
+    //             baseline: "middle",
+    //           });
+    //         } else {
+    //           doc.text(cellValue, cellX, cellY, {
+    //             baseline: "middle",
+    //           });
+    //         }
+    //       }
 
-          if (cellIndex < row.length - 1) {
-            doc.setLineWidth(0.2);
-            doc.line(
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 2) * rowHeight,
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight,
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
+    //       if (cellIndex < row.length - 1) {
+    //         doc.setLineWidth(0.2);
+    //         doc.line(
+    //           startX + columnWidths[cellIndex],
+    //           startY + (i - startIndex + 2) * rowHeight,
+    //           startX + columnWidths[cellIndex],
+    //           startY + (i - startIndex + 3) * rowHeight,
+    //         );
+    //         startX += columnWidths[cellIndex];
+    //       }
+    //     });
 
-        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+    //     startX = (doc.internal.pageSize.width - tableWidth) / 2;
 
-        if (isTotalRow) {
-          doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-        }
+    //     if (isTotalRow) {
+    //       doc.setFont("verdana-regular", "normal");
+    //       doc.setFontSize(10);
+    //     }
+    //   }
+
+    //   const lineWidth = tableWidth;
+    //   const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+    //   const lineY = pageHeight - 15;
+    //   doc.setLineWidth(0.3);
+    //   doc.line(lineX, lineY, lineX + lineWidth, lineY);
+    //   const headingFontSize = 11;
+    //   const headingX = lineX + 2;
+    //   const headingY = lineY + 5;
+    //   doc.setFont("verdana-regular", "normal");
+    //   doc.setFontSize(10);
+    //   doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+    // };
+
+    // Function to calculate total table width
+    
+         const addTableRows = (startX, startY, startIndex, endIndex) => {
+  const lineHeight = 4;
+  const tableWidth = getTotalTableWidth();
+  const pageHeight = doc.internal.pageSize.height;
+
+  const footerReserve = 30;
+
+  let currentY = startY;
+
+  for (let i = startIndex; i < endIndex; i++) {
+    let row = [...rows[i]];
+
+    const isOddRow = i % 2 !== 0;
+    const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+    const isTotalRow = i === rows.length - 1;
+
+    let textColor = [0, 0, 0];
+
+    if (isRedRow) {
+      textColor = [255, 0, 0];
+    }
+
+    // ✅ SMART WRAP FIX
+    const splitRow = row.map((cell, idx) => {
+      const text = String(cell).trim();
+      const maxWidth = columnWidths[idx] - 4;
+
+      const textWidth =
+        (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
+        doc.internal.scaleFactor;
+
+      if (textWidth <= maxWidth) {
+        return [text];
       }
 
+      return doc.splitTextToSize(text, maxWidth);
+    });
+
+    const maxLines = Math.max(...splitRow.map((c) => c.length));
+    const rowHeight = maxLines * lineHeight + 2;
+
+    // 🔥 PAGE BREAK CHECK
+    if (currentY + rowHeight > pageHeight - footerReserve) {
+      // footer
       const lineWidth = tableWidth;
       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
       const lineY = pageHeight - 15;
+
       doc.setLineWidth(0.3);
       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 11;
+
       const headingX = lineX + 2;
       const headingY = lineY + 5;
+
       doc.setFont("verdana-regular", "normal");
       doc.setFontSize(10);
       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-    };
 
-    // Function to calculate total table width
+      // 🔥 FIX: total row ko next page pe force render
+      if (isTotalRow) {
+        doc.addPage();
+        currentY = paddingTop;
+        i--; // 🔥 reprocess same row
+        continue;
+      }
+
+      return {
+        startX,
+        startY: currentY,
+        breakPage: true,
+      };
+    }
+
+    // row background
+    if (isOddRow) {
+      doc.setFillColor(240);
+      doc.rect(startX, currentY, tableWidth, rowHeight, "F");
+    }
+
+    doc.setDrawColor(0);
+
+    // total row styling
+    if (isTotalRow) {
+      const topY = currentY;
+      const bottomY = currentY + rowHeight;
+
+      doc.setFont("verdana", "bold");
+
+      doc.setLineWidth(0.3);
+      doc.line(startX, topY, startX + tableWidth, topY);
+      doc.line(startX, topY + 0.5, startX + tableWidth, topY + 0.5);
+
+      doc.line(startX, bottomY, startX + tableWidth, bottomY);
+      doc.line(startX, bottomY - 0.5, startX + tableWidth, bottomY - 0.5);
+
+      doc.setLineWidth(0.2);
+      doc.line(startX, topY, startX, bottomY);
+      doc.line(startX + tableWidth, topY, startX + tableWidth, bottomY);
+    } else {
+      doc.setLineWidth(0.2);
+      doc.rect(startX, currentY, tableWidth, rowHeight);
+      doc.setFont("verdana-regular", "normal");
+    }
+
+    let currentX = startX;
+
+    splitRow.forEach((textArray, cellIndex) => {
+      const cellWidth = columnWidths[cellIndex];
+
+      doc.setTextColor(...textColor);
+      doc.setFontSize(10);
+
+      const textY =
+        currentY +
+        (rowHeight - textArray.length * lineHeight) / 2 +
+        lineHeight - 1;
+
+     if (cellIndex > 1) {
+  // 🔥 RIGHT ALIGN
+  doc.text(textArray, currentX + cellWidth - 2, textY, {
+    align: "right",
+  });
+
+} else if (cellIndex === 10) {
+  // 🔥 CENTER ALIGN
+  doc.text(textArray, currentX + cellWidth / 2, textY, {
+    align: "center",
+  });
+
+} else {
+  // 🔥 LEFT ALIGN (default)
+  doc.text(textArray, currentX + 2, textY);
+}
+
+      if (cellIndex < splitRow.length - 1) {
+        doc.line(
+          currentX + cellWidth,
+          currentY,
+          currentX + cellWidth,
+          currentY + rowHeight
+        );
+      }
+
+      currentX += cellWidth;
+    });
+
+    currentY += rowHeight;
+
+    if (isTotalRow) {
+      doc.setFont("verdana-regular", "normal");
+    }
+  }
+
+  // 🔥 LAST PAGE FOOTER
+  const lineWidth = tableWidth;
+  const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+  const lineY = pageHeight - 15;
+
+  doc.setLineWidth(0.3);
+  doc.line(lineX, lineY, lineX + lineWidth, lineY);
+
+  const headingX = lineX + 2;
+  const headingY = lineY + 5;
+
+  doc.setFont("verdana-regular", "normal");
+  doc.setFontSize(10);
+  doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
+
+  return {
+    startX,
+    startY: currentY,
+    breakPage: false,
+  };
+};
+    
     const getTotalTableWidth = () => {
       let totalWidth = 0;
       columnWidths.forEach((width) => (totalWidth += width));
@@ -1342,7 +1518,7 @@ export default function ItemSaleSummaryReport() {
           );
         }
 
-        startY += activeIndex === 1 || activeIndex === 2 ? 1 : 10; // Adjust vertical position for the labels
+        startY += activeIndex === 1 || activeIndex === 2 ? 11 : 20; // Adjust vertical position for the labels
 
         addTableHeaders(
           (doc.internal.pageSize.width - totalWidth) / 2,
@@ -1644,16 +1820,72 @@ export default function ItemSaleSummaryReport() {
       });
     });
 
-    // Set column widths
-    [
-      activeIndex === 1 || activeIndex === 2 ? 10 : 20,
-      45,
-      activeIndex === 1 || activeIndex === 2 ? 10 : 12,
-      activeIndex === 1 || activeIndex === 2 ? 12 : 10,
-      12,
-    ].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
+
+  // =====================================================================
+      // FINAL, RELIABLE DYNAMIC WIDTH FOR DESCRIPTION COLUMN
+      // - Uses canvas with the font Excel will actually render (Calibri)
+      // - Adds generous but not excessive padding (15px)
+      // - Falls back to character-based width if canvas fails
+      // - Disables text wrap to prevent hidden clipping
+      // =====================================================================
+      // Disable text wrap for column 2
+      worksheet.getColumn(2).eachCell({ includeEmpty: true }, (cell) => {
+        if (cell.alignment) cell.alignment.wrapText = false;
+        else cell.alignment = { wrapText: false };
+      });
+    
+      // Use Calibri 10pt – the most common fallback for 'CustomFont'
+      const fontForMeasurement = "10px Calibri";
+      const boldFontForMeasurement = "bold 10px Calibri";
+    
+      const getTextPixelWidth = (text, fontStyle) => {
+        if (!text) return 0;
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        context.font = fontStyle;
+        return context.measureText(text.toString()).width;
+      };
+    
+      // Convert pixel width to Excel column width (1 unit ≈ 7 pixels for 10pt font)
+      // Add 15px padding to account for Excel's internal cell margins
+      const pixelsToExcelWidth = (pixels) => {
+        const paddingPx = 15;
+        const pixelsPerUnit = 7;
+        return (pixels + paddingPx) / pixelsPerUnit;
+      };
+    
+      // Find the longest pixel width among descriptions + header
+      let maxPixels = getTextPixelWidth("Description", boldFontForMeasurement);
+      let longestDescLength = "Description".length;
+    
+      dataToExport.forEach((item) => {
+        const desc = item.Description ? item.Description.toString() : "";
+        const w = getTextPixelWidth(desc, fontForMeasurement);
+        if (w > maxPixels) maxPixels = w;
+        if (desc.length > longestDescLength) longestDescLength = desc.length;
+      });
+    
+      let descriptionWidth = pixelsToExcelWidth(maxPixels);
+    
+      // Fallback: if canvas gives a width that is obviously too small (less than 0.8 units per character),
+      // use character-based width with multiplier 1.1 (proven for Calibri 10pt)
+      const minExpectedWidth = longestDescLength * 0.8;
+      if (descriptionWidth < minExpectedWidth) {
+        descriptionWidth = longestDescLength * 1.1 + 2; // 1.1 units per char + small safety
+      }
+    
+      // No upper cap – allow column to be as wide as needed (Excel max is 255)
+      descriptionWidth = Math.max(descriptionWidth, 45); // only minimum
+    
+      worksheet.getColumn(1).width = activeIndex === 1 || activeIndex === 2 ? 10 : 20;
+      worksheet.getColumn(2).width = descriptionWidth;   // exactly fits the longest text
+      worksheet.getColumn(3).width =   activeIndex === 1 || activeIndex === 2 ? 10 : 12;
+      worksheet.getColumn(4).width =  activeIndex === 1 || activeIndex === 2 ? 12 : 10;
+      worksheet.getColumn(5).width = 12;
+      
+     
+      // =====================================================================
+
 
     let totalRowValues = [];
 

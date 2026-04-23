@@ -408,12 +408,12 @@ export default function CustomerLedgerReport() {
              FFnlDat: toInputDate,
              FTrnTyp: transectionType,
              FAccCod: saleType,
-            //  code: organisation.code,
-            //  FLocCod: locationnumber || getLocationNumber,
-            //  FYerDsc: yeardescription || getyeardescription,
-             code: 'NASIRTRD',
-             FLocCod: '001',
-             FYerDsc: '2024-2024',
+             code: organisation.code,
+             FLocCod: locationnumber || getLocationNumber,
+             FYerDsc: yeardescription || getyeardescription,
+            //  code: 'NASIRTRD',
+            //  FLocCod: '001',
+            //  FYerDsc: '2024-2024',
              FSchTxt: searchQuery
          }).toString();
  
@@ -501,10 +501,10 @@ export default function CustomerLedgerReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomer.php";
     const formData = new URLSearchParams({
-      // FLocCod: getLocationNumber,
-      // code: organisation.code,
-      FLocCod: "001",
-      code: "NASIRTRD",
+     code: organisation.code,
+             FLocCod: locationnumber || getLocationNumber,
+      // FLocCod: "001",
+      // code: "NASIRTRD",
     }).toString();
     axios
       .post(apiUrl, formData)

@@ -1479,7 +1479,7 @@ export default function ItemSaleReport() {
         }
       
         // No upper cap – allow column to be as wide as needed (Excel max is 255)
-        descriptionWidth = Math.max(descriptionWidth, 20); // only minimum
+        descriptionWidth = Math.max(descriptionWidth, 45); // only minimum
       
         worksheet.getColumn(1).width = 11;
         worksheet.getColumn(2).width = 8;
