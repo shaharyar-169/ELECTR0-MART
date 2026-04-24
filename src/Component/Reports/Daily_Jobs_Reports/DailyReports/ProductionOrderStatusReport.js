@@ -426,9 +426,9 @@ export default function ProductionOrderStatusReport() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-    //   code: "IZONETRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2025-2025",
+      // code: "IZONETRD",
+      // FLocCod: "001",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -781,7 +781,11 @@ export default function ProductionOrderStatusReport() {
    
 
     // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+   const doc = new jsPDF({
+  orientation: "landscape",
+  unit: "mm",
+  format: "a4"
+});
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -824,10 +828,24 @@ export default function ProductionOrderStatusReport() {
      "Rec Qty",
     "Bal Qty",
     ];
-    const columnWidths = [18,22, 90, 13, 25, 22, 25,25,25,25];
+   
+   let columnWidths = [18,24, 90, 13, 25, 24, 25,25,25,25];
 
-    // Calculate total table width
-    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+// 🔥 FIX: Scale widths to fit page perfectly
+const pageWidth = doc.internal.pageSize.width;
+const sideMargin = 10;
+
+// 🔥 IMPORTANT: add -2 safety gap
+const printableWidth = pageWidth - sideMargin * 2 - 2;
+
+const originalTotalWidth = columnWidths.reduce((a, b) => a + b, 0);
+const scaleFactor = printableWidth / originalTotalWidth;
+
+columnWidths = columnWidths.map((w) => w * scaleFactor);
+
+const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+
+
 
     // Define page height and padding
     const pageHeight = doc.internal.pageSize.height;
@@ -971,8 +989,7 @@ export default function ProductionOrderStatusReport() {
           }
         });
 
-        startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
+startX = Math.floor((doc.internal.pageSize.width - tableWidth) / 2);
         // if (isTotalRow) {
         //   doc.setFont("verdana-regular", "normal");
         //   doc.setFontSize(10);
@@ -1028,18 +1045,11 @@ export default function ProductionOrderStatusReport() {
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
+       
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
+  doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                    doc.text(
           `Page ${pageNumber}`,
           rightX - 5,
           doc.internal.pageSize.height - 10,
@@ -1121,15 +1131,15 @@ export default function ProductionOrderStatusReport() {
 
         startY += 1; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
+addTableHeaders(Math.floor((doc.internal.pageSize.width - totalWidth) / 2), 30);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-        startY = addTableRows(
-          (doc.internal.pageSize.width - totalWidth) / 2,
-          startY,
-          startIndex,
-          endIndex
-        );
+       startY = addTableRows(
+  Math.floor((doc.internal.pageSize.width - totalWidth) / 2),
+  startY,
+  startIndex,
+  endIndex
+);
         if (endIndex < rows.length) {
           startY = addNewPage(startY); // Add new page and update startY
           pageNumber++; // Increment page number
@@ -1164,6 +1174,9 @@ export default function ProductionOrderStatusReport() {
     // Save the PDF files
     doc.save(`ProductionOrderstatusReport As On ${date}.pdf`);
   };
+
+
+
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -2265,9 +2278,40 @@ companyRow.eachCell((cell) => {
                               color: isNegative ? "red" : fontcolor,
                             }}
                           >
-                            <td className="text-center" style={firstColWidth}>
+
+                            {/* <td className="text-center" style={firstColWidth}>
                               {item.PRDNo}
-                            </td>
+                            </td> */}
+
+                            <td
+                    className="text-start"
+                    style={{
+                      ...firstColWidth,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      // color: "blue",
+                      color: selectedIndex === i ? "white": "blue", // ✅ conditional color
+                    }}
+                    
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      // code temporarily store karo
+                      sessionStorage.setItem(
+                      "ProductionOrderStatusData",
+                      JSON.stringify({
+                      code: item.PRDNo,
+                      
+                    }),
+                      );
+
+                      // fixed URL open karo
+                      window.open("/crystalsol/ProductionOrderLedger", "_blank");
+                    }}
+                  >
+                    {item.PRDNo}
+                  </td>
+
+
                             <td className="text-center" style={secondColWidth}>
                               {item.Date}
                             </td>

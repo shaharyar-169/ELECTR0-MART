@@ -41,6 +41,12 @@ export default function ProductionOrderLedger() {
   const fromRef = useRef(null);
   const hasInitialized = useRef(false);
 
+
+  const [isCodeReady, setIsCodeReady] = useState(false);
+const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
+ const [isItemInitialized, setIsItemInitialized] = useState(false);
+
+ 
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
@@ -331,9 +337,9 @@ export default function ProductionOrderLedger() {
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
 
-    //   code: "TAHREEMTRD",
-    //   FLocCod: "001",
-    //   FYerDsc: "2025-2025",
+      // code: "IZONETRD",
+      // FLocCod: "001",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -402,12 +408,12 @@ export default function ProductionOrderLedger() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetProductionOrderList.php";
     const formData = new URLSearchParams({
-    //   FLocCod: getLocationNumber,
-    //   code: organisation.code,
+      FLocCod: getLocationNumber,
+      code: organisation.code,
 
-      FLocCod: "001",
-      code: "TAHREEMTRD",
-      FYerDsc: "2025-2025",
+      // FLocCod: "001",
+      // code: "IZONETRD",
+      // FYerDsc: "2025-2025",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -424,29 +430,81 @@ export default function ProductionOrderLedger() {
     label: `${item.ttrnnum}-${item.taccdsc}`,
   }));
 
-  useEffect(() => {
-    if (
-      isOptionsLoaded &&
-      options.length > 0 &&
-      !saleType &&
-      !hasInitialized.current
-    ) {
-      const firstOption = options[0];
-      setSaleType(firstOption.value);
+  // useEffect(() => {
+  //   if (
+  //     isOptionsLoaded &&
+  //     options.length > 0 &&
+  //     !saleType &&
+  //     !hasInitialized.current
+  //   ) {
+  //     const firstOption = options[0];
+  //     setSaleType(firstOption.value);
 
-      const fullLabel = firstOption.label;
-      const description = fullLabel.split("-").pop()?.trim();
+  //     const fullLabel = firstOption.label;
+  //     const description = fullLabel.split("-").pop()?.trim();
 
-      setCompanyselectdatavalue({
-        value: firstOption.value,
-        label: description,
-        fullLabel: fullLabel,
-      });
+  //     setCompanyselectdatavalue({
+  //       value: firstOption.value,
+  //       label: description,
+  //       fullLabel: fullLabel,
+  //     });
 
-      // Mark as initialized
-      hasInitialized.current = true;
-    }
-  }, [isOptionsLoaded, options, saleType]);
+  //     // Mark as initialized
+  //     hasInitialized.current = true;
+  //   }
+  // }, [isOptionsLoaded, options, saleType]);
+
+
+  
+
+
+useEffect(() => {
+  if (options.length === 0) return;
+  if (isItemInitialized) return;
+
+  const storedData = sessionStorage.getItem("ProductionOrderStatusData");
+  let selectedOption = null;
+
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+    const clickedCode = parsedData.code?.trim();
+ if (parsedData.code) {
+    setIsDoubleClickOpen(true); // ✅ ADD
+  }
+    selectedOption = options.find(
+      (opt) => opt.value?.trim() === clickedCode
+    );
+
+    sessionStorage.removeItem("ProductionOrderStatusData");
+  }
+
+  if (!selectedOption) {
+    selectedOption = options[0];
+  }
+
+  if (selectedOption) {
+    setSaleType(selectedOption.value);
+
+    const description =
+      selectedOption.label.split("-").slice(1).join("-").trim();
+
+    setCompanyselectdatavalue({
+      value: selectedOption.value,
+      label: description,
+    });
+
+    setIsCodeReady(true); // ✅ IMPORTANT
+  }
+
+  setIsItemInitialized(true);
+}, [options, isItemInitialized]);
+
+useEffect(() => {
+  // 🔥 Dono cheezain ready hon
+  if (isDoubleClickOpen && isCodeReady) {
+    fetchReceivableReport();
+  }
+}, [isDoubleClickOpen, isCodeReady]);
 
   const DropdownOption = (props) => {
     return (
