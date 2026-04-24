@@ -334,8 +334,8 @@ const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
     const formData = new URLSearchParams({
       FPrdOrd: saleType,
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
 
       // code: "IZONETRD",
       // FLocCod: "001",
@@ -405,30 +405,34 @@ const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
     }
   }, [supplierList]);
 
+ 
+
+
   useEffect(() => {
-    const apiUrl = apiLinks + "/GetProductionOrderList.php";
-    const formData = new URLSearchParams({
-      FLocCod: getLocationNumber,
-      code: organisation.code,
+  const apiUrl = apiLinks + "/GetProductionOrderList.php";
+  const formData = new URLSearchParams({
+    code: organisation.code,
+    FLocCod: locationnumber || getLocationNumber,
 
       // FLocCod: "001",
       // code: "IZONETRD",
       // FYerDsc: "2025-2025",
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setSupplierList(response.data.List);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
+  }).toString();
 
-  const options = supplierList.map((item) => ({
-    value: item.ttrnnum,
-    label: `${item.ttrnnum}-${item.taccdsc}`,
-  }));
+  axios
+    .post(apiUrl, formData)
+    .then((response) => {
+      setSupplierList(response.data?.List || []);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}, []);
+
+const options = supplierList.map((item) => ({
+  value: item.ttrnnum,
+  label: `${item.ttrnnum}-${item.taccdsc}`,
+}));
 
   // useEffect(() => {
   //   if (
@@ -1695,6 +1699,7 @@ useEffect(() => {
                     value={
                       options.find((opt) => opt.value === saleType) || null
                     } // Ensure correct reference
+                      isDisabled={isDoubleClickOpen}
                     onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
                     id="selectedsale"
                     onChange={(selectedOption) => {

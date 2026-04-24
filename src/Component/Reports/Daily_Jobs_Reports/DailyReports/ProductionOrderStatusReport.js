@@ -422,8 +422,7 @@ export default function ProductionOrderStatusReport() {
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
- 
-      code: organisation.code,
+       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       // code: "IZONETRD",
