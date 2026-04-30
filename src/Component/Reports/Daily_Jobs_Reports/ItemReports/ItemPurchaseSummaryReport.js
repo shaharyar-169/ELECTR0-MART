@@ -2310,7 +2310,7 @@ const exportPDFHandler = () => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata,280),
+                      ...customStyles1(!Companyselectdata,275),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2483,7 +2483,7 @@ const exportPDFHandler = () => {
                     value={transectionType2}
                     onChange={handleTransactionTypeChange2}
                     style={{
-                      width: "280px",
+                      width: "275px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -2629,7 +2629,7 @@ const exportPDFHandler = () => {
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "280px",
+                      width: "275px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,

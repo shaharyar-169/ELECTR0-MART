@@ -63,21 +63,16 @@ export default function ProductionOrderStatusReport() {
   const [Companyselectdata, setCompanyselectdata] = useState("");
 
   console.log("Companyselectdata", Companyselectdata);
-  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-
-  const [Capacityselectdata, setCapacityselectdata] = useState("");
-  const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
-
+ 
   const [GetCapacity, setGetCapacity] = useState([]);
   const [GetCompany, setGetCompany] = useState([]);
-  const [Categoryselectdata, setCategoryselectdata] = useState("");
-  const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
+ 
 
   const [GetCategory, setGetCategory] = useState([]);
 
-  const [Typeselectdata, setTypeselectdata] = useState("");
-  const [typeselectdatavalue, settypeselectdatavalue] = useState("");
+ 
 
+ 
   const [GetType, setGetType] = useState([]);
 
   const [sortData, setSortData] = useState("ASC");
@@ -296,9 +291,9 @@ export default function ProductionOrderStatusReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (selectButtonRef.current) {
+        if (input1Ref.current) {
           e.preventDefault();
-          selectButtonRef.current.focus();
+          input1Ref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -422,6 +417,7 @@ export default function ProductionOrderStatusReport() {
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
+      FTrnSts: transectionType,
        code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
@@ -478,6 +474,21 @@ export default function ProductionOrderStatusReport() {
     setSelectedfromDate(firstDateOfCurrentMonth);
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
+
+
+  const filteredData = tableData.filter((item) => {
+  const query = searchQuery.toUpperCase();
+
+  return (
+    item.PRDNo?.toUpperCase().includes(query) ||
+    item.titmdsc?.toUpperCase().includes(query) ||
+    item.UOM?.toUpperCase().includes(query)
+  );
+});
+
+const totalTbalqnt = filteredData.reduce((sum, item) => {
+  return sum + (Number(item.tbalqnt) || 0);
+}, 0);
 
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCompany.php";
@@ -787,7 +798,7 @@ export default function ProductionOrderStatusReport() {
 });
 
     // Define table data (rows)
-    const rows = tableData.map((item) => [
+    const rows = filteredData.map((item) => [
      item.PRDNo,
      item.Date,
      item.titmdsc,
@@ -802,16 +813,20 @@ export default function ProductionOrderStatusReport() {
     ]);
 
     // Add summary row to the table
-    // rows.push([
+    rows.push([
      
-    //   "",
-    //   "Total",
-     
-    //   String(totalopening),
-    //       String(totaldebit),
-    //   String(totalcredit),
-    //   String(ClosingBalance),
-    // ]);
+            String(formatValue(tableData.length.toLocaleString())),
+        "",
+          "",
+            "",
+              "",
+                "",
+                  "",
+                  "",
+                    "",
+      
+      String(formatValue(totalTbalqnt)),
+    ]);
 
     // Define table column headers and individual column widths
 
@@ -905,10 +920,10 @@ const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
           fontName = boldFont;
         }
 
-        // if (isTotalRow) {
-        //   doc.setFont("verdana", "bold");
-        //   doc.setFontSize(10);
-        // }
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
         if (isOddRow) {
           doc.setFillColor(240);
@@ -989,10 +1004,10 @@ const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
         });
 
 startX = Math.floor((doc.internal.pageSize.width - tableWidth) / 2);
-        // if (isTotalRow) {
-        //   doc.setFont("verdana-regular", "normal");
-        //   doc.setFontSize(10);
-        // }
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
       }
 
       const lineWidth = tableWidth;
@@ -1083,47 +1098,33 @@ startX = Math.floor((doc.internal.pageSize.width - tableWidth) / 2);
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
         // Set font size and weight for the labels
-    
+     let statuOption =
+           transectionType === "P"
+             ? "PENDING"
+             : transectionType === "C"
+               ? "COMPLETED"
+               : "ALL";
        
 
         let search = searchQuery ? searchQuery : "";
+    
 
-        // Set font style, size, and family
-       doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10); // Font size
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
+           doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        doc.text(`Status :`, labelsX, labelsY); // Draw bold label
+     doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                  doc.text(`${statuOption}`, labelsX + 20, labelsY); // Draw the value next to the label
 
     
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-
-        // if (searchQuery) {
-        //   doc.setFont(getfontstyle, "bold"); // Set font to bold
-        //   doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        //   doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-        // }
+        if (searchQuery) {
+     doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+                    doc.text(`Search :`, labelsX + 180, labelsY ); // Draw bold label
+     doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+                    doc.text(`${search}`, labelsX + 205, labelsY); // Draw the value next to the label
+        }
 
         // // Reset font weight to normal if necessary for subsequent text
         
@@ -1260,6 +1261,21 @@ companyRow.eachCell((cell) => {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
+     // Filter data
+     let typestatus =
+       transectionType === "P" ? "PENDING" :
+         transectionType === "C" ? "COMPLETED" : "ALL";
+     let typesearch = searchQuery || "";
+ 
+     const typeAndStoreRow3 = worksheet.addRow(
+       searchQuery ? ["Status :", typestatus,"", "","","","Search :", typesearch] : ["Status: ", typestatus ]
+     );
+     
+      typeAndStoreRow3.eachCell((cell, colIndex) => {
+       cell.font = { name: "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
+       cell.alignment = { horizontal: "left", vertical: "middle" };
+     });
+
   
     const headerStyle = {
       font: fontHeader,
@@ -1294,7 +1310,7 @@ companyRow.eachCell((cell) => {
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    filteredData.forEach((item) => {
       const row = worksheet.addRow([
       item.PRDNo,
      item.Date,
@@ -1324,10 +1340,44 @@ companyRow.eachCell((cell) => {
     });
 
     // Set column widths
-    [8, 10,45,7, 12,10,12, 12,12,12].forEach((width, index) => {
+    [8, 12,45,7, 12,10,12, 12,12,12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
+    const totalRow = worksheet.addRow([
+       String(formatValue(tableData.length.toLocaleString())),
+       "",
+        "",
+          "",
+        "",
+          "",
+        "", 
+         "",
+        "",
+                       String(formatValue(totalTbalqnt)),
+
+       
+     ]);
+ 
+     // total row added
+ 
+     totalRow.eachCell((cell, colNumber) => {
+       cell.font = { bold: true };
+       cell.border = {
+         top: { style: "double" },
+         left: { style: "thin" },
+         bottom: { style: "double" },
+         right: { style: "thin" },
+       };
+ 
+       // Align only the "Total" text to the right
+       if (colNumber === 1) {
+         cell.alignment = { horizontal: "center" };
+       }
+        if (colNumber > 3) {
+         cell.alignment = { horizontal: "right" };
+       }
+     });
    
 
     // Add a blank row
@@ -1408,62 +1458,9 @@ companyRow.eachCell((cell) => {
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
 
-  const handleSearch = (e) => {
-    setSelectedSearch(e.target.value);
-  };
+ 
 
-  let totalEntries = 0;
-  const handlecompanyKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCompanyselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-  const handlecategoryKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCategoryselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-  const handlecapacityKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCapacityselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
+ 
 
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
@@ -1479,10 +1476,7 @@ companyRow.eachCell((cell) => {
     settransectionType(selectedTransactionType);
   };
 
-  const handleTransactionTypeChange2 = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType2(selectedTransactionType);
-  };
+
 
 
 
@@ -1814,6 +1808,8 @@ companyRow.eachCell((cell) => {
     return Number(val) === 0 ? "" : val;
   };
 
+
+
   return (
     <>
       <ToastContainer />
@@ -1841,7 +1837,7 @@ companyRow.eachCell((cell) => {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
               <div
@@ -1947,7 +1943,7 @@ companyRow.eachCell((cell) => {
               </div>
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "50px" }}
+               
               >
                 <div
                   style={{
@@ -2005,7 +2001,7 @@ companyRow.eachCell((cell) => {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, selectButtonRef)}
+                    onKeyDown={(e) => handleToKeyPress(e, input1Ref)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2045,6 +2041,146 @@ companyRow.eachCell((cell) => {
                     }
                     disabled={selectedRadio !== "custom"}
                   />
+                </div>
+              </div>
+               <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Status :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "150px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="P">PENDING</option>
+                    <option value="C">COMPLETED</option>
+                  </select>
+
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
+
+               <div id="lastDiv" >
+                <label for="searchInput" style={{ marginRight: "5px" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input2Ref}
+                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Search"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "150px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -2258,7 +2394,7 @@ companyRow.eachCell((cell) => {
                     </>
                   ) : (
                     <>
-                      {tableData.map((item, i) => {
+                      {filteredData.map((item, i) => {
                         totalEnteries += 1;
                         const isNegative =
                           item.Credit < 0 || item.Balance < 0 || item.Debit < 0;
@@ -2278,9 +2414,6 @@ companyRow.eachCell((cell) => {
                             }}
                           >
 
-                            {/* <td className="text-center" style={firstColWidth}>
-                              {item.PRDNo}
-                            </td> */}
 
                             <td
                     className="text-start"
@@ -2343,7 +2476,7 @@ companyRow.eachCell((cell) => {
                         );
                       })}
                       {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
+                        length: Math.max(0, 27 - filteredData.length),
                       }).map((_, rowIndex) => (
                         <tr
                           key={`blank-${rowIndex}`}
@@ -2483,6 +2616,9 @@ companyRow.eachCell((cell) => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
+               <span className="mobileledger_total">
+                {formatValue(totalTbalqnt)}
+              </span>
             </div>
 
           </div>

@@ -93,46 +93,6 @@ export default function ItemList() {
 
   const comapnyname = organisation.description;
 
-  //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
-
-  // Toggle the ToDATE && FromDATE CalendarOpen state on each click
-
-  // function fetchReceivableReport() {
-  //   const apiUrl = apiLinks + "/ItemList.php";
-  //   setIsLoading(true);
-  //   const formData = new URLSearchParams({
-  //     FItmSts: transectionType,
-  //     FCtgCod: Categoryselectdata,
-  //     FCapCod: Capacityselectdata,
-  //     FSchTxt: searchQuery,
-  //     FCmpCod: Companyselectdata,
-  //     FTypCod: Typeselectdata,
-  //     code: organisation.code,
-  //     FLocCod: locationnumber || getLocationNumber,
-  //     FYerDsc: yeardescription || getyeardescription,
-
-  //   }).toString();
-
-  //   axios
-  //     .post(apiUrl, formData)
-  //     .then((response) => {
-  //       setIsLoading(false);
-
-  //       if (response.data && Array.isArray(response.data)) {
-  //         setTableData(response.data);
-  //       } else {
-  //         // console.warn(
-  //         //   "Response data structure is not as expected:",
-  //         //   response.data
-  //         // );
-  //         setTableData([]);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //       setIsLoading(false);
-  //     });
-  // }
 
   function fetchReceivableReport() {
     const apiUrl = apiLinks + "/ItemList.php";
@@ -1405,7 +1365,7 @@ doc.setFont("verdana-regular", "normal");
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "970px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2200,7 +2160,7 @@ doc.setFont("verdana-regular", "normal");
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "330px",
+                      width: "300px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2389,7 +2349,7 @@ doc.setFont("verdana-regular", "normal");
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}

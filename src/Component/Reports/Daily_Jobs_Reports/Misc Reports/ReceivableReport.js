@@ -476,6 +476,8 @@ export default function ReceivableReport() {
     const apiUrl = apiLinks + "/GetActiveSupplier.php";
     const formData = new URLSearchParams({
       code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -1717,7 +1719,7 @@ export default function ReceivableReport() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "855px",
+    maxWidth: "875px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2248,7 +2250,7 @@ export default function ReceivableReport() {
                     onKeyDown={(e) => handleKeyPress(e, input4Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
