@@ -21,15 +21,13 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-// import { fetchGetUser } from "../../Redux/action";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Balance } from "@mui/icons-material";
+import { Description, Store } from "@mui/icons-material";
 
-
-export default function GeneralLedger() {
+export default function CustomerSaleComparisonReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -38,15 +36,24 @@ export default function GeneralLedger() {
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
-
+  const TypeRef = useRef(null);
   const toRef = useRef(null);
   const fromRef = useRef(null);
+  const companyRef = useRef(null);
   const hasInitialized = useRef(false);
 
   const [saleType, setSaleType] = useState("");
+  const [saleTypeselecteddatavalue, setsaleTypeselecteddatavalue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
+
+  const [Companyselectdata, setCompanyselectdata] = useState("");
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+  const [Categoryselectdata, setCategoryselectdata] = useState("");
+  const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
+  const [GetCategory, setGetCategory] = useState([]);
+  const [GetCompany, setGetCompany] = useState([]);
 
   // DOUBLE STATE HANDLE
   const [isItemInitialized, setIsItemInitialized] = useState(false);
@@ -55,15 +62,10 @@ export default function GeneralLedger() {
 
   const [tableData, setTableData] = useState([]);
 
-  const [totalQnty, setTotalQnty] = useState(0);
-  const [totalOpening, setTotalOpening] = useState(0);
+ 
   const [totalDebit, setTotalDebit] = useState(0);
   const [totalCredit, setTotalCredit] = useState(0);
   const [closingBalance, setClosingBalance] = useState(0);
-
-  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-
-  console.log("Companyselectdatavalue", Companyselectdatavalue.label);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -258,9 +260,9 @@ export default function GeneralLedger() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input1Ref.current) {
+        if (companyRef.current) {
           e.preventDefault();
-          input1Ref.current.focus();
+          companyRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -285,13 +287,49 @@ export default function GeneralLedger() {
       }
       const nextInput = document.getElementById(inputId);
       if (nextInput) {
-        nextInput.focus();
+         nextInput.focus();
         nextInput.select();
       } else {
         document.getElementById("submitButton").click();
       }
     }
   };
+
+const handlecompanyKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = companyRef.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setCompanyselectdata(selectedOption.value);
+      }
+      // const nextInput = document.getElementById(inputId);
+      const nextInput = inputId.current;
+
+      if (nextInput) {
+        nextInput.focus();
+        // nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+  const handlecategoryKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = input1Ref.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setCategoryselectdata(selectedOption.value);
+      }
+      // const nextInput = document.getElementById(inputId);
+      const nextInput = inputId.current;
+
+      if (nextInput) {
+        nextInput.focus();
+        // nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+
 
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
@@ -301,6 +339,8 @@ export default function GeneralLedger() {
       }
     }
   };
+
+
 
   function fetchReceivableReport() {
     const fromDateElement = document.getElementById("fromdatevalidation");
@@ -411,20 +451,24 @@ export default function GeneralLedger() {
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/GeneralLedger.php";
+    const apiUrl = apiLinks + "/CustomerSaleComparison.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
       FAccCod: saleType,
+      FCtgCod: Categoryselectdata,
+      FSchTxt: searchQuery,
+      FCmpCod: Companyselectdata,
+      FRepTyp: transectionType,
+
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
 
-      // code: 'AGCOMP',
-      // FLocCod: '001',
-      // FYerDsc: '2025-2025'
+    //   code: 'SATZTRD',
+    //   FLocCod: '001',
+    //   FYerDsc: '2025-2026'
     }).toString();
 
     axios
@@ -432,9 +476,8 @@ export default function GeneralLedger() {
       .then((response) => {
         setIsLoading(false);
 
-        setTotalDebit(response.data["Total Debit "]);
-        setTotalCredit(response.data["Total Credit"]);
-        setClosingBalance(response.data["Closing Bal "]);
+        setTotalDebit(response.data["Total Qnty"]);
+        setTotalCredit(response.data["Total Amount"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -462,7 +505,7 @@ export default function GeneralLedger() {
       if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
           saleSelectRef.current.focus();
-          // saleSelectRef.current.select();
+        //   saleSelectRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -505,28 +548,24 @@ export default function GeneralLedger() {
     
     }, []);
 
-useEffect(() => {
-  const apiUrl = apiLinks + "/GetActiveAccounts.php";
-  const formData = new URLSearchParams({
-  code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-
-    //  FLocCod: '001',
-    // code: 'AGCOMP',
-  }).toString();
-
-  axios
-    .post(apiUrl, formData)
-    .then((response) => {
-      // Ensure we always have an array
-      const data = response.data || [];
-      setSupplierList(data);
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-      setSupplierList([]); // fallback to empty array
-    });
-}, []);
+ useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveCustomer.php";
+    const formData = new URLSearchParams({
+     code: organisation.code,
+             FLocCod: locationnumber || getLocationNumber,
+    //   FLocCod: "001",
+    //   code: "SATZTRD",
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        setSupplierList(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+  
 
 // Create options, filtering out invalid items
 const options = (supplierList || [])
@@ -535,8 +574,7 @@ const options = (supplierList || [])
     value: item.tacccod,
     label: `${item.tacccod}${item.taccdsc ? ` - ${item.taccdsc.trim()}` : ''}`
   }));
-
-  useEffect(() => {
+ useEffect(() => {
     if (options.length === 0) return;
     if (isItemInitialized) return;
 
@@ -577,14 +615,64 @@ const options = (supplierList || [])
 
     setIsItemInitialized(true);
   }, [options, isItemInitialized]);
-
   useEffect(() => {
     // 🔥 Dono cheezain ready hon
     if (isDoubleClickOpen && isCodeReady) {
       fetchReceivableReport();
     }
   }, [isDoubleClickOpen, isCodeReady]);
-
+ useEffect(() => {
+    const apiUrl = apiLinks + "/GetCompany.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetCompany(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetCompany([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const Companyoption = GetCompany.map((item) => ({
+    value: item.tcmpcod,
+    label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+  }));
+ useEffect(() => {
+    const apiUrl = apiLinks + "/GetCatg.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetCategory(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetCategory([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const categoryoptions = GetCategory.map((item) => ({
+    value: item.tctgcod,
+    label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+  }));
   const DropdownOption = (props) => {
     return (
       <components.Option {...props}>
@@ -603,13 +691,12 @@ const options = (supplierList || [])
       </components.Option>
     );
   };
-
-  const customStyles1 = (hasError) => ({
+  const customStyles1 = (hasError, width) => ({
     control: (base, state) => ({
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 360,
+      width: width,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -769,11 +856,7 @@ const options = (supplierList || [])
     }),
   });
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
-
+ 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
   const exportPDFHandler = () => {
@@ -782,13 +865,11 @@ const options = (supplierList || [])
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
+      item.code,
       item.Description,
-      item.Debit,
-      item.Credit,
-      item.Balance,
+      item.Rate,
+      item.Qnty,
+      item.Amount,
     ]);
 
     // Add summary row to the table
@@ -797,23 +878,19 @@ const options = (supplierList || [])
       "",
       "",
       "",
-      "Total",
-      String(formatValue(totalDebit)),
-      String(formatValue(totalCredit)),
-      String(formatValue(closingBalance)),
+          String(formatValue(totalDebit.toLocaleString())),
+      String(formatValue(totalCredit.toLocaleString())),
     ]);
 
     // Define table column headers and individual column widths
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
-      "Description",
-      "Debit",
-      "Credit",
-      "Balance",
+      "Code",
+     "Description",
+      "Rate",
+      "Qnty",
+      "Amount",
     ];
-    const columnWidths = [24, 17, 15, 110, 30, 30, 30];
+    const columnWidths = [40, 110, 30,25, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -941,13 +1018,13 @@ const options = (supplierList || [])
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+          if (cellIndex === 20 ) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+          } else if (cellIndex > 1) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1036,15 +1113,7 @@ const options = (supplierList || [])
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
+      
         // Add page numbering
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
@@ -1066,7 +1135,7 @@ const options = (supplierList || [])
         startY += 5; // Adjust vertical position for the company title
         doc.setFont("verdana-regular", "normal");
         addTitle(
-          `General Ledger From: ${fromInputDate} To: ${toInputDate}`,
+          `Customer Sale Comparison Report From: ${fromInputDate} To: ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1078,56 +1147,60 @@ const options = (supplierList || [])
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let status =
-          transectionType === "A"
-            ? "ALL"
-            : transectionType === "CRV"
-              ? "Cash Receive Voucher"
-              : transectionType === "CPV"
-                ? "Cash Payment Voucher"
-                : transectionType === "BRV"
-                  ? "Bank Receive Voucher"
-                  : transectionType === "BPV"
-                    ? "Bank Payment Voucher"
-                    : transectionType === "JRV"
-                      ? "Journal Voucher"
-                      : transectionType === "INV"
-                        ? "Item Sale"
-                        : transectionType === "SRN"
-                          ? "Sale Return"
-                          : transectionType === "BIL"
-                            ? "Purchase"
-                            : transectionType === "PRN"
-                              ? "Purchase Return"
-                              : transectionType === "ISS"
-                                ? "Issue"
-                                : transectionType === "REC"
-                                  ? "Received"
-                                  : transectionType === "SLY"
-                                    ? "Salary"
-                                    : "ALL";
+         let Typefilter =
+           transectionType === "INV"
+             ? "SALE"
+             : transectionType === "SRN"
+               ? "SALE RETURN"
+               : "ALL";
 
-        let search = Companyselectdatavalue.label
-          ? Companyselectdatavalue.label
+        let accountcode = saleTypeselecteddatavalue.label
+          ? saleTypeselecteddatavalue.label
           : "ALL";
 
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(10);
-        doc.text(`Account :`, labelsX, labelsY + 8.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(10);
-        doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+           let companycode = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";
+           let categorycode = categoryselectdatavalue.label
+          ? categoryselectdatavalue.label
+          : "ALL";
+
+           let search = searchQuery ? searchQuery : "";
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Type :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+        doc.text(`Account `, labelsX, labelsY + 8.5); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
+        doc.text(`: ${accountcode}`, labelsX + 20, labelsY + 8.5); // Draw the value next to the label
 
-        startY += 10; // Adjust vertical position for the labels
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Category `, labelsX + 170, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`: ${categorycode}`, labelsX + 195, labelsY + 8.5); // Draw the value next to the label
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+  doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Company `, labelsX, labelsY + 12.8); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`: ${companycode}`, labelsX + 20, labelsY + 12.8); // Draw the value next to the label
+
+
+      
+          doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Type `, labelsX + 170, labelsY + 12.8); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`: ${Typefilter}`, labelsX + 195, labelsY + 12.8); // Draw the value next to the label
+
+
+        startY += 15; // Adjust vertical position for the labels
+
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 34);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1168,7 +1241,7 @@ const options = (supplierList || [])
     handlePagination();
 
     // Save the PDF files
-    doc.save(`GeneralLedger Form ${fromInputDate} To ${toInputDate}.pdf`);
+    doc.save(`CustomerSaleComparisonReport Form ${fromInputDate} To ${toInputDate}.pdf`);
   };
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
@@ -1176,12 +1249,12 @@ const options = (supplierList || [])
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 4; // Ensure this matches the actual number of columns
+    const numColumns = 5; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "center",
       "left",
-     
+      "left",
+      "right",
       "right",
       "right",
     ];
@@ -1227,7 +1300,7 @@ const options = (supplierList || [])
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Supplier Purchase Comparison Report From ${fromInputDate} To ${toInputDate}`,
+      `Customer Sale Comparison Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1242,62 +1315,41 @@ const options = (supplierList || [])
 
     // Add an empty row after the title section
     worksheet.addRow([]);
+    let Typefilter =
+           transectionType === "INV"
+             ? "SALE"
+             : transectionType === "SRN"
+               ? "SALE RETURN"
+               : "ALL";
 
-    let typestatus = "";
-
-    if (transectionType === "A") {
-      typestatus = "ALL";
-    } else if (transectionType === "CRV") {
-      typestatus = "CASH RECEIVE VOUCHER";
-    } else if (transectionType === "CPV") {
-      typestatus = "CASH PAYMENT VOUCHER";
-    } else if (transectionType === "BRV") {
-      typestatus = "BANK RECEIVE VOUCHER";
-    } else if (transectionType === "BPV") {
-      typestatus = "BANK PAYMENT VOUCHER";
-    } else if (transectionType === "JRV") {
-      typestatus = "JOURNAL VOUCHER";
-    } else if (transectionType === "INV") {
-      typestatus = "ITEM SALE";
-    } else if (transectionType === "SRN") {
-      typestatus = "SALE RETURN";
-    } else if (transectionType === "BIL") {
-      typestatus = "PURCHASE";
-    } else if (transectionType === "PRN") {
-      typestatus = "PURCHASE RETURN";
-    } else if (transectionType === "ISS") {
-      typestatus = "ISSUE";
-    } else if (transectionType === "REC") {
-      typestatus = "RECEIVE";
-    } else if (transectionType === "SLY") {
-      typestatus = "SALARY";
-    } else {
-      typestatus = "ALL"; // Default value
-    }
-
-    let Accountselect = Companyselectdatavalue.label
+    let Accountselect = saleTypeselecteddatavalue.label
+      ? saleTypeselecteddatavalue.label
+      : "ALL";
+       let companycode = Companyselectdatavalue.label
       ? Companyselectdatavalue.label
+      : "ALL";
+       let categorycode = categoryselectdatavalue.label
+      ? categoryselectdatavalue.label
       : "ALL";
 
     let typesearch = searchQuery || "";
 
     // Apply styling for the status row
     const typeAndStoreRow2 = worksheet.addRow([
-      "ACCOUNT :",
+      "Account :",
       Accountselect,
       "",
-      "",
-      "TYPE :",
-      typestatus,
+           "Category :",
+      categorycode,
     ]);
 
     const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery ? ["", "", "", "", "SEARCH :", typesearch] : [""],
+     ["Company :", companycode,"",  "Type :", Typefilter] 
     );
 
     // Merge cells for Accountselect (columns B to D)
     worksheet.mergeCells(
-      `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`,
+      `B${typeAndStoreRow2.number}:C${typeAndStoreRow2.number}`,
     );
 
     // Apply styling for the status row
@@ -1305,7 +1357,7 @@ const options = (supplierList || [])
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5].includes(colIndex),
+        bold: [1, 4].includes(colIndex),
       };
       cell.alignment = {
         horizontal: colIndex === 2 ? "left" : "left", // Left align the account name
@@ -1317,7 +1369,7 @@ const options = (supplierList || [])
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [5].includes(colIndex),
+        bold: [1,4].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1341,13 +1393,12 @@ const options = (supplierList || [])
 
     // Add headers
     const headers = [
-      "Date",
-      "Trn#",
-      "Type",
+      "Code",
+    
       "Description",
-      "Debit",
-      "Credit",
-      "Balance",
+      "Rate",
+      "Qnty",
+      "Amount",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1355,13 +1406,11 @@ const options = (supplierList || [])
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item["Trn#"],
-        item.Type,
+        item.code,
         item.Description,
-        item.Debit,
-        item.Credit,
-        item.Balance,
+        item.Rate,
+        item.Qnty,
+        item.Amount,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1383,10 +1432,8 @@ const options = (supplierList || [])
       "",
       "",
       "",
-      "Total",
-      totalDebit,
-      totalCredit,
-      closingBalance,
+     String(totalDebit.toLocaleString()),
+     String(totalCredit.toLocaleString())
     ]);
 
     // total row added
@@ -1401,13 +1448,13 @@ const options = (supplierList || [])
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 5 || colNumber === 6 || colNumber === 7) {
+      if (colNumber === 3 || colNumber === 4 || colNumber === 5) {
         cell.alignment = { horizontal: "right" };
       }
     });
 
     // Set column widths
-    [10, 7, 7, 45, 15, 15, 15].forEach((width, index) => {
+    [20, 45,15, 12, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1470,9 +1517,14 @@ const options = (supplierList || [])
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `GeneralLedger  From ${fromInputDate} To ${toInputDate}.xlsx`);
+    saveAs(blob, `CustomerSaleComparisonReport  From ${fromInputDate} To ${toInputDate}.xlsx`);
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+
+ const handleTransactionTypeChange = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType(selectedTransactionType);
+  };
 
   const dispatch = useDispatch();
 
@@ -1508,23 +1560,18 @@ const options = (supplierList || [])
     width: "80px",
   };
   const secondColWidth = {
-    width: "54px",
+    width: "515px",
   };
-  const thirdColWidth = {
-    width: "32px",
-  };
+//   const thirdColWidth = {
+//     width: "100px",
+//   };
   const forthColWidth = {
-    width: "360px",
+    width: "80px",
   };
   const fifthColWidth = {
-    width: "90px",
+    width: "100px",
   };
-  const sixthColWidth = {
-    width: "90px",
-  };
-  const seventhColWidth = {
-    width: "90px",
-  };
+ 
 
   const sixthcol = { width: "8px" };
 
@@ -1701,7 +1748,7 @@ const options = (supplierList || [])
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="General Ledger" />
+          <NavComponent textdata="Customer Sale Comparison Report" />
 
           <div
             className="row"
@@ -1714,14 +1761,14 @@ const options = (supplierList || [])
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
               {/* ------ */}
 
-              <div
+               <div
                 className="d-flex align-items-center  "
-                style={{ marginRight: "1px" }}
+                style={{ marginLeft: "8px" }}
               >
                 <div
                   style={{
@@ -1760,13 +1807,13 @@ const options = (supplierList || [])
                         const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
 
                         setSaleType(selectedOption.value);
-                        setCompanyselectdatavalue({
+                        setsaleTypeselecteddatavalue({
                           value: selectedOption.value,
                           label: description, // Keep only the description
                         });
                       } else {
                         setSaleType("");
-                        setCompanyselectdatavalue("");
+                        setsaleTypeselecteddatavalue("");
                       }
                     }}
                     onInputChange={(inputValue, { action }) => {
@@ -1777,7 +1824,7 @@ const options = (supplierList || [])
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!saleType),
+                      ...customStyles1(!saleType, 420),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -1793,112 +1840,10 @@ const options = (supplierList || [])
                 </div>
               </div>
 
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
+               <div className="d-flex align-items-center" >
                 <div
                   style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "200px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="CRV">CASH RECEIVE VORCHER</option>
-                    <option value="CPV">Cash PAYMENT VORCHER</option>
-                    <option value="BRV">Bank RECEIVE VORCHER</option>
-                    <option value="BPV">BANK PAYMENT VORCHER</option>
-                    <option value="JRV">JOURNAL VORCHER</option>
-                    <option value="INV">ITEM SALE</option>
-                    <option value="SRN">SALE RETURN</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
-                    <option value="ISS">ISSUE</option>
-                    <option value="REC">RECEIVED</option>
-                    <option value="SLY">SALARY</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div className="d-flex align-items-center">
-                <div
-                  style={{
-                    width: "80px",
+                    width: "50px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -1918,7 +1863,7 @@ const options = (supplierList || [])
                 <div
                   id="fromdatevalidation"
                   style={{
-                    width: "135px",
+                    width: "90px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -1937,7 +1882,7 @@ const options = (supplierList || [])
                   <input
                     style={{
                       height: "20px",
-                      width: "90px",
+                      width: "70px",
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
@@ -1979,7 +1924,7 @@ const options = (supplierList || [])
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "2px",
                             fontSize: getdatafontsize,
                             fontFamily: getfontstyle,
                             color: fontcolor,
@@ -1993,13 +1938,12 @@ const options = (supplierList || [])
                   />
                 </div>
               </div>
-              <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "15px" }}
+              <div className="d-flex align-items-center"
+               style={{marginRight:'5px'}}
               >
                 <div
                   style={{
-                    width: "60px",
+                    width: "40px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -2019,7 +1963,7 @@ const options = (supplierList || [])
                 <div
                   id="todatevalidation"
                   style={{
-                    width: "135px",
+                    width: "90px",
                     border: `1px solid ${fontcolor}`,
                     display: "flex",
                     alignItems: "center",
@@ -2039,7 +1983,7 @@ const options = (supplierList || [])
                     ref={toRef}
                     style={{
                       height: "20px",
-                      width: "90px",
+                      width: "70px",
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
@@ -2053,7 +1997,7 @@ const options = (supplierList || [])
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                    onKeyDown={(e) => handleToKeyPress(e, companyRef)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2081,7 +2025,7 @@ const options = (supplierList || [])
                               selectedRadio === "custom"
                                 ? "pointer"
                                 : "default",
-                            marginLeft: "18px",
+                            marginLeft: "2px",
                             fontSize: getdatafontsize,
                             fontFamily: getfontstyle,
                             color: fontcolor,
@@ -2096,7 +2040,264 @@ const options = (supplierList || [])
                 </div>
               </div>
 
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
+             
+            </div>
+          </div>
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+            
+
+             
+
+               <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Company :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={companyRef}
+                    options={Companyoption}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCompanyselectdata(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setCompanyselectdata("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata, 250),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+             <div                className="d-flex align-items-center"
+                style={{ marginRight: "15px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Type :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={TypeRef}
+                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="INV">SALE</option>
+                    <option value="SRN">SALE RETURN</option>
+                  </select>
+
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div> 
+              
+          
+            </div>
+          </div>
+
+           <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+   
+    <div
+                className="d-flex align-items-center"
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Category :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class "
+                    ref={input1Ref}
+                    options={categoryoptions}
+                    onKeyDown={(e) => handlecategoryKeypress(e, TypeRef)}
+                    id="categoryid"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setCategoryselectdata(selectedOption.value);
+                        setcategoryselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Set only the 'NGS' part of the label
+                        });
+                      } else {
+                        setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setcategoryselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata, 250),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+     <div id="lastDiv" style={{ marginRight: "15px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
                     style={{
@@ -2118,7 +2319,6 @@ const options = (supplierList || [])
                     value={searchQuery}
                     autoComplete="off"
                     style={{
-                      marginRight: "20px",
                       width: "200px",
                       height: "24px",
                       fontSize: getdatafontsize,
@@ -2159,6 +2359,10 @@ const options = (supplierList || [])
                   )}
                 </div>
               </div>
+
+
+
+           
             </div>
           </div>
           <div>
@@ -2198,26 +2402,21 @@ const options = (supplierList || [])
                     }}
                   >
                     <td className="border-dark" style={firstColWidth}>
-                      Date
+                      Code
                     </td>
                     <td className="border-dark" style={secondColWidth}>
-                      Trn#
+                     Description
                     </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Typ
-                    </td>
+                    {/* <td className="border-dark" style={thirdColWidth}>
+                      Rate
+                    </td> */}
                     <td className="border-dark" style={forthColWidth}>
-                      Description
+                      Qnty
                     </td>
                     <td className="border-dark" style={fifthColWidth}>
-                      Debit
+                      Amount
                     </td>
-                    <td className="border-dark" style={sixthColWidth}>
-                      Credit
-                    </td>
-                    <td className="border-dark" style={seventhColWidth}>
-                      Balance
-                    </td>
+                    
 
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
@@ -2252,7 +2451,7 @@ const options = (supplierList || [])
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="7" className="text-center">
+                        <td colSpan="4" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -2265,7 +2464,7 @@ const options = (supplierList || [])
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 7 }).map((_, colIndex) => (
+                            {Array.from({ length: 4 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2276,11 +2475,10 @@ const options = (supplierList || [])
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
+                        {/* <td style={thirdColWidth}></td> */}
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
+                      
                       </tr>
                     </>
                   ) : (
@@ -2302,27 +2500,22 @@ const options = (supplierList || [])
                               //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
                             }}
                           >
-                            <td className="text-center" style={firstColWidth}>
-                              {item.Date}
+                            <td className="text-start" style={firstColWidth}>
+                              {item.code}
                             </td>
-                            <td className="text-center" style={secondColWidth}>
-                              {item["Trn#"]}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
-                            </td>
-                            <td className="text-start" style={forthColWidth}>
+                            <td className="text-start" style={secondColWidth}>
                               {item.Description}
                             </td>
+                            {/* <td className="text-end" style={thirdColWidth}>
+                              {item.Rate}
+                            </td> */}
+                            <td className="text-end" style={forthColWidth}>
+                              { formatValue(item.Qnty)}
+                            </td>
                             <td className="text-end" style={fifthColWidth}>
-                              {formatValue(item.Debit)}
+                              {formatValue(item.Amount)}
                             </td>
-                            <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item.Credit)}
-                            </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Balance)}
-                            </td>
+                            
                           </tr>
                         );
                       })}
@@ -2336,7 +2529,7 @@ const options = (supplierList || [])
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 7 }).map((_, colIndex) => (
+                          {Array.from({ length: 4 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2346,11 +2539,10 @@ const options = (supplierList || [])
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
+                        {/* <td style={thirdColWidth}></td> */}
                         <td style={forthColWidth}></td>
                         <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
+                      
                       </tr>
                     </>
                   )}
@@ -2383,20 +2575,23 @@ const options = (supplierList || [])
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-            <div
+            {/* <div
               style={{
                 ...thirdColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            ></div> */}
             <div
               style={{
                 ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >                  <span className="mobileledger_total">
+                {formatValue(totalDebit.toLocaleString())}
+              </span>
+            </div>
             <div
               style={{
                 ...fifthColWidth,
@@ -2405,31 +2600,10 @@ const options = (supplierList || [])
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(totalDebit)}
+                {formatValue(totalCredit.toLocaleString())}
               </span>
             </div>
-            <div
-              style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalCredit)}
-              </span>
-            </div>
-            <div
-              style={{
-                ...seventhColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(closingBalance)}
-              </span>
-            </div>
+          
           </div>
 
           <div
@@ -2478,33 +2652,3 @@ const options = (supplierList || [])
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

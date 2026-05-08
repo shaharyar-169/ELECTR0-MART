@@ -38,8 +38,8 @@ export default function PayableAggingReport() {
   const input1Ref = useRef(null);
 
   const toRef = useRef(null);
-  const fromRef = useRef(null);
-  const companyRef = useRef(null);
+  const DaysRef = useRef(null);
+  const SearchRef = useRef(null);
   const categoryRef = useRef(null);
   const capacityRef = useRef(null);
   const storeRef = useRef(null);
@@ -59,6 +59,27 @@ export default function PayableAggingReport() {
   const [totalAmt6, setTotalAmt6] = useState(0);
   const [total, setTotal] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
+
+   const [mobileNumber, setmobileNumber] = useState("30");
+  const interval = Number(mobileNumber) || 0;
+
+ const getRanges = (n) => {
+  if (!n) return [];
+
+  return [
+    { label: `0 - ${n}`, key: "Amt001" },
+    { label: `${n} - ${n * 2}`, key: "Amt002" },
+    { label: `${n * 2} - ${n * 3}`, key: "Amt003" },
+    { label: `${n * 3} - ${n * 4}`, key: "Amt004" },
+    { label: `${n * 4} - ${n * 5}`, key: "Amt005" },
+    { label: `${n * 5}+`, key: "Amt006" },
+  ];
+};
+
+const ranges = getRanges(interval);
+
+
+
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -207,6 +228,7 @@ export default function PayableAggingReport() {
       FYerDsc: yeardescription || getyeardescription,
       FRepDat: toInputDate,
       FSchTxt: searchQuery,
+      FRepDay: mobileNumber
 
     }).toString();
 
@@ -301,18 +323,26 @@ export default function PayableAggingReport() {
        String(total),
      ]);
     
-        // Define table column headers and individual column widths
-        const headers = [
-  "Code",
-       "Description",
-       "0 - 30",
-       "31 - 60",
-       "61 - 90",
-       "91 - 120",
-       "121 - 150",
-       "150+",
-       "Balance",
-      ];
+     const getRanges = (n) => {
+  if (!n) return [];
+
+  return [
+    `0 - ${n}`,
+    `${n} - ${n * 2}`,
+    `${n * 2} - ${n * 3}`,
+    `${n * 3} - ${n * 4}`,
+    `${n * 4} - ${n * 5}`,
+    `${n * 5}+`,
+  ];
+};
+
+    // Define table column headers and individual column widths
+    const headers = [
+      "Code",
+      "Customer",
+        ...getRanges(interval),
+       "Total",
+    ];
         const columnWidths = [22, 90, 25, 25, 25, 25, 25, 25, 25];
     
         // Calculate total table width
@@ -776,18 +806,26 @@ export default function PayableAggingReport() {
            };
    
            // Add headers
-           const headers = [
-     "Code",
-      "Description",
-      "0 - 30",
-      "31 - 60",
-      "61 - 90",
-      "91 - 120",
-      "121 - 150",
-      "150+",
-      "Balance",
-  
-           ];
+            const getRanges = (n) => {
+  if (!n) return [];
+
+  return [
+    `0 - ${n}`,
+    `${n} - ${n * 2}`,
+    `${n * 2} - ${n * 3}`,
+    `${n * 3} - ${n * 4}`,
+    `${n * 4} - ${n * 5}`,
+    `${n * 5}+`,
+  ];
+};
+
+    // Define table column headers and individual column widths
+    const headers = [
+      "Code",
+      "Customer",
+        ...getRanges(interval),
+       "Total",
+    ];
            const headerRow = worksheet.addRow(headers);
            headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
    
@@ -939,28 +977,28 @@ export default function PayableAggingReport() {
     width: "80px",
   };
   const secondColWidth = {
-    width: "350px",
+    width: isSidebarVisible ? "200px":'360px',
   };
   const thirdColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const forthColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const fifthColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const sixthColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const seventhColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const eighthColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const ninthColWidth = {
-    width: "80px",
+    width: "100px",
   };
    const sixthcol = {
     width: "8px",
@@ -1154,9 +1192,18 @@ export default function PayableAggingReport() {
                     {item.Code}
                   </td>
 
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Customer}
-                            </td>
+                            <td
+                    className="text-start"
+                    title={item.Customer}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Customer}
+                  </td>
                             <td className="text-end" style={thirdColWidth}>
                               {formatValue(item["Amt001"]) }
                             </td>
@@ -1246,11 +1293,11 @@ export default function PayableAggingReport() {
 
   const contentStyle = {
         width: "100%", // 100vw ki jagah 100%
-        maxWidth: "1000px",
+        maxWidth: isSidebarVisible ? "1000px":'1165px',
         height: "calc(100vh - 100px)",
         position: "absolute",
         top: "70px",
-        left: isSidebarVisible ? "60vw" : "50vw",
+        left: isSidebarVisible ? "60vw" : "52vw",
         transform: "translateX(-50%)",
         display: "flex",
         flexDirection: "column",
@@ -1342,6 +1389,9 @@ export default function PayableAggingReport() {
     if (currentRef.current && nextRef.current) {
       currentRef.current.focus();
       nextRef.current.focus();
+      if(nextRef === DaysRef){
+      nextRef.current.select();
+      }
     }
   };
 
@@ -1393,14 +1443,14 @@ export default function PayableAggingReport() {
       settoInputDate(formattedDate); // Update the state with formatted date
 
       // Move focus to the next element
-      focusNextElement(toRef, searchRef);
+      focusNextElement(toRef, DaysRef);
     }
   };
 
-  const handleSearchEnter = (e) => {
+  const handleDaysEnter = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      focusNextElement(searchRef, selectButtonRef);
+      focusNextElement(DaysRef, searchRef);
     }
   };
   useEffect(() => {
@@ -1411,6 +1461,24 @@ export default function PayableAggingReport() {
   return Number(val) === 0 ? "" : val;
 };
 
+const handleMobilenumberInputChange = (e) => {
+  let value = e.target.value;
+
+  // Allow only numbers
+  value = value.replace(/\D/g, "");
+
+  // Limit to 11 digits
+  if (value.length > 11) {
+    value = value.slice(0, 11);
+  }
+
+  // ❌ if empty or 0 → DO NOTHING (keep previous value)
+  if (value === "" || Number(value) === 0) {
+    return;
+  }
+
+  setmobileNumber(value);
+};
   return (
     <>
       <ToastContainer />
@@ -1538,6 +1606,55 @@ export default function PayableAggingReport() {
                 </div>
               </div>
 
+ <div className="d-flex align-items-center " style={{marginRight:'21px'}}>
+                                <div
+                                    style={{
+                                        width: "80px",
+                                        display: "flex",
+                                        justifyContent: "end",
+                                    }}
+                                >
+                                    <label htmlFor="fromDatePicker">
+                                        <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
+                                            Days :
+                                        </span>{" "}
+                                        <br />
+                                    </label>
+                                </div>
+
+                                <input
+                                    ref={DaysRef}
+                                    value={mobileNumber}
+                                    onKeyDown={handleDaysEnter}
+                                    onChange={handleMobilenumberInputChange}
+                                    autoComplete="off"
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    // placeholder="0302-1127364"
+                                    style={{
+                                        color: fontcolor,
+                                        width: "100px",
+                                        height: "24px",
+                                        fontSize: getdatafontsize, fontFamily: getfontstyle, border: `1px solid ${fontcolor}`,
+                                        backgroundColor: getcolor,
+                                        outline: "none",
+                                        paddingLeft: "10px",
+                                        cursor: "text",
+                                        marginLeft: "3px",
+                                    }}
+                                    onFocus={(e) =>
+                                        (e.currentTarget.style.border = "2px solid red")
+                                    }
+                                    onBlur={(e) =>
+                                        (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                    }
+                                />
+                                </div>
+
+
+
+
               {/* Search */}
               <div id="lastDiv" style={{ marginRight: "1px" }}>
                                 <label for="searchInput" style={{ marginRight: "5px" }}>
@@ -1557,7 +1674,7 @@ export default function PayableAggingReport() {
                                         onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                                         type="text"
                                         id="searchsubmit"
-                                        placeholder="Item description"
+                                        placeholder="Search"
                                         value={searchQuery}
                                         autoComplete="off"
                                         style={{
@@ -1660,72 +1777,23 @@ export default function PayableAggingReport() {
                         style={getIconStyle("Customer")}
                       ></i>
                     </td>
-                   <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Amt001")}
-                    >
-                      0 - 30{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amt001")}
-                      ></i>
-                    </td>
-                   <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Amt002")}
-                    >
-                      30 - 60{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amt002")}
-                      ></i>
-                    </td>
-                   <td
-                      className="border-dark"
-                      style={fifthColWidth}
-                      onClick={() => handleSorting("Amt003")}
-                    >
-                      61 - 90{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amt003")}
-                      ></i>
-                    </td>
-                   <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Amt004")}
-                    >
-                      91 - 120{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amt004")}
-                      ></i>
-                    </td>
-                   <td
-                      className="border-dark"
-                      style={seventhColWidth}
-                      onClick={() => handleSorting("Amt005")}
-                    >
-                      121-150{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amt005")}
-                      ></i>
-                    </td>
-                   <td
-                      className="border-dark"
-                      style={eighthColWidth}
-                      onClick={() => handleSorting("Amt006")}
-                    >
-                      150+{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amt006")}
-                      ></i>
-                    </td>
+
+                     {/* 🔥 Dynamic Range Columns */}
+  {ranges.map((r, i) => (
+    <td
+      key={i}
+      style={thirdColWidth}
+      onClick={() => handleSorting(r.key)}
+    >
+      {r.label}{" "}
+      <i
+        className="fa-solid fa-caret-down caretIconStyle"
+        style={getIconStyle(r.key)}
+      />
+    </td>
+  ))}
+                 
+                     
                      <td
                       className="border-dark"
                       style={ninthColWidth}
@@ -1763,14 +1831,13 @@ export default function PayableAggingReport() {
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                //   width: "100%",
-                    tableLayout: "fixed",   // FIXED!
-                  overflowY: "scroll",
+                 width: "100%",
+                                    position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
 

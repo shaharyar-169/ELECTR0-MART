@@ -193,6 +193,8 @@ import SparePartsStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemR
 import ShopStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ShopStockReport.js";
 import SupplierPurchaseComparison from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SupplierPurchaseComparisonReport.js";
 import SupplierPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SupplierPurchaseReport.js";
+import CustomerSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/CustomerSaleReport.js";
+import CustomerSaleComparisonReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/CustomerSaleComparisonReport.js";
 
 //////////////////////////// EMPLOYEE REPORT //////////////////////////////
 import EmployeeAdvanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeAdvanceReport.js";
@@ -434,6 +436,8 @@ function App() {
                 <Route exact path="/ShopStockReport" element={<ShopStockReport />} />
                 <Route exact path="/SupplierPurchaseComparison" element={<SupplierPurchaseComparison />} />
                 <Route exact path="/SupplierPurchaseReport" element={<SupplierPurchaseReport />} />
+                <Route exact path="/CustomerSaleReport" element={<CustomerSaleReport />} />
+                <Route exact path="/CustomerSaleComparison" element={<CustomerSaleComparisonReport />} />
 
 
                 {/* ROUTES FOR MISC REPORT */}

@@ -195,162 +195,132 @@ export default function CompanyList() {
        });
        
      };
+     
+     const drawBalanceAgingRow = (x, y) => {
+  doc.setFont("verdana-regular", "bold");
+  doc.setFontSize(10);
+
+  const labels = ["0-30", "31-60", "61-90", "91-120", "121-180", "180+"];
+  const colWidth = 25;
+  const height = 6;
+
+  labels.forEach((label, i) => {
+    const cellX = x + i * colWidth;
+
+    // Border
+    doc.rect(cellX, y, colWidth, height);
+
+    // Text centered
+    doc.text(label, cellX + colWidth / 2, y + height / 2, {
+      align: "center",
+      baseline: "middle",
+    });
+  });
+};
  
-     const addTableRows = (startX, startY, startIndex, endIndex) => {
-       const rowHeight = 5;
-       const fontSize = 10;
-       const boldFont = 400;
-       const normalFont = getfontstyle;
-       const tableWidth = getTotalTableWidth();
- 
-      
- 
-       for (let i = startIndex; i < endIndex; i++) {
-         const row = rows[i];
-         const isOddRow = i % 2 !== 0;
-         const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-         const isTotalRow = i === rows.length - 1;
-         let textColor = [0, 0, 0];
-         let fontName = normalFont;
- 
-         if (isRedRow) {
-           textColor = [255, 0, 0];
-           fontName = boldFont;
-         }
- 
-         if (isTotalRow) {
-           doc.setFont("verdana", "bold");
-           doc.setFontSize(10);
-         }
- 
-         if (isOddRow) {
-           doc.setFillColor(240);
-           doc.rect(
-             startX,
-             startY + (i - startIndex + 2) * rowHeight,
-             tableWidth,
-             rowHeight,
-             "F"
-           );
-         }
- 
-         doc.setDrawColor(0);
- 
-         if (isTotalRow) {
-           const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-           const rowBottomY = rowTopY + rowHeight;
- 
-           doc.setLineWidth(0.3);
-           doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-           doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
- 
-           doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-           doc.line(
-             startX,
-             rowBottomY - 0.5,
-             startX + tableWidth,
-             rowBottomY - 0.5
-           );
- 
-           doc.setLineWidth(0.2);
-           doc.line(startX, rowTopY, startX, rowBottomY);
-           doc.line(
-             startX + tableWidth,
-             rowTopY,
-             startX + tableWidth,
-             rowBottomY
-           );
-         } else {
-           doc.setLineWidth(0.2);
-           doc.rect(
-             startX,
-             startY + (i - startIndex + 2) * rowHeight,
-             tableWidth,
-             rowHeight
-           );
-         }
- 
-         row.forEach((cell, cellIndex) => {
-           // ⭐ NEW FIX — Perfect vertical centering
-           const cellY =
-             startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
- 
-           const cellX = startX + 2;
- 
-           doc.setTextColor(textColor[0], textColor[1], textColor[2]);
- 
-           if (!isTotalRow) {
-             doc.setFont("verdana-regular", "normal");
-             doc.setFontSize(10);
-           }
- 
-           const cellValue = String(cell);
- 
-           if (cellIndex === 0 || cellIndex === 2) {
-             const rightAlignX = startX + columnWidths[cellIndex] / 2;
-             doc.text(cellValue, rightAlignX, cellY, {
-               align: "center",
-               baseline: "middle",
-             });
-           } else if (
-           
-             cellIndex === 12 
-          
-           
-           ) {
-             const rightAlignX = startX + columnWidths[cellIndex] - 2;
-             doc.text(cellValue, rightAlignX, cellY, {
-               align: "right",
-               baseline: "middle",
-             });
-           } else {
-             if (isTotalRow && cellIndex === 0 && cell === "") {
-               const totalLabelX = startX + columnWidths[0] / 2;
-               doc.text("", totalLabelX, cellY, {
-                 align: "center",
-                 baseline: "middle",
-               });
-             } else {
-               doc.text(cellValue, cellX, cellY, {
-                 baseline: "middle",
-               });
-             }
-           }
- 
-           if (cellIndex < row.length - 1) {
-             doc.setLineWidth(0.2);
-             doc.line(
-               startX + columnWidths[cellIndex],
-               startY + (i - startIndex + 2) * rowHeight,
-               startX + columnWidths[cellIndex],
-               startY + (i - startIndex + 3) * rowHeight
-             );
-             startX += columnWidths[cellIndex];
-           }
-         });
- 
-         startX = (doc.internal.pageSize.width - tableWidth) / 2;
- 
-         if (isTotalRow) {
-           doc.setFont("verdana-regular", "normal");
-           doc.setFontSize(10);
-         }
-       }
- 
-       
- 
-       const lineWidth = tableWidth;
-       const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-       const lineY = pageHeight - 15;
-       doc.setLineWidth(0.3);
-       doc.line(lineX, lineY, lineX + lineWidth, lineY);
-       const headingFontSize = 11;
-       const headingX = lineX + 2;
-       const headingY = lineY + 5;
-       doc.setFont("verdana-regular", "normal");
-       doc.setFontSize(10);
-       doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-     };
+   const addTableRows = (startX, startY, startIndex, endIndex) => {
+  const rowHeight = 5;
+  const tableWidth = getTotalTableWidth();
+
+  // ✅ REQUIRED FONT
+  doc.setFont("verdana-regular", "normal");
+  doc.setFontSize(10);
+
+  for (let i = startIndex; i < endIndex; i++) {
+    const row = rows[i];
+    const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+    const isTotalRow = i === rows.length - 1;
+
+    let textColor = [0, 0, 0];
+
+    if (isRedRow) {
+      textColor = [255, 0, 0];
+    }
+
+    if (isTotalRow) {
+      doc.setFont("verdana-regular", "bold");
+    }
+
+    doc.setDrawColor(0);
+
+    // Normal border
+    doc.setLineWidth(0.2);
+    doc.rect(
+      startX,
+      startY + (i - startIndex + 2) * rowHeight,
+      tableWidth,
+      rowHeight
+    );
+
+    row.forEach((cell, cellIndex) => {
+      // ✅ PERFECT VERTICAL CENTER
+      const cellY =
+        startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+
+      const cellX = startX + 2;
+
+      doc.setTextColor(...textColor);
+
+      const cellValue = String(cell);
+
+      if (cellIndex === 12) {
+        const centerX = startX + columnWidths[cellIndex] / 2;
+        doc.text(cellValue, centerX, cellY, {
+          align: "center",
+          baseline: "middle",
+        });
+      } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+        const rightX = startX + columnWidths[cellIndex] - 2;
+        doc.text(cellValue, rightX, cellY, {
+          align: "right",
+          baseline: "middle",
+        });
+      } else {
+        doc.text(cellValue, cellX, cellY, {
+          baseline: "middle",
+        });
+      }
+
+      // Column borders
+      if (cellIndex < row.length - 1) {
+        doc.setLineWidth(0.2);
+        doc.line(
+          startX + columnWidths[cellIndex],
+          startY + (i - startIndex + 2) * rowHeight,
+          startX + columnWidths[cellIndex],
+          startY + (i - startIndex + 3) * rowHeight
+        );
+        startX += columnWidths[cellIndex];
+      }
+    });
+
+    startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+    // ===== BALANCE AGING =====
+    if (isTotalRow) {
+      const agingTableWidth = 40 + 25 * 6;
+      const agingStartX =
+        (doc.internal.pageSize.width - agingTableWidth) / 2;
+
+      const agingStartY =
+        startY + (i - startIndex + 2) * rowHeight;
+
+      drawBalanceAgingRow(agingStartX + 27.5, agingStartY);
+      continue;
+    }
+  }
+
+  // Footer
+  const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+  const lineY = pageHeight - 15;
+
+  doc.setLineWidth(0.3);
+  doc.line(lineX, lineY, lineX + tableWidth, lineY);
+
+  doc.setFontSize(11);
+  doc.setTextColor(0);
+  doc.text(`Crystal Solution \t ${date} \t ${time}`, lineX + 2, lineY + 5);
+};
  
      // Function to calculate total table width
      const getTotalTableWidth = () => {

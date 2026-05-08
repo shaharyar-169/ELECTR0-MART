@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+
+import axios from "axios";
+
 import { useTheme } from "../../../../ThemeContext";
 import {
   getUserData,
@@ -21,15 +23,14 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-// import { fetchGetUser } from "../../Redux/action";
-import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
+import { fetchGetUser } from "../../../Redux/action";
+import "./misc.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Balance } from "@mui/icons-material";
 
 
-export default function GeneralLedger() {
+export default function IncomeStatement() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -54,6 +55,7 @@ export default function GeneralLedger() {
   const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
 
   const [tableData, setTableData] = useState([]);
+  console.log('incomesatatment data', tableData)
 
   const [totalQnty, setTotalQnty] = useState(0);
   const [totalOpening, setTotalOpening] = useState(0);
@@ -312,9 +314,7 @@ export default function GeneralLedger() {
     let errorType = "";
 
     switch (true) {
-      case !saleType:
-        errorType = "saleType";
-        break;
+   
       case !fromInputDate:
         errorType = "fromDate";
         break;
@@ -361,10 +361,7 @@ export default function GeneralLedger() {
     }
 
     switch (errorType) {
-      case "saleType":
-        toast.error("Please select a Account Code");
-        return;
-
+      
       case "fromDate":
         toast.error("From date is required");
         return;
@@ -411,363 +408,76 @@ export default function GeneralLedger() {
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/GeneralLedger.php";
-    setIsLoading(true);
-    const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
-      FAccCod: saleType,
-      code: organisation.code,
+   const apiUrl = apiLinks + "/IncomeStatement.php";
+
+setIsLoading(true);
+
+const formData = new URLSearchParams({
+  FIntDat: fromInputDate,
+  FFnlDat: toInputDate,
+  FRepRat: transectionType,
+
+   code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+      FYerDsc: yeardescription || getyeardescription,
 
-      // code: 'AGCOMP',
-      // FLocCod: '001',
-      // FYerDsc: '2025-2025'
-    }).toString();
+  // code: "EJAZCENTRE",
+  // FLocCod: "001",
+  // FYerDsc: "2025-2025",
+}).toString();
 
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setIsLoading(false);
+axios
+  .post(apiUrl, formData)
+  .then((response) => {
+    setIsLoading(false);
 
-        setTotalDebit(response.data["Total Debit "]);
-        setTotalCredit(response.data["Total Credit"]);
-        setClosingBalance(response.data["Closing Bal "]);
+    if (response.data && typeof response.data === "object") {
+      setTableData(response.data);
+    } else {
+      console.warn(
+        "Response data structure is not as expected:",
+        response.data
+      );
 
-        if (response.data && Array.isArray(response.data.Detail)) {
-          setTableData(response.data.Detail);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data.Detail,
-          );
-          setTableData([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setIsLoading(false);
-      });
+      setTableData({});
+    }
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+    setIsLoading(false);
+  });
   }
 
   useEffect(() => {
-    const hasComponentMountedPreviously =
-      sessionStorage.getItem("componentMounted");
-    if (
-      !hasComponentMountedPreviously ||
-      (saleSelectRef && saleSelectRef.current)
-    ) {
-      if (saleSelectRef && saleSelectRef.current) {
-        setTimeout(() => {
-          saleSelectRef.current.focus();
-          // saleSelectRef.current.select();
-        }, 0);
-      }
-      sessionStorage.setItem("componentMounted", "true");
-    }
-  }, []);
+     const hasComponentMountedPreviously =
+       sessionStorage.getItem("componentMounted");
+     if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
+       if (fromRef && fromRef.current) {
+         setTimeout(() => {
+           fromRef.current.focus();
+           fromRef.current.select();
+         }, 0);
+       }
+       sessionStorage.setItem("componentMounted", "true");
+     }
+   }, []);
+ 
+   useEffect(() => {
+     const currentDate = new Date();
+     setSelectedToDate(currentDate);
+     settoInputDate(formatDate(currentDate));
+ 
+     const firstDateOfCurrentMonth = new Date(
+       currentDate.getFullYear(),
+       currentDate.getMonth(),
+       1
+     );
+     setSelectedfromDate(firstDateOfCurrentMonth);
+     setfromInputDate(formatDate(firstDateOfCurrentMonth));
+   }, []);
 
 
-     useEffect(() => {
-      const storedData = sessionStorage.getItem("GeneralLedgerData");
-    
-      let toDate = new Date(); // default today
-      let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
-    
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-    
-        // ✅ TO DATE
-        if (parsedData.toInputDate) {
-          const [day, month, year] = parsedData.toInputDate.split("-").map(Number);
-          toDate = new Date(year, month - 1, day);
-        }
-    
-        // ✅ FROM DATE
-        if (parsedData.fromInputDate) {
-          // Case: Payable Report (both dates)
-          const [day, month, year] = parsedData.fromInputDate.split("-").map(Number);
-          fromDate = new Date(year, month - 1, day);
-        } else {
-          // Case: Payable Aging (only toDate)
-          fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
-        }
-      }
-    
-      // ✅ Apply states
-      setSelectedToDate(toDate);
-      settoInputDate(formatDate(toDate));
-    
-      setSelectedfromDate(fromDate);
-      setfromInputDate(formatDate(fromDate));
-    
-    }, []);
-
-useEffect(() => {
-  const apiUrl = apiLinks + "/GetActiveAccounts.php";
-  const formData = new URLSearchParams({
-  code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-
-    //  FLocCod: '001',
-    // code: 'AGCOMP',
-  }).toString();
-
-  axios
-    .post(apiUrl, formData)
-    .then((response) => {
-      // Ensure we always have an array
-      const data = response.data || [];
-      setSupplierList(data);
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-      setSupplierList([]); // fallback to empty array
-    });
-}, []);
-
-// Create options, filtering out invalid items
-const options = (supplierList || [])
-  .filter(item => item?.tacccod != null) // keep only items with a valid tacccod
-  .map(item => ({
-    value: item.tacccod,
-    label: `${item.tacccod}${item.taccdsc ? ` - ${item.taccdsc.trim()}` : ''}`
-  }));
-
-  useEffect(() => {
-    if (options.length === 0) return;
-    if (isItemInitialized) return;
-
-    const storedData = sessionStorage.getItem("GeneralLedgerData");
-    let selectedOption = null;
-
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      const clickedCode = parsedData.code?.trim();
-      if (parsedData.code) {
-        setIsDoubleClickOpen(true); // ✅ ADD
-      }
-      selectedOption = options.find((opt) => opt.value?.trim() === clickedCode);
-
-      sessionStorage.removeItem("GeneralLedgerData");
-    }
-
-    if (!selectedOption) {
-      selectedOption = options[0];
-    }
-
-    if (selectedOption) {
-      setSaleType(selectedOption.value);
-
-      const description = selectedOption.label
-        .split("-")
-        .slice(1)
-        .join("-")
-        .trim();
-
-      setCompanyselectdatavalue({
-        value: selectedOption.value,
-        label: description,
-      });
-
-      setIsCodeReady(true); // ✅ IMPORTANT
-    }
-
-    setIsItemInitialized(true);
-  }, [options, isItemInitialized]);
-
-  useEffect(() => {
-    // 🔥 Dono cheezain ready hon
-    if (isDoubleClickOpen && isCodeReady) {
-      fetchReceivableReport();
-    }
-  }, [isDoubleClickOpen, isCodeReady]);
-
-  const DropdownOption = (props) => {
-    return (
-      <components.Option {...props}>
-        <div
-          style={{
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            paddingBottom: "5px",
-            lineHeight: "3px",
-            // color: fontcolor,
-            textAlign: "start",
-          }}
-        >
-          {props.data.label}
-        </div>
-      </components.Option>
-    );
-  };
-
-  const customStyles1 = (hasError) => ({
-    control: (base, state) => ({
-      ...base,
-      height: "24px",
-      minHeight: "unset",
-      width: 360,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: getcolor,
-      color: fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      borderRadius: 0,
-      border: `1px solid ${fontcolor}`,
-      transition: "border-color 0.15s ease-in-out",
-      "&:hover": {
-        borderColor: state.isFocused ? base.borderColor : fontcolor,
-      },
-      padding: "0 8px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      boxShadow: "none",
-      "&:focus-within": {
-        borderColor: "#3368B5",
-        boxShadow: "0 0 0 1px #3368B5",
-      },
-    }),
-
-    menu: (base) => ({
-      ...base,
-      marginTop: "5px",
-      borderRadius: 0,
-      backgroundColor: getcolor,
-      border: `1px solid ${fontcolor}`,
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      zIndex: 9999,
-    }),
-    menuList: (base) => ({
-      ...base,
-      padding: 0,
-      maxHeight: "200px",
-      // Scrollbar styling for Webkit browsers
-      "&::-webkit-scrollbar": {
-        width: "8px",
-        height: "8px",
-      },
-      "&::-webkit-scrollbar-track": {
-        background: getcolor,
-        borderRadius: "10px",
-      },
-      "&::-webkit-scrollbar-thumb": {
-        backgroundColor: fontcolor,
-        borderRadius: "10px",
-        border: `2px solid ${getcolor}`,
-        "&:hover": {
-          backgroundColor: "#3368B5",
-        },
-      },
-      // Scrollbar styling for Firefox
-      scrollbarWidth: "thin",
-      scrollbarColor: `${fontcolor} ${getcolor}`,
-    }),
-    option: (base, state) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: state.isSelected
-        ? "#3368B5"
-        : state.isFocused
-          ? "#3368B5"
-          : getcolor,
-      color: state.isSelected || state.isFocused ? "white" : fontcolor,
-      "&:hover": {
-        backgroundColor: "#3368B5",
-        color: "white",
-        cursor: "pointer",
-      },
-      "&:active": {
-        backgroundColor: "#1a66cc",
-      },
-      transition: "background-color 0.2s ease, color 0.2s ease",
-    }),
-    dropdownIndicator: (base, state) => ({
-      ...base,
-      padding: 0,
-      marginTop: "-5px",
-      fontSize: "18px",
-      display: "flex",
-      textAlign: "center",
-      color: fontcolor,
-      transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen
-        ? "rotate(180deg)"
-        : "rotate(0deg)",
-      "&:hover": {
-        color: "#3368B5",
-      },
-    }),
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-    singleValue: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      textAlign: "left",
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    input: (base) => ({
-      ...base,
-      color: getcolor === "white" ? "black" : fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      marginTop: "-5px",
-    }),
-    clearIndicator: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      padding: "0 4px",
-      color: fontcolor,
-      "&:hover": {
-        color: "#ff4444",
-      },
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: `${fontcolor}80`, // 50% opacity
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      marginTop: "-5px",
-    }),
-    noOptionsMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    loadingMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    multiValue: (base) => ({
-      ...base,
-      backgroundColor: `${fontcolor}20`, // Light background for tags
-    }),
-    multiValueLabel: (base) => ({
-      ...base,
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    multiValueRemove: (base) => ({
-      ...base,
-      color: `${fontcolor}80`,
-      "&:hover": {
-        backgroundColor: "#ff4444",
-        color: "white",
-      },
-    }),
-  });
+ 
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
@@ -1564,7 +1274,7 @@ const options = (supplierList || [])
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "600px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1688,6 +1398,19 @@ const options = (supplierList || [])
     );
   };
 
+
+  const boxStyle = {
+  fontSize: getdatafontsize,
+  fontFamily: getfontstyle,
+  width: "100%",
+  height: "100%",
+  border: `1px solid ${fontcolor}`,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "end",
+  paddingRight: "5px",
+};
+
   return (
     <>
       <ToastContainer />
@@ -1701,7 +1424,7 @@ const options = (supplierList || [])
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="General Ledger" />
+          <NavComponent textdata="Income Statement" />
 
           <div
             className="row"
@@ -1719,183 +1442,7 @@ const options = (supplierList || [])
             >
               {/* ------ */}
 
-              <div
-                className="d-flex align-items-center  "
-                style={{ marginRight: "1px" }}
-              >
-                <div
-                  style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Account :
-                    </span>{" "}
-                    <br />
-                  </label>
-                </div>
-                <div style={{ marginLeft: "5px" }}>
-                  <Select
-                    className="List-select-class"
-                    ref={saleSelectRef}
-                    options={options}
-                    value={
-                      options.find((opt) => opt.value === saleType) || null
-                    } // Ensure correct reference
-                    isDisabled={isDoubleClickOpen}
-                    onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-                    id="selectedsale"
-                    onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelParts = selectedOption.label.split("-"); // Split by "-"
-                        const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
-
-                        setSaleType(selectedOption.value);
-                        setCompanyselectdatavalue({
-                          value: selectedOption.value,
-                          label: description, // Keep only the description
-                        });
-                      } else {
-                        setSaleType("");
-                        setCompanyselectdatavalue("");
-                      }
-                    }}
-                    onInputChange={(inputValue, { action }) => {
-                      if (action === "input-change") {
-                        return inputValue.toUpperCase();
-                      }
-                      return inputValue;
-                    }}
-                    components={{ Option: DropdownOption }}
-                    styles={{
-                      ...customStyles1(!saleType),
-                      placeholder: (base) => ({
-                        ...base,
-                        textAlign: "left",
-                        marginLeft: "0",
-                        justifyContent: "flex-start",
-                        color: fontcolor,
-                        marginTop: "-5px",
-                      }),
-                    }}
-                    // isClearable
-                    // placeholder="ALL"
-                  />
-                </div>
-              </div>
-
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
-              >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="transactionType">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Type :
-                    </span>
-                  </label>
-                </div>
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "200px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
-                    }}
-                  >
-                    <option value="">ALL</option>
-                    <option value="CRV">CASH RECEIVE VORCHER</option>
-                    <option value="CPV">Cash PAYMENT VORCHER</option>
-                    <option value="BRV">Bank RECEIVE VORCHER</option>
-                    <option value="BPV">BANK PAYMENT VORCHER</option>
-                    <option value="JRV">JOURNAL VORCHER</option>
-                    <option value="INV">ITEM SALE</option>
-                    <option value="SRN">SALE RETURN</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
-                    <option value="ISS">ISSUE</option>
-                    <option value="REC">RECEIVED</option>
-                    <option value="SLY">SALARY</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "space-between",
-              }}
-            >
-              <div className="d-flex align-items-center">
+ <div className="d-flex align-items-center">
                 <div
                   style={{
                     width: "80px",
@@ -2095,342 +1642,570 @@ const options = (supplierList || [])
                   />
                 </div>
               </div>
+              
 
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Type :
+                    </span>
+                  </label>
+                </div>
+
                 <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input2Ref}
+                  <select
+                    ref={input1Ref}
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Search"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "200px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
+                    id="submitButton"
+                    name="type"
                     onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
+                      (e.currentTarget.style.border = "4px solid red")
                     }
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "100px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                   
+                  </select>
+
+                  {transectionType !== "" && (
                     <span
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => settransectionType("")}
                       style={{
                         position: "absolute",
-                        right: "30px",
+                        right: "25px",
                         top: "50%",
                         transform: "translateY(-50%)",
                         cursor: "pointer",
-                        fontSize: "20px",
+                        fontWeight: "bold",
                         color: fontcolor,
                         userSelect: "none",
+                        fontSize: "12px",
                       }}
                     >
-                      ×
+                      ✕
                     </span>
                   )}
                 </div>
               </div>
             </div>
           </div>
-          <div>
-            <div
-              style={{
-                overflowY: "auto",
-                // width: "98.8%",
-              }}
-            >
-              <table
-                className="myTable"
-                id="table"
-                style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  // width: "100%",
-                  position: "relative",
-                  paddingRight: "2%",
-                }}
-              >
-                <thead
-                  style={{
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    fontWeight: "bold",
-                    height: "24px",
-                    position: "sticky",
-                    top: 0,
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: getnavbarbackgroundcolor,
-                  }}
-                >
-                  <tr
-                    style={{
-                      backgroundColor: getnavbarbackgroundcolor,
-                      color: "white",
-                    }}
-                  >
-                    <td className="border-dark" style={firstColWidth}>
-                      Date
-                    </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Trn#
-                    </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Typ
-                    </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Description
-                    </td>
-                    <td className="border-dark" style={fifthColWidth}>
-                      Debit
-                    </td>
-                    <td className="border-dark" style={sixthColWidth}>
-                      Credit
-                    </td>
-                    <td className="border-dark" style={seventhColWidth}>
-                      Balance
-                    </td>
 
-                    <td className="border-dark" style={sixthcol}></td>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-            <div
-              className="table-scroll"
-              style={{
-                backgroundColor: textColor,
-                borderBottom: `1px solid ${fontcolor}`,
-                overflowY: "auto",
-                maxHeight: "48vh",
-                // width: "100%",
-                wordBreak: "break-word",
-              }}
-            >
-              <table
-                id="tableBody"
-                style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  position: "relative",
-                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
-                }}
-              >
-                <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="7" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 7 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        ),
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                              color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
-                              //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
-                            }}
-                          >
-                            <td className="text-center" style={firstColWidth}>
-                              {item.Date}
-                            </td>
-                            <td className="text-center" style={secondColWidth}>
-                              {item["Trn#"]}
-                            </td>
-                            <td className="text-center" style={thirdColWidth}>
-                              {item.Type}
-                            </td>
-                            <td className="text-start" style={forthColWidth}>
-                              {item.Description}
-                            </td>
-                            <td className="text-end" style={fifthColWidth}>
-                              {formatValue(item.Debit)}
-                            </td>
-                            <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item.Credit)}
-                            </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Balance)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 7 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                      </tr>
-                    </>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div style={{border:`1px solid ${fontcolor}`}}></div>
+          <div style={{ 
+              maxHeight: "65vh",
+    overflowY: "auto",
+    overflowX: "hidden",
+    }}>
+         
+         {/* SALE SECTION */}
+         <div style={{display:'flex', flexDirection:'column', justifyContent:'start', alignItems:'start'}}>
+         
+          <div 
+          style={{       
+            width:'100%',
+            paddingLeft:'20px',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'start',
+            color:'red'
+                        
+            }} >SALES</div>
 
-          <div
-            style={{
-              borderBottom: `1px solid ${fontcolor}`,
-              borderTop: `1px solid ${fontcolor}`,
-              height: "24px",
-              display: "flex",
-              paddingRight: "8px",
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+              }} >Total Sale For the Period:</div>
+
+             <div style={{width:"20%"}} ></div>
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData["Total Sales"]}
+                </div>
+              </div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+         </div>
+
+         {/* PURCHASE SECTION */}
+         <div style={{display:'flex', flexDirection:'column', gap:"2px",justifyContent:'start', alignItems:'start'}}>
+         
+          <div 
+          style={{       
+            width:'100%',
+            paddingLeft:'20px',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'start',
+            color:'red'
+                        
+            }} >PURCHASE</div>
+
+           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Opening Stock</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+{tableData["Opening Stock"]}
+                </div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Purchases</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:"0px"}} >
+                <div style={boxStyle}>
+  {tableData["Purchases During The Period"]}
+</div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+  <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Stock Available for Sale</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData["Goods Available For Sale"]}
+                </div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Less Closing Stock</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:"0px"}} >
+                <div style={boxStyle}>
+                  {tableData["Less Closing Stock"]}
+                </div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center",
+            color:'red'
+              }} >Less Cost of Goods Sold</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData["Cost Of Goods Sold"]}
+                </div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+
+             <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'30%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center",
+            color:'green'
+              }} >GROSS PROFIT</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>{tableData["GROSS PROFIT"]}</div>
+              </div>
+              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
+                                <div style={boxStyle}>{tableData["GROSS PROFIT Percentage"]}</div>
+
+              </div>
+               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
+           </div>
+
+         </div>
+
+
+         {/* EXPENSE SECTION */}
+
+           <div style={{display:'flex', flexDirection:'column', gap:"2px",justifyContent:'start', alignItems:'start'}}>
+         
+          <div 
+          style={{       
+            width:'100%',
+            paddingLeft:'20px',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'start',
+            color:'red'
+                        
+            }} >EXPENSES</div>
+
+           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+           justifyContent:'end',
+           paddingRight:'10px'
+              }} >Admin Expenses</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>{tableData["Admin Expenses"]}</div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            justifyContent:'end',
+           paddingRight:'10px'
+              }} >Marketing Expenses</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:"0px"}} >
+                <div style={boxStyle}>{tableData["Marketting Expenses"]}</div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+  <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+         justifyContent:'end',
+           paddingRight:'10px'
+              }} >Financail Expenses</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>{tableData["Financial Expenses"]}</div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+
+           
+           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
             
-            }}
-          >
-            <div
-              style={{
-                ...firstColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...secondColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...thirdColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...forthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...fifthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalDebit)}
-              </span>
-            </div>
-            <div
-              style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalCredit)}
-              </span>
-            </div>
-            <div
-              style={{
-                ...seventhColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(closingBalance)}
-              </span>
-            </div>
+           </div>
+
+             <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center",
+            color:"red"
+              }} >Less Total Expenses</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:"0px"}} >
+                <div style={boxStyle}>{tableData[ "Total Expenses"]}</div>
+              </div>
+
+             <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                {/* <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div> */}
+              </div>
+              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
+                                <div style={boxStyle}>{tableData["Expenses Percentage"]}</div>
+
+              </div>
+               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
+
+
+               
+           </div>
+            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'30%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center",
+            color:'green'
+              }} >NET PROFIT</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>{tableData["NET PROFIT"]}</div>
+              </div>
+              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
+                                <div style={boxStyle}>{tableData["NET PROFIT Percentage"]}</div>
+
+              </div>
+               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
+           </div>
+
+        
+          
+
+         </div>
+
+{/* OTHER INCOME */}
+ <div style={{display:'flex', flexDirection:'column', gap:"2px",justifyContent:'start', alignItems:'start'}}>
+         
+          <div 
+          style={{       
+            width:'100%',
+            paddingLeft:'20px',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'start',
+            color:'red'
+                        
+            }} >OTHER INCOME</div>
+
+           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Other Profit</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>{tableData["Other Profit"]}</div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+
+            {/* <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Purchases</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:"0px"}} >
+                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div> */}
+
+  {/* <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Stock Available for Sale</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div> */}
+
+           {/* <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center"
+              }} >Less Closing Stock</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:"0px"}} >
+                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'10%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center",
+            color:'red'
+              }} >Less Cost of Goods Sold</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
+              </div>
+              <div style={{width:"20%"}} ></div>
+               <div style={{width:"20%"}} ></div>
+           </div> */}
+
+
+             <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
+            <div style={{ width:'30%'}} ></div>
+            <div style={{ 
+              width:'30%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            display:'flex',
+            textAlign:"center",
+            color:'green'
+              }} >TOTAL PROFIT</div>
+
+             
+              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>{tableData["TOTAL PROFIT"]}</div>
+              </div>
+              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
+                                <div style={boxStyle}>{tableData["TOTAL PROFIT Percentage"]}</div>
+
+              </div>
+               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
+           </div>
+
+         </div>
+
+
           </div>
+
+        
 
           <div
             style={{
@@ -2478,33 +2253,3 @@ const options = (supplierList || [])
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
