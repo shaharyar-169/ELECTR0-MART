@@ -232,7 +232,8 @@ import MonthlyProfitReport from "./Component/Reports/Daily_Jobs_Reports/Misc Rep
 import TrailBalanceReport from "./Component/Reports/FinancialReports/TrailBalanceREport.js";
 import InstallmentExpiredAccountReport from "./Component/Reports/FinancialReports/InstallmentexpiredAccount.js";
 import InstallmentClosedAccountReport from "./Component/Reports/FinancialReports/InstallmentClosedAccount.js";
-
+import IncomeStatement from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/IncomeStatement.js";
+import BalanceSheet from "./Component/Reports/FinancialReports/BalanceSheet.js";
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
 import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/TaxsaleRegister.js";
@@ -471,8 +472,11 @@ function App() {
 
                 {/* Rountes for Financial reports */}
                     <Route exact path="/TrialBalance" element={<TrailBalanceReport />} />
-                    <Route exact path="/IncomeStatement" element={<InstallmentExpiredAccountReport />} />
-                    <Route exact path="/BalanceSheet" element={<InstallmentClosedAccountReport />} />
+                    {/* <Route exact path="/IncomeStatement" element={<InstallmentExpiredAccountReport />} /> */}
+                    {/* <Route exact path="/BalanceSheet" element={<InstallmentClosedAccountReport />} /> */}
+                    <Route exact path="/IncomeStatement" element={<IncomeStatement />} />
+                    <Route exact path="/BalanceSheet" element={<BalanceSheet />} />
+
 
                 {/* Rountes for item reports */}
                 <Route exact path="/FBRData" element={<FbrDataReport />} />

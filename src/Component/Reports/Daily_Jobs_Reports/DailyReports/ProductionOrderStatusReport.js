@@ -1181,18 +1181,14 @@ companyRow.eachCell((cell) => {
     settransectionType(selectedTransactionType);
   };
 
-
-
-
-
   const firstColWidth = {
-    width: "60px",
+    width: "70px",
   };
   const secondColWidth = {
     width: "80px",
   };
   const thirdColWidth = {
-    width: "300px",
+    width: "290px",
   };
   const forthColWidth = {
     width: "50px",
@@ -1220,35 +1216,26 @@ companyRow.eachCell((cell) => {
   };
 
   const [columns, setColumns] = useState({
-    titmdsc: [],
-    Description: [],
-    Opening: [],
-    Debit: [],
-    Credit: [],
-    Balance: [],
+      PRDNo: [],
+      Date: [],
+       titmdsc: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-    titmdsc: "",
-    Description: "",
-    Opening: "",
-    Debit: "",
-    Credit: "",
-    Balance: "",
+       PRDNo: "",
+      Date: "",
+       titmdsc: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        titmdsc: tableData.map((row) => row.titmdsc),
-        Description: tableData.map((row) => row.Description),
-        Opening: tableData.map((row) => row.Opening),
+      
+        Date: tableData.map((row) => row.Date),
+        PRDNo: tableData.map((row) => row.PRDNo),
+          titmdsc: tableData.map((row) => row.titmdsc),
 
-        Debit: tableData.map((row) => row.Debit),
-        Credit: tableData.map((row) => row.Credit),
-
-        Balance: tableData.map((row) => row.Balance),
       };
       setColumns(newColumns);
     }
@@ -1265,13 +1252,10 @@ companyRow.eachCell((cell) => {
 
   const resetSorting = () => {
     setColumnSortOrders({
-      titmdsc: null,
-
-      Description: null,
-      Opening: null,
-      Debit: null,
-      Credit: null,
-      Balance: null,
+           PRDNo: null,
+      Date: null,
+       titmdsc: null,
+    
     });
   };
 
@@ -1930,26 +1914,26 @@ companyRow.eachCell((cell) => {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                    //   onClick={() => handleSorting("code")}
+                      onClick={() => handleSorting("PRDNo")}
                     >
                       PRD NO
-                      {/* {" "}
+                      {" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
-                      ></i> */}
+                        style={getIconStyle("PRDNo")}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                    //   onClick={() => handleSorting("Description")}
+                      onClick={() => handleSorting("Date")}
                     >
                       Date
-                      {/* {" "}
+                      {" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i> */}
+                        style={getIconStyle("Date")}
+                      ></i>
                     </td>
                     <td
                       className="border-dark"

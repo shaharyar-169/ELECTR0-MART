@@ -427,9 +427,9 @@ export default function ItemSaleReport() {
       FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
 
-      //  code: 'MULTITRD',
+      //  code: 'AGFACTORY',
       // FLocCod: '001',
-      // FYerDsc: '2025-2026',
+    
     }).toString();
 
     axios
@@ -471,19 +471,64 @@ export default function ItemSaleReport() {
     }
   }, []);
 
-  useEffect(() => {
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
+  // useEffect(() => {
+  //   const currentDate = new Date();
+  //   setSelectedToDate(currentDate);
+  //   settoInputDate(formatDate(currentDate));
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1,
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
-  }, []);
+  //   const firstDateOfCurrentMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth(),
+  //     1,
+  //   );
+  //   setSelectedfromDate(firstDateOfCurrentMonth);
+  //   setfromInputDate(formatDate(firstDateOfCurrentMonth));
+  // }, []);
+
+useEffect(() => {
+  const storedData = sessionStorage.getItem("ItemSaleReport");
+
+  let toDate = new Date();
+  let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+
+    if (parsedData.toInputDate) {
+      const [day, month, year] = parsedData.toInputDate
+        .split("-")
+        .map(Number);
+
+      toDate = new Date(year, month - 1, day);
+    }
+
+    if (parsedData.fromInputDate) {
+      const [day, month, year] = parsedData.fromInputDate
+        .split("-")
+        .map(Number);
+
+      fromDate = new Date(year, month - 1, day);
+    } else {
+      fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+    }
+  }
+
+  setSelectedToDate(toDate);
+  settoInputDate(formatDate(toDate));
+
+  setSelectedfromDate(fromDate);
+  setfromInputDate(formatDate(fromDate));
+
+}, []);
+
+useEffect(() => {
+  const storedData = sessionStorage.getItem("ItemSaleReport");
+  if (storedData && fromInputDate && toInputDate) {
+  fetchDailyStatusReport();
+  // ✅ clear after api call
+    sessionStorage.removeItem("ItemSaleReport");
+  }
+}, [fromInputDate, toInputDate]);
 
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCompany.php";

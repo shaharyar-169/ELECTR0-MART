@@ -374,13 +374,12 @@ export default function ExpenseReport2() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getyeardescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getyeardescription,
 
-            code: "FITNESSGYM",
-            FLocCod: '001',
-            FYerDsc: "2025-2025",
+            // code: "AGFACTORY",
+            // FLocCod: '001',
 
             FSchTxt: searchQuery,
 
@@ -425,19 +424,67 @@ export default function ExpenseReport2() {
         }
     }, []);
 
-    useEffect(() => {
-        const currentDate = new Date();
-        setSelectedToDate(currentDate);
-        settoInputDate(formatDate(currentDate));
+    // useEffect(() => {
+    //     const currentDate = new Date();
+    //     setSelectedToDate(currentDate);
+    //     settoInputDate(formatDate(currentDate));
 
-        const firstDateOfCurrentMonth = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            1
-        );
-        setSelectedfromDate(firstDateOfCurrentMonth);
-        setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    //     const firstDateOfCurrentMonth = new Date(
+    //         currentDate.getFullYear(),
+    //         currentDate.getMonth(),
+    //         1
+    //     );
+    //     setSelectedfromDate(firstDateOfCurrentMonth);
+    //     setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    // }, []);
+
+      useEffect(() => {
+      const storedData = sessionStorage.getItem("ExpenseReportData");
+    
+      let toDate = new Date();
+      let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+    
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+    
+        if (parsedData.toInputDate) {
+          const [day, month, year] = parsedData.toInputDate
+            .split("-")
+            .map(Number);
+    
+          toDate = new Date(year, month - 1, day);
+        }
+    
+        if (parsedData.fromInputDate) {
+          const [day, month, year] = parsedData.fromInputDate
+            .split("-")
+            .map(Number);
+    
+          fromDate = new Date(year, month - 1, day);
+        } else {
+          fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+        }
+      }
+    
+      setSelectedToDate(toDate);
+      settoInputDate(formatDate(toDate));
+    
+      setSelectedfromDate(fromDate);
+      setfromInputDate(formatDate(fromDate));
+    
     }, []);
+    
+    useEffect(() => {
+      const storedData = sessionStorage.getItem("ExpenseReportData");
+    
+      if (storedData && fromInputDate && toInputDate) {
+    
+        fetchReceivableReport();
+    
+        // ✅ clear after api call
+        sessionStorage.removeItem("ExpenseReportData");
+      }
+    }, [fromInputDate, toInputDate]);
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {
@@ -1313,23 +1360,6 @@ export default function ExpenseReport2() {
         setSelectedRadio(days === 0 ? "custom" : `${days}days`);
     };
 
-    useEffect(() => {
-        if (selectedRadio === "custom") {
-            const currentDate = new Date();
-            const firstDateOfCurrentMonth = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-            setSelectedfromDate(firstDateOfCurrentMonth);
-            setfromInputDate(formatDate(firstDateOfCurrentMonth));
-            setSelectedToDate(currentDate);
-            settoInputDate(formatDate(currentDate));
-        } else {
-            const days = parseInt(selectedRadio.replace("days", ""));
-            handleRadioChange(days);
-        }
-    }, [selectedRadio]);
 
     const handleKeyPress = (e, nextInputRef) => {
         if (e.key === "Enter") {

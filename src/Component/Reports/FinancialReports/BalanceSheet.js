@@ -4,15 +4,16 @@ import { Link, useNavigate } from "react-router-dom";
 
 import axios from "axios";
 
-import { useTheme } from "../../../../ThemeContext";
+import { useTheme } from "../../../ThemeContext";
 import {
   getUserData,
   getOrganisationData,
   getLocationnumber,
   getYearDescription,
-} from "../../../Auth";
-import NavComponent from "../../../MainComponent/Navform/navbarform";
-import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
+} from "../../Auth";
+
+import NavComponent from "../../MainComponent/Navform/navbarform";
+import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
 import { BsCalendar } from "react-icons/bs";
@@ -24,13 +25,12 @@ import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useHotkeys } from "react-hotkeys-hook";
-import { fetchGetUser } from "../../../Redux/action";
-import "./misc.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { formHelperTextClasses } from "@mui/material";
+import { Balance } from "@mui/icons-material";
 
-
-export default function IncomeStatement() {
+export default function BalanceSheet() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -304,157 +304,112 @@ export default function IncomeStatement() {
     }
   };
 
-  function fetchReceivableReport() {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
-
+function fetchReceivableReport() {
     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-    let hasError = false;
     let errorType = "";
 
     switch (true) {
-   
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
       case !toInputDate:
         errorType = "toDate";
         break;
       default:
-        hasError = false;
         break;
     }
 
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
+    if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
     } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3",
+        "$1-$2-$3"
       );
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+      if (GlobaltoDate && enteredToDate > GlobaltoDate) {
         errorType = "toDateAfterGlobal";
       } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
         errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
       }
     }
 
     switch (errorType) {
-      
-      case "fromDate":
-        toast.error("From date is required");
-        return;
       case "toDate":
-        toast.error("To date is required");
+        toast.error("Rep Date is required");
         return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
+
       case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
+        toast.error("Rep Date must be in the format dd-mm-yyyy");
         return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
+
       case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
+        toast.error(`Rep Date must be before ${GlobaltoDate1}`);
         return;
       case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
+        toast.error(`Rep Date must be after ${GlobalfromDate1}`);
         return;
 
       default:
         break;
     }
 
-    // console.log(data);
-    document.getElementById("fromdatevalidation").style.border =
-      `1px solid ${fontcolor}`;
-    document.getElementById("todatevalidation").style.border =
-      `1px solid ${fontcolor}`;
+    const fromDateElement = document.getElementById("fromdatevalidation");
+    const toDateElement = document.getElementById("todatevalidation");
 
-   const apiUrl = apiLinks + "/IncomeStatement.php";
-
-setIsLoading(true);
-
-const formData = new URLSearchParams({
-  FIntDat: fromInputDate,
-  FFnlDat: toInputDate,
-  FRepRat: transectionType,
-  code: organisation.code,
-  FLocCod: locationnumber || getLocationNumber,
-  FYerDsc: yeardescription || getyeardescription,
-
-//   code: "EJAZCENTRE",
-//   FLocCod: "001",
-
-}).toString();
-
-axios
-  .post(apiUrl, formData)
-  .then((response) => {
-    setIsLoading(false);
-
-    if (response.data && typeof response.data === "object") {
-      setTableData(response.data);
-    } else {
-      console.warn(
-        "Response data structure is not as expected:",
-        response.data
-      );
-
-      setTableData({});
+    if (fromDateElement) {
+      fromDateElement.style.border = `1px solid ${fontcolor}`;
     }
-  })
-  .catch((error) => {
-    console.error("Error:", error);
-    setIsLoading(false);
-  });
+    if (toDateElement) {
+      toDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+
+    const apiUrl = apiLinks + "/BalanceSheet.php";
+    setIsLoading(true);
+  const formData = new URLSearchParams({
+  
+    FRepDat: toInputDate,
+    FRepRat: transectionType,
+  
+     code: organisation.code,
+        FLocCod: locationnumber || getLocationNumber,
+        FYerDsc: yeardescription || getyeardescription,
+  
+    // code: "EJAZCENTRE",
+    // FLocCod: "001",
+    // FYerDsc: "2025-2025",
+  }).toString();
+  
+  axios
+    .post(apiUrl, formData)
+    .then((response) => {
+      setIsLoading(false);
+  
+      if (response.data && typeof response.data === "object") {
+        setTableData(response.data);
+      } else {
+        console.warn(
+          "Response data structure is not as expected:",
+          response.data
+        );
+  
+        setTableData({});
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      setIsLoading(false);
+    });
   }
 
   useEffect(() => {
      const hasComponentMountedPreviously =
        sessionStorage.getItem("componentMounted");
-     if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-       if (fromRef && fromRef.current) {
+     if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+       if (toRef && toRef.current) {
          setTimeout(() => {
-           fromRef.current.focus();
-           fromRef.current.select();
+           toRef.current.focus();
+           toRef.current.select();
          }, 0);
        }
        sessionStorage.setItem("componentMounted", "true");
@@ -1287,8 +1242,10 @@ const exportPDFHandler = () => {
   }, []);
 
   const contentStyle = {
+    
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "660px",
+    maxWidth: "900px",
+   
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1442,6 +1399,7 @@ const DotButton = ({ onClick }) => {
     </div>
   );
 };
+
   return (
     <>
       <ToastContainer />
@@ -1450,12 +1408,12 @@ const DotButton = ({ onClick }) => {
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            // width: "100%",
+            width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Income Statement" />
+          <NavComponent textdata="BalanceSheet" />
 
           <div
             className="row"
@@ -1473,104 +1431,7 @@ const DotButton = ({ onClick }) => {
             >
               {/* ------ */}
 
- <div className="d-flex align-items-center">
-                <div
-                  style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: "12px",
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
+
               <div
                 className="d-flex align-items-center"
                 style={{ marginLeft: "15px" }}
@@ -1590,7 +1451,7 @@ const DotButton = ({ onClick }) => {
                         fontWeight: "bold",
                       }}
                     >
-                      To :
+                        As on :
                     </span>
                   </label>
                 </div>
@@ -1714,7 +1575,7 @@ const DotButton = ({ onClick }) => {
                     value={transectionType}
                     onChange={handleTransactionTypeChange}
                     style={{
-                      width: "100px",
+                      width: "150px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -1756,580 +1617,814 @@ const DotButton = ({ onClick }) => {
             </div>
           </div>
 
+
         <div style={{border:`1px solid ${fontcolor}`}}></div>
-          <div style={{ 
-              maxHeight: "65vh",
+       <div className="row" style={{display:'flex'}}>
+        <div className="col-md-6">
+            <span style={{
+                color:'red',
+                  fontSize: 16,
+            fontFamily: getfontstyle,
+            fontWeight: 600,
+             letterSpacing: "4px",
+
+            }}>ASSETS</span>
+        </div>
+         <div className="col-md-6">
+              <span style={{
+                color:'red',
+                  fontSize: 16,
+            fontFamily: getfontstyle,
+            fontWeight: 600,
+             letterSpacing: "4px",
+
+            }}>LIABILITIES</span>
+         </div>
+       </div>
+
+        <div style={{border:`1px solid ${fontcolor}`}}></div>
+       
+<div className="row" 
+  style={{  
+    width:'100%',
+    margin:'0px',
+    maxHeight: "55vh",
     overflowY: "auto",
     overflowX: "hidden",
-    }}>
+    }}
+>
+    {/* ASSETS SECTION */}
+
+       <div 
+            style={{ 
+          padding:'0px',
+          width:'50%',
+          borderRight:`1px solid ${fontcolor}`,
+          padding:"0px 10px"
+    }}
+    >
          
-         {/* SALE SECTION */}
-         <div style={{display:'flex', flexDirection:'column', justifyContent:'start', alignItems:'start'}}>
+         {/* FIXED ASSETS SECTION */}
+         <div style={{display:'flex', flexDirection:'column', gap:'2px',justifyContent:'start', alignItems:'start'}}>
          
+       <div style={{width:'100%'}}>
           <div 
           style={{       
-            width:'100%',
-            paddingLeft:'20px',
+            width:'50%',
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            textAlign:'start',
-            color:'red'
+            textAlign:'end',
+            color:'red',
+            paddingRight:"5px"
                         
-            }} >SALES</div>
+            }} >FIXED ASSETS</div>
+<div style={{width:"25%"}}></div>
+<div style={{width:"25%"}}></div>
+</div>
 
            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
             <div style={{ 
-              width:'30%', 
+              width:'45%', 
               padding:'0px',
                fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-              }} >Total Sale For the Period:</div>
-
-             <div style={{width:"25%"}} ></div>
-              <div style={{width:'20%', height:'100%', padding:'0px',display:"flex", gap:'2px'}} >
-                <div style={boxStyle}>
-                  {tableData["Total Sales"]}
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Land & Building :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px', display:"flex", gap:"2px"}} >
+            <div style={boxStyle}>
+                  {tableData.ASSETS["FIXED ASSETS"]["LAND & BUILDING"]}
                 </div>
-                <DotButton
-                 onClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                        "ItemSaleReport",
-                        JSON.stringify({
-                          fromInputDate: fromInputDate,
-                          toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/ItemSaleReport", "_blank");
-                    }}
-                />
+<DotButton />
               </div>
-               <div style={{width:"15%"}} ></div>
+               <div style={{width:"25%"}} ></div>
            </div>
-         </div>
-
-         {/* PURCHASE SECTION */}
-         <div style={{display:'flex', flexDirection:'column', gap:"2px",justifyContent:'start', alignItems:'start'}}>
-         
-          <div 
-          style={{       
-            width:'100%',
-            paddingLeft:'20px',
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            textAlign:'start',
-            color:'red'
-                        
-            }} >PURCHASE</div>
-
-           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
             <div style={{ 
-              width:'30%', 
+              width:'45%', 
               padding:'0px',
                fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Opening Stock</div>
-
-             
-              <div style={{width:'23.6%', height:'100%', padding:'0px',display:"flex", gap:'2px'}} >
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Vehicles :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-{tableData["Opening Stock"]}
+                  {tableData.ASSETS["FIXED ASSETS"]["VEHICLES"]}
                 </div>
-                <DotButton
-                 onClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                        "ItemStockFromDate",
-                        JSON.stringify({
-                          fromInputDate: fromInputDate,
-                        //   toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/ItemStockReportElec", "_blank");
-                    }}
-                />
-                <box/>
+                <DotButton/>
               </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
+               <div style={{width:"25%"}} ></div>
            </div>
-
-            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
             <div style={{ 
-              width:'30%', 
+              width:'45%', 
               padding:'0px',
                fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Purchases</div>
-
-             
-              <div style={{width:'23.3%', height:'100%', padding:"0px",display:"flex", gap:'2px'}} >
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Furniture & Fixture :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-  {tableData["Purchases During The Period"]}
-</div>
-<DotButton
-
- onClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      // ✅ pehle dono old sessions remove karo
-  sessionStorage.removeItem("ItemStockFromDate");
-  sessionStorage.removeItem("ItemStockToDate");
-                      sessionStorage.setItem(
-                        "ItemPurchaseReportData",
-                        JSON.stringify({
-                          fromInputDate: fromInputDate,
-                          toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/ItemPurchaseReport", "_blank");
-                    }}
-
-/>
+                  {tableData.ASSETS["FIXED ASSETS"]["FURNITURE & FIXTURE"]}
+                </div>
+                <DotButton/>
               </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
+               <div style={{width:"25%"}} ></div>
            </div>
-
-  <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
             <div style={{ 
-              width:'30%', 
+              width:'45%', 
               padding:'0px',
                fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Stock Available for Sale</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Electric Equipment :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData["Goods Available For Sale"]}
+                  {tableData.ASSETS["FIXED ASSETS"]["ELECTRIC EQUIPMENT"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+               <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Telephone & Mobiles :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["FIXED ASSETS"]["TELEPHONE & MOBILES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >IT Equipment :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["FIXED ASSETS"]["IT EQUIPMENT"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'50%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"25%"}} ></div>
+               <div style={{width:'25%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["FIXED ASSETS"]["Total"]}
                 </div>
               </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div>
-
-           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Less Closing Stock</div>
-
-             
-              <div style={{width:'23.3%', height:'100%', padding:"0px",display:"flex", gap:'2px'}} >
-                <div style={boxStyle}>
-                  {tableData["Less Closing Stock"]}
-                </div>
-                <DotButton
-                
-                   onClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-  sessionStorage.removeItem("ItemStockFromDate");
-  sessionStorage.removeItem("ItemStockToDate");
-                      sessionStorage.setItem(
-                        "ItemStockToDate",
-                        JSON.stringify({
-                        //   fromInputDate: fromInputDate,
-                          toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/ItemStockReportElec", "_blank");
-                    }}
-                />
-              </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div>
-            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center",
-            color:'red'
-              }} >Less Cost of Goods Sold</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={boxStyle}>
-                  {tableData["Cost Of Goods Sold"]}
-                </div>
-              </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div>
-
-
-             <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'30%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center",
-            color:'green'
-              }} >GROSS PROFIT</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={boxStyle}>{tableData["GROSS PROFIT"]}</div>
-              </div>
-              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
-                                <div style={boxStyle}>{tableData["GROSS PROFIT Percentage"]}</div>
-
-              </div>
-               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
-           </div>
-
-         </div>
-
-
-         {/* EXPENSE SECTION */}
-
-           <div style={{display:'flex', flexDirection:'column', gap:"2px",justifyContent:'start', alignItems:'start'}}>
-         
-          <div 
-          style={{       
-            width:'100%',
-            paddingLeft:'20px',
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            textAlign:'start',
-            color:'red'
-                        
-            }} >EXPENSES</div>
-
-           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-           justifyContent:'end',
-           paddingRight:'10px'
-              }} >Admin Expenses</div>
-
-             
-              <div style={{width:'23.3%', height:'100%', padding:'0px',display:"flex", gap:'2px'}} >
-                <div style={boxStyle}>{tableData["Admin Expenses"]}</div>
-                   <DotButton 
-                     onClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                        "ExpenseReportData",
-                        JSON.stringify({
-                          fromInputDate: fromInputDate,
-                          toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/ExpenseReport", "_blank");
-                    }}
-                   />
-              </div>              
-           
-
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div>
-
-            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            justifyContent:'end',
-           paddingRight:'10px'
-              }} >Marketing Expenses</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:"0px"}} >
-                <div style={boxStyle}>{tableData["Marketting Expenses"]}</div>
-              </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div>
-
-  <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-         justifyContent:'end',
-           paddingRight:'10px'
-              }} >Financail Expenses</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={boxStyle}>{tableData["Financial Expenses"]}</div>
-              </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div>
-
-
-           
-           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
             
            </div>
-
-             <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center",
-            color:"red"
-              }} >Less Total Expenses</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:"0px"}} >
-                <div style={boxStyle}>{tableData[ "Total Expenses"]}</div>
-              </div>
-
-             <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                {/* <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div> */}
-              </div>
-              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
-                                <div style={boxStyle}>{tableData["Expenses Percentage"]}</div>
-
-              </div>
-               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
-
-
-               
-           </div>
-            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'30%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center",
-            color:'green'
-              }} >NET PROFIT</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={boxStyle}>{tableData["NET PROFIT"]}</div>
-              </div>
-              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
-                                <div style={boxStyle}>{tableData["NET PROFIT Percentage"]}</div>
-
-              </div>
-               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
-           </div>
-
-        
-          
-
          </div>
 
-{/* OTHER INCOME */}
- <div style={{display:'flex', flexDirection:'column', gap:"2px",justifyContent:'start', alignItems:'start'}}>
+          {/* CASH & BANK BALANCES SECTION */}
+         <div style={{display:'flex', flexDirection:'column', gap:'2px',justifyContent:'start', alignItems:'start'}}>
          
+         
+         <div style={{width:'100%'}}>
           <div 
           style={{       
-            width:'100%',
-            paddingLeft:'20px',
+            width:'50%',
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            textAlign:'start',
-            color:'red'
+            textAlign:'end',
+            color:'red',
+            paddingRight:"5px"
                         
-            }} >OTHER INCOME</div>
-
-           <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
+            }} >CASH & BANK BALANCES</div>
+<div style={{width:"25%"}}></div>
+<div style={{width:"25%"}}></div>
+</div>
+         
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
             <div style={{ 
-              width:'30%', 
+              width:'45%', 
               padding:'0px',
                fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Other Profit</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={boxStyle}>{tableData["Other Profit"]}</div>
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Cash Account :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["CASH & BANK BALANCES"]["CASH ACCOUNT"]}
+                </div>
+                <DotButton/>
               </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
+               <div style={{width:"25%"}} ></div>
            </div>
-
-            {/* <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
             <div style={{ 
-              width:'30%', 
+              width:'45%', 
               padding:'0px',
                fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Purchases</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:"0px"}} >
-                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Banks :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["CASH & BANK BALANCES"]["BANKS"]}
+                </div>
+                <DotButton/>
               </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div> */}
-
-  {/* <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Stock Available for Sale</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
-              </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div> */}
-
-           {/* <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center"
-              }} >Less Closing Stock</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:"0px"}} >
-                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
-              </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
+               <div style={{width:"25%"}} ></div>
            </div>
-            <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'10%'}} ></div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
             <div style={{ 
-              width:'30%', 
+              width:'45%', 
               padding:'0px',
                fontSize: getdatafontsize,
             fontFamily: getfontstyle,
             fontWeight: "bold",
-            display:'flex',
-            textAlign:"center",
-            color:'red'
-              }} >Less Cost of Goods Sold</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={{width:'100%',height:'100%', border:`1px solid ${fontcolor}`}}></div>
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Credit Cards :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["CASH & BANK BALANCES"]["CREDIT CARDS"]}
+                </div>
+                <DotButton/>
               </div>
-              <div style={{width:"20%"}} ></div>
-               <div style={{width:"20%"}} ></div>
-           </div> */}
-
-
-             <div className="row" style={{display:'flex', alignItems:'center',width:'100%', height:'20px',margin:'0px', textAlign:'start'}}>
-            <div style={{ width:'30%'}} ></div>
-            <div style={{ 
-              width:'30%', 
-              padding:'0px',
-               fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            fontWeight: "bold",
-            display:'flex',
-            textAlign:"center",
-            color:'green'
-              }} >TOTAL PROFIT</div>
-
-             
-              <div style={{width:'20%', height:'100%', padding:'0px'}} >
-                <div style={boxStyle}>{tableData["TOTAL PROFIT"]}</div>
-              </div>
-              <div style={{width:"12%", height:'100%', padding:'0px', marginLeft:"10px"}} >
-                                <div style={boxStyle}>{tableData["TOTAL PROFIT Percentage"]}</div>
-
-              </div>
-               <div style={{width:"5%", display:'flex', justifyContent:'start'}} >%</div>
+               <div style={{width:"25%"}} ></div>
            </div>
-
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Cheques :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["CASH & BANK BALANCES"]["CHEQUES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"30%"}} ></div>
+               <div style={{width:'25%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["CASH & BANK BALANCES"]["Total"]}
+                </div>
+              </div>
+            
+           </div>
          </div>
+
+ {/* RECEIVEABLE SECTION */}
+         <div style={{display:'flex', flexDirection:'column', gap:'2px',justifyContent:'start', alignItems:'start'}}>
+         
+       <div style={{width:'100%'}}>
+          <div 
+          style={{       
+            width:'50%',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            color:'red',
+            paddingRight:"5px"
+                        
+            }} >RECEIVEABLE</div>
+<div style={{width:"25%"}}></div>
+<div style={{width:"25%"}}></div>
+</div>
+
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Credit Sale Account :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["RECEIVEABLE"]["CREDIT SALE ACCOUNT"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Salesman Receivable :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["RECEIVEABLE"]["SALESMAN RECEIVABLE"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Staff Advances :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["RECEIVEABLE"]["STAFF ADVANCES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Other Receivables :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["RECEIVEABLE"]["OTHER RECEIVEABLES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+               <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Security Receiables :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["RECEIVEABLE"]["SECURITY RECEIVABLES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Investments :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["RECEIVEABLE"]["INVESTMENTS"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'50%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"25%"}} ></div>
+               <div style={{width:'25%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["RECEIVEABLE"]["Total"]}
+                </div>
+              </div>
+            
+           </div>
+         </div>
+      
+        {/* STOCK SECTION */}
+         <div style={{display:'flex', flexDirection:'column', gap:'2px',justifyContent:'start', alignItems:'start'}}>
+         
+         
+         <div style={{width:'100%'}}>
+          <div 
+          style={{       
+            width:'50%',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            color:'red',
+            paddingRight:"5px"
+                        
+            }} >STOCK</div>
+<div style={{width:"25%"}}></div>
+<div style={{width:"25%"}}></div>
+</div>
+         
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Closing Stock :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["STOCK"]["CLOSING STOCK"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+                      
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'50%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"25%"}} ></div>
+               <div style={{width:'25%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["STOCK"]["Total"]}
+                </div>
+              </div>
+            
+           </div>
+         </div>
+
+
 
 
           </div>
+       
+      {/* LIABILITIES SECTION */}
+           <div 
+            style={{ 
+          padding:'0px',
+          width:'50%',
+           padding:"0px 10px"
+    }}
+    >
+         
+         {/* PAYABLE SECTION */}
+         <div style={{display:'flex', flexDirection:'column', gap:'2px',justifyContent:'start', alignItems:'start'}}>
+         
+          <div 
+          style={{       
+            width:'100%',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'start',
+            color:'red'
+                        
+            }} >PAYABLE</div>
+
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Suppliers :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["PAYABLE"]["SUPPLIERS"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Other Payables :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["PAYABLE"]["OTHER PAYABLES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Commission Payables :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["PAYABLE"]["COMMISSION PAYABLES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Investment By Others :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["PAYABLE"]["INVESTMENT BY OTHERS"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+               <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Security Payables :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["PAYABLE"]["SECURITY PAYABLES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Advance Payables :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["PAYABLE"]["ADVANCES PAYABLES"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'50%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"25%"}} ></div>
+               <div style={{width:'25%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["PAYABLE"]["Total"]}
+                </div>
+              </div>
+            
+           </div>
+         </div>
+
+          {/* CAPITAL SECTION */}
+         <div style={{display:'flex', flexDirection:'column', gap:'2px',justifyContent:'start', alignItems:'start'}}>
+         
+          <div 
+          style={{       
+            width:'100%',
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'start',
+            color:'red'
+                        
+            }} >CAPITAL</div>
+
+         
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Capital :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["CAPITAL"]["CAPITAL"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+           <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Drawing :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["CAPITAL"]["DRAWING"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'45%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} >Profit Transferd :</div>
+               <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["CAPITAL"]["PROFIT TRANSFERD"]}
+                </div>
+                <DotButton/>
+              </div>
+               <div style={{width:"25%"}} ></div>
+           </div>
+            
+            <div className="row" style={{display:'flex',alignItems:'center', height:'20px',width:'100%', margin:'0px', textAlign:'start'}}>
+            <div style={{ 
+              width:'50%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"25%"}} ></div>
+               <div style={{width:'25%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["CAPITAL"]["Total"]}
+                </div>
+              </div>
+            
+           </div>
+         </div>
+
+      
+
+          </div>
+</div>
+
+     {/* FOOTER SECTION */}
+     
+     <div style={{width:'100%', display:'flex',padding:'0', margin:'0' }}>
+         <div style={{width:'50%', margin:'5px 0px',borderTop:`1px solid ${fontcolor}`,borderBottom:`1px solid ${fontcolor}` }}>
+          <div className="row" style={{display:'flex',alignItems:'center', height:'22px',padding:'2px 0px',width:'100%', margin:'0px' }}>
+            <div style={{ 
+              width:'47.5%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"25%"}} ></div>
+               <div style={{width:'23.5%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.ASSETS["Total"]}
+                </div>
+              </div>
+            
+           </div>
+         </div>
+          <div style={{width:'50%', margin:'5px 0px',borderTop:`1px solid ${fontcolor}`,borderBottom:`1px solid ${fontcolor}` }}>
+          <div className="row" style={{display:'flex',alignItems:'center', height:'22px',padding:'2px 0px',width:'100%', margin:'0px' }}>
+            <div style={{ 
+              width:'47.5%', 
+              padding:'0px',
+               fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            fontWeight: "bold",
+            textAlign:'end',
+            paddingRight:'5px'
+              }} ></div>
+                 <div style={{width:"25%"}} ></div>
+               <div style={{width:'23.5%', height:'100%', padding:'0px'}} >
+                <div style={boxStyle}>
+                  {tableData.LIABILITIES["Total"]}
+                </div>
+              </div>
+            
+           </div>
+         </div>
+     </div>
 
         
 

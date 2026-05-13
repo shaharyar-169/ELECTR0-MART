@@ -43,6 +43,8 @@ export default function ItemPurchaseReport() {
   const typeRef = useRef(null);
   const searchRef = useRef(null);
   const selectButtonRef = useRef(null);
+    const [isCodeReady, setIsCodeReady] = useState(false);
+    const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
 
   const [saleType, setSaleType] = useState("");
 
@@ -429,9 +431,9 @@ export default function ItemPurchaseReport() {
       FYerDsc: yeardescription || getyeardescription,
       FTrnTyp: transectionType2,
 
-      // code: 'MULTITRD',
+      // code: 'AGFACTORY',
       // FLocCod: '001',
-      // FYerDsc: '2025-2026',
+    
     }).toString();
 
     axios
@@ -473,19 +475,68 @@ export default function ItemPurchaseReport() {
     }
   }, []);
 
-  useEffect(() => {
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
+  // useEffect(() => {
+  //   const currentDate = new Date();
+  //   setSelectedToDate(currentDate);
+  //   settoInputDate(formatDate(currentDate));
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
-  }, []);
+  //   const firstDateOfCurrentMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth(),
+  //     1
+  //   );
+  //   setSelectedfromDate(firstDateOfCurrentMonth);
+  //   setfromInputDate(formatDate(firstDateOfCurrentMonth));
+  // }, []);
+
+
+useEffect(() => {
+  const storedData = sessionStorage.getItem("ItemPurchaseReportData");
+
+  let toDate = new Date();
+  let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+
+  if (storedData) {
+    const parsedData = JSON.parse(storedData);
+
+    if (parsedData.toInputDate) {
+      const [day, month, year] = parsedData.toInputDate
+        .split("-")
+        .map(Number);
+
+      toDate = new Date(year, month - 1, day);
+    }
+
+    if (parsedData.fromInputDate) {
+      const [day, month, year] = parsedData.fromInputDate
+        .split("-")
+        .map(Number);
+
+      fromDate = new Date(year, month - 1, day);
+    } else {
+      fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+    }
+  }
+
+  setSelectedToDate(toDate);
+  settoInputDate(formatDate(toDate));
+
+  setSelectedfromDate(fromDate);
+  setfromInputDate(formatDate(fromDate));
+
+}, []);
+
+useEffect(() => {
+  const storedData = sessionStorage.getItem("ItemPurchaseReportData");
+
+  if (storedData && fromInputDate && toInputDate) {
+
+    fetchDailyStatusReport();
+
+    // ✅ clear after api call
+    sessionStorage.removeItem("ItemPurchaseReportData");
+  }
+}, [fromInputDate, toInputDate]);
 
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCompany.php";
@@ -2165,6 +2216,7 @@ export default function ItemPurchaseReport() {
                     ref={saleSelectRef}
                     options={options}
                     onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
+                    isDisabled={isDoubleClickOpen}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {

@@ -243,9 +243,10 @@ export default function ItemStockReport() {
       FRepStk: transectionType2,
       FRepRat: transectionType,
 
-      //  code: 'MULTITRD',
+      //  code: 'AGFACTORY',
       // FLocCod: '001',
-      // FYerDsc: '2025-2026',
+    
+
     }).toString();
 
     axios
@@ -287,19 +288,83 @@ export default function ItemStockReport() {
     }
   }, []);
 
-  useEffect(() => {
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
+  // useEffect(() => {
+  //   const currentDate = new Date();
+  //   setSelectedToDate(currentDate);
+  //   settoInputDate(formatDate(currentDate));
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1,
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
-  }, []);
+  //   const firstDateOfCurrentMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth(),
+  //     1,
+  //   );
+  //   setSelectedfromDate(firstDateOfCurrentMonth);
+  //   setfromInputDate(formatDate(firstDateOfCurrentMonth));
+  // }, []);
+
+
+useEffect(() => {
+
+  let finalDate = new Date();
+
+  const fromDateData = sessionStorage.getItem("ItemStockFromDate");
+  const toDateData = sessionStorage.getItem("ItemStockToDate");
+
+  // ✅ FROM DATE
+  if (fromDateData) {
+
+    const parsedData = JSON.parse(fromDateData);
+
+    if (parsedData.fromInputDate) {
+
+      const [day, month, year] = parsedData.fromInputDate
+        .split("-")
+        .map(Number);
+
+      finalDate = new Date(year, month - 1, day);
+    }
+  }
+
+  // ✅ TO DATE
+  if (toDateData) {
+
+    const parsedData = JSON.parse(toDateData);
+
+    if (parsedData.toInputDate) {
+
+      const [day, month, year] = parsedData.toInputDate
+        .split("-")
+        .map(Number);
+
+      finalDate = new Date(year, month - 1, day);
+    }
+  }
+
+  setSelectedToDate(finalDate);
+  settoInputDate(formatDate(finalDate));
+
+}, []);
+
+// =========================
+// AUTO API CALL
+// =========================
+useEffect(() => {
+
+  const fromDateData = sessionStorage.getItem("ItemStockFromDate");
+  const toDateData = sessionStorage.getItem("ItemStockToDate");
+
+  if ((fromDateData || toDateData) && toInputDate) {
+
+    fetchDailyStatusReport();
+
+    sessionStorage.removeItem("ItemStockFromDate");
+    sessionStorage.removeItem("ItemStockToDate");
+  }
+
+}, [toInputDate]);
+
+
+
 
   useEffect(() => {
     const apiUrl = apiLinks + "/GetCompany.php";
