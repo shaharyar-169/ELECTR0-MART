@@ -172,6 +172,7 @@ import ItemStoreStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemRep
 import ItemSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleReport.js";
 import ItemPurchaseReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItempurchaseReport.js";
 import ItemStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemStatusReport.js";
+import ItemStatusComparisonReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemStatusComparisonReport.js";
 import ItemSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleSummaryReport.js";
 import ItemEvalutionReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemEvalutionReport.js";
 import ItemReorderLevelReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemReorderLevelReport.js";
@@ -211,6 +212,7 @@ import EmployeeCommissionComparison from "./Component/Reports/Daily_Jobs_Reports
 import EmployeeFixCommissionReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeFixCommissionRepoet.js";
 import EmployeeFixCommissionSummary from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeFixCommissionSummary.js";
 import EmployeeFixCommissionComparison from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeeFixCommissionComparison.js";
+import EmployeePerformanceReport from "./Component/Reports/Daily_Jobs_Reports/EmployeeReports/EmployeePerformanceReport.js";
 
 //////////////////////////// Transection reports //////////////////////////////
 import MemberCreditMemo from "./Component/Transaction/CreditMemoBil.js";
@@ -416,6 +418,7 @@ function App() {
                 <Route exact path="/ItemSaleReport" element={<ItemSaleReport />} />
                 <Route exact path="/ItemPurchaseReport" element={<ItemPurchaseReport />} />
                 <Route exact path="/ItemStatusReport" element={<ItemStatusReport />} />
+                <Route exact path="/SlowMovingReport" element={<ItemStatusComparisonReport />} />
                 <Route exact path="/ItemSaleSummary" element={<ItemSaleSummaryReport />} />
                 <Route exact path="/ItemSaleComparison" element={<ItemEvalutionReport />} />
                 <Route exact path="/CompanySaleComparison" element={<ItemReorderLevelReport />} />
@@ -467,7 +470,8 @@ function App() {
                 <Route exact path="/EmployeeCommissionComparison" element={<EmployeeCommissionComparison />} />
                 <Route exact path="/FixCommissionReport" element={<EmployeeFixCommissionReport />} />
                 <Route exact path="/FixCommissionSummaryReport" element={<EmployeeFixCommissionSummary />} />
-                <Route exact path="/EmployeePerformanceReport" element={<EmployeeFixCommissionComparison />} />
+                {/* <Route exact path="/EmployeePerformanceReport" element={<EmployeeFixCommissionComparison />} /> */}
+                <Route exact path="/EmployeePerformanceReport" element={<EmployeePerformanceReport />} />
 
 
                 {/* Rountes for Financial reports */}
