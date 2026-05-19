@@ -371,9 +371,9 @@ useEffect(() => {
       cusDate: toInputDate,
       cusYear: transectionType,
       cusId: saleType,
-      // code: "AMRELEC",
-      // FLocCod: "001",
-      // FYerDsc: "2019-2025",
+    //   code: "AMRELEC",
+    //   FLocCod: "001",
+    //   FYerDsc: "2019-2025",
     }).toString();
 
     axios
@@ -455,8 +455,8 @@ useEffect(() => {
     const formData = new URLSearchParams({
       FLocCod: getLocationNumber,
       code: organisation.code,
-      // FLocCod: "001",
-      // code: "AMRELEC",
+    //   FLocCod: "001",
+    //   code: "AMRELEC",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -893,110 +893,275 @@ const drawBalanceAgingRow = (startX, startY) => {
   
 
 
+// const addTableRows = (startX, startY, startIndex, endIndex) => {
+//   const rowHeight = 5;
+//   const fontSize = 10;
+//   const tableWidth = getTotalTableWidth();
+//   doc.setFont("verdana-regular", "normal");
+//   doc.setFontSize(10);
+//   for (let i = startIndex; i < endIndex; i++) {
+//     const row = rows[i];
+//     const isTotalRow = i === rows.length - 1;
+//     const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+//     let textColor = [0, 0, 0];
+//     if (isRedRow) textColor = [255, 0, 0];
+//     doc.setDrawColor(0);
+//     doc.setLineWidth(0.2);
+//     const currentY = startY + (i - startIndex + 2) * rowHeight;
+//     let currentX = startX;
+
+//     // =========================
+//     // ✅ TOTAL ROW (MERGE 1st + 2nd COLUMN)
+//     // =========================
+//     if (isTotalRow) {
+//       const cellY = currentY + rowHeight / 2;
+//       // Merge first 2 columns
+//       const mergedText = `${row[0] || ""} ${row[1] || ""}`;
+//       const mergedWidth = columnWidths[0] + columnWidths[1];
+//       doc.setFont("verdana-regular", "normal");
+//       doc.setTextColor(0);
+//       doc.rect(currentX, currentY, mergedWidth, rowHeight);
+//       doc.text(mergedText, currentX + 2, cellY, { baseline: "middle" });
+//       currentX += mergedWidth;
+
+//       // Remaining columns
+//       for (let cellIndex = 2; cellIndex < row.length; cellIndex++) {
+//         const cellValue = String(row[cellIndex] ?? "");
+//         const cellWidth = columnWidths[cellIndex];
+//         doc.rect(currentX, currentY, cellWidth, rowHeight);
+      
+//         if (      cellIndex === 0 || cellIndex === 2 || cellIndex === 3 ||
+//         cellIndex === 4 || cellIndex === 5  ) {
+//           doc.text(cellValue, currentX + cellWidth - 2, cellY, {
+//             align: "right",
+//             baseline: "middle",
+//           });
+//         } else if (cellIndex === 20) {
+//           doc.text(cellValue, currentX + cellWidth / 2, cellY, {
+//             align: "center",
+//             baseline: "middle",
+//           });
+//         } else {
+//           doc.text(cellValue, currentX + 2, cellY, { baseline: "middle" });
+//         }
+
+        
+//         currentX += cellWidth;
+//       }
+
+//       // Aging Row (below total row)
+//       const agingTableWidth = 40 + 25 * 6;
+//       const agingStartX = (doc.internal.pageSize.width - agingTableWidth) / 2;
+//       const agingStartY = currentY;
+//       drawBalanceAgingRow(agingStartX + 3, agingStartY + 10);
+
+//       // =========================
+//       // ✅ ADDED NOTICE BELOW AGING ROW
+//       // =========================
+//       const noticeText = "In case of any Balance Difference, Contect 0321-4597625 (Accounts Department)";
+//       doc.setFont("verdana-regular", "normal");
+//       doc.setFontSize(11);               // smaller font for notice
+//       doc.setTextColor(0);
+//       const agingRowHeight = 12;        // fixed height from drawBalanceAgingRow
+//       const noticeY = agingStartY + 10 + agingRowHeight + 5; // 4px gap below aging row
+//       doc.text(noticeText, agingStartX + agingTableWidth / 2, noticeY, {
+//         align: "center",
+//       });
+
+//       continue;
+//     }
+
+//     // =========================
+//     // ✅ NORMAL ROWS
+//     // =========================
+//     doc.rect(startX, currentY, tableWidth, rowHeight);
+//     row.forEach((cell, cellIndex) => {
+//       const cellValue = String(cell ?? "");
+//       const cellWidth = columnWidths[cellIndex];
+//       const cellY = currentY + rowHeight / 2;
+//       doc.setTextColor(...textColor);
+//       doc.setFont("verdana-regular", "normal");
+//       if (cellIndex === 20) {
+//         doc.text(cellValue, currentX + cellWidth / 2, cellY, {
+//           align: "center",
+//           baseline: "middle",
+//         });
+//       } else if (
+//         cellIndex === 0 || cellIndex === 2 || cellIndex === 3 ||
+//         cellIndex === 4 || cellIndex === 5
+//       ) {
+//         doc.text(cellValue, currentX + cellWidth - 2, cellY, {
+//           align: "right",
+//           baseline: "middle",
+//         });
+//       } else {
+//         doc.text(cellValue, currentX + 2, cellY, { baseline: "middle" });
+//       }
+//       if (cellIndex < row.length - 1) {
+//         doc.line(
+//           currentX + cellWidth,
+//           currentY,
+//           currentX + cellWidth,
+//           currentY + rowHeight
+//         );
+//       }
+//       currentX += cellWidth;
+//     });
+//   }
+
+//   // =========================
+//   // ✅ FOOTER
+//   // =========================
+//   const lineWidth = tableWidth;
+//   const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+//   const lineY = pageHeight - 15;
+//   doc.setLineWidth(0.3);
+//   doc.line(lineX, lineY, lineX + lineWidth, lineY);
+//   doc.setFontSize(fontSize);
+//   doc.setTextColor(0);
+//   doc.text(`Crystal Solution \t ${date} \t ${time}`, lineX + 2, lineY + 5);
+// };
+
 const addTableRows = (startX, startY, startIndex, endIndex) => {
   const rowHeight = 5;
   const fontSize = 10;
   const tableWidth = getTotalTableWidth();
+
   doc.setFont("verdana-regular", "normal");
   doc.setFontSize(10);
+
   for (let i = startIndex; i < endIndex; i++) {
     const row = rows[i];
     const isTotalRow = i === rows.length - 1;
     const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+
     let textColor = [0, 0, 0];
     if (isRedRow) textColor = [255, 0, 0];
+
     doc.setDrawColor(0);
     doc.setLineWidth(0.2);
+
     const currentY = startY + (i - startIndex + 2) * rowHeight;
     let currentX = startX;
 
     // =========================
-    // ✅ TOTAL ROW (MERGE 1st + 2nd COLUMN)
+    // ❌ TOTAL ROW UI REMOVED (ONLY COMMENTED)
     // =========================
-    // if (isTotalRow) {
-    //   const cellY = currentY + rowHeight / 2;
-    //   // Merge first 2 columns
-    //   const mergedText = `${row[0] || ""} ${row[1] || ""}`;
-    //   const mergedWidth = columnWidths[0] + columnWidths[1];
-    //   doc.setFont("verdana-regular", "normal");
-    //   doc.setTextColor(0);
-    //   doc.rect(currentX, currentY, mergedWidth, rowHeight);
-    //   doc.text(mergedText, currentX + 2, cellY, { baseline: "middle" });
-    //   currentX += mergedWidth;
+    if (isTotalRow) {
+      /*
+      const cellY = currentY + rowHeight / 2;
 
-    //   // Remaining columns
-    //   for (let cellIndex = 2; cellIndex < row.length; cellIndex++) {
-    //     const cellValue = String(row[cellIndex] ?? "");
-    //     const cellWidth = columnWidths[cellIndex];
-    //     doc.rect(currentX, currentY, cellWidth, rowHeight);
-      
-    //     if (      cellIndex === 0 || cellIndex === 2 || cellIndex === 3 ||
-    //     cellIndex === 4 || cellIndex === 5  ) {
-    //       doc.text(cellValue, currentX + cellWidth - 2, cellY, {
-    //         align: "right",
-    //         baseline: "middle",
-    //       });
-    //     } else if (cellIndex === 20) {
-    //       doc.text(cellValue, currentX + cellWidth / 2, cellY, {
-    //         align: "center",
-    //         baseline: "middle",
-    //       });
-    //     } else {
-    //       doc.text(cellValue, currentX + 2, cellY, { baseline: "middle" });
-    //     }
+      const mergedText = `${row[0] || ""} ${row[1] || ""}`;
+      const mergedWidth = columnWidths[0] + columnWidths[1];
 
-        
-    //     currentX += cellWidth;
-    //   }
+      doc.setFont("verdana-regular", "normal");
+      doc.setTextColor(0);
 
-    //   // Aging Row (below total row)
-    //   const agingTableWidth = 40 + 25 * 6;
-    //   const agingStartX = (doc.internal.pageSize.width - agingTableWidth) / 2;
-    //   const agingStartY = currentY;
-    //   drawBalanceAgingRow(agingStartX + 3, agingStartY + 10);
+      doc.rect(currentX, currentY, mergedWidth, rowHeight);
+      doc.text(mergedText, currentX + 2, cellY, { baseline: "middle" });
 
-    //   // =========================
-    //   // ✅ ADDED NOTICE BELOW AGING ROW
-    //   // =========================
-    //   const noticeText = "In case of any Balance Difference, Contect 0321-4597625 (Accounts Department)";
-    //   doc.setFont("verdana-regular", "normal");
-    //   doc.setFontSize(11);               // smaller font for notice
-    //   doc.setTextColor(0);
-    //   const agingRowHeight = 12;        // fixed height from drawBalanceAgingRow
-    //   const noticeY = agingStartY + 10 + agingRowHeight + 5; // 4px gap below aging row
-    //   doc.text(noticeText, agingStartX + agingTableWidth / 2, noticeY, {
-    //     align: "center",
-    //   });
+      currentX += mergedWidth;
 
-    //   continue;
-    // }
+      for (let cellIndex = 2; cellIndex < row.length; cellIndex++) {
+        const cellValue = String(row[cellIndex] ?? "");
+        const cellWidth = columnWidths[cellIndex];
+
+        doc.rect(currentX, currentY, cellWidth, rowHeight);
+
+        if (
+          cellIndex === 0 ||
+          cellIndex === 2 ||
+          cellIndex === 3 ||
+          cellIndex === 4 ||
+          cellIndex === 5
+        ) {
+          doc.text(cellValue, currentX + cellWidth - 2, cellY, {
+            align: "right",
+            baseline: "middle",
+          });
+        } else if (cellIndex === 20) {
+          doc.text(cellValue, currentX + cellWidth / 2, cellY, {
+            align: "center",
+            baseline: "middle",
+          });
+        } else {
+          doc.text(cellValue, currentX + 2, cellY, {
+            baseline: "middle",
+          });
+        }
+
+        currentX += cellWidth;
+      }
+      */
+
+      // =========================
+      // ✅ KEEP AGING ROW
+      // =========================
+      const agingTableWidth = 40 + 25 * 6;
+      const agingStartX =
+        (doc.internal.pageSize.width - agingTableWidth) / 2;
+      const agingStartY = currentY;
+
+      drawBalanceAgingRow(agingStartX + 3, agingStartY + 10);
+
+      // =========================
+      // ✅ NOTICE TEXT
+      // =========================
+      const noticeText =
+        "In case of any Balance Difference, Contect 0321-4597625 (Accounts Department)";
+
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(0);
+
+      const agingRowHeight = 12;
+      const noticeY = agingStartY + 10 + agingRowHeight + 5;
+
+      doc.text(
+        noticeText,
+        agingStartX + agingTableWidth / 2,
+        noticeY,
+        { align: "center" }
+      );
+
+      continue;
+    }
 
     // =========================
     // ✅ NORMAL ROWS
     // =========================
     doc.rect(startX, currentY, tableWidth, rowHeight);
+
     row.forEach((cell, cellIndex) => {
       const cellValue = String(cell ?? "");
       const cellWidth = columnWidths[cellIndex];
       const cellY = currentY + rowHeight / 2;
+
       doc.setTextColor(...textColor);
       doc.setFont("verdana-regular", "normal");
+
       if (cellIndex === 20) {
         doc.text(cellValue, currentX + cellWidth / 2, cellY, {
           align: "center",
           baseline: "middle",
         });
       } else if (
-        cellIndex === 0 || cellIndex === 2 || cellIndex === 3 ||
-        cellIndex === 4 || cellIndex === 5
+        cellIndex === 0 ||
+        cellIndex === 2 ||
+        cellIndex === 3 ||
+        cellIndex === 4 ||
+        cellIndex === 5
       ) {
         doc.text(cellValue, currentX + cellWidth - 2, cellY, {
           align: "right",
           baseline: "middle",
         });
       } else {
-        doc.text(cellValue, currentX + 2, cellY, { baseline: "middle" });
+        doc.text(cellValue, currentX + 2, cellY, {
+          baseline: "middle",
+        });
       }
+
       if (cellIndex < row.length - 1) {
         doc.line(
           currentX + cellWidth,
@@ -1005,6 +1170,7 @@ const addTableRows = (startX, startY, startIndex, endIndex) => {
           currentY + rowHeight
         );
       }
+
       currentX += cellWidth;
     });
   }
@@ -1015,13 +1181,19 @@ const addTableRows = (startX, startY, startIndex, endIndex) => {
   const lineWidth = tableWidth;
   const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
   const lineY = pageHeight - 15;
+
   doc.setLineWidth(0.3);
   doc.line(lineX, lineY, lineX + lineWidth, lineY);
+
   doc.setFontSize(fontSize);
   doc.setTextColor(0);
-  doc.text(`Crystal Solution \t ${date} \t ${time}`, lineX + 2, lineY + 5);
-};
 
+  doc.text(
+    `Crystal Solution \t ${date} \t ${time}`,
+    lineX + 2,
+    lineY + 5
+  );
+};
 
       const getTotalTableWidth = () => {
         let totalWidth = 0;
@@ -1482,7 +1654,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
       bottom: { style: "double" },
       right: { style: "thin" },
     };
-    if (colNumber >= 1 && colNumber <= 5) {
+    if (colNumber >= 1 && colNumber <= 6) {
       cell.alignment = { horizontal: "right" };
     }
   });

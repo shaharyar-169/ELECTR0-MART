@@ -427,14 +427,14 @@ export default function ItemStatusComparisonReport() {
       FCtgCod: Categoryselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
-    //   code: organisation.code,
-    //   FLocCod: locationnumber || getLocationNumber,
-    //   FYerDsc: yeardescription || getyeardescription,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getyeardescription,
       FRepTyp: transectionType,
 
     //  code: 'EJAZCENTRE',
     //   FLocCod: '001',
-    //   FYerDsc: '2025-2025',
+    //   FYerDsc: '2025-2025'
     }).toString();
 
     axios

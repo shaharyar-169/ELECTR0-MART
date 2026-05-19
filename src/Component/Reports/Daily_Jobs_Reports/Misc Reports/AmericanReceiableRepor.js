@@ -54,14 +54,15 @@ export default function AmericanReceivableReport() {
   const [GetTypeData,setGetTypeData]= useState([])
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("A");
+  const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
 
-  const [totalQnty, setTotalQnty] = useState(0);
+ 
   const [totalOpening, setTotalOpening] = useState(0);
-  const [totalDebit, setTotalDebit] = useState(0);
-  const [totalCredit, setTotalCredit] = useState(0);
-  const [closingBalance, setClosingBalance] = useState(0);
+  const [totalSale, settotalSale] = useState(0);
+  const [totalCollection, settotalCollection] = useState(0);
+  const [totalOther, settotalOther] = useState(0);
+   const [totalBalance, settotalBalance] = useState(0);
 
   const [Companyselectdata, setCompanyselectdata] = useState("");
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
@@ -422,13 +423,13 @@ export default function AmericanReceivableReport() {
       // FLocCod: "001",
       // FYerDsc: "2019-2025",
       // code: "AMRELEC",
-   FIntDat: fromInputDate,
+      FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FSalCod : saleType,
       FCtyCod: Cityselectdata,
       FRegCod: Regionselectdata,
-FTypCod: Typeselectdata,
-FAreCod: Areaselectdata,
+      FTypCod: Typeselectdata,
+      FAreCod: Areaselectdata,
          FRepTyp: transectionType,
       FSchTxt: searchQuery,
 
@@ -443,11 +444,13 @@ FAreCod: Areaselectdata,
       .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
-        console.log("Response:", response.data);
+        
         setTotalOpening(response.data["Total Opening"]);
-        setTotalDebit(response.data["Total Debit"]);
-        setTotalCredit(response.data["Total Credit"]);
-        setClosingBalance(response.data["Total Balance"]);
+        settotalSale(response.data["Total Sale"]);
+        settotalCollection(response.data["Total Collection"]);
+        settotalOther(response.data["Total Other"]);
+        settotalBalance(response.data["Total Balance"]);
+
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -856,44 +859,47 @@ FAreCod: Areaselectdata,
     const rows = tableData.map((item) => [
       item.tacccod,
           (item.tcstdsc?.substring(0, 28) || "") ,
-       (item.SalesMan?.substring(0, 20) || "") ,
+      //  (item.SalesMan?.substring(0, 20) || "") ,
       item.SalesManMobile,
         //  (item.Area?.substring(0, 10) || "") ,
         //    (item.Region?.substring(0, 20) || "") ,
-          item.Opening,
-      item.Debit,
-      item.Credit,
+      item.Opening,
+      item.Sale,
+      item.Collection,
+      item.Other,
       item.Balance,
     ]);
 
     // Add summary row to the table
     rows.push([
+          String(formatValue(tableData.length.toLocaleString())),
+
       "",
-      "Total",
        "",
-        "",
-        //  "",
-        //   "",
+       
+     
       String(formatValue(totalOpening)),
-       String(formatValue(totalDebit)),
-       String(formatValue(totalCredit)),
-       String(formatValue(closingBalance)),
+       String(formatValue(totalSale)),
+       String(formatValue(totalCollection)),
+       String(formatValue(totalOther)),
+        String(formatValue(totalBalance)),
     ]);
 
     // Define table column headers and individual column widths
     const headers = [
       "Code",
       "Description",
- "SalMan",
+//  "SalMan",
       "Mobile", 
       // "Area",
       // "Region",
       "Opening",
-      "Debit",
-      "Credit",
+      "Sale",
+      "Collection",
+       "Other",
       "Balance",
     ];
-    const columnWidths = [23,70,50,27,30, 30, 30, 30];
+    const columnWidths = [23,100,27,28,28,28, 28, 28];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -958,7 +964,7 @@ FAreCod: Areaselectdata,
         }
 
         if (isTotalRow) {
-          doc.setFont("verdana", "bold");
+          doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
         }
 
@@ -1025,14 +1031,14 @@ FAreCod: Areaselectdata,
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex===3) {
+          if (cellIndex === 0 || cellIndex===2) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex > 3
+            cellIndex > 2
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1289,19 +1295,21 @@ doc.setFont("verdana-regular", "normal");
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 10; // Ensure this matches the actual number of columns
+    const numColumns = 12; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
       "left",
        "left",
       "left",
-       "left",
       "left",
+        "left",
+          "left",
       "right",
       "right",
       "right",
       "right",
+       "right",
     ];
 
     // Define fonts for different sections
@@ -1364,45 +1372,45 @@ doc.setFont("verdana-regular", "normal");
     let typestatus = "";
 
     if (transectionType === "R") {
-      typestatus = "RECEIABLE";
+      typestatus = "Receivable";
     } else if (transectionType === "P") {
-      typestatus = "PAYABLE";
+      typestatus = "Payable";
     } else {
-      typestatus = "ALL"; // Default value
+      typestatus = "All"; // Default value
     }
 
     let typesearch = searchQuery || "";
 
     let account = Companyselectdatavalue.label
      ? Companyselectdatavalue.label :
-     "ALL";
+     "All";
 
      let Citycode = Cityselectdatavalue.label
      ? Cityselectdatavalue.label :
-     "ALL";
+     "All";
 
      let Regioncode = Regionselectdatavalue.label
      ? Regionselectdatavalue.label :
-     "ALL";
+     "All";
 
       let Typecode = Typeselectdatavalue.label
      ? Typeselectdatavalue.label :
-     "ALL";
+     "All";
 
       let Areacode = Areaselectdatavalue.label
      ? Areaselectdatavalue.label :
-     "ALL";
+     "All";
 
     // Apply styling for the status row
      const typeAndStoreRow2 = worksheet.addRow(
-            ["Saleman :", account, "", "", "", "", "","City :", Citycode]
+            ["Saleman :", account, "", "", "", "City :", Citycode]
     );
 
     const typeAndStoreRow3 = worksheet.addRow(
-             ["Type :", Typecode, "", "", "", "", "","Region :", Regioncode]
+             ["Type :", Typecode, "", "", "", "Region :", Regioncode]
  );
    const typeAndStoreRow4 = worksheet.addRow(
-             ["", "", "", "", "", "", "","Area :", Areacode]
+             ["", "", "", "", "", "Area :", Areacode]
  );
 
     // Merge cells for Accountselect (columns B to D)
@@ -1413,7 +1421,7 @@ doc.setFont("verdana-regular", "normal");
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 8].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1421,7 +1429,7 @@ doc.setFont("verdana-regular", "normal");
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1,8].includes(colIndex),
+        bold: [1,6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1429,7 +1437,7 @@ doc.setFont("verdana-regular", "normal");
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1,8].includes(colIndex),
+        bold: [1,6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -1458,10 +1466,12 @@ doc.setFont("verdana-regular", "normal");
  "SalMan",
       "Mobile", 
       "Area",
-      "Region",
+       "Region",
+      "City",
       "Opening",
-      "Debit",
-      "Credit",
+      "Sale",
+      "Collection",
+      "Other",
       "Balance",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1475,10 +1485,12 @@ doc.setFont("verdana-regular", "normal");
       item.SalesMan ,
       item.SalesManMobile,
        item.Area,
-           item.Region,
+         item.Region,
+           item.City,
           item.Opening,
-      item.Debit,
-      item.Credit,
+      item.Sale,
+      item.Collection,
+       item.Other,
       item.Balance,
       ]);
 
@@ -1498,16 +1510,19 @@ doc.setFont("verdana-regular", "normal");
     });
 
     const totalRow = worksheet.addRow([
-     "",
-      "Total",
+    String(formatValue(tableData.length.toLocaleString())),
+      "",
        "",
         "",
          "",
           "",
-      String(formatValue(totalOpening)),
-       String(formatValue(totalDebit)),
-       String(formatValue(totalCredit)),
-       String(formatValue(closingBalance)),
+            "",
+          "",
+        String(formatValue(totalOpening)),
+       String(formatValue(totalSale)),
+       String(formatValue(totalCollection)),
+       String(formatValue(totalOther)),
+         String(formatValue(Balance)),
     ]);
 
     // total row added
@@ -1523,17 +1538,21 @@ doc.setFont("verdana-regular", "normal");
 
       // Align only the "Total" text to the right
       if (
-        colNumber === 7 ||
-        colNumber === 8 ||
-        colNumber === 9 ||
-        colNumber === 10
+        colNumber > 7
+       
       ) {
         cell.alignment = { horizontal: "right" };
+      }
+       if (
+        colNumber === 1 
+       
+      ) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
     // Set column widths
-    [10, 50,30,12,30,30 ,12, 12, 12, 12, ].forEach((width, index) => {
+    [10, 50,30,12,25,25,25,14,14, 14, 14, 14, ].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1632,50 +1651,93 @@ doc.setFont("verdana-regular", "normal");
     return filteredData;
   };
 
+ const isLargeScreen = window.innerWidth > 1500;
+   const contentStyle = {
+ width: "100%",
+  maxWidth: isSidebarVisible
+    ? (isLargeScreen ? "1270px" : "1000px")
+    : (isLargeScreen ? "1500px" : "1200px"),
+  height: "calc(100vh - 100px)",
+  position: "absolute",
+  top: "70px",
+  left: isSidebarVisible ? "60vw" : "53vw",
+  transform: "translateX(-50%)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden",
+  textAlign: "center",
+  fontSize: "15px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "23px",
+  fontFamily: "verdana",
+  zIndex: 1,
+  padding: "0 20px",
+  boxSizing: "border-box",
+};
+
   const firstColWidth = {
     width: "80px",
   };
   const secondColWidth = {
-    width: isSidebarVisible ? "115px" : "165px",
+    width: isSidebarVisible
+    ? (isLargeScreen ? "230px" : "100px")
+    : (isLargeScreen ? "340px" : "150px"),
   };
   const thirdColWidth = {
-  width: isSidebarVisible ? "115px" : "165px",
+     width: isSidebarVisible
+     ? (isLargeScreen ? "130px" : "80px")
+    : (isLargeScreen ? "150px" : "100px"),
   };
   const forthColWidth = {
-    width: "90px",
+  width: isSidebarVisible
+     ? (isLargeScreen ? "90px" : "70px")
+    : (isLargeScreen ? "90px" : "90px"),
   };
   const fifthColWidth = {
-  width: isSidebarVisible ? "115px" : "165px",
+  width: isSidebarVisible ? "70px" : "100px",
+  };
+   const sixthColWidth1 = {
+    width: isSidebarVisible
+     ? (isLargeScreen ? "130px" : "75px")
+    : (isLargeScreen ? "150px" : "100px"),
   };
   const sixthColWidth = {
-   width: isSidebarVisible ? "115px" : "165px",
+   width: isSidebarVisible ? "65px" : "100px",
   };
     const seventhColWidth = {
-    width: "90px",
+   width: isSidebarVisible ? "90px" : "93px",
   };
     const eightColWidth = {
-    width: "90px",
+ width: isSidebarVisible ? "90px" : "93px",
   };
     const ninthColWidth = {
-    width: "90px",
+   width: isSidebarVisible ? "90px" : "93px",
   };
     const tenthColWidth = {
-    width: "90px",
+  width: isSidebarVisible ? "90px" : "93px",
+  };
+     const elewenthColWidth = {
+   width: isSidebarVisible ? "90px" : "93px",
   };
   const sixthcol = {
     width: "8px",
   };
 
   const [columns, setColumns] = useState({
-    tacccod: [],
+     tacccod: [],
       tcstdsc: [],
       SalesMan: [],
       SalesManMobile: [],
        Area: [],
-      Region: [],
+         Region: [],
+      City: [],
       Opening: [],
-      Debit: [],
-      Credit: [],
+      Sale: [],
+      Collection: [],
+        Other: [],
       Balance: [],
   });
   const [columnSortOrders, setColumnSortOrders] = useState({
@@ -1684,10 +1746,12 @@ doc.setFont("verdana-regular", "normal");
       SalesMan: "",
       SalesManMobile: "",
        Area: "",
-      Region: "",
+         Region: "",
+      City: "",
       Opening: "",
-      Debit: "",
-      Credit: "",
+      Sale: "",
+      Collection: "",
+        Other: "",
       Balance: "",
   });
   // When you receive your initial table data, transform it into column-oriented format
@@ -1700,9 +1764,11 @@ doc.setFont("verdana-regular", "normal");
         SalesManMobile: tableData.map((row) => row.SalesManMobile),
         Area: tableData.map((row) => row.Area),
         Region: tableData.map((row) => row.Region),
+        City: tableData.map((row) => row.City),
         Opening: tableData.map((row) => row.Opening),
-        Debit: tableData.map((row) => row.Debit),
-        Credit: tableData.map((row) => row.Credit),
+        Sale: tableData.map((row) => row.Sale),
+        Collection: tableData.map((row) => row.Collection),
+        Other: tableData.map((row) => row.Other),
         Balance: tableData.map((row) => row.Balance),
       };
       setColumns(newColumns);
@@ -1762,10 +1828,12 @@ doc.setFont("verdana-regular", "normal");
       SalesMan: null,
       SalesManMobile: null,
        Area: null,
-      Region: null,
+         Region: null,
+      City: null,
       Opening: null,
-      Debit: null,
-      Credit: null,
+      Sale: null,
+      Collection: null,
+        Other: null,
       Balance: null,
     });
   };
@@ -1776,7 +1844,7 @@ doc.setFont("verdana-regular", "normal");
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="10" className="text-center">
+              <td colSpan="12" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -1788,7 +1856,7 @@ doc.setFont("verdana-regular", "normal");
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 10 }).map((_, colIndex) => (
+                {Array.from({ length: 12 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1799,11 +1867,13 @@ doc.setFont("verdana-regular", "normal");
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
               <td style={fifthColWidth}></td>
+              <td style={sixthColWidth1}></td>
               <td style={sixthColWidth}></td>
               <td style={seventhColWidth}></td>
               <td style={eightColWidth}></td>
               <td style={ninthColWidth}></td>
               <td style={tenthColWidth}></td>
+               <td style={elewenthColWidth}></td>
             </tr>
           </>
         ) : (
@@ -1894,10 +1964,21 @@ doc.setFont("verdana-regular", "normal");
                               }}
                             >
                               {item.SalesMan}
+                         
                             </td>
-                  <td className="text-start" style={forthColWidth}>
-                    {item.SalesManMobile}
-                  </td>
+                 <td
+                              className="text-start"
+                              title={item.SalesManMobile}
+                              style={{
+                                ...forthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.SalesManMobile}
+                         
+                            </td>
                 <td
                               className="text-start"
                               title={item.Area}
@@ -1910,11 +1991,12 @@ doc.setFont("verdana-regular", "normal");
                             >
                               {item.Area}
                             </td>
-                  <td
+
+                             <td
                               className="text-start"
                               title={item.Region}
                               style={{
-                                ...sixthColWidth,
+                                ...sixthColWidth1,
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -1922,16 +2004,31 @@ doc.setFont("verdana-regular", "normal");
                             >
                               {item.Region}
                             </td>
+                  <td
+                              className="text-start"
+                              title={item.City}
+                              style={{
+                                ...sixthColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {item.City}
+                            </td>
                    <td className="text-end" style={seventhColWidth}>
                     {item.Opening}
                   </td>
                    <td className="text-end" style={eightColWidth}>
-                    {item.Debit}
+                    {item.Sale}
                   </td>
                    <td className="text-end" style={ninthColWidth}>
-                    {item.Credit}
+                    {item.Collection}
                   </td>
                    <td className="text-end" style={tenthColWidth}>
+                    {item.Other}
+                  </td>
+                  <td className="text-end" style={tenthColWidth}>
                     {item.Balance}
                   </td>
                 </tr>
@@ -1947,7 +2044,7 @@ doc.setFont("verdana-regular", "normal");
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 10 }).map((_, colIndex) => (
+                {Array.from({ length: 12 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
@@ -1958,11 +2055,13 @@ doc.setFont("verdana-regular", "normal");
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
               <td style={fifthColWidth}></td>
+              <td style={sixthColWidth1}></td>
               <td style={sixthColWidth}></td>
               <td style={seventhColWidth}></td>
               <td style={eightColWidth}></td>
               <td style={ninthColWidth}></td>
               <td style={tenthColWidth}></td>
+               <td style={elewenthColWidth}></td>
             </tr>
           </>
         )}
@@ -2016,31 +2115,7 @@ doc.setFont("verdana-regular", "normal");
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
 
-  const contentStyle = {
-     width: "100%", // 100vw ki jagah 100%
-    maxWidth: isSidebarVisible ? "1000px" : "1200px",
-        // maxWidth: "1000px",
-
-    height: "calc(100vh - 100px)",
-    position: "absolute",
-    top: "70px",
-    left: isSidebarVisible ? "60vw" : "52vw",
-    transform: "translateX(-50%)",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    textAlign: "center",
-    fontSize: "15px",
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "23px",
-    fontFamily: '"Poppins", sans-serif',
-    zIndex: 1,
-    padding: "0 20px", // Side padding for small screens
-    boxSizing: "border-box", // Padding ko width mein include kare
-  };
+ 
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
@@ -2829,14 +2904,14 @@ doc.setFont("verdana-regular", "normal");
                       paddingLeft: "12px",
                     }}
                   >
-                    <option value="A">ALL</option>
-                    <option value="R">Receiable</option>
-                    <option value="A">Advance</option>
+                    <option value="">ALL</option>
+                    <option value="R">RECEIABLE</option>
+                    <option value="A">ADVANCE</option>
                   </select>
 
-                  {transectionType !== "A" && (
+                  {transectionType !== "" && (
                     <span
-                      onClick={() => settransectionType("A")}
+                      onClick={() => settransectionType("")}
                       style={{
                         position: "absolute",
                         right: "25px",
@@ -3012,15 +3087,26 @@ doc.setFont("verdana-regular", "normal");
                       ></i>
                     </td>
 
-                    <td
+ <td
                       className="border-dark"
-                      style={sixthColWidth}
+                      style={sixthColWidth1}
                       onClick={() => handleSorting("Region")}
                     >
                       Region{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Region")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("City")}
+                    >
+                      City{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("City")}
                       ></i>
                     </td>
 
@@ -3039,29 +3125,41 @@ doc.setFont("verdana-regular", "normal");
                      <td
                       className="border-dark"
                       style={eightColWidth}
-                      onClick={() => handleSorting("Debit")}
+                      onClick={() => handleSorting("Sale")}
                     >
-                      Debit{" "}
+                      Sale{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Debit")}
+                        style={getIconStyle("Sale")}
                       ></i>
                     </td>
 
                      <td
                       className="border-dark"
                       style={ninthColWidth}
-                      onClick={() => handleSorting("Credit")}
+                      onClick={() => handleSorting("Collection")}
                     >
-                      Credit{" "}
+                      Collection{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Credit")}
+                        style={getIconStyle("Collection")}
                       ></i>
                     </td>
                      <td
                       className="border-dark"
                       style={tenthColWidth}
+                      onClick={() => handleSorting("Other")}
+                    >
+                      Other{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Other")}
+                      ></i>
+                    </td>
+
+                     <td
+                      className="border-dark"
+                      style={elewenthColWidth}
                       onClick={() => handleSorting("Balance")}
                     >
                       Balance{" "}
@@ -3158,6 +3256,15 @@ doc.setFont("verdana-regular", "normal");
             >
               {/* <span className="mobileledger_total">{totalCredit}</span> */}
             </div>
+             <div
+              style={{
+                ...sixthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">{closingBalance}</span> */}
+            </div>
             <div
               style={{
                 ...sixthColWidth,
@@ -3183,7 +3290,7 @@ doc.setFont("verdana-regular", "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{formatValue(totalDebit)}</span>
+              <span className="mobileledger_total">{formatValue(totalSale)}</span>
             </div>
              <div
               style={{
@@ -3192,7 +3299,7 @@ doc.setFont("verdana-regular", "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{formatValue(totalCredit)}</span>
+              <span className="mobileledger_total">{formatValue(totalCollection)}</span>
             </div>
              <div
               style={{
@@ -3201,7 +3308,16 @@ doc.setFont("verdana-regular", "normal");
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{formatValue(closingBalance)}</span>
+              <span className="mobileledger_total">{formatValue(totalOther)}</span>
+            </div>
+             <div
+              style={{
+                ...elewenthColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">{formatValue(totalBalance)}</span>
             </div>
           </div>
           <div

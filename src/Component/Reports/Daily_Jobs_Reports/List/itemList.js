@@ -45,7 +45,8 @@ export default function ItemList() {
 
   const [Capacityselectdata, setCapacityselectdata] = useState("");
   const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
-
+  const [tableData, setTableData] = useState([]);
+  console.log("Tbaledata", tableData);
   const [GetCapacity, setGetCapacity] = useState([]);
 
   const [Categoryselectdata, setCategoryselectdata] = useState("");
@@ -100,14 +101,19 @@ export default function ItemList() {
 
     const formData = new URLSearchParams({
       FItmSts:transectionType,
-      FCtgCod: Categoryselectdata,
+     
       FCapCod: Capacityselectdata,
+      FCtgCod: Categoryselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FTypCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+
+      code: 'NASIRTRD',
+      FLocCod: '001',
+      FYerDsc: '2025-2025',
     }).toString();
 
     axios
@@ -124,6 +130,9 @@ export default function ItemList() {
             Category: item.Category,
             Capacity: item.Capacity,
             Type: item.Type,
+             UOM: item.UOM,
+            Purchase: item.Purchase,
+            Sale: item.Sale,
             Status:
               item.Status === "N"
                 ? "N"
@@ -142,6 +151,9 @@ export default function ItemList() {
             Category: transformedData.map((item) => item.Category),
             Capacity: transformedData.map((item) => item.Capacity),
             Type: transformedData.map((item) => item.Type),
+            UOM: transformedData.map((item) => item.UOM),
+            Purchase: transformedData.map((item) => item.Purchase),
+            Sale: transformedData.map((item) => item.Sale),
             Status: transformedData.map((item) => item.Status),
           };
           setColumns(newColumns);
@@ -154,6 +166,9 @@ export default function ItemList() {
             Category: [],
             Capacity: [],
             Type: [],
+              UOM: [],
+                Purchase: [],
+                  Sale: [],
             Status: [],
           });
         }
@@ -288,8 +303,7 @@ export default function ItemList() {
         console.error("Error:", error);
       });
   }, []);
-
-  
+ 
   const options = GetCompany.map((item) => ({
     value: item.tcmpcod,
     label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
@@ -994,15 +1008,16 @@ doc.setFont("verdana-regular", "normal");
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+    const numColumns = 9; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
       "left",
       "left",
       "left",
-      // "left",
-      // "left",
+      "left",
+      "right",
+      "right",
       "center",
     ];
 
@@ -1142,8 +1157,9 @@ doc.setFont("verdana-regular", "normal");
       "Description",
       "Company",
       "Category",
-      // "Capacity",
-      // "Type",
+      "UOM",
+      "Purchase",
+       "Sale",
       "Status",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1156,8 +1172,9 @@ doc.setFont("verdana-regular", "normal");
         item.Description,
         item.Company,
         item.Category,
-        // item.Capacity,
-        // item.Type,
+        item.UOM,
+        item.Purchase,
+          item.Sale,
         item.Status,
       ]);
 
@@ -1187,7 +1204,7 @@ doc.setFont("verdana-regular", "normal");
 
 
     // Set column widths
-    [20, 45, 30, 30,  7].forEach((width, index) => {
+    [20, 45, 30, 30,8,12,12 , 7].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1197,6 +1214,9 @@ doc.setFont("verdana-regular", "normal");
         "",
          "",
         "",
+         "",
+        "",
+          "",
        
      ]);
  
@@ -1295,8 +1315,7 @@ doc.setFont("verdana-regular", "normal");
   const btnColor = "#3368B5";
   const textColor = "white";
 
-  const [tableData, setTableData] = useState([]);
-  console.log("comapnydata", tableData);
+
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
