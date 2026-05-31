@@ -648,6 +648,9 @@ export default function ItemLedgerReport() {
         const formData = new URLSearchParams({
             FLocCod: getLocationNumber,
             code: organisation.code,
+
+            //   FLocCod: '001',
+            // code: 'NASIRTRD',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -704,6 +707,7 @@ export default function ItemLedgerReport() {
 
 //   setIsItemInitialized(true);
 // }, [options, isItemInitialized]);
+
 const [isCodeReady, setIsCodeReady] = useState(false);
 const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
 
@@ -1567,7 +1571,7 @@ useEffect(() => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 6; // Ensure this matches the actual number of columns
+        const numColumns = 13; // Ensure this matches the actual number of columns
 
         const columnAlignments = [
             "left",
@@ -1576,6 +1580,7 @@ useEffect(() => {
             "center",
             "left",
             "right",
+              "right",
             "right",
             "right",
             "right",
@@ -1722,7 +1727,8 @@ useEffect(() => {
             "Type",
             "Str",
             "Description",
-            "Purchase",
+            "Rate",
+             "Purchase",
             "Pur-Ret",
             "Receive",
             "Issue",
@@ -1741,6 +1747,7 @@ useEffect(() => {
                item.Type,
                item.Str,
                item.Description,
+                  formatValue(item.Rate)        ,
        formatValue(item.Purchase)        ,
         formatValue(item["Pur-Ret"])         ,
           formatValue(item.Receive)       ,
@@ -1771,6 +1778,7 @@ useEffect(() => {
                "",
                "",
                "Total",
+                "",
                String(formatValue(totalpurchase)),
                String(formatValue(totalpurchaseReturn)),
                String(formatValue(totalReceive)),
@@ -1793,19 +1801,15 @@ useEffect(() => {
 
             // Align only the "Total" text to the right
             if (
-                colNumber === 6 ||
-                colNumber === 7 ||
-                colNumber === 8 ||
-                colNumber === 9 ||
-                colNumber === 10 ||
-                colNumber === 11 ||
-                colNumber === 12) {
+                colNumber > 6
+                
+            ) {
                 cell.alignment = { horizontal: "right" };
             }
         });
 
         // Set column widths
-        [11, 8, 7, 5, 45, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
+        [11, 8, 7, 5, 45,12 ,12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
             worksheet.getColumn(index + 1).width = width;
         });
 
@@ -1901,32 +1905,31 @@ useEffect(() => {
         width: "30px",
     };
     const forthColWidth = {
-        width: "60px",
+       width: isSidebarVisible ?"60px" :'82px',
     };
     const sixthColWidth = {
         width: "300px",
     };
     const seventhColWidth = {
-        width: "60px",
+        width: isSidebarVisible ?"60px" :'82px',
     };
     const eightColWidth = {
-        width: "60px",
+        width: isSidebarVisible ?"60px" :'82px',
     };
     const ninthColWidth = {
-        width: "60px",
+        width: isSidebarVisible ?"60px" :'82px',
     };
     const tenthColWidth = {
-        width: "60px",
+        width: isSidebarVisible ?"60px" :'82px',
     };
-
     const elewenthColWidth = {
-        width: "60px",
+     width: isSidebarVisible ?"60px" :'82px',
     };
     const tewlthColWidth = {
-        width: "60px",
+        width: isSidebarVisible ?"60px" :'82px',
     };
     const thirteenColWidth = {
-        width: "60px",
+       width: isSidebarVisible ?"60px" :'82px',
     };
 
     const sixthcol = { width: "8px" };
@@ -1953,11 +1956,11 @@ useEffect(() => {
 
     const contentStyle = {
         width: "100%", // 100vw ki jagah 100%
-        maxWidth: "1000px",
+        maxWidth: isSidebarVisible ? "1000px":'1200px',
         height: "calc(100vh - 100px)",
         position: "absolute",
         top: "70px",
-        left: isSidebarVisible ? "60vw" : "50vw",
+        left: isSidebarVisible ? "60vw" : "52vw",
         transform: "translateX(-50%)",
         display: "flex",
         flexDirection: "column",
@@ -2596,7 +2599,7 @@ cursor:'pointer'
                                         type="text"
                                         //  disabled={isDoubleClickOpen} 
                                         id="searchsubmit"
-                                        placeholder="Item description"
+                                        placeholder="Search"
                                         value={searchQuery}
                                         autoComplete="off"
                                         style={{

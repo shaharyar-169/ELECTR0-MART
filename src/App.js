@@ -229,6 +229,7 @@ import ExpenseReport2 from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/
 import ProjectComparisonReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/ProjectComparisonReport.js";
 import AmericanReceivableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableAgging.js";
 import MonthlyProfitReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/MonthlyProfitReport.js";
+import AmericanLimitUtilizationReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanLimitUtilization.js";
 
 /////////////////////////////// FINANCIAL REPORT /////////////////////////////
 import TrailBalanceReport from "./Component/Reports/FinancialReports/TrailBalanceREport.js";
@@ -454,6 +455,7 @@ function App() {
                 <Route exact path="/ProjectComparison" element={<ProjectComparisonReport />} />
                 <Route exact path="/AmericanReceivableAgging" element={<AmericanReceivableAggingReport />} />
                 <Route exact path="/MonthlyProfitReport" element={<MonthlyProfitReport />} />
+                <Route exact path="/AmericanLimitUtilization" element={<AmericanLimitUtilizationReport />} />
 
 
                 {/* ROUTES FOR EMPLOYEE REPORT */}
