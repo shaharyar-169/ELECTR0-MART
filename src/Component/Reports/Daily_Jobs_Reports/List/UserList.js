@@ -791,36 +791,12 @@ const formatValue = (val) => {
 
   let totalEntries = 0;
 
-  // const firstColWidth = {
-  //   width: "10%",
-  // };
-  // const secondColWidth = {
-  //   width: "18%",
-  // };
-  // const thirdColWidth = {
-  //   width: "8.2%",
-  // };
-  // const forthColWidth = {
-  //   width: "8%",
-  // };
-  // const fifthColWidth = {
-  //   width: "11%",
-  // };
-  // const sixthColWidth = {
-  //   width: "23.3%",
-  // };
-  // const seventhColWidth = {
-  //   width: "10%",
-  // };
-  // const eightColWidth = {
-  //   width: "10%",
-  // };
 
   const firstColWidth = {
     width: "90px",
   };
   const secondColWidth = {
-    width: "270px",
+    width: "265px",
   };
   const thirdColWidth = {
     width: "63px",
@@ -1249,9 +1225,9 @@ const formatValue = (val) => {
       paddingRight: "25px",
     }}
   >
-    <option value="">ALL</option>
-    <option value="A">ACTIVE</option>
-    <option value="N">NON-ACTIVE</option>
+ <option value="">All</option>
+    <option value="A">Active</option>
+    <option value="N">Not Active</option>
   </select>
 
   {transectionType !== "" && (
@@ -1294,7 +1270,7 @@ const formatValue = (val) => {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{

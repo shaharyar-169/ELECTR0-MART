@@ -28,7 +28,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Balance } from "@mui/icons-material";
 
-export default function GeneralLedger() {
+export default function GeneralLedger() {  
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -450,6 +450,8 @@ export default function GeneralLedger() {
         setIsLoading(false);
       });
   }
+
+
 
   useEffect(() => {
     const hasComponentMountedPreviously =
@@ -2587,34 +2589,5 @@ const options = (supplierList || [])
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -90,9 +90,8 @@ export default function CompanyList() {
       FCmpSts: transectionType,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-
-    
       FSchTxt: searchQuery,
+      
     }).toString();
 
     axios
@@ -724,6 +723,7 @@ export default function CompanyList() {
       transition: "transform 0.3s ease, color 0.3s ease",
     };
   };
+  
   const renderTableData = () => {
     return (
       <>
@@ -1019,9 +1019,9 @@ const contentStyle = {
                       paddingRight: "25px",
                     }}
                   >
-                    <option value="">ALL</option>
-                    <option value="A">ACTIVE</option>
-                    <option value="N">NON-ACTIVE</option>
+                    <option value="">All</option>
+    <option value="A">Active</option>
+    <option value="N">Not Active</option>
                   </select>
 
                   {transectionType !== "" && (

@@ -420,9 +420,9 @@ export default function AmericanLimitUtilizationReport() {
     const apiUrl = apiLinks + "/AmericanLimitUtilization.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-    //   FLocCod: "001",
-    //   FYerDsc: "2019-2025",
-    //   code: "AMRELEC",
+      // FLocCod: "001",
+      // FYerDsc: "2019-2025",
+      // code: "AMRELEC",
 
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
@@ -643,10 +643,10 @@ export default function AmericanLimitUtilizationReport() {
       label: `${item.tarecod}-${item.taredsc.trim()}`,
     }));
 
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
+  // const handleTransactionTypeChange = (event) => {
+  //   const selectedTransactionType = event.target.value;
+  //   settransectionType(selectedTransactionType);
+  // };
 
     const handleTransactionTypeChange2 = (event) => {
     const selectedTransactionType = event.target.value;
@@ -1865,7 +1865,7 @@ doc.setFont("verdana-regular", "normal");
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="12" className="text-center">
+              <td colSpan="13" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -2836,7 +2836,7 @@ doc.setFont("verdana-regular", "normal");
                     onBlur={(e) =>
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
-                    value={transectionType}
+                    value={transectionType2}
                     onChange={handleTransactionTypeChange2}
                     style={{
                       width: "250px",
@@ -2851,7 +2851,7 @@ doc.setFont("verdana-regular", "normal");
                     }}
                   >
                     <option value="A">ALL</option>
-                    <option value="H">HEIGH</option>
+                    <option value="H">HIGH</option>
                     <option value="L">LOW</option>
                     <option value="M">MEDIUM</option>
 

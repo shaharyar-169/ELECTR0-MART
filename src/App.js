@@ -152,6 +152,8 @@ import PurchaseOrderStatusReport from "./Component/Reports/Daily_Jobs_Reports/Da
 import ProductionOrderStatusReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/ProductionOrderStatusReport.js";
 import DailySalryRegisterReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailySalaryRegister.js";
 import DailyCashBankReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/DailyCash&BankReport.js";
+import ProductionYearlyReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/ProductionYearlyReport.js";
+import ProductionMonthlyReport from "./Component/Reports/Daily_Jobs_Reports/DailyReports/ProductionMonthlyReport.js";
 
 //////////////////////////// Installments reports //////////////////////////////
 import InstallmentBalanceReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentBalanceReport.js";
@@ -179,7 +181,7 @@ import ItemReorderLevelReport from "./Component/Reports/Daily_Jobs_Reports/ItemR
 import RawMaterialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/RawMaterialStockReport.js";
 import SemiFinishStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SemiFinishStockReport.js";
 import FinishItemStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/FinishItemStcokReport.js";
-import SerialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SerialStockReport.js"; 
+import SerialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SerialStockReport.js";
 import ItemMarginReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemMarginReport.js";
 import ItemMarginSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemMarginSumamryReport.js";
 import SparePartsSaleReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SparePartsSaleReport.js";
@@ -240,6 +242,9 @@ import BalanceSheet from "./Component/Reports/FinancialReports/BalanceSheet.js";
 //////////////////////////// FBR DATA reports //////////////////////////////
 import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/FbrData.js";
 import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/TaxsaleRegister.js";
+//////////////////////////// FBR DATA reports //////////////////////////////
+import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/CollectorWiseCustomerSearch.js";
+
 function App() {
   const queryClient = new QueryClient();
 
@@ -323,7 +328,7 @@ function App() {
 
 
                 {/* Rountes for ledgers reports */}
-               
+
                 <Route exact path="/GeneralLedger1" element={<GeneralLedger />} />
                 <Route exact path="/SupplierLedger" element={<SupplierLedger1 />} />
                 <Route exact path="/CustomerLedger" element={<CustomerLedger1 />} />
@@ -396,6 +401,8 @@ function App() {
                 <Route exact path="/ProductionOrderStatus" element={<ProductionOrderStatusReport />} />
                 <Route exact path="/DailySalaryRegister" element={<DailySalryRegisterReport />} />
                 <Route exact path="/CashandBankBook" element={<DailyCashBankReport />} />
+                <Route exact path="/ProductionYearlyReport" element={<ProductionYearlyReport />} />
+                <Route exact path="/ProductionMonthlyReport" element={<ProductionMonthlyReport />} />
 
 
                 {/* Rountes for Installments reports */}
@@ -477,11 +484,11 @@ function App() {
 
 
                 {/* Rountes for Financial reports */}
-                    <Route exact path="/TrialBalance" element={<TrailBalanceReport />} />
-                    {/* <Route exact path="/IncomeStatement" element={<InstallmentExpiredAccountReport />} /> */}
-                    {/* <Route exact path="/BalanceSheet" element={<InstallmentClosedAccountReport />} /> */}
-                    <Route exact path="/IncomeStatement" element={<IncomeStatement />} />
-                    <Route exact path="/BalanceSheet" element={<BalanceSheet />} />
+                <Route exact path="/TrialBalance" element={<TrailBalanceReport />} />
+                {/* <Route exact path="/IncomeStatement" element={<InstallmentExpiredAccountReport />} /> */}
+                {/* <Route exact path="/BalanceSheet" element={<InstallmentClosedAccountReport />} /> */}
+                <Route exact path="/IncomeStatement" element={<IncomeStatement />} />
+                <Route exact path="/BalanceSheet" element={<BalanceSheet />} />
 
 
                 {/* Rountes for item reports */}
@@ -493,6 +500,11 @@ function App() {
                 {/* Rountes for Transection reports */}
                 <Route exact path="/CreditMemoBill" element={<MemberCreditMemo />} />
                 <Route exact path="/MemberReceiveableReport" element={<MemberRecivableReport />} />
+
+
+                {/* Rountes for Utilities reports */}
+                <Route exact path="/CollectorWiseCustomerSearch" element={<CollectorWiseCustomerSearch />} />
+
 
 
                 {/* Rountes for Dashboard */}

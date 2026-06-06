@@ -803,7 +803,7 @@ doc.setFont('verdana-regular', "normal");
      const workbook = new ExcelJS.Workbook();
      const worksheet = workbook.addWorksheet("Sheet1");
  
-     const numColumns = 7; // Ensure this matches the actual number of columns
+     const numColumns = 9; // Ensure this matches the actual number of columns
  
      const columnAlignments = [
        "center",
@@ -813,7 +813,9 @@ doc.setFont('verdana-regular', "normal");
        "left",
        "center",
        "left",
-       "center"
+       "center",
+        "right",
+       "right"
      ];
  
      // Define fonts for different sections
@@ -946,7 +948,7 @@ typeAndStoreRow2.eachCell((cell, colIndex) => {
  
      // Add headers
      const headers = [
-      "Code", "Ml No", "Name", "F Name", "CNIC","Mobile", "Collector", "Status"
+      "Code", "Ml No", "Name", "F Name", "CNIC","Mobile", "Collector", "Status", "Credit Day" , "Credit Limit"
      ];
      const headerRow = worksheet.addRow(headers);
      headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -961,7 +963,9 @@ typeAndStoreRow2.eachCell((cell, colIndex) => {
       item.tnicnum ,
       item.tmobnum ,
       item.Collector ,
-      item.tcststs ,
+      item.tcststs,
+      item.tcrtday,
+      item.tcrtlim,
        ]);
  
        row.eachCell((cell, colIndex) => {
@@ -980,7 +984,7 @@ typeAndStoreRow2.eachCell((cell, colIndex) => {
      });
  
      // Set column widths
-     [10,8, 35,35,18, 14,20,7].forEach((width, index) => {
+     [10,8, 35,35,18, 14,20,7,12,12].forEach((width, index) => {
        worksheet.getColumn(index + 1).width = width;
      });
  
@@ -993,7 +997,8 @@ typeAndStoreRow2.eachCell((cell, colIndex) => {
         "",
        "",
         "",
-       
+        "",
+        "",
       
            ]);
  
