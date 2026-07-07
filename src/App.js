@@ -35,6 +35,8 @@ import DashboardAdminDealer from "./Component/MainComponent/Dashboard2/Dashboard
 import ResturentDashboard from "./Component/MainComponent/ResturentDashboard/Resturentdashboad.jsx";
 //////////////////////////// GYM DASHBOARD //////////////////////////////
 import GYMDashboard from "./Component/MainComponent/GYMDashboard/Gym.jsx";
+//////////////////////////// ELECTRONICS DASHBOARD //////////////////////////////
+import ElectronicsDasboard from "./Component/MainComponent/ElectronicsDashboard/Electronicdashboard.jsx";
 
 //////////////////////////// List reports //////////////////////////////
 import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList1.js";
@@ -165,6 +167,8 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 import InstallmentCustomerList from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCustomerList.js";
 import InstallmentLedger2 from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentLedger2.js";
 import InstallmentRecoveryReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentRecoveryReport.js";
+import InstallmentWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentWiseReport.js"; 
+import MonthWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/MonthWiseReport.js";
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
@@ -415,6 +419,8 @@ function App() {
                 {/* <Route exact path="/InstallmentRecveryReport" element={<InstallmentCustomerList />} /> */}
                 <Route exact path="/InstallmentLedger" element={<InstallmentLedger2 />} />
                 <Route exact path="/InstallmentRecveryReport" element={<InstallmentRecoveryReport />} />
+                <Route exact path="/InstallmentWiseReport" element={<InstallmentWiseReport />} />
+                <Route exact path="/InstallmentMonthWiseReport" element={<MonthWiseReport />} />
 
 
                 {/* Rountes for item reports */}
@@ -512,6 +518,7 @@ function App() {
                 <Route exact path="/AdminDealer" element={<DashboardAdminDealer />} />
                 <Route exact path="/ResturentDashboard" element={<ResturentDashboard />} />
                 <Route exact path="/GymDashboard" element={<GYMDashboard />} />
+                <Route exact path="/NasirTradersDashboard" element={<ElectronicsDasboard />} />
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />

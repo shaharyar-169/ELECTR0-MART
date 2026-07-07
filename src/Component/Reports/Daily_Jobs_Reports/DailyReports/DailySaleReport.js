@@ -261,9 +261,9 @@ export default function DailySaleReport() {
     const apiMainUrl = apiLinks + "/DailySaleReport.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getYearDescription,
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getYearDescription,
       
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
@@ -271,9 +271,9 @@ export default function DailySaleReport() {
       FStrCod: storeType,
       FSchTxt: searchQuery,
 
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
-      // FYerDsc: '2024-2024',
+      code: 'MULTITRD',
+      FLocCod: '001',
+      FYerDsc: '2024-2024',
     }).toString();
 
     axios

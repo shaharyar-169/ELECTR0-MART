@@ -647,8 +647,8 @@ export default function AmericanSaleReturnStoreStockReport() {
     const doc = new jsPDF({ orientation: "landscape" });
 
     const length = GetHeading.length;
-    const hideDescription = length >= 9 && length <= 15;
-     const hideCode = length >= 11 && length <= 15;
+    const hideDescription = length >= 9 && length <= 20;
+     const hideCode = length >= 11 && length <= 20;
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
@@ -685,9 +685,7 @@ export default function AmericanSaleReturnStoreStockReport() {
       // ❌ Description hide condition
       ...(!hideDescription ? ["Description"] : []),
 
-      "Qnty",
-
-     
+      "Qnty",     
 
      ...GetHeading.map((heading, index) =>
   heading.tstrabb?.trim()
@@ -736,6 +734,15 @@ export default function AmericanSaleReturnStoreStockReport() {
         // 130, // Description
         19, // Qnty
         ...Array(length).fill(19),
+      ];
+    }
+
+ else if (length >= 16 && length <= 20) {
+      columnWidths = [
+        // 45, // Code
+        // 130, // Description
+        17, // Qnty
+        ...Array(length).fill(17),
       ];
     }
 
@@ -1620,6 +1627,14 @@ export default function AmericanSaleReturnStoreStockReport() {
     CommonColWidth = { width: isSidebarVisible ? "60px" : "65px" };
   }
 
+    else if (length >=16 && length <= 20) {
+    // 🔹 Case 4
+    firstColWidth = { width: isSidebarVisible ? "50px" : "70px" };
+    secondColWidth = { width: isSidebarVisible ? "50px" : "100px" };
+    thirdColWidth = { width: isSidebarVisible ? "40px" : "50px" };
+    CommonColWidth = { width: isSidebarVisible ? "53px" : "60px" };
+  }
+
   const sixthcol = {
     width: "8px",
   };
@@ -1645,6 +1660,7 @@ export default function AmericanSaleReturnStoreStockReport() {
       Qnt013: [],
       Qnt014: [],
       Qnt015: [],
+         Qnt016: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
@@ -1668,6 +1684,7 @@ export default function AmericanSaleReturnStoreStockReport() {
       Qnt013: "",
       Qnt014: "",
       Qnt015: "",
+      Qnt016: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -1694,6 +1711,8 @@ export default function AmericanSaleReturnStoreStockReport() {
              Qnt013: tableData.map((row) => row.Qnt013),
              Qnt014: tableData.map((row) => row.Qnt014),
              Qnt015: tableData.map((row) => row.Qnt015),
+                          Qnt016: tableData.map((row) => row.Qnt016),
+
       };
       setColumns(newColumns);
     }
@@ -1730,6 +1749,7 @@ export default function AmericanSaleReturnStoreStockReport() {
       Qnt013: null,
       Qnt014: null,
       Qnt015: null,
+        Qnt016: null,
 
     });
   };
@@ -2768,7 +2788,7 @@ export default function AmericanSaleReturnStoreStockReport() {
   style={secondColWidth}
   onClick={() => handleSorting("Description")}
 >
-  {GetHeading && GetHeading.length >= 11 && GetHeading.length <= 14
+  {GetHeading && GetHeading.length >= 11 && GetHeading.length <= 20
     ? (isSidebarVisible ? "Des " : "Description ") : "Description "}
   
   <i
@@ -2782,7 +2802,7 @@ export default function AmericanSaleReturnStoreStockReport() {
   style={thirdColWidth}
   onClick={() => handleSorting("Qnty")}
 >
-  {GetHeading && GetHeading.length >= 11 && GetHeading.length <= 14
+  {GetHeading && GetHeading.length >= 11 && GetHeading.length <= 20
     ? (isSidebarVisible ? "Qty " : "Qnty ") : "Qnty "}
   
   <i
@@ -2800,8 +2820,8 @@ export default function AmericanSaleReturnStoreStockReport() {
 
                       const displayText =
                         rawText.length > 5 ? rawText.slice( 0,
-  GetHeading && GetHeading.length >= 11 && GetHeading.length <= 14
-    ? (isSidebarVisible ? 3 : 5)
+  GetHeading && GetHeading.length >= 11 && GetHeading.length <= 20
+    ? (isSidebarVisible ? 3 : 4)
     : 5
 ) : rawText;
 

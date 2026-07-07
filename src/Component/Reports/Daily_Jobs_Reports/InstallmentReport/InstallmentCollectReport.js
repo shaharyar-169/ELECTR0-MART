@@ -38,7 +38,7 @@ export default function InstallmentCollectReport() {
 
     const [saleType, setSaleType] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [transectionType, settransectionType] = useState("A");
+    const [transectionType, settransectionType] = useState("");
     const [transectionType2, settransectionType2] = useState("");
 
     const [supplierList, setSupplierList] = useState([]);
@@ -414,8 +414,8 @@ export default function InstallmentCollectReport() {
             FLocCod: locationnumber || getLocationNumber,
             FYerDsc: yeardescription || getyeardescription,
             
-            // code: 'MTSELEC',
-            // FLocCod: '002',
+            // code: 'BAJWATRD',
+            // FLocCod: '001',
 
         }).toString();
 
@@ -477,10 +477,10 @@ export default function InstallmentCollectReport() {
     useEffect(() => {
         const apiUrl = apiLinks + "/GetActiveCollector.php";
         const formData = new URLSearchParams({
-        //   code: organisation.code,
-        //    FLocCod: getLocationNumber,
-             FLocCod: '001',
-            code: 'MTSELEC',
+          code: organisation.code,
+           FLocCod: getLocationNumber,
+            //  FLocCod: '001',
+            // code: 'MTSELEC',
         }).toString();
         axios
             .post(apiUrl, formData)
@@ -517,169 +517,171 @@ export default function InstallmentCollectReport() {
       };
     
       const customStyles1 = (hasError) => ({
-        control: (base, state) => ({
-          ...base,
-          height: "24px",
-          minHeight: "unset",
-          width: 250,
-          fontSize: getdatafontsize,
-          fontFamily: getfontstyle,
-          backgroundColor: getcolor,
-          color: fontcolor,
-          caretColor: getcolor === "white" ? "black" : "white",
-          borderRadius: 0,
-          border: `1px solid ${fontcolor}`,
-          transition: "border-color 0.15s ease-in-out",
-          "&:hover": {
-            borderColor: state.isFocused ? base.borderColor : fontcolor,
-          },
-          padding: "0 8px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          boxShadow: "none",
-          "&:focus-within": {
-            borderColor: "#3368B5",
-            boxShadow: "0 0 0 1px #3368B5",
-          },
-        }),
-    
-        menu: (base) => ({
-          ...base,
-          marginTop: "5px",
-          borderRadius: 0,
-          backgroundColor: getcolor,
-          border: `1px solid ${fontcolor}`,
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          zIndex: 9999,
-        }),
-        menuList: (base) => ({
-          ...base,
-          padding: 0,
-          maxHeight: "200px",
-          // Scrollbar styling for Webkit browsers
-          "&::-webkit-scrollbar": {
-            width: "8px",
-            height: "8px",
-          },
-          "&::-webkit-scrollbar-track": {
-            background: getcolor,
-            borderRadius: "10px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: fontcolor,
-            borderRadius: "10px",
-            border: `2px solid ${getcolor}`,
-            "&:hover": {
-              backgroundColor: "#3368B5",
-            },
-          },
-          // Scrollbar styling for Firefox
-          scrollbarWidth: "thin",
-          scrollbarColor: `${fontcolor} ${getcolor}`,
-        }),
-        option: (base, state) => ({
-          ...base,
-          fontSize: getdatafontsize,
-          fontFamily: getfontstyle,
-          backgroundColor: state.isSelected
-            ? "#3368B5"
-            : state.isFocused
-            ? "#3368B5"
-            : getcolor,
-          color: state.isSelected || state.isFocused ? "white" : fontcolor,
-          "&:hover": {
-            backgroundColor: "#3368B5",
-            color: "white",
-            cursor: "pointer",
-          },
-          "&:active": {
-            backgroundColor: "#1a66cc",
-          },
-          transition: "background-color 0.2s ease, color 0.2s ease",
-        }),
-        dropdownIndicator: (base, state) => ({
-          ...base,
-          padding: 0,
-          marginTop: "-5px",
-          fontSize: "18px",
-          display: "flex",
-          textAlign: "center",
-          color: fontcolor,
-          transition: "transform 0.2s ease",
-          transform: state.selectProps.menuIsOpen
-            ? "rotate(180deg)"
-            : "rotate(0deg)",
-          "&:hover": {
-            color: "#3368B5",
-          },
-        }),
-        indicatorSeparator: () => ({
-          display: "none",
-        }),
-        singleValue: (base) => ({
-          ...base,
-          marginTop: "-5px",
-          textAlign: "left",
-          color: fontcolor,
-          fontSize: getdatafontsize,
-          fontFamily: getfontstyle,
-        }),
-        input: (base) => ({
-          ...base,
-          color: getcolor === "white" ? "black" : fontcolor,
-          caretColor: getcolor === "white" ? "black" : "white",
-          marginTop: "-5px",
-        }),
-        clearIndicator: (base) => ({
-          ...base,
-          marginTop: "-5px",
-          padding: "0 4px",
-          color: fontcolor,
-          "&:hover": {
-            color: "#ff4444",
-          },
-        }),
-        placeholder: (base) => ({
-          ...base,
-          color: `${fontcolor}80`, // 50% opacity
-          fontSize: getdatafontsize,
-          fontFamily: getfontstyle,
-          marginTop: "-5px",
-        }),
-        noOptionsMessage: (base) => ({
-          ...base,
-          fontSize: getdatafontsize,
-          fontFamily: getfontstyle,
-          color: fontcolor,
-          backgroundColor: getcolor,
-        }),
-        loadingMessage: (base) => ({
-          ...base,
-          fontSize: getdatafontsize,
-          fontFamily: getfontstyle,
-          color: fontcolor,
-          backgroundColor: getcolor,
-        }),
-        multiValue: (base) => ({
-          ...base,
-          backgroundColor: `${fontcolor}20`, // Light background for tags
-        }),
-        multiValueLabel: (base) => ({
-          ...base,
-          color: fontcolor,
-          fontSize: getdatafontsize,
-          fontFamily: getfontstyle,
-        }),
-        multiValueRemove: (base) => ({
-          ...base,
-          color: `${fontcolor}80`,
-          "&:hover": {
-            backgroundColor: "#ff4444",
-            color: "white",
-          },
-        }),
-      });
+  control: (base, state) => ({
+    ...base,
+    height: "24px",
+    minHeight: "unset",
+    width: 300,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    backgroundColor: getcolor,
+    color: fontcolor,
+    caretColor: getcolor === "white" ? "black" : "white",
+    borderRadius: 0,
+    border: `1px solid ${fontcolor}`,
+    transition: "border-color 0.15s ease-in-out",
+    "&:hover": {
+      borderColor: state.isFocused ? base.borderColor : fontcolor,
+    },
+    padding: "0 8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    boxShadow: "none",
+    "&:focus-within": {
+      borderColor: "red",               // Changed from #3368B5 to red
+      boxShadow: "0 0 0 1px red",       // Changed from #3368B5 to red
+    },
+  }),
+
+  menu: (base) => ({
+    ...base,
+    marginTop: "5px",
+    borderRadius: 0,
+    backgroundColor: getcolor,
+    border: `1px solid ${fontcolor}`,
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    zIndex: 9999,
+  }),
+  menuList: (base) => ({
+    ...base,
+    padding: 0,
+    maxHeight: "200px",
+    "&::-webkit-scrollbar": {
+      width: "8px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-track": {
+      background: getcolor,
+      borderRadius: "10px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: fontcolor,
+      borderRadius: "10px",
+      border: `2px solid ${getcolor}`,
+      "&:hover": {
+        backgroundColor: "#3368B5",     // unchanged
+      },
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: `${fontcolor} ${getcolor}`,
+  }),
+  option: (base, state) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    backgroundColor: state.isSelected
+      ? "#3368B5"
+      : state.isFocused
+        ? "#3368B5"
+        : getcolor,
+    color:
+      state.isSelected || state.isFocused
+        ? "white"
+        : fontcolor,
+    "&:hover": {
+      backgroundColor: "#3368B5",
+      color: "white",
+      cursor: "pointer",
+    },
+    "&:active": {
+      backgroundColor: "#1a66cc",
+    },
+    transition: "background-color 0.2s ease, color 0.2s ease",
+  }),
+
+  dropdownIndicator: (base, state) => ({
+    ...base,
+    padding: 0,
+    marginTop: "-5px",
+    fontSize: "18px",
+    display: "flex",
+    textAlign: "center",
+    color: fontcolor,
+    transition: "transform 0.2s ease",
+    transform: state.selectProps.menuIsOpen
+      ? "rotate(180deg)"
+      : "rotate(0deg)",
+    "&:hover": {
+      color: "#3368B5",                // unchanged
+    },
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+  singleValue: (base) => ({
+    ...base,
+    marginTop: "-5px",
+    textAlign: "left",
+    color: fontcolor,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+  }),
+  input: (base) => ({
+    ...base,
+    color: getcolor === "white" ? "black" : fontcolor,
+    caretColor: getcolor === "white" ? "black" : "white",
+    marginTop: "-5px",
+  }),
+  clearIndicator: (base) => ({
+    ...base,
+    marginTop: "-5px",
+    padding: "0 4px",
+    color: fontcolor,
+    "&:hover": {
+      color: "#ff4444",                // unchanged
+    },
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: `${fontcolor}80`,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    marginTop: "-5px",
+  }),
+  noOptionsMessage: (base) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    color: fontcolor,
+    backgroundColor: getcolor,
+  }),
+  loadingMessage: (base) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    color: fontcolor,
+    backgroundColor: getcolor,
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: `${fontcolor}20`,
+  }),
+  multiValueLabel: (base) => ({
+    ...base,
+    color: fontcolor,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+  }),
+  multiValueRemove: (base) => ({
+    ...base,
+    color: `${fontcolor}80`,
+    "&:hover": {
+      backgroundColor: "#ff4444",
+      color: "white",
+    },
+  }),
+});
 
     const handleTransactionTypeChange = (event) => {
         const selectedTransactionType = event.target.value;
@@ -699,47 +701,50 @@ export default function InstallmentCollectReport() {
         const rows = tableData.map((item) => [
             item.Date,
             item['Trn#'],
-            // item.Type,
-            
+            item.Type,
+             item.Code,
             item['Manual #'],
             item.Customer,
+            item.Collector,
            item.Mobile,
             item['Ins Amt'],
             item.Collection,
             item.Diff,
-             item.Collector,
+           
         ]);
 
         // Add summary row to the table
         rows.push([
-            String(formatValue(tableData.length.toLocaleString())),
+            String(formatValue(totalDebit)),
             "",
             "",
-            // "",
             "",
             "",
-            // String(formatValue(totalDebit)),
+            "",
+            "",
+            "",
             String(formatValue(totalCredit)),
             String(formatValue(closingBalance)),
             String(formatValue(totalDif)),
-             "",
+           
         ]);
 
         // Define table column headers and individual column widths
         const headers = [
             "Date",
             "Trn#",
-            // "Type",
-           
+            "Type",
+           "Code",
             "Manual#",
             "Customer",
+            "Col",
              "Mobile",
             "Ins Amt",
             "Collection",
             "Diff",
-            "Col",
+         
         ];
-        const columnWidths = [23, 16,  25, 90,26, 30, 30, 30, 15];
+        const columnWidths = [23, 16, 10, 23,25, 90,10, 28, 25, 25, 20];
 
         // Calculate total table width
         const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -869,17 +874,15 @@ export default function InstallmentCollectReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 4 ) {
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 || cellIndex === 3 || cellIndex === 6 || cellIndex === 7  ) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8
+            cellIndex > 7
+            
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -980,14 +983,16 @@ export default function InstallmentCollectReport() {
                 // }
 
                 // Add page numbering
-doc.setFont("verdana-regular", "normal");
-          doc.setFontSize(10);
-                          doc.text(
-                    `Page ${pageNumber}`,
-                    rightX - 15,
-                    doc.internal.pageSize.height - 10,
-                    { align: "right" }
-                );
+ const totalPages = Math.ceil(rows.length / rowsPerPage);
+        // Add page numbering
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+      doc.text(
+  `Page ${pageNumber} / ${totalPages}`,
+  rightX - 20,
+  doc.internal.pageSize.height - 10,
+  { align: "right" },
+);
             };
 
             let currentPageIndex = 0;
@@ -1103,234 +1108,253 @@ doc.setFont("verdana-regular", "normal");
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
     const handleDownloadCSV = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet1");
 
-        const numColumns = 9; // Ensure this matches the actual number of columns
+  const numColumns = 11; // Ensure this matches the actual number of columns
 
-        const columnAlignments = [
-            "center",
-            "center",
-            "left",
-            // "center",
-            "left",
-            "center",
-            "right",
-            "right",
-            "right",
-            "right",
-        ];
+  const columnAlignments = [
+    "center",
+    "center",
+    "center",
+    "center",
+    "left",
+    "left",
+    "center",
+    "center",
+    "right",
+    "right",
+    "right",
+  ];
 
-        // Define fonts for different sections
-        const fontCompanyName = { name: 'CustomFont' || "CustomFont", size: 18, bold: true };
-        const fontStoreList = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-        const fontHeader = { name: 'CustomFont' || "CustomFont", size: 10, bold: true };
-        const fontTableContent = { name: 'CustomFont' || "CustomFont", size: 10, bold: false };
-
-        // Add an empty row at the start
-        worksheet.addRow([]);
-
-        // Add company name
-        const companyRow = worksheet.addRow([comapnyname]);
-        companyRow.eachCell((cell) => {
-            cell.font = fontCompanyName;
-            cell.alignment = { horizontal: "center" };
-        });
-
-        worksheet.getRow(companyRow.number).height = 30;
-        worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
-
-        // Add Store List row
-        const storeListRow = worksheet.addRow([`Installment Collection Report From ${fromInputDate} To ${toInputDate}`]);
-        storeListRow.eachCell((cell) => {
-            cell.font = fontStoreList;
-            cell.alignment = { horizontal: "center" };
-        });
-
-        worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
-
-        // Add an empty row after the title section
-        worksheet.addRow([]);
-
-        let typecompany = Companyselectdatavalue.label
-            ? Companyselectdatavalue.label
-            : "ALL";
-
-        let actype = transectionType2 === "001" ?
-            "MONTHLY" : transectionType2 === "002"
-                ? "DAILY": transectionType2 === "003"
-                ? "WEEKLY" : "ALL"
-
-        let type = transectionType === "L" ?
-            "LESS INS" : transectionType === "F"
-                ? "FULL INS" : transectionType === "E"
-                    ? "EXTRA INS" : "ALL";
-
-
-
-      const typeAndStoreRow = worksheet.addRow([
-  "Collector :",
-  typecompany,
-  "",
-  "",
-  "",
-  "A/C Type :",
-  actype,
-  "",
-  "Type :",
-  type
-]);
-
-worksheet.mergeCells(`B${typeAndStoreRow.number}:E${typeAndStoreRow.number}`);
-
-// Columns that should be RIGHT aligned (values)
-const rightAlignCols = [6,9];
-
-// Columns that should be BOLD (labels)
-const boldCols = [1, 6, 9];
-
-typeAndStoreRow.eachCell((cell, colIndex) => {
-  cell.font = {
-    name: "CustomFont",
-    size: 10,
-    bold: boldCols.includes(colIndex),
+  // Helper: convert any value (including strings with commas) to a safe number
+  const toNumber = (value) => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const cleaned = value.replace(/,/g, ""); // remove all commas
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+    return 0;
   };
 
-  cell.alignment = {
-    horizontal: rightAlignCols.includes(colIndex) ? "right" : "left",
-    vertical: "middle",
-  };
-});
+  // Define fonts for different sections
+  const fontCompanyName = { name: "CustomFont" || "CustomFont", size: 18, bold: true };
+  const fontStoreList = { name: "CustomFont" || "CustomFont", size: 10, bold: false };
+  const fontHeader = { name: "CustomFont" || "CustomFont", size: 10, bold: true };
+  const fontTableContent = { name: "CustomFont" || "CustomFont", size: 10, bold: false };
 
+  // Add an empty row at the start
+  worksheet.addRow([]);
 
+  // Add company name
+  const companyRow = worksheet.addRow([comapnyname]);
+  companyRow.eachCell((cell) => {
+    cell.font = fontCompanyName;
+    cell.alignment = { horizontal: "center" };
+  });
 
-        // Header style
-        const headerStyle = {
-            font: fontHeader,
-            alignment: { horizontal: "center", vertical: "middle" },
-            fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-            border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
-        };
+  worksheet.getRow(companyRow.number).height = 30;
+  worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
 
-        // Add headers
-        const headers = [
-            "Date",
-            "Trn#",
-            // "Type",
-           
-            "Manual#",
-            "Customer",
-             "Mobile",
-            "Ins Amt",
-            "Collection",
-            "Diff",
-             "Col",
-        ];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+  // Add Store List row
+  const storeListRow = worksheet.addRow([`Installment Collection Report From ${fromInputDate} To ${toInputDate}`]);
+  storeListRow.eachCell((cell) => {
+    cell.font = fontStoreList;
+    cell.alignment = { horizontal: "center" };
+  });
 
-        // Add data rows
-        tableData.forEach((item) => {
-            const row = worksheet.addRow([
-                item.Date,
-                item['Trn#'],
-                // item.Type,
-               
-                item['Manual #'],
-                item.Customer,
-               item.Mobile,
-                item['Ins Amt'],
-                item.Collection,
-                item.Diff,
-                  item.Collector,
-            ]);
+  worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
 
-            row.eachCell((cell, colIndex) => {
-                cell.font = fontTableContent;
-                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-                cell.alignment = { horizontal: columnAlignments[colIndex - 1] || "left", vertical: "middle" };
-            });
-        });
+  // Add an empty row after the title section
+  worksheet.addRow([]);
 
-        // Set column widths
-        [11, 8, 10, 45, 12,12, 14, 14, 6].forEach((width, index) => {
-            worksheet.getColumn(index + 1).width = width;
-        });
+  let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
 
+  let actype = transectionType2 === "001"
+    ? "MONTHLY"
+    : transectionType2 === "002"
+    ? "DAILY"
+    : transectionType2 === "003"
+    ? "WEEKLY"
+    : "ALL";
 
-        const totalRow = worksheet.addRow([
-        String(formatValue(tableData.length.toLocaleString())),
-            "",
-            "",
-            "",
-            "",
-           
-        //  String(formatValue(totalDebit)),
-         String(formatValue(totalCredit)),
-         String(formatValue(closingBalance)),
-         String(formatValue(totalDif)),
-          "",
-        ]);
+  let type = transectionType === "L"
+    ? "LESS INS"
+    : transectionType === "F"
+    ? "FULL INS"
+    : transectionType === "E"
+    ? "EXTRA INS"
+    : "ALL";
 
-        // total row added
+  const typeAndStoreRow = worksheet.addRow([
+    "Collector :",
+    typecompany,
+    "",
+    "",
+    "",
+    "A/C Type :",
+    actype,
+    "",
+    "Type :",
+    type,
+  ]);
 
-        totalRow.eachCell((cell, colNumber) => {
-            cell.font = { name: 'CustomFont', size: 10, bold: true }; // Apply CustomFont
-            cell.border = {
-                top: { style: "double" },
-                left: { style: "thin" },
-                bottom: { style: "double" },
-                right: { style: "thin" },
-            };
+  worksheet.mergeCells(`B${typeAndStoreRow.number}:E${typeAndStoreRow.number}`);
 
-            // Align only the "Total" text to the right
-            if (
-                colNumber === 6 ||
-                colNumber === 7 ||
-                colNumber === 8 
-               
-            ) {
-                cell.alignment = { horizontal: "right" };
-            }
-            if (
-                colNumber === 1                
-               
-            ) {
-                cell.alignment = { horizontal: "center" };
-            }
-        });
+  const rightAlignCols = [6, 9];
+  const boldCols = [1, 6, 9];
 
-
-        // Add an empty row after the title section
-        worksheet.addRow([]);
-        // Date and Time
-     const today = new Date();
-     const currentTime = today.toLocaleTimeString("en-GB");
-     const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
-     const userid = user.tusrid;
- 
-     const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
-     dateTimeRow.eachCell((cell) => {
-       cell.font = { name: "CustomFont", size: 10 };
-       cell.alignment = { horizontal: "left" };
-     });
- 
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-     dateTimeRow1.eachCell((cell) => {
-       cell.font = { name: "CustomFont", size: 10 };
-       cell.alignment = { horizontal: "left" };
-     });
- 
-     // Merge cells
-     worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
-     worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
- 
-
-        // Generate and save the Excel file
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, `InstallmentCollectionReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+  typeAndStoreRow.eachCell((cell, colIndex) => {
+    cell.font = {
+      name: "CustomFont",
+      size: 10,
+      bold: boldCols.includes(colIndex),
     };
+    cell.alignment = {
+      horizontal: rightAlignCols.includes(colIndex) ? "right" : "left",
+      vertical: "middle",
+    };
+  });
+
+  // Header style
+  const headerStyle = {
+    font: fontHeader,
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+    border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+  };
+
+  // Add headers
+  const headers = [
+    "Date",
+    "Trn#",
+    "Type",
+    "Code",
+    "Manual#",
+    "Customer",
+    "Col",
+    "Mobile",
+    "Ins Amt",
+    "Collection",
+    "Diff",
+  ];
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+  // Add data rows with numeric conversion
+  tableData.forEach((item) => {
+    const insAmtNum = toNumber(item["Ins Amt"]);
+    const collectionNum = toNumber(item.Collection);
+    const diffNum = toNumber(item.Diff);
+
+    const row = worksheet.addRow([
+      item.Date,
+      item["Trn#"],
+      item.Type,
+      item.Code,
+      item["Manual #"],
+      item.Customer,
+      item.Collector,
+      item.Mobile,
+      insAmtNum,
+      collectionNum,
+      diffNum,
+    ]);
+
+    row.eachCell((cell, colIndex) => {
+      cell.font = fontTableContent;
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.alignment = {
+        horizontal: columnAlignments[colIndex - 1] || "left",
+        vertical: "middle",
+      };
+      // Apply number formatting for numeric columns (9,10,11) – no decimals
+      if (colIndex >= 9 && colIndex <= 11) {
+        cell.numFmt = "#,##0";
+      }
+    });
+  });
+
+  // Set column widths
+  [11, 8, 7, 10, 15, 45, 6, 12, 12, 12, 12].forEach((width, index) => {
+    worksheet.getColumn(index + 1).width = width;
+  });
+
+  // Convert totals to numbers (remove commas, parse)
+  const totalInsAmtNum = toNumber(totalCredit);
+  const totalCollectionNum = toNumber(closingBalance);
+  const totalDiffNum = toNumber(totalDif);
+
+  const totalRow = worksheet.addRow([
+    String(formatValue(totalDebit)), // this is just a label, keep as string
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    totalInsAmtNum,
+    totalCollectionNum,
+    totalDiffNum,
+  ]);
+
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { name: "CustomFont", size: 10, bold: true };
+    cell.border = {
+      top: { style: "double" },
+      left: { style: "thin" },
+      bottom: { style: "double" },
+      right: { style: "thin" },
+    };
+    // Right align numeric columns (9,10,11)
+    if (colNumber > 7) {
+      cell.alignment = { horizontal: "right" };
+      if (colNumber >= 9 && colNumber <= 11) {
+        cell.numFmt = "#,##0"; // no decimals for totals
+      }
+    }
+    if (colNumber === 1) {
+      cell.alignment = { horizontal: "center" };
+    }
+  });
+
+  // Add an empty row after the title section
+  worksheet.addRow([]);
+
+  // Date and Time
+  const today = new Date();
+  const currentTime = today.toLocaleTimeString("en-GB");
+  const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+  const userid = user.tusrid;
+
+  const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+  dateTimeRow.eachCell((cell) => {
+    cell.font = { name: "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  dateTimeRow1.eachCell((cell) => {
+    cell.font = { name: "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  // Merge cells
+  worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+  worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+
+  // Generate and save the Excel file
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  saveAs(blob, `InstallmentCollectionReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+};
     ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
 
@@ -1365,21 +1389,58 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         return filteredData;
     };
 
+     const isLargeScreen = window.innerWidth > 1500;
+
+  const contentStyle = {
+ width: "100%",
+  maxWidth: isSidebarVisible
+    ? (isLargeScreen ? "1200px" : "1000px")
+    : (isLargeScreen ? "1200px" : "1200px"),
+  height: "calc(100vh - 100px)",
+  position: "absolute",
+  top: "70px",
+  left: isSidebarVisible ? "60vw" : "53vw",
+  transform: "translateX(-50%)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden",
+  textAlign: "center",
+  fontSize: "15px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "23px",
+  fontFamily: "verdana",
+  zIndex: 1,
+  padding: "0 20px",
+  boxSizing: "border-box",
+};
+
     const firstColWidth = {
         width: "80px",
     };
     const secondColWidth = {
-        width: "55px",
+        width: "60px",
     };
-  
+   const thirdColWidth = {
+        width: "40px",
+    };
     const forthColWidth = {
-        width: "90px",
+        width: "80px",
     };
     const fifthColWidth = {
-        width: "70px",
+       width: isSidebarVisible
+    ? (isLargeScreen ? "135px" : "80px")
+    : (isLargeScreen ? "135px" : "135px"),
+
+      
     };
     const sixthColWidth = {
-        width: "350px",
+ width: isSidebarVisible
+    ? (isLargeScreen ? "360px" : "200px")
+    : (isLargeScreen ? "360px" : "360px"),
+
     };
     const seventhColWidth = {
         width: "40px",
@@ -1387,11 +1448,14 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
     const eighthColWidth = {
         width: "100px",
     };
-    const ninhthColWidth = {
-        width: "100px",
+    const ninthColWidth = {
+        width: "90px",
     };
     const tenthColWidth = {
-        width: "100px",
+        width: "90px",
+    };
+     const elewenthColWidth = {
+        width: "90px",
     };
         const sixColWidth = {
         width: "8px",
@@ -1431,29 +1495,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
         };
     }, []);
 
-    const contentStyle = {
-    width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
-    height: "calc(100vh - 100px)",
-    position: "absolute",
-    top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
-    transform: "translateX(-50%)",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    textAlign: "center",
-    fontSize: "15px",
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "23px",
-    fontFamily: '"Poppins", sans-serif',
-    zIndex: 1,
-    padding: "0 20px", // Side padding for small screens
-    boxSizing: "border-box", // Padding ko width mein include kare
-  };
+   
 
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1901,9 +1943,9 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
 
                   </select>
 
-                  {transectionType !== "A" && (
+                  {transectionType !== "" && (
                     <span
-                      onClick={() => settransectionType("A")}
+                      onClick={() => settransectionType("")}
                       style={{
                         position: "absolute",
                         right: "25px",
@@ -1989,7 +2031,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                     <option value="">ALL</option>
                     <option value="001">MONTHLY</option>
                     <option value="002">DAILY</option>
-                                        <option value="003">WEEKLY</option>
+                    <option value="003">WEEKLY</option>
 
                   </select>
 
@@ -2119,31 +2161,33 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                         <td className="border-dark" style={secondColWidth}>
                                             Trn#
                                         </td>
-                                        {/* <td className="border-dark" style={thirdColWidth}>
+                                        <td className="border-dark" style={thirdColWidth}>
                                             Type
-                                        </td> */}
-                                       
+                                        </td>
+                                         <td className="border-dark" style={forthColWidth}>
+                                            Code
+                                        </td>                                       
                                         <td className="border-dark" style={fifthColWidth}>
                                             Manual #
                                         </td>
                                         <td className="border-dark" style={sixthColWidth}>
                                             Customer
                                         </td>
-                                         <td className="border-dark" style={forthColWidth}>
-                                            Mobile
+                                         <td className="border-dark" style={seventhColWidth}>
+                                            Col
                                         </td>
                                        
                                         <td className="border-dark" style={eighthColWidth}>
+                                            Mobile
+                                        </td>
+                                        <td className="border-dark" style={ninthColWidth}>
                                             Ins Amt
                                         </td>
-                                        <td className="border-dark" style={eighthColWidth}>
+                                        <td className="border-dark" style={tenthColWidth}>
                                             Collection
                                         </td>
-                                        <td className="border-dark" style={eighthColWidth}>
+                                         <td className="border-dark" style={elewenthColWidth}>
                                             Diff
-                                        </td>
-                                         <td className="border-dark" style={seventhColWidth}>
-                                            Col
                                         </td>
                                           <td className="border-dark" style={sixColWidth}>
                                             
@@ -2170,7 +2214,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                 id="tableBody"
                                 style={{
                                     fontFamily: getfontstyle, fontSize: getdatafontsize,
-                                    // width: "100%",
+                                    width: "100%",
                                    position: "relative",
                                 ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                                 }}
@@ -2183,7 +2227,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                     backgroundColor: getcolor,
                                                 }}
                                             >
-                                                <td colSpan="9" className="text-center">
+                                                <td colSpan="11" className="text-center">
                                                     <Spinner animation="border" variant="primary" />
                                                 </td>
                                             </tr>
@@ -2196,7 +2240,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                             color: fontcolor,
                                                         }}
                                                     >
-                                                        {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                        {Array.from({ length: 11 }).map((_, colIndex) => (
                                                             <td key={`blank-${rowIndex}-${colIndex}`}>
                                                                 &nbsp;
                                                             </td>
@@ -2207,15 +2251,16 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                {/* <td style={thirdColWidth}></td> */}
+                                                <td style={thirdColWidth}></td>
+                                                <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                                                                <td style={forthColWidth}></td>
-
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninhthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eighthColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
+
 
                                             </tr>
                                         </>
@@ -2242,32 +2287,52 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                         <td className="text-center" style={secondColWidth}>
                                                             {item['Trn#']}
                                                         </td>
-                                                        {/* <td className="text-center" style={thirdColWidth}>
+                                                        <td className="text-center" style={thirdColWidth}>
                                                             {item.Type}
-                                                        </td> */}
-                                                       
-                                                        <td className="text-start" style={fifthColWidth}>
-                                                            {item['Manual #']}
-                                                        </td>
-                                                        <td className="text-start" style={sixthColWidth}>
-                                                            {item.Customer}
-                                                        </td>
+                                                        </td>   
                                                          <td className="text-center" style={forthColWidth}>
-                                                            {item.Mobile}
-                                                        </td>
-                                                       
-                                                        <td className="text-end" style={eighthColWidth}>
-                                                            {item['Ins Amt']}
-                                                        </td>
-                                                        <td className="text-end" style={ninhthColWidth}>
-                                                            {item.Collection}
-                                                        </td>
-                                                        <td className="text-end" style={tenthColWidth}>
-                                                            {item.Diff}
-                                                        </td>
-                                                         <td className="text-end" style={seventhColWidth}>
+                                                            {item.Code}
+                                                        </td>                                                     
+                                                       <td
+                    className="text-start"
+                    title={item["Manual #"]}
+                    style={{
+                      ...fifthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item["Manual #"]}
+                  </td>
+                                                       <td
+                    className="text-start"
+                    title={item.Customer}
+                    style={{
+                      ...sixthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Customer}
+                  </td>
+                                                         <td className="text-center" style={seventhColWidth}>
                                                             {item.Collector}
                                                         </td>
+                                                         <td className="text-center" style={eighthColWidth}>
+                                                            {item.Mobile}
+                                                        </td>
+                                                        <td className="text-end" style={ninthColWidth}>
+                                                            {item['Ins Amt']}
+                                                        </td>
+                                                        <td className="text-end" style={tenthColWidth}>
+                                                            {item.Collection}
+                                                        </td>
+                                                        <td className="text-end" style={elewenthColWidth}>
+                                                            {item.Diff}
+                                                        </td>
+                                                      
 
                                                     </tr>
                                                 );
@@ -2282,7 +2347,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                                         color: fontcolor,
                                                     }}
                                                 >
-                                                    {Array.from({ length: 9 }).map((_, colIndex) => (
+                                                    {Array.from({ length: 11 }).map((_, colIndex) => (
                                                         <td key={`blank-${rowIndex}-${colIndex}`}>
                                                             &nbsp;
                                                         </td>
@@ -2292,15 +2357,15 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                             <tr>
                                                 <td style={firstColWidth}></td>
                                                 <td style={secondColWidth}></td>
-                                                {/* <td style={thirdColWidth}></td> */}
+                                                <td style={thirdColWidth}></td>
+                                                <td style={forthColWidth}></td>
                                                 <td style={fifthColWidth}></td>
                                                 <td style={sixthColWidth}></td>
-                                                                                                <td style={forthColWidth}></td>
-
-                                                <td style={eighthColWidth}></td>
-                                                <td style={ninhthColWidth}></td>
-                                                <td style={tenthColWidth}></td>
                                                 <td style={seventhColWidth}></td>
+                                                <td style={eighthColWidth}></td>
+                                                <td style={ninthColWidth}></td>
+                                                <td style={tenthColWidth}></td>
+                                                <td style={elewenthColWidth}></td>
 
 
                                             </tr>
@@ -2329,7 +2394,7 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                        <span className="mobileledger_total2">{formatValue(tableData.length.toLocaleString())}</span>
+                        <span className="mobileledger_total2">{formatValue(totalDebit)}</span>
 
                         </div>
                         <div
@@ -2339,15 +2404,23 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         ></div>
-                        {/* <div
+                        <div
                             style={{
                                 ...thirdColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
-                        </div> */}
+                        </div>
                        
+                        <div
+                            style={{
+                                ...forthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+                        </div>
                         <div
                             style={{
                                 ...fifthColWidth,
@@ -2356,17 +2429,9 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                             }}
                         >
                         </div>
-                        <div
-                            style={{
-                                ...sixthColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                        </div>
                          <div
                             style={{
-                                ...forthColWidth,
+                                ...sixthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
@@ -2375,7 +2440,25 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                        
                         <div
                             style={{
+                                ...seventhColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+
+                        </div>
+                        <div
+                            style={{
                                 ...eighthColWidth,
+                                background: getcolor,
+                                borderRight: `1px solid ${fontcolor}`,
+                            }}
+                        >
+
+                        </div>
+                        <div
+                            style={{
+                                ...ninthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
@@ -2383,9 +2466,9 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                             <span className="mobileledger_total">{formatValue(totalCredit)}</span>
 
                         </div>
-                        <div
+                         <div
                             style={{
-                                ...ninhthColWidth,
+                                ...tenthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
@@ -2393,24 +2476,14 @@ typeAndStoreRow.eachCell((cell, colIndex) => {
                             <span className="mobileledger_total">{formatValue(closingBalance)}</span>
 
                         </div>
-                        <div
+                         <div
                             style={{
-                                ...tenthColWidth,
+                                ...elewenthColWidth,
                                 background: getcolor,
                                 borderRight: `1px solid ${fontcolor}`,
                             }}
                         >
                             <span className="mobileledger_total">{formatValue(totalDif)}</span>
-
-                        </div>
-                         <div
-                            style={{
-                                ...seventhColWidth,
-                                background: getcolor,
-                                borderRight: `1px solid ${fontcolor}`,
-                            }}
-                        >
-                            {/* <span className="mobileledger_total">{formatValue(totalDebit)}</span> */}
 
                         </div>
 

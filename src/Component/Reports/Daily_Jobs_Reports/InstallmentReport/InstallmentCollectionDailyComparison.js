@@ -252,9 +252,9 @@ export default function InstallmentCollectionDailyComparison() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input1Reftype.current) {
+        if (saleSelectRef.current) {
           e.preventDefault();
-          input1Reftype.current.focus();
+          saleSelectRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -280,7 +280,7 @@ export default function InstallmentCollectionDailyComparison() {
       const nextInput = document.getElementById(inputId);
       if (nextInput) {
         nextInput.focus();
-        nextInput.select();
+        // nextInput.select();
       } else {
         document.getElementById("submitButton").click();
       }
@@ -449,12 +449,12 @@ export default function InstallmentCollectionDailyComparison() {
       sessionStorage.getItem("componentMounted");
     if (
       !hasComponentMountedPreviously ||
-      (saleSelectRef && saleSelectRef.current)
+      (fromRef && fromRef.current)
     ) {
-      if (saleSelectRef && saleSelectRef.current) {
+      if (fromRef && fromRef.current) {
         setTimeout(() => {
-          saleSelectRef.current.focus();
-          // saleSelectRef.current.select();
+          fromRef.current.focus();
+          fromRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -516,170 +516,172 @@ export default function InstallmentCollectionDailyComparison() {
     );
   };
 
-  const customStyles1 = (hasError) => ({
-    control: (base, state) => ({
-      ...base,
-      height: "24px",
-      minHeight: "unset",
-      width: 250,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: getcolor,
-      color: fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      borderRadius: 0,
-      border: `1px solid ${fontcolor}`,
-      transition: "border-color 0.15s ease-in-out",
-      "&:hover": {
-        borderColor: state.isFocused ? base.borderColor : fontcolor,
-      },
-      padding: "0 8px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      boxShadow: "none",
-      "&:focus-within": {
-        borderColor: "#3368B5",
-        boxShadow: "0 0 0 1px #3368B5",
-      },
-    }),
+   const customStyles1 = (hasError) => ({
+  control: (base, state) => ({
+    ...base,
+    height: "24px",
+    minHeight: "unset",
+    width: 250,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    backgroundColor: getcolor,
+    color: fontcolor,
+    caretColor: getcolor === "white" ? "black" : "white",
+    borderRadius: 0,
+    border: `1px solid ${fontcolor}`,
+    transition: "border-color 0.15s ease-in-out",
+    "&:hover": {
+      borderColor: state.isFocused ? base.borderColor : fontcolor,
+    },
+    padding: "0 8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    boxShadow: "none",
+    "&:focus-within": {
+      borderColor: "red",               // Changed from #3368B5 to red
+      boxShadow: "0 0 0 1px red",       // Changed from #3368B5 to red
+    },
+  }),
 
-    menu: (base) => ({
-      ...base,
-      marginTop: "5px",
-      borderRadius: 0,
-      backgroundColor: getcolor,
-      border: `1px solid ${fontcolor}`,
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      zIndex: 9999,
-    }),
-    menuList: (base) => ({
-      ...base,
-      padding: 0,
-      maxHeight: "200px",
-      // Scrollbar styling for Webkit browsers
-      "&::-webkit-scrollbar": {
-        width: "8px",
-        height: "8px",
+  menu: (base) => ({
+    ...base,
+    marginTop: "5px",
+    borderRadius: 0,
+    backgroundColor: getcolor,
+    border: `1px solid ${fontcolor}`,
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    zIndex: 9999,
+  }),
+  menuList: (base) => ({
+    ...base,
+    padding: 0,
+    maxHeight: "200px",
+    "&::-webkit-scrollbar": {
+      width: "8px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-track": {
+      background: getcolor,
+      borderRadius: "10px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: fontcolor,
+      borderRadius: "10px",
+      border: `2px solid ${getcolor}`,
+      "&:hover": {
+        backgroundColor: "#3368B5",     // unchanged
       },
-      "&::-webkit-scrollbar-track": {
-        background: getcolor,
-        borderRadius: "10px",
-      },
-      "&::-webkit-scrollbar-thumb": {
-        backgroundColor: fontcolor,
-        borderRadius: "10px",
-        border: `2px solid ${getcolor}`,
-        "&:hover": {
-          backgroundColor: "#3368B5",
-        },
-      },
-      // Scrollbar styling for Firefox
-      scrollbarWidth: "thin",
-      scrollbarColor: `${fontcolor} ${getcolor}`,
-    }),
-    option: (base, state) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: state.isSelected
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: `${fontcolor} ${getcolor}`,
+  }),
+  option: (base, state) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    backgroundColor: state.isSelected
+      ? "#3368B5"
+      : state.isFocused
         ? "#3368B5"
-        : state.isFocused
-          ? "#3368B5"
-          : getcolor,
-      color: state.isSelected || state.isFocused ? "white" : fontcolor,
-      "&:hover": {
-        backgroundColor: "#3368B5",
-        color: "white",
-        cursor: "pointer",
-      },
-      "&:active": {
-        backgroundColor: "#1a66cc",
-      },
-      transition: "background-color 0.2s ease, color 0.2s ease",
-    }),
-    dropdownIndicator: (base, state) => ({
-      ...base,
-      padding: 0,
-      marginTop: "-5px",
-      fontSize: "18px",
-      display: "flex",
-      textAlign: "center",
-      color: fontcolor,
-      transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen
-        ? "rotate(180deg)"
-        : "rotate(0deg)",
-      "&:hover": {
-        color: "#3368B5",
-      },
-    }),
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-    singleValue: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      textAlign: "left",
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    input: (base) => ({
-      ...base,
-      color: getcolor === "white" ? "black" : fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      marginTop: "-5px",
-    }),
-    clearIndicator: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      padding: "0 4px",
-      color: fontcolor,
-      "&:hover": {
-        color: "#ff4444",
-      },
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: `${fontcolor}80`, // 50% opacity
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      marginTop: "-5px",
-    }),
-    noOptionsMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    loadingMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    multiValue: (base) => ({
-      ...base,
-      backgroundColor: `${fontcolor}20`, // Light background for tags
-    }),
-    multiValueLabel: (base) => ({
-      ...base,
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    multiValueRemove: (base) => ({
-      ...base,
-      color: `${fontcolor}80`,
-      "&:hover": {
-        backgroundColor: "#ff4444",
-        color: "white",
-      },
-    }),
-  });
+        : getcolor,
+    color:
+      state.isSelected || state.isFocused
+        ? "white"
+        : fontcolor,
+    "&:hover": {
+      backgroundColor: "#3368B5",
+      color: "white",
+      cursor: "pointer",
+    },
+    "&:active": {
+      backgroundColor: "#1a66cc",
+    },
+    transition: "background-color 0.2s ease, color 0.2s ease",
+  }),
+
+  dropdownIndicator: (base, state) => ({
+    ...base,
+    padding: 0,
+    marginTop: "-5px",
+    fontSize: "18px",
+    display: "flex",
+    textAlign: "center",
+    color: fontcolor,
+    transition: "transform 0.2s ease",
+    transform: state.selectProps.menuIsOpen
+      ? "rotate(180deg)"
+      : "rotate(0deg)",
+    "&:hover": {
+      color: "#3368B5",                // unchanged
+    },
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+  singleValue: (base) => ({
+    ...base,
+    marginTop: "-5px",
+    textAlign: "left",
+    color: fontcolor,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+  }),
+  input: (base) => ({
+    ...base,
+    color: getcolor === "white" ? "black" : fontcolor,
+    caretColor: getcolor === "white" ? "black" : "white",
+    marginTop: "-5px",
+  }),
+  clearIndicator: (base) => ({
+    ...base,
+    marginTop: "-5px",
+    padding: "0 4px",
+    color: fontcolor,
+    "&:hover": {
+      color: "#ff4444",                // unchanged
+    },
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: `${fontcolor}80`,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    marginTop: "-5px",
+  }),
+  noOptionsMessage: (base) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    color: fontcolor,
+    backgroundColor: getcolor,
+  }),
+  loadingMessage: (base) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    color: fontcolor,
+    backgroundColor: getcolor,
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: `${fontcolor}20`,
+  }),
+  multiValueLabel: (base) => ({
+    ...base,
+    color: fontcolor,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+  }),
+  multiValueRemove: (base) => ({
+    ...base,
+    color: `${fontcolor}80`,
+    "&:hover": {
+      backgroundColor: "#ff4444",
+      color: "white",
+    },
+  }),
+});
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
@@ -712,7 +714,7 @@ export default function InstallmentCollectionDailyComparison() {
 
     // Add summary row to the table
     rows.push([
-      "",
+      String(formatValue(tableData.length.toLocaleString())),
       "",
       String(formatValue(SaleCust)),
       String(formatValue(TotalSale)),
@@ -740,7 +742,7 @@ export default function InstallmentCollectionDailyComparison() {
       "Collection",
       "Diff",
     ];
-    const columnWidths = [23, 28, 25, 27, 27, 27, 27, 27, 27,27,27];
+    const columnWidths = [23, 28, 25, 27, 27, 27, 27, 27, 27, 27, 27];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -983,14 +985,16 @@ export default function InstallmentCollectionDailyComparison() {
         // }
 
         // Add page numbering
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+        // Add page numbering
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(
-          `Page ${pageNumber}`,
-          rightX - 15,
-          doc.internal.pageSize.height - 10,
-          { align: "right" },
-        );
+      doc.text(
+  `Page ${pageNumber} / ${totalPages}`,
+  rightX - 20,
+  doc.internal.pageSize.height - 10,
+  { align: "right" },
+);
       };
 
       let currentPageIndex = 0;
@@ -1092,276 +1096,238 @@ export default function InstallmentCollectionDailyComparison() {
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
   ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
   const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 11; // Ensure this matches the actual number of columns
+  const numColumns = 11;
 
-    const columnAlignments = [
-      "center",
-      "left",
-      "right",
-      "right",
-      "right",
-      "right",
-      "right",
-      "right",
-      "right",
-       "right",
-      "right",
-    ];
+  const columnAlignments = [
+    "center",
+    "left",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+  ];
 
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
+  // Helper: convert any value (including strings with commas) to a safe number
+  const toNumber = (value) => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const cleaned = value.replace(/,/g, ""); // remove all commas
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+    return 0;
+  };
 
-    // Add an empty row at the start
-    worksheet.addRow([]);
+  // Define fonts
+  const fontCompanyName = { name: "CustomFont" || "CustomFont", size: 18, bold: true };
+  const fontStoreList = { name: "CustomFont" || "CustomFont", size: 10, bold: false };
+  const fontHeader = { name: "CustomFont" || "CustomFont", size: 10, bold: true };
+  const fontTableContent = { name: "CustomFont" || "CustomFont", size: 10, bold: false };
 
-    // Add company name
-    const companyRow = worksheet.addRow([comapnyname]);
-    companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
-      cell.alignment = { horizontal: "center" };
-    });
+  worksheet.addRow([]);
 
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`,
-    );
+  // Company name
+  const companyRow = worksheet.addRow([comapnyname]);
+  companyRow.eachCell((cell) => {
+    cell.font = fontCompanyName;
+    cell.alignment = { horizontal: "center" };
+  });
+  worksheet.getRow(companyRow.number).height = 30;
+  worksheet.mergeCells(
+    `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`
+  );
 
-    // Add Store List row
-    const storeListRow = worksheet.addRow([
-      `Installment Collection Daily comparison From ${fromInputDate} To ${toInputDate}`,
-    ]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
+  // Title row
+  const storeListRow = worksheet.addRow([
+    `Installment Collection Daily comparison From ${fromInputDate} To ${toInputDate}`,
+  ]);
+  storeListRow.eachCell((cell) => {
+    cell.font = fontStoreList;
+    cell.alignment = { horizontal: "center" };
+  });
+  worksheet.mergeCells(
+    `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`
+  );
 
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`,
-    );
+  worksheet.addRow([]);
 
-    // Add an empty row after the title section
-    worksheet.addRow([]);
+  let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
 
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
+  let actype =
+    transectionType2 === "001"
+      ? "MONTHLY"
+      : transectionType2 === "002"
+      ? "DAILY"
+      : transectionType2 === "003"
+      ? "WEEKLY"
       : "ALL";
 
-    let actype =
-      transectionType2 === "001"
-        ? "MONTHLY"
-        : transectionType2 === "002"
-          ? "DAILY"
-          : transectionType2 === "003"
-            ? "WEEKLY"
-            : "ALL";
+  const typeAndStoreRow = worksheet.addRow([
+    "Collector :",
+    typecompany,
+    "",
+    "",
+    "",
+    "",
+    "Type :",
+    actype,
+  ]);
 
-    const typeAndStoreRow = worksheet.addRow([
-      "Collector :",
-      typecompany,
-      "",
-      "",
-      "",
-      "",
-      "Type :",
-      actype,
+  worksheet.mergeCells(`B${typeAndStoreRow.number}:E${typeAndStoreRow.number}`);
+
+  const rightAlignCols = [7];
+  const boldCols = [1, 7];
+
+  typeAndStoreRow.eachCell((cell, colIndex) => {
+    cell.font = { name: "CustomFont", size: 10, bold: boldCols.includes(colIndex) };
+    cell.alignment = {
+      horizontal: rightAlignCols.includes(colIndex) ? "right" : "left",
+      vertical: "middle",
+    };
+  });
+
+  // Header style
+  const headerStyle = {
+    font: fontHeader,
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+    border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
+  };
+
+  const headers = [
+    "Date",
+    "Day",
+    "SaleCust",
+    "SaleAmt",
+    "RentAmt",
+    "TotalAmt",
+    "AdvaceAmt",
+    "CustNos",
+    "InsAmt",
+    "Collection",
+    "Diff",
+  ];
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+  // Data rows with numeric conversion
+  tableData.forEach((item) => {
+    const row = worksheet.addRow([
+      item.Date,
+      item.Day,
+      toNumber(item.SaleCust),
+      toNumber(item.SaleAmt),
+      toNumber(item.RentAmt),
+      toNumber(item.TotalAmt),
+      toNumber(item.AdvaceAmt),
+      toNumber(item.CustNos),
+      toNumber(item.InsAmt),
+      toNumber(item.Collection),
+      toNumber(item.Diff),
     ]);
 
-    worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:E${typeAndStoreRow.number}`,
-    );
-
-    // Columns that should be RIGHT aligned (values)
-    const rightAlignCols = [7];
-
-    // Columns that should be BOLD (labels)
-    const boldCols = [1, 7];
-
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont",
-        size: 10,
-        bold: boldCols.includes(colIndex),
-      };
-
-      cell.alignment = {
-        horizontal: rightAlignCols.includes(colIndex) ? "right" : "left",
-        vertical: "middle",
-      };
-    });
-
-    // Header style
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
+    row.eachCell((cell, colIndex) => {
+      cell.font = fontTableContent;
+      cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
         bottom: { style: "thin" },
         right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = [
-      "Date",
-      "Day",
-      "SaleCust",
-      "SaleAmt",
-      "RentAmt",
-      "TotalAmt",
-      "AdvaceAmt",
-      "CustNos",
-      "InsAmt",
-      "Collection",
-      "Diff",
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([
-          item.Date,
-      item.Day,
-      item.SaleCust,
-      item.SaleAmt,
-      item.RentAmt,
-      item.TotalAmt,
-      item.AdvaceAmt,
-      item.CustNos,
-      item.InsAmt,
-      item.Collection,
-      item.Diff,
-      ]);
-
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
-      });
-    });
-
-    // Set column widths
-    [11, 14, 10, 14, 14, 14, 14, 14, 14, 14,14,14].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    const totalRow = worksheet.addRow([
-       "",
-      "",
-      String(formatValue(SaleCust)),
-      String(formatValue(TotalSale)),
-      String(formatValue(TotalRent)),
-      String(formatValue(TotalAmount)),
-      String(formatValue(TotalAdvance)),
-      String(formatValue(TotalCust)),
-      String(formatValue(TotalIns)),
-      String(formatValue(TotalCol)),
-      String(formatValue(TotalDif)),
-    ]);
-
-    // total row added
-
-    totalRow.eachCell((cell, colNumber) => {
-      cell.font = { name: "CustomFont", size: 10, bold: true }; // Apply CustomFont
-      cell.border = {
-        top: { style: "double" },
-        left: { style: "thin" },
-        bottom: { style: "double" },
-        right: { style: "thin" },
       };
-
-      // Align only the "Total" text to the right
-      if (
-        colNumber === 3 ||
-        colNumber === 4 ||
-        colNumber === 5 ||
-        colNumber === 6 ||
-        colNumber === 7 ||
-        colNumber === 8 ||
-        colNumber === 9 ||
-         colNumber === 10 ||
-          colNumber === 11
-      ) {
-        cell.alignment = { horizontal: "right" };
+      cell.alignment = {
+        horizontal: columnAlignments[colIndex - 1] || "left",
+        vertical: "middle",
+      };
+      // Apply number format (#,##0) for numeric columns (colIndex 3 to 11)
+      if (colIndex >= 3 && colIndex <= 11) {
+        cell.numFmt = "#,##0";
       }
     });
+  });
 
-    // Add an empty row after the title section
-    worksheet.addRow([]);
-    // Date and Time
-    const today = new Date();
-    const currentTime = today.toLocaleTimeString("en-GB");
-    const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
-    const userid = user.tusrid;
+  // Set column widths
+  [11, 14, 10, 14, 14, 14, 14, 14, 14, 14, 14, 14].forEach((width, index) => {
+    worksheet.getColumn(index + 1).width = width;
+  });
 
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentDate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = { name: "CustomFont", size: 10 };
-      cell.alignment = { horizontal: "left" };
-    });
+  // Total row – convert each total using toNumber()
+  const totalRow = worksheet.addRow([
+   toNumber(tableData.length.toLocaleString()),
+    "",
+    toNumber(SaleCust),
+    toNumber(TotalSale),
+    toNumber(TotalRent),
+    toNumber(TotalAmount),
+    toNumber(TotalAdvance),
+    toNumber(TotalCust),
+    toNumber(TotalIns),
+    toNumber(TotalCol),
+    toNumber(TotalDif),
+  ]);
 
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow1.eachCell((cell) => {
-      cell.font = { name: "CustomFont", size: 10 };
-      cell.alignment = { horizontal: "left" };
-    });
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { name: "CustomFont", size: 10, bold: true };
+    cell.border = {
+      top: { style: "double" },
+      left: { style: "thin" },
+      bottom: { style: "double" },
+      right: { style: "thin" },
+    };
+    if (colNumber >= 3 && colNumber <= 11) {
+      cell.alignment = { horizontal: "right" };
+      cell.numFmt = "#,##0";
+    }
 
-    // Merge cells
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
-    );
+    if (colNumber === 1) {
+      cell.alignment = { horizontal: "center" };
+      cell.numFmt = "#,##0";
+    }
+  });
 
-    // Generate and save the Excel file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(
-      blob,
-      `InstallmentCollectionDailyComparison From ${fromInputDate} To ${toInputDate}.xlsx`,
-    );
-  };
+  worksheet.addRow([]);
+
+  // Date and Time
+  const today = new Date();
+  const currentTime = today.toLocaleTimeString("en-GB");
+  const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+  const userid = user.tusrid;
+
+  const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+  dateTimeRow.eachCell((cell) => {
+    cell.font = { name: "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  dateTimeRow1.eachCell((cell) => {
+    cell.font = { name: "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  worksheet.mergeCells(
+    `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+  );
+  worksheet.mergeCells(
+    `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+  );
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(
+    blob,
+    `InstallmentCollectionDailyComparison From ${fromInputDate} To ${toInputDate}.xlsx`
+  );
+};
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
@@ -1402,28 +1368,28 @@ export default function InstallmentCollectionDailyComparison() {
     width: "90px",
   };
   const thirdColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const forthColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const fifthColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const sixthColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const seventhColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const eighthColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const ninhthColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const tenthColWidth = {
-    width: "85px",
+    width: "87px",
   };
   const sixColWidth = {
     width: "8px",
@@ -1612,13 +1578,13 @@ export default function InstallmentCollectionDailyComparison() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
 
               {/* CODE FOR SELECT */}
 
-              <div className="d-flex align-items-center">
+              <div className="d-flex align-items-center" style={{marginLeft:'10px'}}>
                 <div
                   style={{
                     width: "80px",
@@ -1719,7 +1685,7 @@ export default function InstallmentCollectionDailyComparison() {
                   />
                 </div>
               </div>
-              <div className="d-flex align-items-center">
+              <div className="d-flex align-items-center" style={{marginLeft:'100px'}}>
                 <div
                   style={{
                     width: "60px",
@@ -1776,7 +1742,7 @@ export default function InstallmentCollectionDailyComparison() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, "firsttype")}
+                    onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -1818,7 +1784,78 @@ export default function InstallmentCollectionDailyComparison() {
                   />
                 </div>
               </div>
-               <div
+            
+            </div>
+          </div>
+
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+
+              <div className="d-flex align-items-center  " style={{ marginLeft: '15px' }}>
+                <div style={{ width: '80px', display: 'flex', justifyContent: 'end' }}>
+                  <label htmlFor="fromDatePicker"><span style={{ fontFamily: getfontstyle, fontSize: getdatafontsize, fontWeight: 'bold' }}>Collector :</span>  <br /></label>
+                </div>
+                <div style={{ marginLeft: '5px' }} >
+                  <Select
+                    className="List-select-class"
+                    ref={saleSelectRef}
+                    options={options}
+                    onKeyDown={(e) => handleSaleKeypress(e, "submitButton")}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setSaleType(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Set only the 'NGS' part of the label
+                        });
+                      } else {
+                        setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!saleType),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+
+                </div>
+
+
+              </div>
+
+                <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
               >
@@ -1845,7 +1882,7 @@ export default function InstallmentCollectionDailyComparison() {
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <select
                     ref={input1Reftype}
-                    onKeyDown={(e) => handleKeyPress(e, input1Ref)}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     id="submitButton"
                     name="type"
                     onFocus={(e) =>
@@ -1894,6 +1931,10 @@ export default function InstallmentCollectionDailyComparison() {
                   )}
                 </div>
               </div>
+
+
+
+
             </div>
           </div>
 
@@ -1965,7 +2006,7 @@ export default function InstallmentCollectionDailyComparison() {
                     <td className="border-dark" style={ninhthColWidth}>
                       Collection
                     </td>
-                     <td className="border-dark" style={tenthColWidth}>
+                    <td className="border-dark" style={tenthColWidth}>
                       Diff
                     </td>
                     <td className="border-dark" style={sixColWidth}></td>
@@ -1985,12 +2026,11 @@ export default function InstallmentCollectionDailyComparison() {
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontFamily: getfontstyle,
                   fontSize: getdatafontsize,
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
@@ -2033,7 +2073,7 @@ export default function InstallmentCollectionDailyComparison() {
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
-                                                <td style={eighthColWidth}></td>
+                        <td style={eighthColWidth}></td>
 
                         <td style={ninhthColWidth}></td>
                         <td style={tenthColWidth}></td>
@@ -2082,13 +2122,13 @@ export default function InstallmentCollectionDailyComparison() {
                             <td className="text-end" style={eighthColWidth}>
                               {item.CustNos}
                             </td>
-                             <td className="text-end" style={eighthColWidth}>
+                            <td className="text-end" style={eighthColWidth}>
                               {item.InsAmt}
                             </td>
                             <td className="text-end" style={ninhthColWidth}>
                               {item.Collection}
                             </td>
-                             <td className="text-end" style={tenthColWidth}>
+                            <td className="text-end" style={tenthColWidth}>
                               {item.Diff}
                             </td>
                           </tr>
@@ -2120,7 +2160,7 @@ export default function InstallmentCollectionDailyComparison() {
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
-                          <td style={eighthColWidth}></td>
+                        <td style={eighthColWidth}></td>
                         <td style={ninhthColWidth}></td>
                         <td style={tenthColWidth}></td>
 
@@ -2138,7 +2178,7 @@ export default function InstallmentCollectionDailyComparison() {
               height: "24px",
               display: "flex",
               paddingRight: "8px",
-              // width: '101.2%'
+             
             }}
           >
             <div
@@ -2147,7 +2187,11 @@ export default function InstallmentCollectionDailyComparison() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+               <span className="mobileledger_total2">
+                {formatValue(tableData.length.toLocaleString())}
+              </span>
+            </div>
             <div
               style={{
                 ...secondColWidth,
@@ -2221,7 +2265,7 @@ export default function InstallmentCollectionDailyComparison() {
                 {formatValue(TotalCust)}
               </span>
             </div>
-              <div
+            <div
               style={{
                 ...eighthColWidth,
                 background: getcolor,
@@ -2243,7 +2287,7 @@ export default function InstallmentCollectionDailyComparison() {
                 {formatValue(TotalCol)}
               </span>
             </div>
-              <div
+            <div
               style={{
                 ...tenthColWidth,
                 background: getcolor,

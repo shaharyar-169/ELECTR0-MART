@@ -230,13 +230,13 @@ export default function ItemStockReportPos() {
             FCapCod: Capacityselectdata,
             FSchTxt: searchQuery,
             FCmpCod: Companyselectdata,
-            // code: organisation.code,
-            // FLocCod: locationnumber || getLocationNumber,
-            // FYerDsc: yeardescription || getYearDescription,
+            code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+            FYerDsc: yeardescription || getYearDescription,
 
-            code: 'UMAIRPOS',
-            FLocCod: '001',
-            FYerDsc: '2021-2025',
+            // code: 'UMAIRPOS',
+            // FLocCod: '001',
+            // FYerDsc: '2021-2025',
 
         }).toString();
 
@@ -634,15 +634,14 @@ export default function ItemStockReportPos() {
         const pageHeight = doc.internal.pageSize.height;
         const paddingTop = 15;
 
-        // Set font properties for the table
-        doc.setFont(getfontstyle);
-        doc.setFontSize(10);
+      doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
 
         // Function to add table headers
         const addTableHeaders = (startX, startY) => {
             // Set font style and size for headers
-            doc.setFont(getfontstyle, "bold"); // Set font to bold
-            doc.setFontSize(12); // Set font size for headers
+          doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
 
             headers.forEach((header, index) => {
                 const cellWidth = columnWidths[index];
@@ -664,164 +663,152 @@ export default function ItemStockReportPos() {
                 startX += columnWidths[index]; // Move to the next column
             });
 
-            // Reset font style and size after adding headers
-            doc.setFont(getfontstyle);
-            doc.setFontSize(12);
+        
         };
 
         const addTableRows = (startX, startY, startIndex, endIndex) => {
-            const rowHeight = 5; // Adjust row height
-            const fontSize = 10; // Adjust font size
-            const boldFont = 400; // Bold font
-            const normalFont = getfontstyle; // Default font
-            const tableWidth = getTotalTableWidth(); // Calculate total table width
+      let totalRowBottomY = null;
+      const rowHeight = 5;
+      const fontSize = 10;
+      const boldFont = 400;
+      const normalFont = getfontstyle;
+      const tableWidth = getTotalTableWidth();
 
-            doc.setFontSize(fontSize);
+      for (let i = startIndex; i < endIndex; i++) {
+        const row = rows[i];
+        const isOddRow = i % 2 !== 0;
+        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+        const isTotalRow = i === rows.length - 1;
+        let textColor = [0, 0, 0];
 
-            for (let i = startIndex; i < endIndex; i++) {
-                const row = rows[i];
-                const isTotalRow = i === rows.length - 1; // Check if this is the total row
-                let textColor = [0, 0, 0]; // Default text color
-                let fontName = normalFont; // Default font
-                let currentX = startX; // Track current column position
+        if (isRedRow) {
+          textColor = [255, 0, 0];
+        }
 
-                // Check if Qnty (column index 6) is negative
-                if (parseFloat(row[8]) < 0) {
-                    textColor = [255, 0, 0]; // Set red color for negative Qnty
-                }
+        if (isTotalRow) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+        }
 
-                // For total row, set bold font and prepare for double border
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, 'bold');
-                }
+        if (isOddRow) {
+          doc.setFillColor(240);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+            "F",
+          );
+        }
 
-                // Draw row borders
-                doc.setDrawColor(0);
+        doc.setDrawColor(0);
 
-                // For total row, draw double border
-                if (isTotalRow) {
-                    // First line of the double border
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        currentX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
+        if (isTotalRow) {
+          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+          const rowBottomY = rowTopY + rowHeight;
+          totalRowBottomY = rowBottomY; // ✅ Save bottom of total row
 
-                    // Second line of the double border (slightly offset)
-                    doc.setLineWidth(0.3);
-                    doc.rect(
-                        currentX + 0.5,
-                        startY + (i - startIndex + 2) * rowHeight + 0.5,
-                        tableWidth - 1,
-                        rowHeight - 1
-                    );
-                } else {
-                    // Normal border for other rows
-                    doc.setLineWidth(0.2);
-                    doc.rect(
-                        currentX,
-                        startY + (i - startIndex + 2) * rowHeight,
-                        tableWidth,
-                        rowHeight
-                    );
-                }
+          doc.setLineWidth(0.3);
+          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
 
-                row.forEach((cell, cellIndex) => {
-                    // For total row, adjust vertical position to center in the double border
-                    const cellY = isTotalRow
-                        ? startY + (i - startIndex + 2) * rowHeight + rowHeight / 2
-                        : startY + (i - startIndex + 2) * rowHeight + 3;
+          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+          doc.line(
+            startX,
+            rowBottomY - 0.5,
+            startX + tableWidth,
+            rowBottomY - 0.5,
+          );
 
-                    const cellX = currentX + 2;
+          doc.setLineWidth(0.2);
+          doc.line(startX, rowTopY, startX, rowBottomY);
+          doc.line(
+            startX + tableWidth,
+            rowTopY,
+            startX + tableWidth,
+            rowBottomY,
+          );
+        } else {
+          doc.setLineWidth(0.2);
+          doc.rect(
+            startX,
+            startY + (i - startIndex + 2) * rowHeight,
+            tableWidth,
+            rowHeight,
+          );
+        }
 
-                    // Set text color
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+        // Draw cell text
+        row.forEach((cell, cellIndex) => {
+          const cellY =
+            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+          const cellX = startX + 2;
 
-                    // For total row, keep bold font
-                    if (!isTotalRow) {
-                        // Set font
-                        doc.setFont(fontName, "normal");
-                    }
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-                    // Ensure the cell value is a string
-                    const cellValue = String(cell);
+          if (!isTotalRow) {
+            doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+          }
 
-                    if (cellIndex === 3 || cellIndex === 4 || cellIndex === 5 || cellIndex === 6 || cellIndex === 7 || cellIndex === 8) {
-                        const rightAlignX = currentX + columnWidths[cellIndex] - 2;
-                        doc.text(cellValue, rightAlignX, cellY, {
-                            align: "right",
-                            baseline: "middle",
-                        });
-                    } else {
-                        // For empty cells in total row, add "Total" label centered
-                        if (isTotalRow && cellIndex === 0 && cell === "") {
-                            const totalLabelX = currentX + columnWidths[0] / 2;
-                            doc.text("", totalLabelX, cellY, {
-                                align: "center",
-                                baseline: "middle"
-                            });
-                        } else {
-                            doc.text(cellValue, cellX, cellY, {
-                                baseline: "middle"
-                            });
-                        }
-                    }
+          const cellValue = String(cell);
 
-                    // Draw column borders
-                    if (isTotalRow) {
-                        // Double border for total row columns
-                        doc.setLineWidth(0.3);
-                        doc.rect(
-                            currentX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                        doc.setLineWidth(0.3);
-                        doc.rect(
-                            currentX + 0.5,
-                            startY + (i - startIndex + 2) * rowHeight + 0.5,
-                            columnWidths[cellIndex] - 1,
-                            rowHeight - 1
-                        );
-                    } else {
-                        // Normal border for other rows
-                        doc.setLineWidth(0.2);
-                        doc.rect(
-                            currentX,
-                            startY + (i - startIndex + 2) * rowHeight,
-                            columnWidths[cellIndex],
-                            rowHeight
-                        );
-                    }
-
-                    // Move to next column
-                    currentX += columnWidths[cellIndex];
-                });
-
-                // Reset font after total row
-                if (isTotalRow) {
-                    doc.setFont(getfontstyle, "normal");
-                }
+          if (cellIndex === 10) {
+            const rightAlignX = startX + columnWidths[cellIndex] / 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "center",
+              baseline: "middle",
+            });
+          } else if ([3, 4, 5,6, 7, 8].includes(cellIndex)) {
+            const rightAlignX = startX + columnWidths[cellIndex] - 2;
+            doc.text(cellValue, rightAlignX, cellY, {
+              align: "right",
+              baseline: "middle",
+            });
+          } else {
+            if (isTotalRow && cellIndex === 0 && cell === "") {
+              doc.text("", startX + columnWidths[0] / 2, cellY, {
+                align: "center",
+                baseline: "middle",
+              });
+            } else {
+              doc.text(cellValue, cellX, cellY, { baseline: "middle" });
             }
+          }
 
-            // Draw line at the bottom of the page with padding
-            const lineWidth = tableWidth;
-            const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-            const lineY = pageHeight - 15;
-            doc.setLineWidth(0.3);
-            doc.line(lineX, lineY, lineX + lineWidth, lineY);
-            const headingFontSize = 12;
+          if (cellIndex < row.length - 1) {
+            doc.setLineWidth(0.2);
+            doc.line(
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 2) * rowHeight,
+              startX + columnWidths[cellIndex],
+              startY + (i - startIndex + 3) * rowHeight,
+            );
+            startX += columnWidths[cellIndex];
+          }
+        });
 
-            // Add heading "Crystal Solution" aligned left bottom of the line
-            const headingX = lineX + 2;
-            const headingY = lineY + 5;
-            doc.setFontSize(headingFontSize);
-            doc.setTextColor(0);
-            doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
-        };
+        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
+      }
+
+    
+
+      // Footer line
+      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+      const lineY = pageHeight - 15;
+      doc.setLineWidth(0.3);
+      doc.line(lineX, lineY, lineX + tableWidth, lineY);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(`Crystal Solution    ${date}    ${time}`, lineX + 2, lineY + 5);
+
+      return startY + (endIndex - startIndex + 2) * 5; // Return updated Y
+    };
 
         // Function to calculate total table width
         const getTotalTableWidth = () => {
@@ -859,18 +846,11 @@ export default function ItemStockReportPos() {
                 // Calculate the x-coordinate for the right corner
                 const rightX = doc.internal.pageSize.width - 10;
 
-                // if (date) {
-                //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-                //     if (time) {
-                //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-                //     } else {
-                //         doc.text(date, rightX - 10, startY, { align: "right" });
-                //     }
-                // }
-
+               
                 // Add page numbering
-                doc.setFontSize(pageNumberFontSize);
-                doc.text(
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                            doc.text(
                     `Page ${pageNumber}`,
                     rightX - 5,
                     doc.internal.pageSize.height - 10,
@@ -883,9 +863,10 @@ export default function ItemStockReportPos() {
             let pageNumber = 1; // Initialize page number
 
             while (currentPageIndex * rowsPerPage < rows.length) {
-                addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
+               doc.setFont("Times New Roman", "normal");
+              addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
                 startY += 5; // Adjust vertical position for the company title
-
+ doc.setFont("verdana-regular", "normal");
                 addTitle(
                     `Item Stock Report Pos As on ${toInputDate}`,
                     "",
@@ -925,45 +906,46 @@ export default function ItemStockReportPos() {
 
                 let search = searchQuery ? searchQuery : "";
 
-                // Set font style, size, and family
-                doc.setFont(getfontstyle, "300"); // Font family and style ('normal', 'bold', 'italic', etc.)
-                doc.setFontSize(10); // Font size
+           
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                            doc.text(`Company :`, labelsX, labelsY); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                            doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                            doc.text(`Capacity :`, labelsX + 180, labelsY); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                            doc.text(`${typeText}`, labelsX + 205, labelsY); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`CAPACITY :`, labelsX + 180, labelsY); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${typeText}`, labelsX + 205, labelsY); // Draw the value next to the label
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                            doc.text(`Category :`, labelsX, labelsY + 4.3); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                            doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`CATEGORY :`, labelsX, labelsY + 4.3); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${category}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                            doc.text(`Status :`, labelsX + 180, labelsY + 4.3); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                            doc.text(`${status}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
 
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.text(`STATUS :`, labelsX + 180, labelsY + 4.3); // Draw bold label
-                doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                doc.text(`${status}`, labelsX + 205, labelsY + 4.3); // Draw the value next to the label
-
-                // doc.setFont(getfontstyle, "bold"); // Set font to bold
-                // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-                // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
+                
                 if (searchQuery) {
-                    doc.setFont(getfontstyle, "bold"); // Set font to bold
-                    doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-                    doc.setFont(getfontstyle, "normal"); // Reset font to normal
-                    doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
+ doc.setFont("verdana", "bold");
+            doc.setFontSize(10);
+                                doc.text(`Search :`, labelsX + 180, labelsY + 8.5); // Draw bold label
+ doc.setFont("verdana-regular", "normal");
+            doc.setFontSize(10);
+                                doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
                 }
 
-                // // Reset font weight to normal if necessary for subsequent text
-                doc.setFont(getfontstyle, "bold"); // Set font to bold
-                doc.setFontSize(10);
+             
 
                 startY += 10; // Adjust vertical position for the labels
 
@@ -1224,9 +1206,9 @@ export default function ItemStockReportPos() {
         totalRow.eachCell((cell, colNumber) => {
             cell.font = { bold: true };
             cell.border = {
-                top: { style: "thin" },
+                top: { style: "double" },
                 left: { style: "thin" },
-                bottom: { style: "thin" },
+                bottom: { style: "double" },
                 right: { style: "thin" },
             };
 
@@ -1381,42 +1363,85 @@ export default function ItemStockReportPos() {
     };
 
 
+     const contentStyle = {
+    width: "100%", // 100vw ki jagah 100%
+    maxWidth: "1000px",
+    height: "calc(100vh - 100px)",
+    position: "absolute",
+    top: "70px",
+    left: isSidebarVisible ? "60vw" : "50vw",
+    transform: "translateX(-50%)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    textAlign: "center",
+    fontSize: "15px",
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: "23px",
+    fontFamily: '"Poppins", sans-serif',
+    zIndex: 1,
+    padding: "0 20px", // Side padding for small screens
+    boxSizing: "border-box", // Padding ko width mein include kare
+  };
 
     const firstColWidth = {
-        width: "10%",
+        width: "100px",
     };
     const secondColWidth = {
-        width: "30.6%",
+        width: "310px",
     };
     const thirdColWidth = {
-        width: "9%",
+        width: "85px",
     };
     const forthColWidth = {
-        width: "9%",
+        width: "85px",
     };
     const fifthColWidth = {
-        width: "9%",
+        width: "85px",
     };
     const sixthColWidth = {
-        width: "5%",
+        width: "60px",
     };
     const seventhColWidth = {
-        width: "9%",
+        width: "85px",
     };
     const eighthColWidth = {
-        width: "9%",
+        width: "85px",
     };
     const ninthColWidth = {
-        width: "9%",
+        width: "85px",
     };
     const tenthColWidth = {
-        width: "9%",
+        width: "85px",
+    };
+     const LastColWidth = {
+        width: "8px",
     };
 
-    useHotkeys("s", fetchDailyStatusReport);
-    useHotkeys("alt+p", exportPDFHandler);
-    useHotkeys("alt+e", handleDownloadCSV);
-    useHotkeys("esc", () => navigate("/MainPage"));
+    useHotkeys(
+       "alt+s",
+       () => {
+         fetchDailyStatusReport();
+         resetSorting();
+       },
+       { preventDefault: true, enableOnFormTags: true }
+     );
+   
+     useHotkeys("alt+p", exportPDFHandler, {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
+     useHotkeys("alt+e", handleDownloadCSV, {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
+     useHotkeys("alt+r", () => navigate("/MainPage"), {
+       preventDefault: true,
+       enableOnFormTags: true,
+     });
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -1430,30 +1455,72 @@ export default function ItemStockReportPos() {
         };
     }, []);
 
-    const contentStyle = {
-        backgroundColor: getcolor,
-        width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
-        position: "absolute",
-        top: "53%",
-        left: isSidebarVisible ? "60%" : "50%",
-        transform: "translate(-50%, -50%)",
-        transition: isSidebarVisible
-            ? "left 3s ease-in-out, width 2s ease-in-out"
-            : "left 3s ease-in-out, width 2s ease-in-out",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "start",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        wordBreak: "break-word",
-        textAlign: "center",
-        maxWidth: "1100px",
-        fontSize: "15px",
-        fontStyle: "normal",
-        fontWeight: "400",
-        lineHeight: "23px",
-        fontFamily: '"Poppins", sans-serif',
-    };
+
+     const [columns, setColumns] = useState({
+        Qnty: [],
+       
+      });
+      const [columnSortOrders, setColumnSortOrders] = useState({
+        Qnty: "",
+       
+      });
+      useEffect(() => {
+        if (tableData.length > 0) {
+          const newColumns = {
+            Qnty: tableData.map((row) => row.Qnty),
+          
+          };
+          setColumns(newColumns);
+        }
+      }, [tableData]);
+    
+      const handleSorting = (col) => {
+        const currentOrder = columnSortOrders[col];
+        const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+    
+        const sortedData = [...tableData].sort((a, b) => {
+          const aVal =
+            a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+          const bVal =
+            b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+    
+          const numA = parseFloat(aVal.replace(/,/g, ""));
+          const numB = parseFloat(bVal.replace(/,/g, ""));
+    
+          if (!isNaN(numA) && !isNaN(numB)) {
+            return newOrder === "ASC" ? numA - numB : numB - numA;
+          } else {
+            return newOrder === "ASC"
+              ? aVal.localeCompare(bVal)
+              : bVal.localeCompare(aVal);
+          }
+        });
+    
+        setTableData(sortedData);
+    
+        setColumnSortOrders((prev) => ({
+          ...Object.keys(prev).reduce((acc, key) => {
+            acc[key] = key === col ? newOrder : null;
+            return acc;
+          }, {}),
+        }));
+      };
+    
+      const resetSorting = () => {
+        setColumnSortOrders({
+          Qnty: null,
+        
+        });
+      };
+      const getIconStyle = (colKey) => {
+        const order = columnSortOrders[colKey];
+        return {
+          transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+          color: order === "ASC" || order === "DSC" ? "red" : "white",
+          transition: "transform 0.3s ease, color 0.3s ease",
+        };
+      };
+   
 
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     useEffect(() => {
@@ -1598,7 +1665,7 @@ export default function ItemStockReportPos() {
                     style={{
                         backgroundColor: getcolor,
                         color: fontcolor,
-                        width: "100%",
+                        // width: "100%",
                         border: `1px solid ${fontcolor}`,
                         borderRadius: "9px",
                     }}
@@ -2027,7 +2094,7 @@ export default function ItemStockReportPos() {
                                         onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                                         type="text"
                                         id="searchsubmit"
-                                        placeholder="Item description"
+                                        placeholder="Search"
                                         value={searchQuery}
                                         autoComplete="off"
                                         style={{
@@ -2080,7 +2147,7 @@ export default function ItemStockReportPos() {
                         <div
                             style={{
                                 overflowY: "auto",
-                                width: "98.8%",
+                                // width: "98.8%",
                             }}
                         >
                             <table
@@ -2123,9 +2190,17 @@ export default function ItemStockReportPos() {
                                         {/* <td className="border-dark" style={fifthColWidth}>
                                             Pur Ret
                                         </td> */}
-                                        <td className="border-dark" style={sixthColWidth}>
-                                            Qnty
-                                        </td>
+                                         <td
+                      className="border-dark"
+                      style={sixthColWidth}
+                      onClick={() => handleSorting("Qnty")}
+                    >
+                      Qnty{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnty")}
+                      ></i>
+                    </td>
                                         <td className="border-dark" style={seventhColWidth}>
                                             Ex Amt
                                         </td>
@@ -2138,6 +2213,9 @@ export default function ItemStockReportPos() {
                                         <td className="border-dark" style={tenthColWidth}>
                                             Inc Amt
                                         </td>
+                                        <td className="border-dark" style={LastColWidth}>
+                                            
+                                        </td>
                                     </tr>
                                 </thead>
                             </table>
@@ -2149,8 +2227,7 @@ export default function ItemStockReportPos() {
                                 backgroundColor: textColor,
                                 borderBottom: `1px solid ${fontcolor}`,
                                 overflowY: "auto",
-                                maxHeight: "50vh",
-                                width: "100%",
+                                maxHeight: "47vh",
                                 wordBreak: "break-word",
                             }}
                         >
@@ -2158,8 +2235,9 @@ export default function ItemStockReportPos() {
                                 className="myTable"
                                 id="tableBody"
                                 style={{
-                                    fontSize: getdatafontsize, fontFamily: getfontstyle, width: "100%",
+                                  width: "100%",
                                     position: "relative",
+                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                                 }}
                             >
                                 <tbody id="tablebody">
@@ -2224,9 +2302,18 @@ export default function ItemStockReportPos() {
                                                         <td className="text-start" style={firstColWidth}>
                                                             {item.Code}
                                                         </td>
-                                                        <td className="text-start" style={secondColWidth}>
-                                                            {item.Description}
-                                                        </td>
+                                                        <td
+                    className="text-start"
+                    title={item.Description}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Description}
+                  </td>
                                                         <td className="text-start" style={thirdColWidth}>
                                                             {item.PCTCode}
                                                         </td>
@@ -2296,7 +2383,7 @@ export default function ItemStockReportPos() {
                             borderTop: `1px solid ${fontcolor}`,
                             height: "24px",
                             display: "flex",
-                            paddingRight: "10px"
+                            paddingRight: "8px"
                         }}
                     >
                         <div
@@ -2397,7 +2484,6 @@ export default function ItemStockReportPos() {
                         <SingleButton
                             to="/MainPage"
                             text="Return"
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2406,7 +2492,6 @@ export default function ItemStockReportPos() {
                         <SingleButton
                             text="PDF"
                             onClick={exportPDFHandler}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2415,7 +2500,6 @@ export default function ItemStockReportPos() {
                         <SingleButton
                             text="Excel"
                             onClick={handleDownloadCSV}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -2425,8 +2509,10 @@ export default function ItemStockReportPos() {
                             id="searchsubmit"
                             text="Select"
                             ref={selectButtonRef}
-                            onClick={fetchDailyStatusReport}
-                            style={{ backgroundColor: "#186DB7", width: "120px" }}
+                           onClick={() => {
+                fetchDailyStatusReport();
+                resetSorting();
+              }}
                             onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
                             onBlur={(e) =>
                                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)

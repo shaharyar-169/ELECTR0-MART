@@ -46,6 +46,8 @@ export default function EmployeeCommissionReport() {
   const searchRef = useRef(null);
   const CommissionRef = useRef(null);
   const selectButtonRef = useRef(null);
+  const SearchRef = useRef(null);
+  const TypeRef2= useRef(null);
 
   const [saleType, setSaleType] = useState("");
 
@@ -97,7 +99,7 @@ export default function EmployeeCommissionReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("P");
   const [transectionType2, settransectionType2] = useState("");
-
+   const [transectionType3, settransectionType3] = useState("");
   console.log('transectionType2',transectionType2)
 
   const [totalqnty, settotalqnty] = useState(0);
@@ -439,26 +441,28 @@ export default function EmployeeCommissionReport() {
       "todatevalidation"
     ).style.border = `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/EmployeeCommissionReport.php";
+    const apiUrl = apiLinks + "/EmployeeSaleCommissionReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-
       FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FCmpCod: Companyselectdata,
       FRepRat: transectionType,
+      FRepTyp: transectionType2,
+      FTrnTyp: transectionType3,
+      FEmpCod: Employeeselectdata,
+      FComPrc: mobileNumber,
+      FSchTxt: searchQuery,
+
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
-      FRepTyp: transectionType2,
-      FEmpCod: Employeeselectdata,
-      FComPrc: mobileNumber,
     
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-      // FYerDsc: "2024-2024",
+      // code: "USMANMTR",
+      // FLocCod: "002",
+      // FYerDsc: "2025-2025",
     }).toString();
 
     axios
@@ -468,7 +472,7 @@ export default function EmployeeCommissionReport() {
 
         settotaldebit(response.data["Total Qnty"]);
         settotalcredit(response.data["Total Amount"]);
-        setClosingBalance(response.data["Total Margin"]);
+        // setClosingBalance(response.data["Total Margin"]);
          setcommission(response.data["Total Commission"]);
 
        if (response.data && Array.isArray(response.data.Detail)) {
@@ -518,10 +522,10 @@ export default function EmployeeCommissionReport() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveEmployee.php";
     const formData = new URLSearchParams({
-      //    code: organisation.code,
-      //     FLocCod: locationnumber || getLocationNumber,
-      code: "NASIRTRD",
-      FLocCod: "001",
+         code: organisation.code,
+          FLocCod: locationnumber || getLocationNumber,
+      // code: "NASIRTRD",
+      // FLocCod: "001",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -884,11 +888,11 @@ export default function EmployeeCommissionReport() {
       item["Trn#"],
       item.Type,
       item.Description,
-      formatValue(item['Cost Rate']),
+      // formatValue(item['Cost Rate']),
       formatValue(item.Qnty),
       formatValue(item.Rate),
       formatValue(item["Sale Amount"]),
-      formatValue(item.Margin),
+      // formatValue(item.Margin),
         formatValue(item.Commission),
     ]);
 
@@ -900,9 +904,9 @@ export default function EmployeeCommissionReport() {
       "Total",
          "",
       String(formatValue(totaldebit)),
-      "",
+      // "",
       String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
+      // String(formatValue(ClosingBalance)),
        String(formatValue(commission)),
     ]);
 
@@ -913,14 +917,14 @@ export default function EmployeeCommissionReport() {
       "Trn#",
       "Type",
       "Description",
-         "Cost Rate",
+        //  "Cost Rate",
       "Qnty",
       "Rate",
       "Amount",
-       "Margin",
+      //  "Margin",
        "Commission",
     ];
-    const columnWidths = [24, 16, 12, 100,25, 18, 25, 25, 25,25];
+    const columnWidths = [24, 16, 12, 100,18, 30, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1054,19 +1058,15 @@ export default function EmployeeCommissionReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 2) {
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2 ) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex === 4 ||
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8 ||
-             cellIndex === 9 
+            cellIndex > 3 
+           
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1188,7 +1188,7 @@ export default function EmployeeCommissionReport() {
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         addTitle(
-          `Employee Commission Report From ${fromInputDate} To ${toInputDate}`,
+          `Employee Sale Commission Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1344,26 +1344,26 @@ export default function EmployeeCommissionReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeCommissionReport As On ${date}.pdf`);
+    doc.save(`EmployeeSaleCommissionReport As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 10; // Ensure this matches the actual number of columns
+    const numColumns = 8; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
-      "left",
+  
       "center",
       "center",
+      "center",
       "left",
-      "right",
         "right",
       "right",
       "right",
       "right",
-      "right"
+    
     ];
 
     // Define fonts for different sections
@@ -1412,7 +1412,7 @@ export default function EmployeeCommissionReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Commission Report From ${fromInputDate} To ${toInputDate}`,
+      `Employee Sale Commission Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1587,11 +1587,11 @@ export default function EmployeeCommissionReport() {
       "Trn#",
       "Type",
       "Description",
-         "Cost Rate",
+        //  "Cost Rate",
       "Qnty",
       "Rate",
       "Amount",
-      "Margin",
+      // "Margin",
         "Commission",
     ];
     const headerRow = worksheet.addRow(headers);
@@ -1605,11 +1605,11 @@ export default function EmployeeCommissionReport() {
         item.Type,
         item.Description,
         //    item.Store,
-        formatValue(item['Cost Rate']),
+        // formatValue(item['Cost Rate']),
         formatValue(item.Qnty),
         formatValue(item.Rate),
         formatValue(item["Sale Amount"]),
-        formatValue(item.Margin),
+        // formatValue(item.Margin),
          formatValue(item.Commission),
       ]);
 
@@ -1629,7 +1629,7 @@ export default function EmployeeCommissionReport() {
     });
 
     // Set column widths
-    [10, 8, 6, 50,12, 8, 12, 15, 15,15].forEach((width, index) => {
+    [10, 8, 6, 50,8, 12, 15, 15].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1641,9 +1641,9 @@ export default function EmployeeCommissionReport() {
       "Total",
          "",
       String(formatValue(totaldebit)),
-      "",
+      // "",
       String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
+      // String(formatValue(ClosingBalance)),
       String(formatValue(commission)),
     ]);
 
@@ -1727,7 +1727,7 @@ export default function EmployeeCommissionReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeCommissionReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `EmployeeSaleCommissionReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -1835,6 +1835,11 @@ export default function EmployeeCommissionReport() {
   const handleTransactionTypeChange2 = (event) => {
     const selectedTransactionType = event.target.value;
     settransectionType2(selectedTransactionType);
+  };
+
+  const handleTransactionTypeChange3 = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType3(selectedTransactionType);
   };
 
   const firstColWidth = {
@@ -2184,21 +2189,22 @@ export default function EmployeeCommissionReport() {
 };
 
 
-  const handleMobilenumberInputChange = (e) => {
+ const handleMobilenumberInputChange = (e) => {
   let value = e.target.value;
 
-  // remove non-numeric characters
-  value = value.replace(/\D/g, "");
+  // 🔥 allow only numbers + one decimal point
+  value = value.replace(/[^0-9.]/g, "");
 
-  // limit to 2 digits only (max 50)
-  if (value.length > 2) {
-    value = value.slice(0, 2);
+  // 🔥 prevent multiple dots
+  const parts = value.split(".");
+  if (parts.length > 2) {
+    value = parts[0] + "." + parts[1];
   }
 
-  // convert to number
+  // limit integer part to 2 digits (max 50 rule still applies)
   let num = Number(value);
 
-  // empty input → show 0
+  // empty input → 0
   if (value === "") {
     setmobileNumber("0");
     return;
@@ -2243,7 +2249,7 @@ useEffect(() => {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Commission Report" />
+          <NavComponent textdata="Employee Sale Commission Report" />
 
           {/* ------------1st row */}
           <div
@@ -2543,7 +2549,6 @@ useEffect(() => {
               </div>
             </div>
           </div>
-
           <div
             className="row"
             style={{ marginTop: "8px", marginBottom: "8px", margin: "0px" }}
@@ -2561,9 +2566,7 @@ useEffect(() => {
               }}
             ></div>
           </div>
-
           {/* //////////////// second ROW ///////////////////////// */}
-
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -2730,7 +2733,6 @@ useEffect(() => {
               </div>
             </div>
           </div>
-
           {/* //////////////// THIRD ROW ///////////////////////// */}
           <div
             className="row"
@@ -2893,7 +2895,6 @@ useEffect(() => {
               </div>
             </div>
           </div>
-
           {/* //////////////// FORTH ROW ///////////////////////// */}
           <div
             className="row"
@@ -2939,7 +2940,7 @@ useEffect(() => {
                     className="List-select-class "
                     ref={input2Ref}
                     options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
+                    onKeyDown={(e) => handlecapacityKeypress(e, TypeRef2)}
                     id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2998,7 +2999,7 @@ useEffect(() => {
                                <input
   ref={CommissionRef}
   value={mobileNumber}
-  onKeyDown={(e) => handleMobilePress(e, selectButtonRef)}
+  onKeyDown={(e) => handleMobilePress(e, SearchRef)}
   onChange={handleMobilenumberInputChange}
   autoComplete="off"
   type="number"
@@ -3024,6 +3025,164 @@ useEffect(() => {
                             </div>
             </div>
           </div>
+            {/* //////////////// FIFTH ROW ///////////////////////// */}
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "6px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Type2 :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={TypeRef2}
+                    onKeyDown={(e) => handleKeyPress(e, input4Refrate)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType3}
+                    onChange={handleTransactionTypeChange3}
+                    style={{
+                      width: "225px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
+                    }}
+                  >
+                     <option value="">ALL</option>
+                    <option value="R">RECEIVABLE</option>
+                    <option value="P">PAYABLE</option>
+                  </select>
+
+                  {transectionType3 !== "" && (
+                    <span
+                      onClick={() => settransectionType3("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
+
+
+                <div id="lastDiv" style={{ marginRight: "1px" }}>
+                                <label for="searchInput" style={{ marginRight: "5px" }}>
+                                    <span
+                                        style={{
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Search :
+                                    </span>{" "}
+                                </label>
+                                <div style={{ position: "relative", display: "inline-block" }}>
+                                    <input
+                                        ref={SearchRef}
+                                        onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
+                                        type="text"
+                                        id="searchsubmit"
+                                        placeholder="Search"
+                                        value={searchQuery}
+                                        autoComplete="off"
+                                        style={{
+                                            marginRight: "20px",
+                                            width: "225px",
+                                            height: "24px",
+                                            fontSize: getdatafontsize,
+                                            fontFamily: getfontstyle,
+                                            color: fontcolor,
+                                            backgroundColor: getcolor,
+                                            border: `1px solid ${fontcolor}`,
+                                            outline: "none",
+                                            paddingLeft: "10px",
+                                            paddingRight: "25px", // space for the clear icon
+                                        }}
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.border = "2px solid red")
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                        }
+                                        onChange={(e) =>
+                                            setSearchQuery((e.target.value || "").toUpperCase())
+                                        }
+                                    />
+                                    {searchQuery && (
+                                        <span
+                                            onClick={() => setSearchQuery("")}
+                                            style={{
+                                                position: "absolute",
+                                                right: "30px",
+                                                top: "50%",
+                                                transform: "translateY(-50%)",
+                                                cursor: "pointer",
+                                                fontSize: "20px",
+                                                color: fontcolor,
+                                                userSelect: "none",
+                                            }}
+                                        >
+                                            ×
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+            </div>
+          </div>
 
           <div>
             <div
@@ -3039,7 +3198,7 @@ useEffect(() => {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   // width: "100%",
-                  // position: "relative",
+                  position: "relative",
                 }}
               >
                 <thead
@@ -3072,9 +3231,9 @@ useEffect(() => {
                     <td className="border-dark" style={forthColWidth}>
                       Description
                     </td>
-                     <td className="border-dark" style={forthColWidth1}>
+                     {/* <td className="border-dark" style={forthColWidth1}>
                       Cost Rate
-                    </td>
+                    </td> */}
 
                     {/* <td className="border-dark" style={sixthColWidth}>
                                  Str
@@ -3090,9 +3249,9 @@ useEffect(() => {
                       Amount
                     </td>
 
-                    <td className="border-dark" style={tenthColWidth}>
+                    {/* <td className="border-dark" style={tenthColWidth}>
                       Margin
-                    </td>
+                    </td> */}
                      <td className="border-dark" style={elewenthColWidth}>
                       Comission
                     </td>
@@ -3108,20 +3267,20 @@ useEffect(() => {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "40vh",
+                maxHeight: "35vh",
                 // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                wordBreak: "break-word",
+                            
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  width: "100%",
+                  // width: "100%",
                   position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -3132,7 +3291,7 @@ useEffect(() => {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="10" className="text-center">
+                        <td colSpan="8" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3145,7 +3304,7 @@ useEffect(() => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 10 }).map((_, colIndex) => (
+                            {Array.from({ length: 8 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3158,14 +3317,14 @@ useEffect(() => {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                                                <td style={forthColWidth1}></td>
+                                                {/* <td style={forthColWidth1}></td> */}
 
                         {/* <td style={sixthColWidth}></td> */}
                         <td style={eightColWidth}></td>
                                                 <td style={seventhColWidth}></td>
 
                         <td style={ninthColWidth}></td>
-                        <td style={tenthColWidth}></td>
+                        {/* <td style={tenthColWidth}></td> */}
                                                 <td style={elewenthColWidth}></td>
 
                       </tr>
@@ -3185,7 +3344,7 @@ useEffect(() => {
                         );
 
                         const isNegative =
-                          nQnty < 0 || nRate < 0 || nMargin < 0;
+                          nQnty < 0 || nRate < 0;
 
                         return (
                           <tr
@@ -3204,7 +3363,7 @@ useEffect(() => {
                             <td className="text-start" style={firstColWidth}>
                               {item.Date}
                             </td>
-                            <td className="text-start" style={secondColWidth}>
+                            <td className="text-center" style={secondColWidth}>
                               {item["Trn#"]}
                             </td>
                             <td className="text-center" style={thirdColWidth}>
@@ -3213,9 +3372,9 @@ useEffect(() => {
                             <td className="text-start" style={forthColWidth}>
                               {item.Description}
                             </td>
-                            <td className="text-end" style={forthColWidth1}>
+                            {/* <td className="text-end" style={forthColWidth1}>
                               {formatValue(item['Cost Rate'])}
-                            </td>
+                            </td> */}
                             {/* <td className="text-end" style={sixthColWidth}>
                                          {item.Store}
                                        </td> */}
@@ -3229,9 +3388,9 @@ useEffect(() => {
                             <td className="text-end" style={ninthColWidth}>
                               {formatValue(item["Sale Amount"])}
                             </td>
-                            <td className="text-end" style={tenthColWidth}>
+                            {/* <td className="text-end" style={tenthColWidth}>
                               {formatValue(item.Margin)}
-                            </td>
+                            </td> */}
                              <td className="text-end" style={elewenthColWidth}>
                               {formatValue(item.Commission)}
                             </td>
@@ -3248,7 +3407,7 @@ useEffect(() => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 10 }).map((_, colIndex) => (
+                          {Array.from({ length: 8 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3260,14 +3419,14 @@ useEffect(() => {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                                                <td style={forthColWidth1}></td>
+                                                {/* <td style={forthColWidth1}></td> */}
 
                         {/* <td style={sixthColWidth}></td> */}
                         <td style={eightColWidth}></td>
                                                 <td style={seventhColWidth}></td>
 
                         <td style={ninthColWidth}></td>
-                        <td style={tenthColWidth}></td>
+                        {/* <td style={tenthColWidth}></td> */}
                                                 <td style={elewenthColWidth}></td>
 
                       </tr>
@@ -3322,17 +3481,17 @@ useEffect(() => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
+              <span className="mobileledger_total">{totalexcel}</span>
             </div>
-             <div
+             {/* <div
               style={{
                 ...forthColWidth1,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{totalexcel}</span> */}
-            </div>
+              <span className="mobileledger_total">{totalexcel}</span>
+            </div> */}
             {/* <div
                          style={{
                            ...sixthColWidth,
@@ -3374,7 +3533,7 @@ useEffect(() => {
                 {formatValue(totalcredit)}
               </span>
             </div>
-            <div
+            {/* <div
               style={{
                 ...tenthColWidth,
                 background: getcolor,
@@ -3384,7 +3543,7 @@ useEffect(() => {
               <span className="mobileledger_total">
                 {formatValue(ClosingBalance)}
               </span>
-            </div>
+            </div> */}
 
              <div
               style={{

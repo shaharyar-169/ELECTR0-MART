@@ -1411,7 +1411,6 @@ export default function SupplierPurchaseComparison() {
 
 
 
-
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   useEffect(() => {
     if (isFilterApplied || tableData.length > 0) {

@@ -34,7 +34,7 @@ export default function ShopStockReport() {
   const saleSelectRef = useRef(null);
 
   const toRef = useRef(null);
-  const fromRef = useRef(null);
+  const locationRef = useRef(null);
   const companyRef = useRef(null);
   const categoryRef = useRef(null);
   const capacityRef = useRef(null);
@@ -71,12 +71,16 @@ export default function ShopStockReport() {
   const [Categoryselectdata, setCategoryselectdata] = useState("");
   const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
 
+   const [Locationselectdata, setLocationselectdata] = useState("");
+  const [Locationselectdatavalue, setLocationselectdatavalue] = useState("");
+
   const [GetCategory, setGetCategory] = useState([]);
 
   const [Typeselectdata, setTypeselectdata] = useState("");
   const [typeselectdatavalue, settypeselectdatavalue] = useState("");
 
   const [GetType, setGetType] = useState([]);
+   const [GetLocationData, setGetLocationData] = useState([]);
 
   const [sortData, setSortData] = useState("ASC");
 
@@ -242,14 +246,14 @@ export default function ShopStockReport() {
       FCapCod: Capacityselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
-      FStrCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      FLocCod: Locationselectdata,
       FRepStk: transectionType2,
       FRepRat: transectionType,
+      code: organisation.code,
+      FYerDsc: yeardescription || getyeardescription,
+  
 
-      // code: "BGH",
+      // code: "SCPOS",
       // FLocCod: "001",
       // FYerDsc: "2025-2026",
     }).toString();
@@ -422,6 +426,38 @@ export default function ShopStockReport() {
     label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
   }));
 
+  // LOCATION API CALL BELOW
+
+   useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveLocations.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+          // code: "SCPOS",
+          // FLocCod:'001'
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetLocationData(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data,
+          );
+          setGetLocationData([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+
+  const Locationoptions = GetLocationData.map((item) => ({
+    value: item.tloccod,
+    label: `${item.tloccod}-${item.tlocdsc.trim()}`,
+  }));
+
   const DropdownOption = (props) => {
     return (
       <components.Option {...props}>
@@ -441,12 +477,12 @@ export default function ShopStockReport() {
     );
   };
 
-  const customStyles1 = (hasError) => ({
+  const customStyles1 = (hasError, width) => ({
     control: (base, state) => ({
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 250,
+      width: width,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -951,8 +987,8 @@ export default function ShopStockReport() {
         let category = categoryselectdatavalue.label
           ? categoryselectdatavalue.label
           : "ALL";
-        let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label + "-" + "Stock"
+        let typename = Locationselectdatavalue.label
+          ? Locationselectdatavalue.label + "-" + "Stock"
           : "ALL";
 
         let search = searchQuery ? searchQuery : "";
@@ -966,7 +1002,7 @@ export default function ShopStockReport() {
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
-        doc.text(`Store :`, labelsX + 180, labelsY); // Draw bold label
+        doc.text(`Location :`, labelsX + 180, labelsY); // Draw bold label
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         doc.text(`${typename}`, labelsX + 200, labelsY); // Draw the value next to the label
@@ -1148,8 +1184,8 @@ export default function ShopStockReport() {
     let typecategory = categoryselectdatavalue.label
       ? categoryselectdatavalue.label
       : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
+    let typetype = Locationselectdatavalue.label
+      ? Locationselectdatavalue.label
       : "ALL ";
 
     let RATE =
@@ -1184,7 +1220,7 @@ export default function ShopStockReport() {
        "",
         "",
          "",
-      "Store :",
+      "Location :",
       typetype,
     ]);
 
@@ -2159,9 +2195,9 @@ export default function ShopStockReport() {
                 </div>
               </div>
 
-              <div
+               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "7px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
@@ -2174,38 +2210,34 @@ export default function ShopStockReport() {
                   <label htmlFor="transactionType">
                     <span
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
                         fontSize: getdatafontsize,
                         fontFamily: getfontstyle,
                         fontWeight: "bold",
-                        marginRight: "3px",
                       }}
                     >
-                      Store :
+                      Location :
                     </span>
                   </label>
                 </div>
 
-                <div style={{ marginRight: "21px" }}>
+                <div style={{ marginLeft: "3px" }}>
                   <Select
-                    className="List-select-class"
-                    ref={typeRef}
-                    options={typeoptions}
-                    onKeyDown={(e) => handlecompanyKeypress(e, input4Refrate)}
-                    id="selectedsale"
+                    className="List-select-class "
+                    ref={locationRef}
+                    options={Locationoptions}
+                    onKeyDown={(e) => handlecapacityKeypress(e, input4Refrate)}
+                    id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
-                        setTypeselectdata(selectedOption.value);
-                        settypeselectdatavalue({
+                        setLocationselectdata(selectedOption.value);
+                        setLocationselectdatavalue({
                           value: selectedOption.value,
-                          label: labelPart,
+                          label: labelPart, // Set only the 'NGS' part of the label
                         });
                       } else {
-                        setTypeselectdata("");
-                        settypeselectdatavalue("");
+                        setLocationselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+                        setLocationselectdatavalue("");
                       }
                     }}
                     onInputChange={(inputValue, { action }) => {
@@ -2216,7 +2248,7 @@ export default function ShopStockReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata),
+                      ...customStyles1(!Companyselectdata, 280),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2306,7 +2338,7 @@ export default function ShopStockReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata),
+                      ...customStyles1(!Companyselectdata, 320),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2362,7 +2394,7 @@ export default function ShopStockReport() {
                     value={transectionType}
                     onChange={handleTransactionTypeChange}
                     style={{
-                      width: "250px",
+                      width: "280px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -2471,7 +2503,7 @@ export default function ShopStockReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata),
+                      ...customStyles1(!Companyselectdata, 320),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2557,7 +2589,7 @@ export default function ShopStockReport() {
                     value={transectionType2}
                     onChange={handleTransactionTypeChange2}
                     style={{
-                      width: "250px",
+                      width: "280px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -2642,7 +2674,7 @@ export default function ShopStockReport() {
                     className="List-select-class "
                     ref={input2Ref}
                     options={capacityoptions}
-                    onKeyDown={(e) => handlecapacityKeypress(e, typeRef)}
+                    onKeyDown={(e) => handlecapacityKeypress(e, locationRef)}
                     id="selectedsale2"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -2665,7 +2697,7 @@ export default function ShopStockReport() {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Companyselectdata),
+                      ...customStyles1(!Companyselectdata, 320),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2704,7 +2736,7 @@ export default function ShopStockReport() {
                     autoComplete="off"
                     style={{
                       marginRight: "20px",
-                      width: "250px",
+                      width: "280px",
                       height: "24px",
                       fontSize: getdatafontsize,
                       fontFamily: getfontstyle,
@@ -2746,6 +2778,9 @@ export default function ShopStockReport() {
               </div>
             </div>
           </div>
+
+
+        
 
           <div>
             {/* Table Head */}
@@ -2912,7 +2947,7 @@ export default function ShopStockReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "43vh",
+                maxHeight: "38vh",
                
               }}
             >

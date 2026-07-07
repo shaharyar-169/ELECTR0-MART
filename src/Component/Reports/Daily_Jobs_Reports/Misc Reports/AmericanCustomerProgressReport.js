@@ -37,40 +37,39 @@ export default function AmericanCustomerProgress() {
 
   // Add this at the top of your component
   const hasInitialized = useRef(false);
-
   const toRef = useRef(null);
   const fromRef = useRef(null);
 
-  const [saleType, setSaleType] = useState("");
+ const [saleType, setSaleType] = useState("");
  const [tableData, setTableData] = useState([]);
 
-  const [TableDataHeading, setTableDataHeading] = useState([]);
+ const [TableDataHeading, setTableDataHeading] = useState([]);
 
-  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
-  console.log("Companyselectdatavalue", Companyselectdatavalue);
-  const [searchQuery, setSearchQuery] = useState("");
-  const currentYear1 = new Date().getFullYear().toString();
-  const [transectionType, settransectionType] = useState(currentYear1);
+ const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+ console.log("Companyselectdatavalue", Companyselectdatavalue);
+ const [searchQuery, setSearchQuery] = useState("");
+ const currentYear1 = new Date().getFullYear().toString();
+ const [transectionType, settransectionType] = useState(currentYear1);
 
-  const [supplierList, setSupplierList] = useState([]);
+ const [supplierList, setSupplierList] = useState([]);
 
-  const [totalQnty, setTotalQnty] = useState(0);
-  const [totalDebit, setTotalDebit] = useState(0);
-  const [totalde, settotalde] = useState(0);
-  const [closingBalance, setClosingBalance] = useState(0);
+ const [totalQnty, setTotalQnty] = useState(0);
+ const [totalDebit, setTotalDebit] = useState(0);
+ const [totalde, settotalde] = useState(0);
+ const [closingBalance, setClosingBalance] = useState(0);
 
-  const [amt1, setamt1] = useState(0);
-  const [amt2, setamt2] = useState(0);
-  const [amt3, setamt3] = useState(0);
-  const [amt4, setamt4] = useState(0);
-  const [amt5, setamt5] = useState(0);
-  const [amt6, setamt6] = useState(0);
-  const [amt7, setamt7] = useState(0);
+ const [amt1, setamt1] = useState(0);
+ const [amt2, setamt2] = useState(0);
+ const [amt3, setamt3] = useState(0);
+ const [amt4, setamt4] = useState(0);
+ const [amt5, setamt5] = useState(0);
+ const [amt6, setamt6] = useState(0);
+ const [amt7, setamt7] = useState(0);
 
 
-  const [totalAggingBal, settotalAggingBal] = useState(0);
+ const [totalAggingBal, settotalAggingBal] = useState(0);
 
-const cleanNumber = (val) => {
+ const cleanNumber = (val) => {
   return Number(String(val || 0).replace(/,/g, "")) || 0;
 };
 
@@ -80,6 +79,7 @@ useEffect(() => {
   const total = values.reduce((sum, val) => {
     return sum + cleanNumber(val);
   }, 0);
+
 
   settotalAggingBal(total);
 }, [amt2, amt3, amt4, amt5, amt6, amt7]);
@@ -364,16 +364,18 @@ useEffect(() => {
     const apiUrl = apiLinks + "/AmericanCustomerProgress.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
+
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
-
       cusDate: toInputDate,
       cusYear: transectionType,
       cusId: saleType,
-    //   code: "AMRELEC",
-    //   FLocCod: "001",
-    //   FYerDsc: "2019-2025",
+
+      // code: "AMRELEC",
+      // FLocCod: "001",
+      // FYerDsc: "2019-2025",
+
     }).toString();
 
     axios
@@ -455,8 +457,8 @@ useEffect(() => {
     const formData = new URLSearchParams({
       FLocCod: getLocationNumber,
       code: organisation.code,
-    //   FLocCod: "001",
-    //   code: "AMRELEC",
+      // FLocCod: "001",
+      // code: "AMRELEC",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -723,27 +725,27 @@ useEffect(() => {
       const rows = tableData.map((item) => [
       
         item["Sr#"],
-     item.Month,
-        formatValue(item.Debit),
-        formatValue(item.Credit),
-                formatValue(item.Other),
+        item.Month,
+        formatValue(item.Sale),
+        formatValue(item.Collection),
+        formatValue(item.Other),
         formatValue(item.Balance),
       ]);
   
       // Add summary row to the table
       rows.push([
         "", "",
-         formatValue(tableData.at(-1)?.Debit),
-         formatValue(tableData.at(-1)?.Credit),
-         "",
+         formatValue(tableData.at(-1)?.Sale),
+         formatValue(tableData.at(-1)?.Collection),
+         formatValue(tableData.at(-1)?.Other),
         formatValue(tableData.at(-1)?.Balance)]);
   
       // Define table column headers and individual column widths
       const headers = [
         "Sr#",
         "Month",
-        "Debit",
-        "Credit",
+        "Sale",
+        "Collection",
         "Other",
         "Balance",
       ];
@@ -1350,12 +1352,12 @@ doc.setFont("verdana-regular", "normal");
             // doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
             doc.text(`: ${TableDataHeading[0].Address1}`, labelsX + 36, labelsY + 20.8); // Draw the value next to the label
 
-             doc.setFont("verdana", "bold");
-  doc.setFontSize(10)
-            doc.text(`Grade`, labelsX + 125, labelsY + 20.8); // Draw bold label
-doc.setFont("verdana-regular", "normal");
-  doc.setFontSize(10)
-            doc.text(`: ${TableDataHeading[0].Grade || ""}`, labelsX + 141, labelsY + 20.8); // Draw the value next to the label
+//              doc.setFont("verdana", "bold");
+//   doc.setFontSize(10)
+//             doc.text(`Grade`, labelsX + 125, labelsY + 20.8); // Draw bold label
+// doc.setFont("verdana-regular", "normal");
+//   doc.setFontSize(10)
+//             doc.text(`: ${TableDataHeading[0].Grade || ""}`, labelsX + 141, labelsY + 20.8); // Draw the value next to the label
   
                       doc.setFont("verdana", "bold");
   doc.setFontSize(10)
@@ -1438,7 +1440,7 @@ const handleDownloadCSV = async () => {
 
   const numColumns = 6;
 
-  const columnAlignments = ["right", "left", "right", "right", "right","right"];
+  const columnAlignments = ["center", "left", "right", "right", "right","right"];
 
   const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
   const fontStoreList = { name: "CustomFont", size: 10, bold: false };
@@ -1604,7 +1606,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
     },
   };
 
-  const headers = ["Sr#", "Month", "Debit", "Credit", "Other","Balance"];
+  const headers = ["Sr#", "Month", "Sale", "Collection", "Other","Balance"];
   const headerRow = worksheet.addRow(headers);
   headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
@@ -1613,8 +1615,8 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
     const row = worksheet.addRow([
       item["Sr#"],
       item.Month,
-      formatValue(item.Debit),
-      formatValue(item.Credit),
+      formatValue(item.Sale),
+      formatValue(item.Collection),
        formatValue(item.Other),
       formatValue(item.Balance),
     
@@ -1639,9 +1641,9 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
   const totalRow = worksheet.addRow([
     "",
     "",
-    String(formatValue(tableData.at(-1).Debit)),
-    String(formatValue(tableData.at(-1).Credit)),
-    "",
+    String(formatValue(tableData.at(-1).Sale)),
+    String(formatValue(tableData.at(-1).Collection)),
+    String(formatValue(tableData.at(-1).Other)),
     String(formatValue(tableData.at(-1).Balance)),
    
   ]);
@@ -1788,16 +1790,19 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
     width: "40px",
   };
   const secondColWidth = {
-    width: "130px",
+    width: "100px",
   };
   const thirdColWidth = {
-    width: "130px",
+    width: "100px",
   };
   const forthColWidth = {
-    width: "130px",
+    width: "100px",
+  };
+   const forthColWidth1 = {
+    width: "100px",
   };
   const fifthColWidth = {
-    width: "130px",
+    width: "100px",
   };
 
   const sixcol = {
@@ -2283,10 +2288,13 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
                       Month
                     </td>
                     <td className="border-dark" style={thirdColWidth}>
-                      Debit
+                      Sale
                     </td>
                     <td className="border-dark" style={forthColWidth}>
-                      Credit
+                      Collection
+                    </td>
+                     <td className="border-dark" style={forthColWidth1}>
+                      Other
                     </td>
                     <td className="border-dark" style={fifthColWidth}>
                       Balance
@@ -2326,7 +2334,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="6" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -2339,7 +2347,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 5 }).map((_, colIndex) => (
+                            {Array.from({ length: 6 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2352,6 +2360,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
+                        <td style={forthColWidth1}></td>
                         <td style={fifthColWidth}></td>
                       </tr>
                     </>
@@ -2379,10 +2388,13 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
                               {item.Month}
                             </td>
                             <td className="text-end" style={thirdColWidth}>
-                              {formatValue(item.Debit)}
+                              {formatValue(item.Sale)}
                             </td>
                             <td className="text-end" style={forthColWidth}>
-                              {formatValue(item.Credit)}
+                              {formatValue(item.Collection)}
+                            </td>
+                             <td className="text-end" style={forthColWidth1}>
+                              {formatValue(item.Other)}
                             </td>
                             <td className="text-end" style={fifthColWidth}>
                               {formatValue(item.Balance)}
@@ -2400,7 +2412,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 5 }).map((_, colIndex) => (
+                          {Array.from({ length: 6 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2412,6 +2424,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
+                        <td style={forthColWidth1}></td>
                         <td style={fifthColWidth}></td>
                       </tr>
                     </>
@@ -2453,7 +2466,7 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(tableData.at(-1)?.Debit)}
+                {formatValue(tableData.at(-1)?.Sale)}
               </span>
             </div>
             <div
@@ -2464,7 +2477,18 @@ typeAndStoreRow7.eachCell((cell, colIndex) => {
               }}
             >
               <span className="mobileledger_total">
-                {formatValue(tableData.at(-1)?.Credit)}
+                {formatValue(tableData.at(-1)?.Collection)}
+              </span>
+            </div>
+             <div
+              style={{
+                ...forthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(tableData.at(-1)?.Other)}
               </span>
             </div>
             <div

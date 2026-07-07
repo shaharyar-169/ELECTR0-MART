@@ -243,7 +243,7 @@ export default function SerialStockReport() {
       FYerDsc: yeardescription || getyeardescription,
    
       // code: "AGFACTORY",
-      // FLocCod: "002",
+      // FLocCod: "001",
       // FYerDsc: "2025-2025",
     }).toString();
 
@@ -411,189 +411,194 @@ export default function SerialStockReport() {
     label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
   }));
 
-  const DropdownOption = (props) => {
-    return (
-      <components.Option {...props}>
-        <div
-          style={{
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            paddingBottom: "5px",
-            lineHeight: "3px",
-            // color: fontcolor,
-            textAlign: "start",
-          }}
-        >
-          {props.data.label}
-        </div>
-      </components.Option>
-    );
-  };
+ const DropdownOption = (props) => {
+     return (
+       <components.Option {...props}>
+         <div
+           style={{
+             fontSize: getdatafontsize,
+             fontFamily: getfontstyle,
+             padding: "2px 8px",            // tighter vertical padding
+             lineHeight: "1.2",
+             // lineHeight: "3px",
+             whiteSpace: "normal",
+             wordBreak: "break-word",
+             // color: fontcolor,
+             textAlign: "start",
+           }}
+         >
+           {props.data.label}
+         </div>
+       </components.Option>
+     );
+   };
+  
+   const customStyles1 = (hasError) => ({
+  control: (base, state) => ({
+    ...base,
+    height: "24px",
+    minHeight: "unset",
+    width: 270,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    backgroundColor: getcolor,
+    color: fontcolor,
+    caretColor: getcolor === "white" ? "black" : "white",
+    borderRadius: 0,
+    border: `1px solid ${fontcolor}`,
+    transition: "border-color 0.15s ease-in-out",
+    "&:hover": {
+      borderColor: state.isFocused ? base.borderColor : fontcolor,
+    },
+    padding: "0 8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    boxShadow: "none",
+    "&:focus-within": {
+      borderColor: "red",            // ✅ changed to red
+      boxShadow: "0 0 0 1px red",   // ✅ changed to red
+    },
+  }),
 
-  const customStyles1 = (hasError) => ({
-    control: (base, state) => ({
-      ...base,
-      height: "24px",
-      minHeight: "unset",
-      width: 270,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: getcolor,
-      color: fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      borderRadius: 0,
-      border: `1px solid ${fontcolor}`,
-      transition: "border-color 0.15s ease-in-out",
-      "&:hover": {
-        borderColor: state.isFocused ? base.borderColor : fontcolor,
-      },
-      padding: "0 8px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      boxShadow: "none",
-      "&:focus-within": {
-        borderColor: "#3368B5",
-        boxShadow: "0 0 0 1px #3368B5",
-      },
-    }),
-
-    menu: (base) => ({
-      ...base,
-      marginTop: "5px",
-      borderRadius: 0,
-      backgroundColor: getcolor,
-      border: `1px solid ${fontcolor}`,
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      zIndex: 9999,
-    }),
-    menuList: (base) => ({
-      ...base,
-      padding: 0,
-      maxHeight: "200px",
-      // Scrollbar styling for Webkit browsers
-      "&::-webkit-scrollbar": {
-        width: "8px",
-        height: "8px",
-      },
-      "&::-webkit-scrollbar-track": {
-        background: getcolor,
-        borderRadius: "10px",
-      },
-      "&::-webkit-scrollbar-thumb": {
-        backgroundColor: fontcolor,
-        borderRadius: "10px",
-        border: `2px solid ${getcolor}`,
-        "&:hover": {
-          backgroundColor: "#3368B5",
-        },
-      },
-      // Scrollbar styling for Firefox
-      scrollbarWidth: "thin",
-      scrollbarColor: `${fontcolor} ${getcolor}`,
-    }),
-    option: (base, state) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: state.isSelected
-        ? "#3368B5"
-        : state.isFocused
-        ? "#3368B5"
-        : getcolor,
-      color: state.isSelected || state.isFocused ? "white" : fontcolor,
+  menu: (base) => ({
+    ...base,
+    marginTop: "5px",
+    borderRadius: 0,
+    backgroundColor: getcolor,
+    border: `1px solid ${fontcolor}`,
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    zIndex: 9999,
+    width: "auto",
+    minWidth: "100%",
+  }),
+  menuList: (base) => ({
+    ...base,
+    padding: 0,
+    maxHeight: "200px",
+    "&::-webkit-scrollbar": {
+      width: "8px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-track": {
+      background: getcolor,
+      borderRadius: "10px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: fontcolor,
+      borderRadius: "10px",
+      border: `2px solid ${getcolor}`,
       "&:hover": {
         backgroundColor: "#3368B5",
-        color: "white",
-        cursor: "pointer",
       },
-      "&:active": {
-        backgroundColor: "#1a66cc",
-      },
-      transition: "background-color 0.2s ease, color 0.2s ease",
-    }),
-    dropdownIndicator: (base, state) => ({
-      ...base,
-      padding: 0,
-      marginTop: "-5px",
-      fontSize: "18px",
-      display: "flex",
-      textAlign: "center",
-      color: fontcolor,
-      transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen
-        ? "rotate(180deg)"
-        : "rotate(0deg)",
-      "&:hover": {
-        color: "#3368B5",
-      },
-    }),
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-    singleValue: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      textAlign: "left",
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    input: (base) => ({
-      ...base,
-      color: getcolor === "white" ? "black" : fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      marginTop: "-5px",
-    }),
-    clearIndicator: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      padding: "0 4px",
-      color: fontcolor,
-      "&:hover": {
-        color: "#ff4444",
-      },
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: `${fontcolor}80`, // 50% opacity
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      marginTop: "-5px",
-    }),
-    noOptionsMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    loadingMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    multiValue: (base) => ({
-      ...base,
-      backgroundColor: `${fontcolor}20`, // Light background for tags
-    }),
-    multiValueLabel: (base) => ({
-      ...base,
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    multiValueRemove: (base) => ({
-      ...base,
-      color: `${fontcolor}80`,
-      "&:hover": {
-        backgroundColor: "#ff4444",
-        color: "white",
-      },
-    }),
-  });
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: `${fontcolor} ${getcolor}`,
+  }),
+  option: (base, state) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    backgroundColor: state.isSelected
+      ? "#3368B5"
+      : state.isFocused
+      ? "#3368B5"
+      : getcolor,
+    color: state.isSelected || state.isFocused ? "white" : fontcolor,
+    whiteSpace: "normal",
+    wordBreak: "break-word",
+    padding: "2px 8px",
+    lineHeight: "1.2",
+    "&:hover": {
+      backgroundColor: "#3368B5",
+      color: "white",
+      cursor: "pointer",
+    },
+    "&:active": {
+      backgroundColor: "#1a66cc",
+    },
+    transition: "background-color 0.2s ease, color 0.2s ease",
+  }),
+  dropdownIndicator: (base, state) => ({
+    ...base,
+    padding: 0,
+    marginTop: "-5px",
+    fontSize: "18px",
+    display: "flex",
+    textAlign: "center",
+    color: fontcolor,
+    transition: "transform 0.2s ease",
+    transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+    "&:hover": {
+      color: "#3368B5",
+    },
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+  singleValue: (base) => ({
+    ...base,
+    marginTop: "-5px",
+    textAlign: "left",
+    color: fontcolor,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+  }),
+  input: (base) => ({
+    ...base,
+    color: getcolor === "white" ? "black" : fontcolor,
+    caretColor: getcolor === "white" ? "black" : "white",
+    marginTop: "-5px",
+  }),
+  clearIndicator: (base) => ({
+    ...base,
+    marginTop: "-5px",
+    padding: "0 4px",
+    color: fontcolor,
+    "&:hover": {
+      color: "#ff4444",
+    },
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: `${fontcolor}80`,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    marginTop: "-5px",
+  }),
+  noOptionsMessage: (base) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    color: fontcolor,
+    backgroundColor: getcolor,
+  }),
+  loadingMessage: (base) => ({
+    ...base,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    color: fontcolor,
+    backgroundColor: getcolor,
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: `${fontcolor}20`,
+  }),
+  multiValueLabel: (base) => ({
+    ...base,
+    color: fontcolor,
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+  }),
+  multiValueRemove: (base) => ({
+    ...base,
+    color: `${fontcolor}80`,
+    "&:hover": {
+      backgroundColor: "#ff4444",
+      color: "white",
+    },
+  }),
+});
 
   const exportPDFHandler = () => {
     
@@ -604,6 +609,7 @@ export default function SerialStockReport() {
     // Define table data (rows)
     const rows = tableData.map((item) => [
       item.SerNo,
+      item.titmcod,
       item.Description,
       item['Last Date'],
     formatValue(item["Pur Rate"]),
@@ -614,6 +620,7 @@ export default function SerialStockReport() {
     rows.push([
         String(formatValue(tableData.length.toLocaleString())),
       "",
+       "",
       "",
       "",
       String(formatValue(totalqnty)),
@@ -622,13 +629,14 @@ export default function SerialStockReport() {
     // Define table column headers and individual column widths
 
     const headers = [
-      "Code",
+      "SerNo#",
+       "Code",
       "Description",
       "Last Date",
       "Pur Rate",
       "Qnty",
     ];
-    const columnWidths = [38, 100, 23, 25, 20];
+    const columnWidths = [25,28 ,90, 23, 25, 15];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -759,16 +767,16 @@ export default function SerialStockReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 2) {
+          if (cellIndex === 3) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
-            cellIndex === 4 
+            cellIndex === 4 ||
+            cellIndex === 5 
+            
          
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
@@ -1007,297 +1015,313 @@ export default function SerialStockReport() {
     doc.save(`SerialStockReport As On ${toInputDate}.pdf`);
   };
 
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
+ const handleDownloadCSV = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 5; // Ensure this matches the actual number of columns
+  const numColumns = 7; // Ensure this matches the actual number of columns
 
-    const columnAlignments = [
-      "left",
-      "left",
-      "center",
-      "right",
-      "right",
-    ];
+  const columnAlignments = [
+    "left",
+    "left",
+    "left",
+    "right",
+    "center",
+    "right",
+    "right",
+  ];
 
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
+  // Helper: convert any value (including strings with commas) to a safe number
+  const toNumber = (value) => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const cleaned = value.replace(/,/g, ""); // remove all commas
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+    return 0;
+  };
+
+  // Define fonts for different sections
+  const fontCompanyName = {
+    name: "CustomFont" || "CustomFont",
+    size: 18,
+    bold: true,
+  };
+  const fontStoreList = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
+  const fontHeader = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: true,
+  };
+  const fontTableContent = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
+
+  // Add an empty row at the start
+  worksheet.addRow([]);
+
+  // Add company name
+  const companyRow = worksheet.addRow([comapnyname]);
+  companyRow.eachCell((cell) => {
+    cell.font = fontCompanyName;
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.getRow(companyRow.number).height = 30;
+  worksheet.mergeCells(
+    `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      companyRow.number
+    }`
+  );
+
+  // Add Store List row
+  const storeListRow = worksheet.addRow([
+    `Serial Stock Report As On ${toInputDate}`,
+  ]);
+  storeListRow.eachCell((cell) => {
+    cell.font = fontStoreList;
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.mergeCells(
+    `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      storeListRow.number
+    }`
+  );
+
+  // Add an empty row after the title section
+  worksheet.addRow([]);
+
+  let typecompany = Companyselectdatavalue.label
+    ? Companyselectdatavalue.label
+    : "ALL";
+  let typecapacity = capacityselectdatavalue.label
+    ? capacityselectdatavalue.label
+    : "ALL";
+  let typecategory = categoryselectdatavalue.label
+    ? categoryselectdatavalue.label
+    : "ALL";
+  let typetype = typeselectdatavalue.label
+    ? typeselectdatavalue.label
+    : "ALL ";
+
+  let typesearch = searchQuery ? searchQuery : "";
+
+  // Add first row
+  const typeAndStoreRow = worksheet.addRow([
+    "Company :",
+    typecompany,
+    "",
+    "Capacity :",
+    typecapacity,
+  ]);
+
+  // Add second row
+  const typeAndStoreRow2 = worksheet.addRow([
+    "Category :",
+    typecategory,
+    "",
+    "Store :",
+    typetype,
+  ]);
+
+  // Add third row with conditional rendering for "SEARCH:"
+  const typeAndStoreRow4 = worksheet.addRow(
+    searchQuery ? ["", "", "", "Search :", typesearch] : [""]
+  );
+
+  // Apply styling for the status row
+  typeAndStoreRow.eachCell((cell, colIndex) => {
+    cell.font = {
       name: "CustomFont" || "CustomFont",
       size: 10,
-      bold: false,
+      bold: [1, 4].includes(colIndex),
     };
-    const fontHeader = {
+    cell.alignment = { horizontal: "left", vertical: "middle" };
+  });
+  typeAndStoreRow2.eachCell((cell, colIndex) => {
+    cell.font = {
       name: "CustomFont" || "CustomFont",
       size: 10,
-      bold: true,
+      bold: [1, 4].includes(colIndex),
     };
-    const fontTableContent = {
+    cell.alignment = { horizontal: "left", vertical: "middle" };
+  });
+  typeAndStoreRow4.eachCell((cell, colIndex) => {
+    cell.font = {
       name: "CustomFont" || "CustomFont",
       size: 10,
-      bold: false,
+      bold: [1, 4].includes(colIndex),
     };
+    cell.alignment = { horizontal: "left", vertical: "middle" };
+  });
 
-    // Add an empty row at the start
-    worksheet.addRow([]);
+  // Header style
+  const headerStyle = {
+    font: fontHeader,
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFC6D9F7" },
+    },
+    border: {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    },
+  };
 
-    // Add company name
-    const companyRow = worksheet.addRow([comapnyname]);
-    companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
-      cell.alignment = { horizontal: "center" };
-    });
+  // Add headers
+  const headers = [
+    "SerNo#",
+    "Code",
+    "Description",
+    "Store",
+    "Last Date",
+    "Pur Rate",
+    "Qnty",
+  ];
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
-      }`
-    );
-
-    // Add Store List row
-    const storeListRow = worksheet.addRow([
-      `Serial Stock Report As On ${toInputDate}`,
-    ]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
-      }`
-    );
-
-    // Add an empty row after the title section
-    worksheet.addRow([]);
-
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
-    let typecapacity = capacityselectdatavalue.label
-      ? capacityselectdatavalue.label
-      : "ALL";
-    let typecategory = categoryselectdatavalue.label
-      ? categoryselectdatavalue.label
-      : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
-      : "ALL ";
-
- 
-
-    let typesearch = searchQuery ? searchQuery : "";
-
-    // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "Company :",
-      typecompany,
-      "",
-      "Capacity :",
-      typecapacity,
+  // Add data rows with numeric conversion for Rate and Qnty
+  tableData.forEach((item) => {
+    const row = worksheet.addRow([
+      item.SerNo,
+      item.titmcod,
+      item.Description,
+      item.Store,
+      item["Last Date"],
+      toNumber(item["Pur Rate"]),
+      toNumber(item.Qnty),
     ]);
 
-    // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "Category :",
-      typecategory,
-      "",
-      "Store :",
-      typetype,
-    ]);
-
-  
-    // Add third row with conditional rendering for "SEARCH:"
-       const typeAndStoreRow4 = worksheet.addRow(
-      searchQuery ? ["", "", "", "Search :", typesearch] : [""]
-    );
-
-    // Apply styling for the status row
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-  
-    typeAndStoreRow4.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
+    row.eachCell((cell, colIndex) => {
+      cell.font = fontTableContent;
+      cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
         bottom: { style: "thin" },
         right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = [
-      "Code",
-      "Description",
-      "Last Date",
-      "Pur Rate",
-      "Qnty",
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([
-      item.SerNo,
-      item.Description,
-      item['Last Date'],
-    formatValue(item["Pur Rate"]),
-   formatValue(item.Qnty),
-      ]);
-
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
-      });
-    });
-
-    // Set column widths
-    [18,45,11,12,10].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    const totalRow = worksheet.addRow([
-      String(formatValue(tableData.length.toLocaleString())),
-      "",
-      "",
-      "",
-      String(formatValue(totalqnty)),
-    ]);
-
-    // total row added
-
-    totalRow.eachCell((cell, colNumber) => {
-      cell.font = { bold: true };
-      cell.border = {
-        top: { style: "double" },
-        left: { style: "thin" },
-        bottom: { style: "double" },
-        right: { style: "thin" },
       };
-
-      // Align only the "Total" text to the right
-      if (colNumber === 5) {
-        cell.alignment = { horizontal: "right" };
-      }
-        if (colNumber === 1) {
-        cell.alignment = { horizontal: "center" };
+      cell.alignment = {
+        horizontal: columnAlignments[colIndex - 1] || "left",
+        vertical: "middle",
+      };
+      // Apply number format (no decimals) for Rate (col6) and Qnty (col7)
+      if (colIndex === 6 || colIndex === 7) {
+        cell.numFmt = "#,##0";
       }
     });
+  });
 
-    // Add a blank row
-    worksheet.addRow([]);
-    // Get current date and time
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
+  // Set column widths
+  [18, 18, 45, 8, 11, 12, 10].forEach((width, index) => {
+    worksheet.getColumn(index + 1).width = width;
+  });
+
+  // Total row – store count as number, totalQnty as number
+  const totalRow = worksheet.addRow([
+    tableData.length, // record count as number
+    "",
+    "",
+    "",
+    "",
+    "",
+    toNumber(totalqnty),
+  ]);
+
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true };
+    cell.border = {
+      top: { style: "double" },
+      left: { style: "thin" },
+      bottom: { style: "double" },
+      right: { style: "thin" },
     };
-    // Get current date
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-    const currentTime = getCurrentTime();
-    const currentdate = getCurrentDate();
-    const userid = user.tusrid;
 
-    // Add date and time row
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
+    if (colNumber === 7) {
+      cell.alignment = { horizontal: "right" };
+      cell.numFmt = "#,##0";
+    }
+    if (colNumber === 1) {
+      cell.alignment = { horizontal: "center" };
+      cell.numFmt = "#,##0";
+    }
+  });
 
-    // Merge across all columns
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
-      }`
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
-      }`
-    );
+  // Add a blank row
+  worksheet.addRow([]);
 
-    // Generate and save the Excel file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `SerialStockReport As On ${currentdate}.xlsx`);
+  // Get current date and time
+  const getCurrentTime = () => {
+    const today = new Date();
+    const hh = String(today.getHours()).padStart(2, "0");
+    const mm = String(today.getMinutes()).padStart(2, "0");
+    const ss = String(today.getSeconds()).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
   };
+  const getCurrentDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  const currentTime = getCurrentTime();
+  const currentdate = getCurrentDate();
+  const userid = user.tusrid;
+
+  // Add date and time row
+  const dateTimeRow = worksheet.addRow([
+    `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+  ]);
+  dateTimeRow.eachCell((cell) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+    };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  // FIXED: was incorrectly using dateTimeRow.eachCell – now using dateTimeRow1
+  dateTimeRow1.eachCell((cell) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+    };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  // Merge across all columns
+  worksheet.mergeCells(
+    `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      dateTimeRow.number
+    }`
+  );
+  worksheet.mergeCells(
+    `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      dateTimeRow1.number
+    }`
+  );
+
+  // Generate and save the Excel file
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, `SerialStockReport As On ${currentdate}.xlsx`);
+};
 
   const dispatch = useDispatch();
 
@@ -1378,48 +1402,24 @@ export default function SerialStockReport() {
     }
   };
 
-
   const handleTransactionTypeChange2 = (event) => {
     const selectedTransactionType = event.target.value;
     settransectionType2(selectedTransactionType);
   };
 
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
-
+  
   const firstColWidth = {
+    width: "135px",
+  };
+    const firstColWidth1 = {
     width: "135px",
   };
   const secondColWidth = {
     width: "360px",
+  };
+
+   const secondColWidth1 = {
+    width: "60px",
   };
   const thirdColWidth = {
     width: "90px",
@@ -1445,21 +1445,21 @@ export default function SerialStockReport() {
   };
 
   const [columns, setColumns] = useState({
-    SerNo: [],
-    Description: [],
-    ["Last Date"]: [],
-    ["Pur Rate"]: [], // ✔ Corrected key
-    Qnty: [],
-    Amount: [],
+   SerNo: [],
+      titmcod: [],
+      Description: [],
+      ["Last Date"]: [],
+      ["Pur Rate"]: [],
+      Qnty: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-    SerNo: "",
-    Description: "",
-    ["Last Date"]: "",
-    ["Pur Rate"]: "", // ✔ Corrected key
-    Qnty: "",
-    Amount: "",
+     SerNo: "",
+      titmcod: "",
+      Description: "",
+      ["Last Date"]: "",
+      ["Pur Rate"]: "",
+      Qnty: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -1467,11 +1467,11 @@ export default function SerialStockReport() {
     if (tableData.length > 0) {
       const newColumns = {
         SerNo: tableData.map((row) => row.SerNo),
+        titmcod: tableData.map((row) => row.titmcod),
         Description: tableData.map((row) => row.Description),
         ["Last Date"]: tableData.map((row) => row["Last Date"]),
         ["Pur Rate"]: tableData.map((row) => row["Pur Rate"]),
         Qnty: tableData.map((row) => row.Qnty),
-        Amount: tableData.map((row) => row.Amount),
       };
       setColumns(newColumns);
     }
@@ -1489,11 +1489,11 @@ export default function SerialStockReport() {
   const resetSorting = () => {
     setColumnSortOrders({
       SerNo: null,
+      titmcod: null,
       Description: null,
       ["Last Date"]: null,
       ["Pur Rate"]: null,
       Qnty: null,
-      Amount: null,
     });
   };
 
@@ -1545,7 +1545,7 @@ export default function SerialStockReport() {
         {isLoading ? (
           <>
             <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="5" className="text-center">
+              <td colSpan="7" className="text-center">
                 <Spinner animation="border" variant="primary" />
               </td>
             </tr>
@@ -1557,14 +1557,16 @@ export default function SerialStockReport() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 5 }).map((_, colIndex) => (
+                {Array.from({ length: 7 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
             ))}
             <tr>
               <td style={firstColWidth}></td>
+              <td style={firstColWidth1}></td>
               <td style={secondColWidth}></td>
+              <td style={secondColWidth1}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
               <td style={sixthColWidth}></td>
@@ -1597,7 +1599,8 @@ export default function SerialStockReport() {
                       ...firstColWidth,
                       cursor: "pointer",
                       textDecoration: "underline",
-                      color: "blue",
+                      // color: "blue",
+                      color: selectedIndex === i ? (isNegative ? "white" : 'white') : "blue", // ✅ conditional color
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
@@ -1616,10 +1619,14 @@ export default function SerialStockReport() {
                   >
                     {item.SerNo}
                   </td>
-
-
+                   <td className="text-start" style={firstColWidth1}>
+                    {item.titmcod}
+                  </td>
                   <td className="text-start" style={secondColWidth}>
                     {item.Description}
+                  </td>
+                    <td className="text-end" style={secondColWidth1}>
+                    {item.Store}
                   </td>
                   <td className="text-center" style={thirdColWidth}>
                     {item["Last Date"]}
@@ -1646,14 +1653,16 @@ export default function SerialStockReport() {
                   color: fontcolor,
                 }}
               >
-                {Array.from({ length: 5 }).map((_, colIndex) => (
+                {Array.from({ length: 7 }).map((_, colIndex) => (
                   <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                 ))}
               </tr>
             ))}
             <tr>
               <td style={firstColWidth}></td>
+              <td style={firstColWidth1}></td>
               <td style={secondColWidth}></td>
+              <td style={secondColWidth1}></td>
               <td style={thirdColWidth}></td>
               <td style={forthColWidth}></td>
               <td style={sixthColWidth}></td>
@@ -2348,7 +2357,7 @@ export default function SerialStockReport() {
                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
                     }
                     value={transectionType}
-                    onChange={handleTransactionTypeChange}
+                    onChange={handleTransactionTypeChange2}
                     style={{
                       width: "270px",
                       height: "24px",
@@ -2513,10 +2522,21 @@ export default function SerialStockReport() {
                       style={firstColWidth}
                       onClick={() => handleSorting("SerNo")}
                     >
-                      Code{" "}
+                      SerNo #{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("SerNo")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={firstColWidth1}
+                      onClick={() => handleSorting("titmcod")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("titmcod")}
                       ></i>
                     </td>
 
@@ -2529,6 +2549,18 @@ export default function SerialStockReport() {
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
                         style={getIconStyle("Description")}
+                      ></i>
+                    </td>
+
+                     <td
+                      className="border-dark"
+                      style={secondColWidth1}
+                      onClick={() => handleSorting("Store")}
+                    >
+                      Store{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Store")}
                       ></i>
                     </td>
 
@@ -2634,9 +2666,26 @@ export default function SerialStockReport() {
                 {formatValue(tableData.length.toLocaleString())}
               </span>
             </div>
+             <div
+              style={{
+                ...firstColWidth1,
+                background: getcolor,
+                marginLeft: "2px",
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              
+            </div>
             <div
               style={{
                 ...secondColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            ></div>
+             <div
+              style={{
+                ...secondColWidth1,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}

@@ -1711,7 +1711,7 @@ export default function ProductionYearlyReport() {
                                                 </td>
                                                 <td
                                                     className="text-start"
-                                                    title={item.company}
+                                                    title={item.Company}
                                                     style={{
                                                         ...fifthColWidth,
                                                         whiteSpace: "nowrap",
@@ -1719,7 +1719,7 @@ export default function ProductionYearlyReport() {
                                                         textOverflow: "ellipsis",
                                                     }}
                                                 >
-                                                    {item.company}
+                                                    {item.Company}
                                                 </td>
                                                 <td className="text-start" style={sixthColWidth}>
                                                     {item.Category}

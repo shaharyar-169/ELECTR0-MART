@@ -1079,9 +1079,9 @@ const handleSorting = (col) => {
       paddingRight: "25px",
     }}
   >
-    <option value="">ALL</option>
-    <option value="A">ACTIVE</option>
-    <option value="N">NON-ACTIVE</option>
+   <option value="">All</option>
+    <option value="A">Active</option>
+    <option value="N">Not Active</option>
   </select>
 
   {transectionType !== "" && (

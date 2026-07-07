@@ -871,8 +871,8 @@ export default function LocationList() {
   });
 
  
-  const firstColWidth = { width: "60px" };
-  const secondColWidth = { width: "360px" };
+  const firstColWidth = { width: "55px" };
+  const secondColWidth = { width: "250px" };
   const thirdColWidth = { width: "360px" };
     const forthColWidth = { width: "40px" };
 
@@ -893,7 +893,7 @@ export default function LocationList() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "900px",
+    maxWidth: "715px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1099,7 +1099,6 @@ export default function LocationList() {
               }}
             >
               <table
-                className="myTable"
                 id="table"
                 style={{
                   fontSize: getdatafontsize,
@@ -1242,7 +1241,7 @@ export default function LocationList() {
               borderTop: `1px solid ${fontcolor}`,
               height: "24px",
               display: "flex",
-              paddingRight: "1.2%",
+              paddingRight: "8px",
               // width: "101.2%",
             }}
           >

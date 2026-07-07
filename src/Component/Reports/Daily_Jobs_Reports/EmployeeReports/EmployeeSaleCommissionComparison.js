@@ -308,9 +308,9 @@ export default function EmployeeCommissionComparison() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (saleSelectRef.current) {
+        if (selectButtonRef.current) {
           e.preventDefault();
-          saleSelectRef.current.focus();
+          selectButtonRef.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -434,16 +434,7 @@ export default function EmployeeCommissionComparison() {
     const formData = new URLSearchParams({
      FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      FCtgCod: Categoryselectdata,
-      FCapCod: Capacityselectdata,
-      FCmpCod: Companyselectdata,
-      FRepRat: transectionType,
-      FRepTyp: transectionType2,
-      FTrnTyp: transectionType3,
-      FEmpCod: Employeeselectdata,
-      FComPrc: mobileNumber,
-      FSchTxt: searchQuery,
-
+     
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
@@ -458,10 +449,9 @@ export default function EmployeeCommissionComparison() {
       .then((response) => {
         setIsLoading(false);
 
-        settotaldebit(response.data["Total Qnty"]);
-        // settotalcredit(response.data["Total Amount"]);
-        setClosingBalance(response.data["Total Amount"]);
-                setCommission(response.data["Total Comm"]);
+        settotaldebit(response.data["Total Amount"]);
+     
+                setCommission(response.data["Total Commission"]);
 
 
         if (response.data && Array.isArray(response.data.Detail)) {
@@ -508,361 +498,7 @@ export default function EmployeeCommissionComparison() {
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveEmployee.php";
-    const formData = new URLSearchParams({
-         code: organisation.code,
-          FLocCod: locationnumber || getLocationNumber,
-      // code: "NASIRTRD",
-      // FLocCod: "001",
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetEmployee(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetEmployee([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-  const employeeoptions = GetEmployee.map((item) => ({
-    value: item.tempcod,
-    label: `${item.tempcod}-${item.tempnam.trim()}`,
-  }));
-
-  const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
-  useEffect(() => {
-    if (GetEmployee.length > 0) {
-      setIsOptionsLoaded(true);
-    }
-  }, [GetEmployee]);
-
-  useEffect(() => {
-    if (
-      isOptionsLoaded &&
-      employeeoptions.length > 0 &&
-      !Employeeselectdata &&
-      !hasInitialized.current
-    ) {
-      const firstOption = employeeoptions[0];
-      setEmployeeselectdata(firstOption.value);
-
-      const fullLabel = firstOption.label;
-      const description = fullLabel.split("-").pop()?.trim();
-
-      setEmployeeselectdatavalue({
-        value: firstOption.value,
-        label: description,
-        fullLabel: fullLabel,
-      });
-
-      // Mark as initialized
-      hasInitialized.current = true;
-    }
-  }, [isOptionsLoaded, employeeoptions, Employeeselectdata]);
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetCompany.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetCompany(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetCompany([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-  const options = GetCompany.map((item) => ({
-    value: item.tcmpcod,
-    label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
-  }));
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetCapacity.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetCapacity(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetCapacity([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  const capacityoptions = GetCapacity.map((item) => ({
-    value: item.tcapcod,
-    label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
-  }));
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetCatg.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetCategory(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetCategory([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  const categoryoptions = GetCategory.map((item) => ({
-    value: item.tctgcod,
-    label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
-  }));
-
-  useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveStore.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-    }).toString();
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setGetType(response.data);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
-          setGetType([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
-
-  const typeoptions = GetType.map((item) => ({
-    value: item.tstrcod,
-    label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
-  }));
-
-  const DropdownOption = (props) => {
-    return (
-      <components.Option {...props}>
-        <div
-          style={{
-            fontSize: getdatafontsize,
-            fontFamily: getfontstyle,
-            paddingBottom: "5px",
-            lineHeight: "3px",
-            // color: fontcolor,
-            textAlign: "start",
-          }}
-        >
-          {props.data.label}
-        </div>
-      </components.Option>
-    );
-  };
-
-  const customStyles1 = (hasError) => ({
-    control: (base, state) => ({
-      ...base,
-      height: "24px",
-      minHeight: "unset",
-      width: 225,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: getcolor,
-      color: fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      borderRadius: 0,
-      border: `1px solid ${fontcolor}`,
-      transition: "border-color 0.15s ease-in-out",
-      "&:hover": {
-        borderColor: state.isFocused ? base.borderColor : fontcolor,
-      },
-      padding: "0 8px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      boxShadow: "none",
-      "&:focus-within": {
-        borderColor: "#3368B5",
-        boxShadow: "0 0 0 1px #3368B5",
-      },
-    }),
-
-    menu: (base) => ({
-      ...base,
-      marginTop: "5px",
-      borderRadius: 0,
-      backgroundColor: getcolor,
-      border: `1px solid ${fontcolor}`,
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      zIndex: 9999,
-    }),
-    menuList: (base) => ({
-      ...base,
-      padding: 0,
-      maxHeight: "200px",
-      // Scrollbar styling for Webkit browsers
-      "&::-webkit-scrollbar": {
-        width: "8px",
-        height: "8px",
-      },
-      "&::-webkit-scrollbar-track": {
-        background: getcolor,
-        borderRadius: "10px",
-      },
-      "&::-webkit-scrollbar-thumb": {
-        backgroundColor: fontcolor,
-        borderRadius: "10px",
-        border: `2px solid ${getcolor}`,
-        "&:hover": {
-          backgroundColor: "#3368B5",
-        },
-      },
-      // Scrollbar styling for Firefox
-      scrollbarWidth: "thin",
-      scrollbarColor: `${fontcolor} ${getcolor}`,
-    }),
-    option: (base, state) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      backgroundColor: state.isSelected
-        ? "#3368B5"
-        : state.isFocused
-        ? "#3368B5"
-        : getcolor,
-      color: state.isSelected || state.isFocused ? "white" : fontcolor,
-      "&:hover": {
-        backgroundColor: "#3368B5",
-        color: "white",
-        cursor: "pointer",
-      },
-      "&:active": {
-        backgroundColor: "#1a66cc",
-      },
-      transition: "background-color 0.2s ease, color 0.2s ease",
-    }),
-    dropdownIndicator: (base, state) => ({
-      ...base,
-      padding: 0,
-      marginTop: "-5px",
-      fontSize: "18px",
-      display: "flex",
-      textAlign: "center",
-      color: fontcolor,
-      transition: "transform 0.2s ease",
-      transform: state.selectProps.menuIsOpen
-        ? "rotate(180deg)"
-        : "rotate(0deg)",
-      "&:hover": {
-        color: "#3368B5",
-      },
-    }),
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-    singleValue: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      textAlign: "left",
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    input: (base) => ({
-      ...base,
-      color: getcolor === "white" ? "black" : fontcolor,
-      caretColor: getcolor === "white" ? "black" : "white",
-      marginTop: "-5px",
-    }),
-    clearIndicator: (base) => ({
-      ...base,
-      marginTop: "-5px",
-      padding: "0 4px",
-      color: fontcolor,
-      "&:hover": {
-        color: "#ff4444",
-      },
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: `${fontcolor}80`, // 50% opacity
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      marginTop: "-5px",
-    }),
-    noOptionsMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    loadingMessage: (base) => ({
-      ...base,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-      color: fontcolor,
-      backgroundColor: getcolor,
-    }),
-    multiValue: (base) => ({
-      ...base,
-      backgroundColor: `${fontcolor}20`, // Light background for tags
-    }),
-    multiValueLabel: (base) => ({
-      ...base,
-      color: fontcolor,
-      fontSize: getdatafontsize,
-      fontFamily: getfontstyle,
-    }),
-    multiValueRemove: (base) => ({
-      ...base,
-      color: `${fontcolor}80`,
-      "&:hover": {
-        backgroundColor: "#ff4444",
-        color: "white",
-      },
-    }),
-  });
+ 
 
   const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
@@ -870,29 +506,26 @@ export default function EmployeeCommissionComparison() {
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.code,
-      item["Sales Man"],
-      formatValue(item.Qnty),
-      formatValue(item.Amount),
-      // formatValue(item.Margin),
-            formatValue(item.Comm),
+      item.tempcod,
+      formatValue(item.Name),
+       item["Sale Amt"],
+      formatValue(item.Commission),
+    
 
     ]);
 
     // Add summary row to the table
     rows.push([
+       String(formatValue(tableData.length.toLocaleString())),
       "",
-      "Total",
-      String(formatValue(totaldebit)),
-      // String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
+       String(formatValue(totaldebit)),
         String(formatValue(Commission)),
     ]);
 
     // Define table column headers and individual column widths
 
-    const headers = ["Code", "Sales Man", "Qnty", "Amount", "Comm"];
-    const columnWidths = [15, 110, 20, 27, 27];
+    const headers = ["Code", "Name", "Sale Amt",  "Commission"];
+    const columnWidths = [15, 110, 30, 30];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1032,7 +665,7 @@ export default function EmployeeCommissionComparison() {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4 || cellIndex === 5) {
+          } else if (cellIndex > 1) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1099,7 +732,7 @@ export default function EmployeeCommissionComparison() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 45; // Adjust this value based on your requirements
+    const rowsPerPage = 47; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1121,14 +754,6 @@ export default function EmployeeCommissionComparison() {
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
 
         // Add page numbering
           doc.setFont("verdana-regular", "normal");
@@ -1166,111 +791,12 @@ export default function EmployeeCommissionComparison() {
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        let Ratefilter =
-          transectionType === "P"
-            ? "PURCHASE RATE"
-            : transectionType == "M"
-            ? "SM RATE"
-            : transectionType == "A"
-            ? "AVERAGE RATE"
-            : transectionType == "W"
-            ? "WEIGHTRD AVERAGE"
-            : transectionType == "F"
-            ? "FIFP"
-            : "";
+       
+       
+       
+        startY += -5; // Adjust vertical position for the labels
 
-        let transectionsts =
-          transectionType2 === "C"
-            ? "CASH"
-            : transectionType2 == "R"
-            ? "CREDIT"
-            : transectionType2 == "I"
-            ? "INSTALLMENT"
-            : "ALL";
-
-        // let employeedata = Employeeselectdatavalue.label
-        //   ? Employeeselectdatavalue.label
-        //   : "ALL";
-
-        let typeText = capacityselectdatavalue.label
-          ? capacityselectdatavalue.label
-          : "ALL";
-        let typeItem = Companyselectdatavalue.label
-          ? Companyselectdatavalue.label
-          : "ALL";
-        let category = categoryselectdatavalue.label
-          ? categoryselectdatavalue.label
-          : "ALL";
-        let typename = typeselectdatavalue.label
-          ? typeselectdatavalue.label
-          : "ALL";
-
-        let commission = mobileNumber ? mobileNumber : "";
-
-        // doc.setFont("verdana", "bold"); // Set font to bold
-        // doc.setFontSize(10);
-        // doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-        // doc.setFont("verdana-regular", "normal"); // Set font to bold
-        // doc.setFontSize(10);
-        // doc.text(`${employeedata}`, labelsX + 25, labelsY); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Company :`, labelsX, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${typeItem}`, labelsX + 25, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Rate :`, labelsX + 120, labelsY + 4.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${Ratefilter}`, labelsX + 140, labelsY + 4.3); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Category :`, labelsX, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${category}`, labelsX + 25, labelsY + 8.3); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Type :`, labelsX + 120, labelsY + 8.3); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${transectionsts}`, labelsX + 140, labelsY + 8.3); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        doc.setFont("verdana", "bold"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`Capacity :`, labelsX, labelsY + 12.5); // Draw bold label
-        doc.setFont("verdana-regular", "normal"); // Set font to bold
-        doc.setFontSize(10);
-        doc.text(`${typeText}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 145, labelsY + 8.5); // Draw the value next to the label
-
-     
-          doc.setFont("verdana", "bold"); // Set font to bold
-          doc.setFontSize(10);
-          doc.text(`Commission :`, labelsX + 120, labelsY + 12.5); // Draw bold label
-          doc.setFont("verdana-regular", "normal"); // Set font to bold
-          doc.setFontSize(10);
-          doc.text(`${commission}`, labelsX + 148, labelsY + 12.5); // Draw the value next to the label
-      
-
-        startY += 15; // Adjust vertical position for the labels
-
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 44);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 24);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1318,9 +844,9 @@ export default function EmployeeCommissionComparison() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 5; // Ensure this matches the actual number of columns
+    const numColumns = 4; // Ensure this matches the actual number of columns
 
-    const columnAlignments = ["center", "left", "right", "right", "right" ];
+    const columnAlignments = ["center", "left", "right", "right"];
 
     // Define fonts for different sections
     const fontCompanyName = {
@@ -1383,125 +909,7 @@ export default function EmployeeCommissionComparison() {
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let employeedata = Employeeselectdatavalue.label
-      ? Employeeselectdatavalue.label
-      : "ALL";
-
-    let typecompany = Companyselectdatavalue.label
-      ? Companyselectdatavalue.label
-      : "ALL";
-    let typecapacity = capacityselectdatavalue.label
-      ? capacityselectdatavalue.label
-      : "ALL";
-    let typecategory = categoryselectdatavalue.label
-      ? categoryselectdatavalue.label
-      : "ALL";
-    let typetype = typeselectdatavalue.label
-      ? typeselectdatavalue.label
-      : "ALL ";
-
-    let Ratefilter =
-      transectionType === "P"
-        ? "PURCHASE RATE"
-        : transectionType == "M"
-        ? "SM RATE"
-        : transectionType == "A"
-        ? "AVERAGE RATE"
-        : transectionType == "W"
-        ? "WEIGHTRD AVERAGE"
-        : transectionType == "F"
-        ? "FIFP"
-        : "";
-
-    let transectionsts =
-      transectionType2 === "C"
-        ? "CASH"
-        : transectionType2 == "R"
-        ? "CREDIT"
-        : transectionType2 == "I"
-        ? "INSTALLMENT"
-        : "ALL";
-
-    let commission = mobileNumber ? mobileNumber : "";
-
-    // const typeAndStoreRow5 = worksheet.addRow(["Employee :", employeedata, ""]);
-    // Add first row
-    const typeAndStoreRow = worksheet.addRow([
-      "Company :",
-      typecompany,
-      "",
-
-      "Rate :",
-      Ratefilter,
-    ]);
-
-    // Add second row
-    const typeAndStoreRow2 = worksheet.addRow([
-      "Category :",
-      typecategory,
-      "",
-
-      "Type :",
-      transectionsts,
-    ]);
-
-       // Add third row with conditional rendering for "SEARCH:"
-    // const typeAndStoreRow4 = worksheet.addRow(
-    //   searchQuery
-    //     ? ["Capacity :", typecapacity, "", "Commission :", typesearch]
-    //     : ["Capacity :", typecapacity]
-    // );
-
-     const typeAndStoreRow4 = worksheet.addRow(
-      ["Capacity :", typecapacity, "", "Comm :", commission]
-        
-    );
-
-    // Apply styling for the status row
-    // typeAndStoreRow5.eachCell((cell, colIndex) => {
-    //   cell.font = {
-    //     name: "CustomFont" || "CustomFont",
-    //     size: 10,
-    //     bold: [1, 4].includes(colIndex),
-    //   };
-    //   cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    //   typeAndStoreRow3.eachCell((cell, colIndex) => {
-    //     cell.font = {
-    //         name: "CustomFont" || "CustomFont",
-    //         size: 10,
-    //         bold: [1, 7].includes(colIndex),
-    //     };
-    //     cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
-    typeAndStoreRow4.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 4].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
-    const headerStyle = {
+     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
       fill: {
@@ -1516,21 +924,20 @@ export default function EmployeeCommissionComparison() {
         right: { style: "thin" },
       },
     };
+  
 
     // Add headers
-    const headers = ["Code", "Description", "Qnty", "Amount", "Commission"];
+    const headers = ["Code", "Name", "Sale Amt",  "Commission"];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.code,
-      item["Sales Man"],
-        formatValue(item.Qnty),
-        formatValue(item.Amount),
-        // formatValue(item.Margin),
-        formatValue(item.Comm),
+        item.tempcod,
+             formatValue(item.Name),
+      item["Sale Amt"],
+        formatValue(item.Commission),
 
       ]);
 
@@ -1550,16 +957,15 @@ export default function EmployeeCommissionComparison() {
     });
 
     // Set column widths
-    [10, 50, 9, 12, 12].forEach((width, index) => {
+    [7, 45, 14, 14].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
+           String(formatValue(tableData.length.toLocaleString())),
+
       "",
-      "Total",
       String(formatValue(totaldebit)),
-      // String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
             String(formatValue(Commission)),
 
     ]);
@@ -1576,8 +982,11 @@ export default function EmployeeCommissionComparison() {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
+      if (colNumber >2) {
         cell.alignment = { horizontal: "right" };
+      }
+       if (colNumber ===1) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
@@ -1665,253 +1074,53 @@ export default function EmployeeCommissionComparison() {
   };
 
   let totalEntries = 0;
-  const handleEmployeeKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setEmployeeselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-
-  const handlecompanyKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCompanyselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-  const handlecategoryKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCategoryselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-  const handlecapacityKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCapacityselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-
-  const handleKeyPress = (e, nextInputRef) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (nextInputRef.current) {
-        nextInputRef.current.focus();
-      }
-    }
-  };
-
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
-
-  const handleTransactionTypeChange2 = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType2(selectedTransactionType);
-  };
-
-   const handleTransactionTypeChange3 = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType3(selectedTransactionType);
-  };
-
-  
+ 
 
 
- const handleMobilePress = (e, nextInputRef) => {
-  const inputEl = document.getElementById("phone");
-  const value = Number(e.target.value);
-
-  if (e.key === "Enter") {
-    e.preventDefault();
-
-    // empty validation
-    if (value === "" || value === null || isNaN(value)) {
-      toast.error("Commission cannot be empty");
-      inputEl.style.border = "2px solid red";
-      return;
-    }
-
-    // range validation
-    if (value < 0 || value > 50) {
-      toast.error("Commission must be between 0% and 50%");
-      inputEl.style.border = "2px solid red";
-      return;
-    }
-
-    inputEl.style.border = "1px solid black";
-
-    // move to next input
-    if (nextInputRef.current) {
-      nextInputRef.current.focus();
-    //   nextInputRef.current.select();
-    }
-  }
-};
-
-
-  const handleMobilenumberInputChange = (e) => {
-  let value = e.target.value;
-
-  // 🔥 allow only numbers + one decimal point
-  value = value.replace(/[^0-9.]/g, "");
-
-  // 🔥 prevent multiple dots
-  const parts = value.split(".");
-  if (parts.length > 2) {
-    value = parts[0] + "." + parts[1];
-  }
-
-  // limit integer part to 2 digits (max 50 rule still applies)
-  let num = Number(value);
-
-  // empty input → 0
-  if (value === "") {
-    setmobileNumber("0");
-    return;
-  }
-
-  // if value > 50 → ignore
-  if (num > 50) {
-    return;
-  }
-
-  setmobileNumber(value);
-};
-
-
-
-
-  // const firstColWidth = {
-  //     width: "10%",
-  // };
-  // const secondColWidth = {
-  //     width: "30.6%",
-  // };
-  // const thirdColWidth = {
-  //     width: "9%",
-  // };
-  // const forthColWidth = {
-  //     width: "9%",
-  // };
-  // const fifthColWidth = {
-  //     width: "9%",
-  // };
-  // const sixthColWidth = {
-  //     width: "5%",
-  // };
-  // const seventhColWidth = {
-  //     width: "9%",
-  // };
-  // const eighthColWidth = {
-  //     width: "9%",
-  // };
-  // const ninthColWidth = {
-  //     width: "9%",
-  // };
-  // const tenthColWidth = {
-  //     width: "9%",
-  // };
 
   const firstColWidth = {
     width: "60px",
   };
   const secondColWidth = {
-    width: "400px",
+    width: "360px",
   };
   const thirdColWidth = {
-    width: "80px",
+    width: "100px",
   };
   const forthColWidth = {
-    width: "80px",
+    width: "100px",
   };
-  // const sixthColWidth = {
-  //   width: "100px",
-  // };
 
-  const seventhColWidth = {
-    width: "100px",
-  };
-   const eightthColWidth = {
-    width: "100px",
-  };
 
   const sixthcol = {
     width: "8px",
   };
 
   const [columns, setColumns] = useState({
-    code: [],
-    ["Sales Man"]: [],
-    Qnty: [],
-    Amount: [],
-    Margin: [],
-    Comm: [],
+     tempcod: [],
+     
+      Name: [],
+      ["Sale Amt"]: [],
+      Commission: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
-    code: "",
-    ["Sales Man"]: "",
-    Qnty: "",
-    Amount: "",
-    Margin: "",
-    Comm: "",
+     tempcod: "",
+     
+      Name: "",
+      ["Sale Amt"]: "",
+      Commission: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        code: tableData.map((row) => row.code),
-        ["Sales Man"]: tableData.map((row) => row["Sales Man"]),
-        Qnty: tableData.map((row) => row.Qnty),
-        Amount: tableData.map((row) => row.Amount),
-        Margin: tableData.map((row) => row.Margin),
-                Comm: tableData.map((row) => row.Comm),
+        tempcod: tableData.map((row) => row.tempcod),
+        Name: tableData.map((row) => row.Name),
+        ["Sales Amt"]: tableData.map((row) => row["Sales Amt"]),
+        Commission: tableData.map((row) => row.Commission),
+       
 
       };
       setColumns(newColumns);
@@ -1929,12 +1138,11 @@ export default function EmployeeCommissionComparison() {
 
   const resetSorting = () => {
     setColumnSortOrders({
-      code: null,
-      ["Sales Man"]: null,
-      Qnty: null,
-      Amount: null,
-      Margin: null,
-      Comm: null,
+      tempcod: null,
+     
+      Name: null,
+      ["Sale Amt"]: null,
+      Commission: null,
     });
   };
 
@@ -2006,7 +1214,7 @@ export default function EmployeeCommissionComparison() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "633px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2198,7 +1406,7 @@ export default function EmployeeCommissionComparison() {
                          alignItems: "center",
                          margin: "0px",
                          padding: "0px",
-                         justifyContent: "space-between",
+                         justifyContent: "start",
                        }}
                      >
                        <div
@@ -2302,7 +1510,7 @@ export default function EmployeeCommissionComparison() {
                            />
                          </div>
                        </div>
-                       <div className="d-flex align-items-center">
+                       <div className="d-flex align-items-center" style={{marginLeft:'100px'}}>
                          <div
                            style={{
                              width: "60px",
@@ -2359,7 +1567,7 @@ export default function EmployeeCommissionComparison() {
                              }}
                              value={toInputDate}
                              onChange={handleToInputChange}
-                             onKeyDown={(e) => handleToKeyPress(e, employeeref)}
+                             onKeyDown={(e) => handleToKeyPress(e, selectButtonRef)}
                              id="toDatePicker"
                              autoComplete="off"
                              placeholder="dd-mm-yyyy"
@@ -2402,722 +1610,11 @@ export default function EmployeeCommissionComparison() {
                          </div>
                        </div>
          
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginRight: "21px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Employee :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class"
-                             ref={employeeref}
-                             options={employeeoptions}
-                             value={
-                               employeeoptions.find(
-                                 (opt) => opt.value === Employeeselectdata
-                               ) || null
-                             } // Ensure correct reference
-                             onKeyDown={(e) => handleEmployeeKeypress(e, saleSelectRef)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                               if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-         
-                                 setEmployeeselectdata(selectedOption.value);
-                                   setEmployeeselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart,
-                                   tcrtcom: selectedOption.tcrtcom,
-                                   tcshcom: selectedOption.tcshcom,
-                                   tinscom: selectedOption.tinscom,
-                                 });
-                               } else {
-                                 setEmployeeselectdata("");
-                                 setEmployeeselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Employeeselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             // isClearable
-                             // placeholder="ALL"
-                           />
-                         </div>
-                       </div>
+                     
                      </div>
                    </div>
-                   <div
-                     className="row"
-                     style={{ marginTop: "8px", marginBottom: "8px", margin: "0px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "start",
-                         border: "1px solid lightgrey",
-                         // boxShadow: "0px 2px 6px rgba(0,0,0,0.25)", // 👈 shadow added
-                       }}
-                     ></div>
-                   </div>
-                   {/* //////////////// second ROW ///////////////////////// */}
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "space-between",
-                       }}
-                     >
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginLeft: "7px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Company :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class"
-                             ref={saleSelectRef}
-                             options={options}
-                             onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                               if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-                                 setCompanyselectdata(selectedOption.value);
-                                 setCompanyselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart,
-                                 });
-                               } else {
-                                 setCompanyselectdata("");
-                                 setCompanyselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Companyselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             isClearable
-                             placeholder="ALL"
-                           />
-                         </div>
-                       </div>
-         
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginRight: "21px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Rate :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ position: "relative", display: "inline-block" }}>
-                           <select
-                             ref={input4Refrate}
-                             onKeyDown={(e) => handleKeyPress(e, input4Ref)}
-                             id="submitButton"
-                             name="type"
-                             onFocus={(e) =>
-                               (e.currentTarget.style.border = "4px solid red")
-                             }
-                             onBlur={(e) =>
-                               (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                             }
-                             value={transectionType}
-                             onChange={handleTransactionTypeChange}
-                             style={{
-                               width: "225px",
-                               height: "24px",
-                               marginLeft: "5px",
-                               backgroundColor: getcolor,
-                               border: `1px solid ${fontcolor}`,
-                               fontSize: getdatafontsize,
-                               fontFamily: getfontstyle,
-                               color: fontcolor,
-                               paddingLeft: "12px",
-                             }}
-                           >
-                             <option value="P">PURCHASE RATE</option>
-                             <option value="A">AVERAGE RATE</option>
-                             <option value="M">LAST SM RATE</option>
-                             <option value="W">WEIGHTED AVERAGE</option>
-                             <option value="F">FIFO</option>
-                           </select>
-         
-                           {transectionType !== "P" && (
-                             <span
-                               onClick={() => settransectionType("P")}
-                               style={{
-                                 position: "absolute",
-                                 right: "25px",
-                                 top: "50%",
-                                 transform: "translateY(-50%)",
-                                 cursor: "pointer",
-                                 fontWeight: "bold",
-                                 color: fontcolor,
-                                 userSelect: "none",
-                                 fontSize: "12px",
-                               }}
-                             >
-                               ✕
-                             </span>
-                           )}
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                   {/* //////////////// THIRD ROW ///////////////////////// */}
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "space-between",
-                       }}
-                     >
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginLeft: "7px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Category :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class "
-                             ref={input1Ref}
-                             options={categoryoptions}
-                             onKeyDown={(e) => handlecategoryKeypress(e, input2Ref)}
-                             id="selectedsale"
-                             onChange={(selectedOption) => {
-                               if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-                                 setCategoryselectdata(selectedOption.value);
-                                 setcategoryselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart, // Set only the 'NGS' part of the label
-                                 });
-                               } else {
-                                 setCategoryselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                 setcategoryselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Companyselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             isClearable
-                             placeholder="ALL"
-                           />
-                         </div>
-                       </div>
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginRight: "21px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Type :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ position: "relative", display: "inline-block" }}>
-                           <select
-                             ref={input4Ref}
-                             onKeyDown={(e) => handleKeyPress(e, CommissionRef)}
-                             id="submitButton"
-                             name="type"
-                             onFocus={(e) =>
-                               (e.currentTarget.style.border = "4px solid red")
-                             }
-                             onBlur={(e) =>
-                               (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                             }
-                             value={transectionType2}
-                             onChange={handleTransactionTypeChange2}
-                             style={{
-                               width: "225px",
-                               height: "24px",
-                               marginLeft: "5px",
-                               backgroundColor: getcolor,
-                               border: `1px solid ${fontcolor}`,
-                               fontSize: getdatafontsize,
-                               fontFamily: getfontstyle,
-                               color: fontcolor,
-                               paddingLeft: "12px",
-                             }}
-                           >
-                             <option value="" >ALL</option>
-                             <option value="C" >CASH</option>
-                             <option value="R" >CREDIT</option>
-                             <option value="I">INSTALLMENT</option>
-                           </select>
-         
-                           {transectionType2 !== "" && (
-                             <span
-                               onClick={() => settransectionType2("")}
-                               style={{
-                                 position: "absolute",
-                                 right: "25px",
-                                 top: "50%",
-                                 transform: "translateY(-50%)",
-                                 cursor: "pointer",
-                                 fontWeight: "bold",
-                                 color: fontcolor,
-                                 userSelect: "none",
-                                 fontSize: "12px",
-                               }}
-                             >
-                               ✕
-                             </span>
-                           )}
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                   {/* //////////////// FORTH ROW ///////////////////////// */}
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "space-between",
-                       }}
-                     >
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginLeft: "7px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Capacity :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ marginLeft: "3px" }}>
-                           <Select
-                             className="List-select-class "
-                             ref={input2Ref}
-                             options={capacityoptions}
-                             onKeyDown={(e) => handlecapacityKeypress(e, TypeRef2)}
-                             id="selectedsale2"
-                             onChange={(selectedOption) => {
-                               if (selectedOption && selectedOption.value) {
-                                 const labelPart = selectedOption.label.split("-")[1];
-                                 setCapacityselectdata(selectedOption.value);
-                                 setcapacityselectdatavalue({
-                                   value: selectedOption.value,
-                                   label: labelPart, // Set only the 'NGS' part of the label
-                                 });
-                               } else {
-                                 setCapacityselectdata(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                                 setcapacityselectdatavalue("");
-                               }
-                             }}
-                             onInputChange={(inputValue, { action }) => {
-                               if (action === "input-change") {
-                                 return inputValue.toUpperCase();
-                               }
-                               return inputValue;
-                             }}
-                             components={{ Option: DropdownOption }}
-                             styles={{
-                               ...customStyles1(!Companyselectdata),
-                               placeholder: (base) => ({
-                                 ...base,
-                                 textAlign: "left",
-                                 marginLeft: "0",
-                                 justifyContent: "flex-start",
-                                 color: fontcolor,
-                                 marginTop: "-5px",
-                               }),
-                             }}
-                             isClearable
-                             placeholder="ALL"
-                           />
-                         </div>
-                       </div>
-         
-         
-                        <div className="d-flex align-items-center " style={{marginRight:'21px'}}>
-                                         <div
-                                             style={{
-                                                 width: "110px",
-                                                 display: "flex",
-                                                 justifyContent: "end",
-                                             }}
-                                         >
-                                             <label htmlFor="fromDatePicker">
-                                                 <span style={{ fontSize: getdatafontsize, fontFamily: getfontstyle, fontWeight: "bold" }}>
-                                                     Commission % :
-                                                 </span>{" "}
-                                                 <br />
-                                             </label>
-                                         </div>
-         
-                                        <input
-           ref={CommissionRef}
-           value={mobileNumber}
-           onKeyDown={(e) => handleMobilePress(e, SearchRef)}
-           onChange={handleMobilenumberInputChange}
-           autoComplete="off"
-           type="number"
-           id="phone"
-           name="phone"
-           placeholder="0"
-           style={{
-             color: fontcolor,
-             width: "225px",
-             height: "24px",
-             fontSize: getdatafontsize,
-             fontFamily: getfontstyle,
-             border: `1px solid ${fontcolor}`,
-             backgroundColor: getcolor,
-             outline: "none",
-             paddingLeft: "10px",
-             marginLeft: "3px",
-           }}
-           onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-           onBlur={(e) => (e.currentTarget.style.border = `1px solid ${fontcolor}`)}
-         />
-         
-                                     </div>
-                     </div>
-                   </div>
-                     {/* //////////////// FIFTH ROW ///////////////////////// */}
-                   <div
-                     className="row"
-                     style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-                   >
-                     <div
-                       style={{
-                         width: "100%",
-                         display: "flex",
-                         alignItems: "center",
-                         margin: "0px",
-                         padding: "0px",
-                         justifyContent: "space-between",
-                       }}
-                     >
-                       <div
-                         className="d-flex align-items-center"
-                         style={{ marginLeft: "5px" }}
-                       >
-                         <div
-                           style={{
-                             marginLeft: "10px",
-                             width: "80px",
-                             display: "flex",
-                             justifyContent: "end",
-                           }}
-                         >
-                           <label htmlFor="transactionType">
-                             <span
-                               style={{
-                                 fontSize: getdatafontsize,
-                                 fontFamily: getfontstyle,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               Type2 :
-                             </span>
-                           </label>
-                         </div>
-         
-                         <div style={{ position: "relative", display: "inline-block" }}>
-                           <select
-                             ref={TypeRef2}
-                             onKeyDown={(e) => handleKeyPress(e, input4Refrate)}
-                             id="submitButton"
-                             name="type"
-                             onFocus={(e) =>
-                               (e.currentTarget.style.border = "4px solid red")
-                             }
-                             onBlur={(e) =>
-                               (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                             }
-                             value={transectionType3}
-                             onChange={handleTransactionTypeChange3}
-                             style={{
-                               width: "225px",
-                               height: "24px",
-                               marginLeft: "5px",
-                               backgroundColor: getcolor,
-                               border: `1px solid ${fontcolor}`,
-                               fontSize: getdatafontsize,
-                               fontFamily: getfontstyle,
-                               color: fontcolor,
-                               paddingLeft: "12px",
-                             }}
-                           >
-                              <option value="">ALL</option>
-                             <option value="R">RECEIVABLE</option>
-                             <option value="P">PAYABLE</option>
-                           </select>
-         
-                           {transectionType3 !== "" && (
-                             <span
-                               onClick={() => settransectionType3("")}
-                               style={{
-                                 position: "absolute",
-                                 right: "25px",
-                                 top: "50%",
-                                 transform: "translateY(-50%)",
-                                 cursor: "pointer",
-                                 fontWeight: "bold",
-                                 color: fontcolor,
-                                 userSelect: "none",
-                                 fontSize: "12px",
-                               }}
-                             >
-                               ✕
-                             </span>
-                           )}
-                         </div>
-                       </div>
-         
-         
-                         <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                         <label for="searchInput" style={{ marginRight: "5px" }}>
-                                             <span
-                                                 style={{
-                                                     fontSize: getdatafontsize,
-                                                     fontFamily: getfontstyle,
-                                                     fontWeight: "bold",
-                                                 }}
-                                             >
-                                                 Search :
-                                             </span>{" "}
-                                         </label>
-                                         <div style={{ position: "relative", display: "inline-block" }}>
-                                             <input
-                                                 ref={SearchRef}
-                                                 onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                                                 type="text"
-                                                 id="searchsubmit"
-                                                 placeholder="Search"
-                                                 value={searchQuery}
-                                                 autoComplete="off"
-                                                 style={{
-                                                     marginRight: "20px",
-                                                     width: "225px",
-                                                     height: "24px",
-                                                     fontSize: getdatafontsize,
-                                                     fontFamily: getfontstyle,
-                                                     color: fontcolor,
-                                                     backgroundColor: getcolor,
-                                                     border: `1px solid ${fontcolor}`,
-                                                     outline: "none",
-                                                     paddingLeft: "10px",
-                                                     paddingRight: "25px", // space for the clear icon
-                                                 }}
-                                                 onFocus={(e) =>
-                                                     (e.currentTarget.style.border = "2px solid red")
-                                                 }
-                                                 onBlur={(e) =>
-                                                     (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                                 }
-                                                 onChange={(e) =>
-                                                     setSearchQuery((e.target.value || "").toUpperCase())
-                                                 }
-                                             />
-                                             {searchQuery && (
-                                                 <span
-                                                     onClick={() => setSearchQuery("")}
-                                                     style={{
-                                                         position: "absolute",
-                                                         right: "30px",
-                                                         top: "50%",
-                                                         transform: "translateY(-50%)",
-                                                         cursor: "pointer",
-                                                         fontSize: "20px",
-                                                         color: fontcolor,
-                                                         userSelect: "none",
-                                                     }}
-                                                 >
-                                                     ×
-                                                 </span>
-                                             )}
-                                         </div>
-                                     </div>
-                     </div>
-                   </div>
+                  
+                 
 
           <div>
             {/* Table Head */}
@@ -3158,83 +1655,52 @@ export default function EmployeeCommissionComparison() {
                     <td
                       className="border-dark"
                       style={firstColWidth}
-                      onClick={() => handleSorting("code")}
+                      onClick={() => handleSorting("tempcod")}
                     >
                       Code{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
+                        style={getIconStyle("tempcod")}
                       ></i>
                     </td>
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                      onClick={() => handleSorting("Sales Man")}
+                      onClick={() => handleSorting("Name")}
                     >
-                      Sales Man{" "}
+                      Name{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Sales Man")}
+                        style={getIconStyle("Name")}
                       ></i>
                     </td>
-                    {/* <td
+                  
+                    <td
                       className="border-dark"
                       style={thirdColWidth}
-                      onClick={() => handleSorting("Rate")}
+                      onClick={() => handleSorting("Sale Amt")}
                     >
-                      Rate{" "}
+                      Sale Amt{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Rate")}
+                        style={getIconStyle("Sale Amt")}
                       ></i>
-                    </td> */}
+                    </td>
+
+                   
+
                     <td
                       className="border-dark"
                       style={forthColWidth}
-                      onClick={() => handleSorting("Qnty")}
+                      onClick={() => handleSorting("Commission")}
                     >
-                      Qnty{" "}
+                      Commission{" "}
                       <i
                         className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
+                        style={getIconStyle("Commission")}
                       ></i>
                     </td>
 
-                    {/* <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Amount")}
-                    >
-                      Amount{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amount")}
-                      ></i>
-                    </td> */}
-
-                    <td
-                      className="border-dark"
-                      style={seventhColWidth}
-                      onClick={() => handleSorting("Amount")}
-                    >
-                      Amount{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Amount")}
-                      ></i>
-                    </td>
-
-                      <td
-                      className="border-dark"
-                      style={eightthColWidth}
-                      onClick={() => handleSorting("Comm")}
-                    >
-                      Commision{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Comm")}
-                      ></i>
-                    </td>
 
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
@@ -3248,20 +1714,19 @@ export default function EmployeeCommissionComparison() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "35vh",
-                // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                maxHeight: "50vh",
+           
+               
               }}
             >
               <table
-                className="myTable"
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
+                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -3272,7 +1737,7 @@ export default function EmployeeCommissionComparison() {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="4" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3285,7 +1750,7 @@ export default function EmployeeCommissionComparison() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 5 }).map((_, colIndex) => (
+                            {Array.from({ length: 4 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3296,11 +1761,8 @@ export default function EmployeeCommissionComparison() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
-                        {/* <td style={thirdColWidth}></td> */}
+                        <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                        {/* <td style={sixthColWidth}></td> */}
-                        <td style={seventhColWidth}></td>
-                                                <td style={eightthColWidth}></td>
 
                       </tr>
                     </>
@@ -3308,12 +1770,13 @@ export default function EmployeeCommissionComparison() {
                     <>
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
-                         const amount = toNumber(item.Amount);
-  const qnty   = toNumber(item.Qnty);
-  const margin = toNumber(item.Margin);
+                         const amount = toNumber(item["Sale Amt"]);
+                         const Comm   = toNumber(item.Commission);
+ 
 
-  const isNegative = qnty < 0 || amount < 0;
-
+  const isNegative =
+                amount                 < 0 ||
+                Comm < 0 
                         return (
                           <tr
                             key={`${i}-${selectedIndex}`}
@@ -3329,27 +1792,18 @@ export default function EmployeeCommissionComparison() {
                             }}
                           >
                             <td className="text-center" style={firstColWidth}>
-                              {item.code}
+                              {item.tempcod}
                             </td>
                             <td className="text-start" style={secondColWidth}>
-                              {item["Sales Man"]}
+                              {item.Name}
                             </td>
-                            {/* <td className="text-end" style={thirdColWidth}>
-                              {formatValue(item.Rate)}
-                            </td> */}
+                                                     <td className="text-end" style={thirdColWidth}>
+                              {formatValue(item["Sale Amt"])}
+                            </td>
                             <td className="text-end" style={forthColWidth}>
-                              {formatValue(item.Qnty)}
+                              {formatValue(item.Commission)}
                             </td>
-
-                            {/* <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item.Amount)}
-                            </td> */}
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.Amount)}
-                            </td>
-                            <td className="text-end" style={eightthColWidth}>
-                              {formatValue(item.Comm)}
-                            </td>
+                        
                           </tr>
                         );
                       })}
@@ -3363,7 +1817,7 @@ export default function EmployeeCommissionComparison() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 5 }).map((_, colIndex) => (
+                          {Array.from({ length: 4 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3373,11 +1827,8 @@ export default function EmployeeCommissionComparison() {
                       <tr>
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
-                        {/* <td style={thirdColWidth}></td> */}
+                        <td style={thirdColWidth}></td>
                         <td style={forthColWidth}></td>
-                        {/* <td style={sixthColWidth}></td> */}
-                        <td style={seventhColWidth}></td>
-                                                <td style={eightthColWidth}></td>
 
                       </tr>
                     </>
@@ -3415,53 +1866,21 @@ export default function EmployeeCommissionComparison() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-            {/* <div
+           
+            <div
               style={{
                 ...thirdColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{totalexcel}</span>
-            </div> */}
-            <div
-              style={{
-                ...forthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
+               <span className="mobileledger_total">
                 {formatValue(totaldebit)}
               </span>
-            </div>
-            {/* <div
+                        </div>
+                        <div
               style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalcredit)}
-              </span>
-            </div> */}
-
-            <div
-              style={{
-                ...seventhColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(ClosingBalance)}
-              </span>
-            </div>
-
-             <div
-              style={{
-                ...eightthColWidth,
+                ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
@@ -3470,6 +1889,8 @@ export default function EmployeeCommissionComparison() {
                 {formatValue(Commission)}
               </span>
             </div>
+
+          
           </div>
           {/* Action Buttons */}
           <div

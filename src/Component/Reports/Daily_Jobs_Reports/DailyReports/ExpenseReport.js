@@ -364,11 +364,10 @@ export default function ExpenseReport() {
         const formData = new URLSearchParams({
             FIntDat: fromInputDate,
             FFnlDat: toInputDate,
-            code: organisation.code,
-            FLocCod: locationnumber || getLocationNumber,
-            FYerDsc: yeardescription || getyeardescription,
-
-            code: "FITNESSGYM",
+            // code: organisation.code,
+            // FLocCod: locationnumber || getLocationNumber,
+            // FYerDsc: yeardescription || getyeardescription,
+            code: "AGFACTORY",
             FLocCod: '001',
             FYerDsc: "2025-2025",
 
@@ -428,6 +427,8 @@ export default function ExpenseReport() {
         setSelectedfromDate(firstDateOfCurrentMonth);
         setfromInputDate(formatDate(firstDateOfCurrentMonth));
     }, []);
+
+  
 
     ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
     const exportPDFHandler = () => {

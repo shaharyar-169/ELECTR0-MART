@@ -414,16 +414,7 @@ export default function MonthlyItemSaleComparisonReport() {
       });
   }
 
-  // useEffect(() => {
-  //   const currentTab = tabRefs.current[activeIndex];
-  //   const line = lineRef.current;
-
-  //   if (currentTab && line) {
-  //     line.style.width = `${currentTab.offsetWidth}px`;
-  //     line.style.left = `${currentTab.offsetLeft}px`;
-  //   }
-  // }, [activeIndex]);
-
+  
   useEffect(() => {
   const currentTab = tabRefs.current[activeIndex];
   const line = lineRef.current;
@@ -2047,6 +2038,7 @@ export default function MonthlyItemSaleComparisonReport() {
   const setCompanyValue =
     activeIndex === 1 ? setCompanyselectdatavalue1 : setCompanyselectdatavalue;
 
+
   const monthLabels = [
     "Jan",
     "Feb",
@@ -2079,7 +2071,6 @@ export default function MonthlyItemSaleComparisonReport() {
         ],
       }
     : {};
-
   const barOptions = {
     responsive: true,
     plugins: {
@@ -2188,6 +2179,8 @@ export default function MonthlyItemSaleComparisonReport() {
           )}
         </Modal.Body>
       </Modal>
+
+
       <ToastContainer />
       <div style={contentStyle}>
         <div

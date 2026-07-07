@@ -434,12 +434,12 @@ export default function AmericanCustomerLedger() {
       FFnlDat: toInputDate,
       FTrnTyp: transectionType,
       FAccCod: saleType,
-    //   code: organisation.code,
-    //   FLocCod: locationnumber || getLocationNumber,
-    //   FYerDsc: yeardescription || getYearDescription,
-      code: "AMRELEC",
-      FLocCod: "001",
-      FYerDsc: "2019-2025",
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      FYerDsc: yeardescription || getYearDescription,
+    //   code: "AMRELEC",
+    //   FLocCod: "001",
+    //   FYerDsc: "2019-2025",
     }).toString();
 
     axios
@@ -562,10 +562,10 @@ export default function AmericanCustomerLedger() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomer.php";
     const formData = new URLSearchParams({
-    //   FLocCod: getLocationNumber,
-    //   code: organisation.code,
-      FLocCod: "001",
-      code: "AMRELEC",
+      FLocCod: getLocationNumber,
+      code: organisation.code,
+    //   FLocCod: "001",
+    //   code: "AMRELEC",
     }).toString();
     axios
       .post(apiUrl, formData)

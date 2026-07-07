@@ -3,7 +3,7 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import { getUserData, getOrganisationData ,getLocationnumber, getYearDescription} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -16,13 +16,14 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
+// import { fetchGetUser } from "../../Redux/action";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
-import qs from 'qs';
 import "react-toastify/dist/ReactToastify.css";
 
-export default function CollectorWiseCustomerSearch() {
+
+export default function InstallmentWiseReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -33,6 +34,9 @@ export default function CollectorWiseCustomerSearch() {
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
   const collectorRef = useRef(null);
+  const fromRef = useRef(null);
+    const toRef = useRef(null);   
+ 
   const [CollectorData, setCollectorData] = useState([]);
   const [sortData, setSortData] = useState("ASC");
 
@@ -40,13 +44,26 @@ export default function CollectorWiseCustomerSearch() {
   const [isAscendingdec, setisAscendingdec] = useState(true);
   const [isAscendingsts, setisAscendingsts] = useState(true);
   const [tableData, setTableData] = useState([]);
-  console.log("comapnydata", tableData);
 
   const [Collector, setCollector] = useState("");
   const [CollectorDataValue, setCollectorDataValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("");
+  const [transectionType, settransectionType] = useState("I1");
 
+  const [selectedRadio, setSelectedRadio] = useState("custom");
+
+
+  const [selectedfromDate, setSelectedfromDate] = useState(null);
+  const [fromInputDate, setfromInputDate] = useState("");
+  const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
+  // state for To DatePicker
+  const [selectedToDate, setSelectedToDate] = useState(null);
+  const [toInputDate, settoInputDate] = useState("");
+  const [toCalendarOpen, settoCalendarOpen] = useState(false); 
+
+
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+  const [saleType, setSaleType] = useState("");
 
   const [TotalRecords, setTotalRecords] = useState(0);
   const [TotalBill, setTotalBill] = useState(0);
@@ -74,77 +91,376 @@ export default function CollectorWiseCustomerSearch() {
     getdatafontsize,
   } = useTheme();
 
-  useEffect(() => {
+
+  const comapnyname = organisation.description;
+ 
+ useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
 
-  const comapnyname = organisation.description;
+  // Assume getfromdate and gettodate are dynamic and fetched from context or state
+  const fromdatevalidate = getfromdate; // e.g., "01-01-2023"
+  const todatevaliadete = gettodate; // e.g., "31-12-2023"
+
+  // Function to convert "DD-MM-YYYY" string to Date object
+  const convertToDate = (dateString) => {
+    const [day, month, year] = dateString.split("-"); // Split string into day, month, year
+    return new Date(year, month - 1, day); // Create Date object (Month is zero-indexed)
+  };
+
+  // Convert dynamic date strings to Date objects
+  const GlobalfromDate = convertToDate(fromdatevalidate); // "01-01-2023" -> Date object
+  const GlobaltoDate = convertToDate(todatevaliadete); // "31-12-2023" -> Date object
+
+  // If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
+  const formatDate1 = (date) => {
+    return `${String(date.getDate()).padStart(2, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getFullYear()}`;
+  };
+
+  // Optionally format the Date objects back to string if needed
+  const GlobalfromDate1 = formatDate1(GlobalfromDate); // '01-01-2023'
+  const GlobaltoDate1 = formatDate1(GlobaltoDate); // '31-12-2023'
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
+const formatDate = (date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
+const handlefromInputChange = (e) => {
+    setfromInputDate(e.target.value);
+  };
 
-  function fetchReceivableReport() {
-    const apiUrl = apiLinks + "/CollectorWiseCustomerSearch.php";
-    setIsLoading(true);
-    const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+ const handlefromKeyPress = (e, inputId) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const fromDateElement = document.getElementById("fromdatevalidation");
+      const formattedInput = fromInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3"
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
-      FColCod: Collector,
-      FSchTxt: searchQuery,
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
 
-      // FYerDsc: '2025-2025',
-      // code: 'USMANMTR',
-      // FLocCod: '002',
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        setIsLoading(false);
-
-        setTotalRecords(response.data.Totals["Total Records"]);
-        setTotalBill(response.data.Totals["Total Bill"]);
-        setTotalAdvance(response.data.Totals["Total Advance"]);
-        setTotalInstallmentPaid(response.data.Totals["Total Installment Paid"]);
-        setTotalPaidAdvanceInstallment(response.data.Totals["Total Paid (Advance+Installment)"]);
-        setTotalLastPaid(response.data.Totals["Total Last Paid"]);
-        setTotalInstAmount(response.data.Totals["Total Inst.Amount"]);
-        setTotalShortAmount(response.data.Totals["Total Short Amount"]);
-        setTotalReceivable(response.data.Totals["Total Receivable"]);
-        setTotalBalance(response.data.Totals["Total Balance"]);
-
-        if (response.data && Array.isArray(response.data.Detail)) {
-          setTableData(response.data.Detail);
-        } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data,
-          );
-          setTableData([]);
+        if (month > 12 || month === 0) {
+          toast.error("Please enter a valid month (MM) between 01 and 12");
+          return;
         }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setIsLoading(false);
-      });
-  }
 
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          return;
+        }
+
+        const currentDate = new Date();
+        const enteredDate = new Date(year, month - 1, day);
+
+        if (GlobalfromDate && enteredDate < GlobalfromDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+        if (GlobalfromDate && enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        }
+
+        fromDateElement.style.border = `1px solid ${fontcolor}`;
+        setfromInputDate(formattedInput);
+
+        const nextInput = document.getElementById(inputId);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        } else {
+          document.getElementById("submitButton").click();
+        }
+      } else {
+        toast.error("Date must be in the format dd-mm-yyyy");
+      }
+    }
+  };
+
+
+ const handlefromDateChange = (date) => {
+    setSelectedfromDate(date);
+    setfromInputDate(date ? formatDate(date) : "");
+    setfromCalendarOpen(false);
+  };
+
+
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
+
+
+  const handleToInputChange = (e) => {
+    settoInputDate(e.target.value);
+  };
+
+ const handleToKeyPress = (e, inputref) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const toDateElement = document.getElementById("todatevalidation");
+      const formattedInput = toInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3",
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
+
+        if (month > 12 || month === 0) {
+          alert("Please enter a valid month (MM) between 01 and 12");
+          return;
+        }
+
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          alert(`Please enter a valid day (DD) for month ${month}`);
+          return;
+        }
+
+        const enteredDate = new Date(year, month - 1, day); // Month is zero-based
+
+        // Convert GlobalfromDate and GlobaltoDate to Date objects for comparison
+        // const fromDate = new Date(GlobalfromDate.split('-').reverse().join('-'));
+        // const toDate = new Date(GlobaltoDate.split('-').reverse().join('-'));
+
+        if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+          );
+          return;
+        }
+
+        toDateElement.style.border = `1px solid ${fontcolor}`; // Add border color
+        settoInputDate(formattedInput);
+
+        if (saleSelectRef.current) {
+          e.preventDefault();
+          saleSelectRef.current.focus(); // Move focus to React Select
+        }
+      } else {
+        toast.error(
+          `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+        );
+      }
+    }
+  };
+
+ const handleToDateChange = (date) => {
+    setSelectedToDate(date);
+    settoInputDate(date ? formatDate(date) : "");
+    settoCalendarOpen(false);
+  };
+
+  const toggleToCalendar = () => {
+    settoCalendarOpen((prevOpen) => !prevOpen);
+  };
+
+
+
+   function fetchReceivableReport(codeParam) {
+      const fromDateElement = document.getElementById("fromdatevalidation");
+      const toDateElement = document.getElementById("todatevalidation");
+  
+      const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+  
+      let hasError = false;
+      let errorType = "";
+  
+      switch (true) {
+        // case !saleType:
+        //     errorType = "saleType";
+        //     break;
+        case !fromInputDate:
+          errorType = "fromDate";
+          break;
+        case !toInputDate:
+          errorType = "toDate";
+          break;
+        default:
+          hasError = false;
+          break;
+      }
+  
+      if (!dateRegex.test(fromInputDate)) {
+        errorType = "fromDateInvalid";
+      } else if (!dateRegex.test(toInputDate)) {
+        errorType = "toDateInvalid";
+      } else {
+        const formattedFromInput = fromInputDate.replace(
+          /^(\d{2})(\d{2})(\d{4})$/,
+          "$1-$2-$3"
+        );
+        const [fromDay, fromMonth, fromYear] = formattedFromInput
+          .split("-")
+          .map(Number);
+        const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
+  
+        const formattedToInput = toInputDate.replace(
+          /^(\d{2})(\d{2})(\d{4})$/,
+          "$1-$2-$3"
+        );
+        const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
+        const enteredToDate = new Date(toYear, toMonth - 1, toDay);
+  
+        if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
+          errorType = "fromDateBeforeGlobal";
+        } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
+          errorType = "fromDateAfterGlobal";
+        } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+          errorType = "toDateAfterGlobal";
+        } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
+          errorType = "toDateBeforeGlobal";
+        } else if (enteredToDate < enteredFromDate) {
+          errorType = "toDateBeforeFromDate";
+        }
+      }
+  
+      switch (errorType) {
+        // case "saleType":
+        //     toast.error("Please select a Account Code");
+        //     return;
+  
+        case "fromDate":
+          toast.error("From date is required");
+          return;
+        case "toDate":
+          toast.error("To date is required");
+          return;
+        case "fromDateInvalid":
+          toast.error("From date must be in the format dd-mm-yyyy");
+          return;
+        case "toDateInvalid":
+          toast.error("To date must be in the format dd-mm-yyyy");
+          return;
+        case "fromDateBeforeGlobal":
+          toast.error(
+            `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "fromDateAfterGlobal":
+          toast.error(
+            `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "toDateAfterGlobal":
+          toast.error(
+            `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "toDateBeforeGlobal":
+          toast.error(
+            `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+          );
+          return;
+        case "toDateBeforeFromDate":
+          toast.error("To date must be after from date");
+          return;
+  
+        default:
+          break;
+      }
+  
+  
+  
+      document.getElementById(
+        "fromdatevalidation"
+      ).style.border = `1px solid ${fontcolor}`;
+      document.getElementById(
+        "todatevalidation"
+      ).style.border = `1px solid ${fontcolor}`;
+  
+      const apiUrl = apiLinks + "/CollectorCustomers.php";
+      setIsLoading(true);
+      const formData = new URLSearchParams({
+        FIntDat: fromInputDate,
+        FFnlDat: toInputDate,
+        FRepTyp: transectionType,
+        FColCod: saleType,
+        code: organisation.code,
+        FLocCod: locationnumber || getLocationNumber,
+  
+        // code: 'BAJWATRD',
+        // FLocCod: '001',
+  
+      }).toString();
+  
+      axios
+        .post(apiUrl, formData)
+        .then((response) => {
+          setIsLoading(false);
+          // Update total amount and quantity
+          
+          if (response.data && Array.isArray(response.data.Detail)) {
+            setTableData(response.data.Detail);
+          } else {
+            console.warn(
+              "Response data structure is not as expected:",
+              response.data
+            );
+            setTableData([]);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setIsLoading(false);
+        });
+    }
 
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (collectorRef && collectorRef.current)) {
-      if (collectorRef && collectorRef.current) {
+    // If it hasn't mounted before or on refresh, select the 'from date' input
+    if (
+      !hasComponentMountedPreviously ||
+      (fromRef && fromRef.current)
+    ) {
+      if (fromRef && fromRef.current) {
         setTimeout(() => {
-          collectorRef.current.focus();
-          // collectorRef.current.select();
+          fromRef.current.focus(); // Focus on the input field
+          fromRef.current.select(); // Select the text within the input field
         }, 0);
       }
-      sessionStorage.setItem("componentMounted", "true");
+      sessionStorage.setItem("componentMounted", "true"); // Set the flag indicating mount
+
     }
+  }, []);
+
+  useEffect(() => {
+    const currentDate = new Date();
+
+    // First date of current month
+    const firstDateOfCurrentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+
+    // Last date of current month
+    const lastDateOfCurrentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
+
+    setSelectedfromDate(firstDateOfCurrentMonth);
+    setfromInputDate(formatDate(firstDateOfCurrentMonth));
+
+    setSelectedToDate(lastDateOfCurrentMonth);
+    settoInputDate(formatDate(lastDateOfCurrentMonth));
   }, []);
 
   const handleTransactionTypeChange = (event) => {
@@ -364,7 +680,7 @@ export default function CollectorWiseCustomerSearch() {
 
   const handleSaleKeypress = (event, inputId) => {
     if (event.key === "Enter") {
-      const selectedOption = collectorRef.current.state.selectValue;
+      const selectedOption = saleSelectRef.current.state.selectValue;
       if (selectedOption && selectedOption.value) {
         setCollectorData(selectedOption.value);
       }
@@ -387,42 +703,40 @@ const exportPDFHandler = () => {
   const doc = new jsPDF({ orientation: "landscape" });
 
   // ------------------------------------------------------------------
-  // 1. Build table rows with combined Customer and Guarantor columns
+  // 1. Build table rows with combined Customer and Mobile (no CNIC)
   // ------------------------------------------------------------------
   const rows = tableData.map((item) => {
-    // Combine Customer, Mobile, CNIC – each on a new line
-    const customerCombined = `${item.Customer || ""}\n${item.Mobile || ""}\n${item.CNIC || ""}`;
-    // Combine Guarantor Name, Mobile, CNIC
-    const guarantorCombined = `${item["1st Guaranter Name"] || ""}\n${item["1st Guaranter Mobile"] || ""}\n${item["1st Guaranter CNIC"] || ""}`;
-    const witnessCombined = `${item["2nd Witness Name"] || ""}\n${item["2nd Witness Mobile"] || ""}\n${item["2nd Witness CNIC"] || ""}`;
+    // Combine Customer and Mobile – each on a new line
+    const customerCombined = `${item.Customer || ""}\n${item.Mobile || ""}`;
 
     return [
       item.Code,
-      item["Sale Invoice No"],
-      item["Invoice Date"],
       customerCombined,
-      guarantorCombined,
-      witnessCombined,
-      item["Item"],
-      item["No Of Installment"],
-      item["Total Bill"],
-      item["Advance"],
-      item["Installment Paid"],
-      item["Total Paid (Advance+Installment)"],
-      item["Last Paid"],
-       item["Last Date"],
-      item["Inst.Amount"],
-      item["Short Amount"],
-      item["Total Receivable (Short+Regular)"],
-      item["Balance"],
+      item.InvNo,
+      item.SaleDate,
+      item.Item,
+      item.NoOfIns,
+      item.InsAmt,
+      item.Receiavable,
+      item.Collected,
+      item.Advance,
+      item.MonthCst01,
+      item.MonthCst02,
+      item.MonthCst03,
+      item.OB,
+      item.Sale,
+      item.Rent,
+      item.LastCol,
+      item.CurMonthCol,
+      item.CB,
     ];
   });
 
   // ------------------------------------------------------------------
-  // 2. Add summary row (totals) with matching 17 columns
+  // 2. Add summary row (totals)
   // ------------------------------------------------------------------
   rows.push([
-    String(formatValue(TotalRecords)),
+    String(formatValue(tableData.length.toLocaleString())),
     "",
     "",
     "",
@@ -430,29 +744,46 @@ const exportPDFHandler = () => {
     "",
     "",
     "",
-    String(formatValue(TotalBill)),
-    String(formatValue(TotalAdvance)),
-    String(formatValue(TotalInstallmentPaid)),
-    String(formatValue(TotalPaidAdvanceInstallment)),
-    String(formatValue(TotalLastPaid)),
-      "",
-    String(formatValue(TotalInstAmount)),
-    String(formatValue(TotalShortAmount)),
-    String(formatValue(TotalReceivable)),
-    String(formatValue(TotalBalance)),
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
   ]);
 
   // ------------------------------------------------------------------
-  // 3. Column headers (17 columns)
+  // 3. Column headers
   // ------------------------------------------------------------------
   const headers = [
-    "Code", "Inv", "Date", "Customer", "1st Guaranter", "2nd Guaranter",
-    "Item", "No", "T.Bill", "Adv", "I.Paid", "T.Paid",
-    "L.Paid",  "L.Date","I.Amt", "Short", "Rec", "Balance"
+    "Code",
+    "Customer",
+    "In No",
+    "S.Date",
+    "Item",
+    "Ins",
+    "I.Amt",
+    "Rec",
+    "Coll",
+    "Adv",
+    "M.Cos1",
+    "M.Cos2",
+    "M.Cos3",
+    "OB",
+    "Sale",
+    "Rent",
+    "L.Col",
+    "C.M.Col",
+    "CB",
   ];
 
-  // Column widths (unchanged)
-  const columnWidths = [16, 11, 16, 25, 25, 25, 25, 5, 14, 14, 14, 14, 14,16, 14, 14, 14, 14];
+  // Column widths – **Customer column reduced from 28 to 22**
+  const columnWidths = [16, 22, 12, 17, 28, 7, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14];
 
   const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
   const pageHeight = doc.internal.pageSize.height;
@@ -470,7 +801,6 @@ const exportPDFHandler = () => {
 
   // --------------------------------------------------------------
   // splitTextToLines – handles explicit newlines and word wrapping
-  //   now uses a maxWidth reduced by 2*cellPadding to avoid overflow
   // --------------------------------------------------------------
   const splitTextToLines = (text, maxWidth) => {
     if (!text) return [""];
@@ -498,7 +828,7 @@ const exportPDFHandler = () => {
     return allLines.length ? allLines : [""];
   };
 
-  // Table headers (unchanged)
+  // Table headers
   const addTableHeaders = (startX, startY) => {
     doc.setFont("verdana-regular", "normal");
     doc.setFontSize(8);
@@ -515,14 +845,13 @@ const exportPDFHandler = () => {
     });
   };
 
-  // Add a single row (returns row height)
+  // Add a single row
   const addSingleRow = (row, i, startX, currentY, isTotalRow) => {
     const isOddRow = i % 2 !== 0;
     const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
     let textColor = [0, 0, 0];
     if (isRedRow) textColor = [255, 0, 0];
 
-    // Calculate required lines for each cell, using reduced maxWidth to avoid overflow
     const cellLines = row.map((cell, colIdx) => {
       const maxWidth = columnWidths[colIdx] - 2 * cellPadding;
       const cellText = String(cell);
@@ -531,13 +860,11 @@ const exportPDFHandler = () => {
     const maxLines = Math.max(...cellLines.map(lines => lines.length), 1);
     const rowHeight = maxLines * lineIncrement + cellTopPadding + cellBottomPadding;
 
-    // Alternating row background
     if (isOddRow && !isTotalRow) {
       doc.setFillColor(240);
       doc.rect(startX, currentY, getTotalTableWidth(), rowHeight, "F");
     }
 
-    // Draw cell borders and content
     doc.setDrawColor(0);
     let currentX = startX;
     for (let colIdx = 0; colIdx < row.length; colIdx++) {
@@ -550,10 +877,9 @@ const exportPDFHandler = () => {
       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
       doc.setFont("verdana-regular", "normal");
 
-      // --- Adjust font size for total row numeric values ---
-      let currentFontSize = fontSize; // default 7
+      let currentFontSize = fontSize;
       if (isTotalRow && colIdx > 7) {
-        currentFontSize = 6; // smaller for total figures
+        currentFontSize = 6;
       }
       doc.setFontSize(currentFontSize);
 
@@ -561,16 +887,13 @@ const exportPDFHandler = () => {
       lines.forEach((line, lineIdx) => {
         const lineY = startY + lineIdx * lineIncrement;
         let xPos;
-        if (colIdx === 0 || colIdx === 1 || colIdx === 2 || colIdx === 7) {
-          // center aligned
+        if (colIdx === 0 || colIdx === 2 || colIdx === 3 || colIdx === 5) {
           xPos = currentX + cellWidth / 2;
           doc.text(line, xPos, lineY, { align: "center", baseline: "top" });
-        } else if (colIdx > 7) {
-          // right aligned (numeric)
+        } else if (colIdx > 5) {
           xPos = currentX + cellWidth - cellPadding;
           doc.text(line, xPos, lineY, { align: "right", baseline: "top" });
         } else {
-          // left aligned
           xPos = currentX + cellPadding;
           doc.text(line, xPos, lineY, { baseline: "top" });
         }
@@ -583,7 +906,6 @@ const exportPDFHandler = () => {
       currentX += cellWidth;
     }
 
-    // Extra thick lines for total row
     if (isTotalRow) {
       const tableWidth = getTotalTableWidth();
       doc.setLineWidth(0.3);
@@ -615,7 +937,7 @@ const exportPDFHandler = () => {
     doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
   };
 
-  // Dynamic pagination (unchanged)
+  // Dynamic pagination
   const handlePagination = () => {
     let currentPage = 1;
     let currentRowIndex = 0;
@@ -633,13 +955,21 @@ const exportPDFHandler = () => {
       currentY += 5;
       doc.setFont("verdana-regular", "normal");
       doc.setFontSize(14);
-      doc.text("Collector Wise Customer Search", doc.internal.pageSize.width / 2, currentY, { align: "center" });
+      doc.text(`Installment Wise Report From ${fromInputDate} To ${toInputDate}`, doc.internal.pageSize.width / 2, currentY, { align: "center" });
       currentY += -5;
 
       const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
       const labelsY = currentY + 4;
-      let collectordata = CollectorDataValue.label ? CollectorDataValue.label : "ALL";
-      let search = searchQuery ? searchQuery : "";
+      let collectordata = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+
+      let Typefilter =
+        transectionType === "I1"
+          ? "2 Installment"
+          : transectionType === "I2"
+          ? "3 Installment"
+          : transectionType === "I3"
+          ? "4+ Installment"
+          : "ALL";
 
       doc.setFont("verdana", "bold");
       doc.setFontSize(8);
@@ -648,14 +978,12 @@ const exportPDFHandler = () => {
       doc.setFontSize(8);
       doc.text(`${collectordata}`, labelsX + 20, labelsY + 8.5);
 
-      if (searchQuery) {
-        doc.setFont("verdana", "bold");
-        doc.setFontSize(8);
-        doc.text(`Search :`, labelsX + 200, labelsY + 8.5);
-        doc.setFont("verdana-regular", "normal");
-        doc.setFontSize(8);
-        doc.text(`${search}`, labelsX + 215, labelsY + 8.5);
-      }
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(8);
+      doc.text(`Type :`, labelsX + 200, labelsY + 8.5);
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(8);
+      doc.text(`${Typefilter}`, labelsX + 215, labelsY + 8.5);
 
       currentY += 15;
       addTableHeaders(tableStartX, currentY);
@@ -722,7 +1050,7 @@ const exportPDFHandler = () => {
 
   handlePagination();
 
-  doc.save(`CollectorWiseCustomerSearch As On ${date}.pdf`);
+  doc.save(`InstallmentWiseReport As On ${date}.pdf`);
 };
 
 
@@ -730,33 +1058,31 @@ const exportPDFHandler = () => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet1");
 
-  const numColumns = 26; // Ensure this matches the actual number of columns
+  const numColumns = 24; // Ensure this matches the actual number of columns
   const columnAlignments = [
     "center",
+    "left",
+    "left",
+    "center",
     "center",
     "center",
     "left",
     "center",
-    "center",
-    "left",
-    "center",
-    "center",
-    "left",
-    "center",
-    "center",
-    "left",
     "right",
     "right",
     "right",
     "right",
-    "right",
+    "center",
     "center",
     "right",
     "right",
     "right",
     "right",
     "right",
-    "left",
+    "right",
+    "right",
+    "right",
+    "right",
     "center",
   ];
 
@@ -792,7 +1118,7 @@ const exportPDFHandler = () => {
   );
 
   // Store List
-  const storeListRow = worksheet.addRow(["Collector Wise Customer Search"]);
+  const storeListRow = worksheet.addRow([`Installment Wise Report From ${fromInputDate} To ${toInputDate}`]);
   storeListRow.eachCell((cell) => {
     cell.font = fontStoreList;
     cell.alignment = { horizontal: "center" };
@@ -805,13 +1131,21 @@ const exportPDFHandler = () => {
   worksheet.addRow([]);
 
   // Filter data
-  let Collectorcode = CollectorDataValue.label ? CollectorDataValue.label : "ALL";
-  let typesearch = searchQuery || "";
+  let Collectorcode = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
+ 
+
+   let Typefilter =
+           transectionType === "I1"
+             ? "2 Installment"
+             : transectionType === "I2"
+               ? "3 Installment"
+                : transectionType === "I3"
+               ? "4+ Installment"
+               : "ALL";
 
   const typeAndStoreRow3 = worksheet.addRow(
-    searchQuery
-      ? ["Collector", Collectorcode, "", "", "", "", "", "Search :", typesearch]
-      : [""]
+    ["Collector :", Collectorcode, "", "", "", "", "", "","","Type :", Typefilter]
+     
   );
   worksheet.mergeCells(`B${typeAndStoreRow3.number}:C${typeAndStoreRow3.number}`);
 
@@ -819,7 +1153,7 @@ const exportPDFHandler = () => {
     cell.font = {
       name: "CustomFont" || "CustomFont",
       size: 10,
-      bold: [1, 8].includes(colIndex),
+      bold: [1, 10].includes(colIndex),
     };
     cell.alignment = { horizontal: "left", vertical: "middle" };
   });
@@ -843,32 +1177,31 @@ const exportPDFHandler = () => {
 
   // Headers
   const headers = [
-    "Code",
-    "Sl Inv",
-    "In Date",
-    "Customer",
-    "CNIC",
-    "Mobile",
-    "1st Guaranter name",
-    "1st Guaranter CNIC",
-    "1st Gur Mobile",
-    "2nd Guaranter name",
-    "2nd Gur CNIC",
-    "2nd Gur Mobile",
-    "Item",
-    "Ins",
-    "Total Bill",
-    "Advance",
-    "Ins Paid",
-    "Toatl Paid",
-    "Last Date",
-    "Last Paid",
-    "Ins Amt",
-    "Short Amt",
-    "Total Rec",
-    "Balance",
-    "Collector Name",
-    "Status",
+  "Code",
+  "Customer",
+  "Old Code",
+  "Mobile",
+  "Invoice No",
+  "Sale Date",
+  "Item",
+  "Ins",
+  "Ins Amt",
+  "Receivable",
+  "Collected",
+  "Advance",
+  "Prm Date",
+  "Last Date",
+  "MthCost01",
+  "MthCost02",
+  "MthCost03",
+  "OB",
+  "Sale",
+  "Rent",
+  "LasCol",
+  "CurMthCol",
+  "CB",
+  "ExpDate",
+ 
   ];
   const headerRow = worksheet.addRow(headers);
   headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -876,32 +1209,30 @@ const exportPDFHandler = () => {
   // Add data rows with numeric conversion
   tableData.forEach((item, index) => {
     const row = worksheet.addRow([
-      item.Code,
-      item["Sale Invoice No"],
-      item["Invoice Date"],
-      item.Customer,
-      item.CNIC,
-      item.Mobile,
-      item["1st Guaranter Name"],
-      item["1st Guaranter CNIC"],
-      item["1st Guaranter Mobile"],
-      item["2nd Witness Name"],
-      item["2nd Witness CNIC"],
-      item["2nd Witness Mobile"],
-      item.Item,
-      item["No Of Installment"],
-      toNumber(item["Total Bill"]),
-      toNumber(item.Advance),
-      toNumber(item["Installment Paid"]),
-      toNumber(item["Total Paid (Advance+Installment)"]),
-      item["Last Date"],
-      toNumber(item["Last Paid"]),
-      toNumber(item["Inst.Amount"]),
-      toNumber(item["Short Amount"]),
-      toNumber(item["Total Receivable (Short+Regular)"]),
-      toNumber(item.Balance),
-      item["Collector Name"],
-      item.Status,
+    item.Code,
+    item.Customer,
+    item.OldCode,
+    item.Mobile,
+    item.InvNo,
+    item.SaleDate,
+    item.Item,
+    item.NoOfIns,
+    item.InsAmt,
+    item.Receiavable,
+    item.Collected,
+    item.Advance,
+    item.PrmDate,
+    item.LastDate,
+    item.MonthCst01,
+    item.MonthCst02,
+    item.MonthCst03,
+    item.OB,
+    item.Sale,
+    item.Rent,
+    item.LastCol,
+    item.CurMonthCol,
+    item.CB,
+    item.ExpDate,     
     ]);
 
     row.eachCell((cell, colIndex) => {
@@ -938,8 +1269,8 @@ const exportPDFHandler = () => {
 
   // Column widths
   [
-    10, 8, 10, 40, 16, 14, 40, 18, 14, 40, 18, 14, 40, 8, 12, 12, 12, 12, 12,
-    12, 12, 12, 12, 12, 30, 10,
+    10, 45, 10, 12, 10, 10, 40, 6, 12, 12, 12, 12, 10, 10, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 10,
   ].forEach((width, index) => {
     worksheet.getColumn(index + 1).width = width;
   });
@@ -956,7 +1287,7 @@ const exportPDFHandler = () => {
   const totalBalanceNum = toNumber(TotalBalance);
 
   const totalRow = worksheet.addRow([
-    String(formatValue(TotalRecords)),
+    String(formatValue(tableData.length.toLocaleString())),
     "",
     "",
     "",
@@ -970,18 +1301,17 @@ const exportPDFHandler = () => {
     "",
     "",
     "",
-    totalBillNum,
-    totalAdvanceNum,
-    totalInstallmentPaidNum,
-    totalPaidAdvanceInstallmentNum,
-    "",
-    totalLastPaidNum,
-    totalInstAmountNum,
-    totalShortAmountNum,
-    totalReceivableNum,
-    totalBalanceNum,
+     "",
     "",
     "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    
   ]);
 
   totalRow.eachCell((cell, colNumber) => {
@@ -995,7 +1325,7 @@ const exportPDFHandler = () => {
     if (colNumber === 1) {
       cell.alignment = { horizontal: "center" };
     }
-    if (colNumber > 14) {
+    if (colNumber > 8) {
       cell.alignment = { horizontal: "right" };
     }
     // Apply number format to total row numeric cells
@@ -1043,7 +1373,7 @@ const exportPDFHandler = () => {
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  saveAs(blob, `CollectorWiseCustomerSearch As On ${currentDate}.xlsx`);
+  saveAs(blob, `InstallmentWiseReport As On ${currentDate}.xlsx`);
 };
 
     const handleKeyPress = (e, nextInputRef) => {
@@ -1077,164 +1407,151 @@ const exportPDFHandler = () => {
   let totalEntries = 0;
 
   // State for column data
-  const [columns, setColumns] = useState({
-    Code: [],
-    "Sale Invoice No": [],
-    "Invoice Date": [],
-    Customer: [],
-    CNIC: [],
-    Mobile: [],
-    "1st Guaranter Name": [],
-    "1st Guaranter CNIC": [],
-    "1st Guaranter Mobile": [],
-    "2nd Witness Name": [],
-    "2nd Witness CNIC": [],
-    "2nd Witness Mobile": [],
-    Item: [],
-    "No Of Installment": [],
-    "Total Bill": [],
-    Advance: [],
-    "Installment Paid": [],
-    "Total Paid (Advance+Installment)": [],
-    "Last Date": [],
-    "Last Paid": [],
-    "Inst.Amount": [],
-    "Short Amount": [],
-    "Total Receivable (Short+Regular)": [],
-    Balance: [],
-    "Collector Name": [],
-    Status: [],
+const [columns, setColumns] = useState({
+  Code: [],
+  Customer: [],
+  OldCode: [],
+  Mobile: [],
+  InvNo: [],
+  SaleDate: [],
+  Item: [],
+  NoOfIns: [],
+  InsAmt: [],
+  Receiavable: [],
+  Collected: [],
+  Advance: [],
+  PrmDate: [],
+  LastDate: [],
+  MonthCst01: [],
+  MonthCst02: [],
+  MonthCst03: [],
+  OB: [],
+  Sale: [],
+  Rent: [],
+  LastCol: [],
+  CurMonthCol: [],
+  CB: [],
+  ExpDate: [],
+});
 
-  });
+// State for column sorting order: 'asc', 'desc', or null
+const [columnSortOrders, setColumnSortOrders] = useState({
+  Code: null,
+  Customer: null,
+  OldCode: null,
+  Mobile: null,
+  InvNo: null,
+  SaleDate: null,
+  Item: null,
+  NoOfIns: null,
+  InsAmt: null,
+  Receiavable: null,
+  Collected: null,
+  Advance: null,
+  PrmDate: null,
+  LastDate: null,
+  MonthCst01: null,
+  MonthCst02: null,
+  MonthCst03: null,
+  OB: null,
+  Sale: null,
+  Rent: null,
+  LastCol: null,
+  CurMonthCol: null,
+  CB: null,
+  ExpDate: null,
+});
 
-  // State for column sorting order: 'asc', 'desc', or null
-  const [columnSortOrders, setColumnSortOrders] = useState({
+// Reset sorting
+const resetSorting = () => {
+  setColumnSortOrders({
     Code: null,
-    "Sale Invoice No": null,
-    "Invoice Date": null,
     Customer: null,
-    CNIC: null,
+    OldCode: null,
     Mobile: null,
-    "1st Guaranter Name": null,
-    "1st Guaranter CNIC": null,
-    "1st Guaranter Mobile": null,
-    "2nd Witness Name": null,
-    "2nd Witness CNIC": null,
-    "2nd Witness Mobile": null,
+    InvNo: null,
+    SaleDate: null,
     Item: null,
-    "No Of Installment": null,
-    "Total Bill": null,
+    NoOfIns: null,
+    InsAmt: null,
+    Receiavable: null,
+    Collected: null,
     Advance: null,
-    "Installment Paid": null,
-    "Total Paid (Advance+Installment)": null,
-    "Last Date": null,
-    "Last Paid": null,
-    "Inst.Amount": null,
-    "Short Amount": null,
-    "Total Receivable (Short+Regular)": null,
-    Balance: null,
-    "Collector Name": null,
-    Status: null,
-
+    PrmDate: null,
+    LastDate: null,
+    MonthCst01: null,
+    MonthCst02: null,
+    MonthCst03: null,
+    OB: null,
+    Sale: null,
+    Rent: null,
+    LastCol: null,
+    CurMonthCol: null,
+    CB: null,
+    ExpDate: null,
   });
+};
 
-  // Reset sorting
-  const resetSorting = () => {
-    setColumnSortOrders({
-      Code: null,
-      "Sale Invoice No": null,
-      "Invoice Date": null,
-      Customer: null,
-      CNIC: null,
-      Mobile: null,
-      "1st Guaranter Name": null,
-      "1st Guaranter CNIC": null,
-      "1st Guaranter Mobile": null,
-      "2nd Witness Name": null,
-      "2nd Witness CNIC": null,
-      "2nd Witness Mobile": null,
-      Item: null,
-      "No Of Installment": null,
-      "Total Bill": null,
-      Advance: null,
-      "Installment Paid": null,
-      "Total Paid (Advance+Installment)": null,
-      "Last Date": null,
-      "Last Paid": null,
-      "Inst.Amount": null,
-      "Short Amount": null,
-      "Total Receivable (Short+Regular)": null,
-      Balance: null,
-      "Collector Name": null,
-      Status: null,
+// Update columns whenever tableData changes
+useEffect(() => {
+  if (tableData.length > 0) {
+    const newColumns = {
+      Code: tableData.map((row) => row.Code),
+      Customer: tableData.map((row) => row.Customer),
+      OldCode: tableData.map((row) => row.OldCode),
+      Mobile: tableData.map((row) => row.Mobile),
+      InvNo: tableData.map((row) => row.InvNo),
+      SaleDate: tableData.map((row) => row.SaleDate),
+      Item: tableData.map((row) => row.Item),
+      NoOfIns: tableData.map((row) => row.NoOfIns),
+      InsAmt: tableData.map((row) => row.InsAmt),
+      Receiavable: tableData.map((row) => row.Receiavable),
+      Collected: tableData.map((row) => row.Collected),
+      Advance: tableData.map((row) => row.Advance),
+      PrmDate: tableData.map((row) => row.PrmDate),
+      LastDate: tableData.map((row) => row.LastDate),
+      MonthCst01: tableData.map((row) => row.MonthCst01),
+      MonthCst02: tableData.map((row) => row.MonthCst02),
+      MonthCst03: tableData.map((row) => row.MonthCst03),
+      OB: tableData.map((row) => row.OB),
+      Sale: tableData.map((row) => row.Sale),
+      Rent: tableData.map((row) => row.Rent),
+      LastCol: tableData.map((row) => row.LastCol),
+      CurMonthCol: tableData.map((row) => row.CurMonthCol),
+      CB: tableData.map((row) => row.CB),
+      ExpDate: tableData.map((row) => row.ExpDate),
+    };
+    setColumns(newColumns);
+  } else {
+    // Clear columns if no data
+    setColumns({
+      Code: [],
+      Customer: [],
+      OldCode: [],
+      Mobile: [],
+      InvNo: [],
+      SaleDate: [],
+      Item: [],
+      NoOfIns: [],
+      InsAmt: [],
+      Receiavable: [],
+      Collected: [],
+      Advance: [],
+      PrmDate: [],
+      LastDate: [],
+      MonthCst01: [],
+      MonthCst02: [],
+      MonthCst03: [],
+      OB: [],
+      Sale: [],
+      Rent: [],
+      LastCol: [],
+      CurMonthCol: [],
+      CB: [],
+      ExpDate: [],
     });
-  };
-
-  // Update columns whenever tableData changes
-  useEffect(() => {
-    if (tableData.length > 0) {
-      const newColumns = {
-        Code: tableData.map((row) => row.Code),
-        "Sale Invoice No": tableData.map((row) => row["Sale Invoice No"]),
-        "Invoice Date": tableData.map((row) => row["Invoice Date"]),
-        Customer: tableData.map((row) => row.Customer),
-        CNIC: tableData.map((row) => row.CNIC),
-        Mobile: tableData.map((row) => row.Mobile),
-        "1st Guaranter Name": tableData.map((row) => row["1st Guaranter Name"]),
-        "1st Guaranter CNIC": tableData.map((row) => row["1st Guaranter CNIC"]),
-        "1st Guaranter Mobile": tableData.map((row) => row["1st Guaranter Mobile"]),
-        "2nd Witness Name": tableData.map((row) => row["2nd Witness Name"]),
-        "2nd Witness CNIC": tableData.map((row) => row["2nd Witness CNIC"]),
-        "2nd Witness Mobile": tableData.map((row) => row["2nd Witness Mobile"]),
-        Item: tableData.map((row) => row.Item),
-        "No Of Installment": tableData.map((row) => row["No Of Installment"]),
-        "Total Bill": tableData.map((row) => row["Total Bill"]),
-        Advance: tableData.map((row) => row.Advance),
-        "Installment Paid": tableData.map((row) => row["Installment Paid"]),
-        "Total Paid (Advance+Installment)": tableData.map((row) => row["Total Paid (Advance+Installment)"]),
-        "Last Date": tableData.map((row) => row["Last Date"]),
-        "Last Paid": tableData.map((row) => row["Last Paid"]),
-        "Inst.Amount": tableData.map((row) => row["Inst.Amount"]),
-        "Short Amount": tableData.map((row) => row["Short Amount"]),
-        "Total Receivable (Short+Regular)": tableData.map((row) => row["Total Receivable (Short+Regular)"]),
-        Balance: tableData.map((row) => row.Balance),
-        "Collector Name": tableData.map((row) => row["Collector Name"]),
-        Status: tableData.map((row) => row.Status),
-      };
-      setColumns(newColumns);
-    } else {
-      // Clear columns if no data
-      setColumns({
-
-        Code: [],
-        "Sale Invoice No": [],
-        "Invoice Date": [],
-        Customer: [],
-        CNIC: [],
-        Mobile: [],
-        "1st Guaranter Name": [],
-        "1st Guaranter CNIC": [],
-        "1st Guaranter Mobile": [],
-        "2nd Witness Name": [],
-        "2nd Witness CNIC": [],
-        "2nd Witness Mobile": [],
-        Item: [],
-        "No Of Installment": [],
-        "Total Bill": [],
-        Advance: [],
-        "Installment Paid": [],
-        "Total Paid (Advance+Installment)": [],
-        "Last Date": [],
-        "Last Paid": [],
-        "Inst.Amount": [],
-        "Short Amount": [],
-        "Total Receivable (Short+Regular)": [],
-        Balance: [],
-        "Collector Name": [],
-        Status: [],
-      });
-    }
-  }, [tableData]);
+  }
+}, [tableData]);
 
   const handleSorting = (col) => {
     const currentOrder = columnSortOrders[col];
@@ -1332,21 +1649,21 @@ const exportPDFHandler = () => {
   };
 
   const firstColWidth = { width: isSidebarVisible ? (isLargeScreen ? "80px" : "80px") : (isLargeScreen ? "80px" : "80px") };
-  const secondColWidth = { width: isSidebarVisible ? (isLargeScreen ? "60px" : "60px") : (isLargeScreen ? "60px" : "60px") };
-  const thirdColWidth = { width: isSidebarVisible ? (isLargeScreen ? "80px" : "80px") : (isLargeScreen ? "80px" : "80px") };
-  const thirdColWidth1 = { width: isSidebarVisible ? (isLargeScreen ? "200px" : "200px") : (isLargeScreen ? "200px" : "200px") };
-  const forthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "120px" : "120px") : (isLargeScreen ? "120px" : "120px") };
-  const fifthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
+  const secondColWidth = { width: isSidebarVisible ? (isLargeScreen ? "300px" : "300px") : (isLargeScreen ? "300px" : "300px") };
+  const thirdColWidth = { width: isSidebarVisible ? (isLargeScreen ? "70px" : "70px") : (isLargeScreen ? "70px" : "70px") };
+  const thirdColWidth1 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
+  const forthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "60px" : "60px") : (isLargeScreen ? "60px" : "60px") };
+  const fifthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "90px" : "90px") : (isLargeScreen ? "90px" : "90px") };
   const fifthColWidth1 = { width: isSidebarVisible ? (isLargeScreen ? "200px" : "200px") : (isLargeScreen ? "200px" : "200px") };
-  const sixthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "120px" : "120px") : (isLargeScreen ? "120px" : "120px") };
-  const seventhColWidth = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
-  const seventhColWidth1 = { width: isSidebarVisible ? (isLargeScreen ? "200px" : "200px") : (isLargeScreen ? "200px" : "200px") };
-  const eighthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "120px" : "120px") : (isLargeScreen ? "120px" : "120px") };
-  const ninthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
+  const sixthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "50px" : "50px") : (isLargeScreen ? "50px" : "50px") };
+  const seventhColWidth = { width: isSidebarVisible ? (isLargeScreen ? "90px" : "90px") : (isLargeScreen ? "90px" : "90px") };
+  const seventhColWidth1 = { width: isSidebarVisible ? (isLargeScreen ? "90px" : "90px") : (isLargeScreen ? "90px" : "90px") };
+  const eighthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "90px" : "90px") : (isLargeScreen ? "90px" : "90px") };
+  const ninthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "90px" : "90px") : (isLargeScreen ? "90px" : "90px") };
 
 
-  const tenthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "200px" : "200px") : (isLargeScreen ? "200px" : "200px") };
-  const ColWidth11 = { width: isSidebarVisible ? (isLargeScreen ? "50px" : "50px") : (isLargeScreen ? "50px" : "50px") };
+  const tenthColWidth = { width: isSidebarVisible ? (isLargeScreen ? "80px" : "80px") : (isLargeScreen ? "80px" : "80px") };
+  const ColWidth11 = { width: isSidebarVisible ? (isLargeScreen ? "80px" : "80px") : (isLargeScreen ? "80px" : "80px") };
   const ColWidth12 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
   const ColWidth13 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
   const ColWidth14 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
@@ -1356,11 +1673,9 @@ const exportPDFHandler = () => {
   const ColWidth18 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
   const ColWidth19 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
   const ColWidth20 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
+  const ColWidth21 = { width: isSidebarVisible ? (isLargeScreen ? "80px" : "80px") : (isLargeScreen ? "80px" : "80px") };
 
-  const ColWidth21 = { width: isSidebarVisible ? (isLargeScreen ? "100px" : "100px") : (isLargeScreen ? "100px" : "100px") };
-  const ColWidth22 = { width: isSidebarVisible ? (isLargeScreen ? "200px" : "200px") : (isLargeScreen ? "200px" : "200px") };
-  const ColWidth23 = { width: isSidebarVisible ? (isLargeScreen ? "90px" : "90px") : (isLargeScreen ? "90px" : "90px") };
-
+ 
   const sixthcol = { width: "8px" };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1471,8 +1786,6 @@ const exportPDFHandler = () => {
     ColWidth19.width,
     ColWidth20.width,
     ColWidth21.width,
-    ColWidth22.width,
-    ColWidth23.width,
 
   ];
 
@@ -1489,157 +1802,393 @@ const exportPDFHandler = () => {
           borderRadius: "9px",
         }}
       >
-        <NavComponent textdata="Collector Wise Customer Search" />
+        <NavComponent textdata="Installment Wise Report" />
 
-        <div
-          className="row"
-          style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-        >
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              margin: "0px",
-              padding: "0px",
-              justifyContent: "space-between",
-            }}
-          >
-
-
-            <div
-              className="d-flex align-items-center  "
-              style={{ marginLeft: "15px" }}
-            >
-              <div
-                style={{
-                  width: "80px",
-                  display: "flex",
-                  justifyContent: "end",
-                }}
-              >
-                <label htmlFor="fromDatePicker">
-                  <span
-                    style={{
-                      fontFamily: getfontstyle,
-                      fontSize: getdatafontsize,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Collector :
-                  </span>{" "}
-                  <br />
-                </label>
-              </div>
-              <div style={{ marginLeft: "5px" }}>
-                <Select
-                  className="List-select-class"
-                  ref={collectorRef}
-                  options={Collectoroption}
-                  onKeyDown={(e) => handleSaleKeypress(e, input2Ref)}
-                  id="selectedsale"
-                  onChange={(selectedOption) => {
-                    if (selectedOption && selectedOption.value) {
-                      const labelPart = selectedOption.label.split("-")[1];
-                      setCollector(selectedOption.value);
-                      setCollectorDataValue({
-                        value: selectedOption.value,
-                        label: labelPart, // Set only the 'NGS' part of the label
-                      });
-                    } else {
-                      setCollector(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-                      setCollectorDataValue("");
-                    }
-                  }}
-                  onInputChange={(inputValue, { action }) => {
-                    if (action === "input-change") {
-                      return inputValue.toUpperCase();
-                    }
-                    return inputValue;
-                  }}
-                  components={{ Option: DropdownOption }}
-                  styles={{
-                    ...customStyles1(!Collector),
-                    placeholder: (base) => ({
-                      ...base,
-                      textAlign: "left",
-                      marginLeft: "0",
-                      justifyContent: "flex-start",
-                      color: fontcolor,
-                      marginTop: "-5px",
-                    }),
-                  }}
-                  isClearable
-                  placeholder="ALL"
-                />
-              </div>
-            </div>
-
-            <div id="lastDiv" style={{ marginRight: "5px" }}>
-              <label for="searchInput" style={{ marginRight: "5px" }}>
-                <span
-                  style={{
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Search :
-                </span>{" "}
-              </label>
-              <div style={{ position: "relative", display: "inline-block" }}>
-                <input
-                  ref={input2Ref}
-                  onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                  type="text"
-                  id="searchsubmit"
-                  placeholder="Search"
-                  value={searchQuery}
-                  autoComplete="off"
-                  style={{
-                    marginRight: "20px",
-                    width: "200px",
-                    height: "24px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    color: fontcolor,
-                    backgroundColor: getcolor,
-                    border: `1px solid ${fontcolor}`,
-                    outline: "none",
-                    paddingLeft: "10px",
-                    paddingRight: "25px", // space for the clear icon
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                  onChange={(e) =>
-                    setSearchQuery((e.target.value || "").toUpperCase())
-                  }
-                />
-                {searchQuery && (
-                  <span
-                    onClick={() => setSearchQuery("")}
-                    style={{
-                      position: "absolute",
-                      right: "30px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      cursor: "pointer",
-                      fontSize: "20px",
-                      color: fontcolor,
-                      userSelect: "none",
-                    }}
-                  >
-                    ×
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+       <div
+                   className="row "
+                   style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                 >
+                   <div
+                     style={{
+                       width: "100%",
+                       display: "flex",
+                       alignItems: "center",
+                       margin: "0px",
+                       padding: "0px",
+                       justifyContent: "start",
+                     }}
+                   >
+                   <div className="d-flex align-items-center" style={{ marginLeft: '3px' }}>
+                                   <div
+                                     style={{
+                                       width: "80px",
+                                       display: "flex",
+                                       justifyContent: "end",
+                                     }}
+                                   >
+                                     <label htmlFor="fromDatePicker">
+                                       <span
+                                         style={{
+                                           fontSize: getdatafontsize,
+                                           fontFamily: getfontstyle,
+                                           fontWeight: "bold",
+                                         }}
+                                       >
+                                         From :
+                                       </span>
+                                     </label>
+                                   </div>
+                                   <div
+                                     id="fromdatevalidation"
+                                     style={{
+                                       width: "135px",
+                                       border: `1px solid ${fontcolor}`,
+                                       display: "flex",
+                                       alignItems: "center",
+                                       height: "24px",
+                                       justifyContent: "center",
+                                       marginLeft: "5px",
+                                       background: getcolor,
+                                     }}
+                                     onFocus={(e) =>
+                                       (e.currentTarget.style.border = "2px solid red")
+                                     }
+                                     onBlur={(e) =>
+                                       (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                                     }
+                                   >
+                                     <input
+                                       style={{
+                                         height: "20px",
+                                         width: "90px",
+                                         paddingLeft: "5px",
+                                         outline: "none",
+                                         border: "none",
+                                         fontSize: getdatafontsize,
+                                         fontFamily: getfontstyle,
+                                         backgroundColor: getcolor,
+                                         color: fontcolor,
+                                         opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                         pointerEvents:
+                                           selectedRadio === "custom" ? "auto" : "none",
+                                       }}
+                                       id="frominputid"
+                                       value={fromInputDate}
+                                       ref={fromRef}
+                                       onChange={handlefromInputChange}
+                                       onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+                                       autoComplete="off"
+                                       placeholder="dd-mm-yyyy"
+                                       aria-label="Date Input"
+                                       disabled={selectedRadio !== "custom"}
+                                     />
+                                     <DatePicker
+                                       selected={selectedfromDate}
+                                       onChange={handlefromDateChange}
+                                       dateFormat="dd-MM-yyyy"
+                                       popperPlacement="bottom"
+                                       showPopperArrow={false}
+                                       open={fromCalendarOpen}
+                                       dropdownMode="select"
+                                       customInput={
+                                         <div>
+                                           <BsCalendar
+                                             onClick={
+                                               selectedRadio === "custom"
+                                                 ? toggleFromCalendar
+                                                 : undefined
+                                             }
+                                             style={{
+                                               cursor:
+                                                 selectedRadio === "custom"
+                                                   ? "pointer"
+                                                   : "default",
+                                               marginLeft: "18px",
+                                               fontSize: getdatafontsize,
+                                               fontFamily: getfontstyle,
+                                               color: fontcolor,
+                                               opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                             }}
+                                             disabled={selectedRadio !== "custom"}
+                                           />
+                                         </div>
+                                       }
+                                       disabled={selectedRadio !== "custom"}
+                                     />
+                                   </div>
+                                 </div>
+                     <div
+                       className="d-flex align-items-center"
+         style={{marginLeft:'200px'}}
+                     >
+                       <div
+                         style={{
+                           width: "60px",
+                           display: "flex",
+                           justifyContent: "end",
+                         }}
+                       >
+                         <label htmlFor="toDatePicker">
+                           <span
+                             style={{
+                               fontSize: getdatafontsize,
+                               fontFamily: getfontstyle,
+                               fontWeight: "bold",
+                             }}
+                           >
+                             To :
+                           </span>
+                         </label>
+                       </div>
+                       <div
+                         id="todatevalidation"
+                         style={{
+                           width: "135px",
+                           border: `1px solid ${fontcolor}`,
+                           display: "flex",
+                           alignItems: "center",
+                           height: "24px",
+                           justifyContent: "center",
+                           marginLeft: "5px",
+                           background: getcolor,
+                         }}
+                         onFocus={(e) =>
+                           (e.currentTarget.style.border = "2px solid red")
+                         }
+                         onBlur={(e) =>
+                           (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                         }
+                       >
+                         <input
+                           ref={toRef}
+                           style={{
+                             height: "20px",
+                             width: "90px",
+                             paddingLeft: "5px",
+                             outline: "none",
+                             border: "none",
+                             fontSize: getdatafontsize,
+                             fontFamily: getfontstyle,
+                             backgroundColor: getcolor,
+                             color: fontcolor,
+                             opacity: selectedRadio === "custom" ? 1 : 0.5,
+                             pointerEvents:
+                               selectedRadio === "custom" ? "auto" : "none",
+                           }}
+                           value={toInputDate}
+                           onChange={handleToInputChange}
+                           onKeyDown={(e) => handleToKeyPress(e, saleSelectRef)}
+                           id="toDatePicker"
+                           autoComplete="off"
+                           placeholder="dd-mm-yyyy"
+                           aria-label="To Date Input"
+                           disabled={selectedRadio !== "custom"}
+                         />
+                         <DatePicker
+                           selected={selectedToDate}
+                           onChange={handleToDateChange}
+                           dateFormat="dd-MM-yyyy"
+                           popperPlacement="bottom"
+                           showPopperArrow={false}
+                           open={toCalendarOpen}
+                           dropdownMode="select"
+                           customInput={
+                             <div>
+                               <BsCalendar
+                                 onClick={
+                                   selectedRadio === "custom"
+                                     ? toggleToCalendar
+                                     : undefined
+                                 }
+                                 style={{
+                                   cursor:
+                                     selectedRadio === "custom"
+                                       ? "pointer"
+                                       : "default",
+                                   marginLeft: "18px",
+                                   fontSize: getdatafontsize,
+                                   fontFamily: getfontstyle,
+                                   color: fontcolor,
+                                   opacity: selectedRadio === "custom" ? 1 : 0.5,
+                                 }}
+                                 disabled={selectedRadio !== "custom"}
+                               />
+                             </div>
+                           }
+                           disabled={selectedRadio !== "custom"}
+                         />
+                       </div>
+       
+                     </div>
+       
+                   
+       
+                   </div>
+                 </div>
+       
+                 <div
+                   className="row "
+                   style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+                 >
+                   <div
+                     style={{
+                       width: "100%",
+                       display: "flex",
+                       alignItems: "center",
+                       margin: "0px",
+                       padding: "0px",
+                       justifyContent: "space-between",
+                     }}
+                   >
+                     {/* SELECT TH CODE  */}
+                     <div
+                       className="d-flex align-items-center  "
+                       style={{ marginLeft: "5px" }}
+                     >
+                       <div
+                         style={{
+                           width: "80px",
+                           display: "flex",
+                           justifyContent: "end",
+                         }}
+                       >
+                         <label htmlFor="transactionType">
+                           <span
+                             style={{
+                               display: "flex",
+                               alignItems: "center",
+                               justifyContent: "center",
+                               fontSize: getdatafontsize,
+                               fontFamily: getfontstyle,
+                               fontWeight: "bold",
+                             }}
+                           >
+                             Collector :
+                           </span>
+                         </label>{" "}
+                       </div>
+                       <div style={{ marginLeft: "3px" }}>
+                         <Select
+                           className="List-select-class"
+                           ref={saleSelectRef}
+                           options={Collectoroption}
+                           onKeyDown={(e) => handleSaleKeypress(e, input1Ref)}
+                           id="selectedsale"
+                           onChange={(selectedOption) => {
+                             if (selectedOption && selectedOption.value) {
+                               const labelPart = selectedOption.label.split("-")[1];
+                               setSaleType(selectedOption.value);
+                               setCompanyselectdatavalue({
+                                 value: selectedOption.value,
+                                 label: labelPart,
+                               });
+                             } else {
+                               setSaleType("");
+                               setCompanyselectdatavalue("");
+                             }
+                           }}
+                           onInputChange={(inputValue, { action }) => {
+                             if (action === "input-change") {
+                               return inputValue.toUpperCase();
+                             }
+                             return inputValue;
+                           }}
+                           components={{ Option: DropdownOption }}
+                           styles={{
+                             ...customStyles1(!saleType),
+                             placeholder: (base) => ({
+                               ...base,
+                               textAlign: "left",
+                               marginLeft: "0",
+                               justifyContent: "flex-start",
+                               color: fontcolor,
+                               marginTop: "-5px",
+                             }),
+                           }}
+                           isClearable
+                           placeholder="ALL"
+                         />
+                       </div>
+                     </div>
+                      <div
+                       className="d-flex align-items-center"
+              style={{marginRight:'20px'}}
+                     >
+                       <div
+                         style={{
+                           marginLeft: "10px",
+                           width: "60px",
+                           display: "flex",
+                           justifyContent: "end",
+                         }}
+                       >
+                         <label htmlFor="transactionType">
+                           <span
+                             style={{
+                               fontSize: getdatafontsize,
+                               fontFamily: getfontstyle,
+                               fontWeight: "bold",
+                             }}
+                           >
+                             Type :
+                           </span>
+                         </label>
+                       </div>
+       
+                       <div style={{ position: "relative", display: "inline-block" }}>
+                         <select
+                           ref={input1Ref}
+                           onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                           id="submitButton"
+                           name="type"
+                           onFocus={(e) =>
+                             (e.currentTarget.style.border = "4px solid red")
+                           }
+                           onBlur={(e) =>
+                             (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                           }
+                           value={transectionType}
+                           onChange={handleTransactionTypeChange}
+                           style={{
+                             width: "200px",
+                             height: "24px",
+                             marginLeft: "5px",
+                             backgroundColor: getcolor,
+                             border: `1px solid ${fontcolor}`,
+                             fontSize: getdatafontsize,
+                             fontFamily: getfontstyle,
+                             color: fontcolor,
+                             paddingRight: "25px",
+                           }}
+                         >
+                           <option value="I1">2 Installment</option>
+                           <option value="I2">2 Installment</option>
+                           <option value="I3">4+ Installment</option>
+                         
+                         </select>
+       
+                         {transectionType !== "I1" && (
+                           <span
+                             onClick={() => settransectionType("I1")}
+                             style={{
+                               position: "absolute",
+                               right: "25px",
+                               top: "50%",
+                               transform: "translateY(-50%)",
+                               cursor: "pointer",
+                               fontWeight: "bold",
+                               color: fontcolor,
+                               userSelect: "none",
+                               fontSize: "12px",
+                             }}
+                           >
+                             ✕
+                           </span>
+                         )}
+                       </div>
+                     </div>
+                   </div>
+                 </div>
         {/* Horizontal scroll container */}
         <div
           style={{
@@ -1695,30 +2244,6 @@ const exportPDFHandler = () => {
                   <th
                     className="border-dark"
                     style={{ ...firstColWidth, cursor: "pointer" }}
-                    onClick={() => handleSorting("Sale Invoice No")}
-                  >
-                    Sl Inv{" "}
-                    <i
-                      className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("Sale Invoice No")}
-                    ></i>
-                  </th>
-
-                  <th
-                    className="border-dark"
-                    style={{ ...thirdColWidth, cursor: "pointer" }}
-                    onClick={() => handleSorting("Invoice Date")}
-                  >
-                    Inv Date{" "}
-                    <i
-                      className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("Invoice Date")}
-                    ></i>
-                  </th>
-
-                  <th
-                    className="border-dark"
-                    style={{ ...thirdColWidth1, cursor: "pointer" }}
                     onClick={() => handleSorting("Customer")}
                   >
                     Customer{" "}
@@ -1730,19 +2255,19 @@ const exportPDFHandler = () => {
 
                   <th
                     className="border-dark"
-                    style={{ ...forthColWidth, cursor: "pointer" }}
-                    onClick={() => handleSorting("CNIC")}
+                    style={{ ...thirdColWidth, cursor: "pointer" }}
+                    onClick={() => handleSorting("OldCode")}
                   >
-                    CNIC{" "}
+                    OldCode{" "}
                     <i
                       className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("CNIC")}
+                      style={getIconStyle("OldCode")}
                     ></i>
                   </th>
 
                   <th
                     className="border-dark"
-                    style={{ ...fifthColWidth, cursor: "pointer" }}
+                    style={{ ...thirdColWidth1, cursor: "pointer" }}
                     onClick={() => handleSorting("Mobile")}
                   >
                     Mobile{" "}
@@ -1751,132 +2276,151 @@ const exportPDFHandler = () => {
                       style={getIconStyle("Mobile")}
                     ></i>
                   </th>
+
+                  <th
+                    className="border-dark"
+                    style={{ ...forthColWidth, cursor: "pointer" }}
+                    onClick={() => handleSorting("InvNo")}
+                  >
+                    InvNo{" "}
+                    <i
+                      className="fa-solid fa-caret-down caretIconStyle"
+                      style={getIconStyle("InvNo")}
+                    ></i>
+                  </th>
+
+                  <th
+                    className="border-dark"
+                    style={{ ...fifthColWidth, cursor: "pointer" }}
+                    onClick={() => handleSorting("SaleDate")}
+                  >
+                    SaleDate{" "}
+                    <i
+                      className="fa-solid fa-caret-down caretIconStyle"
+                      style={getIconStyle("SaleDate")}
+                    ></i>
+                  </th>
                   <th
                     className="border-dark"
                     style={{ ...fifthColWidth1, cursor: "pointer" }}
-                    onClick={() => handleSorting("1st Guaranter Name")}
+                    onClick={() => handleSorting("Item")}
                   >
-                    1st Guaranter Name{" "}
+                    Item{" "}
                     <i
                       className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("1st Guaranter Name")}
+                      style={getIconStyle("Item")}
                     ></i>
                   </th>
 
                   <th
                     className="border-dark"
                     style={{ ...sixthColWidth, cursor: "pointer" }}
-                    onClick={() => handleSorting("1st Guaranter CNIC")}
+                    onClick={() => handleSorting("NoOfIns")}
                   >
-                    1st Gur CNIC{" "}
+                    Ins{" "}
                     <i
                       className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("1st Guaranter CNIC")}
+                      style={getIconStyle("NoOfIns")}
                     ></i>
                   </th>
 
                   <th
                     className="border-dark"
                     style={{ ...seventhColWidth, cursor: "pointer" }}
-                    onClick={() => handleSorting("1st Guaranter Mobile")}
+                    onClick={() => handleSorting("InsAmt")}
                   >
-                    Mobile{" "}
+                    InsAmt{" "}
                     <i
                       className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("1st Guaranter Mobile")}
+                      style={getIconStyle("InsAmt")}
                     ></i>
                   </th>
 
                   <th
                     className="border-dark"
                     style={{ ...seventhColWidth1, cursor: "pointer" }}
-                    onClick={() => handleSorting("2nd Witness Name")}
+                    onClick={() => handleSorting("Receiavable")}
                   >
-                    2nd Guaranter Name{" "}
+                    Recei{" "}
                     <i
                       className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("2nd Witness Name")}
+                      style={getIconStyle("Receiavable")}
                     ></i>
                   </th>
 
                   <th
                     className="border-dark"
                     style={{ ...eighthColWidth, cursor: "pointer" }}
-                    onClick={() => handleSorting("2nd Witness CNIC")}
+                    onClick={() => handleSorting("Collected")}
                   >
-                    2nd Gur CNIC{" "}
+                    Collected{" "}
                     <i
                       className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("2nd Witness CNIC")}
+                      style={getIconStyle("Collected")}
                     ></i>
                   </th>
 
                   <th
                     className="border-dark"
                     style={{ ...ninthColWidth, cursor: "pointer" }}
-                    onClick={() => handleSorting("2nd Witness Mobile")}
+                    onClick={() => handleSorting("Advance")}
                   >
-                    Mobile{" "}
+                    Advance{" "}
                     <i
                       className="fa-solid fa-caret-down caretIconStyle"
-                      style={getIconStyle("2nd Witness Mobile")}
+                      style={getIconStyle("Advance")}
                     ></i>
                   </th>
 
                   {/* Additional columns */}
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Item")}>
-                    Item <i className="fa-solid fa-caret-down" style={getIconStyle("Item")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("PrmDate")}>
+                    PrmDate <i className="fa-solid fa-caret-down" style={getIconStyle("PrmDate")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("No Of Installment")}>
-                    Ins <i className="fa-solid fa-caret-down" style={getIconStyle("No Of Installment")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("LastDate")}>
+                    LastDate <i className="fa-solid fa-caret-down" style={getIconStyle("LastDate")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Total Bill")}>
-                    Total Bill <i className="fa-solid fa-caret-down" style={getIconStyle("Total Bill")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("MonthCst01")}>
+                    MonthCst01 <i className="fa-solid fa-caret-down" style={getIconStyle("MonthCst01")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Advance")}>
-                    Advance <i className="fa-solid fa-caret-down" style={getIconStyle("Advance")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("MonthCst02")}>
+                    MonthCst02 <i className="fa-solid fa-caret-down" style={getIconStyle("MonthCst02")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Installment Paid")}>
-                    Ins Paid <i className="fa-solid fa-caret-down" style={getIconStyle("Installment Paid")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("MonthCst03")}>
+                    MonthCst03 <i className="fa-solid fa-caret-down" style={getIconStyle("MonthCst03")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Total Paid (Advance+Installment)")}>
-                    Total Paid <i className="fa-solid fa-caret-down" style={getIconStyle("Total Paid (Advance+Installment)")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("OB")}>
+                    OB <i className="fa-solid fa-caret-down" style={getIconStyle("OB")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Last Date")}>
-                    Last Date <i className="fa-solid fa-caret-down" style={getIconStyle("Last Date")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Sale")}>
+                    Sale <i className="fa-solid fa-caret-down" style={getIconStyle("Sale")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Last Paid")}>
-                    Last Paid <i className="fa-solid fa-caret-down" style={getIconStyle("Last Paid")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Rent")}>
+                    Rent <i className="fa-solid fa-caret-down" style={getIconStyle("Rent")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Inst.Amount")}>
-                    Ins Amt <i className="fa-solid fa-caret-down" style={getIconStyle("Inst.Amount")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("LastCol")}>
+                    LastCol <i className="fa-solid fa-caret-down" style={getIconStyle("LastCol")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Short Amount")}>
-                    Short Amt <i className="fa-solid fa-caret-down" style={getIconStyle("Short Amount")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("CurMonthCol")}>
+                    CurMonthCol <i className="fa-solid fa-caret-down" style={getIconStyle("CurMonthCol")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Total Receivable (Short+Regular)")}>
-                    Total Rec <i className="fa-solid fa-caret-down" style={getIconStyle("Total Receivable (Short+Regular)")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("CB)")}>
+                    CB <i className="fa-solid fa-caret-down" style={getIconStyle("CB")}></i>
                   </th>
 
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Balance")}>
-                    Balance <i className="fa-solid fa-caret-down" style={getIconStyle("Balance")}></i>
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("ExpDate")}>
+                    ExpDate <i className="fa-solid fa-caret-down" style={getIconStyle("ExpDate")}></i>
                   </th>
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Collector Name")}>
-                    Collector Name <i className="fa-solid fa-caret-down" style={getIconStyle("Collector Name")}></i>
-                  </th>
-                  <th style={{ cursor: "pointer" }} onClick={() => handleSorting("Status")}>
-                    Status <i className="fa-solid fa-caret-down" style={getIconStyle("Status")}></i>
-                  </th>
+                 
                 </tr>
               </thead>
 
@@ -1894,7 +2438,7 @@ const exportPDFHandler = () => {
                         key={`blank-${rowIndex}`}
                         style={{ backgroundColor: getcolor, color: fontcolor }}
                       >
-                        {Array.from({ length: 26 }).map((_, colIndex) => (
+                        {Array.from({ length: 23 }).map((_, colIndex) => (
                           <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                         ))}
                       </tr>
@@ -1923,9 +2467,7 @@ const exportPDFHandler = () => {
                       <td style={ColWidth18}></td>
                       <td style={ColWidth19}></td>
                       <td style={ColWidth20}></td>
-                      <td style={ColWidth21}></td>
-                      <td style={ColWidth22}></td>
-                      <td style={ColWidth23}></td>
+                    
                     </tr>
                   </>
                 ) : (
@@ -1939,7 +2481,7 @@ const exportPDFHandler = () => {
                         style={{ backgroundColor: getcolor, color: fontcolor }}
                       >
 
-                        <td
+                        {/* <td
                           className="text-center"
                           style={{
                             ...secondColWidth,
@@ -1962,28 +2504,17 @@ const exportPDFHandler = () => {
                           }}
                         >
                           {item.Code}
+                        </td> */}
+
+                         <td className="text-center" style={secondColWidth}>
+                          {item.Code}
                         </td>
 
-                        <td className="text-center" style={firstColWidth}>
-                          {item["Sale Invoice No"]}
-                        </td>
-                        <td
-                          className="text-start"
-                          title={item["Invoice Date"]}
-                          style={{
-                            ...thirdColWidth,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {item["Invoice Date"]}
-                        </td>
                         <td
                           className="text-start"
                           title={item.Customer}
                           style={{
-                            ...thirdColWidth1,
+                            ...firstColWidth,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -1992,8 +2523,32 @@ const exportPDFHandler = () => {
                           {item.Customer}
                         </td>
                         <td
+                          className="text-start"
+                          title={item.OldCode}
+                          style={{
+                            ...thirdColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.OldCode}
+                        </td>
+                        <td
                           className="text-center"
-                          title={item.CNIC}
+                          title={item.Mobile}
+                          style={{
+                            ...thirdColWidth1,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.Mobile}
+                        </td>
+                        <td
+                          className="text-center"
+                          title={item.InvNo}
                           style={{
                             ...forthColWidth,
                             whiteSpace: "nowrap",
@@ -2001,11 +2556,11 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item.CNIC}
+                          {item.InvNo}
                         </td>
                         <td
                           className="text-center"
-                          title={item["Mobile"]}
+                          title={item["SaleDate"]}
                           style={{
                             ...fifthColWidth,
                             whiteSpace: "nowrap",
@@ -2013,11 +2568,11 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Mobile"]}
+                          {item["SaleDate"]}
                         </td>
                         <td
                           className="text-start"
-                          title={item["1st Guaranter Name"]}
+                          title={item["Item"]}
                           style={{
                             ...fifthColWidth1,
                             whiteSpace: "nowrap",
@@ -2025,14 +2580,14 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["1st Guaranter Name"]}
+                          {item["Item"]}
                         </td>
                         <td className="text-center" style={sixthColWidth}>
-                          {item["1st Guaranter CNIC"]}
+                          {item["NoOfIns"]}
                         </td>
                         <td
-                          className="text-center"
-                          title={item["1st Guaranter Mobile"]}
+                          className="text-end"
+                          title={item["InsAmt"]}
                           style={{
                             ...seventhColWidth,
                             whiteSpace: "nowrap",
@@ -2040,12 +2595,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["1st Guaranter Mobile"]}
+                          {item["InsAmt"]}
                         </td>
 
                         <td
-                          className="text-start"
-                          title={item["2nd Witness Name"]}
+                          className="text-end"
+                          title={item["Receiavable"]}
                           style={{
                             ...seventhColWidth1,
                             whiteSpace: "nowrap",
@@ -2053,69 +2608,16 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["2nd Witness Name"]}
+                          {item["Receiavable"]}
                         </td>
-                        <td className="text-center" style={eighthColWidth}>
-                          {item["2nd Witness CNIC"]}
+                        <td className="text-end" style={eighthColWidth}>
+                          {item["Collected"]}
                         </td>
-                        <td
-                          className="text-center"
-                          title={item["2nd Witness Mobile"]}
-                          style={{
-                            ...ninthColWidth,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {item["2nd Witness Mobile"]}
-                        </td>
-
-
-                        <td
-                          className="text-start"
-                          title={item.Item}
-                          style={{
-                            ...tenthColWidth,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {item.Item}
-                        </td>
-
-                        <td
-                          className="text-end"
-                          title={item["No Of Installment"]}
-                          style={{
-                            ...ColWidth11,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {item["No Of Installment"]}
-                        </td>
-
-                        <td
-                          className="text-end"
-                          title={item["Total Bill"]}
-                          style={{
-                            ...ColWidth12,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {item["Total Bill"]}
-                        </td>
-
                         <td
                           className="text-end"
                           title={item["Advance"]}
                           style={{
-                            ...ColWidth13,
+                            ...ninthColWidth,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -2124,9 +2626,62 @@ const exportPDFHandler = () => {
                           {item["Advance"]}
                         </td>
 
+
+                        <td
+                          className="text-center"
+                          title={item.PrmDate}
+                          style={{
+                            ...tenthColWidth,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.PrmDate}
+                        </td>
+
+                        <td
+                          className="text-center"
+                          title={item["LastDate"]}
+                          style={{
+                            ...ColWidth11,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["LastDate"]}
+                        </td>
+
                         <td
                           className="text-end"
-                          title={item["Installment Paid"]}
+                          title={item["MonthCst01"]}
+                          style={{
+                            ...ColWidth12,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["MonthCst01"]}
+                        </td>
+
+                        <td
+                          className="text-end"
+                          title={item["MonthCst02"]}
+                          style={{
+                            ...ColWidth13,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item["MonthCst02"]}
+                        </td>
+
+                        <td
+                          className="text-end"
+                          title={item["MonthCst03"]}
                           style={{
                             ...ColWidth14,
                             whiteSpace: "nowrap",
@@ -2134,12 +2689,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Installment Paid"]}
+                          {item["MonthCst03"]}
                         </td>
 
                         <td
                           className="text-end"
-                          title={item["Total Paid (Advance+Installment)"]}
+                          title={item["OB"]}
                           style={{
                             ...ColWidth15,
                             whiteSpace: "nowrap",
@@ -2147,12 +2702,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Total Paid (Advance+Installment)"]}
+                          {item["OB"]}
                         </td>
 
                         <td
                           className="text-end"
-                          title={item["Last Date"]}
+                          title={item["Sale"]}
                           style={{
                             ...ColWidth16,
                             whiteSpace: "nowrap",
@@ -2160,12 +2715,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Last Date"]}
+                          {item["Sale"]}
                         </td>
 
                         <td
                           className="text-end"
-                          title={item["Last Paid"]}
+                          title={item["Rent"]}
                           style={{
                             ...ColWidth17,
                             whiteSpace: "nowrap",
@@ -2173,12 +2728,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Last Paid"]}
+                          {item["Rent"]}
                         </td>
 
                         <td
                           className="text-end"
-                          title={item["Inst.Amount"]}
+                          title={item["LastCol"]}
                           style={{
                             ...ColWidth18,
                             whiteSpace: "nowrap",
@@ -2186,12 +2741,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Inst.Amount"]}
+                          {item["LastCol"]}
                         </td>
 
                         <td
                           className="text-end"
-                          title={item["Short Amount"]}
+                          title={item["CurMonthCol"]}
                           style={{
                             ...ColWidth19,
                             whiteSpace: "nowrap",
@@ -2199,12 +2754,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Short Amount"]}
+                          {item["CurMonthCol"]}
                         </td>
 
                         <td
                           className="text-end"
-                          title={item["Total Receivable (Short+Regular)"]}
+                          title={item["CB"]}
                           style={{
                             ...ColWidth20,
                             whiteSpace: "nowrap",
@@ -2212,12 +2767,12 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item["Total Receivable (Short+Regular)"]}
+                          {item["CB"]}
                         </td>
 
                         <td
                           className="text-end"
-                          title={item.Balance}
+                          title={item.ExpDate}
                           style={{
                             ...ColWidth21,
                             whiteSpace: "nowrap",
@@ -2225,32 +2780,10 @@ const exportPDFHandler = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {item.Balance}
+                          {item.ExpDate}
                         </td>
-                        <td
-                          className="text-start"
-                          title={item["Collector Name"]}
-                          style={{
-                            ...ColWidth22,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {item["Collector Name"]}
-                        </td>
-                        <td
-                          className="text-center"
-                          title={item.Status}
-                          style={{
-                            ...ColWidth23,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {item.Status}
-                        </td>
+                       
+                       
                       </tr>
                     ))}
                     {/* Empty rows if data less than totalRows */}
@@ -2260,7 +2793,7 @@ const exportPDFHandler = () => {
                           key={`blank-${rowIndex}`}
                           style={{ backgroundColor: getcolor, color: fontcolor }}
                         >
-                          {Array.from({ length: 26 }).map((_, colIndex) => (
+                          {Array.from({ length: 23 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
                           ))}
                         </tr>
@@ -2290,9 +2823,7 @@ const exportPDFHandler = () => {
                       <td style={ColWidth18}></td>
                       <td style={ColWidth19}></td>
                       <td style={ColWidth20}></td>
-                      <td style={ColWidth21}></td>
-                      <td style={ColWidth22}></td>
-                      <td style={ColWidth23}></td>
+                 
                     </tr>
                   </>
                 )}
@@ -2309,8 +2840,7 @@ const exportPDFHandler = () => {
                 }}
               >
                 <tr >
-                  <td>{TotalRecords}</td>
-                  <td style={{ borderRight: `1px solid ${fontcolor}`, }}></td>
+                  <td>{tableData.length.toLocaleString()}</td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -2323,19 +2853,17 @@ const exportPDFHandler = () => {
                   <td></td>
                   <td></td>
                   <td></td>
-                  <td style={{ textAlign: 'end' }}>{TotalBill}</td>
-                  <td style={{ textAlign: 'end' }}>{TotalAdvance}</td>
-                  <td style={{ textAlign: 'end' }}>{TotalInstallmentPaid}</td>
-                  <td style={{ textAlign: 'end' }}>{TotalPaidAdvanceInstallment}</td>
-                  <td></td>
-                  <td style={{ textAlign: 'end' }}>{TotalLastPaid}</td>
-                  <td style={{ textAlign: 'end' }}>{TotalInstAmount}</td>
-                  <td style={{ textAlign: 'end' }}>{TotalShortAmount}</td>
-                  <td style={{ textAlign: 'end' }}>{TotalReceivable}</td>
-                  <td style={{ textAlign: 'end' }}>{TotalBalance}</td>
-
                   <td></td>
                   <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                 
                 </tr>
               </tfoot>
             </table>

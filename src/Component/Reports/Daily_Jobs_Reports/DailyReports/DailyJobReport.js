@@ -80,6 +80,7 @@ export default function DailyJobReport() {
   const [Cityselectdatavalue, setCityselectdatavalue] = useState("");
 
   const [Complainselectdata, setComplainselectdata] = useState("");
+ 
   const [Complainselectdatavalue, setComplainselectdatavalue] = useState("");
 
   /////////////////////
@@ -779,7 +780,7 @@ export default function DailyJobReport() {
       .then((response) => {
         setIsLoading(false);
 
-        setTotalDebit(response.data["Total "]);
+        setTotalDebit(response.data["Total"]);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -1031,7 +1032,7 @@ const refoptions = Referenceapidata.map((item) => ({
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
     //  FLocCod: "001",
-    //   code: "NASIRTRD",
+    //   code: "BGH",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -1279,6 +1280,7 @@ const refoptions = Referenceapidata.map((item) => ({
     // Add summary row to the table
 
     rows.push([
+         String(formatValue(totalDebit)),
       "",
       "",
       "",
@@ -1289,7 +1291,7 @@ const refoptions = Referenceapidata.map((item) => ({
       "",
       "",
       "",
-      String(formatValue(totalDebit)),
+     
     ]);
 
     // Define table column headers and individual column widths
@@ -1513,7 +1515,7 @@ const refoptions = Referenceapidata.map((item) => ({
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 28; // Adjust this value based on your requirements
+    const rowsPerPage = 27; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1656,10 +1658,10 @@ const refoptions = Referenceapidata.map((item) => ({
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Company :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.text(`Company :`, labelsX, labelsY + 12.5); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${companyvalue}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+        doc.text(`${companyvalue}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1678,10 +1680,10 @@ const refoptions = Referenceapidata.map((item) => ({
         ///////////////////////////////////////////////////////////
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Technician :`, labelsX, labelsY + 12.8); // Draw bold label
+        doc.text(`Technician :`, labelsX, labelsY + 16.8); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${technicianvalue}`, labelsX + 28, labelsY + 12.5); // Draw the value next to the label
+        doc.text(`${technicianvalue}`, labelsX + 28, labelsY + 16.5); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1701,17 +1703,17 @@ const refoptions = Referenceapidata.map((item) => ({
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`City :`, labelsX, labelsY + 16.8); // Draw bold label
+        doc.text(`City :`, labelsX, labelsY + 20.8); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${Citycode}`, labelsX + 25, labelsY + 16.8); // Draw the value next to the label
+        doc.text(`${Citycode}`, labelsX + 20, labelsY + 20.8); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`Area :`, labelsX + 100, labelsY + 16.8); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${Areacode}`, labelsX + 125, labelsY + 16.8); // Draw the value next to the label
+        doc.text(`${Areacode}`, labelsX + 120, labelsY + 16.8); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
@@ -1722,17 +1724,17 @@ const refoptions = Referenceapidata.map((item) => ({
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`Complain :`, labelsX, labelsY + 21.5); // Draw bold label
+        doc.text(`Complain :`, labelsX, labelsY + 26.5); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${complainvalue}`, labelsX + 25, labelsY + 21.5); // Draw the value next to the label
+        doc.text(`${complainvalue}`, labelsX + 25, labelsY + 26.5); // Draw the value next to the label
 
         doc.setFont("verdana", "bold"); // Set font to bold
         doc.setFontSize(10);
         doc.text(`Nature :`, labelsX + 100, labelsY + 21.5); // Draw bold label
         doc.setFont("verdana-regular", "normal"); // Set font to bold
         doc.setFontSize(10);
-        doc.text(`${Naturedata}`, labelsX + 125, labelsY + 21.5); // Draw the value next to the label
+        doc.text(`${Naturedata}`, labelsX + 120, labelsY + 21.5); // Draw the value next to the label
 
         if (searchQuery) {
           doc.setFont("verdana", "bold"); // Set font to bold
@@ -1745,9 +1747,9 @@ const refoptions = Referenceapidata.map((item) => ({
 
         // // Reset font weight to normal if necessary for subsequent text
 
-        startY += 24; // Adjust vertical position for the labels
+        startY += 29; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 43);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 48);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1795,20 +1797,27 @@ const refoptions = Referenceapidata.map((item) => ({
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 11; // Ensure this matches the actual number of columns
+    const numColumns = 18; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "left",
+       "left",
+       "left",
+        "left",
+       "left",
       "left",
       "left",
       "left",
       "left",
       "left",
-      "left",
-      "left",
+        "left",
       "left",
       "left",
       "right",
+      "center",
+      "center",
+       "right",
+        "center",
     ];
 
     // Define fonts for different sections
@@ -1940,10 +1949,12 @@ const refoptions = Referenceapidata.map((item) => ({
 
     // Add first row
     const typeAndStoreRow = worksheet.addRow([
-      "Compnay :",
+          "",
+        "Compnay :",
       companyvalue,
       "",
       "",
+       "",
       "Category :",
       categoryvalue,
       "",
@@ -1952,16 +1963,20 @@ const refoptions = Referenceapidata.map((item) => ({
       typececode,
     ]);
     worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:C${typeAndStoreRow.number}`
+            `   C${typeAndStoreRow.number}:F${typeAndStoreRow.number}`
     );
 
     const typeAndStoreRow4 = worksheet.addRow([
+              "",
+
       "Technician :",
       technicianvalue,
       "",
       "",
-      "Reference :",
-      referencecode,
+       "",
+      
+       "City :",
+      Citycode,
       "",
       "",
       "Status :",
@@ -1969,16 +1984,19 @@ const refoptions = Referenceapidata.map((item) => ({
     ]);
 
     worksheet.mergeCells(
-      `B${typeAndStoreRow4.number}:C${typeAndStoreRow4.number}`
+      `C${typeAndStoreRow4.number}:F${typeAndStoreRow4.number}`
     );
 
     let typesearch = searchQuery || "";
 
     const typeAndStoreRow3 = worksheet.addRow([
-      "City :",
-      Citycode,
+              "",
+
+     "Reference :",
+      referencecode,
       "",
       "",
+       "",
       "Area :",
       Areacode,
       "",
@@ -1988,16 +2006,19 @@ const refoptions = Referenceapidata.map((item) => ({
     ]);
 
     worksheet.mergeCells(
-      `B${typeAndStoreRow3.number}:C${typeAndStoreRow3.number}`
+      `C${typeAndStoreRow3.number}:F${typeAndStoreRow3.number}`
     );
 
     const typeAndStoreRow5 = worksheet.addRow(
       searchQuery
         ? [
+                  "",
+
             "Complain :",
             complainvalue,
             "",
             "",
+             "",
             "Nature :",
             Naturedata,
             "",
@@ -2005,11 +2026,11 @@ const refoptions = Referenceapidata.map((item) => ({
             "Search :",
             typesearch,
           ]
-        : ["Complain :", complainvalue, "", "", "Nature :", Naturedata]
+        : [ "","Complain :", complainvalue, "", "", "", "Nature :", Naturedata]
     );
 
     worksheet.mergeCells(
-      `B${typeAndStoreRow5.number}:C${typeAndStoreRow5.number}`
+      `C${typeAndStoreRow5.number}:F${typeAndStoreRow5.number}`
     );
 
     // Apply styling for the status row
@@ -2017,7 +2038,7 @@ const refoptions = Referenceapidata.map((item) => ({
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5, 9].includes(colIndex),
+        bold: [2, 7, 11].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -2026,7 +2047,7 @@ const refoptions = Referenceapidata.map((item) => ({
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5, 9].includes(colIndex),
+        bold: [2, 7, 11].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -2035,7 +2056,7 @@ const refoptions = Referenceapidata.map((item) => ({
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5, 9].includes(colIndex),
+        bold: [2, 7, 11].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -2043,7 +2064,7 @@ const refoptions = Referenceapidata.map((item) => ({
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1, 5, 9].includes(colIndex),
+        bold: [2, 7, 11].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
@@ -2067,36 +2088,55 @@ const refoptions = Referenceapidata.map((item) => ({
 
     // Add headers
     const headers = [
+      "Sr",
       "Date",
       "job#",
+      "City",
+      "Address",
+      "Serial #",
       "Customer",
       "Mobile",
-      "Company",
       "Item",
+      "Complaint",
       "Technician",
       "Reference",
-      "Type",
       "Status",
       "Day",
+      "Pur Date",
+      "Wrt",
+      "Job Charges",
+      "Paid By"
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
     // Add data rows
-    tableData.forEach((item) => {
+    tableData.forEach((item,i) => {
       const row = worksheet.addRow([
+         i + 1,
         item.Date,
         item["Job#"],
+        item.City,
+        item.Address,
+        item.Serial,
         item.Customer,
         item.Mobile,
-        item.Company,
         item.Item,
+        item.Complaint,
         item.Technician,
         item.Reference,
-        item.Type,
         item.Status,
         item.Day,
-      ]);
+        item['Pur Date'],
+ item.Warranty?.toUpperCase() === "YES"
+      ? "Y"
+      : item.Warranty?.toUpperCase() === "NO"
+      ? "N"
+      : item.Warranty,  
+      item['Job Charges'],
+      item['Paid By']
+    
+    ]);
 
       row.eachCell((cell, colIndex) => {
         cell.font = fontTableContent;
@@ -2114,11 +2154,17 @@ const refoptions = Referenceapidata.map((item) => ({
     });
 
     // Set column widths
-    [12, 7, 30, 12, 30, 45, 30, 30, 15, 13, 8].forEach((width, index) => {
+    [6,11, 7, 25, 45, 13, 45,13, 45, 50,45,45, 15,6, 10, 5,12,8].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
     const totalRow = worksheet.addRow([
+              String(formatValue(totalDebit)),
+
+      "",
+      "",
+        "",
+            "",
       "",
       "",
       "",
@@ -2129,7 +2175,9 @@ const refoptions = Referenceapidata.map((item) => ({
       "",
       "",
       "",
-      String(formatValue(totalDebit)),
+      "",
+       "",
+      "",
     ]);
 
     // total row added
@@ -2137,35 +2185,49 @@ const refoptions = Referenceapidata.map((item) => ({
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { name: "CustomFont", size: 10, bold: true }; // Apply CustomFont
       cell.border = {
-        top: { style: "thin" },
+        top: { style: "double" },
         left: { style: "thin" },
-        bottom: { style: "thin" },
+        bottom: { style: "double" },
         right: { style: "thin" },
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 11) {
-        cell.alignment = { horizontal: "right" };
+      if (colNumber === 1) {
+        cell.alignment = { horizontal: "center" };
       }
+
     });
-
-    // Get current date
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-
-    const currentdate = getCurrentDate();
-
-    // Generate and save the Excel file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `DailyJobReport From ${fromInputDate} To ${toInputDate}.xlsx`);
+// Blank row
+     worksheet.addRow([]);
+ 
+     // Date and Time
+     const today = new Date();
+     const currentTime = today.toLocaleTimeString("en-GB");
+     const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+     const userid = user.tusrid;
+ 
+     const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+     dateTimeRow.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+     dateTimeRow1.eachCell((cell) => {
+       cell.font = { name: "CustomFont", size: 10 };
+       cell.alignment = { horizontal: "left" };
+     });
+ 
+     // Merge cells
+     worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+     worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+ 
+     // Save Excel
+     const buffer = await workbook.xlsx.writeBuffer();
+     const blob = new Blob([buffer], {
+       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     });
+     saveAs(blob, `DailyJobReport From ${fromInputDate} To ${toInputDate}.xlsx`);
   };
   /////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -2205,7 +2267,7 @@ const refoptions = Referenceapidata.map((item) => ({
   const contentStyle = {
  width: "100%",
   maxWidth: isSidebarVisible
-    ? (isLargeScreen ? "1250px" : "1000px")
+    ? (isLargeScreen ? "1270px" : "1000px")
     : (isLargeScreen ? "1500px" : "1200px"),
   height: "calc(100vh - 100px)",
   position: "absolute",
@@ -2227,6 +2289,9 @@ const refoptions = Referenceapidata.map((item) => ({
   padding: "0 20px",
   boxSizing: "border-box",
 };
+ const firstColWidth1 = {
+    width: "35px",
+  };
 
   const firstColWidth = {
     width: "80px",
@@ -2237,27 +2302,27 @@ const refoptions = Referenceapidata.map((item) => ({
   };
   const thirdColWidth = {
   width: isSidebarVisible
-    ? (isLargeScreen ? "120px" : "80px")
-    : (isLargeScreen ? "160px" : "110px"),
+    ? (isLargeScreen ? "105px" : "63px")
+    : (isLargeScreen ? "145px" : "95px"),
   };
   const forthColWidth = {
     width: "90px",
   };
   const fifthColWidth = {
    width: isSidebarVisible
-    ? (isLargeScreen ? "120px" : "80px")
-    : (isLargeScreen ? "160px" : "110px"),
+    ? (isLargeScreen ? "105px" : "63px")
+    : (isLargeScreen ? "145px" : "95px"),
   };
 
    const forteenColWidth = {
    width: isSidebarVisible
-    ? (isLargeScreen ? "120px" : "80px")
-    : (isLargeScreen ? "160px" : "110px"),
+    ? (isLargeScreen ? "105px" : "63px")
+    : (isLargeScreen ? "145px" : "95px"),
   };
   const sixthColWidth = {
    width: isSidebarVisible
-    ? (isLargeScreen ? "120px" : "80px")
-    : (isLargeScreen ? "160px" : "110px"),
+    ? (isLargeScreen ? "105px" : "63px")
+    : (isLargeScreen ? "145px" : "95px"),
   };
   const seventhColWidth = {
     width: "100px",
@@ -2271,20 +2336,24 @@ const refoptions = Referenceapidata.map((item) => ({
 
   const tenthColWidth = {
     width: isSidebarVisible
-    ? (isLargeScreen ? "120px" : "80px")
-    : (isLargeScreen ? "160px" : "110px"),
+    ? (isLargeScreen ? "105px" : "63px")
+    : (isLargeScreen ? "145px" : "95px"),
   };
 
   const companyColWidth = {
  width: isSidebarVisible
-    ?(isLargeScreen ? "120px" : "80px")
-    : (isLargeScreen ? "160px" : "110px"),  };
+    ?(isLargeScreen ? "105px" : "63px")
+    : (isLargeScreen ? "145px" : "95px"),  };
   const sixthcol = {
     width: "8px",
   };
 
+  const thirteenColWidth1 = {
+    width: "80px",
+  };
+
   const thirteenColWidth = {
-    width: "40px",
+    width: "30px",
   };
 
 
@@ -3377,12 +3446,12 @@ const refoptions = Referenceapidata.map((item) => ({
 
               <div
                 className="d-flex align-items-center"
-                style={{ marginLeft: "12px" }}
+                style={{ marginLeft: isSidebarVisible ? "33px" :'83px' }}
               >
                 <div
                   style={{
                     marginLeft: "10px",
-                    width: "80px",
+                    width: "70px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3431,7 +3500,7 @@ const refoptions = Referenceapidata.map((item) => ({
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Categoryselectdata, isSidebarVisible ? (isLargeScreen ? 350 : 230): 350),
+                      ...customStyles1(!Categoryselectdata, isSidebarVisible ? (isLargeScreen ? 300 : 230): 300),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3454,7 +3523,7 @@ const refoptions = Referenceapidata.map((item) => ({
                 <div
                   style={{
                     marginLeft: "10px",
-                    width: "70px",
+                    width: "50px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3605,11 +3674,11 @@ const refoptions = Referenceapidata.map((item) => ({
                 </div>
               </div>
 
-              <div className="d-flex align-items-center">
+               <div className="d-flex align-items-center">
                 <div
                   style={{
-                    // marginLeft: "10px",
-                    width: "85px",
+                    marginLeft: isSidebarVisible ? "25px" :'75px',
+                    width: "90px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3625,7 +3694,7 @@ const refoptions = Referenceapidata.map((item) => ({
                         fontWeight: "bold",
                       }}
                     >
-                      Complain :
+                      City :
                     </span>
                   </label>
                 </div>
@@ -3633,21 +3702,21 @@ const refoptions = Referenceapidata.map((item) => ({
                 <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={Complainref}
-                    options={ComplaindataOption}
-                    onKeyDown={(e) => handlecityKeypress(e, CityRef)}
+                    ref={CityRef}
+                    options={CitydataOption}
+                    onKeyDown={(e) => handlecityKeypress(e, AreaRef)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
-                        setComplainselectdata(selectedOption.value);
-                        setComplainselectdatavalue({
+                        setCityselectdata(selectedOption.value);
+                        setCityselectdatavalue({
                           value: selectedOption.value,
                           label: labelPart,
                         });
                       } else {
-                        setComplainselectdata("");
-                        setComplainselectdatavalue("");
+                        setCityselectdata("");
+                        setCityselectdatavalue("");
                       }
                     }}
                     onInputChange={(inputValue, { action }) => {
@@ -3658,7 +3727,7 @@ const refoptions = Referenceapidata.map((item) => ({
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Complainselectdata, isSidebarVisible ? (isLargeScreen ? 350 : 230): 350),
+                      ...customStyles1(!Cityselectdata, isSidebarVisible ? (isLargeScreen ? 300 : 230): 300),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3771,11 +3840,15 @@ const refoptions = Referenceapidata.map((item) => ({
                 justifyContent: "space-between",
               }}
             >
-              <div className="d-flex align-items-center">
+             
+              <div
+                className="d-flex align-items-center"
+                // style={{ marginRight: "6px" }}
+              >
                 <div
                   style={{
-                    marginLeft: "10px",
-                    width: "90px",
+                    marginLeft: "20px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3791,7 +3864,7 @@ const refoptions = Referenceapidata.map((item) => ({
                         fontWeight: "bold",
                       }}
                     >
-                      City :
+                      Reference :
                     </span>
                   </label>
                 </div>
@@ -3799,21 +3872,21 @@ const refoptions = Referenceapidata.map((item) => ({
                 <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={CityRef}
-                    options={CitydataOption}
-                    onKeyDown={(e) => handlecityKeypress(e, AreaRef)}
+                    ref={ReferenceRef}
+                    options={refoptions}
+                    onKeyDown={(e) => handlerefernceKeypress(e, input1Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
                         const labelPart = selectedOption.label.split("-")[1];
-                        setCityselectdata(selectedOption.value);
-                        setCityselectdatavalue({
+                        setReferenceselectdata(selectedOption.value);
+                        setReferenceselectdatavalue({
                           value: selectedOption.value,
                           label: labelPart,
                         });
                       } else {
-                        setCityselectdata("");
-                        setCityselectdatavalue("");
+                        setReferenceselectdata("");
+                        setReferenceselectdatavalue("");
                       }
                     }}
                     onInputChange={(inputValue, { action }) => {
@@ -3824,7 +3897,7 @@ const refoptions = Referenceapidata.map((item) => ({
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Cityselectdata, 230),
+                      ...customStyles1(!Referenceselectdata, isSidebarVisible ? (isLargeScreen ? 350 : 300): 350),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3840,14 +3913,16 @@ const refoptions = Referenceapidata.map((item) => ({
                 </div>
               </div>
 
+  
+
               <div
                 className="d-flex align-items-center"
-                style={{ marginRight: "10px" }}
+                style={{ marginRight: isSidebarVisible ? (isLargeScreen ? "66px": "15px") :"15px" }}
               >
                 <div
                   style={{
                     marginLeft: "10px",
-                    width: "80px",
+                    width: "45px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -3896,7 +3971,7 @@ const refoptions = Referenceapidata.map((item) => ({
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Areaselectdata, isSidebarVisible ? (isLargeScreen ? 350 : 230): 350),
+                      ...customStyles1(!Areaselectdata, isSidebarVisible ? (isLargeScreen ? 300 : 230): 300),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3912,7 +3987,7 @@ const refoptions = Referenceapidata.map((item) => ({
                 </div>
               </div>
 
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
+              <div id="lastDiv" >
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
                     style={{
@@ -3994,14 +4069,11 @@ const refoptions = Referenceapidata.map((item) => ({
                 justifyContent: "space-between",
               }}
             >
-              <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "6px" }}
-              >
+            <div className="d-flex align-items-center">
                 <div
                   style={{
-                    marginLeft: "20px",
-                    width: "80px",
+                    marginLeft: "15px",
+                    width: "85px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -4017,7 +4089,7 @@ const refoptions = Referenceapidata.map((item) => ({
                         fontWeight: "bold",
                       }}
                     >
-                      Reference :
+                      Complain :
                     </span>
                   </label>
                 </div>
@@ -4025,23 +4097,37 @@ const refoptions = Referenceapidata.map((item) => ({
                 <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={ReferenceRef}
-                    options={refoptions}
-                    onKeyDown={(e) => handlerefernceKeypress(e, input1Ref)}
+                    ref={Complainref}
+                    options={ComplaindataOption}
+                    onKeyDown={(e) => handlecityKeypress(e, CityRef)}
                     id="selectedsale"
+                    // onChange={(selectedOption) => {
+                    //   if (selectedOption && selectedOption.value) {
+                    //     const labelPart = selectedOption.label.split("-")[1];
+                    //     setComplainselectdata(selectedOption.value);
+                    //     setComplainselectdatavalue({
+                    //       value: selectedOption.value,
+                    //       label: labelPart,
+                    //     });
+                    //   } else {
+                    //     setComplainselectdata("");
+                    //     setComplainselectdatavalue("");
+                    //   }
+                    // }}
+
                     onChange={(selectedOption) => {
-                      if (selectedOption && selectedOption.value) {
-                        const labelPart = selectedOption.label.split("-")[1];
-                        setReferenceselectdata(selectedOption.value);
-                        setReferenceselectdatavalue({
-                          value: selectedOption.value,
-                          label: labelPart,
-                        });
-                      } else {
-                        setReferenceselectdata("");
-                        setReferenceselectdatavalue("");
-                      }
-                    }}
+  if (selectedOption && selectedOption.value) {
+    setComplainselectdata(selectedOption.value);
+
+    setComplainselectdatavalue({
+      value: selectedOption.value,
+      label: selectedOption.label,   // full label
+    });
+  } else {
+    setComplainselectdata("");
+    setComplainselectdatavalue("");
+  }
+}}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();
@@ -4050,7 +4136,7 @@ const refoptions = Referenceapidata.map((item) => ({
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Referenceselectdata, 300),
+                      ...customStyles1(!Complainselectdata, isSidebarVisible ? (isLargeScreen ? 670 : 670): 670),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -4105,6 +4191,9 @@ const refoptions = Referenceapidata.map((item) => ({
                       color: "white",
                     }}
                   >
+                     <td className="border-dark" style={firstColWidth1}>
+                      Sr
+                    </td>
                     <td className="border-dark" style={firstColWidth}>
                       Date
                     </td>
@@ -4112,27 +4201,30 @@ const refoptions = Referenceapidata.map((item) => ({
                       Job#
                     </td>
                     <td className="border-dark" style={thirdColWidth}>
-                      Customer
+                    {isSidebarVisible ? (isLargeScreen ? 'Customer': 'Custm'):'Customer'}  
+
                     </td>
                     <td className="border-dark" style={forthColWidth}>
                       Mobile
                     </td>
 
                     <td className="border-dark" style={companyColWidth}>
-                      Company
+                   {isSidebarVisible ? (isLargeScreen ? 'Company': 'Comp'):'Company'}  
+
                     </td>
 
                     <td className="border-dark" style={fifthColWidth}>
                       Item
                     </td>
                     <td className="border-dark" style={forteenColWidth}>
-                      Compalint
+                    {isSidebarVisible ? (isLargeScreen ? 'Complaint': 'Complai'):'Complaint'}  
                     </td>
                     <td className="border-dark" style={sixthColWidth}>
-                      Technician
+                      {isSidebarVisible ? (isLargeScreen ? 'Technician': 'Techni'):'Technician'}  
                     </td>
                     <td className="border-dark" style={tenthColWidth}>
-                      Reference
+                    {isSidebarVisible ? (isLargeScreen ? 'Reference': 'Refer'):'Reference'}  
+
                     </td>
                     <td className="border-dark" style={seventhColWidth}>
                       Type
@@ -4143,6 +4235,10 @@ const refoptions = Referenceapidata.map((item) => ({
                     <td className="border-dark" style={ninhthColWidth}>
                       Day
                     </td>
+                     <td className="border-dark" style={thirteenColWidth1}>
+                      Pur Date
+                    </td>
+
                     <td className="border-dark" style={thirteenColWidth}>
                       Wrt
                     </td>
@@ -4182,7 +4278,7 @@ const refoptions = Referenceapidata.map((item) => ({
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="13" className="text-center">
+                        <td colSpan="15" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -4195,7 +4291,7 @@ const refoptions = Referenceapidata.map((item) => ({
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 13 }).map((_, colIndex) => (
+                            {Array.from({ length: 15 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -4204,6 +4300,8 @@ const refoptions = Referenceapidata.map((item) => ({
                         )
                       )}
                       <tr>
+                                                <td style={firstColWidth1}></td>
+
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
@@ -4217,7 +4315,8 @@ const refoptions = Referenceapidata.map((item) => ({
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
                         <td style={ninhthColWidth}></td>
-                                                <td style={thirteenColWidth}></td>
+                        <td style={thirteenColWidth1}></td>
+                        <td style={thirteenColWidth}></td>
 
                       </tr>
                     </>
@@ -4238,7 +4337,10 @@ const refoptions = Referenceapidata.map((item) => ({
                               color: fontcolor,
                             }}
                           >
-                            <td className="text-start" style={firstColWidth}>
+                            <td className="text-start" style={firstColWidth1}>
+                              {i + 1}
+                            </td>
+                            <td className="text-center" style={firstColWidth}>
                               {item.Date}
                             </td>
                             <td className="text-start" style={secondColWidth}>
@@ -4296,7 +4398,7 @@ const refoptions = Referenceapidata.map((item) => ({
                                 textOverflow: "ellipsis",
                               }}
                             >
-                              {item.Compalint}
+                              {item.Complaint}
                             </td>
                             <td
                               className="text-start"
@@ -4312,7 +4414,7 @@ const refoptions = Referenceapidata.map((item) => ({
                             </td>
                             <td
                               className="text-start"
-                              title={item.Item}
+                              title={item.Reference}
                               style={{
                                 ...tenthColWidth,
                                 whiteSpace: "nowrap",
@@ -4320,7 +4422,7 @@ const refoptions = Referenceapidata.map((item) => ({
                                 textOverflow: "ellipsis",
                               }}
                             >
-                              {item.Item}
+                              {item.Reference}
                             </td>
                             <td
                               className="text-start"
@@ -4349,9 +4451,16 @@ const refoptions = Referenceapidata.map((item) => ({
                             <td className="text-end" style={ninhthColWidth}>
                               {formatValue(item.Day)}
                             </td>
-                               <td className="text-end" style={thirteenColWidth}>
-                              {item.Warranty}
+                            <td className="text-start" style={thirteenColWidth1}>
+                              {item['Pur Date']}
                             </td>
+                            <td className="text-center" style={thirteenColWidth}>
+  {item.Warranty?.toUpperCase() === "YES" || item.Warranty?.toUpperCase() === "Y"
+    ? "Y"
+    : item.Warranty?.toUpperCase() === "NO" || item.Warranty?.toUpperCase() === "N"
+    ? "N"
+    : ""}
+</td>
                           </tr>
                         );
                       })}
@@ -4365,7 +4474,7 @@ const refoptions = Referenceapidata.map((item) => ({
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 13 }).map((_, colIndex) => (
+                          {Array.from({ length: 15 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -4373,6 +4482,8 @@ const refoptions = Referenceapidata.map((item) => ({
                         </tr>
                       ))}
                       <tr>
+                                                <td style={firstColWidth1}></td>
+
                         <td style={firstColWidth}></td>
                         <td style={secondColWidth}></td>
                         <td style={thirdColWidth}></td>
@@ -4385,6 +4496,8 @@ const refoptions = Referenceapidata.map((item) => ({
                         <td style={seventhColWidth}></td>
                         <td style={eighthColWidth}></td>
                         <td style={ninhthColWidth}></td>
+                                                <td style={thirteenColWidth1}></td>
+
                         <td style={thirteenColWidth}></td>
 
                       </tr>
@@ -4404,6 +4517,17 @@ const refoptions = Referenceapidata.map((item) => ({
               paddingRight: "8px",
             }}
           >
+              <div
+              style={{
+                ...firstColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+             <span className="mobileledger_total">
+                {formatValue(totalDebit)}
+              </span>  
+            </div>
             <div
               style={{
                 ...firstColWidth,
@@ -4494,6 +4618,17 @@ const refoptions = Referenceapidata.map((item) => ({
             >
               
             </div>
+             <div
+              style={{
+                ...thirteenColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              {/* <span className="mobileledger_total">
+                {formatValue(totalDebit)}
+              </span>   */}
+            </div>
             <div
               style={{
                 ...thirteenColWidth,
@@ -4501,7 +4636,9 @@ const refoptions = Referenceapidata.map((item) => ({
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              
+              {/* <span className="mobileledger_total">
+                {formatValue(totalDebit)}
+              </span>   */}
             </div>
 
           </div>

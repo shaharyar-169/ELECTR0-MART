@@ -1550,10 +1550,10 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
     width: "50px",
   };
   const sixthColWidth = {
-    width: "275px",
+    width: "270px",
   };
   const seventhColWidth = {
-    width: "275px",
+    width: "270px",
   };
   const eightColWidth = {
     width: "60px",
@@ -1561,8 +1561,8 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
   const ninthColWidth = {
     width: "100px",
   };
-   const tenthColWidth = {
-    width: "50px",
+  const TenthColWidth = {
+    width: "60px",
   };
   const sixthcol = {
     width: "8px",
@@ -2360,19 +2360,15 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                       ></i> */}
                     </td>
 
+
                      <td
                       className="border-dark"
-                      style={tenthColWidth}
-                      //   onClick={() => handleSorting("Item")}
+                      style={TenthColWidth}
+                      //   onClick={() => handleSorting("Qnty")}
                     >
                       Str
-                      {/* {" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Item")}
-                      ></i> */}
+                      
                     </td>
-
                     <td
                       className="border-dark"
                       style={eightColWidth}
@@ -2385,6 +2381,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                         style={getIconStyle("Qnty")}
                       ></i> */}
                     </td>
+
 
                     <td
                       className="border-dark"
@@ -2448,7 +2445,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length:9 }).map((_, colIndex) => (
+                            {Array.from({ length: 9 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -2463,7 +2460,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
-                                               <td style={tenthColWidth}></td>
+                                               <td style={TenthColWidth}></td>
 
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
@@ -2508,7 +2505,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                             <td className="text-start" style={seventhColWidth}>
                               {item.Item}
                             </td>
-                            <td className="text-start" style={seventhColWidth}>
+                              <td className="text-start" style={TenthColWidth}>
                               {item.Str}
                             </td>
                             <td className="text-end" style={eightColWidth}>
@@ -2530,7 +2527,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length:9 }).map((_, colIndex) => (
+                          {Array.from({ length: 9 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -2544,7 +2541,7 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                         <td style={forthColWidth}></td>
                         <td style={sixthColWidth}></td>
                         <td style={seventhColWidth}></td>
-                                                <td style={tenthColWidth}></td>
+                                                                       <td style={TenthColWidth}></td>
 
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
@@ -2629,9 +2626,9 @@ typeAndStoreRow3.eachCell((cell, colIndex) => {
                 {formatValue(ClosingBalance)}
               </span> */}
             </div>
-             <div
+              <div
               style={{
-                ...tenthColWidth,
+                ...TenthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}

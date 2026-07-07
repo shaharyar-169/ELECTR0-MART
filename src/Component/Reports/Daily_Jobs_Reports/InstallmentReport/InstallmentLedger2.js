@@ -524,441 +524,740 @@ useEffect(() => {
   };
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-  const exportPDFHandler = () => {
-    // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+// const exportPDFHandler = () => {
+//   const doc = new jsPDF({ orientation: "landscape" });
 
-    // Define table data (rows)
-    const rows = tableData.map((item) => [
-      item.Date,
-      item["Trn#"],
-      item.Type,
-      item.Description,
-      formatValue(item.Sale),
-      formatValue(item.Collection),
-      formatValue(item.Balance),
-    ]);
+//   // ─── Table data ───────────────────────────────────────────────
+//   const rows = tableData.map((item) => [
+//     item.Date,
+//     item["Trn#"],
+//     item.Type,
+//     item.Description,
+//     formatValue(item.Sale),
+//     formatValue(item.Collection),
+//     formatValue(item.Balance),
+//   ]);
 
-       // Define table column headers and individual column widths
+//   const headers = [
+//     "Date",
+//     "Trn#",
+//     "Type",
+//     "Description",
+//     "Sale",
+//     "Collection",
+//     "Balance",
+//   ];
+//   const columnWidths = [25, 20, 17, 110, 25, 25, 25];
+//   const totalWidth = columnWidths.reduce((acc, w) => acc + w, 0);
+//   const pageHeight = doc.internal.pageSize.height;
+//   const paddingTop = 15;
+//   const footerReserve = 18;
 
-    const headers = [
-      "Date",
-      "Trn#",
-      "Type",
-      "Description",
-      "Sale",
-      "Collection",
-      "Balance",
-    ];
-    const columnWidths = [25, 20, 17, 110, 25, 25, 25];
+//   // ─── Helper: total table width ──────────────────────────────
+//   const getTotalTableWidth = () => {
+//     let total = 0;
+//     columnWidths.forEach((w) => (total += w));
+//     return total;
+//   };
 
-    // Calculate total table width
-    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+//   // ─── Safe form header ────────────────────────────────────────
+//   const drawFormHeader = (doc, startY) => {
+//     const pageWidth = doc.internal.pageSize.width;
+//     const formWidth = 300;
+//     const startX = (pageWidth - formWidth) / 2;
 
-    // Define page height and padding
-    const pageHeight = doc.internal.pageSize.height;
-    const paddingTop = 15;
+//     const leftX = startX;
+//     const rightX = startX + formWidth / 2;
+//     const thirdColX = rightX + 60;
 
-const drawFormHeader = (doc, startY) => {
-  const pageWidth = doc.internal.pageSize.width;
-  const formWidth = 300;
-  const startX = (pageWidth - formWidth) / 2;
+//     const labelWidth = 28;
+//     const fieldHeight = 6;
+//     const gapY = 2;
 
-  // Left column (for A/C, Name, Address, Profession)
-  const leftX = startX;
+//     doc.setFont("verdana-regular", "normal");
+//     doc.setFontSize(10);
 
-  // Right column (Sale Date, Sale Amt, Rent Amt, Balance, Ins Num)
-  const rightX = startX + formWidth / 2; // shift more to right
+//     // Safe field drawer – checks every coordinate
+//     const drawField = (label, value, x, y, fieldWidth, alignRight = false, valueColor = [0, 0, 0]) => {
+//       // If any coordinate is not a number, skip drawing to avoid errors
+//       if (isNaN(x) || isNaN(y) || isNaN(fieldWidth)) return;
 
-  // Middle-right / third column (Ins Amt, center between officeContact and right)
-  const thirdColX = rightX + 60; // adjust width so Ins Amt aligns in middle
+//       const fieldX = x + labelWidth + 2;
+//       if (label) doc.text(`${label} :`, x + labelWidth, y + 4, { align: "right" });
+//       doc.rect(fieldX, y, fieldWidth, fieldHeight);
 
-  const centerFieldWidth = 50;
-  const rightFieldWidth = 50;
-  const labelWidth = 28;
-  const fieldHeight = 6;
-  const gapY = 2;
+//       if (value) {
+//         doc.setTextColor(...valueColor);
+//         const textX = alignRight ? fieldX + fieldWidth - 2 : fieldX + 2;
+//         doc.text(String(value), textX, y + 4, { align: alignRight ? "right" : "left" });
+//         doc.setTextColor(0, 0, 0);
+//       }
+//     };
 
-  doc.setFont("verdana-regular", "normal");
-  doc.setFontSize(10);
+//     let y = startY;
 
-  const drawField = (label, value, x, y, fieldWidth, alignRight = false, valueColor = [0, 0, 0]) => {
-    const fieldX = x + labelWidth + 2;
+//     // ─── Rows 1–7 ──────────────────────────────────────────────
+//     drawField("A/C", "14-01-0001-ADIL MASIH", leftX, y, 90);
+//     drawField("Sale Date", "", rightX, y, 50, true);
+//     y += fieldHeight + gapY;
 
-    if (label) doc.text(`${label} :`, x + labelWidth, y + 4, { align: "right" });
-    doc.rect(fieldX, y, fieldWidth, fieldHeight);
+//     drawField("Name", "AFTAB AHMAD ( AFTAB AHMAD )", leftX, y, 90);
+//     drawField("Sale Amt", "", rightX, y, 50, true);
+//     y += fieldHeight + gapY;
 
-    if (value) {
-      doc.setTextColor(...valueColor);
-      doc.text(
-        String(value),
-        alignRight ? fieldX + fieldWidth - 2 : fieldX + 2,
-        y + 4,
-        { align: alignRight ? "right" : "left" }
-      );
-    }
-    doc.setTextColor(0, 0, 0);
+//     drawField("Address", "", leftX, y, 90);
+//     drawField("Rent Amt", "", rightX, y, 50, true);
+//     y += fieldHeight + gapY;
+
+//     drawField("", "", leftX, y, 90);
+//     drawField("Total Amount", "", rightX, y, 50, true);
+//     y += fieldHeight + gapY;
+
+//     drawField("Sales Man", "AFTAB AHMAD", leftX, y, 90);
+//     drawField("Balance", "", rightX, y, 50, true, [255, 0, 0]);
+//     y += fieldHeight + gapY;
+
+//     drawField("Collector", "ZUBAIR", leftX, y, 90);
+//     drawField("PrmDate", "", rightX, y, 50, true);
+//     y += fieldHeight + gapY;
+
+//     drawField("Verify By", "", leftX, y, 90);
+//     drawField("Ins Num", "", rightX, y, 50, true);
+//     y += fieldHeight + gapY;
+
+//     // Partial line
+//     doc.setLineWidth(0.4);
+//     doc.line(startX, y + 4, rightX + 50, y + 4);
+//     y += 8;
+
+//     // Profession / officeContact / Ins Amt
+//     drawField("Profession", "", leftX, y, 90);
+//     drawField("officeContact", "", rightX - 15, y, 50);
+//     drawField("Ins Amt", "", thirdColX, y, 50, true);
+//     y += fieldHeight + gapY;
+
+//     drawField("OfficeAdd1", "", leftX, y, 90);
+//     y += fieldHeight + gapY;
+
+//     drawField("officeAdd2", "", leftX, y, 90);
+//     y += fieldHeight + gapY;
+
+//     // Line before Guarantor
+//     doc.setLineWidth(0.4);
+//     doc.line(startX, y + 4, startX + formWidth, y + 4);
+//     y += 8;
+
+//     // ─── Guarantor & Witness ──────────────────────────────────
+//     const sideWidth = 90;
+//     const halfWidth = Math.floor((sideWidth - 2) / 2);
+
+//     drawField("Guarantor", "", leftX, y, sideWidth);
+//     drawField("Witness", "", rightX, y, sideWidth);
+//     y += fieldHeight + gapY;
+
+//     drawField("Father Name", "", leftX, y, sideWidth);
+//     drawField("Father Name", "", rightX, y, sideWidth);
+//     y += fieldHeight + gapY;
+
+//     drawField("Address", "", leftX, y, sideWidth);
+//     drawField("Address", "", rightX, y, sideWidth);
+//     y += fieldHeight + gapY;
+
+//     drawField("", "", leftX, y, sideWidth);
+//     drawField("", "", rightX, y, sideWidth);
+//     y += fieldHeight + gapY;
+
+//     // Mobile & CNIC (split)
+//     drawField("Mobile", "", leftX, y, halfWidth);
+//     drawField("CNIC", "", leftX + labelWidth + halfWidth + 2, y, halfWidth);
+
+//     drawField("Mobile", "", rightX, y, halfWidth);
+//     drawField("CNIC", "", rightX + labelWidth + halfWidth + 2, y, halfWidth);
+//     y += fieldHeight + gapY;
+
+//     // Final line
+//     doc.setLineWidth(0.4);
+//     doc.line(startX, y + 4, startX + formWidth, y + 4);
+
+//     return y + 10;
+//   };
+
+//   // ─── Table headers ──────────────────────────────────────────
+//   const addTableHeaders = (startX, startY) => {
+//     doc.setFont("verdana", "bold");
+//     doc.setFontSize(10);
+//     let currentX = startX;
+//     headers.forEach((header, index) => {
+//       const cellWidth = columnWidths[index];
+//       const cellHeight = 6;
+//       const cellX = currentX + cellWidth / 2;
+//       const cellY = startY + cellHeight / 2 + 1.5;
+//       doc.setFillColor(200, 200, 200);
+//       doc.rect(currentX, startY, cellWidth, cellHeight, "F");
+//       doc.setLineWidth(0.2);
+//       doc.rect(currentX, startY, cellWidth, cellHeight);
+//       doc.setTextColor(0);
+//       doc.text(header, cellX, cellY, { align: "center" });
+//       currentX += cellWidth;
+//     });
+//   };
+
+//   // ─── Footer ──────────────────────────────────────────────────
+//   const drawFooter = () => {
+//     const tableWidth = getTotalTableWidth();
+//     const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+//     const lineY = pageHeight - 12;
+//     doc.setLineWidth(0.3);
+//     doc.line(lineX, lineY, lineX + tableWidth, lineY);
+//     doc.setFont("verdana-regular", "normal");
+//     doc.setFontSize(10);
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(`Crystal Solution    ${date}    ${time}`, lineX + 2, lineY + 4);
+//   };
+
+//   // ─── Table rows (dynamic) ──────────────────────────────────
+//   const addTableRows = (startX, startY, startIndex) => {
+//     const lineHeight = 4;
+//     const tableWidth = getTotalTableWidth();
+//     let currentY = startY;
+//     let currentRowIndex = startIndex;
+
+//     while (currentRowIndex < rows.length) {
+//       const row = rows[currentRowIndex];
+//       const isOddRow = currentRowIndex % 2 !== 0;
+//       const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+//       const isTotalRow = currentRowIndex === rows.length - 1;
+//       const textColor = isRedRow ? [255, 0, 0] : [0, 0, 0];
+
+//       const splitRow = row.map((cell, idx) => {
+//         const text = String(cell).trim();
+//         const maxWidth = columnWidths[idx] - 4;
+//         const textWidth =
+//           (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
+//           doc.internal.scaleFactor;
+//         if (textWidth <= maxWidth) return [text];
+//         return doc.splitTextToSize(text, maxWidth);
+//       });
+
+//       const maxLines = Math.max(...splitRow.map((c) => c.length));
+//       const rowHeight = maxLines * lineHeight + 2;
+
+//       if (currentY + rowHeight > pageHeight - footerReserve) {
+//         drawFooter();
+//         return currentRowIndex;
+//       }
+
+//       if (isOddRow && !isTotalRow) {
+//         doc.setFillColor(240);
+//         doc.rect(startX, currentY, tableWidth, rowHeight, "F");
+//       }
+//       doc.setDrawColor(0);
+
+//       if (isTotalRow) {
+//         doc.setFont("verdana", "bold");
+//         doc.setLineWidth(0.3);
+//         doc.line(startX, currentY, startX + tableWidth, currentY);
+//         doc.line(startX, currentY + 0.5, startX + tableWidth, currentY + 0.5);
+//         doc.line(startX, currentY + rowHeight, startX + tableWidth, currentY + rowHeight);
+//         doc.line(startX, currentY + rowHeight - 0.5, startX + tableWidth, currentY + rowHeight - 0.5);
+//         doc.setLineWidth(0.2);
+//         doc.line(startX, currentY, startX, currentY + rowHeight);
+//         doc.line(startX + tableWidth, currentY, startX + tableWidth, currentY + rowHeight);
+//       } else {
+//         doc.setLineWidth(0.2);
+//         doc.rect(startX, currentY, tableWidth, rowHeight);
+//         doc.setFont("verdana-regular", "normal");
+//       }
+
+//       let currentX = startX;
+//       splitRow.forEach((textArray, cellIndex) => {
+//         const cellWidth = columnWidths[cellIndex];
+//         doc.setTextColor(...textColor);
+//         doc.setFontSize(10);
+//         const textY =
+//           currentY + (rowHeight - textArray.length * lineHeight) / 2 + lineHeight - 1;
+
+//         if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+//           doc.text(textArray, currentX + cellWidth / 2, textY, { align: "center" });
+//         } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+//           doc.text(textArray, currentX + cellWidth - 2, textY, { align: "right" });
+//         } else {
+//           doc.text(textArray, currentX + 2, textY);
+//         }
+
+//         if (cellIndex < splitRow.length - 1) {
+//           doc.line(currentX + cellWidth, currentY, currentX + cellWidth, currentY + rowHeight);
+//         }
+//         currentX += cellWidth;
+//       });
+
+//       currentY += rowHeight;
+//       currentRowIndex++;
+//       if (isTotalRow) doc.setFont("verdana-regular", "normal");
+//     }
+
+//     drawFooter();
+//     return rows.length;
+//   };
+
+//   // ─── Pagination (form header only on first page) ──────────
+//   const handlePagination = () => {
+//     const addTitle = (title, y, fontSize = 18) => {
+//       doc.setFontSize(fontSize);
+//       doc.text(title, doc.internal.pageSize.width / 2, y, { align: "center" });
+//     };
+
+//     let rowIndex = 0;
+//     let pageNumber = 1;
+//     let currentY = paddingTop;
+
+//     while (rowIndex < rows.length) {
+//       if (pageNumber > 1) {
+//         doc.addPage();
+//         currentY = paddingTop;
+//       }
+
+//       // Title
+//       doc.setFont("helvetica", "300");
+//       addTitle(comapnyname, currentY, 18);
+//       currentY += 5;
+
+//       doc.setFont("verdana-regular", "normal");
+//       doc.setFontSize(10);
+//       addTitle(
+//         `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
+//         currentY,
+//         12
+//       );
+//       currentY += 8;
+
+//       // Form header – only on first page
+//       if (pageNumber === 1) {
+//         currentY = drawFormHeader(doc, currentY);
+//       } else {
+//         currentY += 2; // tiny gap
+//       }
+
+//       // Table headers
+//       const headersStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+//       addTableHeaders(headersStartX, currentY);
+//       currentY += 6;
+
+//       // Rows
+//       const nextRowIndex = addTableRows(headersStartX, currentY, rowIndex);
+
+//       if (nextRowIndex < rows.length) {
+//         rowIndex = nextRowIndex;
+//         pageNumber++;
+//       } else {
+//         break;
+//       }
+//     }
+//   };
+
+//   // ─── Date / time ─────────────────────────────────────────────
+//   const getCurrentDate = () => {
+//     const today = new Date();
+//     const dd = String(today.getDate()).padStart(2, "0");
+//     const mm = String(today.getMonth() + 1).padStart(2, "0");
+//     const yyyy = today.getFullYear();
+//     return `${dd}-${mm}-${yyyy}`;
+//   };
+//   const getCurrentTime = () => {
+//     const today = new Date();
+//     const hh = String(today.getHours()).padStart(2, "0");
+//     const mm = String(today.getMinutes()).padStart(2, "0");
+//     const ss = String(today.getSeconds()).padStart(2, "0");
+//     return hh + ":" + mm + ":" + ss;
+//   };
+//   const date = getCurrentDate();
+//   const time = getCurrentTime();
+
+//   // ─── Generate ────────────────────────────────────────────────
+//   handlePagination();
+
+//   const totalPages = doc.getNumberOfPages();
+//   for (let p = 1; p <= totalPages; p++) {
+//     doc.setPage(p);
+//     doc.setFont("verdana-regular", "normal");
+//     doc.setFontSize(10);
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(
+//       `Page ${p} / ${totalPages}`,
+//       doc.internal.pageSize.width - 10,
+//       pageHeight - 8,
+//       { align: "right" }
+//     );
+//   }
+
+//   doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
+// };
+
+const exportPDFHandler = () => {
+  const doc = new jsPDF({ orientation: "landscape" });
+
+  // ─── Table data ───────────────────────────────────────────────
+  const rows = tableData.map((item) => [
+    item.Date,
+    item["Trn#"],
+    item.Type,
+    item.Description,
+    formatValue(item.Sale),
+    formatValue(item.Collection),
+    formatValue(item.Balance),
+  ]);
+
+  const headers = [
+    "Date",
+    "Trn#",
+    "Type",
+    "Description",
+    "Sale",
+    "Collection",
+    "Balance",
+  ];
+  const columnWidths = [27, 20, 17, 110, 25, 25, 25];
+  const totalWidth = columnWidths.reduce((acc, w) => acc + w, 0);
+  const pageHeight = doc.internal.pageSize.height;
+  const paddingTop = 15;
+  const footerReserve = 18;
+
+  // ─── Helper: total table width ──────────────────────────────
+  const getTotalTableWidth = () => {
+    let total = 0;
+    columnWidths.forEach((w) => (total += w));
+    return total;
   };
 
-  let y = startY;
+  // ─── Safe form header ────────────────────────────────────────
+  const drawFormHeader = (doc, startY) => {
+    const pageWidth = doc.internal.pageSize.width;
+    const formWidth = 300;
+    const startX = (pageWidth - formWidth) / 2;
 
-  // ───────────── ROW 1 ─────────────
-  drawField("A/C", "14-01-0001-ADIL MASIH", leftX, y, 90);
-  drawField("Sale Date", "", rightX, y, 50, true);
-  y += fieldHeight + gapY;
+    const leftX = startX;
+    const rightX = startX + formWidth / 2;
+    const thirdColX = rightX + 60;
 
-  // ───────────── ROW 2 ─────────────
-  drawField("Name", "AFTAB AHMAD ( AFTAB AHMAD )", leftX, y, 90);
-  drawField("Sale Amt", "", rightX, y, 50, true);
-  y += fieldHeight + gapY;
+    const labelWidth = 28;
+    const fieldHeight = 6;
+    const gapY = 2;
 
-  // ───────────── ROW 3 ─────────────
-  drawField("Address", "", leftX, y, 90);
-  drawField("Rent Amt", "", rightX, y, 50, true);
-  y += fieldHeight + gapY;
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
 
-  // ───────────── ROW 4 ─────────────
-  drawField("", "", leftX, y, 90);
-  drawField("Total Amount", "", rightX, y, 50, true);
-  y += fieldHeight + gapY;
+    // Safe field drawer – checks every coordinate
+    const drawField = (label, value, x, y, fieldWidth, alignRight = false, valueColor = [0, 0, 0]) => {
+      // If any coordinate is not a number, skip drawing to avoid errors
+      if (isNaN(x) || isNaN(y) || isNaN(fieldWidth)) return;
 
-  // ───────────── ROW 5 ─────────────
-  drawField("Sales Man", "AFTAB AHMAD", leftX, y, 90);
-  drawField("Balance", "", rightX, y, 50, true, [255, 0, 0]);
-  y += fieldHeight + gapY;
+      const fieldX = x + labelWidth + 2;
+      if (label) doc.text(`${label} :`, x + labelWidth, y + 4, { align: "right" });
+      doc.rect(fieldX, y, fieldWidth, fieldHeight);
 
-  // ───────────── ROW 6 ─────────────
-  drawField("Collector", "ZUBAIR", leftX, y, 90);
-  drawField("PrmDate", "", rightX, y, 50, true);
-  y += fieldHeight + gapY;
-
-  // ───────────── ROW 7 ─────────────
-  drawField("Verify By", "", leftX, y, 90);
-  drawField("Ins Num", "", rightX, y, 50, true); // stay under Balance
-  y += fieldHeight + gapY;
-
-  // ───────────── PARTIAL LINE ─────────────
-  doc.setLineWidth(0.4);
-  doc.line(startX, y + 4, rightX + 50, y + 4); // line ends at Ins Num
-  y += 8;
-
-  // ───────────── PROFESSION / OFFICE CONTACT / INS AMT ─────────────
-  drawField("Profession", "", leftX, y, 90); // left
-  drawField("officeContact", "", rightX + 10, y, centerFieldWidth); // center between Prof & Ins Amt
-  drawField("Ins Amt", "", thirdColX, y, rightFieldWidth, true); // Ins Amt aligned in middle-right
-  y += fieldHeight + gapY;
-
-  drawField("OfficeAdd1", "", leftX, y, 90);
-  y += fieldHeight + gapY;
-
-  drawField("officeAdd2", "", leftX, y, 90);
-  y += fieldHeight + gapY;
-
-  // ───────────── FINAL LINE ─────────────
-  doc.setLineWidth(0.4);
-  doc.line(startX, y + 4, startX + formWidth, y + 4);
-
-  return y + 10;
-};
-
-
-    const addTableHeaders = (startX, startY) => {
-      // Set font style and size for headers
-      doc.setFont("verdana", "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
-
-      headers.forEach((header, index) => {
-        const cellWidth = columnWidths[index];
-        const cellHeight = 6; // Height of the header row
-        const cellX = startX + cellWidth / 2; // Center the text horizontally
-        const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-        // Draw the grey background for the header
-        doc.setFillColor(200, 200, 200); // Grey color
-        doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-        // Draw the outer border
-        doc.setLineWidth(0.2); // Set the width of the outer border
-        doc.rect(startX, startY, cellWidth, cellHeight);
-
-        // Set text alignment to center
-        doc.setTextColor(0); // Set text color to black
-        doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-        startX += columnWidths[index]; // Move to the next column
-      });
+      if (value) {
+        doc.setTextColor(...valueColor);
+        const textX = alignRight ? fieldX + fieldWidth - 2 : fieldX + 2;
+        doc.text(String(value), textX, y + 4, { align: alignRight ? "right" : "left" });
+        doc.setTextColor(0, 0, 0);
+      }
     };
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5;
-      const fontSize = 10;
-      const boldFont = 400;
-      const normalFont = getfontstyle;
-      const tableWidth = getTotalTableWidth();
+    let y = startY;
 
-      doc.setFontSize(11);
+    // ─── Rows 1–7 ──────────────────────────────────────────────
+    drawField("A/C", Companyselectdatavalue.label, leftX, y, 90);
+    drawField("Sale Date", headerData.InvDate, rightX, y, 50, true);
+    y += fieldHeight + gapY;
 
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0;
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-        const isTotalRow = i === rows.length - 1;
-        let textColor = [0, 0, 0];
-        let fontName = normalFont;
+    drawField("Name", headerData.Name, leftX, y, 90);
+    drawField("Sale Amt", headerData.SaleAmt, rightX, y, 50, true);
+    y += fieldHeight + gapY;
 
-        if (isRedRow) {
-          textColor = [255, 0, 0];
-          fontName = boldFont;
-        }
+    drawField("Address",  headerData.Address1 , leftX, y, 90);
+    drawField("Rent Amt", headerData.RentAmt, rightX, y, 50, true);
+    y += fieldHeight + gapY;
 
-     
+    drawField("", headerData.Address2, leftX, y, 90);
+    drawField("Total Amount",  headerData.TotalAmt, rightX, y, 50, true);
+    y += fieldHeight + gapY;
 
-        if (isOddRow) {
-          doc.setFillColor(240);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F",
-          );
-        }
+    drawField("Sales Man", headerData.SalesMan, leftX, y, 90);
+    drawField("Balance",     (
+                         parseFloat(
+                          headerData?.TotalAmt?.replace(/,/g, "") || 0,
+                        ) -
+                        parseFloat(headerData?.Advance?.replace(/,/g, "") || 0)
+                      ).toLocaleString(), rightX, y, 50, true, [255, 0, 0]);
+    y += fieldHeight + gapY;
 
-        doc.setDrawColor(0);
+    drawField("Collector",  headerData.Collector, leftX, y, 90);
+    drawField("PrmDate", headerData.PrmDate, rightX, y, 50, true);
+    y += fieldHeight + gapY;
 
-        doc.setLineWidth(0.2);
-        doc.rect(
-          startX,
-          startY + (i - startIndex + 2) * rowHeight,
-          tableWidth,
-          rowHeight,
-        );
+    drawField("Verify By", headerData.verify, leftX, y, 90);
+    drawField("Ins Num", headerData.InsNum, rightX, y, 50, true);
+    y += fieldHeight + gapY;
 
-        row.forEach((cell, cellIndex) => {
-          // ⭐ NEW FIX — Perfect vertical centering
-          const cellY =
-            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+    // Partial line
+    doc.setLineWidth(0.4);
+    doc.line(startX, y + 4, rightX + 50, y + 4);
+    y += 8;
 
-          const cellX = startX + 2;
+    // Profession / officeContact / Ins Amt
+    drawField("Profession", headerData.Profession, leftX, y, 90);
+    drawField("officeContact", headerData.OfficeContact, rightX - 15, y, 50);
+    drawField("Ins Amt", headerData.InsAmt, thirdColX, y, 50, true);
+    y += fieldHeight + gapY;
 
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+    drawField("OfficeAdd1", headerData.OfficeAdd1, leftX, y, 90);
+    y += fieldHeight + gapY;
 
-          if (!isTotalRow) {
-            doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-          }
+    drawField("officeAdd2", headerData.OfficeAdd2, leftX, y, 90);
+    y += fieldHeight + gapY;
 
-          const cellValue = String(cell);
+    // Line before Guarantor
+    doc.setLineWidth(0.4);
+    doc.line(startX, y + 4, startX + formWidth, y + 4);
+    y += 8;
 
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          }
-          
+    // ─── Guarantor & Witness ──────────────────────────────────
+    const sideWidth = 100;
+    const halfWidth = Math.floor((sideWidth-15 - 2) / 2);
 
-          if (cellIndex < row.length - 1) {
-            doc.setLineWidth(0.2);
-            doc.line(
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 2) * rowHeight,
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight,
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
+    drawField("Guarantor", headerData.GrnName, leftX, y, sideWidth);
+    drawField("Witness",  headerData.WitName, rightX, y, sideWidth);
+    y += fieldHeight + gapY;
 
-        startX = (doc.internal.pageSize.width - tableWidth) / 2;
+    drawField("Father Name", headerData.GrnFather, leftX, y, sideWidth);
+    drawField("Father Name", headerData.WitFather, rightX, y, sideWidth);
+    y += fieldHeight + gapY;
 
-     
+    drawField("Address", headerData.GrnAdd1 , leftX, y, sideWidth);
+    drawField("Address", headerData.WitAdd1, rightX, y, sideWidth);
+    y += fieldHeight + gapY;
+
+    drawField("", headerData.GrnAdd2 , leftX, y, sideWidth);
+    drawField("", headerData.WitAdd2, rightX, y, sideWidth);
+    y += fieldHeight + gapY;
+
+    // Mobile & CNIC (split)
+    drawField("Mobile", headerData.GrnMobile, leftX, y, halfWidth);
+    drawField("CNIC", headerData.GrnNic, leftX-12 + labelWidth + halfWidth + 2, y, halfWidth);
+
+    drawField("Mobile", headerData.WitMobile, rightX, y, halfWidth);
+    drawField("CNIC", headerData.WitNic, rightX-12 + labelWidth + halfWidth + 2, y, halfWidth);
+    y += fieldHeight + gapY;
+
+    // Final line
+    doc.setLineWidth(0.4);
+    doc.line(startX, y + 4, startX + formWidth, y + 4);
+
+    return y + 10;
+  };
+
+  // ─── Table headers ──────────────────────────────────────────
+  const addTableHeaders = (startX, startY) => {
+    doc.setFont("verdana", "bold");
+    doc.setFontSize(10);
+    let currentX = startX;
+    headers.forEach((header, index) => {
+      const cellWidth = columnWidths[index];
+      const cellHeight = 6;
+      const cellX = currentX + cellWidth / 2;
+      const cellY = startY + cellHeight / 2 + 1.5;
+      doc.setFillColor(200, 200, 200);
+      doc.rect(currentX, startY, cellWidth, cellHeight, "F");
+      doc.setLineWidth(0.2);
+      doc.rect(currentX, startY, cellWidth, cellHeight);
+      doc.setTextColor(0);
+      doc.text(header, cellX, cellY, { align: "center" });
+      currentX += cellWidth;
+    });
+  };
+
+  // ─── Footer ──────────────────────────────────────────────────
+  const drawFooter = () => {
+    const tableWidth = getTotalTableWidth();
+    const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+    const lineY = pageHeight - 12;
+    doc.setLineWidth(0.3);
+    doc.line(lineX, lineY, lineX + tableWidth, lineY);
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Crystal Solution    ${date}    ${time}`, lineX + 2, lineY + 4);
+  };
+
+  // ─── Table rows (dynamic, NO total row) ────────────────────
+ const addTableRows = (startX, startY, startIndex) => {
+  const lineHeight = 4;
+  const tableWidth = getTotalTableWidth();
+  let currentY = startY;
+  let currentRowIndex = startIndex;
+
+  while (currentRowIndex < rows.length) {
+    const row = rows[currentRowIndex];
+    const isOddRow = currentRowIndex % 2 !== 0;
+    const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+    const textColor = isRedRow ? [255, 0, 0] : [0, 0, 0];
+
+    // ─── Split each cell, but DO NOT split for Date, Trn#, Type ───
+    const splitRow = row.map((cell, idx) => {
+      const text = String(cell).trim();
+      // Skip wrapping for columns 0, 1, 2 (Date, Trn#, Type)
+      if (idx === 0 || idx === 1 || idx === 2) {
+        return [text]; // keep as single line
+      }
+      const maxWidth = columnWidths[idx] - 4;
+      const textWidth =
+        (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
+        doc.internal.scaleFactor;
+      if (textWidth <= maxWidth) return [text];
+      return doc.splitTextToSize(text, maxWidth);
+    });
+
+    const maxLines = Math.max(...splitRow.map((c) => c.length));
+    const rowHeight = maxLines * lineHeight + 2;
+
+    if (currentY + rowHeight > pageHeight - footerReserve) {
+      drawFooter();
+      return currentRowIndex;
+    }
+
+    // ─── Draw background and borders (unchanged) ───
+    if (isOddRow) {
+      doc.setFillColor(240);
+      doc.rect(startX, currentY, tableWidth, rowHeight, "F");
+    }
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    doc.rect(startX, currentY, tableWidth, rowHeight);
+    doc.setFont("verdana-regular", "normal");
+
+    // ─── Draw cell content (unchanged) ───
+    let currentX = startX;
+    splitRow.forEach((textArray, cellIndex) => {
+      const cellWidth = columnWidths[cellIndex];
+      doc.setTextColor(...textColor);
+      doc.setFontSize(10);
+      const textY =
+        currentY + (rowHeight - textArray.length * lineHeight) / 2 + lineHeight - 1;
+
+      if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
+        doc.text(textArray, currentX + cellWidth / 2, textY, { align: "center" });
+      } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
+        doc.text(textArray, currentX + cellWidth - 2, textY, { align: "right" });
+      } else {
+        doc.text(textArray, currentX + 2, textY);
       }
 
-      const lineWidth = tableWidth;
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-      const lineY = pageHeight - 15;
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 11;
-      const headingX = lineX + 2;
-      const headingY = lineY + 5;
-      doc.setFont("verdana-regular", "normal");
-      doc.setFontSize(10);
-      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-    };
+      if (cellIndex < splitRow.length - 1) {
+        doc.line(currentX + cellWidth, currentY, currentX + cellWidth, currentY + rowHeight);
+      }
+      currentX += cellWidth;
+    });
 
-    // Function to calculate total table width
-    const getTotalTableWidth = () => {
-      let totalWidth = 0;
-      columnWidths.forEach((width) => (totalWidth += width));
-      return totalWidth;
-    };
-
-    // Function to add a new page and reset startY
-    const addNewPage = (startY) => {
-      doc.addPage();
-      return paddingTop; // Set startY for each new page
-    };
-
-    // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
-
-    // Function to handle pagination
-    const handlePagination = () => {
-      // Define the addTitle function
-      const addTitle = (
-        title,
-        date,
-        time,
-        pageNumber,
-        startY,
-        titleFontSize = 18,
-        pageNumberFontSize = 10,
-      ) => {
-        doc.setFontSize(titleFontSize); // Set the font size for the title
-        doc.text(title, doc.internal.pageSize.width / 2, startY, {
-          align: "center",
-        });
-
-        // Calculate the x-coordinate for the right corner
-        const rightX = doc.internal.pageSize.width - 10;
-
-               // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
-          `Page ${pageNumber}`,
-          rightX - 5,
-          doc.internal.pageSize.height - 10,
-          { align: "right" },
-        );
-      };
-
-      let currentPageIndex = 0;
-      let startY = paddingTop; // Initialize startY
-      let pageNumber = 1; // Initialize page number
-
-      // while (currentPageIndex * rowsPerPage < rows.length) {
-      //   doc.setFontSize(10);
-      //   doc.setFont("helvetica", "300");
-      //   addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
-      //   startY += 5; // Adjust vertical position for the company title
-
-      //   doc.setFont("verdana-regular", "normal");
-      //   doc.setFontSize(10);
-      //   addTitle(
-      //     `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
-      //     "",
-      //     "",
-      //     pageNumber,
-      //     startY,
-      //     12,
-      //   ); // Render sale report title with decreased font size, provide the time, and page number
-      //   startY += 5;
-      //   startY += 1; // Adjust vertical position for the labels
-
-      //   addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
-      //   const startIndex = currentPageIndex * rowsPerPage;
-      //   const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-      //   startY = addTableRows(
-      //     (doc.internal.pageSize.width - totalWidth) / 2,
-      //     startY,
-      //     startIndex,
-      //     endIndex,
-      //   );
-      //   if (endIndex < rows.length) {
-      //     startY = addNewPage(startY); // Add new page and update startY
-      //     pageNumber++; // Increment page number
-      //   }
-      //   currentPageIndex++;
-      // }
-
-      while (currentPageIndex * rowsPerPage < rows.length) {
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "300");
-
-  // Company Name
-  addTitle(comapnyname, 12, 12, pageNumber, startY, 18);
-  startY += 5;
-
-  // Report Title
-  doc.setFont("verdana-regular", "normal");
-  doc.setFontSize(10);
-
-  addTitle(
-    `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
-    "",
-    "",
-    pageNumber,
-    startY,
-    12
-  );
-
-  startY += 8;
-
-  // 🟢 1️⃣ DRAW FORM HEADER (YOUR IMAGE LAYOUT)
-  let currentY = drawFormHeader(doc, startY);
-
-  // 🟢 2️⃣ TABLE HEADERS BELOW FORM
-  addTableHeaders(
-    (doc.internal.pageSize.width - totalWidth) / 2,
-    currentY
-  );
-
-  const startIndex = currentPageIndex * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-
-  // 🟢 3️⃣ TABLE ROWS
-  startY = addTableRows(
-    (doc.internal.pageSize.width - totalWidth) / 2,
-    currentY,
-    startIndex,
-    endIndex
-  );
-
-  if (endIndex < rows.length) {
-    startY = addNewPage(startY);
-    pageNumber++;
+    currentY += rowHeight;
+    currentRowIndex++;
   }
 
-  currentPageIndex++;
-}
+  drawFooter();
+  return rows.length;
+};
 
+  // ─── Pagination (form header only on first page) ──────────
+  const handlePagination = () => {
+    const addTitle = (title, y, fontSize = 18) => {
+      doc.setFontSize(fontSize);
+      doc.text(title, doc.internal.pageSize.width / 2, y, { align: "center" });
     };
 
-    const getCurrentDate = () => {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
-    };
+    let rowIndex = 0;
+    let pageNumber = 1;
+    let currentY = paddingTop;
 
-    // Function to get current time in the format HH:MM:SS
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return hh + ":" + mm + ":" + ss;
-    };
+    while (rowIndex < rows.length) {
+      if (pageNumber > 1) {
+        doc.addPage();
+        currentY = paddingTop;
+      }
 
-    const date = getCurrentDate(); // Get current date
-    const time = getCurrentTime(); // Get current time
+      // Title
+      doc.setFont("helvetica", "300");
+      addTitle(comapnyname, currentY, 18);
+      currentY += 5;
 
-    // Call function to handle pagination
-    handlePagination();
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      addTitle(
+        `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
+        currentY,
+        12
+      );
+      currentY += 8;
 
-    // Save the PDF files
-    doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
+      // Form header – only on first page
+      if (pageNumber === 1) {
+        currentY = drawFormHeader(doc, currentY);
+      } else {
+        currentY += 2; // tiny gap
+      }
+
+      // Table headers
+      const headersStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+      addTableHeaders(headersStartX, currentY);
+      currentY += 6;
+
+      // Rows
+      const nextRowIndex = addTableRows(headersStartX, currentY, rowIndex);
+
+      if (nextRowIndex < rows.length) {
+        rowIndex = nextRowIndex;
+        pageNumber++;
+      } else {
+        break;
+      }
+    }
   };
 
+  // ─── Date / time ─────────────────────────────────────────────
+  const getCurrentDate = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+  const getCurrentTime = () => {
+    const today = new Date();
+    const hh = String(today.getHours()).padStart(2, "0");
+    const mm = String(today.getMinutes()).padStart(2, "0");
+    const ss = String(today.getSeconds()).padStart(2, "0");
+    return hh + ":" + mm + ":" + ss;
+  };
+  const date = getCurrentDate();
+  const time = getCurrentTime();
+
+  // ─── Generate ────────────────────────────────────────────────
+  handlePagination();
+
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(
+      `Page ${p} / ${totalPages}`,
+      doc.internal.pageSize.width - 10,
+      pageHeight - 8,
+      { align: "right" }
+    );
+  }
+
+  doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
+};
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();

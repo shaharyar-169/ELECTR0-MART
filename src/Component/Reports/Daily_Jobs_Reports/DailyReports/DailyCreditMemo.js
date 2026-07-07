@@ -212,12 +212,13 @@ export default function DailyCreditReport() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
-      // FYerDsc: '2024-2024',
       FRepDat: toInputDate,
       FRepTyp: transectionType,
       FSchTxt: searchQuery,
+      
+      // code: 'NASIRTRD',
+      // FLocCod: '001',
+      // FYerDsc: '2024-2024',
     }).toString();
 
     axios
@@ -755,13 +756,16 @@ export default function DailyCreditReport() {
         // }
 
         // Add page numbering
-        doc.setFontSize(pageNumberFontSize);
-        doc.text(
-          `Page ${pageNumber}`,
-          rightX - 20,
-          doc.internal.pageSize.height - 10,
-          { align: "right" },
-        );
+       const totalPages = Math.ceil(rows.length / rowsPerPage);
+        // Add page numbering
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+      doc.text(
+  `Page ${pageNumber} / ${totalPages}`,
+  rightX - 20,
+  doc.internal.pageSize.height - 10,
+  { align: "right" },
+);
       };
 
       let currentPageIndex = 0;
@@ -868,280 +872,289 @@ export default function DailyCreditReport() {
     doc.save(`DailyCreditMemoReport AS on ${toInputDate}.pdf`);
   };
 
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
+ const handleDownloadCSV = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 8; // Ensure this matches the actual number of columns
+  const numColumns = 8; // Ensure this matches the actual number of columns
 
-    const columnAlignments = [
-      "left",
-      "left",
-      "left",
-      "left",
-      "left",
-      "right",
-      "right",
-      "right",
-    ];
+  const columnAlignments = [
+    "center",
+    "left",
+    "left",
+    "left",
+    "center",
+    "right",
+    "right",
+    "right",
+  ];
 
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-
-    // Add an empty row at the start
-    worksheet.addRow([]);
-
-    // Add company name
-    const companyRow = worksheet.addRow([comapnyname]);
-    companyRow.eachCell((cell) => {
-      cell.font = fontCompanyName;
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
-      }`,
-    );
-
-    // Add Store List row
-    const storeListRow = worksheet.addRow([
-      `Daily Credit Memo Report As on ${toInputDate}`,
-    ]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
-      }`,
-    );
-
-    // Add an empty row after the title section
-    worksheet.addRow([]);
-
-    // let typecompany = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-
-    let typestatus = "";
-
-    if (transectionType === "A") {
-      typestatus = "ALL";
-    } else if (transectionType === "O") {
-      typestatus = "OUTSTANDING";
-    } else if (transectionType === "N") {
-      typestatus = "NILL";
-    } else {
-      typestatus = "ALL"; // Default value
+  // Helper: convert any value (including strings with commas) to a safe number
+  const toNumber = (value) => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const cleaned = value.replace(/,/g, ""); // remove all commas
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
     }
+    return 0;
+  };
 
-    let typesearch = searchQuery ? searchQuery : "";
+  // Define fonts for different sections
+  const fontCompanyName = {
+    name: "CustomFont" || "CustomFont",
+    size: 18,
+    bold: true,
+  };
+  const fontStoreList = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
+  const fontHeader = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: true,
+  };
+  const fontTableContent = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
 
-    //    const typeAndStoreRow2 = worksheet.addRow(["STORE :", typecategory]);
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["Type :", typestatus, "", "", "", "", "Search :", typesearch]
-        : ["Type :", typestatus, ""],
-    );
+  // Add an empty row at the start
+  worksheet.addRow([]);
 
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
+  // Add company name
+  const companyRow = worksheet.addRow([comapnyname]);
+  companyRow.eachCell((cell) => {
+    cell.font = fontCompanyName;
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.getRow(companyRow.number).height = 30;
+  worksheet.mergeCells(
+    `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`
+  );
+
+  // Add Store List row
+  const storeListRow = worksheet.addRow([
+    `Daily Credit Memo Report As on ${toInputDate}`,
+  ]);
+  storeListRow.eachCell((cell) => {
+    cell.font = fontStoreList;
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.mergeCells(
+    `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`
+  );
+
+  // Add an empty row after the title section
+  worksheet.addRow([]);
+
+  let typestatus = "";
+
+  if (transectionType === "A") {
+    typestatus = "ALL";
+  } else if (transectionType === "O") {
+    typestatus = "OUTSTANDING";
+  } else if (transectionType === "N") {
+    typestatus = "NILL";
+  } else {
+    typestatus = "ALL"; // Default value
+  }
+
+  let typesearch = searchQuery ? searchQuery : "";
+
+  const typeAndStoreRow3 = worksheet.addRow(
+    searchQuery
+      ? ["Type :", typestatus, "", "", "", "", "Search :", typesearch]
+      : ["Type :", typestatus, ""]
+  );
+
+   worksheet.mergeCells(`B${typeAndStoreRow3.number}:C${typeAndStoreRow3.number}`);
+
+  typeAndStoreRow3.eachCell((cell, colIndex) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: [1, 7].includes(colIndex),
+    };
+    cell.alignment = { horizontal: "left", vertical: "middle" };
+  });
+
+  // Header style
+  const headerStyle = {
+    font: fontHeader,
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFC6D9F7" },
+    },
+    border: {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    },
+  };
+
+  // Add headers
+  const headers = [
+    "Inv#",
+    "Date",
+    "Salesman",
+    "Customer",
+    "Mobile",
+    "Amount",
+    "Received",
+    "Balance",
+  ];
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+  // Add data rows with numeric conversion
+  tableData.forEach((item) => {
+    const amountNum = toNumber(item.Amount);
+    const receivedNum = toNumber(item.Received);
+    const balanceNum = toNumber(item.Balance);
+
+    const row = worksheet.addRow([
+      item["Inv#"],
+      item.Date,
+      item.SalesMan,
+      item.Customer,
+      item.Mobile,
+      amountNum,
+      receivedNum,
+      balanceNum,
+    ]);
+
+    // Check if quantity is negative (parse as float)
+    const isNegativeQty = parseFloat(item.Qnty) < 0;
+
+    row.eachCell((cell, colIndex) => {
+      // Apply red font to ALL cells if Qnty is negative
       cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 7].includes(colIndex),
+        ...fontTableContent,
+        color: isNegativeQty ? { argb: "FFFF0000" } : fontTableContent.color,
       };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // Header style
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
+      cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
         bottom: { style: "thin" },
         right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = [
-      "Inv#",
-      "Date",
-      // "Code",
-      "Salesman",
-      "Customer",
-      "Mobile",
-      "Amount",
-      "Received",
-      "Balance",
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([
-        item["Inv#"],
-        item.Date,
-        // item.Code,
-        item.SalesMan,
-        item.Customer,
-        item.Mobile,
-        item.Amount,
-        item.Received,
-        item.Balance,
-      ]);
-
-      // Check if quantity is negative (parse as float)
-      const isNegativeQty = parseFloat(item.Qnty) < 0;
-
-      row.eachCell((cell, colIndex) => {
-        // Apply red font to ALL cells if Qnty is negative
-        cell.font = {
-          ...fontTableContent,
-          color: isNegativeQty ? { argb: "FFFF0000" } : fontTableContent.color,
-        };
-
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
-      });
-    });
-
-    // Set column widths
-    [8, 10, 35, 35, 13, 15, 15, 15].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    const totalRow = worksheet.addRow([
-      String(formatValue(tableData.length.toLocaleString())),
-      "",
-      "",
-      "",
-      "",
-      String(formatValue(totalPurchase)),
-      String(formatValue(totalOpening)),
-      String(formatValue(totalBalance)),
-    ]);
-
-    // total row added
-
-    totalRow.eachCell((cell, colNumber) => {
-      cell.font = { bold: true };
-      cell.border = {
-        top: { style: "double" },
-        left: { style: "thin" },
-        bottom: { style: "double" },
-        right: { style: "thin" },
       };
-
-      // Align only the "Total" text to the right
-      if (colNumber === 6 || colNumber === 7 || colNumber === 8) {
-        cell.alignment = { horizontal: "right" };
-      }
-
-      if (colNumber === 1) {
-        cell.alignment = { horizontal: "center" };
+      cell.alignment = {
+        horizontal: columnAlignments[colIndex - 1] || "left",
+        vertical: "middle",
+      };
+      // Apply number format (#,##0) for Amount, Received, Balance (colIndex 6,7,8)
+      if (colIndex === 6 || colIndex === 7 || colIndex === 8) {
+        cell.numFmt = "#,##0";
       }
     });
+  });
 
-    // Add a blank row
-    worksheet.addRow([]);
-    // Get current date and time
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
+  // Set column widths
+  [8, 10, 35, 35, 13, 15, 15, 15].forEach((width, index) => {
+    worksheet.getColumn(index + 1).width = width;
+  });
+
+  // Convert totals to numbers
+  const totalPurchaseNum = toNumber(totalPurchase);
+  const totalOpeningNum = toNumber(totalOpening);
+  const totalBalanceNum = toNumber(totalBalance);
+
+  const totalRow = worksheet.addRow([
+    String(formatValue(tableData.length.toLocaleString())),
+    "",
+    "",
+    "",
+    "",
+    totalPurchaseNum,
+    totalOpeningNum,
+    totalBalanceNum,
+  ]);
+
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true };
+    cell.border = {
+      top: { style: "double" },
+      left: { style: "thin" },
+      bottom: { style: "double" },
+      right: { style: "thin" },
     };
-    // Get current date
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-    const currentTime = getCurrentTime();
-    const currentdate = getCurrentDate();
-    const userid = user.tusrid;
+    if (colNumber === 6 || colNumber === 7 || colNumber === 8) {
+      cell.alignment = { horizontal: "right" };
+      cell.numFmt = "#,##0";
+    }
+    if (colNumber === 1) {
+      cell.alignment = { horizontal: "center" };
+    }
+  });
 
-    // Add date and time row
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
+  // Add a blank row
+  worksheet.addRow([]);
 
-    // Merge across all columns
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
-    );
-
-    // Generate and save the Excel file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `DailyCreditMemoReport As on ${toInputDate}.xlsx`);
+  // Get current date and time
+  const getCurrentTime = () => {
+    const today = new Date();
+    const hh = String(today.getHours()).padStart(2, "0");
+    const mm = String(today.getMinutes()).padStart(2, "0");
+    const ss = String(today.getSeconds()).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
   };
+  const getCurrentDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  const currentTime = getCurrentTime();
+  const currentdate = getCurrentDate();
+  const userid = user.tusrid;
+
+  // Add date and time row
+  const dateTimeRow = worksheet.addRow([
+    `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+  ]);
+  dateTimeRow.eachCell((cell) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+    };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  // FIXED: was incorrectly using dateTimeRow.eachCell – now dateTimeRow1.eachCell
+  dateTimeRow1.eachCell((cell) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+    };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  // Merge across all columns
+  worksheet.mergeCells(
+    `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+  );
+  worksheet.mergeCells(
+    `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+  );
+
+  // Generate and save the Excel file
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, `DailyCreditMemoReport As on ${toInputDate}.xlsx`);
+};
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
@@ -1287,10 +1300,10 @@ export default function DailyCreditReport() {
     width: "80px",
   };
   const forthColWidth = {
-    width: isSidebarVisible ? "240px" : "300px",
+    width: isSidebarVisible ? "250px" : "350px",
   };
   const fifthColWidth = {
-    width: isSidebarVisible ? "240px" : "300px",
+    width: isSidebarVisible ? "250px" : "350px",
   };
   const sixthColWidth = {
     width: "90px",
@@ -1787,7 +1800,7 @@ export default function DailyCreditReport() {
                     onKeyDown={(e) => handleKeyPress(e, input3Ref)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -2002,9 +2015,7 @@ export default function DailyCreditReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // width: "100%",
-                  position: "relative",
-                  // width: "100%",
+                  width: "100%",
                   position: "relative",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
@@ -2105,7 +2116,7 @@ export default function DailyCreditReport() {
                             >
                               {item["Inv#"]}
                             </td>
-                            <td className="text-start" style={secondColWidth}>
+                            <td className="text-center" style={secondColWidth}>
                               {item.Date}
                             </td>
                             {/* <td className="text-start" style={thirdColWidth}>
@@ -2140,12 +2151,14 @@ export default function DailyCreditReport() {
                                                         </td> */}
 
                             <td
-                              className="text-start"
+                              className="text-center"
                               style={{
-                                ...firstColWidth,
+                                ...sixthColWidth,
                                 cursor: "pointer",
                                 textDecoration: "underline",
-                                color: "blue",
+                                // color: "blue",
+                                color: selectedIndex === i ? "white" : "blue", // ✅ conditional color
+
                               }}
                               onDoubleClick={(e) => {
                                 e.stopPropagation();

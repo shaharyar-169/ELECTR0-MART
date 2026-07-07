@@ -26,7 +26,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FormatShapesOutlined } from "@mui/icons-material";
 
-export default function AmericanSaleReturnStoreStockReport() {
+export default function AmericanStoreStockReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -233,7 +233,7 @@ export default function AmericanSaleReturnStoreStockReport() {
       toDateElement.style.border = `1px solid ${fontcolor}`;
     }
 
-    const apiMainUrl = apiLinks + "/AmericanStoreStockReportSpareParts.php";
+    const apiMainUrl = apiLinks + "/AmericanStoreStockReportItems.php";
     setIsLoading(true);
     const formMainData = new URLSearchParams({
       FRepDat: toInputDate,
@@ -321,11 +321,12 @@ export default function AmericanSaleReturnStoreStockReport() {
   }, []);
 
   useEffect(() => {
-    const apiUrl = apiLinks + "/GetAmericanStoreSpareParts.php";
+    const apiUrl = apiLinks + "/GetAmericanStoreItems.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      // code: "ARMELEC",
-      //       FYerDsc: "2024-2024",
+      
+    //  code: "AMRELEC",
+    //   FLocCod: "001",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -645,12 +646,13 @@ export default function AmericanSaleReturnStoreStockReport() {
     const doc = new jsPDF({ orientation: "landscape" });
 
     const length = GetHeading.length;
-    const hideDescription = length >= 9 && length <= 10;
+    const hideDescription = length >= 9 && length <= 15;
+     const hideCode = length >= 11 && length <= 15;
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Code,
-
+      // item.Code,
+ ...(!hideCode ? [item.Code] : []),
       // ❌ Description sirf tab add ho jab hide na karna ho
       ...(!hideDescription ? [item.Description] : []),
 
@@ -665,10 +667,10 @@ export default function AmericanSaleReturnStoreStockReport() {
 
     // 🔹 Summary Row
     rows.push([
-      "",
+      
+        ...(!hideCode ? [""] : []),
       ...(!hideDescription ? [""] : []),
       String(totalqnty),
-
       ...GetHeading.map((_, index) => {
         const key = `Qnt${String(index + 1).padStart(3, "0")}`;
         return String(totals[key] || "0");
@@ -677,18 +679,22 @@ export default function AmericanSaleReturnStoreStockReport() {
 
     // 🔹 Summary Row
     const headers = [
-      "Code",
-
+    
+ ...(!hideCode ? ["Code"] : []),
       // ❌ Description hide condition
       ...(!hideDescription ? ["Description"] : []),
 
       "Qnty",
 
-      ...GetHeading.map((heading, index) =>
-        heading.tstrabb?.trim()
-          ? heading.tstrabb.slice(0, 5)
-          : `GD-${index + 1}`,
-      ),
+     
+
+     ...GetHeading.map((heading, index) =>
+  heading.tstrabb?.trim()
+    ? heading.tstrabb
+    : heading.tstrdsc
+        ? heading.tstrdsc.slice(0, 5)
+        : `GD-${index + 1}`
+),
     ];
 
     let columnWidths = [];
@@ -713,12 +719,22 @@ export default function AmericanSaleReturnStoreStockReport() {
         20, // Qnty
         ...Array(length).fill(20),
       ];
-    } else if (length >= 9 && length <= 10) {
+    } 
+    else if (length >= 9 && length <= 10) {
       columnWidths = [
-        100, // Code
+        45, // Code
         // 130, // Description
-        20, // Qnty
-        ...Array(length).fill(20),
+        22, // Qnty
+        ...Array(length).fill(25),
+      ];
+    }
+
+     else if (length >= 11 && length <= 15) {
+      columnWidths = [
+        // 45, // Code
+        // 130, // Description
+        19, // Qnty
+        ...Array(length).fill(19),
       ];
     }
 
@@ -854,7 +870,7 @@ export default function AmericanSaleReturnStoreStockReport() {
               align: "center",
               baseline: "middle",
             });
-          } else if (cellIndex >= 2) {
+          } else if ( cellIndex >1) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -1319,11 +1335,13 @@ export default function AmericanSaleReturnStoreStockReport() {
       "Description",
       "Qnty",
 
-      ...GetHeading.map((heading, index) =>
-        heading.tstrabb?.trim()
-          ? heading.tstrabb.slice(0, 5) // ✅ max 5 characters
-          : `GD-${index + 1}`,
-      ),
+     ...GetHeading.map((heading, index) =>
+  heading.tstrabb?.trim()
+    ? heading.tstrabb
+    : heading.tstrdsc
+        ? heading.tstrdsc.slice(0, 5)
+        : `GD-${index + 1}`
+),
     ];
 
     const headerRow = worksheet.addRow(headers);
@@ -1593,6 +1611,13 @@ export default function AmericanSaleReturnStoreStockReport() {
     thirdColWidth = { width: "70px" };
     CommonColWidth = { width: "70px" };
   }
+   else if (length >=11 && length <= 15) {
+    // 🔹 Case 4
+    firstColWidth = { width: isSidebarVisible ? "50px" : "80px" };
+    secondColWidth = { width: isSidebarVisible ? "50px" : "110px" };
+    thirdColWidth = { width: isSidebarVisible ? "45px" : "50px" };
+    CommonColWidth = { width: isSidebarVisible ? "60px" : "65px" };
+  }
 
   const sixthcol = {
     width: "8px",
@@ -1609,6 +1634,16 @@ export default function AmericanSaleReturnStoreStockReport() {
     Qnt003: [],
     Qnt004: [],
     Qnt005: [],
+     Qnt006: [],
+    Qnt007: [],
+    Qnt008: [],
+    Qnt009: [],
+    Qnt010: [],
+     Qnt011: [],
+      Qnt012: [],
+      Qnt013: [],
+      Qnt014: [],
+      Qnt015: [],
   });
 
   const [columnSortOrders, setColumnSortOrders] = useState({
@@ -1622,6 +1657,16 @@ export default function AmericanSaleReturnStoreStockReport() {
     Qnt003: "",
     Qnt004: "",
     Qnt005: "",
+     Qnt006: "",
+    Qnt007: "",
+    Qnt008: "",
+    Qnt009: "",
+    Qnt010: "",
+     Qnt011: "",
+      Qnt012: "",
+      Qnt013: "",
+      Qnt014: "",
+      Qnt015: "",
   });
 
   // When you receive your initial table data, transform it into column-oriented format
@@ -1638,6 +1683,16 @@ export default function AmericanSaleReturnStoreStockReport() {
         Qnt003: tableData.map((row) => row.Qnt003),
         Qnt004: tableData.map((row) => row.Qnt004),
         Qnt005: tableData.map((row) => row.Qnt005),
+         Qnt006: tableData.map((row) => row.Qnt006),
+          Qnt007: tableData.map((row) => row.Qnt007),
+           Qnt008: tableData.map((row) => row.Qnt008),
+            Qnt009: tableData.map((row) => row.Qnt009),
+             Qnt010: tableData.map((row) => row.Qnt010),
+             Qnt011: tableData.map((row) => row.Qnt011),
+             Qnt012: tableData.map((row) => row.Qnt012),
+             Qnt013: tableData.map((row) => row.Qnt013),
+             Qnt014: tableData.map((row) => row.Qnt014),
+             Qnt015: tableData.map((row) => row.Qnt015),
       };
       setColumns(newColumns);
     }
@@ -1664,6 +1719,17 @@ export default function AmericanSaleReturnStoreStockReport() {
       Qnt003: null,
       Qnt004: null,
       Qnt005: null,
+      Qnt006: null,
+      Qnt007: null,
+      Qnt008: null,
+      Qnt009: null,
+      Qnt010: null,
+      Qnt011: null,
+      Qnt012: null,
+      Qnt013: null,
+      Qnt014: null,
+      Qnt015: null,
+
     });
   };
 
@@ -2600,7 +2666,7 @@ export default function AmericanSaleReturnStoreStockReport() {
                     onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
                     type="text"
                     id="searchsubmit"
-                    placeholder="Item description"
+                    placeholder="Search"
                     value={searchQuery}
                     autoComplete="off"
                     style={{
@@ -2697,28 +2763,32 @@ export default function AmericanSaleReturnStoreStockReport() {
                       ></i>
                     </td>
                     <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
-                    >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
-                    </td>
+  className="border-dark"
+  style={secondColWidth}
+  onClick={() => handleSorting("Description")}
+>
+  {GetHeading && GetHeading.length >= 11 && GetHeading.length <= 14
+    ? (isSidebarVisible ? "Des " : "Description ") : "Description "}
+  
+  <i
+    className="fa-solid fa-caret-down caretIconStyle"
+    style={getIconStyle("Description")}
+  ></i>
+</td>
 
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Qnty")}
-                    >
-                      Qnty{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Qnty")}
-                      ></i>
-                    </td>
+                               <td
+  className="border-dark"
+  style={thirdColWidth}
+  onClick={() => handleSorting("Qnty")}
+>
+  {GetHeading && GetHeading.length >= 11 && GetHeading.length <= 14
+    ? (isSidebarVisible ? "Qty " : "Qnty ") : "Qnty "}
+  
+  <i
+    className="fa-solid fa-caret-down caretIconStyle"
+    style={getIconStyle("Qnty")}
+  ></i>
+</td>
 
                     {GetHeading.map((heading, index) => {
                       const sortKey = `Qnt${String(index + 1).padStart(3, "0")}`;
@@ -2728,7 +2798,11 @@ export default function AmericanSaleReturnStoreStockReport() {
                         : heading.tstrdsc || `GD-${index + 1}`;
 
                       const displayText =
-                        rawText.length > 5 ? rawText.slice(0, 5) : rawText;
+                        rawText.length > 5 ? rawText.slice( 0,
+  GetHeading && GetHeading.length >= 11 && GetHeading.length <= 14
+    ? (isSidebarVisible ? 3 : 5)
+    : 5
+) : rawText;
 
                       return (
                         <td

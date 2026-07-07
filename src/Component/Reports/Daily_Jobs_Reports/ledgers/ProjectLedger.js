@@ -409,9 +409,9 @@ export default function ProjectLedger() {
     setIsLoading(true);
     const formData = new URLSearchParams({
        FPrjCod: saleType,
-      // code: organisation.code,
+      code: organisation.code,
    
-      code: 'FOUTURA',
+      // code: 'MULTITRD',
       // FLocCod: '001',
       // FYerDsc: '2025-2025'
     }).toString();
@@ -500,9 +500,9 @@ export default function ProjectLedger() {
   useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveProjects.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-    //   FLocCod: '001',
-      code: 'FOUTURA',
+      code: organisation.code,
+      // FLocCod: '001',
+      // code: 'MULTITRD',
     }).toString();
     axios
       .post(apiUrl, formData)

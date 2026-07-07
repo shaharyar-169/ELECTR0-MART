@@ -807,7 +807,7 @@ export default function EmployeeAdvanceReport() {
     // Add summary row to the table
     rows.push([
      
-      "",
+       String(formatValue(tableData.length.toLocaleString())),
       "Total",
      
       String(formatValue(totalopening)),
@@ -826,7 +826,7 @@ export default function EmployeeAdvanceReport() {
       "Credit",
       "Balance",
     ];
-    const columnWidths = [25, 75, 22, 22, 22, 22];
+    const columnWidths = [25, 90, 22, 22, 22, 22];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -958,7 +958,7 @@ export default function EmployeeAdvanceReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 10) {
+          if (cellIndex === 0) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
@@ -1069,14 +1069,16 @@ export default function EmployeeAdvanceReport() {
         // }
 
         // Add page numbering
-doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(
-          `Page ${pageNumber}`,
-          rightX - 5,
-          doc.internal.pageSize.height - 10,
-          { align: "right" }
-        );
+ const totalPages = Math.ceil(rows.length / rowsPerPage);
+        // Add page numbering
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+      doc.text(
+  `Page ${pageNumber} / ${totalPages}`,
+  rightX - 20,
+  doc.internal.pageSize.height - 10,
+  { align: "right" },
+);
       };
 
       let currentPageIndex = 0;
@@ -1147,45 +1149,9 @@ doc.setFont("verdana-regular", "normal");
        doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10); // Font size
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`COMPANY :`, labelsX, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeItem}`, labelsX + 25, labelsY); // Draw the value next to the label
+            startY += -4; // Adjust vertical position for the labels
 
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STORE :`, labelsX + 180, labelsY); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typename}`, labelsX + 205, labelsY); // Draw the value next to the label
-
-    
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`CAPACITY :`, labelsX, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${typeText}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
-
-        // doc.setFont(getfontstyle, "bold"); // Set font to bold
-        // doc.text(`STATUS :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        // doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        // doc.text(`${transectionsts}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-
-        // if (searchQuery) {
-        //   doc.setFont(getfontstyle, "bold"); // Set font to bold
-        //   doc.text(`SEARCH :`, labelsX + 180, labelsY + 8.5); // Draw bold label
-        //   doc.setFont(getfontstyle, "normal"); // Reset font to normal
-        //   doc.text(`${search}`, labelsX + 205, labelsY + 8.5); // Draw the value next to the label
-        // }
-
-        // // Reset font weight to normal if necessary for subsequent text
-        
-
-        startY += 1; // Adjust vertical position for the labels
-
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 25);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1229,238 +1195,264 @@ doc.setFont("verdana-regular", "normal");
     doc.save(`EmployeeAdvanceReport As On ${date}.pdf`);
   };
 
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
+ const handleDownloadCSV = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 6; // Ensure this matches the actual number of columns
+  const numColumns = 6; // Ensure this matches the actual number of columns
 
-    const columnAlignments = [
-      "left",
-      "left",
-      "right",
-      "right",
-      "right",
-      "right",
-    ];
+  const columnAlignments = [
+    "left",
+    "left",
+    "right",
+    "right",
+    "right",
+    "right",
+  ];
 
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-
-    // Add an empty row at the start
-    worksheet.addRow([]);
-
-    // Add company name
- // Add company name
-const companyRow = worksheet.addRow([comapnyname]);
-
-companyRow.eachCell((cell) => {
-  cell.font = {
-    name: "Times New Roman",
-    size: 16,       // optional
-    bold: true,     // optional
+  // Define fonts for different sections
+  const fontCompanyName = {
+    name: "CustomFont" || "CustomFont",
+    size: 18,
+    bold: true,
   };
-  cell.alignment = { horizontal: "center" };
-});
+  const fontStoreList = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
+  const fontHeader = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: true,
+  };
+  const fontTableContent = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
 
+  // Helper to convert any value to a safe number (0 if invalid)
+  // FIXED: removes commas before parsing
+  const toNumber = (value) => {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      // Remove all commas
+      const cleaned = value.replace(/,/g, '');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+    return 0;
+  };
 
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
-      }`
-    );
+  // Add an empty row at the start
+  worksheet.addRow([]);
 
-    // Add Store List row
-    const storeListRow = worksheet.addRow([
-      `Employee Advance Report From ${fromInputDate} To ${toInputDate}`,
+  // Add company name
+  const companyRow = worksheet.addRow([comapnyname]);
+
+  companyRow.eachCell((cell) => {
+    cell.font = {
+      name: "Times New Roman",
+      size: 16, // optional
+      bold: true, // optional
+    };
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.getRow(companyRow.number).height = 30;
+  worksheet.mergeCells(
+    `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      companyRow.number
+    }`
+  );
+
+  // Add Store List row
+  const storeListRow = worksheet.addRow([
+    `Employee Advance Report From ${fromInputDate} To ${toInputDate}`,
+  ]);
+  storeListRow.eachCell((cell) => {
+    cell.font = fontStoreList;
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.mergeCells(
+    `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      storeListRow.number
+    }`
+  );
+
+  // Add an empty row after the title section
+  worksheet.addRow([]);
+
+  const headerStyle = {
+    font: fontHeader,
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFC6D9F7" },
+    },
+    border: {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    },
+  };
+
+  // Add headers
+  const headers = [
+    "Code",
+    "Description",
+    "Opening",
+    "Debit",
+    "Credit",
+    "Balance",
+  ];
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+  // Store starting row of data (for potential formula later)
+  const dataStartRow = headerRow.number + 1;
+
+  // Add data rows with numeric values
+  tableData.forEach((item) => {
+    const openingNum = toNumber(item.Opening);
+    const debitNum = toNumber(item.Debit);
+    const creditNum = toNumber(item.Credit);
+    const balanceNum = toNumber(item.Balance);
+
+    const row = worksheet.addRow([
+      item.code,
+      item.Description,
+      openingNum,
+      debitNum,
+      creditNum,
+      balanceNum,
     ]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
 
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
-      }`
-    );
-
-    // Add an empty row after the title section
-    worksheet.addRow([]);
-
-  
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
+    row.eachCell((cell, colIndex) => {
+      cell.font = fontTableContent;
+      cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
         bottom: { style: "thin" },
         right: { style: "thin" },
-      },
-    };
-
-    // Add headers
-    const headers = [
-      "Code",
-      "Description",
-      "Opening",
-      "Debit",
-      "Credit",
-      "Balance",
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    // Add data rows
-    tableData.forEach((item) => {
-      const row = worksheet.addRow([
-        item.code,
-     item.Description,
-    formatValue(item.Opening)   ,
-    formatValue(item.Debit)   ,
-    formatValue(item.Credit)   ,
-    formatValue(item.Balance)   ,
-      ]);
-
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
-      });
-    });
-
-    // Set column widths
-    [10, 45,12, 12,12, 12].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    const totalRow = worksheet.addRow([
-     
-      "",
-      "Total",
-     
-      String(formatValue(totalopening)),
-          String(formatValue(totaldebit)),
-      String(formatValue(totalcredit)),
-      String(formatValue(ClosingBalance)),
-    ]);
-
-    // total row added
-
-    totalRow.eachCell((cell, colNumber) => {
-      cell.font = { bold: true };
-      cell.border = {
-        top: { style: "double" },
-        left: { style: "thin" },
-        bottom: { style: "double" },
-        right: { style: "thin" },
       };
-
-      // Align only the "Total" text to the right
-      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
-        cell.alignment = { horizontal: "right" };
+      cell.alignment = {
+        horizontal: columnAlignments[colIndex - 1] || "left",
+        vertical: "middle",
+      };
+      // Apply number formatting for numeric columns (index 3-6) - NO DECIMALS
+      if (colIndex >= 3 && colIndex <= 6) {
+        cell.numFmt = "#,##0"; // thousand separator, no decimal places
       }
     });
+  });
 
-    // Add a blank row
-    worksheet.addRow([]);
-    // Get current date and time
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
+  // Set column widths
+  [10, 45, 12, 12, 12, 12].forEach((width, index) => {
+    worksheet.getColumn(index + 1).width = width;
+  });
+
+  // Convert totals to numbers (using the same toNumber helper)
+  const totalOpeningNum = toNumber(totalopening);
+  const totalDebitNum = toNumber(totaldebit);
+  const totalCreditNum = toNumber(totalcredit);
+  const closingBalanceNum = toNumber(ClosingBalance);
+
+  const totalRow = worksheet.addRow([
+    String(tableData.length.toLocaleString()),
+    "Total",
+    totalOpeningNum,
+    totalDebitNum,
+    totalCreditNum,
+    closingBalanceNum,
+  ]);
+
+  // total row added
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true };
+    cell.border = {
+      top: { style: "double" },
+      left: { style: "thin" },
+      bottom: { style: "double" },
+      right: { style: "thin" },
     };
-    // Get current date
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-    const currentTime = getCurrentTime();
-    const currentdate = getCurrentDate();
-    const userid = user.tusrid;
+    // Align only numeric columns to the right
+    if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6) {
+      cell.alignment = { horizontal: "right" };
+      cell.numFmt = "#,##0"; // NO DECIMALS for total cells as well
+    } else if (colNumber === 1) {
+      cell.alignment = { horizontal: "center" };
+    }
+  });
 
-    // Add date and time row
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
-      cell.alignment = { horizontal: "left" };
-    });
+  // Add a blank row
+  worksheet.addRow([]);
 
-    // Merge across all columns
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
-      }`
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
-      }`
-    );
-
-    // Generate and save the Excel file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `EmployeeAdvanceReport As On ${currentdate}.xlsx`);
+  // Get current date and time
+  const getCurrentTime = () => {
+    const today = new Date();
+    const hh = String(today.getHours()).padStart(2, "0");
+    const mm = String(today.getMinutes()).padStart(2, "0");
+    const ss = String(today.getSeconds()).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
   };
+  // Get current date
+  const getCurrentDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  const currentTime = getCurrentTime();
+  const currentdate = getCurrentDate();
+  const userid = user.tusrid;
+
+  // Add date and time row
+  const dateTimeRow = worksheet.addRow([
+    `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+  ]);
+  dateTimeRow.eachCell((cell) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+    };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  // Add user ID row
+  const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  dateTimeRow1.eachCell((cell) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+    };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  // Merge across all columns
+  worksheet.mergeCells(
+    `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      dateTimeRow.number
+    }`
+  );
+  worksheet.mergeCells(
+    `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
+      dateTimeRow1.number
+    }`
+  );
+
+  // Generate and save the Excel file
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, `EmployeeAdvanceReport As On ${currentdate}.xlsx`);
+};
 
   const dispatch = useDispatch();
 

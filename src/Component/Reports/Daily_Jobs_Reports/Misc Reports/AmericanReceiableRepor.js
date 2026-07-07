@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-
 import axios from "axios";
-
 import { useTheme } from "../../../../ThemeContext";
 import {
   getUserData,

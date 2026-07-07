@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+
+import axios from "axios";
+
 import { useTheme } from "../../../../ThemeContext";
 import {
   getUserData,
@@ -21,87 +23,88 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
+import { fetchGetUser } from "../../../Redux/action";
+import "./misc.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Balance, Description, Store } from "@mui/icons-material";
-import '../../../vardana/vardana';
-import '../../../vardana/verdana-bold'
+import { Balance } from "@mui/icons-material";
 
-
-export default function EmployeeSalryRegisterReport() {
+export default function AmericanYearWiseCustomerSaleReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
-
-  const saleSelectRef = useRef(null);
-
-  const toRef = useRef(null);
-  const fromRef = useRef(null);
-  const companyRef = useRef(null);
-  const categoryRef = useRef(null);
-  const capacityRef = useRef(null);
-  const storeRef = useRef(null);
-  const typeRef = useRef(null);
-  const searchRef = useRef(null);
-  const selectButtonRef = useRef(null);
-
-  const [saleType, setSaleType] = useState("");
-
-const [Employeeselectdata, setEmployeeselectdata] = useState("");
-  const [Employeeselectdatavalue, setEmployeeselectdatavalue] = useState("");
- const [isOptionsLoaded, setIsOptionsLoaded] = useState(false);
-  const hasInitialized = useRef(false);
-  const employeeref = useRef(null);
-  const [GetEmployee, setGetEmployee] = useState([]);
-  const [storeList, setStoreList] = useState([]);
-  const [storeType, setStoreType] = useState("");
-
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
+  const DaysRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
-  const input4Refrate = useRef(null);
-  const input5Ref = useRef(null);
   const input4Ref = useRef(null);
-  const input6Ref = useRef(null);
+  const AreaRef = useRef(null);
+  const TypeRef = useRef(null);
+  const SearchRef = useRef(null);
+  const Type2Ref = useRef(null);
+
+
+  const toRef = useRef(null);
+  const fromRef = useRef(null);
+
+  const [GetAreaData, setGetAreaData] = useState([])
+  const [GetTypeData, setGetTypeData] = useState([])
+  const [saleType, setSaleType] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [transectionType, settransectionType] = useState("");
+  const [supplierList, setSupplierList] = useState([]);
+
+  const [Amt001, setAmt001] = useState(0);
+  const [Amt002, setAmt002] = useState(0);
+  const [Amt003, setAmt003] = useState(0);
+  const [Amt004, setAmt004] = useState(0);
+  const [Amt005, setAmt005] = useState(0);
+  const [Amt006, setAmt006] = useState(0);
+  const [Total, setTotal] = useState(0);
 
   const [Companyselectdata, setCompanyselectdata] = useState("");
-
-  console.log("Companyselectdata", Companyselectdata);
   const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
 
-  const [Capacityselectdata, setCapacityselectdata] = useState("");
-  const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
+  console.log('Companyselectdatavalue',)
+  const [mobileNumber, setmobileNumber] = useState("30");
+  const interval = Number(mobileNumber) || 0;
 
-  const [GetCapacity, setGetCapacity] = useState([]);
-  const [GetCompany, setGetCompany] = useState([]);
-  const [Categoryselectdata, setCategoryselectdata] = useState("");
-  const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
+  const getRanges = (n) => {
+    if (!n) return [];
 
-  const [GetCategory, setGetCategory] = useState([]);
+    return [
+      { label: `0 - ${n}`, key: "Amt001" },
+      { label: `${n} - ${n * 2}`, key: "Amt002" },
+      { label: `${n * 2} - ${n * 3}`, key: "Amt003" },
+      { label: `${n * 3} - ${n * 4}`, key: "Amt004" },
+      { label: `${n * 4} - ${n * 5}`, key: "Amt005" },
+      { label: `${n * 5}+`, key: "Amt006" },
+    ];
+  };
+
+  const ranges = getRanges(interval);
+
+
+  const [Cityselectdata, setCityselectdata] = useState("");
+  const [Cityselectdatavalue, setCityselectdatavalue] = useState("");
+
+  const [Regionselectdata, setRegionselectdata] = useState("");
+  const [Regionselectdatavalue, setRegionselectdatavalue] = useState("");
 
   const [Typeselectdata, setTypeselectdata] = useState("");
-  const [typeselectdatavalue, settypeselectdatavalue] = useState("");
+  const [Typeselectdatavalue, setTypeselectdatavalue] = useState("");
 
-  const [GetType, setGetType] = useState([]);
+  const [Areaselectdata, setAreaselectdata] = useState("");
+  const [Areaselectdatavalue, setAreaselectdatavalue] = useState("");
 
-  const [sortData, setSortData] = useState("ASC");
+  const [GetCompany, setGetCompany] = useState([]);
+  const [GetCity, setGetCity] = useState([]);
+  const [GetRegion, setGetRegion] = useState([]);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [transectionType, settransectionType] = useState("A");
-  const [transectionType2, settransectionType2] = useState("");
-
-  const [TotalSalary, setTotalSalary] = useState(0);
-  const [TotalSaleCom, setTotalSaleCom] = useState(0);
-  const [TotalRecCom, setTotalRecCom] = useState(0);
-  const [TotalAdvance, setTotalAdvance] = useState(0);
-  const [TotalFine, setTotalFine] = useState(0);
-    const [TotalNetAmount, setTotalNetAmount] = useState(0);
-
-
-  const [totaldebit, settotaldebit] = useState(0);
-  const [totalcredit, settotalcredit] = useState(0);
+  console.log('dropdowndata', saleType)
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -112,11 +115,6 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
-  const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
-
-  const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
-
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -126,19 +124,19 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
     apiLinks,
     getLocationNumber,
     getyeardescription,
+    getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
     getdatafontsize,
   } = useTheme();
 
-  useEffect(() => {
-    document.documentElement.style.setProperty("--background-color", getcolor);
-  }, [getcolor]);
-
   const comapnyname = organisation.description;
 
+  const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
+
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
+
   const fromdatevalidate = getfromdate;
   const todatevaliadete = gettodate;
 
@@ -155,12 +153,16 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       date.getMonth() + 1
     ).padStart(2, "0")}-${date.getFullYear()}`;
   };
-  const GlobaltoDate1 = formatDate1(GlobaltoDate);
+
   const GlobalfromDate1 = formatDate1(GlobalfromDate);
+  const GlobaltoDate1 = formatDate1(GlobaltoDate);
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
-  // Toggle the ToDATE CalendarOpen state on each click
+  // Toggle the ToDATE && FromDATE CalendarOpen state on each click
+  const toggleFromCalendar = () => {
+    setfromCalendarOpen((prevOpen) => !prevOpen);
+  };
   const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
   };
@@ -169,85 +171,6 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
-  };
-
-  const handleToDateChange = (date) => {
-    setSelectedToDate(date);
-    settoInputDate(date ? formatDate(date) : "");
-    settoCalendarOpen(false);
-  };
-  const handleToInputChange = (e) => {
-    settoInputDate(e.target.value);
-  };
-
-  const handlefromInputChange = (e) => {
-    setfromInputDate(e.target.value);
-  };
-
-  const handlefromKeyPress = (e, inputId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const fromDateElement = document.getElementById("fromdatevalidation");
-      const formattedInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-        const [day, month, year] = formattedInput.split("-").map(Number);
-
-        if (month > 12 || month === 0) {
-          toast.error("Please enter a valid month (MM) between 01 and 12");
-          return;
-        }
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        if (day > daysInMonth || day === 0) {
-          toast.error(`Please enter a valid day (DD) for month ${month}`);
-          return;
-        }
-
-        const currentDate = new Date();
-        const enteredDate = new Date(year, month - 1, day);
-
-        if (GlobalfromDate && enteredDate < GlobalfromDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-        if (GlobalfromDate && enteredDate > GlobaltoDate) {
-          toast.error(
-            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-          );
-          return;
-        }
-
-        fromDateElement.style.border = `1px solid ${fontcolor}`;
-        setfromInputDate(formattedInput);
-
-        const nextInput = document.getElementById(inputId);
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
-        } else {
-          document.getElementById("submitButton").click();
-        }
-      } else {
-        toast.error("Date must be in the format dd-mm-yyyy");
-      }
-    }
-  };
-
-  const handlefromDateChange = (date) => {
-    setSelectedfromDate(date);
-    setfromInputDate(date ? formatDate(date) : "");
-    setfromCalendarOpen(false);
-  };
-
-  const toggleFromCalendar = () => {
-    setfromCalendarOpen((prevOpen) => !prevOpen);
   };
 
   const handleToKeyPress = (e) => {
@@ -304,9 +227,9 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (employeeref.current) {
+        if (input1Ref.current) {
           e.preventDefault();
-          employeeref.current.focus();
+          input1Ref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -314,44 +237,54 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
     }
   };
 
-  function fetchDailyStatusReport() {
-    const fromDateElement = document.getElementById("fromdatevalidation");
-    const toDateElement = document.getElementById("todatevalidation");
+  const handleToDateChange = (date) => {
+    setSelectedToDate(date);
+    settoInputDate(date ? formatDate(date) : "");
+    settoCalendarOpen(false);
+  };
+  const handleToInputChange = (e) => {
+    settoInputDate(e.target.value);
+  };
+  const handleSaleKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = input1Ref.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setSaleType(selectedOption.value);
+      }
+      const nextInput = document.getElementById(inputId);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+  const handleKeyPress = (e, nextInputRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextInputRef.current) {
+        nextInputRef.current.focus();
+      }
+    }
+  };
 
+  function fetchReceivableReport() {
     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
-    let hasError = false;
     let errorType = "";
 
     switch (true) {
-      //    case !saleType:
-      //        errorType = "saleType";
-      //        break;
-      case !fromInputDate:
-        errorType = "fromDate";
-        break;
       case !toInputDate:
         errorType = "toDate";
         break;
       default:
-        hasError = false;
         break;
     }
 
-    if (!dateRegex.test(fromInputDate)) {
-      errorType = "fromDateInvalid";
-    } else if (!dateRegex.test(toInputDate)) {
+    if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
     } else {
-      const formattedFromInput = fromInputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
-      );
-      const [fromDay, fromMonth, fromYear] = formattedFromInput
-        .split("-")
-        .map(Number);
-      const enteredFromDate = new Date(fromYear, fromMonth - 1, fromDay);
-
       const formattedToInput = toInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
         "$1-$2-$3"
@@ -359,104 +292,77 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-      if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
-        errorType = "fromDateBeforeGlobal";
-      } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
-        errorType = "fromDateAfterGlobal";
-      } else if (GlobaltoDate && enteredToDate > GlobaltoDate) {
+      if (GlobaltoDate && enteredToDate > GlobaltoDate) {
         errorType = "toDateAfterGlobal";
       } else if (GlobaltoDate && enteredToDate < GlobalfromDate) {
         errorType = "toDateBeforeGlobal";
-      } else if (enteredToDate < enteredFromDate) {
-        errorType = "toDateBeforeFromDate";
       }
     }
 
     switch (errorType) {
-      case "saleType":
-        toast.error("Please select a Account Code");
+      case "toDate":
+        toast.error("Rep Date is required");
         return;
 
-      case "fromDate":
-        toast.error("From date is required");
-        return;
-      case "toDate":
-        toast.error("To date is required");
-        return;
-      case "fromDateInvalid":
-        toast.error("From date must be in the format dd-mm-yyyy");
-        return;
       case "toDateInvalid":
-        toast.error("To date must be in the format dd-mm-yyyy");
+        toast.error("Rep Date must be in the format dd-mm-yyyy");
         return;
-      case "fromDateBeforeGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "fromDateAfterGlobal":
-        toast.error(
-          `From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
+
       case "toDateAfterGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
+        toast.error(`Rep Date must be before ${GlobaltoDate1}`);
         return;
       case "toDateBeforeGlobal":
-        toast.error(
-          `To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-        );
-        return;
-      case "toDateBeforeFromDate":
-        toast.error("To date must be after from date");
+        toast.error(`Rep Date must be after ${GlobalfromDate1}`);
         return;
 
       default:
         break;
     }
 
-    // console.log(data);
-    document.getElementById(
-      "fromdatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
-    document.getElementById(
-      "todatevalidation"
-    ).style.border = `1px solid ${fontcolor}`;
+    const fromDateElement = document.getElementById("fromdatevalidation");
+    const toDateElement = document.getElementById("todatevalidation");
 
-    const apiUrl = apiLinks + "/EmployeeSalaryRegister.php";
+    if (fromDateElement) {
+      fromDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+    if (toDateElement) {
+      toDateElement.style.border = `1px solid ${fontcolor}`;
+    }
+
+    const apiUrl = apiLinks + "/AmericanYearWiseCustomerSaleReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FEmpCod: Employeeselectdata,
+      
+      // code: "AMRELEC",
+      FSalCod: saleType,
+      FCtgCod: Regionselectdata,
+      FCapCod: Cityselectdata,
+      FTypCod: Typeselectdata,
+
+
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
       code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      // code: "BRIGHT",
-      // FLocCod: "001",
-      // FYerDsc: "2025-2025",
+
+
     }).toString();
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
+        console.log("Response:", response.data);
 
-        setTotalSalary(response.data["TotalSalary"]);
-        setTotalSaleCom(response.data["TotalSaleCom"]);
-        setTotalRecCom(response.data["TotalRecCom"]);
-        setTotalAdvance(response.data["TotalAdvance"]);
-        setTotalFine(response.data["TotalFine"]);
-        setTotalNetAmount(response.data["TotalNetAmount"]);
+        setAmt001(response.data["Grand Total"]["Total Customers"]);
+        setAmt002(response.data["Grand Total"]["Quantity"]);
+
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
         } else {
           console.warn(
             "Response data structure is not as expected:",
-            response.data.Detail
+            response.data
           );
           setTableData([]);
         }
@@ -470,11 +376,11 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-      if (fromRef && fromRef.current) {
+    if (!hasComponentMountedPreviously || (input1Ref && input1Ref.current)) {
+      if (input1Ref && input1Ref.current) {
         setTimeout(() => {
-          fromRef.current.focus();
-          fromRef.current.select();
+          input1Ref.current.focus();
+          // input1Ref.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -495,74 +401,139 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
- 
- useEffect(() => {
-    const apiUrl = apiLinks + "/GetActiveEmployee.php";
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveSalesman.php";
     const formData = new URLSearchParams({
-         code: organisation.code,
-          FLocCod: locationnumber || getLocationNumber,
-      // code: "BRIGHT",
-      // FLocCod: "001",
+       code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+      // code: 'AMRELEC',
+
     }).toString();
     axios
       .post(apiUrl, formData)
       .then((response) => {
         if (response.data && Array.isArray(response.data)) {
-          setGetEmployee(response.data);
+          setGetCompany(response.data);
         } else {
           console.warn(
             "Response data structure is not as expected:",
             response.data
           );
-          setGetEmployee([]);
+          setGetCompany([]);
         }
       })
       .catch((error) => {
         console.error("Error:", error);
       });
   }, []);
-  const employeeoptions = GetEmployee.map((item) => ({
-    value: item.tempcod,
-    label: `${item.tempcod}-${item.tempnam.trim()}`,
+  const options = GetCompany.map((item) => ({
+    value: item.tsalcod,
+    label: `${item.tsalcod}-${item.tsaldsc.trim()}`,
   }));
 
- 
   useEffect(() => {
-    if (GetEmployee.length > 0) {
-      setIsOptionsLoaded(true);
-    }
-  }, [GetEmployee]);
+    const apiUrl = apiLinks + "/GetCapacity.php";
+    const formData = new URLSearchParams({
+       code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+      // code: 'AMRELEC',
 
-  useEffect(() => {
-    if (
-      isOptionsLoaded &&
-      employeeoptions.length > 0 &&
-      !Employeeselectdata &&
-      !hasInitialized.current
-    ) {
-      const firstOption = employeeoptions[0];
-      setEmployeeselectdata(firstOption.value);
-
-      const fullLabel = firstOption.label;
-      const description = fullLabel.split("-").pop()?.trim();
-
-      setEmployeeselectdatavalue({
-        value: firstOption.value,
-        label: description,
-        fullLabel: fullLabel,
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetCity(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetCity([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
       });
+  }, []);
+  const Cityoptions = GetCity.map((item) => ({
+    value: item.tcapcod,
+    label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
+  }));
 
-      // Mark as initialized
-      hasInitialized.current = true;
-    }
-  }, [isOptionsLoaded, employeeoptions, Employeeselectdata]);
+
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetCatg.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      // code: 'AMRELEC',
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetRegion(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetRegion([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const Regionoptions = GetRegion.map((item) => ({
+    value: item.tctgcod,
+    label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+  }));
 
 
- const handleEmployeeKeypress = (event, inputId) => {
+
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveType.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+      // code: 'AGFACTORY',
+      // FLocCod: '001',
+
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetTypeData(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetTypeData([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const TypeDataoption = GetTypeData.map((item) => ({
+    value: item.ttypcod,
+    label: `${item.ttypcod}-${item.ttypdsc.trim()}`,
+  }));
+
+  const handleTransactionTypeChange = (event) => {
+    const selectedTransactionType = event.target.value;
+    settransectionType(selectedTransactionType);
+  };
+
+  const handlecompanyKeypress = (event, inputId) => {
     if (event.key === "Enter") {
-      const selectedOption = employeeref.current.state.selectValue;
+      const selectedOption = input1Ref.current.state.selectValue;
       if (selectedOption && selectedOption.value) {
-        setEmployeeselectdata(selectedOption.value);
+        setCompanyselectdata(selectedOption.value);
       }
       // const nextInput = document.getElementById(inputId);
       const nextInput = inputId.current;
@@ -600,7 +571,7 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       ...base,
       height: "24px",
       minHeight: "unset",
-      width: 320,
+      width: 250,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       backgroundColor: getcolor,
@@ -618,8 +589,8 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       justifyContent: "space-between",
       boxShadow: "none",
       "&:focus-within": {
-        borderColor: "#3368B5",
-        boxShadow: "0 0 0 1px #3368B5",
+        borderColor: "red",               // Changed from #3368B5 to red
+        boxShadow: "0 0 0 1px red",       // Changed from #3368B5 to red
       },
     }),
 
@@ -636,7 +607,6 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       ...base,
       padding: 0,
       maxHeight: "200px",
-      // Scrollbar styling for Webkit browsers
       "&::-webkit-scrollbar": {
         width: "8px",
         height: "8px",
@@ -650,10 +620,9 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
         borderRadius: "10px",
         border: `2px solid ${getcolor}`,
         "&:hover": {
-          backgroundColor: "#3368B5",
+          backgroundColor: "#3368B5",     // unchanged
         },
       },
-      // Scrollbar styling for Firefox
       scrollbarWidth: "thin",
       scrollbarColor: `${fontcolor} ${getcolor}`,
     }),
@@ -664,12 +633,13 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       backgroundColor: state.isSelected
         ? "#3368B5"
         : state.isFocused
-        ? "#3368B5"
-        : getcolor,
-   color:
-  state.isSelected || state.isFocused
-    ? "white"
-    : fontcolor,      "&:hover": {
+          ? "#3368B5"
+          : getcolor,
+      color:
+        state.isSelected || state.isFocused
+          ? "white"
+          : fontcolor,
+      "&:hover": {
         backgroundColor: "#3368B5",
         color: "white",
         cursor: "pointer",
@@ -679,6 +649,7 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       },
       transition: "background-color 0.2s ease, color 0.2s ease",
     }),
+
     dropdownIndicator: (base, state) => ({
       ...base,
       padding: 0,
@@ -692,7 +663,7 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
         ? "rotate(180deg)"
         : "rotate(0deg)",
       "&:hover": {
-        color: "#3368B5",
+        color: "#3368B5",                // unchanged
       },
     }),
     indicatorSeparator: () => ({
@@ -718,12 +689,12 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       padding: "0 4px",
       color: fontcolor,
       "&:hover": {
-        color: "#ff4444",
+        color: "#ff4444",                // unchanged
       },
     }),
     placeholder: (base) => ({
       ...base,
-      color: `${fontcolor}80`, // 50% opacity
+      color: `${fontcolor}80`,
       fontSize: getdatafontsize,
       fontFamily: getfontstyle,
       marginTop: "-5px",
@@ -744,7 +715,7 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
     }),
     multiValue: (base) => ({
       ...base,
-      backgroundColor: `${fontcolor}20`, // Light background for tags
+      backgroundColor: `${fontcolor}20`,
     }),
     multiValueLabel: (base) => ({
       ...base,
@@ -763,52 +734,61 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
   });
 
   const exportPDFHandler = () => {
-      // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "potraite" });
+    const globalfontsize = 10;
+    console.log("gobal font data", globalfontsize);
+
+    // Create a new jsPDF instance with landscape orientation
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.Date,
-     item.SLYNo,
-    //   item.Code,
-    //  item.Employee,
-    formatValue(item.Salary)   ,
-    formatValue(item.SaleCom)   ,
-    formatValue(item.RecCom)   ,
-    formatValue(item.AdvDed)   ,
-    formatValue(item.FineAmt)   ,
-    formatValue(item.TotalAmt)   ,
+      item.Year,
+      item["Total Customers"],
+      item["2026"],
+      item["2025"],
+      item["2024"],
+      item["2023"],
+      item["2022"],
+      item["2021"],
+      item["2020"],
+      item["2019"],
+      item.Total,
     ]);
 
     // Add summary row to the table
     rows.push([
+      String(formatValue(tableData.length.toLocaleString())),
+      String(formatValue(Amt001)),
       "",
       "",
-    //   "Total",
-     String(formatValue(TotalSalary)),
-     String(formatValue(TotalSaleCom)),
-     String(formatValue(TotalRecCom)),
-     String(formatValue(TotalAdvance)),
-     String(formatValue(TotalFine)),
-     String(formatValue(TotalNetAmount)),
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      String(formatValue(Amt002)),
 
-        
+
     ]);
 
-    // Define table column headers and individual column widths
 
+
+    // Define table column headers and individual column widths
     const headers = [
-      "Date",
-      "SLYNo",
-    //  "Employee",
-      "Salary",
-      "SaleCom",
-      "RecCom",
-      "AdvDed",
-      "FineAmt",
-      "TotalAmt"
+      "Year",
+      "T-Cust",
+      "2026",
+      "2025",
+      "2024",
+      "2023",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "Total",
     ];
-    const columnWidths = [24, 20,25, 25, 25, 25,25,25];
+    const columnWidths = [16, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -818,14 +798,14 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
     const paddingTop = 15;
 
     // Set font properties for the table
-    // doc.setFont("verdana-regular", "normal");
-    // doc.setFontSize(10);
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
 
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-      doc.setFont("verdana", "bold"); // Set font to bold
-      doc.setFontSize(10); // Set font size for headers
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -847,17 +827,17 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
         startX += columnWidths[index]; // Move to the next column
       });
 
-    
+      // Reset font style and size after adding headers
+      doc.setFont(getfontstyle);
+      doc.setFontSize(10);
     };
 
-      const addTableRows = (startX, startY, startIndex, endIndex) => {
+    const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
       const normalFont = getfontstyle;
       const tableWidth = getTotalTableWidth();
-
-      doc.setFontSize(11);
 
       for (let i = startIndex; i < endIndex; i++) {
         const row = rows[i];
@@ -873,7 +853,7 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
         }
 
         if (isTotalRow) {
-          doc.setFont("verdana", "bold");
+          doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
         }
 
@@ -940,21 +920,14 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0 || cellIndex === 1 ) {
+          if (cellIndex === 0) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
           } else if (
-            cellIndex === 3  ||
-            cellIndex === 4 ||
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7 || 
-             cellIndex === 8
-            
-            
+            cellIndex > 0
           ) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
@@ -1022,7 +995,7 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
+    const rowsPerPage = 29; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -1044,23 +1017,15 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
         // Add page numbering
-  doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(
-          `Page ${pageNumber}`,
-          rightX - 5,
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(
+          `Page ${pageNumber} / ${totalPages}`,
+          rightX - 20,
           doc.internal.pageSize.height - 10,
-          { align: "right" }
+          { align: "right" },
         );
       };
 
@@ -1069,45 +1034,73 @@ const [Employeeselectdata, setEmployeeselectdata] = useState("");
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-    
-           doc.setFontSize(10);
-        doc.setFont('helvetica', "300");
+        doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-       
-        doc.setFont('verdana-regular', "normal");
-         doc.setFontSize(10);
+        doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Employee Salary Register Report From ${fromInputDate} To ${toInputDate}`,
+          `American Year Wise Customer Sale Report As On ${toInputDate}`,
           "",
           "",
           pageNumber,
           startY,
           12
         ); // Render sale report title with decreased font size, provide the time, and page number
-        startY += 5;
+        startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-        // Set font size and weight for the labels
-    
-        let EMPLOYEEDATA = Employeeselectdatavalue.label
-          ? Employeeselectdatavalue.label
-          : "ALL";   
+         let accoount = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";      
+        let Categorycode = Regionselectdatavalue.label
+          ? Regionselectdatavalue.label
+          : "ALL";
+        let Typecode = Typeselectdatavalue.label
+          ? Typeselectdatavalue.label
+          : "ALL";
+        let capacitycode = Cityselectdatavalue.label
+          ? Cityselectdatavalue.label
+          : "ALL";
 
- doc.setFont('verdana', "bold");
-        doc.setFontSize(10)
-        doc.text(`Employee :`, labelsX, labelsY); // Draw bold label
-doc.setFont('verdana-regular', "normal");
-        doc.setFontSize(10)
-                doc.text(`${EMPLOYEEDATA}`, labelsX + 25, labelsY); // Draw the value next to the label
+        // Set font style, size, and family
+
+
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Saleman :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${accoount}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Category :`, labelsX + 200, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${Categorycode}`, labelsX + 225, labelsY + 8.5); // Draw the value next to the label
+
+
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Type :`, labelsX, labelsY + 12.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${Typecode}`, labelsX + 25, labelsY + 12.5); // Draw the value next to the label
+
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Capacity :`, labelsX + 200, labelsY + 12.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${capacitycode}`, labelsX + 225, labelsY + 12.5); // Draw the value next to the label
 
 
 
-        startY += 1; // Adjust vertical position for the labels
+        startY += 14; // Adjust vertical position for the labels
 
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 30);
+        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 33);
         const startIndex = currentPageIndex * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
         startY = addTableRows(
@@ -1127,9 +1120,9 @@ doc.setFont('verdana-regular', "normal");
     const getCurrentDate = () => {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
       const yyyy = today.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
+      return dd + "/" + mm + "/" + yyyy;
     };
 
     // Function to get current time in the format HH:MM:SS
@@ -1148,24 +1141,26 @@ doc.setFont('verdana-regular', "normal");
     handlePagination();
 
     // Save the PDF files
-    doc.save(`EmployeeSalaryRegisterReport As On ${date}.pdf`);
+    doc.save(`AmericanYearWiseCustomerSale As On ${date}.pdf`);
   };
 
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 8; // Ensure this matches the actual number of columns
+    const numColumns = 11; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
       "center",
-      "center",
-    //   "left",
       "right",
       "right",
       "right",
       "right",
       "right",
+      "right",
+      "right",
+      "right",
+       "right",
       "right",
     ];
 
@@ -1195,29 +1190,21 @@ doc.setFont('verdana-regular', "normal");
     worksheet.addRow([]);
 
     // Add company name
- // Add company name
-const companyRow = worksheet.addRow([comapnyname]);
-
-companyRow.eachCell((cell) => {
-  cell.font = {
-    name: "Times New Roman",
-    size: 16,       // optional
-    bold: true,     // optional
-  };
-  cell.alignment = { horizontal: "center" };
-});
-
+    const companyRow = worksheet.addRow([comapnyname]);
+    companyRow.eachCell((cell) => {
+      cell.font = fontCompanyName;
+      cell.alignment = { horizontal: "center" };
+    });
 
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number
       }`
     );
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Employee Salary Register Report From ${fromInputDate} To ${toInputDate}`,
+      `American Year Wise Customer Sale Report As on ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1225,38 +1212,63 @@ companyRow.eachCell((cell) => {
     });
 
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number
       }`
     );
 
     // Add an empty row after the title section
     worksheet.addRow([]);
 
-    let employeedata = Employeeselectdatavalue.label
-      ? Employeeselectdatavalue.label
-      : "ALL";
+    let typestatus = "";
+   
+let accoount = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";      
+        let Categorycode = Regionselectdatavalue.label
+          ? Regionselectdatavalue.label
+          : "ALL";
+        let Typecode = Typeselectdatavalue.label
+          ? Typeselectdatavalue.label
+          : "ALL";
+        let capacitycode = Cityselectdatavalue.label
+          ? Cityselectdatavalue.label
+          : "ALL";
+  
 
- const typeAndStoreRow5 = worksheet.addRow([
-      "Employee :",
-      employeedata,
-      "",
-      "",
-      "",
-    ]);
+    // Apply styling for the status row
+    const typeAndStoreRow2 = worksheet.addRow(
+      ["Saleman :", accoount, "", "", "", "Category :", Categorycode]
+    );
 
-     worksheet.mergeCells(`B${typeAndStoreRow5.number}:E${typeAndStoreRow5.number}`);
+     worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
+    
 
- typeAndStoreRow5.eachCell((cell, colIndex) => {
+    const typeAndStoreRow3 = worksheet.addRow(
+      ["Type :", Typecode, "", "", "", "Capacity :", capacitycode]
+    );
+   
+        worksheet.mergeCells(`B${typeAndStoreRow3.number}:D${typeAndStoreRow3.number}`);
+
+
+    // Apply styling for the status row
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
-        bold: [1].includes(colIndex),
+        bold: [1, 6].includes(colIndex),
       };
       cell.alignment = { horizontal: "left", vertical: "middle" };
     });
-
-  
+    typeAndStoreRow3.eachCell((cell, colIndex) => {
+      cell.font = {
+        name: "CustomFont" || "CustomFont",
+        size: 10,
+        bold: [1, 6].includes(colIndex),
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle" };
+    });
+   
+    // Header style
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
@@ -1273,17 +1285,21 @@ companyRow.eachCell((cell) => {
       },
     };
 
-    // Add headers
+   
+
+    // Define table column headers and individual column widths
     const headers = [
-      "Date",
-      "SLYNo",
-    //  "Employee",
-      "Salary",
-      "SaleCom",
-      "RecCom",
-      "AdvDed",
-      "FineAmt",
-      "TotalAmt"
+     "Year",
+      "T-Cust",
+      "2026",
+      "2025",
+      "2024",
+      "2023",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "Total",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -1291,16 +1307,17 @@ companyRow.eachCell((cell) => {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-       item.Date,
-     item.SLYNo,
-    //   item.Code,
-    //  item.Employee,
-    formatValue(item.Salary)   ,
-    formatValue(item.SaleCom)   ,
-    formatValue(item.RecCom)   ,
-    formatValue(item.AdvDed)   ,
-    formatValue(item.FineAmt)   ,
-    formatValue(item.TotalAmt)   ,
+       item.Year,
+      item["Total Customers"],
+      item["2026"],
+      item["2025"],
+      item["2024"],
+      item["2023"],
+      item["2022"],
+      item["2021"],
+      item["2020"],
+      item["2019"],
+      item.Total,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1318,21 +1335,18 @@ companyRow.eachCell((cell) => {
       });
     });
 
-    // Set column widths
-    [10,8, ,12, 12,12, 12,12,12].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
     const totalRow = worksheet.addRow([
-    "",
+       String(formatValue(tableData.length.toLocaleString())),
+      String(formatValue(Amt001)),
       "",
-    //   "Total",
-     String(formatValue(TotalSalary)),
-     String(formatValue(TotalSaleCom)),
-     String(formatValue(TotalRecCom)),
-     String(formatValue(TotalAdvance)),
-     String(formatValue(TotalFine)),
-     String(formatValue(TotalNetAmount)),
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      String(formatValue(Amt002)),
     ]);
 
     // total row added
@@ -1347,9 +1361,23 @@ companyRow.eachCell((cell) => {
       };
 
       // Align only the "Total" text to the right
-      if (colNumber === 3 || colNumber === 4 || colNumber === 5 || colNumber === 6 || colNumber === 7 || colNumber === 8) {
+      if (
+        colNumber > 1
+
+      ) {
         cell.alignment = { horizontal: "right" };
       }
+      if (
+        colNumber === 1
+
+      ) {
+        cell.alignment = { horizontal: "center" };
+      }
+    });
+
+    // Set column widths
+    [9, 12, 12, 12, 12, 12, 12, 12, 12,12,12].forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
     });
 
     // Add a blank row
@@ -1400,13 +1428,11 @@ companyRow.eachCell((cell) => {
 
     // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number
       }`
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number
       }`
     );
 
@@ -1415,9 +1441,8 @@ companyRow.eachCell((cell) => {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `EmployeeSalaryRegisterReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `AmericanYearWiseCustomerSale As on ${currentdate}.xlsx`);
   };
-
   const dispatch = useDispatch();
 
   const tableTopColor = "#3368B5";
@@ -1436,150 +1461,317 @@ companyRow.eachCell((cell) => {
   };
 
   let totalEntries = 0;
-  const handlecompanyKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCompanyselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
 
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
+  const getFilteredTableData = () => {
+    let filteredData = tableData;
+    if (selectedSearch.trim() !== "") {
+      const query = selectedSearch.trim().toLowerCase();
+      filteredData = filteredData.filter(
+        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
+      );
     }
+    return filteredData;
   };
-  const handlecategoryKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCategoryselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-  const handlecapacityKeypress = (event, inputId) => {
-    if (event.key === "Enter") {
-      const selectedOption = saleSelectRef.current.state.selectValue;
-      if (selectedOption && selectedOption.value) {
-        setCapacityselectdata(selectedOption.value);
-      }
-      // const nextInput = document.getElementById(inputId);
-      const nextInput = inputId.current;
-
-      if (nextInput) {
-        nextInput.focus();
-        // nextInput.select();
-      } else {
-        document.getElementById("submitButton").click();
-      }
-    }
-  };
-
-  const handleKeyPress = (e, nextInputRef) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (nextInputRef.current) {
-        nextInputRef.current.focus();
-      }
-    }
-  };
-
-  const handleTransactionTypeChange = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType(selectedTransactionType);
-  };
-
-  const handleTransactionTypeChange2 = (event) => {
-    const selectedTransactionType = event.target.value;
-    settransectionType2(selectedTransactionType);
-  };
-
-  
-  
 
   const firstColWidth = {
-    width: "80px",
+    width: "55px",
   };
   const secondColWidth = {
-    width: "60px",
+    width: "90px",
   };
   const thirdColWidth = {
-    width: "40px",
+    width: "90px",
   };
-//   const forthColWidth = {
-//     width: "360px",
-//   };
+  const forthColWidth = {
+    width: "90px",
+  };
+
   const sixthColWidth = {
-    width: "100px",
+    width: "90px",
   };
   const seventhColWidth = {
-    width: "100px",
+    width: "90px",
   };
   const eightColWidth = {
-    width: "100px",
+    width: "90px",
   };
   const ninthColWidth = {
-    width: "100px",
+    width: "90px",
   };
-   const tenthColWidth = {
-    width: "100px",
+  const tenthColWidth = {
+    width: "90px",
   };
-   const elewenthColWidth = {
-    width: "100px",
+  const tenthColWidth1 = {
+    width: "90px",
+  };
+  const tenthColWidth2 = {
+    width: "90px",
   };
   const sixthcol = {
     width: "8px",
   };
 
   const [columns, setColumns] = useState({
-    code: [],
-
-    Description: [],
-    Opening: [],
-    Debit: [],
-    Credit: [],
-    Balance: [],
+    Year: [],
+    "Total Customers": [],
+    "2026": [],
+    "2025": [],
+    "2024": [],
+    "2023": [],
+    "2022": [],
+    "2021": [],
+    "2020": [],
+    "2019": [],
+    Total: [],
   });
-
   const [columnSortOrders, setColumnSortOrders] = useState({
-    code: "",
-
-    Description: "",
-    Opening: "",
-    Debit: "",
-    Credit: "",
-    Balance: "",
+    Year: "",
+    "Total Customers": "",
+    "2026": "",
+    "2025": "",
+    "2024": "",
+    "2023": "",
+    "2022": "",
+    "2021": "",
+    "2020": "",
+    "2019": "",
+    Total: "",
   });
-
   // When you receive your initial table data, transform it into column-oriented format
   useEffect(() => {
     if (tableData.length > 0) {
       const newColumns = {
-        code: tableData.map((row) => row.code),
-        Description: tableData.map((row) => row.Description),
-        Opening: tableData.map((row) => row.Opening),
-
-        Debit: tableData.map((row) => row.Debit),
-        Credit: tableData.map((row) => row.Credit),
-
-        Balance: tableData.map((row) => row.Balance),
+        Year: tableData.map((row) => row.Year),
+        "Total Customers": tableData.map((row) => row["Total Customers"]),
+        "2026": tableData.map((row) => row["2026"]),
+        "2025": tableData.map((row) => row["2025"]),
+        "2024": tableData.map((row) => row["2024"]),
+        "2023": tableData.map((row) => row["2023"]),
+        "2022": tableData.map((row) => row["2022"]),
+        "2021": tableData.map((row) => row["2021"]),
+        "2020": tableData.map((row) => row["2020"]),
+        "2019": tableData.map((row) => row["2019"]),
+        Total: tableData.map((row) => row.Total),
       };
       setColumns(newColumns);
     }
   }, [tableData]);
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      let aVal = a[col] ?? "";
+      let bVal = b[col] ?? "";
+
+      aVal = aVal.toString();
+      bVal = bVal.toString();
+
+      // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
+      if (col === "tcstcod" || col === "tcstcod") {
+        // Reverse strings → compare from right side
+        const revA = aVal.split("").reverse().join("");
+        const revB = bVal.split("").reverse().join("");
+
+        return newOrder === "ASC"
+          ? revA.localeCompare(revB)
+          : revB.localeCompare(revA);
+      }
+
+      // ⭐ Numeric sorting
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
+
+      // Default → normal string sorting
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Year: null,
+      "Total Customers": null,
+      "2026": null,
+      "2025": null,
+      "2024": null,
+      "2023": null,
+      "2022": null,
+      "2021": null,
+      "2020": null,
+      "2019": null,
+      Total: null,
+    });
+  };
+
+  const renderTableData = () => {
+    return (
+      <>
+        {isLoading ? (
+          <>
+            <tr style={{ backgroundColor: getcolor }}>
+              <td colSpan="11" className="text-center">
+                <Spinner animation="border" variant="primary" />
+              </td>
+            </tr>
+            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 11 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              {/* <td style={fifthColWidth}></td> */}
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+              <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
+              <td style={tenthColWidth}></td>
+              <td style={tenthColWidth1}></td>
+              <td style={tenthColWidth2}></td>
+            </tr>
+          </>
+        ) : (
+          <>
+            {tableData.map((item, i) => {
+              totalEnteries += 1;
+              return (
+                <tr
+                  key={`${i}-${selectedIndex}`}
+                  ref={(el) => (rowRefs.current[i] = el)}
+                  onClick={() => handleRowClick(i)}
+                  className={selectedIndex === i ? "selected-background" : ""}
+                  style={{
+                    backgroundColor: getcolor,
+                    color: fontcolor,
+                  }}
+                >
+                  <td className="text-center" style={firstColWidth}>
+                    {item.Year}
+                  </td>
+
+
+                  <td
+                    className="text-end"
+                    title={item["Total Customers"]}
+                    style={{
+                      ...secondColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item["Total Customers"]}
+                  </td>
+                  <td
+                    className="text-end"
+                    title={item["2026"]}
+                    style={{
+                      ...thirdColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item["2026"]}
+                  </td>
+                  <td className="text-end" style={forthColWidth}>
+                    {item["2025"]}
+                  </td>
+
+                  <td
+                    className="text-end"
+                    title={item["2024"]}
+                    style={{
+                      ...sixthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item["2024"]}
+                  </td>
+                  <td className="text-end" style={seventhColWidth}>
+                    {item["2023"]}
+                  </td>
+                  <td className="text-end" style={eightColWidth}>
+                    {item["2022"]}
+                  </td>
+                  <td className="text-end" style={ninthColWidth}>
+                    {item["2021"]}
+                  </td>
+                  <td className="text-end" style={tenthColWidth}>
+                    {item["2020"]}
+                  </td>
+                  <td className="text-end" style={tenthColWidth1}>
+                    {item["2019"]}
+                  </td>
+                  <td className="text-end" style={tenthColWidth2}>
+                    {item["Total"]}
+                  </td>
+                </tr>
+              );
+            })}
+            {Array.from({
+              length: Math.max(0, 25 - tableData.length),
+            }).map((_, rowIndex) => (
+              <tr
+                key={`blank-${rowIndex}`}
+                style={{
+                  backgroundColor: getcolor,
+                  color: fontcolor,
+                }}
+              >
+                {Array.from({ length: 11 }).map((_, colIndex) => (
+                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td style={firstColWidth}></td>
+              <td style={secondColWidth}></td>
+              <td style={thirdColWidth}></td>
+              <td style={forthColWidth}></td>
+              {/* <td style={fifthColWidth}></td> */}
+              <td style={sixthColWidth}></td>
+              <td style={seventhColWidth}></td>
+              <td style={eightColWidth}></td>
+              <td style={ninthColWidth}></td>
+              <td style={tenthColWidth}></td>
+              <td style={tenthColWidth1}></td>
+              <td style={tenthColWidth2}></td>
+            </tr>
+          </>
+        )}
+      </>
+    );
+  };
 
   const getIconStyle = (colKey) => {
     const order = columnSortOrders[colKey];
@@ -1590,63 +1782,10 @@ companyRow.eachCell((cell) => {
     };
   };
 
-  const resetSorting = () => {
-    setColumnSortOrders({
-      code: null,
-
-      Description: null,
-      Opening: null,
-      Debit: null,
-      Credit: null,
-      Balance: null,
-    });
-  };
-
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-  const sortedData = [...tableData].sort((a, b) => {
-    const aVal = a[col] != null ? a[col].toString().trim() : "";
-    const bVal = b[col] != null ? b[col].toString().trim() : "";
-
-    // Attempt numeric conversion
-    const numA = Number(aVal.replace(/,/g, ""));
-    const numB = Number(bVal.replace(/,/g, ""));
-
-    // Check if numeric sorting is possible
-    const bothNumeric =
-      !isNaN(numA) && !isNaN(numB) && aVal !== "" && bVal !== "";
-
-    if (bothNumeric) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    }
-
-    // Alphabetical sorting as fallback
-    return newOrder === "ASC"
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  });
-
-  // Update table
-  setTableData(sortedData);
-
-  // Update column sort indicator
-  setColumnSortOrders((prev) => {
-    const updated = {};
-    Object.keys(prev).forEach((key) => {
-      updated[key] = key === col ? newOrder : null;
-    });
-    return updated;
-  });
-};
-
-
-
   useHotkeys(
     "alt+s",
     () => {
-      fetchDailyStatusReport();
+      fetchReceivableReport();
       resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true }
@@ -1676,14 +1815,17 @@ companyRow.eachCell((cell) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+  useEffect(() => {
+    document.documentElement.style.setProperty("--background-color", getcolor);
+  }, [getcolor]);
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "970px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
-    left: isSidebarVisible ? "60vw" : "50vw",
+    left: isSidebarVisible ? "60vw" : "52vw",
     transform: "translateX(-50%)",
     display: "flex",
     flexDirection: "column",
@@ -1721,7 +1863,6 @@ companyRow.eachCell((cell) => {
   const handleRowClick = (index) => {
     setSelectedIndex(index);
   };
-
   useEffect(() => {
     if (selectedRowId !== null) {
       const newIndex = tableData.findIndex(
@@ -1730,7 +1871,6 @@ companyRow.eachCell((cell) => {
       setSelectedIndex(newIndex);
     }
   }, [tableData, selectedRowId]);
-
   const handleKeyDown = (e) => {
     if (selectedIndex === -1 || e.target.id === "searchInput") return;
     if (e.key === "ArrowUp") {
@@ -1745,7 +1885,6 @@ companyRow.eachCell((cell) => {
       scrollToSelectedRow();
     }
   };
-
   const scrollToSelectedRow = () => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1754,14 +1893,12 @@ companyRow.eachCell((cell) => {
       });
     }
   };
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedIndex]);
-
   useEffect(() => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1771,69 +1908,57 @@ companyRow.eachCell((cell) => {
     }
   }, [selectedIndex]);
 
-  const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
-
-  const focusNextElement = (currentRef, nextRef) => {
-    if (currentRef.current && nextRef.current) {
-      currentRef.current.focus();
-      nextRef.current.focus();
-    }
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
   };
 
-  const handleToDateEnter = (e) => {
-    if (e.key === "Enter") {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
+  const handleRadioChange = (days) => {
+    const toDate = parseDate(toInputDate);
+    const fromDate = new Date(toDate);
+    fromDate.setUTCDate(fromDate.getUTCDate() - days);
 
-      const inputDate = e.target.value;
-      const formattedDate = inputDate.replace(
-        /^(\d{2})(\d{2})(\d{4})$/,
-        "$1-$2-$3"
+    setSelectedfromDate(fromDate);
+    setfromInputDate(formatDate(fromDate));
+    setSelectedRadio(days === 0 ? "custom" : `${days}days`);
+  };
+
+  useEffect(() => {
+    if (selectedRadio === "custom") {
+      const currentDate = new Date();
+      const firstDateOfCurrentMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
       );
-
-      // Basic format validation (dd-mm-yyyy)
-      if (
-        !/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
-      ) {
-        toast.error("Date must be in the format dd-mm-yyyy");
-        return;
-      }
-
-      const [day, month, year] = formattedDate.split("-").map(Number);
-      const enteredDate = new Date(year, month - 1, day);
-      const daysInMonth = new Date(year, month, 0).getDate();
-
-      // Validate month, day, and date range
-      if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
-        toast.error("Invalid date. Please check the day and month.");
-        return;
-      }
-      if (enteredDate > GlobaltoDate) {
-        toast.error(`Date must be before ${GlobaltoDate1}`);
-        return;
-      }
-
-      // Update input value and state
-      e.target.value = formattedDate;
-      settoInputDate(formattedDate); // Update the state with formatted date
-
-      // Move focus to the next element
-      focusNextElement(toRef, saleSelectRef);
+      setSelectedfromDate(firstDateOfCurrentMonth);
+      setfromInputDate(formatDate(firstDateOfCurrentMonth));
+      setSelectedToDate(currentDate);
+      settoInputDate(formatDate(currentDate));
+    } else {
+      const days = parseInt(selectedRadio.replace("days", ""));
+      handleRadioChange(days);
     }
-  };
+  }, [selectedRadio]);
 
-  const handleStoreEnter = (e) => {
-    if (e.key === "Enter" && !menuStoreIsOpen) {
-      e.preventDefault();
-      focusNextElement(storeRef, selectButtonRef);
-    }
-  };
 
-  const handleSearchEnter = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      focusNextElement(searchRef, selectButtonRef);
+  const handleMobilenumberInputChange = (e) => {
+    let value = e.target.value;
+
+    // Allow only numbers
+    value = value.replace(/\D/g, "");
+
+    // Limit to 11 digits
+    if (value.length > 11) {
+      value = value.slice(0, 11);
     }
+
+    // ❌ if empty or 0 → DO NOTHING (keep previous value)
+    if (value === "" || Number(value) === 0) {
+      return;
+    }
+
+    setmobileNumber(value);
   };
 
   const formatValue = (val) => {
@@ -1853,246 +1978,25 @@ companyRow.eachCell((cell) => {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Employee Salary Register Report" />
+          <NavComponent textdata="American Year Wise Customer Sale Report" />
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
 
-          {/* ------------1st row */}
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "start",
-              }}
-            >
               <div
                 className="d-flex align-items-center"
-                style={{marginLeft:'20px'}}
-              >
-                <div
-                  style={{
-                    width: "80px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="fromDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      From :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="fromdatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: "12px",
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    id="frominputid"
-                    value={fromInputDate}
-                    ref={fromRef}
-                    onChange={handlefromInputChange}
-                    onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedfromDate}
-                    onChange={handlefromDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={fromCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-              <div
-                className="d-flex align-items-center " style={{marginLeft:"80px"}}
-              >
-                <div
-                  style={{
-                    width: "60px",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                >
-                  <label htmlFor="toDatePicker">
-                    <span
-                      style={{
-                        fontSize: getdatafontsize,
-                        fontFamily: getfontstyle,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      To :
-                    </span>
-                  </label>
-                </div>
-                <div
-                  id="todatevalidation"
-                  style={{
-                    width: "135px",
-                    border: `1px solid ${fontcolor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "24px",
-                    justifyContent: "center",
-                    marginLeft: "5px",
-                    background: getcolor,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.border = "2px solid red")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                  }
-                >
-                  <input
-                    ref={toRef}
-                    style={{
-                      height: "20px",
-                      width: "90px",
-                      paddingLeft: "5px",
-                      outline: "none",
-                      border: "none",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      backgroundColor: getcolor,
-                      color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
-                    }}
-                    value={toInputDate}
-                    onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, employeeref)}
-                    id="toDatePicker"
-                    autoComplete="off"
-                    placeholder="dd-mm-yyyy"
-                    aria-label="To Date Input"
-                    disabled={selectedRadio !== "custom"}
-                  />
-                  <DatePicker
-                    selected={selectedToDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd-MM-yyyy"
-                    popperPlacement="bottom"
-                    showPopperArrow={false}
-                    open={toCalendarOpen}
-                    dropdownMode="select"
-                    customInput={
-                      <div>
-                        <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleToCalendar
-                              : undefined
-                          }
-                          style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
-                            marginLeft: "18px",
-                            fontSize: getdatafontsize,
-                            fontFamily: getfontstyle,
-                            color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
-                          }}
-                          disabled={selectedRadio !== "custom"}
-                        />
-                      </div>
-                    }
-                    disabled={selectedRadio !== "custom"}
-                  />
-                </div>
-              </div>
-             
-            </div>
-          </div>
-          <div
-            className="row"
-            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                margin: "0px",
-                padding: "0px",
-                justifyContent: "start",
-              }}
-            >
-             
-               <div
-                className="d-flex align-items-center"
-                style={{ marginLeft: "12px" }}
+                style={{ marginRight: "21px" }}
               >
                 <div
                   style={{
@@ -2113,7 +2017,7 @@ companyRow.eachCell((cell) => {
                         fontWeight: "bold",
                       }}
                     >
-                      Employee :
+                      Salesman :
                     </span>
                   </label>
                 </div>
@@ -2121,30 +2025,25 @@ companyRow.eachCell((cell) => {
                 <div style={{ marginLeft: "3px" }}>
                   <Select
                     className="List-select-class"
-                    ref={employeeref}
-                    options={employeeoptions}
-                    value={
-                      employeeoptions.find(
-                        (opt) => opt.value === Employeeselectdata
-                      ) || null
-                    } // Ensure correct reference
-                    onKeyDown={(e) => handleEmployeeKeypress(e, selectButtonRef)}
+                    ref={input1Ref}
+                    options={options}
+                    onKeyDown={(e) => handlecompanyKeypress(e, TypeRef)}
                     id="selectedsale"
-                        onChange={(selectedOption) => {
-  if (selectedOption && selectedOption.value) {
-    setEmployeeselectdata(selectedOption.value);
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        setSaleType(selectedOption.value);
 
-    const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+                        const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
 
-    setEmployeeselectdatavalue({
-      value: selectedOption.value,
-      label: labelWithoutCode,
-    });
-  } else {
-    setEmployeeselectdata("");
-    setEmployeeselectdatavalue("");
-  }
-}}
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelWithoutCode,
+                        });
+                      } else {
+                        setSaleType("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
                     onInputChange={(inputValue, { action }) => {
                       if (action === "input-change") {
                         return inputValue.toUpperCase();
@@ -2153,7 +2052,7 @@ companyRow.eachCell((cell) => {
                     }}
                     components={{ Option: DropdownOption }}
                     styles={{
-                      ...customStyles1(!Employeeselectdata),
+                      ...customStyles1(!saleType),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -2163,136 +2062,436 @@ companyRow.eachCell((cell) => {
                         marginTop: "-5px",
                       }),
                     }}
-                    // isClearable
-                    // placeholder="ALL"
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+              {/* ------ */}
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Category :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={input2Ref}
+                    options={Regionoptions}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input3Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        setRegionselectdata(selectedOption.value);
+
+                        const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+                        setRegionselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelWithoutCode,
+                        });
+                      } else {
+                        setRegionselectdata("");
+                        setRegionselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Regionselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Type :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={TypeRef}
+                    options={TypeDataoption}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input2Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        setTypeselectdata(selectedOption.value);
+
+                        const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+                        setTypeselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelWithoutCode,
+                        });
+                      } else {
+                        setTypeselectdata("");
+                        setTypeselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Regionselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+
+
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Capacity :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={input3Ref}
+                    options={Cityoptions}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        setCityselectdata(selectedOption.value);
+
+                        const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+                        setCityselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelWithoutCode,
+                        });
+                      } else {
+                        setCityselectdata("");
+                        setCityselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Cityselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
                   />
                 </div>
               </div>
             </div>
           </div>
 
+
+
           <div>
-            {/* Table Head */}
             <div
               style={{
                 overflowY: "auto",
-                // width: "98.8%",
+                // width: "98.3%",
               }}
             >
               <table
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  // width: "100%",
+                  fontSize: parseInt(getdatafontsize),
+                  //   width: "100%",
                   position: "relative",
                 }}
               >
                 <thead
                   style={{
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
                     top: 0,
                     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: tableHeadColor,
+                    backgroundColor: getnavbarbackgroundcolor,
                   }}
                 >
                   <tr
                     style={{
-                      backgroundColor: tableHeadColor,
+                      backgroundColor: getnavbarbackgroundcolor,
                       color: "white",
                     }}
                   >
                     <td
                       className="border-dark"
                       style={firstColWidth}
+                      onClick={() => handleSorting("Year")}
                     >
-                      Date
-                     
-                      
+                      Year{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Year")}
+                      ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={secondColWidth}
-                    //   onClick={() => handleSorting("Description")}
+                      onClick={() => handleSorting("Total Customers")}
                     >
-                      SLYNo
-                    
+                      T-Cust{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Total Customers")}
+                      ></i>
                     </td>
-                    {/* <td
+
+                    <td
                       className="border-dark"
                       style={thirdColWidth}
+                      onClick={() => handleSorting("2026")}
                     >
-                      Code
-                   
-                    </td> */}
-                  
+                      2026{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2026")}
+                      ></i>
+                    </td>
+
+                    <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("2025")}
+                    >
+                      2025{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2025")}
+                      ></i>
+                    </td>
 
                     <td
                       className="border-dark"
                       style={sixthColWidth}
+                      onClick={() => handleSorting("2024")}
                     >
-                      Salary
-                    
+                      2024{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2024")}
+                      ></i>
                     </td>
+
                     <td
                       className="border-dark"
                       style={seventhColWidth}
+                      onClick={() => handleSorting("2023")}
                     >
-                      SaleCom
-                      
-                    </td>
-                     <td
-                      className="border-dark"
-                      style={eightColWidth}
-                    >
-                      RecCom
-                      
-                    </td>
-                     <td
-                      className="border-dark"
-                      style={ninthColWidth}
-                    >
-                      AdvDed
-                      
+                      2023{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2023")}
+                      ></i>
                     </td>
 
+                    <td
+                      className="border-dark"
+                      style={eightColWidth}
+                      onClick={() => handleSorting("2022")}
+                    >
+                      2022{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2022")}
+                      ></i>
+                    </td>
+
+                    <td
+                      className="border-dark"
+                      style={ninthColWidth}
+                      onClick={() => handleSorting("2021")}
+                    >
+                      2021{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2021")}
+                      ></i>
+                    </td>
                     <td
                       className="border-dark"
                       style={tenthColWidth}
+                      onClick={() => handleSorting("2020")}
                     >
-                      FineAmt
-                      
+                      2020{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2020")}
+                      ></i>
                     </td>
 
                     <td
                       className="border-dark"
-                      style={elewenthColWidth}
+                      style={tenthColWidth1}
+                      onClick={() => handleSorting("2019")}
                     >
-                      TotalAmt
-                      
+                      2019{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("2019")}
+                      ></i>
+                    </td>
+                    <td
+                      className="border-dark"
+                      style={tenthColWidth2}
+                      onClick={() => handleSorting("Total")}
+                    >
+                      Total{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Total")}
+                      ></i>
                     </td>
 
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
+
+
+
+
                 </thead>
               </table>
             </div>
-            {/* Table Body */}
             <div
               className="table-scroll"
               style={{
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "50vh",
+                maxHeight: "40vh",
                 // width: "100%",
-                position: "relative",
-                ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                wordBreak: "break-word",
               }}
             >
               <table
@@ -2303,140 +2502,15 @@ companyRow.eachCell((cell) => {
                   fontFamily: getfontstyle,
                   width: "100%",
                   position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
-                <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="8" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 8 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        )
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        {/* <td style={thirdColWidth}></td> */}
-                        {/* <td style={forthColWidth}></td> */}
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
-                        <td style={tenthColWidth}></td>
-                        <td style={elewenthColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        const isNegative =
-                          item.Credit < 0 || item.Balance < 0 || item.Debit < 0;
-
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              // color: fontcolor,
-                              color: isNegative ? "red" : fontcolor,
-                            }}
-                          >
-                            <td className="text-center" style={firstColWidth}>
-                              {item.Date}
-                            </td>
-                            <td className="text-center" style={secondColWidth}>
-                              {item.SLYNo}
-                            </td>
-                            {/* <td className="text-end" style={thirdColWidth}>
-                              {item.Code}
-                            </td> */}
-                            {/* <td className="text-start" style={forthColWidth}>
-                              {item.Employee}
-                            </td> */}
-                            <td className="text-end" style={sixthColWidth}>
-                              {formatValue(item.Salary)}
-                            </td>
-                            <td className="text-end" style={seventhColWidth}>
-                              {formatValue(item.SaleCom)}
-                            </td>
-                            <td className="text-end" style={eightColWidth}>
-                              {formatValue(item.RecCom)}
-                            </td>
-                            <td className="text-end" style={ninthColWidth}>
-                              {formatValue(item.AdvDed)}
-                            </td>
-                            <td className="text-end" style={tenthColWidth}>
-                              {formatValue(item.FineAmt)}
-                            </td>
-                            <td className="text-end" style={elewenthColWidth}>
-                              {formatValue(item.TotalAmt)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 8 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        {/* <td style={thirdColWidth}></td> */}
-                        {/* <td style={forthColWidth}></td> */}
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eightColWidth}></td>
-                        <td style={ninthColWidth}></td>
-                        <td style={tenthColWidth}></td>
-                        <td style={elewenthColWidth}></td>
-                      </tr>
-                    </>
-                  )}
+                <tbody id="tablebody" >
+                  {renderTableData()}
                 </tbody>
               </table>
             </div>
           </div>
-          {/* Table Footer */}
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,
@@ -2450,7 +2524,6 @@ companyRow.eachCell((cell) => {
               style={{
                 ...firstColWidth,
                 background: getcolor,
-                marginLeft: "2px",
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
@@ -2464,25 +2537,27 @@ companyRow.eachCell((cell) => {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
-            {/* <div
+            >
+              <span className="mobileledger_total">{formatValue(Amt001)}</span>
+
+            </div>
+            <div
               style={{
                 ...thirdColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              
-            </div> */}
-            {/* <div
+            </div>
+            <div
               style={{
                 ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              
-            </div> */}
+            </div>
+
             <div
               style={{
                 ...sixthColWidth,
@@ -2490,11 +2565,7 @@ companyRow.eachCell((cell) => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(TotalSalary)}
-              </span>
             </div>
-
             <div
               style={{
                 ...seventhColWidth,
@@ -2502,57 +2573,49 @@ companyRow.eachCell((cell) => {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(TotalSaleCom)}
-              </span>
             </div>
-
-             <div
+            <div
               style={{
                 ...eightColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(TotalRecCom)}
-              </span>
             </div>
-             <div
+            <div
               style={{
                 ...ninthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(TotalAdvance)}
-              </span>
             </div>
-             <div
+            <div
               style={{
                 ...tenthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(TotalFine)}
-              </span>
             </div>
-             <div
+            <div
               style={{
-                ...elewenthColWidth,
+                ...tenthColWidth1,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(TotalNetAmount)}
-              </span>
+            </div>
+            <div
+              style={{
+                ...tenthColWidth2,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">{formatValue(Amt002)}</span>
             </div>
           </div>
-          {/* Action Buttons */}
           <div
             style={{
               margin: "5px",
@@ -2586,9 +2649,9 @@ companyRow.eachCell((cell) => {
             <SingleButton
               id="searchsubmit"
               text="Select"
-              ref={selectButtonRef}
+              ref={input4Ref}
               onClick={() => {
-                fetchDailyStatusReport();
+                fetchReceivableReport();
                 resetSorting();
               }}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}

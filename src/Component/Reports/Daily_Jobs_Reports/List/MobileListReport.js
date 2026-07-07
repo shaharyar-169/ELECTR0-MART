@@ -1035,10 +1035,10 @@ export default function MobileListReport() {
       paddingRight: "25px",
     }}
   >
-    <option value="">ALL</option>
-    <option value="A">ACTIVE</option>
-    <option value="N">NON-ACTIVE</option>
-     <option value="R">RESTRICTED</option>
+   <option value="">All</option>
+    <option value="A">Active</option>
+    <option value="N">Not Active</option>
+     <option value="R">Restricted</option>
   </select>
 
   {transectionType !== "" && (
