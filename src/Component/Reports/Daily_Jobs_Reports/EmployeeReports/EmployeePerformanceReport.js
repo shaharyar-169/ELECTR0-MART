@@ -403,6 +403,7 @@ const [mobileNumber, setmobileNumber] = useState("");
       // code: "BRIGHT",
       // FLocCod: "001",
       // FYerDsc:'2024-2024'
+       // FYerDsc:'2024-2024'
     }).toString();
 
     axios
@@ -959,8 +960,9 @@ const exportPDFHandler = () => {
   const rows = tableData.map((item) => [
     item.code,
     item["Sales Man"],
-    formatValue(item.Qnty),
+   
     formatValue(item.Cost),
+     formatValue(item.Qnty),
     formatValue(item.Amount),
     formatValue(item.Margin),
     formatValue(item["Net Margin"]),
@@ -987,8 +989,8 @@ const exportPDFHandler = () => {
   const headers = [
     "Code",
     "Sales Man",
-    "Qnty",
-    "Cost",
+      "Cost",
+    "Qnty",  
     "Amount",
     "Margin",
     "Nwt Mar",
@@ -1453,8 +1455,9 @@ const exportPDFHandler = () => {
     const row = worksheet.addRow([
       item.code,
       item["Sales Man"],
-      toNumber(item.Qnty),
+      
       toNumber(item.Cost),
+      toNumber(item.Qnty),
       toNumber(item.Amount),
       toNumber(item.Margin),
       toNumber(item.Delivery),
@@ -1643,12 +1646,12 @@ const exportPDFHandler = () => {
     ? (isLargeScreen ? "200px" : "80px")
     : (isLargeScreen ? "230px" : "150px"),
   };
-  const thirdColWidth = {
+  const forthColWidth = {
         width: isSidebarVisible
     ? (isLargeScreen ? "95px" : "95px")
     : (isLargeScreen ? "95px" : "95px"),
   };
-  const forthColWidth = {
+  const thirdColWidth = {
         width: isSidebarVisible
     ? (isLargeScreen ? "70px" : "60px")
     : (isLargeScreen ? "70px" : "70px"),
@@ -2512,10 +2515,10 @@ const exportPDFHandler = () => {
                     {item['Sales Man']}
                   </td>
                                   <td className="text-end" style={thirdColWidth}>
-                                    { formatValue(item.Qnty)}
+                                    { formatValue(item.Cost)}
                                   </td>
                                   <td className="text-end" style={forthColWidth}>
-                                    {formatValue(item.Cost)}
+                                    {formatValue(item.Qnty)}
                                   </td>
                                   <td className="text-end" style={fifthColWidth}>
                                     {formatValue(item.Amount)}
