@@ -1806,7 +1806,7 @@ const formatValue = (val) => {
                     <option value="CPV">Cash PAYMENT VORCHER</option>
                     <option value="BRV">Bank RECEIVE VORCHER</option>
                     <option value="BPV">BANK PAYMENT VORCHER</option>
-                    <option value="JRV">JOURNAL VORCHER</option>
+                    <option value="JVR">JOURNAL VORCHER</option>
                     <option value="INV">ITEM SALE</option>
                     <option value="SRN">SALE RETURN</option>
                     <option value="BIL">PURCHASE</option>

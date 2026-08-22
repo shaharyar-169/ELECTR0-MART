@@ -105,7 +105,7 @@ export default function ItemPriceList() {
       // FLocCod: '001',
       // FYerDsc:"2025-2025",
 
-      FCtgCod: Companyselectdata,
+      FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FTypCod: Typeselectdata,
       FCmpCod: Companyselectdata,

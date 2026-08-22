@@ -44,6 +44,7 @@ export default function InstallmentRecoveryReport() {
   const capacityRef = useRef(null);
   const storeRef = useRef(null);
   const employeeref = useRef(null);
+  const CustomerRef = useRef(null);
   const typeRef = useRef(null);
   const searchRef = useRef(null);
   const selectButtonRef = useRef(null);
@@ -75,10 +76,19 @@ export default function InstallmentRecoveryReport() {
 
   const [GetCapacity, setGetCapacity] = useState([]);
   const [GetEmployee, setGetEmployee] = useState([]);
+  const [GetCutomers, setGetCutomers] = useState([]);
+
+  console.log('customer daa', GetCutomers)
   const [CollectorData, setCollectorData] = useState([]);
 
   const [Employeeselectdata, setEmployeeselectdata] = useState("");
   const [Employeeselectdatavalue, setEmployeeselectdatavalue] = useState("");
+
+  const [Customerselectdata, setCustomerselectdata] = useState("");
+  const [Customerselectdatavalue, setCustomerselectdatavalue] = useState("");
+
+console.log('customer code ', Customerselectdata)
+console.log('customer code value ', Customerselectdatavalue)
 
   const [GetCompany, setGetCompany] = useState([]);
   const [Categoryselectdata, setCategoryselectdata] = useState("");
@@ -106,6 +116,7 @@ export default function InstallmentRecoveryReport() {
   const [totalIns, settotalIns] = useState(0);
   const [totalReceive, settotalReceive] = useState(0);
   const [totalCollection, settotalCollection] = useState(0);
+  const [totalDisc, settotalDisc] = useState(0);
   const [totalOutstan, settotalOutstan] = useState(0);
   const [totalBalance, settotalBalance] = useState(0);
 
@@ -439,6 +450,7 @@ export default function InstallmentRecoveryReport() {
       FAreCod: Categoryselectdata,
       FRepTyp: transectionType2,
       FColCod: Collector,
+      FCstTyp: Customerselectdata,     
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
@@ -457,6 +469,7 @@ export default function InstallmentRecoveryReport() {
         settotalIns(response.data["Total Ins "]);
         settotalReceive(response.data["Total Receivable "]);
         settotalCollection(response.data["Total Collection "]);
+        settotalDisc(response.data["Total Disc "]);
         settotalOutstan(response.data["Total Outstanding "]);
         settotalBalance(response.data["Total Balance "]);
 
@@ -547,6 +560,39 @@ useEffect(() => {
     label: `${item.tgrpcod}-${item.tgrpdsc}`,
   }));
 
+  // CUSTOMER SELECT API
+
+   useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveCustTypes.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
+        // code : 'MTSELEC',
+        // FLocCod:'002'
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetCutomers(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data,
+          );
+          setGetCutomers([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const customerOption = GetCutomers.map((item) => ({
+    value: item.ttypcod,
+    label: `${item.ttypcod}-${item.ttypdsc}`,
+  }));
+
+
   useEffect(() => {
     const apiUrl = apiLinks + "/GetVerifys.php";
     const formData = new URLSearchParams({
@@ -629,15 +675,18 @@ useEffect(() => {
     label: `${item.tcolcod}-${item.tcolnam.trim()}`,
   }));
 
-  const DropdownOption = (props) => {
+ const DropdownOption = (props) => {
     return (
       <components.Option {...props}>
         <div
           style={{
             fontSize: getdatafontsize,
             fontFamily: getfontstyle,
-            paddingBottom: "5px",
-            lineHeight: "3px",
+            padding: "2px 8px", // tighter vertical padding
+            lineHeight: "1.2",
+            // lineHeight: "3px",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
             // color: fontcolor,
             textAlign: "start",
           }}
@@ -648,172 +697,174 @@ useEffect(() => {
     );
   };
 
- const customStyles1 = (hasError) => ({
-  control: (base, state) => ({
-    ...base,
-    height: "24px",
-    minHeight: "unset",
-    width: 250,
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-    backgroundColor: getcolor,
-    color: fontcolor,
-    caretColor: getcolor === "white" ? "black" : "white",
-    borderRadius: 0,
-    border: `1px solid ${fontcolor}`,
-    transition: "border-color 0.15s ease-in-out",
-    "&:hover": {
-      borderColor: state.isFocused ? base.borderColor : fontcolor,
-    },
-    padding: "0 8px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    boxShadow: "none",
-    "&:focus-within": {
-      borderColor: "red",               // Changed from #3368B5 to red
-      boxShadow: "0 0 0 1px red",       // Changed from #3368B5 to red
-    },
-  }),
-
-  menu: (base) => ({
-    ...base,
-    marginTop: "5px",
-    borderRadius: 0,
-    backgroundColor: getcolor,
-    border: `1px solid ${fontcolor}`,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    zIndex: 9999,
-  }),
-  menuList: (base) => ({
-    ...base,
-    padding: 0,
-    maxHeight: "200px",
-    "&::-webkit-scrollbar": {
-      width: "8px",
-      height: "8px",
-    },
-    "&::-webkit-scrollbar-track": {
-      background: getcolor,
-      borderRadius: "10px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: fontcolor,
-      borderRadius: "10px",
-      border: `2px solid ${getcolor}`,
+  const customStyles1 = (hasError) => ({
+    control: (base, state) => ({
+      ...base,
+      height: "24px",
+      minHeight: "unset",
+      width: 220,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: getcolor,
+      color: fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      borderRadius: 0,
+      border: `1px solid ${state.isFocused ? "red" : fontcolor}`, // Updated
+      transition: "border-color 0.15s ease-in-out",
       "&:hover": {
-        backgroundColor: "#3368B5",     // unchanged
+        borderColor: state.isFocused ? "red" : fontcolor, // Updated
       },
-    },
-    scrollbarWidth: "thin",
-    scrollbarColor: `${fontcolor} ${getcolor}`,
-  }),
-  option: (base, state) => ({
-    ...base,
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-    backgroundColor: state.isSelected
-      ? "#3368B5"
-      : state.isFocused
-        ? "#3368B5"
-        : getcolor,
-    color:
-      state.isSelected || state.isFocused
-        ? "white"
-        : fontcolor,
-    "&:hover": {
-      backgroundColor: "#3368B5",
-      color: "white",
-      cursor: "pointer",
-    },
-    "&:active": {
-      backgroundColor: "#1a66cc",
-    },
-    transition: "background-color 0.2s ease, color 0.2s ease",
-  }),
+      padding: "0 8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      boxShadow: state.isFocused ? "0 0 0 1px red" : "none", // Updated
+    }),
 
-  dropdownIndicator: (base, state) => ({
-    ...base,
-    padding: 0,
-    marginTop: "-5px",
-    fontSize: "18px",
-    display: "flex",
-    textAlign: "center",
-    color: fontcolor,
-    transition: "transform 0.2s ease",
-    transform: state.selectProps.menuIsOpen
-      ? "rotate(180deg)"
-      : "rotate(0deg)",
-    "&:hover": {
-      color: "#3368B5",                // unchanged
-    },
-  }),
-  indicatorSeparator: () => ({
-    display: "none",
-  }),
-  singleValue: (base) => ({
-    ...base,
-    marginTop: "-5px",
-    textAlign: "left",
-    color: fontcolor,
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-  }),
-  input: (base) => ({
-    ...base,
-    color: getcolor === "white" ? "black" : fontcolor,
-    caretColor: getcolor === "white" ? "black" : "white",
-    marginTop: "-5px",
-  }),
-  clearIndicator: (base) => ({
-    ...base,
-    marginTop: "-5px",
-    padding: "0 4px",
-    color: fontcolor,
-    "&:hover": {
-      color: "#ff4444",                // unchanged
-    },
-  }),
-  placeholder: (base) => ({
-    ...base,
-    color: `${fontcolor}80`,
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-    marginTop: "-5px",
-  }),
-  noOptionsMessage: (base) => ({
-    ...base,
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-    color: fontcolor,
-    backgroundColor: getcolor,
-  }),
-  loadingMessage: (base) => ({
-    ...base,
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-    color: fontcolor,
-    backgroundColor: getcolor,
-  }),
-  multiValue: (base) => ({
-    ...base,
-    backgroundColor: `${fontcolor}20`,
-  }),
-  multiValueLabel: (base) => ({
-    ...base,
-    color: fontcolor,
-    fontSize: getdatafontsize,
-    fontFamily: getfontstyle,
-  }),
-  multiValueRemove: (base) => ({
-    ...base,
-    color: `${fontcolor}80`,
-    "&:hover": {
-      backgroundColor: "#ff4444",
-      color: "white",
-    },
-  }),
-});
+    menu: (base) => ({
+      ...base,
+      marginTop: "5px",
+      borderRadius: 0,
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      zIndex: 9999,
+      width: "auto",
+      minWidth: "100%",
+    }),
+    menuList: (base) => ({
+      ...base,
+      padding: 0,
+      maxHeight: "200px",
+      "&::-webkit-scrollbar": {
+        width: "8px",
+        height: "8px",
+      },
+      "&::-webkit-scrollbar-track": {
+        background: getcolor,
+        borderRadius: "10px",
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: fontcolor,
+        borderRadius: "10px",
+        border: `2px solid ${getcolor}`,
+        "&:hover": {
+          backgroundColor: "#3368B5",
+        },
+      },
+      scrollbarWidth: "thin",
+      scrollbarColor: `${fontcolor} ${getcolor}`,
+    }),
+
+    option: (base, state) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: state.isSelected
+        ? "#3368B5"
+        : state.isFocused
+          ? "#3368B5"
+          : getcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
+      whiteSpace: "normal",
+      wordBreak: "break-word",
+      padding: "2px 8px", // reduced padding
+      lineHeight: "1.2", // ✅ compact line height
+      "&:hover": {
+        backgroundColor: "#3368B5",
+        color: "white",
+        cursor: "pointer",
+      },
+      "&:active": {
+        backgroundColor: "#1a66cc",
+      },
+      transition: "background-color 0.2s ease, color 0.2s ease",
+    }),
+    dropdownIndicator: (base, state) => ({
+      ...base,
+      padding: 0,
+      marginTop: "-5px",
+      fontSize: "18px",
+      display: "flex",
+      textAlign: "center",
+      color: fontcolor,
+      transition: "transform 0.2s ease",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
+      "&:hover": {
+        color: "#3368B5",
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      textAlign: "left",
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    input: (base) => ({
+      ...base,
+      color: getcolor === "white" ? "black" : fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      marginTop: "-5px",
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      padding: "0 4px",
+      color: fontcolor,
+      "&:hover": {
+        color: "#ff4444",
+      },
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      marginTop: "-5px",
+    }),
+    noOptionsMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    loadingMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: `${fontcolor}20`,
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      "&:hover": {
+        backgroundColor: "#ff4444",
+        color: "white",
+      },
+    }),
+  });
+
+ 
+
 const exportManualPDF = () => {
   // Create a new jsPDF instance with landscape orientation
   const doc = new jsPDF({ orientation: "landscape" });
@@ -822,7 +873,16 @@ const exportManualPDF = () => {
   // 1. Build table rows with the requested columns
   // Code, Manual, Customer, Mobile, Address, Item, Sale, Installment, Last Date, Last Amt, Balance
   // ------------------------------------------------------------------
-  const rows = tableData.map((item) => {
+  
+  // Sort tableData by ManualNo or Code to ensure consistent ordering
+  const sortedData = [...tableData].sort((a, b) => {
+    // Extract numeric part from ManualNo (e.g., "000454" -> 454)
+    const numA = parseInt(String(a.ManualNo || "0").replace(/[^0-9]/g, '')) || 0;
+    const numB = parseInt(String(b.ManualNo || "0").replace(/[^0-9]/g, '')) || 0;
+    return numA - numB;
+  });
+
+  const rows = sortedData.map((item) => {
     // Combine Address1 and Address2 if needed
     const fullAddress = [item.Address1 || "", item.Address2 || ""]
       .filter(addr => addr.trim() !== "")
@@ -832,12 +892,11 @@ const exportManualPDF = () => {
       item.Code || "",              // Code (1st)
       item.ManualNo || "",          // Manual (2nd)
       item.Customer || "",          // Customer (3rd)
+      item.FatherName || "", 
       item.Mobile || "",            // Mobile (4th)
-      item.Address1 || "",            // Address (5th)
+      item.Address1 || "",          // Address (5th)
       item.Item || "",              // Item (6th)
-      item.SaleAmt || "0",          // Sale (7th)
       item.InsAmt || "0",           // Installment (8th)
-      item.PrmDate || "",
       item.LastDate || "",          // Last Date (9th)
       item.LastAmt || "0.00",       // Last Amt (10th)
       item.Balance || "0",          // Balance (11th)
@@ -851,12 +910,12 @@ const exportManualPDF = () => {
     String(formatValue(tableData.length.toLocaleString())), // Total count
     "",                                                      // Manual
     "",                                                      // Customer
-    "",                                                      // Mobile
+    "",
+     "",                                                       // Mobile
     "",                                                      // Address
     "",                                                      // Item
-    String(formatValue(totalSale)),                          // Sale Total
     String(formatValue(totalIns)),                           // Installment Total
-    "",                                                      // Last Date
+                                                          // Last Date
     "",     
      "",                                                 // Last Amt
     String(formatValue(totalBalance)),                       // Balance Total
@@ -869,19 +928,18 @@ const exportManualPDF = () => {
     "Code",
     "Manual",
     "Customer",
+    "FatherName",
     "Mobile",
     "Address",
     "Item",
-    "Sale",
     "Installment",
-    "Prm Date",
     "Last Date",
     "Last Amt",
     "Balance",
   ];
 
   // Column widths - Adjusted for 11 columns with proper spacing
-  const columnWidths = [18, 14, 40, 20, 35, 40, 20, 20,20, 20, 20, 20];
+  const columnWidths = [18, 14, 40,40, 20, 35, 40,20, 20, 20, 20];
 
   const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
   const pageHeight = doc.internal.pageSize.height;
@@ -990,15 +1048,15 @@ const exportManualPDF = () => {
         let xPos;
         
         // Column alignment based on column index
-        if (colIdx === 0 || colIdx === 1 || colIdx === 3) {
+        if (colIdx === 0 || colIdx === 1 || colIdx === 4) {
           // Code, Manual, Mobile - center aligned
           xPos = currentX + cellWidth / 2;
           doc.text(line, xPos, lineY, { align: "center", baseline: "top" });
-        } else if (colIdx === 4) {
+        } else if (colIdx === 2 || colIdx === 3 || colIdx === 5 || colIdx === 6) {
           // Address - left aligned
           xPos = currentX + cellPadding;
           doc.text(line, xPos, lineY, { baseline: "top" });
-        } else if (colIdx > 5) {
+        } else if (colIdx > 6) {
           // Numeric columns (Sale, Installment, Last Amt, Balance) - right aligned
           xPos = currentX + cellWidth - cellPadding;
           doc.text(line, xPos, lineY, { align: "right", baseline: "top" });
@@ -1236,6 +1294,7 @@ const exportManualPDF = () => {
       item.InsAmt,
       item.Receiavable,
       item.Collection,
+      item.Disc,
       item.Outstanding,
       item.Balance,
       item.Collector,
@@ -1252,6 +1311,7 @@ const exportManualPDF = () => {
       String(formatValue(totalIns)),
       String(formatValue(totalReceive)),
       String(formatValue(totalCollection)),
+      String(formatValue(totalDisc)),
       String(formatValue(totalOutstan)),
       String(formatValue(totalBalance)),
 
@@ -1270,11 +1330,12 @@ const exportManualPDF = () => {
       "Ins Amt",
       "Recei",
       "Collec",
+      "Disc",
       "Outsta",
       "Balance",
       "Col",
     ];
-    const columnWidths = [22, 70, 27, 15, 27, 27, 27, 27, 27, 15];
+    const columnWidths = [22, 70, 26, 15, 26, 26, 26,18, 26, 26, 10];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1671,7 +1732,7 @@ const exportManualPDF = () => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet1");
 
-  const numColumns = 13; // Ensure this matches the actual number of columns
+  const numColumns = 14; // Ensure this matches the actual number of columns
 
   const columnAlignments = [
     "center",
@@ -1684,6 +1745,7 @@ const exportManualPDF = () => {
     "right",
     "right",
     "right",
+     "right",
     "right",
     "right",
     "right",
@@ -1882,6 +1944,7 @@ const exportManualPDF = () => {
     "Ins Amt",
     "Recei",
     "Collection",
+     "Disc",
     "Outstanding",
     "Balance",
     "Code",
@@ -1902,6 +1965,7 @@ const exportManualPDF = () => {
       toNumber(item.InsAmt),
       toNumber(item.Receiavable),
       toNumber(item.Collection),
+        toNumber(item.Disc),
       toNumber(item.Outstanding),
       toNumber(item.Balance),
       item.Collector,
@@ -1927,7 +1991,7 @@ const exportManualPDF = () => {
   });
 
   // Set column widths
-  [10, 8, 40, 12, 10, 12, 7, 12, 12, 12, 12, 12, 6].forEach((width, index) => {
+  [10, 8, 40, 12, 10, 12, 7, 12, 12, 12,10,12, 12, 6].forEach((width, index) => {
     worksheet.getColumn(index + 1).width = width;
   });
 
@@ -1950,6 +2014,7 @@ const exportManualPDF = () => {
     totalInsNum,
     totalReceiveNum,
     totalCollectionNum,
+    totalDisc,
     totalOutstanNum,
     totalBalanceNum,
     "",
@@ -2445,6 +2510,23 @@ const exportManualPDF = () => {
     }
   };
 
+   const handleCustomerSelectKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = saleSelectRef.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setCustomerselectdata(selectedOption.value);
+      }
+      // const nextInput = document.getElementById(inputId);
+      const nextInput = inputId.current;
+
+      if (nextInput) {
+        nextInput.focus();
+        // nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
   const handlecompanyKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = saleSelectRef.current.state.selectValue;
@@ -2516,10 +2598,13 @@ const exportManualPDF = () => {
     settransectionType2(selectedTransactionType);
   };
 
-    // const isLargeScreen = window.innerWidth > 1500;
+    const isLargeScreen = window.innerWidth > 1500;
  const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: isSidebarVisible ? "1000px" :'1200px',
+    // maxWidth: isSidebarVisible ? "1000px" :'1200px',
+    maxWidth: isSidebarVisible
+    ? (isLargeScreen ? "1270px" : "1000px")
+    : (isLargeScreen ? "1270px" : "1200px"),
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2546,10 +2631,10 @@ const exportManualPDF = () => {
   };
   const secondColWidth = {
    
-     width: isSidebarVisible ? "160px" :'360px',
-    // width: isSidebarVisible
-    // ? (isLargeScreen ? "230px" : "160px")
-    // : (isLargeScreen ? "320px" : "360px"),
+     width: isSidebarVisible ? "100px" :'300px',
+    width: isSidebarVisible
+    ? (isLargeScreen ? "360px" : "100px")
+    : (isLargeScreen ? "360px" : "300px"),
   };
   const thirdColWidth = {
     width: "90px",
@@ -2576,6 +2661,9 @@ const exportManualPDF = () => {
   };
   const tenthColWidth = {
     width:  "85px",
+  };
+   const tenthColWidth1 = {
+    width:  "60px",
   };
   const elewenthColWidth = {
     width: "85px",
@@ -2624,6 +2712,7 @@ const exportManualPDF = () => {
       InsAmt: [],
       Receiavable: [],
       Collection: [],
+       Disc: [],
       Outstanding: [],
       Balance: [],
       Collector: [],
@@ -2638,6 +2727,7 @@ const exportManualPDF = () => {
       InsAmt: "",
       Receiavable: "",
       Collection: "",
+       Disc: "",
       Outstanding: "",
       Balance: "",
       Collector: "",
@@ -2656,6 +2746,7 @@ const exportManualPDF = () => {
         InsAmt: tableData.map((row) => row.InsAmt),
         Receiavable: tableData.map((row) => row.Receiavable),
         Collection: tableData.map((row) => row.Collection),
+         Disc: tableData.map((row) => row.Disc),
         Outstanding: tableData.map((row) => row.Outstanding),
         Balance: tableData.map((row) => row.Balance),
         Collector: tableData.map((row) => row.Collector),
@@ -2723,6 +2814,7 @@ const exportManualPDF = () => {
       InsAmt: null,
       Receiavable: null,
       Collection: null,
+       Disc: null,
       Outstanding: null,
       Balance: null,
       Collector: null,
@@ -3024,7 +3116,7 @@ const exportManualPDF = () => {
               </div>
               <div
                 className="d-flex align-items-center"
-                // style={{ marginLeft:'50px' }}
+                style={{ marginLeft:'28px' }}
               >
                 <div
                   style={{
@@ -3287,7 +3379,7 @@ const exportManualPDF = () => {
 
               <div
                 className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
+             
               >
                 <div
                   style={{
@@ -3318,7 +3410,7 @@ const exportManualPDF = () => {
                     className="List-select-class"
                     ref={employeeref}
                     options={employeeoptions}
-                    onKeyDown={(e) => handleEmployeeKeypress(e, input4Ref)}
+                    onKeyDown={(e) => handleEmployeeKeypress(e, CustomerRef)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -3343,6 +3435,81 @@ const exportManualPDF = () => {
                     components={{ Option: DropdownOption }}
                     styles={{
                       ...customStyles1(!Employeeselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+              {/* CUSTOMER DROPDOWN SELECT */}
+
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Cust Type :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={CustomerRef}
+                    options={customerOption}
+                    onKeyDown={(e) => handleCustomerSelectKeypress(e, input4Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+
+                        setCustomerselectdata(selectedOption.value);
+                        setCustomerselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart, // Keep only the description
+                        });
+                      } else {
+                        setCustomerselectdata("");
+                        setCustomerselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Customerselectdata),
                       placeholder: (base) => ({
                         ...base,
                         textAlign: "left",
@@ -3513,7 +3680,7 @@ const exportManualPDF = () => {
                     value={transectionType2}
                     onChange={handleTransactionTypeChange2}
                     style={{
-                      width: "250px",
+                      width: "220px",
                       height: "24px",
                       marginLeft: "5px",
                       backgroundColor: getcolor,
@@ -3708,6 +3875,17 @@ const exportManualPDF = () => {
                     </td>
                      <td
                       className="border-dark"
+                      style={tenthColWidth1}
+                      onClick={() => handleSorting("Disc")}
+                    >
+                      Disc{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Disc")}
+                      ></i>
+                    </td>
+                     <td
+                      className="border-dark"
                       style={elewenthColWidth}
                       onClick={() => handleSorting("Outstanding")}
                     >
@@ -3777,7 +3955,7 @@ const exportManualPDF = () => {
                           backgroundColor: getcolor,
                         }}
                       >
-                        <td colSpan="12" className="text-center">
+                        <td colSpan="13" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -3790,7 +3968,7 @@ const exportManualPDF = () => {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 12 }).map((_, colIndex) => (
+                            {Array.from({ length: 13 }).map((_, colIndex) => (
                               <td key={`blank-${rowIndex}-${colIndex}`}>
                                 &nbsp;
                               </td>
@@ -3809,6 +3987,7 @@ const exportManualPDF = () => {
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
+                          <td style={tenthColWidth1}></td>
                         <td style={elewenthColWidth}></td>
                         <td style={tewelthColWidth}></td>
                         <td style={thirteenColWidth}></td>
@@ -3910,6 +4089,9 @@ const exportManualPDF = () => {
                             <td className="text-end" style={tenthColWidth}>
                               {item.Collection}
                             </td>
+                            <td className="text-end" style={tenthColWidth1}>
+                              {item.Disc}
+                            </td>
                             <td className="text-end" style={elewenthColWidth}>
                               {item.Outstanding}
                             </td>
@@ -3932,7 +4114,7 @@ const exportManualPDF = () => {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 12 }).map((_, colIndex) => (
+                          {Array.from({ length: 13 }).map((_, colIndex) => (
                             <td key={`blank-${rowIndex}-${colIndex}`}>
                               &nbsp;
                             </td>
@@ -3950,6 +4132,7 @@ const exportManualPDF = () => {
                         <td style={eightColWidth}></td>
                         <td style={ninthColWidth}></td>
                         <td style={tenthColWidth}></td>
+                            <td style={tenthColWidth1}></td>
                         <td style={elewenthColWidth}></td>
                         <td style={tewelthColWidth}></td>
                         <td style={thirteenColWidth}></td>
@@ -4070,6 +4253,18 @@ const exportManualPDF = () => {
             >
               <span className="mobileledger_total">
                 {formatValue(totalCollection)}
+              </span>
+            </div>
+
+             <div
+              style={{
+                ...tenthColWidth1,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
+              <span className="mobileledger_total">
+                {formatValue(totalDisc)}
               </span>
             </div>
             <div

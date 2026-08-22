@@ -102,7 +102,7 @@ export default function ItemPriceListA() {
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getYearDescription,
-      FCtgCod: Companyselectdata,
+      FCtgCod: Categoryselectdata,
       FCapCod: Capacityselectdata,
       FTypCod: Typeselectdata,
       FCmpCod: Companyselectdata,
@@ -150,6 +150,7 @@ export default function ItemPriceListA() {
       }
     }
   };
+  
   const handlecategoryKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = saleSelectRef.current.state.selectValue;

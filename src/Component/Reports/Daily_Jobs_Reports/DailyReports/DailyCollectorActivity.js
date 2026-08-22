@@ -1,20 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-
 import axios from "axios";
-
-import { useTheme } from "../../../ThemeContext";
-import {
-  getUserData,
-  getOrganisationData,
-  getLocationnumber,
-  getYearDescription,
-} from "../../Auth";
-
-
-import NavComponent from "../../MainComponent/Navform/navbarform";
-import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
+import { Link, useNavigate } from "react-router-dom";
+import { useTheme } from "../../../../ThemeContext";
+import { getUserData, getOrganisationData, getLocationnumber, getYearDescription } from "../../../Auth";
+import NavComponent from "../../../MainComponent/Navform/navbarform";
+import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
 import { components } from "react-select";
 import { BsCalendar } from "react-icons/bs";
@@ -25,16 +16,17 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
+import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import './dailydemo.css';
 
-export default function TrailBalanceReport() {
+export default function DailyCollectorActivityReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
-  const yeardescription = getYearDescription();
-  const locationnumber = getLocationnumber();
+
   const saleSelectRef = useRef(null);
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
@@ -42,16 +34,29 @@ export default function TrailBalanceReport() {
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
+  const hasInitialized = useRef(false);
+
   const [saleType, setSaleType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
+
+  // DOUBLE STATE HANDLE
+  const [isItemInitialized, setIsItemInitialized] = useState(false);
+  const [isCodeReady, setIsCodeReady] = useState(false);
+  const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
+
+  const [tableData, setTableData] = useState([]);
 
   const [totalQnty, setTotalQnty] = useState(0);
   const [totalOpening, setTotalOpening] = useState(0);
   const [totalDebit, setTotalDebit] = useState(0);
   const [totalCredit, setTotalCredit] = useState(0);
   const [closingBalance, setClosingBalance] = useState(0);
+
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+
+  console.log("Companyselectdatavalue", Companyselectdatavalue.label);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -62,6 +67,9 @@ export default function TrailBalanceReport() {
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+  const yeardescription = getYearDescription();
+  const locationnumber = getLocationnumber();
+
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -71,12 +79,17 @@ export default function TrailBalanceReport() {
     apiLinks,
     getLocationNumber,
     getyeardescription,
-    getnavbarbackgroundcolor,
     getfromdate,
     gettodate,
     getfontstyle,
     getdatafontsize,
+    getnavbarbackgroundcolor,
   } = useTheme();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--background-color", getcolor);
+    document.documentElement.style.setProperty("--font-color", fontcolor);
+  }, [getcolor, fontcolor]);
 
   const comapnyname = organisation.description;
 
@@ -256,6 +269,7 @@ export default function TrailBalanceReport() {
   const handleToInputChange = (e) => {
     settoInputDate(e.target.value);
   };
+
   const handleSaleKeypress = (event, inputId) => {
     if (event.key === "Enter") {
       const selectedOption = saleSelectRef.current.state.selectValue;
@@ -271,6 +285,7 @@ export default function TrailBalanceReport() {
       }
     }
   };
+
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -290,6 +305,9 @@ export default function TrailBalanceReport() {
     let errorType = "";
 
     switch (true) {
+      case !saleType:
+        errorType = "saleType";
+        break;
       case !fromInputDate:
         errorType = "fromDate";
         break;
@@ -336,6 +354,10 @@ export default function TrailBalanceReport() {
     }
 
     switch (errorType) {
+      case "saleType":
+        toast.error("Please select a Account Code");
+        return;
+
       case "fromDate":
         toast.error("From date is required");
         return;
@@ -371,53 +393,43 @@ export default function TrailBalanceReport() {
       case "toDateBeforeFromDate":
         toast.error("To date must be after from date");
         return;
+
       default:
         break;
     }
 
-    const data = {
-      FIntDat: fromInputDate,
-      FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
-      FAccCod: saleType,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-    };
-    console.log(data);
+    // console.log(data);
     document.getElementById("fromdatevalidation").style.border =
       `1px solid ${fontcolor}`;
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/TrialBalance.php";
+    const apiUrl = apiLinks + "/DailyCollectorActivity.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
-    //  code: "AGCOMP",
-    //   FLocCod: "001",
-    //   FYerDsc: "2025-2026",
-
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      code: organisation.code,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      FRepTyp: transectionType,
-      FSchTxt: searchQuery,
+      FColCod: saleType,
+
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getYearDescription,
+
+      code: 'CRYSTALSOFT',
+      FLocCod: '001',
     }).toString();
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
         setIsLoading(false);
-        console.log("Response:", response.data);
-        setTotalOpening(response.data["OpeningBal "]);
-        setTotalDebit(response.data["TotalDebit "]);
-        setTotalCredit(response.data["TotalCredit"]);
-        setClosingBalance(response.data["ClosingBal "]);
 
-        if (response.data && Array.isArray(response.data.Detail)) {
-          setTableData(response.data.Detail);
+        // setTotalDebit(response.data["Total Debit "]);
+        // setTotalCredit(response.data["Total Credit"]);
+        // setClosingBalance(response.data["Closing Bal "]);
+
+        if (response.data && Array.isArray(response.data)) {
+          setTableData(response.data);
         } else {
           console.warn(
             "Response data structure is not as expected:",
@@ -435,73 +447,372 @@ export default function TrailBalanceReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-      if (fromRef && fromRef.current) {
+    if (
+      !hasComponentMountedPreviously ||
+      (saleSelectRef && saleSelectRef.current)
+    ) {
+      if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
-          fromRef.current.focus();
-          fromRef.current.select();
+          saleSelectRef.current.focus();
+          // saleSelectRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
     }
   }, []);
 
-  useEffect(() => {
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
+     useEffect(() => {
+      const storedData = sessionStorage.getItem("GeneralLedgerData");
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1,
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
-  }, []);
+      let toDate = new Date(); // default today
+      let fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+
+        // ✅ TO DATE
+        if (parsedData.toInputDate) {
+          const [day, month, year] = parsedData.toInputDate.split("-").map(Number);
+          toDate = new Date(year, month - 1, day);
+        }
+
+        // ✅ FROM DATE
+        if (parsedData.fromInputDate) {
+          // Case: Payable Report (both dates)
+          const [day, month, year] = parsedData.fromInputDate.split("-").map(Number);
+          fromDate = new Date(year, month - 1, day);
+        } else {
+          // Case: Payable Aging (only toDate)
+          fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+        }
+      }
+
+      // ✅ Apply states
+      setSelectedToDate(toDate);
+      settoInputDate(formatDate(toDate));
+
+      setSelectedfromDate(fromDate);
+      setfromInputDate(formatDate(fromDate));
+
+    }, []);
+
+useEffect(() => {
+  const apiUrl = apiLinks + "/GetActiveCollector.php";
+  const formData = new URLSearchParams({
+  // code: organisation.code,
+  //     FLocCod: locationnumber || getLocationNumber,
+
+     FLocCod: '001',
+    code: 'CRYSTALSOFT',
+  }).toString();
+
+  axios
+    .post(apiUrl, formData)
+    .then((response) => {
+      // Ensure we always have an array
+      const data = response.data || [];
+      setSupplierList(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+      setSupplierList([]); // fallback to empty array
+    });
+}, []);
+
+// Create options, filtering out invalid items
+const options = (supplierList || [])
+  .filter(item => item?.tcolcod != null) // keep only items with a valid tcolcod
+  .map(item => ({
+    value: item.tcolcod,
+    label: `${item.tcolcod}${item.tcolnam ? ` - ${item.tcolnam.trim()}` : ''}`
+  }));
+
+  useEffect(() => {
+    if (options.length === 0) return;
+    if (isItemInitialized) return;
+
+    const storedData = sessionStorage.getItem("GeneralLedgerData");
+    let selectedOption = null;
+
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      const clickedCode = parsedData.code?.trim();
+      if (parsedData.code) {
+        setIsDoubleClickOpen(true); // ✅ ADD
+      }
+      selectedOption = options.find((opt) => opt.value?.trim() === clickedCode);
+
+      sessionStorage.removeItem("GeneralLedgerData");
+    }
+
+    if (!selectedOption) {
+      selectedOption = options[0];
+    }
+
+    if (selectedOption) {
+      setSaleType(selectedOption.value);
+
+      const description = selectedOption.label
+        .split("-")
+        .slice(1)
+        .join("-")
+        .trim();
+
+      setCompanyselectdatavalue({
+        value: selectedOption.value,
+        label: description,
+      });
+
+      setIsCodeReady(true); // ✅ IMPORTANT
+    }
+
+    setIsItemInitialized(true);
+  }, [options, isItemInitialized]);
+
+  useEffect(() => {
+    // 🔥 Dono cheezain ready hon
+    if (isDoubleClickOpen && isCodeReady) {
+      fetchReceivableReport();
+    }
+  }, [isDoubleClickOpen, isCodeReady]);
+
+   const DropdownOption = (props) => {
+     return (
+       <components.Option {...props}>
+         <div
+           style={{
+             fontSize: getdatafontsize,
+             fontFamily: getfontstyle,
+             padding: "2px 8px",            // tighter vertical padding
+             lineHeight: "1.2",
+             // lineHeight: "3px",
+             whiteSpace: "normal",
+             wordBreak: "break-word",
+             // color: fontcolor,
+             textAlign: "start",
+           }}
+         >
+           {props.data.label}
+         </div>
+       </components.Option>
+     );
+   };
+ 
+ 
+  const customStyles1 = (hasError) => ({
+    control: (base, state) => ({
+      ...base,
+      height: "24px",
+      minHeight: "unset",
+      width: 300,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: getcolor,
+      color: fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      borderRadius: 0,
+      border: `1px solid ${fontcolor}`,
+      transition: "border-color 0.15s ease-in-out",
+      "&:hover": {
+        borderColor: state.isFocused ? base.borderColor : fontcolor,
+      },
+      padding: "0 8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      boxShadow: "none",
+      "&:focus-within": {
+        borderColor: "red", // ✅ Changed to red
+        boxShadow: "0 0 0 1px red", // ✅ Changed to red
+      },
+    }),
+
+    menu: (base) => ({
+      ...base,
+      marginTop: "5px",
+      borderRadius: 0,
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      zIndex: 9999,
+      width: "auto",
+      minWidth: "100%",
+    }),
+    menuList: (base) => ({
+      ...base,
+      padding: 0,
+      maxHeight: "200px",
+      "&::-webkit-scrollbar": {
+        width: "8px",
+        height: "8px",
+      },
+      "&::-webkit-scrollbar-track": {
+        background: getcolor,
+        borderRadius: "10px",
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: fontcolor,
+        borderRadius: "10px",
+        border: `2px solid ${getcolor}`,
+        "&:hover": {
+          backgroundColor: "#3368B5",
+        },
+      },
+      scrollbarWidth: "thin",
+      scrollbarColor: `${fontcolor} ${getcolor}`,
+    }),
+   
+    option: (base, state) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: state.isSelected
+        ? "#3368B5"
+        : state.isFocused
+          ? "#3368B5"
+          : getcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
+      whiteSpace: "normal",
+      wordBreak: "break-word",
+      padding: "2px 8px",        // reduced padding
+      lineHeight: "1.2",         // ✅ compact line height
+      "&:hover": {
+        backgroundColor: "#3368B5",
+        color: "white",
+        cursor: "pointer",
+      },
+      "&:active": {
+        backgroundColor: "#1a66cc",
+      },
+      transition: "background-color 0.2s ease, color 0.2s ease",
+    }),
+    dropdownIndicator: (base, state) => ({
+      ...base,
+      padding: 0,
+      marginTop: "-5px",
+      fontSize: "18px",
+      display: "flex",
+      textAlign: "center",
+      color: fontcolor,
+      transition: "transform 0.2s ease",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
+      "&:hover": {
+        color: "#3368B5",
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      textAlign: "left",
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    input: (base) => ({
+      ...base,
+      color: getcolor === "white" ? "black" : fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      marginTop: "-5px",
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      padding: "0 4px",
+      color: fontcolor,
+      "&:hover": {
+        color: "#ff4444",
+      },
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      marginTop: "-5px",
+    }),
+    noOptionsMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    loadingMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: `${fontcolor}20`,
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      "&:hover": {
+        backgroundColor: "#ff4444",
+        color: "white",
+      },
+    }),
+  });
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
     settransectionType(selectedTransactionType);
   };
 
- const exportPDFHandler = () => {
-    const globalfontsize = 10;
-    console.log("gobal font data", globalfontsize);
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
+  const exportPDFHandler = () => {
     // Create a new jsPDF instance with landscape orientation
     const doc = new jsPDF({ orientation: "landscape" });
 
     // Define table data (rows)
     const rows = tableData.map((item) => [
-      item.code,
-      item.Description,
-      item.Opening,
-      item.Debit,
-      item.Credit,
-      item.Closing,
+      item.Date,
+      item.Time,
+      item.Customer,
+      item.Type,
+     item.Remarks ? item.Remarks.substring(0, 30) + (item.Remarks.length > 30 ? "..." : "") : "",
+      item["Follow Up"],
+      
     ]);
 
     // Add summary row to the table
+
     rows.push([
+        String(tableData.length.toLocaleString()),
       "",
-      "Total",
-      String(totalOpening),
-      String(totalDebit),
-      String(totalCredit),
-      String(closingBalance),
+      "",
+       "",
+      "",
+      "",
     ]);
 
     // Define table column headers and individual column widths
     const headers = [
-      "Code",
-      "Description",
-      "Opening",
-      "Debit",
-      "Credit",
-      "Closing",
+      "Date",
+      "Time",
+      "Remarks",
+      "Type",
+      "Remarks",
+      "Follow Up",
+     
     ];
-    const columnWidths = [23, 100, 30, 30, 30, 30];
+    const columnWidths = [24, 24, 110, 15, 70, 24];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -510,13 +821,15 @@ export default function TrailBalanceReport() {
     const pageHeight = doc.internal.pageSize.height;
     const paddingTop = 15;
 
-      doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
+    // Set font properties for the table
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
+
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-          doc.setFont("verdana", "bold");
-            doc.setFontSize(10);
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -537,11 +850,9 @@ export default function TrailBalanceReport() {
         doc.text(header, cellX, cellY, { align: "center" }); // Center the text
         startX += columnWidths[index]; // Move to the next column
       });
-
-    
     };
 
-   const addTableRows = (startX, startY, startIndex, endIndex) => {
+    const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
@@ -573,7 +884,7 @@ export default function TrailBalanceReport() {
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F"
+            "F",
           );
         }
 
@@ -592,7 +903,7 @@ export default function TrailBalanceReport() {
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5
+            rowBottomY - 0.5,
           );
 
           doc.setLineWidth(0.2);
@@ -601,7 +912,7 @@ export default function TrailBalanceReport() {
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY
+            rowBottomY,
           );
         } else {
           doc.setLineWidth(0.2);
@@ -609,7 +920,7 @@ export default function TrailBalanceReport() {
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
           );
         }
 
@@ -629,18 +940,13 @@ export default function TrailBalanceReport() {
 
           const cellValue = String(cell);
 
-          if (cellIndex === 0) {
+          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 3 || cellIndex === 5) {
             const rightAlignX = startX + columnWidths[cellIndex] / 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "center",
               baseline: "middle",
             });
-          } else if (
-            cellIndex === 2 ||
-            cellIndex === 3 ||
-            cellIndex === 4 ||
-            cellIndex === 5
-          ) {
+          } else if (cellIndex === 40) {
             const rightAlignX = startX + columnWidths[cellIndex] - 2;
             doc.text(cellValue, rightAlignX, cellY, {
               align: "right",
@@ -666,7 +972,7 @@ export default function TrailBalanceReport() {
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
+              startY + (i - startIndex + 3) * rowHeight,
             );
             startX += columnWidths[cellIndex];
           }
@@ -719,7 +1025,7 @@ export default function TrailBalanceReport() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10
+        pageNumberFontSize = 10,
       ) => {
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -729,23 +1035,15 @@ export default function TrailBalanceReport() {
         // Calculate the x-coordinate for the right corner
         const rightX = doc.internal.pageSize.width - 10;
 
-        // if (date) {
-        //     doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-        //     if (time) {
-        //         doc.text(date + " " + time, rightX, startY, { align: "right" });
-        //     } else {
-        //         doc.text(date, rightX - 10, startY, { align: "right" });
-        //     }
-        // }
-
+      
         // Add page numbering
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(
           `Page ${pageNumber}`,
           rightX - 10,
           doc.internal.pageSize.height - 10,
-          { align: "right" }
+          { align: "right" },
         );
       };
 
@@ -754,52 +1052,70 @@ export default function TrailBalanceReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-            doc.setFont("Times New Roman", "normal");
+        doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-     doc.setFont("verdana-regular", "normal");
+        doc.setFont("verdana-regular", "normal");
         addTitle(
-          `Trial Balance From ${fromInputDate} To ${toInputDate}`,
+          `Daily Collector Activity Report  From: ${fromInputDate} To: ${toInputDate}`,
           "",
           "",
           pageNumber,
           startY,
-          12
+          12,
         ); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-     
         let status =
-          transectionType === "R"
-            ? "RECEIVABLE"
-            : transectionType === "P"
-            ? "PAYABLE"
-            : "ALL";
-        let search = searchQuery ? searchQuery : "";
+          transectionType === "A"
+            ? "ALL"
+            : transectionType === "CRV"
+              ? "Cash Receive Voucher"
+              : transectionType === "CPV"
+                ? "Cash Payment Voucher"
+                : transectionType === "BRV"
+                  ? "Bank Receive Voucher"
+                  : transectionType === "BPV"
+                    ? "Bank Payment Voucher"
+                    : transectionType === "JRV"
+                      ? "Journal Voucher"
+                      : transectionType === "INV"
+                        ? "Item Sale"
+                        : transectionType === "SRN"
+                          ? "Sale Return"
+                          : transectionType === "BIL"
+                            ? "Purchase"
+                            : transectionType === "PRN"
+                              ? "Purchase Return"
+                              : transectionType === "ISS"
+                                ? "Issue"
+                                : transectionType === "REC"
+                                  ? "Received"
+                                  : transectionType === "SLY"
+                                    ? "Salary"
+                                    : "ALL";
 
-       
+        let search = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";
 
-  
-    //  doc.setFont("verdana", "bold");
-    //         doc.setFontSize(10); 
-    //                doc.text(`Type :`, labelsX, labelsY + 8.5); // Draw bold label
-    //  doc.setFont("verdana-regular", "normal");
-    //         doc.setFontSize(10);
-    //                 doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Collector :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${search}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
 
-                     if (searchQuery) {
-     doc.setFont("verdana", "bold");
-            doc.setFontSize(10);
-                    doc.text(`Search :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(`${search}`, labelsX + 138, labelsY + 8.5); // Draw the value next to the label
-}
+        // doc.setFont("verdana", "bold");
+        // doc.setFontSize(10);
+        // doc.text(`Type :`, labelsX + 170, labelsY + 8.5); // Draw bold label
+        // doc.setFont("verdana-regular", "normal");
+        // doc.setFontSize(10);
+        // doc.text(`${status}`, labelsX + 185, labelsY + 8.5); // Draw the value next to the label
 
-           
         startY += 10; // Adjust vertical position for the labels
 
         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
@@ -809,7 +1125,7 @@ export default function TrailBalanceReport() {
           (doc.internal.pageSize.width - totalWidth) / 2,
           startY,
           startIndex,
-          endIndex
+          endIndex,
         );
         if (endIndex < rows.length) {
           startY = addNewPage(startY); // Add new page and update startY
@@ -843,9 +1159,10 @@ export default function TrailBalanceReport() {
     handlePagination();
 
     // Save the PDF files
-    doc.save(`TrilaBalance As On ${date}.pdf`);
+    doc.save(`DailyCollectorActivity Form ${fromInputDate} To ${toInputDate}.pdf`);
   };
-
+  ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+  ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
@@ -853,12 +1170,12 @@ export default function TrailBalanceReport() {
     const numColumns = 6; // Ensure this matches the actual number of columns
 
     const columnAlignments = [
+      "center",
+      "Center",
+  "left",
+      "center",
       "left",
-      "left",
-      "right",
-      "right",
-      "right",
-      "right",
+      "center"
     ];
 
     // Define fonts for different sections
@@ -902,7 +1219,7 @@ export default function TrailBalanceReport() {
 
     // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Trial Balance From ${fromInputDate} To ${toInputDate}`,
+      `Daily Collector Activity Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -920,37 +1237,81 @@ export default function TrailBalanceReport() {
 
     let typestatus = "";
 
-    if (transectionType === "R") {
-      typestatus = "RECEIABLE";
-    } else if (transectionType === "P") {
-      typestatus = "PAYABLE";
+    if (transectionType === "A") {
+      typestatus = "ALL";
+    } else if (transectionType === "CRV") {
+      typestatus = "CASH RECEIVE VOUCHER";
+    } else if (transectionType === "CPV") {
+      typestatus = "CASH PAYMENT VOUCHER";
+    } else if (transectionType === "BRV") {
+      typestatus = "BANK RECEIVE VOUCHER";
+    } else if (transectionType === "BPV") {
+      typestatus = "BANK PAYMENT VOUCHER";
+    } else if (transectionType === "JRV") {
+      typestatus = "JOURNAL VOUCHER";
+    } else if (transectionType === "INV") {
+      typestatus = "ITEM SALE";
+    } else if (transectionType === "SRN") {
+      typestatus = "SALE RETURN";
+    } else if (transectionType === "BIL") {
+      typestatus = "PURCHASE";
+    } else if (transectionType === "PRN") {
+      typestatus = "PURCHASE RETURN";
+    } else if (transectionType === "ISS") {
+      typestatus = "ISSUE";
+    } else if (transectionType === "REC") {
+      typestatus = "RECEIVE";
+    } else if (transectionType === "SLY") {
+      typestatus = "SALARY";
     } else {
       typestatus = "ALL"; // Default value
     }
 
+    let Accountselect = Companyselectdatavalue.label
+      ? Companyselectdatavalue.label
+      : "ALL";
+
     let typesearch = searchQuery || "";
 
     // Apply styling for the status row
+    const typeAndStoreRow2 = worksheet.addRow([
+      "Collector :",
+      Accountselect,
+      "",
+      "",
+    
+    ]);
 
-    const typeAndStoreRow3 = worksheet.addRow(
-      searchQuery
-        ? ["", "", "", "", "Search :", typesearch]
-        : ["" ],
-    );
+    // const typeAndStoreRow3 = worksheet.addRow(
+    //   searchQuery ? ["", "", "", "", "SEARCH :", typesearch] : [""],
+    // );
 
     // Merge cells for Accountselect (columns B to D)
-    //  worksheet.mergeCells(`B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`);
+    worksheet.mergeCells(
+      `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`,
+    );
 
     // Apply styling for the status row
-
-    typeAndStoreRow3.eachCell((cell, colIndex) => {
+    typeAndStoreRow2.eachCell((cell, colIndex) => {
       cell.font = {
         name: "CustomFont" || "CustomFont",
         size: 10,
         bold: [1, 5].includes(colIndex),
       };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
+      cell.alignment = {
+        horizontal: colIndex === 2 ? "left" : "left", // Left align the account name
+        vertical: "middle",
+      };
     });
+
+    // typeAndStoreRow3.eachCell((cell, colIndex) => {
+    //   cell.font = {
+    //     name: "CustomFont" || "CustomFont",
+    //     size: 10,
+    //     bold: [5].includes(colIndex),
+    //   };
+    //   cell.alignment = { horizontal: "left", vertical: "middle" };
+    // });
 
     // Header style
     const headerStyle = {
@@ -971,12 +1332,12 @@ export default function TrailBalanceReport() {
 
     // Add headers
     const headers = [
-      "Code",
-      "Description",
-      "Opening",
-      "Debit",
-      "Credit",
-      "Closing",
+       "Date",
+      "Time",
+      "Remarks",
+      "Type",
+      "Remarks",
+      "Follow Up",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -984,12 +1345,13 @@ export default function TrailBalanceReport() {
     // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.code,
-        item.Description,
-        item.Opening,
-        item.Debit,
-        item.Credit,
-        item.Closing,
+       
+  item.Date,
+      item.Time,
+      item.Customer,
+      item.Type,
+      item.Remarks ? item.Remarks.substring(0, 30) + (item.Remarks.length > 30 ? "..." : "") : "",
+      item["Follow Up"],
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -1008,12 +1370,13 @@ export default function TrailBalanceReport() {
     });
 
     const totalRow = worksheet.addRow([
+      String(tableData.length.toLocaleString()),
       "",
-      "Total",
-      String(totalOpening),
-      String(totalDebit),
-      String(totalCredit),
-      String(closingBalance),
+      "",
+       "",
+      "",
+      "",
+    
     ]);
 
     // total row added
@@ -1028,18 +1391,13 @@ export default function TrailBalanceReport() {
       };
 
       // Align only the "Total" text to the right
-      if (
-        colNumber === 3 ||
-        colNumber === 4 ||
-        colNumber === 5 ||
-        colNumber === 6
-      ) {
-        cell.alignment = { horizontal: "right" };
+      if (colNumber === 1) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
     // Set column widths
-    [10, 45, 14, 14, 14, 14].forEach((width, index) => {
+    [10,8, 45, 6, 35, 10].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -1102,8 +1460,84 @@ export default function TrailBalanceReport() {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `TrialBalance  As on ${currentdate}.xlsx`);
+    saveAs(blob, `DailyCollectorActivity  From ${fromInputDate} To ${toInputDate}.xlsx`);
   };
+  ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+
+ const [columns, setColumns] = useState({
+      Description: [],
+      Debit: [],
+      Credit: [],
+      Balance: [],
+  });
+  const [columnSortOrders, setColumnSortOrders] = useState({
+    Description: "",
+      Debit: "",
+      Credit: "",
+      Balance: "",
+  });
+  useEffect(() => {
+    if (tableData.length > 0) {
+      const newColumns = {
+        Description: tableData.map((row) => row.Description),
+        Debit: tableData.map((row) => row.Debit),
+        Credit: tableData.map((row) => row.Credit),
+        Balance: tableData.map((row) => row.Balance),
+
+      };
+      setColumns(newColumns);
+    }
+  }, [tableData]);
+
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+
+    const sortedData = [...tableData].sort((a, b) => {
+      const aVal =
+        a[col] !== null && a[col] !== undefined ? a[col].toString() : "";
+      const bVal =
+        b[col] !== null && b[col] !== undefined ? b[col].toString() : "";
+
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      } else {
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+    });
+
+    setTableData(sortedData);
+
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const resetSorting = () => {
+    setColumnSortOrders({
+      Description: null,
+      Debit: null,
+      Credit: null,
+      Balance: null,
+    });
+  };
+  const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
+
   const dispatch = useDispatch();
 
   const tableTopColor = "#3368B5";
@@ -1112,7 +1546,6 @@ export default function TrailBalanceReport() {
   const btnColor = "#3368B5";
   const textColor = "white";
 
-  const [tableData, setTableData] = useState([]);
   const [selectedSearch, setSelectedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
@@ -1138,291 +1571,31 @@ export default function TrailBalanceReport() {
     width: "80px",
   };
   const secondColWidth = {
-    width: "360px",
+    width: "70px",
   };
   const thirdColWidth = {
-    width: "100px",
+    width: "360px",
   };
   const forthColWidth = {
-    width: "100px",
+    width: "55px",
   };
   const fifthColWidth = {
-    width: "100px",
+    width: "225px",
   };
   const sixthColWidth = {
-    width: "100px",
+    width: "80px",
   };
-  const sixthcol = {
-    width: "8px",
-  };
+  // const seventhColWidth = {
+  //   width: "90px",
+  // };
 
-  const [columns, setColumns] = useState({
-    code: [],
-    Description: [],
-    Opening: [],
-    Debit: [],
-    Credit: [],
-    Closing: [],
-  });
-  const [columnSortOrders, setColumnSortOrders] = useState({
-    code: "",
-    Description: "",
-    Opening: "",
-    Debit: "",
-    Credit: "",
-    Closing: "",
-  });
-
-  // When you receive your initial table data, transform it into column-oriented format
-  useEffect(() => {
-    if (tableData.length > 0) {
-      const newColumns = {
-        code: tableData.map((row) => row.code),
-        Description: tableData.map((row) => row.Description),
-        Opening: tableData.map((row) => row.Opening),
-        Debit: tableData.map((row) => row.Debit),
-        Credit: tableData.map((row) => row.Credit),
-        Closing: tableData.map((row) => row.Closing),
-      };
-      setColumns(newColumns);
-    }
-  }, [tableData]);
-
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
-
-  const sortedData = [...tableData].sort((a, b) => {
-    let aVal = a[col] ?? "";
-    let bVal = b[col] ?? "";
-
-    aVal = aVal.toString();
-    bVal = bVal.toString();
-
-    // ⭐ CODE SORT (13-01-0005)
-    if (col === "code") {
-      const aParts = aVal.split("-").map(p => parseInt(p, 10));
-      const bParts = bVal.split("-").map(p => parseInt(p, 10));
-
-      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-        const diff = (aParts[i] || 0) - (bParts[i] || 0);
-        if (diff !== 0) {
-          return newOrder === "ASC" ? diff : -diff;
-        }
-      }
-      return 0;
-    }
-
-    // ⭐ Numeric sorting
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
-
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    }
-
-    // ⭐ String sorting
-    return newOrder === "ASC"
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  });
-
-  setTableData(sortedData);
-
-  setColumnSortOrders((prev) => ({
-    ...Object.keys(prev).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {}),
-  }));
-};
-
-  const resetSorting = () => {
-    setColumnSortOrders({
-      code: null,
-      Description: null,
-      Opening: null,
-      Debit: null,
-      Credit: null,
-      Closing: null,
-    });
-  };
-
-  const renderTableData = () => {
-    return (
-      <>
-        {isLoading ? (
-          <>
-            <tr style={{ backgroundColor: getcolor }}>
-              <td colSpan="6" className="text-center">
-                <Spinner animation="border" variant="primary" />
-              </td>
-            </tr>
-            {Array.from({ length: Math.max(0, 25 - 5) }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-
-              <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
-            </tr>
-          </>
-        ) : (
-          <>
-            {tableData.map((item, i) => {
-              totalEnteries += 1;
-
-              const openingNum = Number(
-                item.Opening?.toString().replace(/,/g, ""),
-              );
-              const balanceNum = Number(
-                item.Balance?.toString().replace(/,/g, ""),
-              );
-              const balancecre = Number(
-                item.Credit?.toString().replace(/,/g, ""),
-              );
-              const balancedeb = Number(
-                item.Debit?.toString().replace(/,/g, ""),
-              );
-
-              // Prepare values
-              const values = [openingNum, balancedeb, balancecre, balanceNum];
-
-              // Ignore zero values
-              const nonZeroValues = values.filter((v) => v !== 0);
-
-              // Red only if ALL non-zero values are positive
-              const isRed =
-                nonZeroValues.length > 0 && nonZeroValues.every((v) => v > 0);
-
-              return (
-                <tr
-                  key={`${i}-${selectedIndex}`}
-                  ref={(el) => (rowRefs.current[i] = el)}
-                  onClick={() => handleRowClick(i)}
-                  className={selectedIndex === i ? "selected-background" : ""}
-                  style={{
-                    backgroundColor: getcolor,
-                    // color: fontcolor,
-                    color: isRed ? "red" : fontcolor,
-                  }}
-                >
-                  {/* <td className="text-center" style={firstColWidth}>
-                      {item.code}
-                    </td> */}
-
-                  <td
-                    className="text-center"
-                    style={{
-                      ...firstColWidth,
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      color: selectedIndex === i ? (isRed ? "white" : 'white') : "blue", // ✅ conditional color
-
-                    }}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      // code temporarily store karo
-                      sessionStorage.setItem(
-                         "GeneralLedgerData",
-                        JSON.stringify({
-                          code: item.code,
-                          fromInputDate: fromInputDate,
-                          toInputDate: toInputDate,
-                        }),
-                      );
-
-                      // fixed URL open karo
-                      window.open("/crystalsol/GeneralLedger1", "_blank");
-                    }}
-                  >
-                    {item.code}
-                  </td>
-
-                 <td
-                    className="text-start"
-                    title={item.Description}
-                    style={{
-                      ...secondColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Description}
-                  </td>
-                  <td className="text-end" style={thirdColWidth}>
-                    {formatValue(item.Opening)}
-                  </td>
-                  <td className="text-end" style={forthColWidth}>
-                    {formatValue(item.Debit)}
-                  </td>
-                  <td className="text-end" style={fifthColWidth}>
-                    {formatValue(item.Credit)}
-                  </td>
-                  <td className="text-end" style={sixthColWidth}>
-                    {formatValue(item.Closing)}
-                  </td>
-                </tr>
-              );
-            })}
-            {Array.from({
-              length: Math.max(0, 25 - tableData.length),
-            }).map((_, rowIndex) => (
-              <tr
-                key={`blank-${rowIndex}`}
-                style={{
-                  backgroundColor: getcolor,
-                  color: fontcolor,
-                }}
-              >
-                {Array.from({ length: 6 }).map((_, colIndex) => (
-                  <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                ))}
-              </tr>
-            ))}
-            <tr>
-              <td style={firstColWidth}></td>
-              <td style={secondColWidth}></td>
-              <td style={thirdColWidth}></td>
-              <td style={forthColWidth}></td>
-              <td style={fifthColWidth}></td>
-              <td style={sixthColWidth}></td>
-            </tr>
-          </>
-        )}
-      </>
-    );
-  };
-
-  const getIconStyle = (colKey) => {
-    const order = columnSortOrders[colKey];
-    return {
-      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
-      color: order === "ASC" || order === "DSC" ? "red" : "white",
-      transition: "transform 0.3s ease, color 0.3s ease",
-    };
-  };
+  const sixthcol = { width: "8px" };
 
   useHotkeys(
     "alt+s",
     () => {
       fetchReceivableReport();
-      resetSorting();
+         resetSorting();
     },
     { preventDefault: true, enableOnFormTags: true },
   );
@@ -1451,13 +1624,10 @@ export default function TrailBalanceReport() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  useEffect(() => {
-    document.documentElement.style.setProperty("--background-color", getcolor);
-  }, [getcolor]);
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "855px",
+    maxWidth: "900px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1559,26 +1729,24 @@ export default function TrailBalanceReport() {
     setSelectedRadio(days === 0 ? "custom" : `${days}days`);
   };
 
-  useEffect(() => {
-    if (selectedRadio === "custom") {
-      const currentDate = new Date();
-      const firstDateOfCurrentMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1,
-      );
-      setSelectedfromDate(firstDateOfCurrentMonth);
-      setfromInputDate(formatDate(firstDateOfCurrentMonth));
-      setSelectedToDate(currentDate);
-      settoInputDate(formatDate(currentDate));
-    } else {
-      const days = parseInt(selectedRadio.replace("days", ""));
-      handleRadioChange(days);
-    }
-  }, [selectedRadio]);
+  // this function for hide the 0 value figure from the table data
 
   const formatValue = (val) => {
     return Number(val) === 0 ? "" : val;
+  };
+
+  const isMatchedRow = (item) => {
+    if (!searchQuery) return false; // no highlight if search is empty
+
+    const query = searchQuery.toUpperCase();
+
+    // you can match anything you want:
+    return (
+      item.Description?.toUpperCase().includes(query) ||
+      item.Type?.toUpperCase().includes(query) ||
+      item.Date?.toUpperCase().includes(query) ||
+      String(item["Trn#"])?.includes(query)
+    );
   };
 
   return (
@@ -1594,7 +1762,186 @@ export default function TrailBalanceReport() {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Trial Balance" />
+          <NavComponent textdata="Daily Collector Activity Report" />
+
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "start",
+              }}
+            >
+              {/* ------ */}
+
+              <div
+                className="d-flex align-items-center  "
+                style={{ marginRight: "1px" }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="fromDatePicker">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Account :
+                    </span>{" "}
+                    <br />
+                  </label>
+                </div>
+                <div style={{ marginLeft: "5px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={saleSelectRef}
+                    options={options}
+                    value={
+                      options.find((opt) => opt.value === saleType) || null
+                    } // Ensure correct reference
+                    isDisabled={isDoubleClickOpen}
+                    onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+                    id="selectedsale"
+                               onChange={(selectedOption) => {
+  if (selectedOption && selectedOption.value) {
+    setSaleType(selectedOption.value);
+
+    const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+    setCompanyselectdatavalue({
+      value: selectedOption.value,
+      label: labelWithoutCode,
+    });
+  } else {
+    setSaleType("");
+    setCompanyselectdatavalue("");
+  }
+}}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!saleType),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    // isClearable
+                    // placeholder="ALL"
+                  />
+                </div>
+              </div>
+
+              {/* <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Type :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input1Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "200px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingRight: "25px",
+                    }}
+                  >
+                    <option value="">ALL</option>
+                    <option value="CRV">CASH RECEIVE VORCHER</option>
+                    <option value="CPV">Cash PAYMENT VORCHER</option>
+                    <option value="BRV">Bank RECEIVE VORCHER</option>
+                    <option value="BPV">BANK PAYMENT VORCHER</option>
+                    <option value="JVR">JOURNAL VORCHER</option>
+                    <option value="INV">ITEM SALE</option>
+                    <option value="SRN">SALE RETURN</option>
+                    <option value="BIL">PURCHASE</option>
+                    <option value="PRN">PURCHASE RETURN</option>
+                    <option value="ISS">ISSUE</option>
+                    <option value="REC">RECEIVED</option>
+                    <option value="SLY">SALARY</option>
+                  </select>
+
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div> */}
+            </div>
+          </div>
+
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1612,7 +1959,7 @@ export default function TrailBalanceReport() {
               <div className="d-flex align-items-center">
                 <div
                   style={{
-                    width: "60px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
@@ -1620,7 +1967,8 @@ export default function TrailBalanceReport() {
                   <label htmlFor="fromDatePicker">
                     <span
                       style={{
-                        fontSize: parseInt(getdatafontsize),
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
                         fontWeight: "bold",
                       }}
                     >
@@ -1637,7 +1985,7 @@ export default function TrailBalanceReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
-                    marginLeft: "3px",
+                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -1654,7 +2002,7 @@ export default function TrailBalanceReport() {
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
-                      fontSize: parseInt(getdatafontsize),
+                      fontSize: "12px",
                       backgroundColor: getcolor,
                       color: fontcolor,
                       opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1693,7 +2041,8 @@ export default function TrailBalanceReport() {
                                 ? "pointer"
                                 : "default",
                             marginLeft: "18px",
-                            fontSize: parseInt(getdatafontsize),
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
                             color: fontcolor,
                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                           }}
@@ -1705,7 +2054,10 @@ export default function TrailBalanceReport() {
                   />
                 </div>
               </div>
-              <div className="d-flex align-items-center">
+              <div
+                className="d-flex align-items-center"
+                style={{ marginLeft: "15px" }}
+              >
                 <div
                   style={{
                     width: "60px",
@@ -1716,7 +2068,8 @@ export default function TrailBalanceReport() {
                   <label htmlFor="toDatePicker">
                     <span
                       style={{
-                        fontSize: parseInt(getdatafontsize),
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
                         fontWeight: "bold",
                       }}
                     >
@@ -1733,7 +2086,7 @@ export default function TrailBalanceReport() {
                     alignItems: "center",
                     height: "24px",
                     justifyContent: "center",
-                    marginLeft: "3px",
+                    marginLeft: "5px",
                     background: getcolor,
                   }}
                   onFocus={(e) =>
@@ -1751,7 +2104,8 @@ export default function TrailBalanceReport() {
                       paddingLeft: "5px",
                       outline: "none",
                       border: "none",
-                      fontSize: parseInt(getdatafontsize),
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
                       backgroundColor: getcolor,
                       color: fontcolor,
                       opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1789,7 +2143,8 @@ export default function TrailBalanceReport() {
                                 ? "pointer"
                                 : "default",
                             marginLeft: "18px",
-                            fontSize: parseInt(getdatafontsize),
+                            fontSize: getdatafontsize,
+                            fontFamily: getfontstyle,
                             color: fontcolor,
                             opacity: selectedRadio === "custom" ? 1 : 0.5,
                           }}
@@ -1865,28 +2220,30 @@ export default function TrailBalanceReport() {
                   )}
                 </div>
               </div>
-             
             </div>
           </div>
-        
           <div>
             <div
               style={{
                 overflowY: "auto",
-                // width: "98.3%",
+                // width: "98.8%",
               }}
             >
               <table
                 className="myTable"
                 id="table"
                 style={{
-                  fontSize: parseInt(getdatafontsize),
-                  //   width: "100%",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                  // width: "100%",
                   position: "relative",
+                  paddingRight: "2%",
                 }}
               >
                 <thead
                   style={{
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                     fontWeight: "bold",
                     height: "24px",
                     position: "sticky",
@@ -1901,77 +2258,25 @@ export default function TrailBalanceReport() {
                       color: "white",
                     }}
                   >
-                    <td
-                      className="border-dark"
-                      style={firstColWidth}
-                      onClick={() => handleSorting("code")}
-                    >
-                      Code{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("code")}
-                      ></i>
+                    <td className="border-dark" style={firstColWidth}>
+                      Date
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={secondColWidth}
-                      onClick={() => handleSorting("Description")}
-                    >
-                      Description{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Description")}
-                      ></i>
+                    <td className="border-dark" style={secondColWidth}>
+                      Time
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={thirdColWidth}
-                      onClick={() => handleSorting("Opening")}
-                    >
-                      Opening{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Opening")}
-                      ></i>
+                    <td className="border-dark" style={thirdColWidth}>
+                      Customer
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={forthColWidth}
-                      onClick={() => handleSorting("Debit")}
-                    >
-                      Debit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Debit")}
-                      ></i>
+                    <td className="border-dark" style={forthColWidth}>
+                      Type
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={fifthColWidth}
-                      onClick={() => handleSorting("Credit")}
-                    >
-                      Credit{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Credit")}
-                      ></i>
+                     <td className="border-dark" style={fifthColWidth}>
+                      Remarks
                     </td>
-
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Closing")}
-                    >
-                      Closing{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Closing")}
-                      ></i>
+                     <td className="border-dark" style={sixthColWidth}>
+                      Follow
                     </td>
+                                                     
 
                     <td className="border-dark" style={sixthcol}></td>
                   </tr>
@@ -1984,25 +2289,148 @@ export default function TrailBalanceReport() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "50vh",
-            }}
+                maxHeight: "48vh",
+                // width: "100%",
+                wordBreak: "break-word",
+              }}
             >
               <table
                 id="tableBody"
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                    width: "100%",
                   position: "relative",
+                    width: "100%",
                   ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
-                <tbody id="tablebody" style={{ overflowY: "scroll" }}>
-                  {renderTableData()}
+                <tbody id="tablebody">
+                  {isLoading ? (
+                    <>
+                      <tr
+                        style={{
+                          backgroundColor: getcolor,
+                        }}
+                      >
+                        <td colSpan="6" className="text-center">
+                          <Spinner animation="border" variant="primary" />
+                        </td>
+                      </tr>
+                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
+                        (_, rowIndex) => (
+                          <tr
+                            key={`blank-${rowIndex}`}
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                            }}
+                          >
+                            {Array.from({ length:6 }).map((_, colIndex) => (
+                              <td key={`blank-${rowIndex}-${colIndex}`}>
+                                &nbsp;
+                              </td>
+                            ))}
+                          </tr>
+                        ),
+                      )}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        {/* <td style={seventhColWidth}></td> */}
+                      </tr>
+                    </>
+                  ) : (
+                    <>
+                      {tableData.map((item, i) => {
+                        totalEnteries += 1;
+                        return (
+                          <tr
+                            key={`${i}-${selectedIndex}`}
+                            ref={(el) => (rowRefs.current[i] = el)}
+                            onClick={() => handleRowClick(i)}
+                            className={
+                              selectedIndex === i ? "selected-background" : ""
+                            }
+                            style={{
+                              backgroundColor: getcolor,
+                              color: fontcolor,
+                              color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
+                              //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
+                            }}
+                          >
+                            <td className="text-center" style={firstColWidth}>
+                              {item.Date}
+                            </td>
+                            <td className="text-center" style={secondColWidth}>
+                              {item["Time"]}
+                            </td>
+                            <td className="text-start" style={thirdColWidth}>
+                              {item.Customer}
+                            </td>
+                            <td className="text-center" style={forthColWidth}>
+                              {item.Type}
+                            </td>
+                           
+
+  <td
+                    className="text-start"
+                    title={item.Remarks}
+                    style={{
+                      ...fifthColWidth,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.Remarks}
+                  </td>
+
+                            <td className="text-center" style={sixthColWidth}>
+                              {item["Follow Up"]}
+                            </td>
+                            {/* <td className="text-end" style={seventhColWidth}>
+                              {formatValue(item.Balance)}
+                            </td> */}
+                          </tr>
+                        );
+                      })}
+                      {Array.from({
+                        length: Math.max(0, 27 - tableData.length),
+                      }).map((_, rowIndex) => (
+                        <tr
+                          key={`blank-${rowIndex}`}
+                          style={{
+                            backgroundColor: getcolor,
+                            color: fontcolor,
+                          }}
+                        >
+                          {Array.from({ length: 6 }).map((_, colIndex) => (
+                            <td key={`blank-${rowIndex}-${colIndex}`}>
+                              &nbsp;
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={firstColWidth}></td>
+                        <td style={secondColWidth}></td>
+                        <td style={thirdColWidth}></td>
+                        <td style={forthColWidth}></td>
+                        <td style={fifthColWidth}></td>
+                        <td style={sixthColWidth}></td>
+                        {/* <td style={seventhColWidth}></td> */}
+                      </tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
+
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,
@@ -2010,6 +2438,7 @@ export default function TrailBalanceReport() {
               height: "24px",
               display: "flex",
               paddingRight: "8px",
+
             }}
           >
             <div
@@ -2018,11 +2447,9 @@ export default function TrailBalanceReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total2">
+            ><span className="mobileledger_total2">
                 {formatValue(tableData.length.toLocaleString())}
-              </span>
-            </div>
+              </span></div>
             <div
               style={{
                 ...secondColWidth,
@@ -2036,22 +2463,14 @@ export default function TrailBalanceReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalOpening)}
-              </span>
-            </div>
+            ></div>
             <div
               style={{
                 ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">
-                {formatValue(totalDebit)}
-              </span>
-            </div>
+            ></div>
             <div
               style={{
                 ...fifthColWidth,
@@ -2059,9 +2478,9 @@ export default function TrailBalanceReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">
-                {formatValue(totalCredit)}
-              </span>
+              {/* <span className="mobileledger_total">
+                {formatValue(totalDebit)}
+              </span> */}
             </div>
             <div
               style={{
@@ -2070,11 +2489,23 @@ export default function TrailBalanceReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
+              {/* <span className="mobileledger_total">
+                {formatValue(totalCredit)}
+              </span> */}
+            </div>
+            {/* <div
+              style={{
+                ...seventhColWidth,
+                background: getcolor,
+                borderRight: `1px solid ${fontcolor}`,
+              }}
+            >
               <span className="mobileledger_total">
                 {formatValue(closingBalance)}
               </span>
-            </div>
+            </div> */}
           </div>
+
           <div
             style={{
               margin: "5px",
@@ -2109,11 +2540,10 @@ export default function TrailBalanceReport() {
               id="searchsubmit"
               text="Select"
               ref={input3Ref}
-              onClick={() => {
+ onClick={() => {
                 fetchReceivableReport();
                 resetSorting();
-              }}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+              }}              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }

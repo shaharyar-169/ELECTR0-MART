@@ -243,9 +243,9 @@ export default function ItemStockReport() {
       FRepStk: transectionType2,
       FRepRat: transectionType,
 
-      // code: 'MULTITRD',
+      // code: 'AGFACTORY',
       // FLocCod: '001',
-      // FYerDsc:'2025-2026'
+      // FYerDsc:'2025-2025'
     
 
     }).toString();
@@ -678,8 +678,20 @@ const exportPDFHandler = () => {
   const globalfontsize = 10;
   console.log("gobal font data", globalfontsize);
 
-  // Create a new jsPDF instance with portrait orientation
-  const doc = new jsPDF({ orientation: "portrait" });
+  // Create a new jsPDF instance with portrait orientation and set margins
+  const doc = new jsPDF({ 
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4"
+  });
+
+  // Define margins (printable area)
+  const margin = {
+    left: 8,
+    right: 8,
+    top: 10,
+    bottom: 10
+  };
 
   // Define table data (rows)
   const rows = tableData.map((item) => [
@@ -707,14 +719,22 @@ const exportPDFHandler = () => {
     "Qnty",
     "Amount",
   ];
-  const columnWidths = [38, 95, 20, 20, 30];
+  
+  // Calculate column widths based on printable area
+  const pageWidth = doc.internal.pageSize.width;
+  const printableWidth = pageWidth - margin.left - margin.right;
+  
+  // Adjust column widths proportionally to fit printable area
+  const baseWidths = [38, 110, 25, 25, 38];
+  const totalBaseWidth = baseWidths.reduce((acc, w) => acc + w, 0);
+  const columnWidths = baseWidths.map(w => (w / totalBaseWidth) * printableWidth);
 
-  // Calculate total table width
+  // Calculate total table width (will equal printable width)
   const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 
   // Define page height and padding – tightened to fit more rows
   const pageHeight = doc.internal.pageSize.height;
-  const paddingTop = 15;
+  const paddingTop = margin.top + 5;
   const footerReserve = 18; // reduced from 30 to maximise rows
 
   doc.setFont("verdana-regular", "normal");
@@ -802,11 +822,11 @@ const exportPDFHandler = () => {
       const rowHeight = maxLines * lineHeight + 2;
       
       // Check if row fits on current page
-      if (currentY + rowHeight > pageHeight - footerReserve) {
-        // Draw footer on current page (without page number – we'll add later)
+      if (currentY + rowHeight > pageHeight - footerReserve - margin.bottom) {
+        // Draw footer on current page
         const lineWidth = tableWidth;
         const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-        const lineY = pageHeight - 12; // moved down slightly
+        const lineY = pageHeight - 12 - margin.bottom;
         
         doc.setLineWidth(0.3);
         doc.line(lineX, lineY, lineX + lineWidth, lineY);
@@ -889,10 +909,10 @@ const exportPDFHandler = () => {
       }
     }
     
-    // Draw footer on last page (still without page number)
+    // Draw footer on last page
     const lineWidth = tableWidth;
     const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-    const lineY = pageHeight - 12;
+    const lineY = pageHeight - 12 - margin.bottom;
     
     doc.setLineWidth(0.3);
     doc.line(lineX, lineY, lineX + lineWidth, lineY);
@@ -1038,8 +1058,8 @@ const exportPDFHandler = () => {
     doc.setPage(p);
     doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10);
-    // Position at the same Y as "Crystal Solution" text (pageHeight - 8)
-    doc.text(`Page ${p} / ${totalPages}`, doc.internal.pageSize.width - 15, pageHeight - 8, { align: "right" });
+    // Position at the same Y as "Crystal Solution" text (pageHeight - 8 - margin.bottom)
+    doc.text(`Page ${p} / ${totalPages}`, doc.internal.pageSize.width - margin.right - 5, pageHeight - 8 - margin.bottom, { align: "right" });
   }
   
   // Save the PDF

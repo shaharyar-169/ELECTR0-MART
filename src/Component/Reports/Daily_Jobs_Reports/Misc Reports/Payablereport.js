@@ -40,11 +40,13 @@ export default function PayableReport() {
   const input1Ref = useRef(null);
   const input2Ref = useRef(null);
   const input3Ref = useRef(null);
+  const input6Ref = useRef(null);
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
 
   const [saleType, setSaleType] = useState("");
+  console.log("accountcode", saleType);
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
@@ -64,6 +66,11 @@ export default function PayableReport() {
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
 
+  const [Companyselectdata, setCompanyselectdata] = useState("");
+  const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
+  const [GetCompany, setGetCompany] = useState([]);
+
+  console.log("account code ", Companyselectdata);
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -240,9 +247,9 @@ export default function PayableReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input1Ref.current) {
+        if (input6Ref.current) {
           e.preventDefault();
-          input1Ref.current.focus();
+          input6Ref.current.focus();
         }
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
@@ -398,10 +405,10 @@ export default function PayableReport() {
       // FLocCod: "001",
       // FYerDsc: "2024-2024",
       // code: "NASIRTRD",
-
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
       code: organisation.code,
+      FAccCod: saleType,
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FRepTyp: transectionType,
@@ -462,12 +469,254 @@ export default function PayableReport() {
     setfromInputDate(formatDate(firstDateOfCurrentMonth));
   }, []);
 
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetSubControlAccounts.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+            FLocCod: locationnumber || getLocationNumber,
+      FManCod: "22",
+      // code: "NASIRTRD",
+      // FLocCod: "001",
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetCompany(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data,
+          );
+          setGetCompany([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const options = GetCompany.map((item) => ({
+    value: item.tacccod,
+    label: `${item.tacccod}-${item.taccdsc.trim()}`,
+  }));
+
+  const handlecompanyKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      // Use getValue() method instead of accessing state directly
+      const selectedValue = input1Ref.current?.getValue?.();
+      if (selectedValue && selectedValue.length > 0) {
+        const selectedOption = selectedValue[0];
+        if (selectedOption && selectedOption.value) {
+          setCompanyselectdata(selectedOption.value);
+        }
+      }
+
+      const nextInput = inputId.current;
+      if (nextInput) {
+        nextInput.focus();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+
+  const DropdownOption = (props) => {
+    return (
+      <components.Option {...props}>
+        <div
+          style={{
+            fontSize: getdatafontsize,
+            fontFamily: getfontstyle,
+            padding: "2px 8px", // tighter vertical padding
+            lineHeight: "1.2",
+            // lineHeight: "3px",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            // color: fontcolor,
+            textAlign: "start",
+          }}
+        >
+          {props.data.label}
+        </div>
+      </components.Option>
+    );
+  };
+
+  const customStyles1 = (hasError) => ({
+    control: (base, state) => ({
+      ...base,
+      height: "24px",
+      minHeight: "unset",
+      width: 350,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: getcolor,
+      color: fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      borderRadius: 0,
+      border: `1px solid ${fontcolor}`,
+      transition: "border-color 0.15s ease-in-out",
+      "&:hover": {
+        borderColor: state.isFocused ? base.borderColor : fontcolor,
+      },
+      padding: "0 8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      boxShadow: "none",
+      "&:focus-within": {
+        borderColor: "#FF0000", // ✅ Changed to red
+        boxShadow: "0 0 0 1px #FF0000", // ✅ Changed to red shadow
+      },
+    }),
+
+    menu: (base) => ({
+      ...base,
+      marginTop: "5px",
+      borderRadius: 0,
+      backgroundColor: getcolor,
+      border: `1px solid ${fontcolor}`,
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      zIndex: 9999,
+      width: "auto",
+      minWidth: "100%",
+    }),
+    menuList: (base) => ({
+      ...base,
+      padding: 0,
+      maxHeight: "200px",
+      "&::-webkit-scrollbar": {
+        width: "8px",
+        height: "8px",
+      },
+      "&::-webkit-scrollbar-track": {
+        background: getcolor,
+        borderRadius: "10px",
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: fontcolor,
+        borderRadius: "10px",
+        border: `2px solid ${getcolor}`,
+        "&:hover": {
+          backgroundColor: "#3368B5",
+        },
+      },
+      scrollbarWidth: "thin",
+      scrollbarColor: `${fontcolor} ${getcolor}`,
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      backgroundColor: state.isSelected
+        ? "#3368B5"
+        : state.isFocused
+          ? "#3368B5"
+          : getcolor,
+      color: state.isSelected || state.isFocused ? "white" : fontcolor,
+      whiteSpace: "normal",
+      wordBreak: "break-word",
+      padding: "2px 8px",
+      lineHeight: "1.2",
+      "&:hover": {
+        backgroundColor: "#3368B5",
+        color: "white",
+        cursor: "pointer",
+      },
+      "&:active": {
+        backgroundColor: "#1a66cc",
+      },
+      transition: "background-color 0.2s ease, color 0.2s ease",
+    }),
+    dropdownIndicator: (base, state) => ({
+      ...base,
+      padding: 0,
+      marginTop: "-5px",
+      fontSize: "18px",
+      display: "flex",
+      textAlign: "center",
+      color: fontcolor,
+      transition: "transform 0.2s ease",
+      transform: state.selectProps.menuIsOpen
+        ? "rotate(180deg)"
+        : "rotate(0deg)",
+      "&:hover": {
+        color: "#3368B5",
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      textAlign: "left",
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    input: (base) => ({
+      ...base,
+      color: getcolor === "white" ? "black" : fontcolor,
+      caretColor: getcolor === "white" ? "black" : "white",
+      marginTop: "-5px",
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      marginTop: "-5px",
+      padding: "0 4px",
+      color: fontcolor,
+      "&:hover": {
+        color: "#ff4444",
+      },
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      marginTop: "-5px",
+    }),
+    noOptionsMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    loadingMessage: (base) => ({
+      ...base,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+      color: fontcolor,
+      backgroundColor: getcolor,
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: `${fontcolor}20`,
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: fontcolor,
+      fontSize: getdatafontsize,
+      fontFamily: getfontstyle,
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: `${fontcolor}80`,
+      "&:hover": {
+        backgroundColor: "#ff4444",
+        color: "white",
+      },
+    }),
+  });
+
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
     settransectionType(selectedTransactionType);
   };
 
- const exportPDFHandler = () => {
+  const exportPDFHandler = () => {
     const globalfontsize = 10;
     console.log("gobal font data", globalfontsize);
 
@@ -512,13 +761,13 @@ export default function PayableReport() {
     const pageHeight = doc.internal.pageSize.height;
     const paddingTop = 15;
 
-      doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
     // Function to add table headers
     const addTableHeaders = (startX, startY) => {
       // Set font style and size for headers
-          doc.setFont("verdana", "bold");
-            doc.setFontSize(10);
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(10);
 
       headers.forEach((header, index) => {
         const cellWidth = columnWidths[index];
@@ -539,11 +788,9 @@ export default function PayableReport() {
         doc.text(header, cellX, cellY, { align: "center" }); // Center the text
         startX += columnWidths[index]; // Move to the next column
       });
-
-    
     };
 
-   const addTableRows = (startX, startY, startIndex, endIndex) => {
+    const addTableRows = (startX, startY, startIndex, endIndex) => {
       const rowHeight = 5;
       const fontSize = 10;
       const boldFont = 400;
@@ -575,7 +822,7 @@ export default function PayableReport() {
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
             rowHeight,
-            "F"
+            "F",
           );
         }
 
@@ -594,7 +841,7 @@ export default function PayableReport() {
             startX,
             rowBottomY - 0.5,
             startX + tableWidth,
-            rowBottomY - 0.5
+            rowBottomY - 0.5,
           );
 
           doc.setLineWidth(0.2);
@@ -603,7 +850,7 @@ export default function PayableReport() {
             startX + tableWidth,
             rowTopY,
             startX + tableWidth,
-            rowBottomY
+            rowBottomY,
           );
         } else {
           doc.setLineWidth(0.2);
@@ -611,7 +858,7 @@ export default function PayableReport() {
             startX,
             startY + (i - startIndex + 2) * rowHeight,
             tableWidth,
-            rowHeight
+            rowHeight,
           );
         }
 
@@ -668,7 +915,7 @@ export default function PayableReport() {
               startX + columnWidths[cellIndex],
               startY + (i - startIndex + 2) * rowHeight,
               startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight
+              startY + (i - startIndex + 3) * rowHeight,
             );
             startX += columnWidths[cellIndex];
           }
@@ -721,7 +968,7 @@ export default function PayableReport() {
         pageNumber,
         startY,
         titleFontSize = 18,
-        pageNumberFontSize = 10
+        pageNumberFontSize = 10,
       ) => {
         doc.setFontSize(titleFontSize); // Set the font size for the title
         doc.text(title, doc.internal.pageSize.width / 2, startY, {
@@ -741,13 +988,13 @@ export default function PayableReport() {
         // }
 
         // Add page numbering
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(
           `Page ${pageNumber}`,
           rightX - 10,
           doc.internal.pageSize.height - 10,
-          { align: "right" }
+          { align: "right" },
         );
       };
 
@@ -756,54 +1003,51 @@ export default function PayableReport() {
       let pageNumber = 1; // Initialize page number
 
       while (currentPageIndex * rowsPerPage < rows.length) {
-            doc.setFont("Times New Roman", "normal");
+        doc.setFont("Times New Roman", "normal");
         addTitle(comapnyname, 12, 12, pageNumber, startY, 18); // Render company title with default font size, only date, and page number
         startY += 5; // Adjust vertical position for the company title
-     doc.setFont("verdana-regular", "normal");
+        doc.setFont("verdana-regular", "normal");
         addTitle(
           `Payable Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
           startY,
-          12
+          12,
         ); // Render sale report title with decreased font size, provide the time, and page number
         startY += -5;
 
         const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
         const labelsY = startY + 4; // Position the labels below the titles and above the table
 
-     
         let status =
           transectionType === "R"
             ? "RECEIVABLE"
             : transectionType === "P"
-            ? "PAYABLE"
-            : "ALL";
+              ? "PAYABLE"
+              : "ALL";
         let search = searchQuery ? searchQuery : "";
 
         // let accoount = Companyselectdatavalue.label
         //   ? Companyselectdatavalue.label
         //   : "ALL";
 
-  
-     doc.setFont("verdana", "bold");
-            doc.setFontSize(10); 
-                   doc.text(`Type :`, labelsX, labelsY + 8.5); // Draw bold label
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Type :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${status}`, labelsX + 15, labelsY + 8.5); // Draw the value next to the label
 
-                     if (searchQuery) {
-     doc.setFont("verdana", "bold");
-            doc.setFontSize(10);
-                    doc.text(`Search :`, labelsX + 120, labelsY + 8.5); // Draw bold label
-     doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-                    doc.text(`${search}`, labelsX + 138, labelsY + 8.5); // Draw the value next to the label
-}
+        if (searchQuery) {
+          doc.setFont("verdana", "bold");
+          doc.setFontSize(10);
+          doc.text(`Search :`, labelsX + 120, labelsY + 8.5); // Draw bold label
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+          doc.text(`${search}`, labelsX + 138, labelsY + 8.5); // Draw the value next to the label
+        }
 
-           
         startY += 10; // Adjust vertical position for the labels
 
         addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
@@ -813,7 +1057,7 @@ export default function PayableReport() {
           (doc.internal.pageSize.width - totalWidth) / 2,
           startY,
           startIndex,
-          endIndex
+          endIndex,
         );
         if (endIndex < rows.length) {
           startY = addNewPage(startY); // Add new page and update startY
@@ -1192,54 +1436,54 @@ export default function PayableReport() {
     }
   }, [tableData]);
 
- const handleSorting = (col) => {
-  const currentOrder = columnSortOrders[col];
-  const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  const handleSorting = (col) => {
+    const currentOrder = columnSortOrders[col];
+    const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
 
-  const sortedData = [...tableData].sort((a, b) => {
-    let aVal = a[col] ?? "";
-    let bVal = b[col] ?? "";
+    const sortedData = [...tableData].sort((a, b) => {
+      let aVal = a[col] ?? "";
+      let bVal = b[col] ?? "";
 
-    aVal = aVal.toString();
-    bVal = bVal.toString();
+      aVal = aVal.toString();
+      bVal = bVal.toString();
 
-    // ⭐ CODE SORT (13-01-0005)
-    if (col === "code") {
-      const aParts = aVal.split("-").map(p => parseInt(p, 10));
-      const bParts = bVal.split("-").map(p => parseInt(p, 10));
+      // ⭐ CODE SORT (13-01-0005)
+      if (col === "code") {
+        const aParts = aVal.split("-").map((p) => parseInt(p, 10));
+        const bParts = bVal.split("-").map((p) => parseInt(p, 10));
 
-      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-        const diff = (aParts[i] || 0) - (bParts[i] || 0);
-        if (diff !== 0) {
-          return newOrder === "ASC" ? diff : -diff;
+        for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+          const diff = (aParts[i] || 0) - (bParts[i] || 0);
+          if (diff !== 0) {
+            return newOrder === "ASC" ? diff : -diff;
+          }
         }
+        return 0;
       }
-      return 0;
-    }
 
-    // ⭐ Numeric sorting
-    const numA = parseFloat(aVal.replace(/,/g, ""));
-    const numB = parseFloat(bVal.replace(/,/g, ""));
+      // ⭐ Numeric sorting
+      const numA = parseFloat(aVal.replace(/,/g, ""));
+      const numB = parseFloat(bVal.replace(/,/g, ""));
 
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return newOrder === "ASC" ? numA - numB : numB - numA;
-    }
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return newOrder === "ASC" ? numA - numB : numB - numA;
+      }
 
-    // ⭐ String sorting
-    return newOrder === "ASC"
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  });
+      // ⭐ String sorting
+      return newOrder === "ASC"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
 
-  setTableData(sortedData);
+    setTableData(sortedData);
 
-  setColumnSortOrders((prev) => ({
-    ...Object.keys(prev).reduce((acc, key) => {
-      acc[key] = key === col ? newOrder : null;
-      return acc;
-    }, {}),
-  }));
-};
+    setColumnSortOrders((prev) => ({
+      ...Object.keys(prev).reduce((acc, key) => {
+        acc[key] = key === col ? newOrder : null;
+        return acc;
+      }, {}),
+    }));
+  };
   const resetSorting = () => {
     setColumnSortOrders({
       code: null,
@@ -1334,8 +1578,12 @@ export default function PayableReport() {
                       ...firstColWidth,
                       cursor: "pointer",
                       textDecoration: "underline",
-                      color: selectedIndex === i ? (isRed ? "white" : 'white') : "blue", // ✅ conditional color
-
+                      color:
+                        selectedIndex === i
+                          ? isRed
+                            ? "white"
+                            : "white"
+                          : "blue", // ✅ conditional color
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
@@ -1763,7 +2011,7 @@ export default function PayableReport() {
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+                    onKeyDown={(e) => handleToKeyPress(e, input6Ref)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -1893,9 +2141,83 @@ export default function PayableReport() {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "end",
+                justifyContent: "space-between",
               }}
             >
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "50px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      A/C :
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={input6Ref}
+                    options={options}
+                    onKeyDown={(e) => handlecompanyKeypress(e, input1Ref)}
+                    id="selectedsale"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelParts = selectedOption.label.split("-"); // Split by "-"
+                        const description = labelParts.slice(3).join("-"); // Remove the first 3 parts
+
+                        setSaleType(selectedOption.value);
+                        setCompanyselectdatavalue({
+                          value: selectedOption.value,
+                          label: description, // Keep only the description
+                        });
+                      } else {
+                        setSaleType("");
+                        setCompanyselectdatavalue("");
+                      }
+                    }}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!saleType),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
+                        color: fontcolor,
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
+                </div>
+              </div>
+
               <div id="lastDiv" style={{ marginRight: "1px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>
                   <span
@@ -2087,8 +2409,8 @@ export default function PayableReport() {
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
                   width: "100%",
-                                    position: "relative",
-                                    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                  position: "relative",
+                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
                 }}
               >
                 <tbody id="tablebody" style={{ overflowY: "scroll" }}>

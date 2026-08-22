@@ -26,6 +26,7 @@ import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 export default function SupplierPurchaseReport() {
   const navigate = useNavigate();
   const user = getUserData();
@@ -1514,6 +1515,99 @@ export default function SupplierPurchaseReport() {
   const [menuAccountIsOpen, setMenuAccountIsOpen] = useState(false);
   const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
 
+    const [columns, setColumns] = useState({
+      code: [],
+        Description: [],
+        Rate: [],
+        Qnty: [],
+        Amount: [],
+    });
+    const [columnSortOrders, setColumnSortOrders] = useState({
+      code: "",
+        Description: "",
+        Rate: "",
+        Qnty: "",
+        Amount: "",
+    });
+    // When you receive your initial table data, transform it into column-oriented format
+    useEffect(() => {
+      if (tableData.length > 0) {
+        const newColumns = {
+          code: tableData.map((row) => row.code),
+          Description: tableData.map((row) => row.Description),
+          Rate: tableData.map((row) => row.Rate),
+          Qnty: tableData.map((row) => row.Qnty),
+          Amount: tableData.map((row) => row.Amount),
+        };
+        setColumns(newColumns);
+      }
+    }, [tableData]);
+  
+    const handleSorting = (col) => {
+      const currentOrder = columnSortOrders[col];
+      const newOrder = currentOrder === "ASC" ? "DSC" : "ASC";
+  
+      const sortedData = [...tableData].sort((a, b) => {
+        let aVal = a[col] ?? "";
+        let bVal = b[col] ?? "";
+  
+        aVal = aVal.toString();
+        bVal = bVal.toString();
+  
+        // ⭐ SPECIAL CASE: Sort CODE from the RIGHT side
+        if (col === "code" || col === "code") {
+          // Reverse strings → compare from right side
+          const revA = aVal.split("").reverse().join("");
+          const revB = bVal.split("").reverse().join("");
+  
+          return newOrder === "ASC"
+            ? revA.localeCompare(revB)
+            : revB.localeCompare(revA);
+        }
+  
+        // ⭐ Numeric sorting
+        const numA = parseFloat(aVal.replace(/,/g, ""));
+        const numB = parseFloat(bVal.replace(/,/g, ""));
+  
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return newOrder === "ASC" ? numA - numB : numB - numA;
+        }
+  
+        // Default → normal string sorting
+        return newOrder === "ASC"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      });
+  
+      setTableData(sortedData);
+  
+      setColumnSortOrders((prev) => ({
+        ...Object.keys(prev).reduce((acc, key) => {
+          acc[key] = key === col ? newOrder : null;
+          return acc;
+        }, {}),
+      }));
+    };
+  
+    const resetSorting = () => {
+      setColumnSortOrders({
+        code: null,
+        Description: null,
+        Rate: null,
+        Qnty: null,
+        Amount: null,
+       
+      });
+    };
+  
+     const getIconStyle = (colKey) => {
+    const order = columnSortOrders[colKey];
+    return {
+      transform: order === "DSC" ? "rotate(180deg)" : "rotate(0deg)",
+      color: order === "ASC" || order === "DSC" ? "red" : "white",
+      transition: "transform 0.3s ease, color 0.3s ease",
+    };
+  };
  
 
   const handleFromDateEnter = (e) => {
@@ -2328,20 +2422,61 @@ export default function SupplierPurchaseReport() {
                       color: "white",
                     }}
                   >
-                    <td className="border-dark" style={firstColWidth}>
-                      Code
+                    <td
+                      className="border-dark"
+                      style={firstColWidth}
+                      onClick={() => handleSorting("code")}
+                    >
+                      Code{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("code")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={secondColWidth}>
-                      Description
+
+                    <td
+                      className="border-dark"
+                      style={secondColWidth}
+                      onClick={() => handleSorting("Description")}
+                    >
+                      Description{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Description")}
+                      ></i>
                     </td>
-                      <td className="border-dark" style={fifthColWidth}>
-                      Rate
+                        <td
+                      className="border-dark"
+                      style={fifthColWidth}
+                      onClick={() => handleSorting("Rate")}
+                    >
+                      Rate{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Rate")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={thirdColWidth}>
-                      Qnty
+                     <td
+                      className="border-dark"
+                      style={thirdColWidth}
+                      onClick={() => handleSorting("Qnty")}
+                    >
+                      Qnty{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Qnty")}
+                      ></i>
                     </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Amount
+                     <td
+                      className="border-dark"
+                      style={forthColWidth}
+                      onClick={() => handleSorting("Amount")}
+                    >
+                      Amount{" "}
+                      <i
+                        className="fa-solid fa-caret-down caretIconStyle"
+                        style={getIconStyle("Amount")}
+                      ></i>
                     </td>
                      <td className="border-dark" style={sixColWidth}>
                       

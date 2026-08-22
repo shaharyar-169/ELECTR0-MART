@@ -169,6 +169,7 @@ import InstallmentLedger2 from "./Component/Reports/Daily_Jobs_Reports/Installme
 import InstallmentRecoveryReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentRecoveryReport.js";
 import InstallmentWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentWiseReport.js"; 
 import MonthWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/MonthWiseReport.js";
+import InstallmentInvestmentStatusReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentInvestmentStatusReport.js";
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
@@ -236,6 +237,12 @@ import ProjectComparisonReport from "./Component/Reports/Daily_Jobs_Reports/Misc
 import AmericanReceivableAggingReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanReceiableAgging.js";
 import MonthlyProfitReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/MonthlyProfitReport.js";
 import AmericanLimitUtilizationReport from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/AmericanLimitUtilization.js";
+import SupplierOutstandingBills from "./Component/Reports/Daily_Jobs_Reports/Misc Reports/SupplierOutstandingBills.js";
+
+
+//////////////////////////// FILE MAINTINANCE //////////////////////////////////
+import StoreMaintinanace from "./Component/FileMaintinance/StoreMaintinance.jsx";
+
 
 /////////////////////////////// FINANCIAL REPORT /////////////////////////////
 import TrailBalanceReport from "./Component/Reports/FinancialReports/TrailBalanceREport.js";
@@ -248,6 +255,7 @@ import FbrDataReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesRepor
 import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/TaxsaleRegister.js";
 //////////////////////////// FBR DATA reports //////////////////////////////
 import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/CollectorWiseCustomerSearch.js";
+
 
 function App() {
   const queryClient = new QueryClient();
@@ -334,6 +342,8 @@ function App() {
                 {/* Rountes for ledgers reports */}
 
                 <Route exact path="/GeneralLedger1" element={<GeneralLedger />} />
+                 {/* <Route exact path="/GeneralLedger1" element={<ElectronicsDasboard />} /> */}
+              
                 <Route exact path="/SupplierLedger" element={<SupplierLedger1 />} />
                 <Route exact path="/CustomerLedger" element={<CustomerLedger1 />} />
                 <Route exact path="/BankRegister" element={<BankRegisterLedger1 />} />
@@ -421,6 +431,7 @@ function App() {
                 <Route exact path="/InstallmentRecveryReport" element={<InstallmentRecoveryReport />} />
                 <Route exact path="/InstallmentWiseReport" element={<InstallmentWiseReport />} />
                 <Route exact path="/InstallmentMonthWiseReport" element={<MonthWiseReport />} />
+                <Route exact path="/InstallmentInvestmentStatusReport" element={<InstallmentInvestmentStatusReport />} />
 
 
                 {/* Rountes for item reports */}
@@ -469,6 +480,7 @@ function App() {
                 <Route exact path="/AmericanReceivableAgging" element={<AmericanReceivableAggingReport />} />
                 <Route exact path="/MonthlyProfitReport" element={<MonthlyProfitReport />} />
                 <Route exact path="/AmericanLimitUtilization" element={<AmericanLimitUtilizationReport />} />
+                <Route exact path="/SupplierOutstandingBills" element={<SupplierOutstandingBills />} />
 
 
                 {/* ROUTES FOR EMPLOYEE REPORT */}

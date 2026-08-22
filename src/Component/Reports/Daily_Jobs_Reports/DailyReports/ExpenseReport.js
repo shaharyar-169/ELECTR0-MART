@@ -367,7 +367,7 @@ export default function ExpenseReport() {
             // code: organisation.code,
             // FLocCod: locationnumber || getLocationNumber,
             // FYerDsc: yeardescription || getyeardescription,
-            code: "AGFACTORY",
+            code: "DEMOELEC",
             FLocCod: '001',
             FYerDsc: "2025-2025",
 

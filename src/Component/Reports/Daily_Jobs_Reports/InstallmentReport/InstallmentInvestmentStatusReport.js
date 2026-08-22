@@ -3,26 +3,32 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../../Auth";
+import {
+  getUserData,
+  getOrganisationData,
+  getLocationnumber,
+  getYearDescription,
+} from "../../../Auth";
 import NavComponent from "../../../MainComponent/Navform/navbarform";
 import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
-import Select from "react-select";
-import { components } from "react-select";
-import { BsCalendar } from "react-icons/bs";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
+import Select from "react-select";
+import { BsCalendar } from "react-icons/bs";
+import DatePicker from "react-datepicker";
 import { useSelector, useDispatch } from "react-redux";
-// import { fetchGetUser } from "../../Redux/action";
 import { fetchGetUser } from "../../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { components } from "react-select";
+import { ToastContainer, toast } from "react-toastify";
+import "../../../vardana/vardana.js";
+import "../../../vardana/verdana-bold.js";
 
-export default function InstallmentSaleReport() {
+export default function InstallmentInvestmentStatusReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -34,28 +40,35 @@ export default function InstallmentSaleReport() {
 
   const toRef = useRef(null);
   const fromRef = useRef(null);
+  const currentDateRef = useRef(null);
 
   const [saleType, setSaleType] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
   const [supplierList, setSupplierList] = useState([]);
 
-  const [totalQnty, setTotalQnty] = useState(0);
-  const [totalOpening, setTotalOpening] = useState(0);
-  const [totalDebit, setTotalDebit] = useState(0);
-  const [totalCredit, setTotalCredit] = useState(0);
-  const [closingBalance, setClosingBalance] = useState(0);
-   const [TotalAmount, setTotalAmount] = useState(0);
-    const [totalIns, settotalIns] = useState(0);
+  // Updated total states
+  const [totalCost, setTotalCost] = useState(0);
+  const [totalSale, setTotalSale] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
+  const [totalAdvance, setTotalAdvance] = useState(0);
+  const [totalCollection, setTotalCollection] = useState(0);
+  const [totalBalance, setTotalBalance] = useState(0);
+  const [totalInvestment, setTotalInvestment] = useState(0);
 
   // state for from DatePicker
   const [selectedfromDate, setSelectedfromDate] = useState(null);
   const [fromInputDate, setfromInputDate] = useState("");
   const [fromCalendarOpen, setfromCalendarOpen] = useState(false);
+
   // state for To DatePicker
   const [selectedToDate, setSelectedToDate] = useState(null);
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+  // state for Current DatePicker
+  const [selectedCurrentDate, setSelectedCurrentDate] = useState(null);
+  const [currentInputDate, setCurrentInputDate] = useState("");
+  const [currentCalendarOpen, setCurrentCalendarOpen] = useState(false);
 
   const {
     isSidebarVisible,
@@ -72,13 +85,15 @@ export default function InstallmentSaleReport() {
     getdatafontsize,
   } = useTheme();
 
+const locationnumber = getLocationnumber();
+
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
   }, [getcolor]);
 
   const comapnyname = organisation.description;
 
-  const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
+  const [selectedRadio, setSelectedRadio] = useState("custom");
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -104,19 +119,36 @@ export default function InstallmentSaleReport() {
 
   //////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
-  // Toggle the ToDATE && FromDATE CalendarOpen state on each click
+  // Toggle the CalendarOpen state on each click
   const toggleFromCalendar = () => {
     setfromCalendarOpen((prevOpen) => !prevOpen);
   };
   const toggleToCalendar = () => {
     settoCalendarOpen((prevOpen) => !prevOpen);
   };
+  const toggleCurrentCalendar = () => {
+    setCurrentCalendarOpen((prevOpen) => !prevOpen);
+  };
+
   const formatDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
+
+  // Get first day of current month
+  const getFirstDayOfMonth = () => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  };
+
+  // Get last day of current month
+  const getLastDayOfMonth = () => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  };
+
   const handlefromDateChange = (date) => {
     setSelectedfromDate(date);
     setfromInputDate(date ? formatDate(date) : "");
@@ -150,7 +182,6 @@ export default function InstallmentSaleReport() {
           return;
         }
 
-        const currentDate = new Date();
         const enteredDate = new Date(year, month - 1, day);
 
         if (GlobalfromDate && enteredDate < GlobalfromDate) {
@@ -182,6 +213,9 @@ export default function InstallmentSaleReport() {
     }
   };
 
+  // ============================================
+  // POINT 1: UPDATED - Sirf focus karo, select nahi
+  // ============================================
   const handleToKeyPress = (e, nextref) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -206,7 +240,6 @@ export default function InstallmentSaleReport() {
           return;
         }
 
-        const currentDate = new Date();
         const enteredDate = new Date(year, month - 1, day);
 
         if (GlobaltoDate && enteredDate > GlobaltoDate) {
@@ -236,10 +269,66 @@ export default function InstallmentSaleReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input2Ref.current) {
+        // CHANGED: Sirf focus karo, select nahi
+        if (currentDateRef.current) {
           e.preventDefault();
-          input2Ref.current.focus();
+          currentDateRef.current.focus();
+          currentDateRef.current.select();
+          // REMOVED: currentDateRef.current.select();
         }
+      } else {
+        toast.error("Date must be in the format dd-mm-yyyy");
+      }
+    }
+  };
+
+  const handleCurrentKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const currentDateElement = document.getElementById(
+        "currentdatevalidation",
+      );
+      const formattedInput = currentInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3",
+      );
+      const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
+      if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
+        const [day, month, year] = formattedInput.split("-").map(Number);
+
+        if (month > 12 || month === 0) {
+          toast.error("Please enter a valid month (MM) between 01 and 12");
+          return;
+        }
+
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth || day === 0) {
+          toast.error(`Please enter a valid day (DD) for month ${month}`);
+          return;
+        }
+
+        const enteredDate = new Date(year, month - 1, day);
+
+        if (GlobaltoDate && enteredDate > GlobaltoDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+          );
+          return;
+        }
+
+        if (GlobaltoDate && enteredDate < GlobalfromDate) {
+          toast.error(
+            `Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+          );
+          return;
+        }
+
+        currentDateElement.style.border = `1px solid ${fontcolor}`;
+        setCurrentInputDate(formattedInput);
+
+        document.getElementById("submitButton").click();
+        document.getElementById("submitButton").focus();
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
       }
@@ -253,6 +342,15 @@ export default function InstallmentSaleReport() {
   };
   const handleToInputChange = (e) => {
     settoInputDate(e.target.value);
+  };
+
+  const handleCurrentDateChange = (date) => {
+    setSelectedCurrentDate(date);
+    setCurrentInputDate(date ? formatDate(date) : "");
+    setCurrentCalendarOpen(false);
+  };
+  const handleCurrentInputChange = (e) => {
+    setCurrentInputDate(e.target.value);
   };
 
   const handleSaleKeypress = (event, inputId) => {
@@ -271,18 +369,10 @@ export default function InstallmentSaleReport() {
     }
   };
 
-  const handleKeyPress = (e, nextInputRef) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (nextInputRef.current) {
-        nextInputRef.current.focus();
-      }
-    }
-  };
-
   function fetchReceivableReport() {
     const fromDateElement = document.getElementById("fromdatevalidation");
     const toDateElement = document.getElementById("todatevalidation");
+    const currentDateElement = document.getElementById("currentdatevalidation");
 
     const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
@@ -296,6 +386,9 @@ export default function InstallmentSaleReport() {
       case !toInputDate:
         errorType = "toDate";
         break;
+      case !currentInputDate:
+        errorType = "currentDate";
+        break;
       default:
         hasError = false;
         break;
@@ -305,6 +398,8 @@ export default function InstallmentSaleReport() {
       errorType = "fromDateInvalid";
     } else if (!dateRegex.test(toInputDate)) {
       errorType = "toDateInvalid";
+    } else if (!dateRegex.test(currentInputDate)) {
+      errorType = "currentDateInvalid";
     } else {
       const formattedFromInput = fromInputDate.replace(
         /^(\d{2})(\d{2})(\d{4})$/,
@@ -322,6 +417,19 @@ export default function InstallmentSaleReport() {
       const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
       const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
+      const formattedCurrentInput = currentInputDate.replace(
+        /^(\d{2})(\d{2})(\d{4})$/,
+        "$1-$2-$3",
+      );
+      const [currentDay, currentMonth, currentYear] = formattedCurrentInput
+        .split("-")
+        .map(Number);
+      const enteredCurrentDate = new Date(
+        currentYear,
+        currentMonth - 1,
+        currentDay,
+      );
+
       if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
         errorType = "fromDateBeforeGlobal";
       } else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
@@ -332,6 +440,10 @@ export default function InstallmentSaleReport() {
         errorType = "toDateBeforeGlobal";
       } else if (enteredToDate < enteredFromDate) {
         errorType = "toDateBeforeFromDate";
+      } else if (GlobaltoDate && enteredCurrentDate > GlobaltoDate) {
+        errorType = "currentDateAfterGlobal";
+      } else if (GlobaltoDate && enteredCurrentDate < GlobalfromDate) {
+        errorType = "currentDateBeforeGlobal";
       }
     }
 
@@ -342,11 +454,17 @@ export default function InstallmentSaleReport() {
       case "toDate":
         toast.error("To date is required");
         return;
+      case "currentDate":
+        toast.error("Current date is required");
+        return;
       case "fromDateInvalid":
         toast.error("From date must be in the format dd-mm-yyyy");
         return;
       case "toDateInvalid":
         toast.error("To date must be in the format dd-mm-yyyy");
+        return;
+      case "currentDateInvalid":
+        toast.error("Current date must be in the format dd-mm-yyyy");
         return;
       case "fromDateBeforeGlobal":
         toast.error(
@@ -371,31 +489,37 @@ export default function InstallmentSaleReport() {
       case "toDateBeforeFromDate":
         toast.error("To date must be after from date");
         return;
-
+      case "currentDateAfterGlobal":
+        toast.error(
+          `Current date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+        );
+        return;
+      case "currentDateBeforeGlobal":
+        toast.error(
+          `Current date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`,
+        );
+        return;
       default:
         break;
     }
 
-    console.log(data);
     document.getElementById("fromdatevalidation").style.border =
       `1px solid ${fontcolor}`;
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
+    document.getElementById("currentdatevalidation").style.border =
+      `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/InstallmentSaleReport.php";
+    const apiUrl = apiLinks + "/InstallmentInvestmentStatusReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
-      FTrnTyp: transectionType,
-      FAccCod: saleType,
+      FRepDat: currentInputDate,
       code: organisation.code,
-      FYerDsc: getyeardescription,
-      FLocCod: getLocationNumber,
-      FSchTxt: searchQuery,
-     
-      // FLocCod: "002",
-      // code: "MTSELEC",
+      FLocCod: locationnumber || getLocationNumber,
+    //   code: "REHMANTRD",
+    //   FLocCod: "001",
     }).toString();
 
     axios
@@ -403,11 +527,13 @@ export default function InstallmentSaleReport() {
       .then((response) => {
         setIsLoading(false);
 
-        setTotalDebit(response.data["Total Sale Amount"]);
-        setTotalCredit(response.data["Total Advance"]);
-        setClosingBalance(response.data["Total Rent"]);
-        setTotalAmount(response.data["Total Amount"]);
-        settotalIns(response.data["Total Ins"]);
+        setTotalCost(response.data["Total Cost "] || 0);
+        setTotalSale(response.data["Total Sale "] || 0);
+        setTotalProfit(response.data["Total Profit "] || 0);
+        setTotalAdvance(response.data["Total Advance "] || 0);
+        setTotalCollection(response.data["Total Collection "] || 0);
+        setTotalBalance(response.data["Total Balance "] || 0);
+        setTotalInvestment(response.data["Total Investment "] || 0);
 
         if (response.data && Array.isArray(response.data.Detail)) {
           setTableData(response.data.Detail);
@@ -441,21 +567,16 @@ export default function InstallmentSaleReport() {
 
   useEffect(() => {
     const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
+    const firstDay = getFirstDayOfMonth();
+    const lastDay = getLastDayOfMonth();
 
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1,
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    setSelectedfromDate(firstDay);
+    setfromInputDate(formatDate(firstDay));
+    setSelectedToDate(lastDay);
+    settoInputDate(formatDate(lastDay));
+    setSelectedCurrentDate(currentDate);
+    setCurrentInputDate(formatDate(currentDate));
   }, []);
-
- 
-
- 
 
   const handleTransactionTypeChange = (event) => {
     const selectedTransactionType = event.target.value;
@@ -463,399 +584,336 @@ export default function InstallmentSaleReport() {
   };
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
-  const exportPDFHandler = () => {
-    // Create a new jsPDF instance with landscape orientation
-    const doc = new jsPDF({ orientation: "landscape" });
+ const exportPDFHandler = () => {
+  const doc = new jsPDF({ orientation: "landscape" });
 
-    // Define table data (rows)
-    const rows = tableData.map((item) => [
-      item.Date,
-      item.INV,
-      item.Customer,
-      item.Mobile,
-      item["Sale Amt"],
-      item["Rent Amt"],
-      item.Rentage,
-      item["Total Amt"],
-      item.Advance,
-      item.Advage,
-      item["Ins Nos"],
-      item["Ins Amt"],
-    ]);
+  const rows = tableData.map((item) => [
+    item.Code || "",
+    item.Customer || "",
+    item.Cost || "",
+    item.SaleAmt || "",
+    item.InsNo || "",
+    item.AdvanceAmt || "",
+    item.Collection || "",
+    item.Profit || "",
+    item.ProfitPrc || "",
+    item.Balance || "",
+    item.Investment || "",
+  ]);
 
-    // Add summary row to the table
-    rows.push([
-      "",
-      "",
-      "",
-      "",
-      String(totalDebit),
-      String(closingBalance),
-      "",
-      String(TotalAmount), 
-       String(totalCredit),
-      "",
-      "",
-      String(totalIns),
-    ]);
+  rows.push([
+   String(tableData.length.toLocaleString()),
+    "",
+    String(totalCost),
+    String(totalSale),
+    "",
+    String(totalAdvance),
+    String(totalCollection),
+    String(totalProfit),
+    "",
+    String(totalBalance),
+    String(totalInvestment),
+  ]);
 
-    
+  const headers = [
+    "Code",
+    "Customer",
+    "Cost",
+    "Sale Amt",
+    "InsNo",
+    "Adv Amt",
+    "Coll",
+    "Profit",
+    "Profit %",
+    "Balance",
+    "Inves",
+  ];
 
-    // Define table column headers and individual column widths
-    const headers = [
-      "Date",
-      "INV",
-      "Customer",
-      "Mobile",
-      "Sale Amt",
-      "Sale Amt",
-      "Rentage",
-      "Total Amt ",
-      "Advance",
-      "Advage",
-      "Ins",
-      "Ins Amt",
-    ];
-    const columnWidths = [24, 16, 60, 28, 25, 25, 20, 25, 20, 15, 12, 25];
+  const columnWidths = [24, 75, 22, 22, 15, 25, 22, 22, 18, 22, 22];
 
-    // Calculate total table width
-    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+  const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+  const pageHeight = doc.internal.pageSize.height;
+  const paddingTop = 15;
 
-    // Define page height and padding
-    const pageHeight = doc.internal.pageSize.height;
-    const paddingTop = 15;
+  doc.setFont("verdana-regular", "normal");
+  doc.setFontSize(10);
 
-    // Set font properties for the table
-    doc.setFont("verdana-regular", "normal");
+  const addTableHeaders = (startX, startY) => {
+    doc.setFont("verdana", "bold");
     doc.setFontSize(10);
 
-    // Function to add table headers
-    const addTableHeaders = (startX, startY) => {
-      // Set font style and size for headers
-      doc.setFont("verdana", "bold");
-      doc.setFontSize(10);
+    headers.forEach((header, index) => {
+      const cellWidth = columnWidths[index];
+      const cellHeight = 6;
+      const cellX = startX + cellWidth / 2;
+      const cellY = startY + cellHeight / 2 + 1.5;
 
-      headers.forEach((header, index) => {
-        const cellWidth = columnWidths[index];
-        const cellHeight = 6; // Height of the header row
-        const cellX = startX + cellWidth / 2; // Center the text horizontally
-        const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
+      doc.setFillColor(200, 200, 200);
+      doc.rect(startX, startY, cellWidth, cellHeight, "F");
+      doc.setLineWidth(0.2);
+      doc.rect(startX, startY, cellWidth, cellHeight);
+      doc.setTextColor(0);
+      doc.text(header, cellX, cellY, { align: "center" });
+      startX += columnWidths[index];
+    });
+  };
 
-        // Draw the grey background for the header
-        doc.setFillColor(200, 200, 200); // Grey color
-        doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
+  const addTableRows = (startX, startY, startIndex, endIndex) => {
+    const rowHeight = 5;
+    const tableWidth = getTotalTableWidth();
 
-        // Draw the outer border
-        doc.setLineWidth(0.2); // Set the width of the outer border
-        doc.rect(startX, startY, cellWidth, cellHeight);
+    for (let i = startIndex; i < endIndex; i++) {
+      const row = rows[i];
+      const isOddRow = i % 2 !== 0;
+      const isTotalRow = i === rows.length - 1;
+      let textColor = [0, 0, 0];
 
-        // Set text alignment to center
-        doc.setTextColor(0); // Set text color to black
-        doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-        startX += columnWidths[index]; // Move to the next column
-      });
-    };
+      if (isTotalRow) {
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+      }
 
-    const addTableRows = (startX, startY, startIndex, endIndex) => {
-      const rowHeight = 5;
-      const fontSize = 10;
-      const boldFont = 400;
-      const normalFont = getfontstyle;
-      const tableWidth = getTotalTableWidth();
+      if (isOddRow) {
+        doc.setFillColor(240);
+        doc.rect(
+          startX,
+          startY + (i - startIndex + 2) * rowHeight,
+          tableWidth,
+          rowHeight,
+          "F",
+        );
+      }
 
-      for (let i = startIndex; i < endIndex; i++) {
-        const row = rows[i];
-        const isOddRow = i % 2 !== 0;
-        const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-        const isTotalRow = i === rows.length - 1;
-        let textColor = [0, 0, 0];
-        let fontName = normalFont;
+      doc.setDrawColor(0);
 
-        if (isRedRow) {
-          textColor = [255, 0, 0];
-          fontName = boldFont;
-        }
+      if (isTotalRow) {
+        const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+        const rowBottomY = rowTopY + rowHeight;
 
-        if (isTotalRow) {
-          doc.setFont("verdana", "bold");
-          doc.setFontSize(10);
-        }
+        doc.setLineWidth(0.3);
+        doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+        doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+        doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+        doc.line(
+          startX,
+          rowBottomY - 0.5,
+          startX + tableWidth,
+          rowBottomY - 0.5,
+        );
+        doc.setLineWidth(0.2);
+        doc.line(startX, rowTopY, startX, rowBottomY);
+        doc.line(
+          startX + tableWidth,
+          rowTopY,
+          startX + tableWidth,
+          rowBottomY,
+        );
+      } else {
+        doc.setLineWidth(0.2);
+        doc.rect(
+          startX,
+          startY + (i - startIndex + 2) * rowHeight,
+          tableWidth,
+          rowHeight,
+        );
+      }
 
-        if (isOddRow) {
-          doc.setFillColor(240);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-            "F",
-          );
-        }
+      row.forEach((cell, cellIndex) => {
+        const cellY =
+          startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
+        const cellX = startX + 2;
 
-        doc.setDrawColor(0);
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 
-        if (isTotalRow) {
-          const rowTopY = startY + (i - startIndex + 2) * rowHeight;
-          const rowBottomY = rowTopY + rowHeight;
-
-          doc.setLineWidth(0.3);
-          doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
-          doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
-
-          doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
-          doc.line(
-            startX,
-            rowBottomY - 0.5,
-            startX + tableWidth,
-            rowBottomY - 0.5,
-          );
-
-          doc.setLineWidth(0.2);
-          doc.line(startX, rowTopY, startX, rowBottomY);
-          doc.line(
-            startX + tableWidth,
-            rowTopY,
-            startX + tableWidth,
-            rowBottomY,
-          );
-        } else {
-          doc.setLineWidth(0.2);
-          doc.rect(
-            startX,
-            startY + (i - startIndex + 2) * rowHeight,
-            tableWidth,
-            rowHeight,
-          );
-        }
-
-        row.forEach((cell, cellIndex) => {
-          // ⭐ NEW FIX — Perfect vertical centering
-          const cellY =
-            startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
-
-          const cellX = startX + 2;
-
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-          if (!isTotalRow) {
-            doc.setFont("verdana-regular", "normal");
-            doc.setFontSize(10);
-          }
-
-          const cellValue = String(cell);
-
-          if (cellIndex === 0 || cellIndex === 1 || cellIndex === 3) {
-            const rightAlignX = startX + columnWidths[cellIndex] / 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "center",
-              baseline: "middle",
-            });
-          } else if (
-            cellIndex === 4 ||
-            cellIndex === 5 ||
-            cellIndex === 6 ||
-            cellIndex === 7 ||
-            cellIndex === 8 ||
-            cellIndex === 9 ||
-            (cellIndex === 10) | (cellIndex === 11)
-          ) {
-            const rightAlignX = startX + columnWidths[cellIndex] - 2;
-            doc.text(cellValue, rightAlignX, cellY, {
-              align: "right",
-              baseline: "middle",
-            });
-          } else {
-            if (isTotalRow && cellIndex === 0 && cell === "") {
-              const totalLabelX = startX + columnWidths[0] / 2;
-              doc.text("", totalLabelX, cellY, {
-                align: "center",
-                baseline: "middle",
-              });
-            } else {
-              doc.text(cellValue, cellX, cellY, {
-                baseline: "middle",
-              });
-            }
-          }
-
-          if (cellIndex < row.length - 1) {
-            doc.setLineWidth(0.2);
-            doc.line(
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 2) * rowHeight,
-              startX + columnWidths[cellIndex],
-              startY + (i - startIndex + 3) * rowHeight,
-            );
-            startX += columnWidths[cellIndex];
-          }
-        });
-
-        startX = (doc.internal.pageSize.width - tableWidth) / 2;
-
-        if (isTotalRow) {
+        if (!isTotalRow) {
           doc.setFont("verdana-regular", "normal");
           doc.setFontSize(10);
         }
-      }
 
-      const lineWidth = tableWidth;
-      const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-      const lineY = pageHeight - 15;
-      doc.setLineWidth(0.3);
-      doc.line(lineX, lineY, lineX + lineWidth, lineY);
-      const headingFontSize = 11;
-      const headingX = lineX + 2;
-      const headingY = lineY + 5;
-      doc.setFont("verdana-regular", "normal");
-      doc.setFontSize(10);
-      doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
-    };
+        const cellValue = String(cell);
 
-    // Function to calculate total table width
-    const getTotalTableWidth = () => {
-      let totalWidth = 0;
-      columnWidths.forEach((width) => (totalWidth += width));
-      return totalWidth;
-    };
-
-    // Function to add a new page and reset startY
-    const addNewPage = (startY) => {
-      doc.addPage();
-      return paddingTop; // Set startY for each new page
-    };
-
-    // Define the number of rows per page
-    const rowsPerPage = 30; // Adjust this value based on your requirements
-
-    // Function to handle pagination
-    const handlePagination = () => {
-      // Define the addTitle function
-      const addTitle = (
-        title,
-        date,
-        time,
-        pageNumber,
-        startY,
-        titleFontSize = 16,
-        dateTimeFontSize = 8,
-        pageNumberFontSize = 8,
-      ) => {
-        doc.setFontSize(titleFontSize); // Set the font size for the title
-        doc.text(title, doc.internal.pageSize.width / 2, startY, {
-          align: "center",
-        });
-
-        // Calculate the x-coordinate for the right corner
-        const rightX = doc.internal.pageSize.width - 10;
-
-        if (date) {
-          doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
-          if (time) {
-            doc.text(date + " " + time, rightX, startY, { align: "right" });
-          } else {
-            doc.text(date, rightX - 10, startY, { align: "right" });
-          }
+        // UPDATED: Column alignment logic
+        if (cellIndex === 0) {
+          // Code - Center
+          const centerX = startX + columnWidths[cellIndex] / 2;
+          doc.text(cellValue, centerX, cellY, {
+            align: "center",
+            baseline: "middle",
+          });
+        } else if (cellIndex === 1) {
+          // Customer - Left
+          const leftX = startX + 2;
+          doc.text(cellValue, leftX, cellY, {
+            align: "left",
+            baseline: "middle",
+          });
+        } else if (cellIndex === 4) {
+          // InsNo - Center
+          const centerX = startX + columnWidths[cellIndex] / 2;
+          doc.text(cellValue, centerX, cellY, {
+            align: "center",
+            baseline: "middle",
+          });
+        } else {
+          // Baki sab columns (Cost, Sale Amt, Adv Amt, Coll, Profit, Profit %, Balance, Investment) - Right
+          const rightAlignX = startX + columnWidths[cellIndex] - 2;
+          doc.text(cellValue, rightAlignX, cellY, {
+            align: "right",
+            baseline: "middle",
+          });
         }
 
-        // Add page numbering
+        if (cellIndex < row.length - 1) {
+          doc.setLineWidth(0.2);
+          doc.line(
+            startX + columnWidths[cellIndex],
+            startY + (i - startIndex + 2) * rowHeight,
+            startX + columnWidths[cellIndex],
+            startY + (i - startIndex + 3) * rowHeight,
+          );
+          startX += columnWidths[cellIndex];
+        }
+      });
+
+      startX = (doc.internal.pageSize.width - tableWidth) / 2;
+
+      if (isTotalRow) {
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(
-          `Page ${pageNumber}`,
-          rightX - 10,
-          doc.internal.pageSize.height - 10,
-          { align: "right" },
-        );
-      };
-
-      let currentPageIndex = 0;
-      let startY = paddingTop; // Initialize startY
-      let pageNumber = 1; // Initialize page number
-
-      while (currentPageIndex * rowsPerPage < rows.length) {
-        doc.setFont("Times New Roman", "normal");
-        addTitle(comapnyname, "", "", pageNumber, startY, 20, 10); // Render company title with default font size, only date, and page number
-        startY += 7; // Adjust vertical position for the company title
-        doc.setFont("verdana-regular", "normal");
-        addTitle(
-          `Installment Sale Report From: ${fromInputDate} To: ${toInputDate}`,
-          "",
-          "",
-          pageNumber,
-          startY,
-          14,
-        ); // Render sale report title with decreased font size, provide the time, and page number
-        startY += 13;
-
-        const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-        const labelsY = startY + 2; // Position the labels below the titles and above the table
-
-        startY += -10; // Adjust vertical position for the labels
-
-        addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
-        const startIndex = currentPageIndex * rowsPerPage;
-        const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
-        startY = addTableRows(
-          (doc.internal.pageSize.width - totalWidth) / 2,
-          startY,
-          startIndex,
-          endIndex,
-        );
-        if (endIndex < rows.length) {
-          startY = addNewPage(startY); // Add new page and update startY
-          pageNumber++; // Increment page number
-        }
-        currentPageIndex++;
       }
-    };
+    }
 
-    const getCurrentDate = () => {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-      const yyyy = today.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
-    };
-
-    // Function to get current time in the format HH:MM:SS
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return hh + ":" + mm + ":" + ss;
-    };
-
-    const date = getCurrentDate(); // Get current date
-    const time = getCurrentTime(); // Get current time
-
-    // Call function to handle pagination
-    handlePagination();
-
-    // Save the PDF file
-    doc.save(`Installmentsalereport As On ${date}.pdf`);
-
-    const pdfBlob = doc.output("blob");
-    const pdfFile = new File([pdfBlob], "table_data.pdf", {
-      type: "application/pdf",
-    });
+    const lineWidth = tableWidth;
+    const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+    const lineY = pageHeight - 15;
+    doc.setLineWidth(0.3);
+    doc.line(lineX, lineY, lineX + lineWidth, lineY);
+    const headingX = lineX + 2;
+    const headingY = lineY + 5;
+    doc.setFont("verdana-regular", "normal");
+    doc.setFontSize(10);
+    doc.text(`Crystal Solution    ${date}    ${time}`, headingX, headingY);
   };
+
+  const getTotalTableWidth = () => {
+    let totalWidth = 0;
+    columnWidths.forEach((width) => (totalWidth += width));
+    return totalWidth;
+  };
+
+  const addNewPage = (startY) => {
+    doc.addPage();
+    return paddingTop;
+  };
+
+  const rowsPerPage = 30;
+
+  const handlePagination = () => {
+    const addTitle = (
+      title,
+      date,
+      time,
+      pageNumber,
+      startY,
+      titleFontSize = 16,
+    ) => {
+      doc.setFontSize(titleFontSize);
+      doc.text(title, doc.internal.pageSize.width / 2, startY, {
+        align: "center",
+      });
+
+      const rightX = doc.internal.pageSize.width - 10;
+      if (date) {
+        doc.setFontSize(8);
+        if (time) {
+          doc.text(date + " " + time, rightX, startY, { align: "right" });
+        }
+      }
+
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(10);
+      doc.text(
+        `Page ${pageNumber}`,
+        rightX - 10,
+        doc.internal.pageSize.height - 10,
+        { align: "right" },
+      );
+    };
+
+    let currentPageIndex = 0;
+    let startY = paddingTop;
+    let pageNumber = 1;
+
+    while (currentPageIndex * rowsPerPage < rows.length) {
+      doc.setFont("Times New Roman", "normal");
+      addTitle(comapnyname, "", "", pageNumber, startY, 20);
+      startY += 7;
+      doc.setFont("verdana-regular", "normal");
+      addTitle(
+        `Installment Investment Status Report From: ${fromInputDate} To: ${toInputDate}`,
+        "",
+        "",
+        pageNumber,
+        startY,
+        14,
+      );
+      startY += 13;
+      startY += -10;
+
+      addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 29);
+      const startIndex = currentPageIndex * rowsPerPage;
+      const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+      startY = addTableRows(
+        (doc.internal.pageSize.width - totalWidth) / 2,
+        startY,
+        startIndex,
+        endIndex,
+      );
+      if (endIndex < rows.length) {
+        startY = addNewPage(startY);
+        pageNumber++;
+      }
+      currentPageIndex++;
+    }
+  };
+
+  const getCurrentDate = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return dd + "/" + mm + "/" + yyyy;
+  };
+
+  const getCurrentTime = () => {
+    const today = new Date();
+    const hh = String(today.getHours()).padStart(2, "0");
+    const mm = String(today.getMinutes()).padStart(2, "0");
+    const ss = String(today.getSeconds()).padStart(2, "0");
+    return hh + ":" + mm + ":" + ss;
+  };
+
+  const date = getCurrentDate();
+  const time = getCurrentTime();
+
+  handlePagination();
+  doc.save(`InstallmentInvestmentStatusReport As On ${date}.pdf`);
+};
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
-  ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
+  ///////////////////////////// DOWNLOAD EXCEL CODE //////////////////////////////////////////////////////////
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 12; // Ensure this matches the actual number of columns
+    const numColumns = 11;
 
     const columnAlignments = [
       "center",
-      "center",
       "left",
+      "right",
+      "right",
       "center",
-      "right",
-      "right",
       "right",
       "right",
       "right",
@@ -864,64 +922,35 @@ export default function InstallmentSaleReport() {
       "right",
     ];
 
-    // Define fonts for different sections
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
+    const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
+    const fontStoreList = { name: "CustomFont", size: 10, bold: false };
+    const fontHeader = { name: "CustomFont", size: 10, bold: true };
+    const fontTableContent = { name: "CustomFont", size: 10, bold: false };
 
-    // Add an empty row at the start
     worksheet.addRow([]);
-
-    // Add company name
     const companyRow = worksheet.addRow([comapnyname]);
     companyRow.eachCell((cell) => {
       cell.font = fontCompanyName;
       cell.alignment = { horizontal: "center" };
     });
-
     worksheet.getRow(companyRow.number).height = 30;
     worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        companyRow.number
-      }`,
+      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`,
     );
 
-    // Add Store List row
     const storeListRow = worksheet.addRow([
-      `Installment Sale Report From ${fromInputDate} To ${toInputDate}`,
+      `Installment Investment Status Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
       cell.alignment = { horizontal: "center" };
     });
-
     worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        storeListRow.number
-      }`,
+      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`,
     );
 
-    // Add an empty row after the title section
     worksheet.addRow([]);
 
-    // Header style
     const headerStyle = {
       font: fontHeader,
       alignment: { horizontal: "center", vertical: "middle" },
@@ -938,39 +967,35 @@ export default function InstallmentSaleReport() {
       },
     };
 
-    // Add headers
     const headers = [
-      "Date",
-      "INV",
+      "Code",
       "Customer",
-      "Mobile",
+      "Cost",
       "Sale Amt",
-      "Sale Amt",
-      "Rentage",
-      "Total Amt ",
-      "Advance",
-      "Advage %",
-      "Ins",
-      "Ins Amt",
+      "InsNo",
+      "Adv Amt",
+      "Coll",
+      "Profit",
+      "Profit",
+      "Balance",
+      "Inves",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
 
-    // Add data rows
     tableData.forEach((item) => {
       const row = worksheet.addRow([
-        item.Date,
-        item.INV,
-        item.Customer,
-        item.Mobile,
-        item["Sale Amt"],
-        item["Rent Amt"],
-        item.Rentage,
-        item["Total Amt"],
-        item.Advance,
-        item.Advage,
-        item["Ins Nos"],
-        item["Ins Amt"],
+        item.Code || "",
+        item.Customer || "",
+        item.Cost || "",
+        item.SaleAmt || "",
+        item.InsNo || "",
+        item.AdvanceAmt || "",
+        item.Collection || "",
+        item.Profit || "",
+        item.ProfitPrc || "",
+        item.Balance || "",
+        item.Investment || "",
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -989,21 +1014,18 @@ export default function InstallmentSaleReport() {
     });
 
     const totalRow = worksheet.addRow([
+       String(tableData.length.toLocaleString()),
       "",
+      String(totalCost),
+      String(totalSale),
       "",
+      String(totalAdvance),
+      String(totalCollection),
+      String(totalProfit),
       "",
-      "",
-      String(totalDebit),
-      String(closingBalance),
-      "",
-      String(TotalAmount), 
-       String(totalCredit),
-      "",
-      "",
-      String(totalIns),
+      String(totalBalance),
+      String(totalInvestment),
     ]);
-
-    // total row added
 
     totalRow.eachCell((cell, colNumber) => {
       cell.font = { bold: true };
@@ -1013,21 +1035,23 @@ export default function InstallmentSaleReport() {
         bottom: { style: "double" },
         right: { style: "thin" },
       };
-
-      // Align only the "Total" text to the right
-      if (colNumber === 5 || colNumber == 6 || colNumber === 8 || colNumber === 9 || colNumber === 12) {
+      if (
+        colNumber > 2      
+      ) {
         cell.alignment = { horizontal: "right" };
+      }
+       if (
+        colNumber === 1      
+      ) {
+        cell.alignment = { horizontal: "center" };
       }
     });
 
-    // Set column widths
-    [11, 8, 40, 12, 12, 12, 10, 12, 12, 8, 10, 12].forEach((width, index) => {
+    [11, 45, 12, 12, 7, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
-    // Add a blank row
     worksheet.addRow([]);
-    // Get current date and time
     const getCurrentTime = () => {
       const today = new Date();
       const hh = String(today.getHours()).padStart(2, "0");
@@ -1035,7 +1059,6 @@ export default function InstallmentSaleReport() {
       const ss = String(today.getSeconds()).padStart(2, "0");
       return `${hh}:${mm}:${ss}`;
     };
-    // Get current date
     const getCurrentDate = () => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -1047,125 +1070,60 @@ export default function InstallmentSaleReport() {
     const currentdate = getCurrentDate();
     const userid = user.tusrid;
 
-    // Add date and time row
     const dateTimeRow = worksheet.addRow([
       `DATE:   ${currentdate}  TIME:   ${currentTime}`,
     ]);
     dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
+      cell.font = { name: "CustomFont", size: 10 };
       cell.alignment = { horizontal: "left" };
     });
     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
     dateTimeRow.eachCell((cell) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        // bold: true
-        // italic: true,
-      };
+      cell.font = { name: "CustomFont", size: 10 };
       cell.alignment = { horizontal: "left" };
     });
 
-    // Merge across all columns
     worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow.number
-      }`,
+      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
     );
     worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${
-        dateTimeRow1.number
-      }`,
+      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
     );
 
-    // Generate and save the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     saveAs(
       blob,
-      `InstallmentSaleReport From ${fromInputDate} To ${toInputDate}.xlsx`,
+      `InstallmentInvestmentStatusReport From ${fromInputDate} To ${toInputDate}.xlsx`,
     );
   };
-  ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
+  ///////////////////////////// DOWNLOAD EXCEL CODE //////////////////////////////////////////////////////////
 
   const dispatch = useDispatch();
 
-  const tableTopColor = "#3368B5";
   const tableHeadColor = "#3368b5";
-  const secondaryColor = "white";
-  const btnColor = "#3368B5";
   const textColor = "white";
 
   const [tableData, setTableData] = useState([]);
-  console.log("installment sale reports data", tableData);
-  const [selectedSearch, setSelectedSearch] = useState("");
+  console.log("installment investment status reports data", tableData);
   const [isLoading, setIsLoading] = useState(false);
   const { data, loading, error } = useSelector((state) => state.getuser);
 
-  const handleSearch = (e) => {
-    setSelectedSearch(e.target.value);
-  };
-
-  let totalEntries = 0;
-
-  const getFilteredTableData = () => {
-    let filteredData = tableData;
-    if (selectedSearch.trim() !== "") {
-      const query = selectedSearch.trim().toLowerCase();
-      filteredData = filteredData.filter(
-        (data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query),
-      );
-    }
-    return filteredData;
-  };
-
-  const firstColWidth = {
-    width: "85px",
-  };
-  const secondColWidth = {
-    width: "55px",
-  };
-  const thirdColWidth = {
-    width: isSidebarVisible ? "150px" : "340px",
-  };
-  const forthColWidth = {
-    width: "90px",
-  };
-  const fifthColWidth = {
-    width: "80px",
-  };
-  const sixthColWidth = {
-    width: "80px",
-  };
-  const seventhColWidth = {
-    width: "80px",
-  };
-  const eighthColWidth = {
-    width: "80px",
-  };
-  const ninthColWidth = {
-    width: "80px",
-  };
-  const tenthColWidth = {
-    width: "70px",
-  };
-  const elewenthColWidth = {
-    width: "60px",
-  };
-  const tewelthColWidth = {
-    width: "80px",
-  };
-
-  const sixthCol = {
-    width: "8px",
-  };
+  // Updated column widths
+  const firstColWidth = { width: "80px" };
+  const secondColWidth = { width: isSidebarVisible ? "200px" : "365px" };
+  const thirdColWidth = { width: isSidebarVisible ? "80px" : "85px" };
+  const forthColWidth = { width: isSidebarVisible ? "80px" : "85px" };
+  const fifthColWidth = { width: "50px" };
+  const sixthColWidth = { width: isSidebarVisible ? "80px" : "85px" };
+  const seventhColWidth = { width: isSidebarVisible ? "80px" : "85px" };
+  const eighthColWidth = { width: isSidebarVisible ? "80px" : "85px" };
+  const ninthColWidth = { width: "60px" };
+  const tenthColWidth = { width: isSidebarVisible ? "80px" : "85px" };
+  const elewenthColWidth = { width: isSidebarVisible ? "80px" : "85px" };
+  const sixthCol = { width: "8px" };
 
   useHotkeys(
     "alt+s",
@@ -1174,7 +1132,6 @@ export default function InstallmentSaleReport() {
     },
     { preventDefault: true, enableOnFormTags: true },
   );
-
   useHotkeys("alt+p", exportPDFHandler, {
     preventDefault: true,
     enableOnFormTags: true,
@@ -1201,7 +1158,7 @@ export default function InstallmentSaleReport() {
   }, []);
 
   const contentStyle = {
-    width: "100%", // 100vw ki jagah 100%
+    width: "100%",
     maxWidth: isSidebarVisible ? "1000px" : "1200px",
     height: "calc(100vh - 100px)",
     position: "absolute",
@@ -1220,8 +1177,8 @@ export default function InstallmentSaleReport() {
     lineHeight: "23px",
     fontFamily: '"Poppins", sans-serif',
     zIndex: 1,
-    padding: "0 20px", // Side padding for small screens
-    boxSizing: "border-box", // Padding ko width mein include kare
+    padding: "0 20px",
+    boxSizing: "border-box",
   };
 
   const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1237,13 +1194,13 @@ export default function InstallmentSaleReport() {
     }
   }, [tableData, isFilterApplied]);
 
-  let totalEnteries = 0;
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const rowRefs = useRef([]);
   const handleRowClick = (index) => {
     setSelectedIndex(index);
   };
+
   useEffect(() => {
     if (selectedRowId !== null) {
       const newIndex = tableData.findIndex(
@@ -1252,6 +1209,7 @@ export default function InstallmentSaleReport() {
       setSelectedIndex(newIndex);
     }
   }, [tableData, selectedRowId]);
+
   const handleKeyDown = (e) => {
     if (selectedIndex === -1 || e.target.id === "searchInput") return;
     if (e.key === "ArrowUp") {
@@ -1266,6 +1224,7 @@ export default function InstallmentSaleReport() {
       scrollToSelectedRow();
     }
   };
+
   const scrollToSelectedRow = () => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1274,12 +1233,14 @@ export default function InstallmentSaleReport() {
       });
     }
   };
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedIndex]);
+
   useEffect(() => {
     if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
       rowRefs.current[selectedIndex].scrollIntoView({
@@ -1298,7 +1259,6 @@ export default function InstallmentSaleReport() {
     const toDate = parseDate(toInputDate);
     const fromDate = new Date(toDate);
     fromDate.setUTCDate(fromDate.getUTCDate() - days);
-
     setSelectedfromDate(fromDate);
     setfromInputDate(formatDate(fromDate));
     setSelectedRadio(days === 0 ? "custom" : `${days}days`);
@@ -1314,8 +1274,13 @@ export default function InstallmentSaleReport() {
       );
       setSelectedfromDate(firstDateOfCurrentMonth);
       setfromInputDate(formatDate(firstDateOfCurrentMonth));
-      setSelectedToDate(currentDate);
-      settoInputDate(formatDate(currentDate));
+      const lastDateOfCurrentMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0,
+      );
+      setSelectedToDate(lastDateOfCurrentMonth);
+      settoInputDate(formatDate(lastDateOfCurrentMonth));
     } else {
       const days = parseInt(selectedRadio.replace("days", ""));
       handleRadioChange(days);
@@ -1330,12 +1295,11 @@ export default function InstallmentSaleReport() {
           style={{
             backgroundColor: getcolor,
             color: fontcolor,
-            // width: "100%",
             border: `1px solid ${fontcolor}`,
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="Installment Sale Report" />
+          <NavComponent textdata="Installment Investment Status Report" />
 
           <div
             className="row"
@@ -1351,6 +1315,7 @@ export default function InstallmentSaleReport() {
                 justifyContent: "space-between",
               }}
             >
+              {/* From Date */}
               <div className="d-flex align-items-center">
                 <div
                   style={{
@@ -1448,9 +1413,11 @@ export default function InstallmentSaleReport() {
                   />
                 </div>
               </div>
+
+              {/* To Date */}
               <div
                 className="d-flex align-items-center"
-                style={{ marginRight: "140px" }}
+                style={{ marginRight: "40px" }}
               >
                 <div
                   style={{
@@ -1548,78 +1515,102 @@ export default function InstallmentSaleReport() {
                   />
                 </div>
               </div>
-              <div id="lastDiv" style={{ marginRight: "5px" }}>
-                <label for="searchInput" style={{ marginRight: "5px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input2Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Search"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "200px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
+
+              {/* Current Date */}
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "40px" }}
+              >
+                <div
+                  style={{
+                    width: "60px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="currentDatePicker">
                     <span
-                      onClick={() => setSearchQuery("")}
                       style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
                       }}
                     >
-                      ×
+                      Curr :
                     </span>
-                  )}
+                  </label>
+                </div>
+                <div
+                  id="currentdatevalidation"
+                  style={{
+                    width: "135px",
+                    border: `1px solid ${fontcolor}`,
+                    display: "flex",
+                    alignItems: "center",
+                    height: "24px",
+                    justifyContent: "center",
+                    marginLeft: "5px",
+                    background: getcolor,
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.border = "2px solid red")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                  }
+                >
+                  <input
+                    ref={currentDateRef}
+                    style={{
+                      height: "20px",
+                      width: "90px",
+                      paddingLeft: "5px",
+                      outline: "none",
+                      border: "none",
+                      fontSize: "12px",
+                      backgroundColor: getcolor,
+                      color: fontcolor,
+                    }}
+                    value={currentInputDate}
+                    onChange={handleCurrentInputChange}
+                    onKeyDown={handleCurrentKeyPress}
+                    id="currentDatePicker"
+                    autoComplete="off"
+                    placeholder="dd-mm-yyyy"
+                    aria-label="Current Date Input"
+                  />
+                  <DatePicker
+                    selected={selectedCurrentDate}
+                    onChange={handleCurrentDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    popperPlacement="bottom"
+                    showPopperArrow={false}
+                    open={currentCalendarOpen}
+                    dropdownMode="select"
+                    customInput={
+                      <div>
+                        <BsCalendar
+                          onClick={toggleCurrentCalendar}
+                          style={{
+                            cursor: "pointer",
+                            marginLeft: "18px",
+                            fontSize: "12px",
+                            color: fontcolor,
+                          }}
+                        />
+                      </div>
+                    }
+                  />
                 </div>
               </div>
+
+              <div id="lastDiv" style={{ marginRight: "5px" }}></div>
             </div>
           </div>
+
+          {/* Table - POINT 2: Hamesha tableLayout: "fixed" */}
           <div>
-            <div
-              style={{
-                overflowY: "auto",
-                // width: "98.8%",
-              }}
-            >
+            <div style={{ overflowY: "auto" }}>
               <table
                 className="myTable"
                 id="table"
@@ -1627,7 +1618,7 @@ export default function InstallmentSaleReport() {
                   fontSize: "12px",
                   width: "100%",
                   position: "relative",
-                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                  tableLayout: "fixed", // Hamesha fixed
                 }}
               >
                 <thead
@@ -1641,53 +1632,48 @@ export default function InstallmentSaleReport() {
                   }}
                 >
                   <tr
-                    style={{
-                      backgroundColor: tableHeadColor,
-                      color: "white",
-                    }}
+                    style={{ backgroundColor: tableHeadColor, color: "white" }}
                   >
                     <td className="border-dark" style={firstColWidth}>
-                      Date
+                      Code
                     </td>
                     <td className="border-dark" style={secondColWidth}>
-                      INV
-                    </td>
-                    <td className="border-dark" style={thirdColWidth}>
                       Customer
                     </td>
-                    <td className="border-dark" style={forthColWidth}>
-                      Mobile
+                    <td className="border-dark" style={thirdColWidth}>
+                      Cost
                     </td>
-                    <td className="border-dark" style={fifthColWidth}>
+                    <td className="border-dark" style={forthColWidth}>
                       Sale Amt
                     </td>
+                    <td className="border-dark" style={fifthColWidth}>
+                      InsNo
+                    </td>
                     <td className="border-dark" style={sixthColWidth}>
-                      Rent Amt
+                      Adv Amt
                     </td>
                     <td className="border-dark" style={seventhColWidth}>
-                      Rentage
+                      Coll
                     </td>
                     <td className="border-dark" style={eighthColWidth}>
-                      Tot Amt
+                      Profit
                     </td>
                     <td className="border-dark" style={ninthColWidth}>
-                      Advance
+                      Profit
                     </td>
                     <td className="border-dark" style={tenthColWidth}>
-                      Adv %
+                      Balance
                     </td>
                     <td className="border-dark" style={elewenthColWidth}>
-                      Ins Nos
+                      Inves
                     </td>
-                    <td className="border-dark" style={tewelthColWidth}>
-                      Ins Amt
-                    </td>
-
                     <td className="border-dark" style={sixthCol}></td>
                   </tr>
                 </thead>
               </table>
             </div>
+
+            {/* Table Body - POINT 2: Hamesha tableLayout: "fixed" */}
             <div
               className="table-scroll"
               style={{
@@ -1695,7 +1681,6 @@ export default function InstallmentSaleReport() {
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
                 maxHeight: "50vh",
-                // width: "100%",
                 wordBreak: "break-word",
               }}
             >
@@ -1706,18 +1691,14 @@ export default function InstallmentSaleReport() {
                   fontSize: "12px",
                   width: "100%",
                   position: "relative",
-                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                  tableLayout: "fixed", // Hamesha fixed
                 }}
               >
                 <tbody id="tablebody">
                   {isLoading ? (
                     <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="12" className="text-center">
+                      <tr style={{ backgroundColor: getcolor }}>
+                        <td colSpan="11" className="text-center">
                           <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
@@ -1730,34 +1711,24 @@ export default function InstallmentSaleReport() {
                               color: fontcolor,
                             }}
                           >
-                            {Array.from({ length: 12 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
+                            <td style={firstColWidth}>&nbsp;</td>
+                            <td style={secondColWidth}>&nbsp;</td>
+                            <td style={thirdColWidth}>&nbsp;</td>
+                            <td style={forthColWidth}>&nbsp;</td>
+                            <td style={fifthColWidth}>&nbsp;</td>
+                            <td style={sixthColWidth}>&nbsp;</td>
+                            <td style={seventhColWidth}>&nbsp;</td>
+                            <td style={eighthColWidth}>&nbsp;</td>
+                            <td style={ninthColWidth}>&nbsp;</td>
+                            <td style={tenthColWidth}>&nbsp;</td>
+                            <td style={elewenthColWidth}>&nbsp;</td>
                           </tr>
                         ),
                       )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eighthColWidth}></td>
-                        <td style={ninthColWidth}></td>
-
-                        <td style={tenthColWidth}></td>
-                        <td style={elewenthColWidth}></td>
-                        <td style={tewelthColWidth}></td>
-                      </tr>
                     </>
                   ) : (
                     <>
                       {tableData.map((item, i) => {
-                        totalEnteries += 1;
                         return (
                           <tr
                             key={`${i}-${selectedIndex}`}
@@ -1772,49 +1743,46 @@ export default function InstallmentSaleReport() {
                             }}
                           >
                             <td className="text-center" style={firstColWidth}>
-                              {item.Date}
-                            </td>
-                            <td className="text-center" style={secondColWidth}>
-                              {item.INV}
+                              {item.Code || ""}
                             </td>
                             <td
                               className="text-start"
                               title={item.Customer}
                               style={{
-                                ...thirdColWidth,
+                                ...secondColWidth,
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                               }}
                             >
-                              {item.Customer}
+                              {item.Customer || ""}
                             </td>
-                            <td className="text-center" style={forthColWidth}>
-                              {item.Mobile}
+                            <td className="text-end" style={thirdColWidth}>
+                              {item.Cost || ""}
                             </td>
-                            <td className="text-end" style={fifthColWidth}>
-                              {item["Sale Amt"]}
+                            <td className="text-end" style={forthColWidth}>
+                              {item.SaleAmt || ""}
+                            </td>
+                            <td className="text-center" style={fifthColWidth}>
+                              {item.InsNo || ""}
                             </td>
                             <td className="text-end" style={sixthColWidth}>
-                              {item["Rent Amt"]}
+                              {item.AdvanceAmt || ""}
                             </td>
                             <td className="text-end" style={seventhColWidth}>
-                              {item.Rentage}
+                              {item.Collection || ""}
                             </td>
                             <td className="text-end" style={eighthColWidth}>
-                              {item["Total Amt"]}
+                              {item.Profit || ""}
                             </td>
                             <td className="text-end" style={ninthColWidth}>
-                              {item.Advance}
+                              {item.ProfitPrc || ""}
                             </td>
                             <td className="text-end" style={tenthColWidth}>
-                              {item.Advage}
+                              {item.Balance || ""}
                             </td>
                             <td className="text-end" style={elewenthColWidth}>
-                              {item["Ins Nos"]}
-                            </td>
-                            <td className="text-end" style={tewelthColWidth}>
-                              {item["Ins Amt"]}
+                              {item.Investment || ""}
                             </td>
                           </tr>
                         );
@@ -1829,27 +1797,19 @@ export default function InstallmentSaleReport() {
                             color: fontcolor,
                           }}
                         >
-                          {Array.from({ length: 12 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
+                          <td style={firstColWidth}>&nbsp;</td>
+                          <td style={secondColWidth}>&nbsp;</td>
+                          <td style={thirdColWidth}>&nbsp;</td>
+                          <td style={forthColWidth}>&nbsp;</td>
+                          <td style={fifthColWidth}>&nbsp;</td>
+                          <td style={sixthColWidth}>&nbsp;</td>
+                          <td style={seventhColWidth}>&nbsp;</td>
+                          <td style={eighthColWidth}>&nbsp;</td>
+                          <td style={ninthColWidth}>&nbsp;</td>
+                          <td style={tenthColWidth}>&nbsp;</td>
+                          <td style={elewenthColWidth}>&nbsp;</td>
                         </tr>
                       ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eighthColWidth}></td>
-                        <td style={ninthColWidth}></td>
-                        <td style={tenthColWidth}></td>
-                        <td style={elewenthColWidth}></td>
-                        <td style={tewelthColWidth}></td>
-                      </tr>
                     </>
                   )}
                 </tbody>
@@ -1857,6 +1817,7 @@ export default function InstallmentSaleReport() {
             </div>
           </div>
 
+          {/* Totals Row */}
           <div
             style={{
               borderBottom: `1px solid ${fontcolor}`,
@@ -1864,7 +1825,6 @@ export default function InstallmentSaleReport() {
               height: "24px",
               display: "flex",
               paddingRight: "8px",
-              // width: '101.2%'
             }}
           >
             <div
@@ -1887,23 +1847,25 @@ export default function InstallmentSaleReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+              <span className="mobileledger_total">{totalCost}</span>
+            </div>
             <div
               style={{
                 ...forthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
+            >
+              <span className="mobileledger_total">{totalSale}</span>
+            </div>
             <div
               style={{
                 ...fifthColWidth,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">{totalDebit}</span>
-            </div>
+            ></div>
             <div
               style={{
                 ...sixthColWidth,
@@ -1911,7 +1873,7 @@ export default function InstallmentSaleReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              <span className="mobileledger_total">{closingBalance}</span>
+              <span className="mobileledger_total">{totalAdvance}</span>
             </div>
             <div
               style={{
@@ -1920,7 +1882,7 @@ export default function InstallmentSaleReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {/* <span className="mobileledger_total">{closingBalance}</span> */}
+              <span className="mobileledger_total">{totalCollection}</span>
             </div>
             <div
               style={{
@@ -1928,9 +1890,8 @@ export default function InstallmentSaleReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >              <span className="mobileledger_total">{TotalAmount}</span>
-
-
+            >
+              <span className="mobileledger_total">{totalProfit}</span>
             </div>
             <div
               style={{
@@ -1938,9 +1899,7 @@ export default function InstallmentSaleReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            >
-              <span className="mobileledger_total">{totalCredit}</span>
-            </div>
+            ></div>
             <div
               style={{
                 ...tenthColWidth,
@@ -1948,8 +1907,7 @@ export default function InstallmentSaleReport() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             >
-              {" "}
-              {/* <span className="mobileledger_total">{closingBalance}</span> */}
+              <span className="mobileledger_total">{totalBalance}</span>
             </div>
             <div
               style={{
@@ -1957,24 +1915,13 @@ export default function InstallmentSaleReport() {
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}
-            ></div>
-            <div
-              style={{
-                ...tewelthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
             >
-                              <span className="mobileledger_total">{totalIns}</span>
-
+              <span className="mobileledger_total">{totalInvestment}</span>
             </div>
           </div>
-          <div
-            style={{
-              margin: "5px",
-              marginBottom: "2px",
-            }}
-          >
+
+          {/* Buttons */}
+          <div style={{ margin: "5px", marginBottom: "2px" }}>
             <SingleButton
               to="/MainPage"
               text="Return"
@@ -2000,7 +1947,7 @@ export default function InstallmentSaleReport() {
               }
             />
             <SingleButton
-              id="searchsubmit"
+              id="submitButton"
               text="Select"
               ref={input3Ref}
               onClick={fetchReceivableReport}
