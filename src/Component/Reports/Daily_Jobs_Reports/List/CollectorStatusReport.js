@@ -45,9 +45,16 @@ export default function CollectorStatusReport() {
   const [isAscendingcode, setisAscendingcode] = useState(true);
   const [isAscendingdec, setisAscendingdec] = useState(true);
   const [isAscendingsts, setisAscendingsts] = useState(true);
-
+ const [saleType, setSaleType] = useState("");
+const [Companyselectdatavalue, setCompanyselectdatavalue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [transectionType, settransectionType] = useState("");
+
+const [supplierList, setSupplierList] = useState([]);
+const [isItemInitialized, setIsItemInitialized] = useState(false);
+  const [isCodeReady, setIsCodeReady] = useState(false);
+  const [isDoubleClickOpen, setIsDoubleClickOpen] = useState(false);
+
 
   const {
     isSidebarVisible,
@@ -90,6 +97,7 @@ export default function CollectorStatusReport() {
       
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
+      FColCod:saleType,
       FSchTxt: searchQuery,
       
 //  code: "CRYSTALSOFT",
@@ -121,11 +129,11 @@ export default function CollectorStatusReport() {
   useEffect(() => {
     const hasComponentMountedPreviously =
       sessionStorage.getItem("componentMounted");
-    if (!hasComponentMountedPreviously || (input3Ref && input3Ref.current)) {
-      if (input3Ref && input3Ref.current) {
+    if (!hasComponentMountedPreviously || (saleSelectRef && saleSelectRef.current)) {
+      if (saleSelectRef && saleSelectRef.current) {
         setTimeout(() => {
-          input3Ref.current.focus();
-          // input3Ref.current.select();
+          saleSelectRef.current.focus();
+          // saleSelectRef.current.select();
         }, 0);
       }
       sessionStorage.setItem("componentMounted", "true");
@@ -364,6 +372,20 @@ export default function CollectorStatusReport() {
  
         let search = searchQuery ? searchQuery : "";
  
+
+
+ let Collectorcode = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";
+
+        doc.setFont("verdana", "bold");
+        doc.setFontSize(10);
+        doc.text(`Collector :`, labelsX, labelsY + 8.5); // Draw bold label
+        doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
+        doc.text(`${Collectorcode}`, labelsX + 25, labelsY + 8.5); // Draw the value next to the label
+
+
         if (searchQuery) {
           doc.setFont("verdana", "bold");
           doc.setFontSize(10);
@@ -460,13 +482,17 @@ export default function CollectorStatusReport() {
      worksheet.addRow([]);
  
       let typesearch = searchQuery || "";
- 
+  let Collectorcode = Companyselectdatavalue.label
+          ? Companyselectdatavalue.label
+          : "ALL";
+
+
      const typeAndStoreRow3 = worksheet.addRow(
-       searchQuery ? ["", "", "", "","Search :", typesearch] : [""]
+       searchQuery ? ["Col",Collectorcode ,"", "", "Search :", typesearch] : ["Col",Collectorcode]
      );
  
      typeAndStoreRow3.eachCell((cell, colIndex) => {
-       cell.font = { name: "CustomFont", size: 10, bold: [5].includes(colIndex) };
+       cell.font = { name: "CustomFont", size: 10, bold: [1,5].includes(colIndex) };
        cell.alignment = { horizontal: "left", vertical: "middle" };
      });
  
@@ -634,6 +660,298 @@ export default function CollectorStatusReport() {
       setColumns(newColumns);
     }
   }, [tableData]);
+
+
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveCollector.php";
+    const formData = new URLSearchParams({
+    code: organisation.code,
+        FLocCod: locationnumber || getLocationNumber,
+  
+      //  FLocCod: '001',
+      // code: 'CRYSTALSOFT',
+    }).toString();
+  
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        // Ensure we always have an array
+        const data = response.data || [];
+        setSupplierList(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setSupplierList([]); // fallback to empty array
+      });
+  }, []);
+  
+  // Create options, filtering out invalid items
+  const options = (supplierList || [])
+    .filter(item => item?.tcolcod != null) // keep only items with a valid tcolcod
+    .map(item => ({
+      value: item.tcolcod,
+      label: `${item.tcolcod}${item.tcolnam ? ` - ${item.tcolnam.trim()}` : ''}`
+    }));
+  
+    useEffect(() => {
+      if (options.length === 0) return;
+      if (isItemInitialized) return;
+  
+      const storedData = sessionStorage.getItem("GeneralLedgerData");
+      let selectedOption = null;
+  
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        const clickedCode = parsedData.code?.trim();
+        if (parsedData.code) {
+          setIsDoubleClickOpen(true); // ✅ ADD
+        }
+        selectedOption = options.find((opt) => opt.value?.trim() === clickedCode);
+  
+        sessionStorage.removeItem("GeneralLedgerData");
+      }
+  
+      if (!selectedOption) {
+        selectedOption = options[0];
+      }
+  
+      if (selectedOption) {
+        setSaleType(selectedOption.value);
+  
+        const description = selectedOption.label
+          .split("-")
+          .slice(1)
+          .join("-")
+          .trim();
+  
+        setCompanyselectdatavalue({
+          value: selectedOption.value,
+          label: description,
+        });
+  
+        setIsCodeReady(true); // ✅ IMPORTANT
+      }
+  
+      setIsItemInitialized(true);
+    }, [options, isItemInitialized]);
+  
+    useEffect(() => {
+      // 🔥 Dono cheezain ready hon
+      if (isDoubleClickOpen && isCodeReady) {
+        fetchReceivableReport();
+      }
+    }, [isDoubleClickOpen, isCodeReady]);
+  
+     const DropdownOption = (props) => {
+       return (
+         <components.Option {...props}>
+           <div
+             style={{
+               fontSize: getdatafontsize,
+               fontFamily: getfontstyle,
+               padding: "2px 8px",            // tighter vertical padding
+               lineHeight: "1.2",
+               // lineHeight: "3px",
+               whiteSpace: "normal",
+               wordBreak: "break-word",
+               // color: fontcolor,
+               textAlign: "start",
+             }}
+           >
+             {props.data.label}
+           </div>
+         </components.Option>
+       );
+     };
+   
+   
+    const customStyles1 = (hasError) => ({
+      control: (base, state) => ({
+        ...base,
+        height: "24px",
+        minHeight: "unset",
+        width: 300,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+        backgroundColor: getcolor,
+        color: fontcolor,
+        caretColor: getcolor === "white" ? "black" : "white",
+        borderRadius: 0,
+        border: `1px solid ${fontcolor}`,
+        transition: "border-color 0.15s ease-in-out",
+        "&:hover": {
+          borderColor: state.isFocused ? base.borderColor : fontcolor,
+        },
+        padding: "0 8px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        boxShadow: "none",
+        "&:focus-within": {
+          borderColor: "red", // ✅ Changed to red
+          boxShadow: "0 0 0 1px red", // ✅ Changed to red
+        },
+      }),
+  
+      menu: (base) => ({
+        ...base,
+        marginTop: "5px",
+        borderRadius: 0,
+        backgroundColor: getcolor,
+        border: `1px solid ${fontcolor}`,
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        zIndex: 9999,
+        width: "auto",
+        minWidth: "100%",
+      }),
+      menuList: (base) => ({
+        ...base,
+        padding: 0,
+        maxHeight: "200px",
+        "&::-webkit-scrollbar": {
+          width: "8px",
+          height: "8px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: getcolor,
+          borderRadius: "10px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: fontcolor,
+          borderRadius: "10px",
+          border: `2px solid ${getcolor}`,
+          "&:hover": {
+            backgroundColor: "#3368B5",
+          },
+        },
+        scrollbarWidth: "thin",
+        scrollbarColor: `${fontcolor} ${getcolor}`,
+      }),
+     
+      option: (base, state) => ({
+        ...base,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+        backgroundColor: state.isSelected
+          ? "#3368B5"
+          : state.isFocused
+            ? "#3368B5"
+            : getcolor,
+        color: state.isSelected || state.isFocused ? "white" : fontcolor,
+        whiteSpace: "normal",
+        wordBreak: "break-word",
+        padding: "2px 8px",        // reduced padding
+        lineHeight: "1.2",         // ✅ compact line height
+        "&:hover": {
+          backgroundColor: "#3368B5",
+          color: "white",
+          cursor: "pointer",
+        },
+        "&:active": {
+          backgroundColor: "#1a66cc",
+        },
+        transition: "background-color 0.2s ease, color 0.2s ease",
+      }),
+      dropdownIndicator: (base, state) => ({
+        ...base,
+        padding: 0,
+        marginTop: "-5px",
+        fontSize: "18px",
+        display: "flex",
+        textAlign: "center",
+        color: fontcolor,
+        transition: "transform 0.2s ease",
+        transform: state.selectProps.menuIsOpen
+          ? "rotate(180deg)"
+          : "rotate(0deg)",
+        "&:hover": {
+          color: "#3368B5",
+        },
+      }),
+      indicatorSeparator: () => ({
+        display: "none",
+      }),
+      singleValue: (base) => ({
+        ...base,
+        marginTop: "-5px",
+        textAlign: "left",
+        color: fontcolor,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+      }),
+      input: (base) => ({
+        ...base,
+        color: getcolor === "white" ? "black" : fontcolor,
+        caretColor: getcolor === "white" ? "black" : "white",
+        marginTop: "-5px",
+      }),
+      clearIndicator: (base) => ({
+        ...base,
+        marginTop: "-5px",
+        padding: "0 4px",
+        color: fontcolor,
+        "&:hover": {
+          color: "#ff4444",
+        },
+      }),
+      placeholder: (base) => ({
+        ...base,
+        color: `${fontcolor}80`,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+        marginTop: "-5px",
+      }),
+      noOptionsMessage: (base) => ({
+        ...base,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+        color: fontcolor,
+        backgroundColor: getcolor,
+      }),
+      loadingMessage: (base) => ({
+        ...base,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+        color: fontcolor,
+        backgroundColor: getcolor,
+      }),
+      multiValue: (base) => ({
+        ...base,
+        backgroundColor: `${fontcolor}20`,
+      }),
+      multiValueLabel: (base) => ({
+        ...base,
+        color: fontcolor,
+        fontSize: getdatafontsize,
+        fontFamily: getfontstyle,
+      }),
+      multiValueRemove: (base) => ({
+        ...base,
+        color: `${fontcolor}80`,
+        "&:hover": {
+          backgroundColor: "#ff4444",
+          color: "white",
+        },
+      }),
+    });
+
+
+     const handleSaleKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = saleSelectRef.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setSaleType(selectedOption.value);
+      }
+      const nextInput = document.getElementById(inputId);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+
 
   const handleSorting = (col) => {
     const currentOrder = columnSortOrders[col];
@@ -955,22 +1273,21 @@ const contentStyle = {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "end",
+                justifyContent: "space-between",
               }}
             >
-              {/* <div
-                className="d-flex align-items-center"
-                style={{ marginRight: "21px" }}
+           <div
+                className="d-flex align-items-center  "
+                style={{ marginLeft: "10px" }}
               >
                 <div
                   style={{
-                    marginLeft: "10px",
-                    width: "60px",
+                    width: "80px",
                     display: "flex",
                     justifyContent: "end",
                   }}
                 >
-                  <label htmlFor="transactionType">
+                  <label htmlFor="fromDatePicker">
                     <span
                       style={{
                         fontSize: getdatafontsize,
@@ -978,62 +1295,60 @@ const contentStyle = {
                         fontWeight: "bold",
                       }}
                     >
-                      Status :
-                    </span>
+                      Collector :
+                    </span>{" "}
+                    <br />
                   </label>
                 </div>
+                <div style={{ marginLeft: "5px" }}>
+                  <Select
+                    className="List-select-class"
+                    ref={saleSelectRef}
+                    options={options}
+                    value={
+                      options.find((opt) => opt.value === saleType) || null
+                    } // Ensure correct reference
+                    isDisabled={isDoubleClickOpen}
+                    onKeyDown={(e) => handleSaleKeypress(e, "searchsubmit")}
+                    id="selectedsale"
+                               onChange={(selectedOption) => {
+  if (selectedOption && selectedOption.value) {
+    setSaleType(selectedOption.value);
 
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input1Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "150px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingRight: "25px",
+    const labelWithoutCode = selectedOption.label.replace(/^[\d-]+-/, "");
+
+    setCompanyselectdatavalue({
+      value: selectedOption.value,
+      label: labelWithoutCode,
+    });
+  } else {
+    setSaleType("");
+    setCompanyselectdatavalue("");
+  }
+}}
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
                     }}
-                  >
-                    <option value="">All</option>
-    <option value="A">Active</option>
-    <option value="N">Not Active</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!saleType),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
                         color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    // isClearable
+                    // placeholder="ALL"
+                  />
                 </div>
-              </div> */}
+              </div>
 
               <div id="lastDiv" style={{ marginRight: "5px" }}>
                 <label for="searchInput" style={{ marginRight: "5px" }}>

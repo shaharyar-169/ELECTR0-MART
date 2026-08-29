@@ -1,0 +1,403 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap");
+
+.el-page {
+  --navy-950: #0f1b2d;
+  --navy-800: #16273f;
+  --navy-700: #1f3654;
+  --navy-500: #37547d;
+  --brass-500: #b8873c;
+  --brass-400: #d3a35f;
+  --paper: #f6f4ef;
+  --paper-dim: #eeebe2;
+  --ink: #1b2430;
+  --ink-soft: #5b6675;
+  --line: #dcd6c8;
+  --ok: #2f7a4f;
+  --warn: #b8873c;
+  --danger: #b3432f;
+
+  min-height: 100vh;
+  width: 100%;
+  background: var(--paper);
+  background-image: radial-gradient(circle at 15% 0%, #ffffff 0%, var(--paper) 45%);
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.el-page * { box-sizing: border-box; }
+
+.el-card {
+  width: 100%;
+  max-width: 1180px;
+  background: #fffdf9;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 30px 60px -30px rgba(15, 27, 45, 0.35);
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.el-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.el-header {
+  background: linear-gradient(135deg, var(--navy-950), var(--navy-800) 60%, var(--navy-700));
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  min-height: 60px;
+}
+
+.el-header::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brass-500), transparent 70%);
+}
+
+.el-header-text {
+  padding: 16px 28px;
+}
+
+.el-eyebrow {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brass-400);
+  margin-bottom: 4px;
+}
+
+.el-header h1 {
+  font-family: "Source Serif 4", serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #fbf9f4;
+  margin: 0;
+}
+
+.el-status-pill {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  margin-right: 28px;
+}
+.el-status-active { background: rgba(47,122,79,0.22); border-color: rgba(47,122,79,0.5); color: #9be0b3; }
+.el-status-inactive { background: rgba(255,255,255,0.08); }
+.el-status-blocked, .el-status-on-hold { background: rgba(179,67,47,0.22); border-color: rgba(179,67,47,0.5); color: #f2a793; }
+
+.el-body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 0;
+}
+
+.el-rail {
+  padding: 24px 20px;
+  background: var(--paper-dim);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.el-photo-frame {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1.5px dashed #c8bfa4;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a39a82;
+  font-size: 12px;
+  margin-bottom: 8px;
+  min-height: 120px;
+}
+
+.el-photo-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.el-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.el-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.el-field input,
+.el-field select {
+  width: 100%;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 12px;
+  color: var(--ink);
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  line-height: 24px;
+}
+
+.el-field input:focus,
+.el-field select:focus {
+  outline: none;
+  border-color: var(--brass-500);
+  box-shadow: 0 0 0 3px rgba(184, 135, 60, 0.18);
+}
+
+.el-code-input {
+  position: relative;
+  display: flex;
+}
+.el-code-input input {
+  padding-right: 28px;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+}
+.el-stepper {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  bottom: 2px;
+  display: flex;
+  flex-direction: column;
+  width: 20px;
+}
+.el-stepper button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0;
+  line-height: 1;
+}
+.el-stepper button:hover { background: var(--paper-dim); color: var(--navy-800); }
+
+.el-mobile-input {
+  display: flex;
+  gap: 6px;
+}
+.el-mobile-input input { flex: 1; }
+.el-icon-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--navy-800);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.el-icon-btn:hover { background: var(--navy-700); }
+
+.el-ledger {
+  padding: 24px 28px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.el-section h2 {
+  font-family: "Source Serif 4", serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy-800);
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.el-section h2::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--brass-500);
+  display: inline-block;
+}
+
+.el-grid {
+  display: grid;
+  gap: 10px 16px;
+}
+.el-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.el-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.el-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.el-section-finance {
+  background: var(--paper-dim);
+  margin: 0 -28px;
+  padding: 16px 28px 20px;
+  border-radius: 0;
+}
+
+.el-footer {
+  padding: 16px 28px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background: #fffdf9;
+  flex-wrap: wrap;
+}
+
+.el-btn {
+  padding: 6px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+  font-family: inherit;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.el-btn:active { transform: translateY(1px); }
+
+.el-btn-primary {
+  background: var(--navy-800);
+  color: #fff;
+  box-shadow: 0 8px 18px -8px rgba(15,27,45,0.55);
+}
+.el-btn-primary:hover { background: var(--navy-700); }
+
+.el-btn-outline {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.el-btn-outline:hover { border-color: var(--navy-500); color: var(--navy-800); }
+
+.el-btn-ghost {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  padding: 4px 8px;
+  font-size: 11px;
+  height: 28px;
+}
+.el-btn-ghost:hover { background: #fff; color: var(--navy-800); }
+
+/* Responsive Design */
+@media (max-width: 880px) {
+  .el-body { 
+    grid-template-columns: 1fr; 
+  }
+  .el-rail { 
+    border-right: none; 
+    border-bottom: 1px solid var(--line);
+    padding: 20px;
+    gap: 12px;
+  }
+  .el-grid-2, .el-grid-3, .el-grid-4 { 
+    grid-template-columns: 1fr 1fr; 
+  }
+  .el-section-finance { 
+    margin: 0 -20px; 
+    padding: 16px 20px;
+  }
+  .el-ledger { 
+    padding: 20px 20px 12px; 
+    gap: 16px;
+  }
+  .el-header {
+    padding: 0;
+  }
+  .el-header-text {
+    padding: 12px 20px;
+  }
+  .el-header h1 {
+    font-size: 20px;
+  }
+  .el-status-pill {
+    margin-right: 20px;
+  }
+  .el-footer {
+    padding: 14px 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .el-grid-2, .el-grid-3, .el-grid-4 { 
+    grid-template-columns: 1fr; 
+  }
+  .el-header { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 0;
+    min-height: auto;
+  }
+  .el-header-text {
+    padding: 12px 16px;
+  }
+  .el-status-pill {
+    margin: 0 16px 12px 16px;
+    align-self: flex-start;
+  }
+  .el-footer { 
+    flex-wrap: wrap; 
+  }
+  .el-btn { 
+    flex: 1; 
+    min-width: 80px;
+  }
+  .el-page {
+    padding: 10px;
+  }
+  .el-card {
+    border-radius: 12px;
+  }
+  .el-body {
+    border-radius: 0;
+  }
+  .el-photo-frame {
+    min-height: 80px;
+  }
+  .el-field input,
+  .el-field select {
+    height: 28px;
+    font-size: 13px;
+  }
+}

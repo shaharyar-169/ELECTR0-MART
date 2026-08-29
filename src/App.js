@@ -522,6 +522,7 @@ function App() {
 
                 {/* Rountes for Utilities reports */}
                 <Route exact path="/CollectorWiseCustomerSearch" element={<CollectorWiseCustomerSearch />} />
+                <Route exact path="/StoreMaintenance" element={<StoreMaintinanace />} />
 
 
 

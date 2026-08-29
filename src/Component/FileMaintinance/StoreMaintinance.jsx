@@ -1,1127 +1,598 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Container, Spinner, Nav } from "react-bootstrap";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
-import { useTheme } from "../../ThemeContext";
-import {
-  getUserData,
-  getOrganisationData,
-  getLocationnumber,
-  getYearDescription,
-} from "../Auth";
+import React, { useState } from "react";
+import "./storemaintenance.css";
+import { FiUpload, FiCamera, FiDownload } from "react-icons/fi";
 
-import NavComponent from "../MainComponent/Navform/navbarform";
-import SingleButton from "../MainComponent/Button/SingleButton/SingleButton";
-import Select from "react-select";
-import { components } from "react-select";
-import { BsCalendar } from "react-icons/bs";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import jsPDF from "jspdf";
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
-import "react-calendar/dist/Calendar.css";
-import { useSelector, useDispatch } from "react-redux";
-import { useHotkeys } from "react-hotkeys-hook";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Balance, CreditCard, Description } from "@mui/icons-material";
-import { autoTable } from "jspdf-autotable";
-import './storemaintenance.css'
+const STOCK_OPTIONS = ["In Stock", "Out of Stock", "Low Stock", "Pre-Order"];
+const STATUS_OPTIONS = ["Active", "Inactive", "Pending", "Closed"];
 
-// export default function StoreMaintinanace() {
+const emptyStore = {
+  code: "",
+  status: "Active",
+  description: "",
+  storeAbb: "",
+  stock: "In Stock",
+  manager: "",
+  phone: "",
+  email: "",
+  address: "",
+  city: "",
+  state: "",
+  zipCode: "",
+  openingDate: "",
+  closingTime: "",
+  storeType: "",
+  region: "",
+  area: "",
+  creditDays: "",
+  creditLimit: "",
+  debit: "",
+  credit: "",
+  amount: "",
+  dueDate: "",
+  address2: "",
+  cnic: "",
+  collector: "",
+  group: "",
+  profession: "",
+  contact: "",
+  monthly: "",
+  fullName: "",
+  g1Name: "",
+  g1FullName: "",
+  g1Address1: "",
+  g1Address2: "",
+  g1Contact: "",
+  g1Cnic: "",
+  g2Name: "",
+  g2FullName: "",
+  g2Address1: "",
+  g2Address2: "",
+  g2Contact: "",
+  g2Cnic: "",
+  verify: "",
+  date: "",
+  remarks: "",
+};
 
-//  const {
-//     isSidebarVisible,
-//     toggleSidebar,
-//     getcolor,
-//     fontcolor,
-//     toggleChangeColor,
-//     apiLinks,
-//     getLocationNumber,
-//     getyeardescription,
-//     getfromdate,
-//     gettodate,
-//     getfontstyle,
-//     getdatafontsize,
-//     getnavbarbackgroundcolor,
-//   } = useTheme();
+function Field({ label, children }) {
+  return (
+    <label className="el-field">
+      <span className="el-field-label">{label}</span>
+      {children}
+    </label>
+  );
+}
 
-//    const contentStyle = {
-//     width: "100%", // 100vw ki jagah 100%
-//     maxWidth: "900px",
-//     height: "calc(100vh - 100px)",
-//     position: "absolute",
-//     top: "70px",
-//     left: isSidebarVisible ? "60vw" : "50vw",
-//     transform: "translateX(-50%)",
-//     display: "flex",
-//     flexDirection: "column",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     overflow: "hidden",
-//     textAlign: "center",
-//     fontSize: "15px",
-//     fontStyle: "normal",
-//     fontWeight: "400",
-//     lineHeight: "23px",
-//     fontFamily: '"Poppins", sans-serif',
-//     zIndex: 1,
-//     padding: "0 20px", // Side padding for small screens
-//     boxSizing: "border-box", // Padding ko width mein include kare
-//   };
+export default function StoreMaintenance() {
+  const [store, setStore] = useState(emptyStore);
 
-// const horizontalFieldWrapperStyle = {
-//   display: "flex",
-//   alignItems: "center",
-//   gap: "5px",
-// };
+  const set = (key) => (e) =>
+    setStore((prev) => ({ ...prev, [key]: e.target.value }));
 
-// const horizontalLabelStyle = {
-//   fontSize: "11px",
-//   fontWeight: "600",
-//   opacity: "0.85",
-//   display: "flex",
-//   alignItems: "center",
-//   whiteSpace: "nowrap",
-//   minWidth: "60px",
-//   textAlign: "end",
-//   justifyContent: "flex-end",
-// };
-
-// const horizontalInputStyle = {
-//   height: "22px",
-//   padding: "1px 8px",
-//   borderWidth: "1px",
-//   borderRadius: "4px",
-//   fontSize: "11px",
-//   transition: "all 0.3s ease",
-//   outline: "none",
-//   fontFamily: "inherit",
-//   flex: 1,
-//   minWidth: "0",
-// };
-
-// const buttonStyle = {
-//   padding: "10px 24px",
-//   borderRadius: "8px",
-//   fontSize: "14px",
-//   fontWeight: "600",
-//   cursor: "pointer",
-//   transition: "all 0.3s ease",
-//   display: "flex",
-//   alignItems: "center",
-//   gap: "8px",
-//   boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-// };
- 
-
-//   return (
-//   <>
-//    <div style={contentStyle}>
- 
-//    {/* Form section */}
-// <div
-//   style={{
-//     backgroundColor: getcolor,
-//     color: fontcolor,
-//     border: `1px solid ${fontcolor}`,
-//     borderRadius: "12px",
-//     boxShadow: "0 10px 40px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.08)",
-//     overflow: "hidden",
-//   }}
-// >
-//   {/* Store Maintenance Header - Full Width at Top */}
-//   <div
-//     style={{
-//       display: "flex",
-//       alignItems: "center",
-//       justifyContent: "center",
-//       padding: "6px 20px",
-//       background: `#3368B5`, // Changed to #3368B5
-//       borderBottom: `2px solid rgba(255,255,255,0.2)`,
-//       position: "relative",
-//       overflow: "hidden",
-//       gap: "8px",
-//       minHeight: "44px",
-//     }}
-//   >
-//     {/* Decorative Background Elements */}
-//     <div
-//       style={{
-//         position: "absolute",
-//         top: "-60%",
-//         right: "-10%",
-//         width: "300px",
-//         height: "300px",
-//         borderRadius: "50%",
-//         background: "rgba(255,255,255,0.05)",
-//         pointerEvents: "none",
-//       }}
-//     />
-//     <div
-//       style={{
-//         position: "absolute",
-//         bottom: "-40%",
-//         left: "-5%",
-//         width: "200px",
-//         height: "200px",
-//         borderRadius: "50%",
-//         background: "rgba(255,255,255,0.05)",
-//         pointerEvents: "none",
-//       }}
-//     />
-    
-//     {/* Icon */}
-//     <div
-//       style={{
-//         fontSize: "14px",
-//         background: "rgba(255,255,255,0.12)",
-//         padding: "4px",
-//         borderRadius: "50%",
-//         width: "28px",
-//         height: "28px",
-//         display: "flex",
-//         alignItems: "center",
-//         justifyContent: "center",
-//         border: "1.5px solid rgba(255,255,255,0.2)",
-//         backdropFilter: "blur(10px)",
-//         zIndex: 1,
-//         flexShrink: 0,
-//       }}
-//     >
-//       🏪
-//     </div>
-    
-//     {/* Title */}
-//     <h2
-//       style={{
-//         margin: "0",
-//         fontSize: "15px",
-//         fontWeight: "600",
-//         color: "#ffffff",
-//         letterSpacing: "0.5px",
-//         textShadow: "0 1px 4px rgba(0,0,0,0.15)",
-//         zIndex: 1,
-//       }}
-//     >
-//       Store Maintenance
-//     </h2>
-//   </div>
-
-//   {/* Form Section */}
-//   <div
-//     style={{
-//       padding: "15px 15px 12px 15px",
-//     }}
-//   >
-//     {/* Row 1: Code + Status (side by side) */}
-//     <div
-//       style={{
-//         display: "grid",
-//         gridTemplateColumns: "1fr 1fr",
-//         gap: "4px 15px",
-//         marginBottom: "4px",
-//       }}
-//     >
-//       {/* Code Field - Number */}
-//       <div style={horizontalFieldWrapperStyle}>
-//         <label style={horizontalLabelStyle}>Code</label>
-//         <input
-//           type="number"
-//           placeholder="Code"
-//           style={{
-//             ...horizontalInputStyle,
-//             borderColor: fontcolor,
-//             color: fontcolor,
-//             backgroundColor: `${fontcolor}10`,
-//           }}
-//           onFocus={(e) => {
-//             e.target.style.borderColor = "#3368B5";
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "0 0 0 2px rgba(51, 104, 181, 0.2)";
-//           }}
-//           onBlur={(e) => {
-//             e.target.style.borderColor = fontcolor;
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "none";
-//           }}
-//         />
-//       </div>
-
-//       {/* Status Field - Select */}
-//       <div style={horizontalFieldWrapperStyle}>
-//         <label style={horizontalLabelStyle}>Status</label>
-//         <select
-//           style={{
-//             ...horizontalInputStyle,
-//             borderColor: fontcolor,
-//             color: fontcolor,
-//             backgroundColor: `${fontcolor}10`,
-//             cursor: "pointer",
-//           }}
-//           onFocus={(e) => {
-//             e.target.style.borderColor = "#3368B5";
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "0 0 0 2px rgba(51, 104, 181, 0.2)";
-//           }}
-//           onBlur={(e) => {
-//             e.target.style.borderColor = fontcolor;
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "none";
-//           }}
-//         >
-//           <option value="">Select Status</option>
-//           <option value="active">Active</option>
-//           <option value="inactive">Inactive</option>
-//           <option value="pending">Pending</option>
-//           <option value="closed">Closed</option>
-//         </select>
-//       </div>
-//     </div>
-
-//     {/* Row 2: Description (full width) */}
-//     <div
-//       style={{
-//         display: "grid",
-//         gridTemplateColumns: "1fr",
-//         gap: "4px 25px",
-//         marginBottom: "4px",
-//       }}
-//     >
-//       <div style={horizontalFieldWrapperStyle}>
-//         <label style={horizontalLabelStyle}>Description</label>
-//         <input
-//           type="text"
-//           placeholder="Description"
-//           style={{
-//             ...horizontalInputStyle,
-//             borderColor: fontcolor,
-//             color: fontcolor,
-//             backgroundColor: `${fontcolor}10`,
-//           }}
-//           onFocus={(e) => {
-//             e.target.style.borderColor = "#3368B5";
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "0 0 0 2px rgba(51, 104, 181, 0.2)";
-//           }}
-//           onBlur={(e) => {
-//             e.target.style.borderColor = fontcolor;
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "none";
-//           }}
-//         />
-//       </div>
-//     </div>
-
-//     {/* Row 3: Store Abb (reduced width - 50%) */}
-//     <div
-//       style={{
-//         display: "grid",
-//         gridTemplateColumns: "0.5fr 1fr",
-//         gap: "4px 25px",
-//         marginBottom: "4px",
-//       }}
-//     >
-//       <div style={horizontalFieldWrapperStyle}>
-//         <label style={horizontalLabelStyle}>Store Abb</label>
-//         <input
-//           type="text"
-//           placeholder="Abbreviation"
-//           style={{
-//             ...horizontalInputStyle,
-//             borderColor: fontcolor,
-//             color: fontcolor,
-//             backgroundColor: `${fontcolor}10`,
-//             maxWidth: "250px",
-//           }}
-//           onFocus={(e) => {
-//             e.target.style.borderColor = "#3368B5";
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "0 0 0 2px rgba(51, 104, 181, 0.2)";
-//           }}
-//           onBlur={(e) => {
-//             e.target.style.borderColor = fontcolor;
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "none";
-//           }}
-//         />
-//       </div>
-//     </div>
-
-//     {/* Row 4: Stock (reduced width - 50%) */}
-//     <div
-//       style={{
-//         display: "grid",
-//         gridTemplateColumns: "0.5fr 1fr",
-//         gap: "4px 25px",
-//         marginBottom: "10px",
-//       }}
-//     >
-//       <div style={horizontalFieldWrapperStyle}>
-//         <label style={horizontalLabelStyle}>Stock</label>
-//         <select
-//           style={{
-//             ...horizontalInputStyle,
-//             borderColor: fontcolor,
-//             color: fontcolor,
-//             backgroundColor: `${fontcolor}10`,
-//             cursor: "pointer",
-//             maxWidth: "250px",
-//           }}
-//           onFocus={(e) => {
-//             e.target.style.borderColor = "#3368B5";
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "0 0 0 2px rgba(51, 104, 181, 0.2)";
-//           }}
-//           onBlur={(e) => {
-//             e.target.style.borderColor = fontcolor;
-//             e.target.style.borderWidth = "1px";
-//             e.target.style.boxShadow = "none";
-//           }}
-//         >
-//           <option value="">Select Stock</option>
-//           <option value="in-stock">In Stock</option>
-//           <option value="out-of-stock">Out of Stock</option>
-//           <option value="low-stock">Low Stock</option>
-//           <option value="pre-order">Pre-Order</option>
-//         </select>
-//       </div>
-//     </div>
-
-//     {/* Action Buttons for Form - Center Aligned */}
-//     <div
-//       style={{
-//         display: "flex",
-//         gap: "10px",
-//         marginTop: "6px",
-//         justifyContent: "center",
-//         borderTop: `1px solid ${fontcolor}20`,
-//         paddingTop: "10px",
-//       }}
-//     >
-//       <button
-//         style={{
-//           ...buttonStyle,
-//           padding: "4px 16px",
-//           background: `#3368B5`, // Changed to #3368B5
-//           color: "#fff",
-//           border: "none",
-//           fontSize: "12px",
-//           borderRadius: "6px",
-//         }}
-//         onMouseEnter={(e) => {
-//           e.target.style.background = `#28528C`; // Darker shade for hover
-//           e.target.style.transform = "translateY(-2px)";
-//           e.target.style.boxShadow = "0 6px 20px rgba(51, 104, 181, 0.4)";
-//         }}
-//         onMouseLeave={(e) => {
-//           e.target.style.background = `#3368B5`;
-//           e.target.style.transform = "translateY(0)";
-//           e.target.style.boxShadow = "none";
-//         }}
-//       >
-//         💾 Save
-//       </button>
-//       <button
-//         style={{
-//           ...buttonStyle,
-//           padding: "4px 16px",
-//           background: `#3368B5`, // Changed to #3368B5
-//           color: "#fff",
-//           border: "none",
-//           fontSize: "12px",
-//           borderRadius: "6px",
-//         }}
-//         onMouseEnter={(e) => {
-//           e.target.style.background = `#28528C`; // Darker shade for hover
-//           e.target.style.transform = "translateY(-2px)";
-//           e.target.style.boxShadow = "0 6px 20px rgba(51, 104, 181, 0.4)";
-//         }}
-//         onMouseLeave={(e) => {
-//           e.target.style.background = `#3368B5`;
-//           e.target.style.transform = "translateY(0)";
-//           e.target.style.boxShadow = "none";
-//         }}
-//       >
-//         🗑️ Return
-//       </button>
-//       <button
-//         style={{
-//           ...buttonStyle,
-//           padding: "4px 16px",
-//           background: `#3368B5`, // Changed to #3368B5
-//           color: "#fff",
-//           border: "none",
-//           fontSize: "12px",
-//           borderRadius: "6px",
-//         }}
-//         onMouseEnter={(e) => {
-//           e.target.style.background = `#28528C`; // Darker shade for hover
-//           e.target.style.transform = "translateY(-2px)";
-//           e.target.style.boxShadow = "0 6px 20px rgba(51, 104, 181, 0.4)";
-//         }}
-//         onMouseLeave={(e) => {
-//           e.target.style.background = `#3368B5`;
-//           e.target.style.transform = "translateY(0)";
-//           e.target.style.boxShadow = "none";
-//         }}
-//       >
-//         ✏️ New
-//       </button>
-//     </div>
-//   </div>
-// </div>
-
-
-
-
-// </div>
-//   </>
-// );
-// }
-
-
-
-
-
-////////////////////////////////////////////////////
-
-
-
-// export default function StoreMaintinanace() {
-//   const {
-//     isSidebarVisible,
-//     toggleSidebar,
-//     getcolor,
-//     fontcolor,
-//     toggleChangeColor,
-//     apiLinks,
-//     getLocationNumber,
-//     getyeardescription,
-//     getfromdate,
-//     gettodate,
-//     getfontstyle,
-//     getdatafontsize,
-//     getnavbarbackgroundcolor,
-//   } = useTheme();
-
-//   const contentStyle = {
-//     width: "100%",
-//     maxWidth: "900px",
-//     height: "calc(100vh - 100px)",
-//     position: "absolute",
-//     top: "70px",
-//     left: isSidebarVisible ? "60vw" : "50vw",
-//     transform: "translateX(-50%)",
-//     display: "flex",
-//     flexDirection: "column",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     overflow: "hidden",
-//     textAlign: "center",
-//     fontSize: "15px",
-//     fontStyle: "normal",
-//     fontWeight: "400",
-//     lineHeight: "23px",
-//     fontFamily: '"Poppins", sans-serif',
-//     zIndex: 1,
-//     padding: "0 20px",
-//     boxSizing: "border-box",
-//   };
-
-//   // Enhanced field wrapper with better spacing
-//   const horizontalFieldWrapperStyle = {
-//     display: "flex",
-//     alignItems: "center",
-//     gap: "8px",
-//     width: "100%",
-//   };
-
-//   // Modern label style with better visibility
-//   const horizontalLabelStyle = {
-//     fontSize: "11px",
-//     fontWeight: "600",
-//     opacity: "0.85",
-//     display: "flex",
-//     alignItems: "center",
-//     whiteSpace: "nowrap",
-//     minWidth: "70px",
-//     textAlign: "end",
-//     justifyContent: "flex-end",
-//     letterSpacing: "0.3px",
-//     color: fontcolor,
-//     textTransform: "uppercase",
-//     fontSize: "10px",
-//     fontWeight: "700",
-//     opacity: "0.7",
-//   };
-
-//   // Enhanced input style with gradient border effect
-//   const horizontalInputStyle = {
-//     height: "22px",
-//     padding: "0 10px",
-//     borderWidth: "1.5px",
-//     borderRadius: "6px",
-//     fontSize: "11px",
-//     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-//     outline: "none",
-//     fontFamily: "inherit",
-//     flex: 1,
-//     minWidth: "0",
-//     background: "transparent",
-//     borderColor: `${fontcolor}30`,
-//     color: fontcolor,
-//     fontWeight: "500",
-//     letterSpacing: "0.2px",
-//   };
-
-//   const buttonStyle = {
-//     padding: "4px 18px",
-//     borderRadius: "6px",
-//     fontSize: "11px",
-//     fontWeight: "600",
-//     cursor: "pointer",
-//     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-//     display: "flex",
-//     alignItems: "center",
-//     gap: "6px",
-//     textTransform: "uppercase",
-//     letterSpacing: "0.5px",
-//     border: "none",
-//   };
-
-//   // Modern card wrapper with glass effect
-//   const cardStyle = {
-//     backgroundColor: getcolor,
-//     color: fontcolor,
-//     border: `1px solid ${fontcolor}15`,
-//     borderRadius: "16px",
-//     boxShadow: `
-//       0 20px 60px rgba(0,0,0,0.12),
-//       0 8px 30px rgba(0,0,0,0.06),
-//       inset 0 1px 0 rgba(255,255,255,0.1)
-//     `,
-//     overflow: "hidden",
-//     backdropFilter: "blur(10px)",
-//     width: "100%",
-//     maxWidth: "650px",
-//   };
-
-//   return (
-//     <>
-//       <div style={contentStyle}>
-//         <div style={cardStyle}>
-//           {/* Store Maintenance Header - Premium Design */}
-//           <div
-//             style={{
-//               display: "flex",
-//               alignItems: "center",
-//               justifyContent: "space-between",
-//               padding: "8px 24px",
-//               background: `linear-gradient(135deg, #3368B5 0%, #28528C 100%)`,
-//               position: "relative",
-//               overflow: "hidden",
-//               minHeight: "44px",
-//             }}
-//           >
-//             {/* Decorative Background Elements */}
-//             <div
-//               style={{
-//                 position: "absolute",
-//                 top: "-80%",
-//                 right: "-5%",
-//                 width: "250px",
-//                 height: "250px",
-//                 borderRadius: "50%",
-//                 background: "rgba(255,255,255,0.06)",
-//                 pointerEvents: "none",
-//               }}
-//             />
-//             <div
-//               style={{
-//                 position: "absolute",
-//                 bottom: "-60%",
-//                 left: "-3%",
-//                 width: "180px",
-//                 height: "180px",
-//                 borderRadius: "50%",
-//                 background: "rgba(255,255,255,0.04)",
-//                 pointerEvents: "none",
-//               }}
-//             />
-
-//             {/* Left Section - Icon & Title */}
-//             <div
-//               style={{
-//                 display: "flex",
-//                 alignItems: "center",
-//                 gap: "12px",
-//                 zIndex: 1,
-//               }}
-//             >
-//               <div
-//                 style={{
-//                   fontSize: "14px",
-//                   background: "rgba(255,255,255,0.15)",
-//                   padding: "4px",
-//                   borderRadius: "50%",
-//                   width: "32px",
-//                   height: "32px",
-//                   display: "flex",
-//                   alignItems: "center",
-//                   justifyContent: "center",
-//                   border: "1.5px solid rgba(255,255,255,0.2)",
-//                   backdropFilter: "blur(10px)",
-//                   flexShrink: 0,
-//                 }}
-//               >
-//                 🏪
-//               </div>
-//               <h2
-//                 style={{
-//                   margin: "0",
-//                   fontSize: "14px",
-//                   fontWeight: "700",
-//                   color: "#ffffff",
-//                   letterSpacing: "0.8px",
-//                   textShadow: "0 1px 4px rgba(0,0,0,0.15)",
-//                 }}
-//               >
-//                 Store Maintenance
-//               </h2>
-//             </div>
-
-//             {/* Right Section - Status Badge */}
-//             <div
-//               style={{
-//                 display: "flex",
-//                 alignItems: "center",
-//                 gap: "8px",
-//                 zIndex: 1,
-//               }}
-//             >
-//               <div
-//                 style={{
-//                   width: "6px",
-//                   height: "6px",
-//                   borderRadius: "50%",
-//                   background: "#4ade80",
-//                   boxShadow: "0 0 12px rgba(74, 222, 128, 0.6)",
-//                   animation: "pulse 2s infinite",
-//                 }}
-//               />
-//               <span
-//                 style={{
-//                   fontSize: "10px",
-//                   color: "rgba(255,255,255,0.8)",
-//                   fontWeight: "500",
-//                   letterSpacing: "0.5px",
-//                 }}
-//               >
-//                 ACTIVE
-//               </span>
-//             </div>
-//           </div>
-
-//           {/* Form Section with Enhanced Design */}
-//           <div
-//             style={{
-//               padding: "18px 24px 16px 24px",
-//             }}
-//           >
-//             {/* Row 1: Code + Status */}
-//             <div
-//               style={{
-//                 display: "grid",
-//                 gridTemplateColumns: "1fr 1fr",
-//                 gap: "6px 20px",
-//                 marginBottom: "6px",
-//               }}
-//             >
-//               <div style={horizontalFieldWrapperStyle}>
-//                 <label style={horizontalLabelStyle}>Code</label>
-//                 <input
-//                   type="number"
-//                   placeholder="Enter store code"
-//                   style={{
-//                     ...horizontalInputStyle,
-//                     background: `${fontcolor}05`,
-//                   }}
-//                   onFocus={(e) => {
-//                     e.target.style.borderColor = "#3368B5";
-//                     e.target.style.boxShadow = "0 0 0 3px rgba(51, 104, 181, 0.15)";
-//                     e.target.style.background = `${fontcolor}08`;
-//                   }}
-//                   onBlur={(e) => {
-//                     e.target.style.borderColor = `${fontcolor}30`;
-//                     e.target.style.boxShadow = "none";
-//                     e.target.style.background = `${fontcolor}05`;
-//                   }}
-//                 />
-//               </div>
-
-//               <div style={horizontalFieldWrapperStyle}>
-//                 <label style={horizontalLabelStyle}>Status</label>
-//                 <select
-//                   style={{
-//                     ...horizontalInputStyle,
-//                     background: `${fontcolor}05`,
-//                     cursor: "pointer",
-//                     appearance: "none",
-//                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='${fontcolor.replace('#', '%23')}40'/%3E%3C/svg%3E")`,
-//                     backgroundRepeat: "no-repeat",
-//                     backgroundPosition: "right 10px center",
-//                     paddingRight: "28px",
-//                   }}
-//                   onFocus={(e) => {
-//                     e.target.style.borderColor = "#3368B5";
-//                     e.target.style.boxShadow = "0 0 0 3px rgba(51, 104, 181, 0.15)";
-//                     e.target.style.background = `${fontcolor}08`;
-//                   }}
-//                   onBlur={(e) => {
-//                     e.target.style.borderColor = `${fontcolor}30`;
-//                     e.target.style.boxShadow = "none";
-//                     e.target.style.background = `${fontcolor}05`;
-//                   }}
-//                 >
-//                   <option value="">Select Status</option>
-//                   <option value="active">Active</option>
-//                   <option value="inactive">Inactive</option>
-//                   <option value="pending">Pending</option>
-//                   <option value="closed">Closed</option>
-//                 </select>
-//               </div>
-//             </div>
-
-//             {/* Row 2: Description */}
-//             <div
-//               style={{
-//                 display: "grid",
-//                 gridTemplateColumns: "1fr",
-//                 gap: "6px 20px",
-//                 marginBottom: "6px",
-//               }}
-//             >
-//               <div style={horizontalFieldWrapperStyle}>
-//                 <label style={horizontalLabelStyle}>Description</label>
-//                 <input
-//                   type="text"
-//                   placeholder="Enter store description"
-//                   style={{
-//                     ...horizontalInputStyle,
-//                     background: `${fontcolor}05`,
-//                   }}
-//                   onFocus={(e) => {
-//                     e.target.style.borderColor = "#3368B5";
-//                     e.target.style.boxShadow = "0 0 0 3px rgba(51, 104, 181, 0.15)";
-//                     e.target.style.background = `${fontcolor}08`;
-//                   }}
-//                   onBlur={(e) => {
-//                     e.target.style.borderColor = `${fontcolor}30`;
-//                     e.target.style.boxShadow = "none";
-//                     e.target.style.background = `${fontcolor}05`;
-//                   }}
-//                 />
-//               </div>
-//             </div>
-
-//             {/* Row 3: Store Abb + Stock */}
-//             <div
-//               style={{
-//                 display: "grid",
-//                 gridTemplateColumns: "1fr 1fr",
-//                 gap: "6px 20px",
-//                 marginBottom: "6px",
-//               }}
-//             >
-//               <div style={horizontalFieldWrapperStyle}>
-//                 <label style={horizontalLabelStyle}>Store Abb</label>
-//                 <input
-//                   type="text"
-//                   placeholder="Abbreviation"
-//                   style={{
-//                     ...horizontalInputStyle,
-//                     background: `${fontcolor}05`,
-//                   }}
-//                   onFocus={(e) => {
-//                     e.target.style.borderColor = "#3368B5";
-//                     e.target.style.boxShadow = "0 0 0 3px rgba(51, 104, 181, 0.15)";
-//                     e.target.style.background = `${fontcolor}08`;
-//                   }}
-//                   onBlur={(e) => {
-//                     e.target.style.borderColor = `${fontcolor}30`;
-//                     e.target.style.boxShadow = "none";
-//                     e.target.style.background = `${fontcolor}05`;
-//                   }}
-//                 />
-//               </div>
-
-//               <div style={horizontalFieldWrapperStyle}>
-//                 <label style={horizontalLabelStyle}>Stock</label>
-//                 <select
-//                   style={{
-//                     ...horizontalInputStyle,
-//                     background: `${fontcolor}05`,
-//                     cursor: "pointer",
-//                     appearance: "none",
-//                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='${fontcolor.replace('#', '%23')}40'/%3E%3C/svg%3E")`,
-//                     backgroundRepeat: "no-repeat",
-//                     backgroundPosition: "right 10px center",
-//                     paddingRight: "28px",
-//                   }}
-//                   onFocus={(e) => {
-//                     e.target.style.borderColor = "#3368B5";
-//                     e.target.style.boxShadow = "0 0 0 3px rgba(51, 104, 181, 0.15)";
-//                     e.target.style.background = `${fontcolor}08`;
-//                   }}
-//                   onBlur={(e) => {
-//                     e.target.style.borderColor = `${fontcolor}30`;
-//                     e.target.style.boxShadow = "none";
-//                     e.target.style.background = `${fontcolor}05`;
-//                   }}
-//                 >
-//                   <option value="">Select Stock</option>
-//                   <option value="in-stock">In Stock</option>
-//                   <option value="out-of-stock">Out of Stock</option>
-//                   <option value="low-stock">Low Stock</option>
-//                   <option value="pre-order">Pre-Order</option>
-//                 </select>
-//               </div>
-//             </div>
-
-//             {/* Action Buttons - Premium Design */}
-//             <div
-//               style={{
-//                 display: "flex",
-//                 gap: "10px",
-//                 marginTop: "12px",
-//                 justifyContent: "center",
-//                 borderTop: `1px solid ${fontcolor}10`,
-//                 paddingTop: "14px",
-//               }}
-//             >
-//               <button
-//                 style={{
-//                   ...buttonStyle,
-//                   background: `linear-gradient(135deg, #3368B5, #28528C)`,
-//                   color: "#fff",
-//                   boxShadow: "0 4px 12px rgba(51, 104, 181, 0.3)",
-//                 }}
-//                 onMouseEnter={(e) => {
-//                   e.target.style.transform = "translateY(-2px)";
-//                   e.target.style.boxShadow = "0 8px 24px rgba(51, 104, 181, 0.4)";
-//                 }}
-//                 onMouseLeave={(e) => {
-//                   e.target.style.transform = "translateY(0)";
-//                   e.target.style.boxShadow = "0 4px 12px rgba(51, 104, 181, 0.3)";
-//                 }}
-//               >
-//                 💾 Save
-//               </button>
-//               <button
-//                 style={{
-//                   ...buttonStyle,
-//                   background: `transparent`,
-//                   color: fontcolor,
-//                   border: `1.5px solid ${fontcolor}20`,
-//                 }}
-//                 onMouseEnter={(e) => {
-//                   e.target.style.background = `${fontcolor}08`;
-//                   e.target.style.transform = "translateY(-2px)";
-//                   e.target.style.borderColor = fontcolor;
-//                 }}
-//                 onMouseLeave={(e) => {
-//                   e.target.style.background = "transparent";
-//                   e.target.style.transform = "translateY(0)";
-//                   e.target.style.borderColor = `${fontcolor}20`;
-//                 }}
-//               >
-//                 🗑️ Return
-//               </button>
-//               <button
-//                 style={{
-//                   ...buttonStyle,
-//                   background: `transparent`,
-//                   color: fontcolor,
-//                   border: `1.5px solid ${fontcolor}20`,
-//                 }}
-//                 onMouseEnter={(e) => {
-//                   e.target.style.background = `${fontcolor}08`;
-//                   e.target.style.transform = "translateY(-2px)";
-//                   e.target.style.borderColor = fontcolor;
-//                 }}
-//                 onMouseLeave={(e) => {
-//                   e.target.style.background = "transparent";
-//                   e.target.style.transform = "translateY(0)";
-//                   e.target.style.borderColor = `${fontcolor}20`;
-//                 }}
-//               >
-//                 ✏️ New
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Add this CSS for pulse animation */}
-//       <style>{`
-//         @keyframes pulse {
-//           0%, 100% { opacity: 1; transform: scale(1); }
-//           50% { opacity: 0.5; transform: scale(0.8); }
-//         }
-//       `}</style>
-//     </>
-//   );
-// }
-
-
-
-export default function StoreMaintinanace() {
-  const {
-    isSidebarVisible,
-    toggleSidebar,
-    getcolor,
-    fontcolor,
-    toggleChangeColor,
-    apiLinks,
-    getLocationNumber,
-    getyeardescription,
-    getfromdate,
-    gettodate,
-    getfontstyle,
-    getdatafontsize,
-    getnavbarbackgroundcolor,
-  } = useTheme();
-
-  // Set CSS variables for dynamic theming
-  const cardStyle = {
-    backgroundColor: getcolor,
-    color: fontcolor,
-    '--card-bg': getcolor,
-    '--font-color': fontcolor,
-    '--border-color': `${fontcolor}30`,
-    '--input-bg': `${fontcolor}05`,
-    '--input-focus-bg': `${fontcolor}08`,
-    '--hover-bg': `${fontcolor}08`,
+  const bumpCode = (dir) => {
+    setStore((prev) => {
+      const currentCode = parseInt(prev.code, 10) || 0;
+      const next = Math.max(0, currentCode + dir);
+      return { ...prev, code: String(next).padStart(4, "0") };
+    });
   };
 
-  // Dynamic left position based on sidebar
-  const contentPosition = {
-    left: isSidebarVisible ? "60vw" : "50vw",
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Store data saved:", store);
+  };
+
+  const contentStyle = {
+    width: "100%",
+    maxWidth: "800px",
+    margin: "0 auto",
+    fontFamily: '"Verdana", Geneva, Tahoma, sans-serif',
   };
 
   return (
-    <>
-      <div 
-        className="store-maintenance-content" 
-        style={contentPosition}
-      >
-        <div 
-          className="store-maintenance-card" 
-          style={cardStyle}
-        >
-          {/* Store Maintenance Header */}
-          <div className="store-header">
-            <div className="store-header-bg-1" />
-            <div className="store-header-bg-2" />
+    <div className="el-page-host">
+      <div className="el-page-wrapper" style={contentStyle}>
+        <div className="el-page">
+          <div className="el-card">
+            <form onSubmit={handleSubmit}>
+              <header className="el-header">
+                <h1>Customer Maintenance</h1>
+              </header>
 
-            {/* Left Section */}
-            <div className="store-header-left">
-              <div className="store-icon-wrapper">🏪</div>
-              <h2 className="store-title">Store Maintenance</h2>
-            </div>
+              {/* Scrollable Body */}
+              <div className="el-scrollable-body">
+                <div className="el-body">
+                  {/* LEFT LEDGER */}
+                  <div className="el-ledger">
+                    {/* TOP ROW: Code, Man, Ref, Status */}
+                    <div className="el-top-fields">
+                      <Field label="Code">
+                        <div className="el-code-input">
+                          <input
+                            value={store.code}
+                            onChange={set("code")}
+                            placeholder="Store code"
+                          />
+                          <div className="el-stepper">
+                            <button
+                              type="button"
+                              onClick={() => bumpCode(1)}
+                              aria-label="Increment code"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => bumpCode(-1)}
+                              aria-label="Decrement code"
+                            >
+                              ▼
+                            </button>
+                          </div>
+                        </div>
+                      </Field>
 
-            {/* Right Section */}
-            <div className="store-header-right">
-              <div className="status-dot" />
-              <span className="status-text">ACTIVE</span>
-            </div>
-          </div>
+                      <Field label="Man">
+                        <input
+                          value={store.manager}
+                          onChange={set("manager")}
+                          placeholder="Manager name"
+                        />
+                      </Field>
 
-          {/* Form Section */}
-          <div className="store-form-section">
-            {/* Row 1: Code + Status (2 columns) */}
-            <div className="store-row">
-              <div className="store-field-wrapper">
-                <label className="store-label">Code</label>
-                <input
-                  type="number"
-                  placeholder="code"
-                  className="store-input store-input-code"
-                />
+                      <Field label="Ref">
+                        <input
+                          value={store.storeAbb}
+                          onChange={set("storeAbb")}
+                          placeholder="Reference"
+                        />
+                      </Field>
+
+                      <Field label="Status">
+                        <select value={store.status} onChange={set("status")}>
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                    </div>
+
+                    {/* SECOND ROW: Mobile, Name */}
+                    <div className="el-second-row">
+                      <Field label="Mobile">
+                        <input
+                          type="tel"
+                          value={store.phone}
+                          onChange={set("phone")}
+                          placeholder="Mobile number"
+                        />
+                      </Field>
+
+                      <Field label="Name">
+                        <input
+                          value={store.description}
+                          onChange={set("description")}
+                          placeholder="Store name"
+                        />
+                      </Field>
+                    </div>
+
+                    <section className="el-section">
+                      <h2>Personal Info</h2>
+                      
+                      {/* Row 1: Name, Email */}
+                      <div className="el-personal-row-1">
+                        <Field label="Name">
+                          <input
+                            value={store.description}
+                            onChange={set("description")}
+                            placeholder="Full name"
+                          />
+                        </Field>
+
+                        <Field label="Email">
+                          <input
+                            type="email"
+                            value={store.email}
+                            onChange={set("email")}
+                            placeholder="Email address"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 2: Address1, Address2 */}
+                      <div className="el-personal-row-2">
+                        <Field label="Address1">
+                          <input
+                            value={store.address}
+                            onChange={set("address")}
+                            placeholder="Street address"
+                          />
+                        </Field>
+
+                        <Field label="Address2">
+                          <input
+                            value={store.address2}
+                            onChange={set("address2")}
+                            placeholder="Address line 2"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 3: Type, CNIC, City */}
+                      <div className="el-personal-row-3">
+                        <Field label="Type">
+                          <select value={store.storeType} onChange={set("storeType")}>
+                            <option value="">Select type…</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Warehouse">Warehouse</option>
+                            <option value="Distribution">Distribution</option>
+                            <option value="Outlet">Outlet</option>
+                          </select>
+                        </Field>
+
+                        <Field label="CNIC">
+                          <input
+                            value={store.cnic}
+                            onChange={set("cnic")}
+                            placeholder="CNIC number"
+                          />
+                        </Field>
+
+                        <Field label="City">
+                          <input
+                            value={store.city}
+                            onChange={set("city")}
+                            placeholder="City"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 4: Collector, Area, Group */}
+                      <div className="el-personal-row-4">
+                        <Field label="Collector">
+                          <input
+                            value={store.collector}
+                            onChange={set("collector")}
+                            placeholder="Collector name"
+                          />
+                        </Field>
+
+                        <Field label="Area">
+                          <input
+                            value={store.area}
+                            onChange={set("area")}
+                            placeholder="Area/Locality"
+                          />
+                        </Field>
+
+                        <Field label="Group">
+                          <input
+                            value={store.group}
+                            onChange={set("group")}
+                            placeholder="Group name"
+                          />
+                        </Field>
+                      </div>
+                    </section>
+
+                    {/* Additional Info Section */}
+                    <section className="el-section el-section-additional">
+                      <h2>Additional Info</h2>
+                      
+                      {/* Row 1: Profession */}
+                      <div className="el-additional-row-1">
+                        <Field label="Profession">
+                          <input
+                            value={store.profession}
+                            onChange={set("profession")}
+                            placeholder="Profession/Occupation"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 2: Address1, Address2 */}
+                      <div className="el-additional-row-2">
+                        <Field label="Address1">
+                          <input
+                            value={store.address}
+                            onChange={set("address")}
+                            placeholder="Street address"
+                          />
+                        </Field>
+
+                        <Field label="Address2">
+                          <input
+                            value={store.address2}
+                            onChange={set("address2")}
+                            placeholder="Address line 2"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 3: Contact, Monthly (low width) */}
+                      <div className="el-additional-row-3">
+                        <Field label="Contact">
+                          <input
+                            type="tel"
+                            value={store.contact}
+                            onChange={set("contact")}
+                            placeholder="Contact number"
+                          />
+                        </Field>
+
+                        <Field label="Monthly">
+                          <input
+                            type="number"
+                            value={store.monthly}
+                            onChange={set("monthly")}
+                            placeholder="Monthly income"
+                          />
+                        </Field>
+                      </div>
+                    </section>
+
+                    {/* Guarantor Info Section */}
+                    <section className="el-section">
+                      <h2>Guarantor Info</h2>
+                      
+                      {/* Row 1: Name, Full Name */}
+                      <div className="el-guarantor-row-1">
+                        <Field label="Name">
+                          <input
+                            value={store.g1Name}
+                            onChange={set("g1Name")}
+                            placeholder="Name"
+                          />
+                        </Field>
+
+                        <Field label="Full Name">
+                          <input
+                            value={store.g1FullName}
+                            onChange={set("g1FullName")}
+                            placeholder="Full name"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 2: Address1, Address2 */}
+                      <div className="el-guarantor-row-2">
+                        <Field label="Address1">
+                          <input
+                            value={store.g1Address1}
+                            onChange={set("g1Address1")}
+                            placeholder="Street address"
+                          />
+                        </Field>
+
+                        <Field label="Address2">
+                          <input
+                            value={store.g1Address2}
+                            onChange={set("g1Address2")}
+                            placeholder="Address line 2"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 3: Contact, CNIC (low width) */}
+                      <div className="el-guarantor-row-3">
+                        <Field label="Contact">
+                          <input
+                            type="tel"
+                            value={store.g1Contact}
+                            onChange={set("g1Contact")}
+                            placeholder="Contact number"
+                          />
+                        </Field>
+
+                        <Field label="CNIC">
+                          <input
+                            value={store.g1Cnic}
+                            onChange={set("g1Cnic")}
+                            placeholder="CNIC number"
+                          />
+                        </Field>
+                      </div>
+                    </section>
+
+                    {/* Duplicate Guarantor Info Section */}
+                    <section className="el-section">
+                      <h2>Guarantor Info</h2>
+                      
+                      {/* Row 1: Name, Full Name */}
+                      <div className="el-guarantor-row-1">
+                        <Field label="Name">
+                          <input
+                            value={store.g2Name}
+                            onChange={set("g2Name")}
+                            placeholder="Name"
+                          />
+                        </Field>
+
+                        <Field label="Full Name">
+                          <input
+                            value={store.g2FullName}
+                            onChange={set("g2FullName")}
+                            placeholder="Full name"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 2: Address1, Address2 */}
+                      <div className="el-guarantor-row-2">
+                        <Field label="Address1">
+                          <input
+                            value={store.g2Address1}
+                            onChange={set("g2Address1")}
+                            placeholder="Street address"
+                          />
+                        </Field>
+
+                        <Field label="Address2">
+                          <input
+                            value={store.g2Address2}
+                            onChange={set("g2Address2")}
+                            placeholder="Address line 2"
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 3: Contact, CNIC (low width) */}
+                      <div className="el-guarantor-row-3">
+                        <Field label="Contact">
+                          <input
+                            type="tel"
+                            value={store.g2Contact}
+                            onChange={set("g2Contact")}
+                            placeholder="Contact number"
+                          />
+                        </Field>
+
+                        <Field label="CNIC">
+                          <input
+                            value={store.g2Cnic}
+                            onChange={set("g2Cnic")}
+                            placeholder="CNIC number"
+                          />
+                        </Field>
+                      </div>
+                    </section>
+
+                    {/* Financial Standing - No heading, just line */}
+                    <div className="el-financial-line"></div>
+
+                    <div className="el-financial-fields">
+                      {/* Row 1: Verify, Date (low width) */}
+                      <div className="el-financial-row-1">
+                        <Field label="Verify">
+                          <input
+                            value={store.verify}
+                            onChange={set("verify")}
+                            placeholder="Verify"
+                          />
+                        </Field>
+
+                        <Field label="Date">
+                          <input
+                            type="date"
+                            value={store.date}
+                            onChange={set("date")}
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 2: Remarks (large height) */}
+                      <div className="el-financial-row-2">
+                        <Field label="Remarks">
+                          <textarea
+                            value={store.remarks}
+                            onChange={set("remarks")}
+                            placeholder="Remarks"
+                            rows={3}
+                          />
+                        </Field>
+                      </div>
+
+                      {/* Row 3: Document with Upload & Download */}
+                      <div className="el-financial-row-3">
+                        <div className="el-document-wrapper">
+                          <span className="el-document-label">Document</span>
+                          <div className="el-document-actions">
+                            <button type="button" className="el-btn el-btn-ghost el-btn-doc">
+                              <FiUpload className="el-btn-icon" />
+                              Upload
+                            </button>
+                            <span className="el-download-label">Download</span>
+                            <button type="button" className="el-btn el-btn-ghost el-btn-doc">
+                              <FiDownload className="el-btn-icon" />
+                              Download
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="el-form-actions">
+                      <button type="submit" className="el-btn el-btn-save">
+                        Save
+                      </button>
+
+                      <button type="button" className="el-btn el-btn-return">
+                        Return
+                      </button>
+
+                      <button type="button" className="el-btn el-btn-new">
+                        New
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* RIGHT RAIL - Photo upload with Guarantor images */}
+                  <aside className="el-rail">
+                    <div className="el-rail-content">
+                      {/* Main Photo */}
+                      <div className="el-photo">
+                        <div className="el-photo-frame">
+                          <span>🏪</span>
+                        </div>
+                        <div className="el-photo-actions">
+                          <button type="button" className="el-btn el-btn-ghost">
+                            <FiUpload className="el-btn-icon" />
+                            Upload
+                          </button>
+                          <button type="button" className="el-btn el-btn-ghost">
+                            <FiCamera className="el-btn-icon" />
+                            Camera
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Guarantor 1 Photo */}
+                      <div className="el-photo el-photo-guarantor" style={{marginTop:'155px'}}>
+                        <div className="el-photo-frame el-photo-frame-small">
+                          <span>👤</span>
+                        </div>
+                        <div className="el-photo-label">Guarantor 1</div>
+                        <div className="el-photo-actions">
+                          <button type="button" className="el-btn el-btn-ghost">
+                            <FiUpload className="el-btn-icon" />
+                            Upload
+                          </button>
+                          <button type="button" className="el-btn el-btn-ghost">
+                            <FiCamera className="el-btn-icon" />
+                            Camera
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Guarantor 2 Photo */}
+                      <div className="el-photo el-photo-guarantor">
+                        <div className="el-photo-frame el-photo-frame-small">
+                          <span>👤</span>
+                        </div>
+                        <div className="el-photo-label">Guarantor 2</div>
+                        <div className="el-photo-actions">
+                          <button type="button" className="el-btn el-btn-ghost">
+                            <FiUpload className="el-btn-icon" />
+                            Upload
+                          </button>
+                          <button type="button" className="el-btn el-btn-ghost">
+                            <FiCamera className="el-btn-icon" />
+                            Camera
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </aside>
+                </div>
               </div>
-
-              <div className="store-field-wrapper">
-                <label className="store-label">Status</label>
-                <select
-                  className="store-select store-select-status"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='${fontcolor.replace('#', '%23')}40'/%3E%3C/svg%3E")`,
-                  }}
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="pending">Pending</option>
-                  <option value="closed">Closed</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Row 2: Description (1 column - full width) */}
-            <div className="store-row">
-              <div className="store-field-wrapper" style={{ flex: 1 }}>
-                <label className="store-label">Description</label>
-                <input
-                  type="text"
-                  placeholder="Description"
-                  className="store-input store-input-description"
-                />
-              </div>
-            </div>
-
-            {/* Row 3: Store Abb + Stock (2 columns) */}
-            <div className="store-row">
-              <div className="store-field-wrapper">
-                <label className="store-label">Store Abb</label>
-                <input
-                  type="text"
-                  placeholder="Abbreviation"
-                  className="store-input store-input-abb"
-                />
-              </div>
-
-              <div className="store-field-wrapper">
-                <label className="store-label">Stock</label>
-                <select
-                  className="store-select store-select-stock"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='${fontcolor.replace('#', '%23')}40'/%3E%3C/svg%3E")`,
-                  }}
-                >
-                  <option value="in-stock">In Stock</option>
-                  <option value="out-of-stock">Out of Stock</option>
-                  <option value="low-stock">Low Stock</option>
-                  <option value="pre-order">Pre-Order</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="store-actions">
-              <button className="store-btn store-btn-primary">
-                💾 Save
-              </button>
-              <button className="store-btn store-btn-secondary">
-                🗑️ Return
-              </button>
-              <button className="store-btn store-btn-secondary">
-                ✏️ New
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

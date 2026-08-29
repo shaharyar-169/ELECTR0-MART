@@ -732,17 +732,17 @@ export default function InstallmentCollectionDailyComparison() {
     const headers = [
       "Date",
       "Day",
-      "SaleCust",
+      "Sale",
       "SaleAmt",
       "RentAmt",
       "TotalAmt",
       "AdvaceAmt",
-      "CustNos",
+      "Nos",
       "InsAmt",
       "Collection",
       "Diff",
     ];
-    const columnWidths = [23, 28, 25, 27, 27, 27, 27, 27, 27, 27, 27];
+    const columnWidths = [23, 28, 18, 27, 27, 27, 27, 18, 27, 27, 27];
 
     // Calculate total table width
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -1205,12 +1205,12 @@ export default function InstallmentCollectionDailyComparison() {
   const headers = [
     "Date",
     "Day",
-    "SaleCust",
+    "Sale",
     "SaleAmt",
     "RentAmt",
     "TotalAmt",
     "AdvaceAmt",
-    "CustNos",
+    "Nos",
     "InsAmt",
     "Collection",
     "Diff",
@@ -1254,7 +1254,7 @@ export default function InstallmentCollectionDailyComparison() {
   });
 
   // Set column widths
-  [11, 14, 10, 14, 14, 14, 14, 14, 14, 14, 14, 14].forEach((width, index) => {
+  [11, 14, 6, 14, 14, 14, 14, 6, 14, 14, 14].forEach((width, index) => {
     worksheet.getColumn(index + 1).width = width;
   });
 
@@ -1368,7 +1368,7 @@ export default function InstallmentCollectionDailyComparison() {
     width: "90px",
   };
   const thirdColWidth = {
-    width: "87px",
+    width: "50px",
   };
   const forthColWidth = {
     width: "87px",
@@ -1382,9 +1382,13 @@ export default function InstallmentCollectionDailyComparison() {
   const seventhColWidth = {
     width: "87px",
   };
-  const eighthColWidth = {
+   const eighthColWidth = {
+    width: "50px",
+  };
+  const eighthColWidth1 = {
     width: "87px",
   };
+ 
   const ninhthColWidth = {
     width: "87px",
   };
@@ -1430,7 +1434,7 @@ export default function InstallmentCollectionDailyComparison() {
 
   const contentStyle = {
     width: "100%", // 100vw ki jagah 100%
-    maxWidth: "1000px",
+    maxWidth: "895px",
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -1983,7 +1987,7 @@ export default function InstallmentCollectionDailyComparison() {
                       Day
                     </td>
                     <td className="border-dark" style={thirdColWidth}>
-                      SaleCust
+                      Sale
                     </td>
                     <td className="border-dark" style={forthColWidth}>
                       Sale Amt
@@ -1998,9 +2002,9 @@ export default function InstallmentCollectionDailyComparison() {
                       Adv Amt
                     </td>
                     <td className="border-dark" style={eighthColWidth}>
-                      Cust Nos
+                      Nos
                     </td>
-                    <td className="border-dark" style={eighthColWidth}>
+                    <td className="border-dark" style={eighthColWidth1}>
                       Ins Amt
                     </td>
                     <td className="border-dark" style={ninhthColWidth}>
@@ -2025,150 +2029,171 @@ export default function InstallmentCollectionDailyComparison() {
                 wordBreak: "break-word",
               }}
             >
-              <table
-                id="tableBody"
+       <table
+  id="tableBody"
+  style={{
+    fontFamily: getfontstyle,
+    fontSize: getdatafontsize,
+    width: "100%",
+    position: "relative",
+    ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+  }}
+>
+  <tbody id="tablebody">
+    {isLoading ? (
+      <>
+        <tr
+          style={{
+            backgroundColor: getcolor,
+          }}
+        >
+          <td colSpan="11" className="text-center">
+            <Spinner animation="border" variant="primary" />
+          </td>
+        </tr>
+        {Array.from({ length: Math.max(0, 30 - 5) }).map(
+          (_, rowIndex) => (
+            <tr
+              key={`blank-${rowIndex}`}
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              {Array.from({ length: 11 }).map((_, colIndex) => (
+                <td key={`blank-${rowIndex}-${colIndex}`}>
+                  &nbsp;
+                </td>
+              ))}
+            </tr>
+          ),
+        )}
+        <tr>
+          <td style={firstColWidth}></td>
+          <td style={secondColWidth}></td>
+          <td style={thirdColWidth}></td>
+          <td style={forthColWidth}></td>
+          <td style={fifthColWidth}></td>
+          <td style={sixthColWidth}></td>
+          <td style={seventhColWidth}></td>
+          <td style={eighthColWidth}></td>
+          <td style={eighthColWidth1}></td>
+          <td style={ninhthColWidth}></td>
+          <td style={tenthColWidth}></td>
+        </tr>
+      </>
+    ) : (
+      <>
+        {tableData.map((item, i) => {
+          totalEnteries += 1;
+          const isSelected = selectedIndex === i;
+          return (
+            <tr
+              key={`${i}-${selectedIndex}`}
+              ref={(el) => (rowRefs.current[i] = el)}
+              onClick={() => handleRowClick(i)}
+              className={
+                isSelected ? "selected-background" : ""
+              }
+              style={{
+                backgroundColor: getcolor,
+                color: fontcolor,
+              }}
+            >
+              <td className="text-center" style={firstColWidth}>
+                {item.Date}
+              </td>
+              <td className="text-start" style={secondColWidth}>
+                {item.Day}
+              </td>
+              <td className="text-end" style={thirdColWidth}>
+                {item.SaleCust}
+              </td>
+              <td className="text-end" style={forthColWidth}>
+                {item.SaleAmt}
+              </td>
+              <td className="text-end" style={fifthColWidth}>
+                {item.RentAmt}
+              </td>
+              <td className="text-end" style={sixthColWidth}>
+                {item.TotalAmt}
+              </td>
+              <td className="text-end" style={seventhColWidth}>
+                {item.AdvaceAmt}
+              </td>
+              <td 
+                className="text-end" 
                 style={{
-                  fontFamily: getfontstyle,
-                  fontSize: getdatafontsize,
-                  width: "100%",
-                  position: "relative",
-                  ...(tableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                  ...eighthColWidth, 
+                  color: isSelected ? "white" : "green"
                 }}
               >
-                <tbody id="tablebody">
-                  {isLoading ? (
-                    <>
-                      <tr
-                        style={{
-                          backgroundColor: getcolor,
-                        }}
-                      >
-                        <td colSpan="11" className="text-center">
-                          <Spinner animation="border" variant="primary" />
-                        </td>
-                      </tr>
-                      {Array.from({ length: Math.max(0, 30 - 5) }).map(
-                        (_, rowIndex) => (
-                          <tr
-                            key={`blank-${rowIndex}`}
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            {Array.from({ length: 11 }).map((_, colIndex) => (
-                              <td key={`blank-${rowIndex}-${colIndex}`}>
-                                &nbsp;
-                              </td>
-                            ))}
-                          </tr>
-                        ),
-                      )}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eighthColWidth}></td>
-                        <td style={eighthColWidth}></td>
-
-                        <td style={ninhthColWidth}></td>
-                        <td style={tenthColWidth}></td>
-                      </tr>
-                    </>
-                  ) : (
-                    <>
-                      {tableData.map((item, i) => {
-                        totalEnteries += 1;
-                        return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                            }}
-                          >
-                            <td className="text-start" style={firstColWidth}>
-                              {item.Date}
-                            </td>
-                            <td className="text-start" style={secondColWidth}>
-                              {item.Day}
-                            </td>
-                            <td className="text-end" style={thirdColWidth}>
-                              {item.SaleCust}
-                            </td>
-                            <td className="text-end" style={forthColWidth}>
-                              {item.SaleAmt}
-                            </td>
-                            <td className="text-end" style={fifthColWidth}>
-                              {item.RentAmt}
-                            </td>
-
-                            <td className="text-end" style={sixthColWidth}>
-                              {item.TotalAmt}
-                            </td>
-
-                            <td className="text-end" style={seventhColWidth}>
-                              {item.AdvaceAmt}
-                            </td>
-                            <td className="text-end" style={eighthColWidth}>
-                              {item.CustNos}
-                            </td>
-                            <td className="text-end" style={eighthColWidth}>
-                              {item.InsAmt}
-                            </td>
-                            <td className="text-end" style={ninhthColWidth}>
-                              {item.Collection}
-                            </td>
-                            <td className="text-end" style={tenthColWidth}>
-                              {item.Diff}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {Array.from({
-                        length: Math.max(0, 27 - tableData.length),
-                      }).map((_, rowIndex) => (
-                        <tr
-                          key={`blank-${rowIndex}`}
-                          style={{
-                            backgroundColor: getcolor,
-                            color: fontcolor,
-                          }}
-                        >
-                          {Array.from({ length: 11 }).map((_, colIndex) => (
-                            <td key={`blank-${rowIndex}-${colIndex}`}>
-                              &nbsp;
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                      <tr>
-                        <td style={firstColWidth}></td>
-                        <td style={secondColWidth}></td>
-                        <td style={thirdColWidth}></td>
-                        <td style={forthColWidth}></td>
-                        <td style={fifthColWidth}></td>
-                        <td style={sixthColWidth}></td>
-                        <td style={seventhColWidth}></td>
-                        <td style={eighthColWidth}></td>
-                        <td style={eighthColWidth}></td>
-                        <td style={ninhthColWidth}></td>
-                        <td style={tenthColWidth}></td>
-
-                      </tr>
-                    </>
-                  )}
-                </tbody>
-              </table>
+                {item.CustNos}
+              </td>
+              <td 
+                className="text-end" 
+                style={{
+                  ...eighthColWidth1, 
+                  color: isSelected ? "white" : "green"
+                }}
+              >
+                {item.InsAmt}
+              </td>
+              <td 
+                className="text-end" 
+                style={{
+                  ...ninhthColWidth, 
+                  color: isSelected ? "white" : "green"
+                }}
+              >
+                {item.Collection}
+              </td>
+              <td 
+                className="text-end" 
+                style={{
+                  ...tenthColWidth, 
+                  color: isSelected ? "white" : "green"
+                }}
+              >
+                {item.Diff}
+              </td>
+            </tr>
+          );
+        })}
+        {Array.from({
+          length: Math.max(0, 27 - tableData.length),
+        }).map((_, rowIndex) => (
+          <tr
+            key={`blank-${rowIndex}`}
+            style={{
+              backgroundColor: getcolor,
+              color: fontcolor,
+            }}
+          >
+            {Array.from({ length: 11 }).map((_, colIndex) => (
+              <td key={`blank-${rowIndex}-${colIndex}`}>
+                &nbsp;
+              </td>
+            ))}
+          </tr>
+        ))}
+        <tr>
+          <td style={firstColWidth}></td>
+          <td style={secondColWidth}></td>
+          <td style={thirdColWidth}></td>
+          <td style={forthColWidth}></td>
+          <td style={fifthColWidth}></td>
+          <td style={sixthColWidth}></td>
+          <td style={seventhColWidth}></td>
+          <td style={eighthColWidth}></td>
+          <td style={eighthColWidth1}></td>
+          <td style={ninhthColWidth}></td>
+          <td style={tenthColWidth}></td>
+        </tr>
+      </>
+    )}
+  </tbody>
+</table>
             </div>
           </div>
           <div
@@ -2267,7 +2292,7 @@ export default function InstallmentCollectionDailyComparison() {
             </div>
             <div
               style={{
-                ...eighthColWidth,
+                ...eighthColWidth1,
                 background: getcolor,
                 borderRight: `1px solid ${fontcolor}`,
               }}

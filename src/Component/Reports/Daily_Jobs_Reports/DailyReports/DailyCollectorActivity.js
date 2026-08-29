@@ -251,10 +251,12 @@ export default function DailyCollectorActivityReport() {
         toDateElement.style.border = `1px solid ${fontcolor}`;
         settoInputDate(formattedInput);
 
-        if (input2Ref.current) {
+        if (input1Ref.current) {
           e.preventDefault();
-          input2Ref.current.focus();
+          input1Ref.current.focus();
         }
+
+
       } else {
         toast.error("Date must be in the format dd-mm-yyyy");
       }
@@ -410,13 +412,14 @@ export default function DailyCollectorActivityReport() {
       FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FColCod: saleType,
+      FTrnTyp: transectionType,
 
-      // code: organisation.code,
-      // FLocCod: locationnumber || getLocationNumber,
+      code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
       // FYerDsc: yeardescription || getYearDescription,
 
-      code: 'CRYSTALSOFT',
-      FLocCod: '001',
+      // code: 'CRYSTALSOFT',
+      // FLocCod: '001',
     }).toString();
 
     axios
@@ -499,11 +502,11 @@ export default function DailyCollectorActivityReport() {
 useEffect(() => {
   const apiUrl = apiLinks + "/GetActiveCollector.php";
   const formData = new URLSearchParams({
-  // code: organisation.code,
-  //     FLocCod: locationnumber || getLocationNumber,
+  code: organisation.code,
+      FLocCod: locationnumber || getLocationNumber,
 
-     FLocCod: '001',
-    code: 'CRYSTALSOFT',
+    //  FLocCod: '001',
+    // code: 'CRYSTALSOFT',
   }).toString();
 
   axios
@@ -1749,6 +1752,22 @@ const options = (supplierList || [])
     );
   };
 
+const isFollowUpDue = (followUpDate) => {
+  if (!followUpDate) return false;
+
+  // Convert DD-MM-YYYY → Date
+  const [day, month, year] = followUpDate.split("-").map(Number);
+
+  const followUp = new Date(year, month - 1, day);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  followUp.setHours(0, 0, 0, 0);
+
+  return followUp <= today;
+};
+
   return (
     <>
       <ToastContainer />
@@ -1775,7 +1794,7 @@ const options = (supplierList || [])
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "start",
+                justifyContent: "space-between",
               }}
             >
               {/* ------ */}
@@ -1854,7 +1873,7 @@ const options = (supplierList || [])
                 </div>
               </div>
 
-              {/* <div
+              <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
               >
@@ -1905,18 +1924,10 @@ const options = (supplierList || [])
                     }}
                   >
                     <option value="">ALL</option>
-                    <option value="CRV">CASH RECEIVE VORCHER</option>
-                    <option value="CPV">Cash PAYMENT VORCHER</option>
-                    <option value="BRV">Bank RECEIVE VORCHER</option>
-                    <option value="BPV">BANK PAYMENT VORCHER</option>
-                    <option value="JVR">JOURNAL VORCHER</option>
-                    <option value="INV">ITEM SALE</option>
-                    <option value="SRN">SALE RETURN</option>
-                    <option value="BIL">PURCHASE</option>
-                    <option value="PRN">PURCHASE RETURN</option>
-                    <option value="ISS">ISSUE</option>
-                    <option value="REC">RECEIVED</option>
-                    <option value="SLY">SALARY</option>
+                    <option value="CALL">Call</option>
+                    <option value="MSG ">Message</option>
+                    <option value="VST">Visit</option>
+                
                   </select>
 
                   {transectionType !== "" && (
@@ -1938,7 +1949,7 @@ const options = (supplierList || [])
                     </span>
                   )}
                 </div>
-              </div> */}
+              </div>
             </div>
           </div>
 
@@ -2114,7 +2125,7 @@ const options = (supplierList || [])
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
-                    onKeyDown={(e) => handleToKeyPress(e, input2Ref)}
+                    onKeyDown={(e) => handleToKeyPress(e, input1Ref)}
                     id="toDatePicker"
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
@@ -2348,20 +2359,16 @@ const options = (supplierList || [])
                       {tableData.map((item, i) => {
                         totalEnteries += 1;
                         return (
-                          <tr
-                            key={`${i}-${selectedIndex}`}
-                            ref={(el) => (rowRefs.current[i] = el)}
-                            onClick={() => handleRowClick(i)}
-                            className={
-                              selectedIndex === i ? "selected-background" : ""
-                            }
-                            style={{
-                              backgroundColor: getcolor,
-                              color: fontcolor,
-                              color: isMatchedRow(item) ? "red" : fontcolor, // 🔥 highlight logic
-                              //  fontWeight: isMatchedRow(item) ? "bold" : "normal", // optional
-                            }}
-                          >
+                         <tr
+  key={`${i}-${selectedIndex}`}
+  ref={(el) => (rowRefs.current[i] = el)}
+  onClick={() => handleRowClick(i)}
+  className={selectedIndex === i ? "selected-background" : ""}
+  style={{
+    backgroundColor: getcolor,
+    color: isFollowUpDue(item["Follow Up"]) ? "red" : fontcolor,
+  }}
+>
                             <td className="text-center" style={firstColWidth}>
                               {item.Date}
                             </td>
