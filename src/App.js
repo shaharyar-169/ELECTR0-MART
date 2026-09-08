@@ -256,6 +256,9 @@ import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/Utilit
 //////////////////////////// FBR DATA reports //////////////////////////////
 import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/CollectorWiseCustomerSearch.js";
 
+/////////////////////////////// AMERICAN TRASECTION FROMA /////////////////////////////
+import InstallarMaintenance from "./Component/FORMS/InstallarMaintenance.jsx";
+
 
 function App() {
   const queryClient = new QueryClient();
@@ -532,6 +535,13 @@ function App() {
                 <Route exact path="/ResturentDashboard" element={<ResturentDashboard />} />
                 <Route exact path="/GymDashboard" element={<GYMDashboard />} />
                 <Route exact path="/NasirTradersDashboard" element={<ElectronicsDasboard />} />
+
+
+
+   {/* Rountes for Forms */}
+                <Route exact path="/InstallationSheet" element={<InstallarMaintenance />} />
+
+
 
 
                 <Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />

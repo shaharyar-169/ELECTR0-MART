@@ -1,0 +1,596 @@
+/* ============================================================
+   STORE MAINTENANCE — viewport-fit fix only
+   (design, layout, colors, fonts, positions all unchanged)
+   ============================================================ */
+
+.el-page-host {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  margin-top: -60px;
+}
+
+.el-page-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 750px;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  display: block !important;
+  overflow: visible !important;
+  align-self: flex-start !important;
+}
+
+.el-page-wrapper * {
+  box-sizing: border-box;
+}
+
+.el-page {
+  --navy-950: #0f1b2d;
+  --navy-800: #16273f;
+  --navy-700: #1f3654;
+  --navy-500: #37547d;
+  --primary-blue: #83daec;
+  --brass-500: #b8873c;
+  --brass-400: #d3a35f;
+  --paper: #f6f4ef;
+  --paper-dim: #eef0f0;
+  --ink: #1b2430;
+  --ink-soft: #6b7280;
+  --line: #e2e2e2;
+  --ok: #2f7a4f;
+  --warn: #b8873c;
+  --danger: #b3432f;
+  --header-blue: #1f5aa8;
+
+  width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: "Verdana", Geneva, Tahoma, sans-serif;
+  color: var(--ink);
+  line-height: 1.4;
+  display: block !important;
+  overflow: visible !important;
+  align-self: flex-start !important;
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+
+.el-card {
+  width: 100%;
+  height: min(650px, calc(100vh - 48px)) !important;
+  min-height: 480px !important;
+  max-height: calc(100vh - 110px) !important;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #e0dcd4;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
+  align-self: flex-start !important;
+}
+
+.el-card form {
+  display: flex !important;
+  flex-direction: column;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.el-header {
+  background: #ffffff;
+  padding: 10px 24px 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  height: auto !important;
+  min-height: 0 !important;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.el-header h1 {
+  font-family: "Verdana", Geneva, Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+  margin: 0;
+  text-align: left;
+  line-height: 1.15;
+  letter-spacing: 0.2px;
+}
+
+.el-subtitle {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: 2px 0 0 0;
+}
+
+.el-scrollable-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  min-height: 0;
+}
+
+.el-scrollable-body::-webkit-scrollbar { width: 5px; }
+.el-scrollable-body::-webkit-scrollbar-track { background: var(--paper-dim); border-radius: 3px; }
+.el-scrollable-body::-webkit-scrollbar-thumb { background: var(--header-blue); border-radius: 3px; }
+.el-scrollable-body::-webkit-scrollbar-thumb:hover { background: #17457f; }
+
+.el-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--paper-dim);
+  margin: 10px 20px 0;
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+
+.el-top-bar .el-field-row {
+  margin-bottom: 0;
+}
+
+.el-top-bar .el-field-row:first-child {
+  max-width: 100px;
+  flex: 0 0 auto;
+
+
+  
+  margin-left: 20px; 
+  }
+
+.el-top-bar .el-field-row:last-child {
+  max-width: 160px;
+  flex: 0 0 auto;
+}
+
+.el-top-bar .el-field-label-right {
+  min-width: 50px;
+  font-size: 12px;
+}
+
+.el-top-bar .el-code-input {
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+
+.el-top-bar .el-code-input input {
+  padding-right: 20px;
+  font-weight: 500;
+  height: 28px;
+  font-size: 12px;
+}
+
+.el-top-bar .el-stepper {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  display: flex;
+  flex-direction: column;
+  width: 16px;
+  background: var(--header-blue);
+  border-radius: 0 5px 5px 0;
+}
+
+.el-top-bar .el-stepper button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 6px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.el-top-bar .el-stepper button:hover { opacity: 0.85; }
+
+.el-top-bar select {
+  height: 28px;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.el-body {
+  display: flex;
+  width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0 20px 5px;
+}
+
+.el-main-content {
+  flex: 1;
+  padding: 0;
+  min-width: 0;
+  overflow-y: visible;
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+
+.el-section {
+  background: var(--paper-dim);
+  border-radius: 8px;
+  padding: 5px 16px 12px;
+  margin-top: 10px;
+}
+
+.el-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* ============================================================
+   FIELD ROWS WITH LABELS ON LEFT
+   ============================================================ */
+
+.el-field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.el-field-label-right {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+  min-width: 95px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.el-field-row input,
+.el-field-row select {
+  flex: 1;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  font-size: 12px;
+  color: var(--ink);
+  font-family: "Verdana", Geneva, Tahoma, sans-serif;
+  height: 28px;
+  line-height: 26px;
+  min-width: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.el-field-row input:focus,
+.el-field-row select:focus {
+  outline: none;
+  border-color: var(--header-blue);
+  box-shadow: 0 0 0 3px rgba(31, 90, 168, 0.12);
+}
+
+.el-field-row input::placeholder {
+  color: #9aa0a6;
+  font-size: 11px;
+}
+
+/* Fixed width for specific fields - Phone No, NIC #, JC #, EP # */
+.fixed-width-field {
+  max-width: 250px !important;
+  width: 250px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Smaller width for select fields */
+.el-field-row select {
+  max-width: 250px;
+}
+
+/* Row with two fields (Phone No + Mobile No) - SAME ROW with space-between */
+.el-row-2-fields {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 20px;
+}
+
+.el-row-2-fields .el-field-row-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 22px;
+}
+
+.el-row-2-fields .el-field-row-inner.el-field-left {
+  justify-content: flex-start;
+  flex: 0 1 auto;
+}
+
+.el-row-2-fields .el-field-row-inner.el-field-right {
+  justify-content: flex-end;
+  flex: 0 1 auto;
+}
+
+.el-row-2-fields .el-field-row-inner .el-field-label-right {
+  min-width: 70px;
+  font-size: 12px;
+}
+
+.el-row-2-fields .el-field-row-inner input {
+  max-width: 200px;
+  width: 200px;
+  flex: 0 0 auto;
+}
+
+/* ============================================================
+   A/C CODE SECTION
+   ============================================================ */
+
+.el-account-code-section {
+  background: var(--paper-dim);
+  border-radius: 8px;
+  margin: 0px 20px 0px;
+  padding: 6px 16px;
+  border: none;
+}
+
+.el-account-code-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.el-account-code-row .el-field-label-right {
+  min-width: 95px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.el-account-code-input {
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  font-size: 12px;
+  color: var(--ink);
+  font-family: "Verdana", Geneva, Tahoma, sans-serif;
+  height: 28px;
+  line-height: 26px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.el-account-code-input:focus {
+  outline: none;
+  border-color: var(--header-blue);
+  box-shadow: 0 0 0 3px rgba(31, 90, 168, 0.12);
+}
+
+.el-account-code-input:first-of-type {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.el-account-code-input:last-of-type {
+  width: 350px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.el-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  background: #ffffff;
+  border: none;
+  padding: 8px 0;
+  flex-shrink: 0;
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.el-form-actions .el-btn {
+  height: 25px;
+  min-width: 100px;
+  padding: 0px 22px;
+  border-radius: 6px;
+  font-family: "Verdana", Geneva, Tahoma, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--header-blue);
+  border: 1px solid var(--header-blue);
+  color: #ffffff;
+  transition: opacity 0.15s ease;
+}
+
+.el-form-actions .el-btn:hover { opacity: 0.85; }
+
+.el-btn-save,
+.el-btn-return,
+.el-btn-new {
+  background: var(--header-blue);
+  border: 1px solid var(--header-blue);
+  color: #ffffff;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .el-card {
+    height: min(660px, calc(100vh - 40px)) !important;
+    min-height: 440px !important;
+    max-height: calc(100vh - 40px) !important;
+  }
+}
+
+@media (max-width: 880px) {
+  .el-page-host { padding: 12px; }
+  .el-page-wrapper { max-width: 100%; }
+  .el-card {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-radius: 8px;
+  }
+  .el-body { flex-direction: column; padding: 0 16px 16px; }
+  .el-top-bar { margin: 10px 16px 0; flex-wrap: wrap; padding: 6px 12px; }
+  .el-top-bar .el-field-row:first-child,
+  .el-top-bar .el-field-row:last-child {
+    max-width: none;
+    flex: 1 1 180px;
+  }
+  .el-main-content { padding: 0; }
+  .el-field-label-right { min-width: 80px; font-size: 11px; }
+  .el-field-row input[type="tel"],
+  .el-field-row select {
+    max-width: none;
+  }
+  .fixed-width-field {
+    max-width: 200px !important;
+    width: 200px !important;
+  }
+  .el-row-2-fields {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .el-row-2-fields .el-field-row-inner input {
+    max-width: 160px;
+    width: 160px;
+    flex: 0 0 auto;
+  }
+  .el-account-code-section { margin: 8px 16px 12px; padding: 6px 12px; }
+  .el-account-code-row .el-field-label-right { min-width: 80px; }
+}
+
+@media (max-width: 768px) {
+  .el-row-2-fields {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .el-row-2-fields .el-field-row-inner.el-field-left,
+  .el-row-2-fields .el-field-row-inner.el-field-right {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .el-row-2-fields .el-field-row-inner input {
+    max-width: none;
+    width: 100%;
+    flex: 1;
+  }
+  .fixed-width-field {
+    max-width: 100% !important;
+    width: 100% !important;
+    flex: 1 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .el-page-host { padding: 8px; }
+  .el-page-wrapper { max-width: 100%; }
+  .el-card { border-radius: 6px; height: auto !important; min-height: 0 !important; max-height: none !important; }
+  .el-header { padding: 10px 16px 8px; }
+  .el-header h1 { font-size: 16px; }
+  .el-top-bar { margin: 10px 12px 0; padding: 8px 12px; flex-direction: column; align-items: stretch; gap: 8px; }
+  .el-top-bar .el-field-row:first-child,
+  .el-top-bar .el-field-row:last-child {
+    max-width: none;
+  }
+  .el-body { padding: 0 12px 12px; }
+  .el-section { padding: 10px 12px 12px; }
+  .el-field-row { flex-wrap: wrap; gap: 4px; }
+  .el-field-label-right { min-width: 100%; text-align: left; font-size: 12px; }
+  .el-field-row input,
+  .el-field-row select {
+    max-width: none;
+    width: 100%;
+  }
+  .fixed-width-field {
+    max-width: 100% !important;
+    width: 100% !important;
+    flex: 1 !important;
+  }
+  .el-row-2-fields { flex-direction: column; gap: 3px; }
+  .el-row-2-fields .el-field-row-inner { flex-wrap: wrap; gap: 4px; }
+  .el-row-2-fields .el-field-row-inner .el-field-label-right { min-width: 100%; text-align: left; }
+  .el-row-2-fields .el-field-row-inner input { max-width: none; width: 100%; }
+  .el-account-code-section { margin: 8px 12px 12px; padding: 8px 12px; }
+  .el-account-code-row { flex-wrap: wrap; gap: 4px; }
+  .el-account-code-row .el-field-label-right { min-width: 100%; text-align: left; }
+  .el-account-code-input:first-of-type,
+  .el-account-code-input:last-of-type {
+    width: 100%;
+  }
+  .el-form-actions { flex-wrap: wrap; padding: 10px 12px; gap: 8px; }
+  .el-form-actions .el-btn { flex: 1; min-width: 0; height: 34px; font-size: 11px; padding: 2px 10px; }
+}
+
+@media (max-width: 400px) {
+  .el-form-actions .el-btn { min-width: 0; font-size: 10px; padding: 2px 8px; }
+}
+
+/* ============================================================
+   RESET HEIGHTS
+   ============================================================ */
+
+.el-page-wrapper,
+.el-page-wrapper .el-page,
+.el-page-wrapper .el-card,
+.el-page-wrapper .el-card form,
+.el-page-wrapper .el-body,
+.el-page-wrapper .el-main-content {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.el-page-wrapper, .el-page, .el-card { align-self: flex-start !important; }
