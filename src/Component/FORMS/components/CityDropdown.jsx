@@ -68,6 +68,20 @@ export default function CitySelect({
     setIsOpen(false);
   };
 
+  // Clear the selected city
+  const handleClear = (e) => {
+    e.stopPropagation(); // Prevent dropdown from opening
+    onChange(""); // Clear the displayed value
+    onCityCodeChange(""); // Clear the city code
+    setIsOpen(false); // Close dropdown if open
+    // Reset highlighted index
+    setHighlightedIndex(-1);
+    // Focus the input after clearing
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   // Scroll the highlighted option into view
   useEffect(() => {
     if (!isOpen || highlightedIndex < 0 || !listRef.current) return;
@@ -181,24 +195,65 @@ export default function CitySelect({
   }, []);
 
   return (
-    <div style={{ position: "relative" }}>
-      <input
-        ref={inputRef}
-        type="text"
-        readOnly
-        className="city-select-dropdown fixed-width-field"
-        value={value || ""}
-        onClick={() => {
-          if (isOpen) {
-            setIsOpen(false);
-          } else {
-            openAndHighlightCurrent();
-          }
-        }}
-        onKeyDown={handleInputKeyDown}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-      />
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <div style={{ position: "relative", display: "inline-block" }}>
+        <input
+          ref={inputRef}
+          type="text"
+          readOnly
+          className="city-select-dropdown fixed-width-field"
+          value={value || ""}
+          onClick={() => {
+            if (isOpen) {
+              setIsOpen(false);
+            } else {
+              openAndHighlightCurrent();
+            }
+          }}
+          onKeyDown={handleInputKeyDown}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          style={{
+            paddingRight: value ? "20px" : "8px", // Add space for clear icon when value exists
+          }}
+        />
+        {/* Clear (×) icon - only show when a city is selected */}
+        {value && (
+          <button
+            type="button"
+            onClick={handleClear}
+            style={{
+              position: "absolute",
+              right: "4px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+              color: "#999",
+              padding: "2px 4px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: "1",
+              borderRadius: "50%",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#333";
+              e.currentTarget.style.backgroundColor = "#f0f0f0";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#999";
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+            aria-label="Clear selected city"
+          >
+            ×
+          </button>
+        )}
+      </div>
 
       {isOpen && (
         <ul

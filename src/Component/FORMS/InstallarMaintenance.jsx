@@ -12,6 +12,7 @@ import {
 import CitySelect from "./components/CityDropdown";
 import FormButtons from "./components/FormButton";
 import InstallationCode from "./components/InstallarCode";
+import InstallerSearchModal from "./InstallerSearchModal";
 
 const STATUS_OPTIONS = ["Active", "Non-Active"];
 
@@ -63,12 +64,15 @@ export default function InstallarMaintenance() {
   console.log('getUserData', getUserData.user)
 
   const [code, setCode] = useState("");
+  const [maxCode, setMaxCode] = useState("");
   const [organisation, setOrganisation] = useState(null);
   const [selectedCityCode, setSelectedCityCode] = useState("");
   const [cityOptions, setCityOptions] = useState([]);
   const [showDescriptionInUnlabeled, setShowDescriptionInUnlabeled] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCoolingDown, setIsCoolingDown] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const codeInputRef = useRef(null);
 
   // Refs for all form fields for Enter key navigation
@@ -246,7 +250,7 @@ export default function InstallarMaintenance() {
             address2: data.tadd002 || prev.address2,
             phone: data.tphnnum || prev.phone,
             mobile: data.tmobnum || prev.mobile,
-            nic: data.tnicnum || prev.nic,
+            nic: formatNIC(data.tnicnum) || "",
             jcName: data.tjaznam || prev.jcName,
             jcNumber: data.tjaznum || prev.jcNumber,
             epName: data.tespnam || prev.epName,
@@ -307,19 +311,31 @@ export default function InstallarMaintenance() {
   // Fetch installation data by NIC
   const fetchInstallationDataByNIC = (nicNumber) => {
     if (!organisation || !nicNumber) {
+      console.error("[NIC Lookup] Missing organisation or nicNumber:", { organisation, nicNumber });
       showToast("Data not found", 'error');
       return;
     }
 
+    // Remove hyphens for API call
+    const cleanNic = nicNumber.replace(/-/g, '');
+    console.log("[NIC Lookup] Input NIC:", nicNumber, "| Cleaned NIC:", cleanNic);
+    console.log("[NIC Lookup] Organisation code:", organisation.code);
+
     const apiUrl = apiLinks + "/GetInstallarbyCNIC.php";
     const formData = new URLSearchParams({
       code: organisation.code,
-      FNicNum: nicNumber,
+      FNicNum: cleanNic,
     }).toString();
+
+    console.log("[NIC Lookup] API URL:", apiUrl);
+    console.log("[NIC Lookup] Request body:", formData);
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
+        console.log("[NIC Lookup] Raw response.data:", response.data);
+        console.log("[NIC Lookup] response.data type:", typeof response.data);
+        console.log("[NIC Lookup] response.data length:", response.data?.length);
         if (response.data && response.data.length > 0) {
           const data = response.data[0];
           
@@ -345,7 +361,7 @@ export default function InstallarMaintenance() {
             address2: data.tadd002 || prev.address2,
             phone: data.tphnnum || prev.phone,
             mobile: data.tmobnum || prev.mobile,
-            nic: data.tnicnum || prev.nic,
+            nic: formatNIC(data.tnicnum) || prev.nic,
             jcName: data.tjaznam || prev.jcName,
             jcNumber: data.tjaznum || prev.jcNumber,
             epName: data.tespnam || prev.epName,
@@ -368,6 +384,7 @@ export default function InstallarMaintenance() {
           // Show success toast
           showToast("User data found", 'success');
         } else {
+          console.warn("[NIC Lookup] No data found. response.data:", response.data);
           // No data found - clear form fields
           setFormStore((prev) => ({
             status: "Active",
@@ -379,7 +396,7 @@ export default function InstallarMaintenance() {
             phone: "",
             mobile: "",
             city: "",
-            nic: "",
+            nic: prev.nic,
             jcName: "",
             jcNumber: "",
             epName: "",
@@ -396,16 +413,43 @@ export default function InstallarMaintenance() {
           showToast("Data not found", 'error');
           
           console.warn(
-            "No data found for NIC:",
+            "[NIC Lookup] No data found for NIC:",
             nicNumber
           );
         }
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.error("[NIC Lookup] API error:", error);
+        console.error("[NIC Lookup] Error response:", error.response?.data);
+        console.error("[NIC Lookup] Error status:", error.response?.status);
         // Show error toast on API failure
         showToast("Data not found", 'error');
       });
+  };
+
+  // Format NIC with automatic hyphens
+  const formatNIC = (value) => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Limit to 13 digits
+    const limitedDigits = digits.slice(0, 13);
+    
+    // Format with hyphens: 5-7-1 (total 13 digits)
+    if (limitedDigits.length <= 5) {
+      return limitedDigits;
+    } else if (limitedDigits.length <= 12) {
+      return `${limitedDigits.slice(0, 5)}-${limitedDigits.slice(5)}`;
+    } else {
+      return `${limitedDigits.slice(0, 5)}-${limitedDigits.slice(5, 12)}-${limitedDigits.slice(12, 13)}`;
+    }
+  };
+
+  // Handle NIC change with formatting
+  const handleNicChange = (e) => {
+    const rawValue = e.target.value;
+    const formattedValue = formatNIC(rawValue);
+    setFormStore((prev) => ({ ...prev, nic: formattedValue }));
   };
 
   const set = (key) => (e) => {
@@ -424,6 +468,35 @@ export default function InstallarMaintenance() {
       const newCode = String(next).padStart(4, "0");
       return newCode;
     });
+  };
+
+  // Handle selection from search modal
+  const handleInstallerSelect = (installerData) => {
+    if (installerData.code) {
+      setCode(installerData.code);
+      // Immediately fetch full data for the selected code
+      fetchInstallationDataByCode(installerData.code);
+    }
+  };
+
+  // Handle Installer Code change from increment/decrement controls
+  const handleInstallerCodeChange = (newCode) => {
+    fetchInstallationDataByCode(newCode);
+  };
+
+  // Handle modal close - return focus to Code input
+  const handleModalClose = () => {
+    setIsSearchModalOpen(false);
+    // Focus the Code input field after modal closes
+    setTimeout(() => {
+      if (codeInputRef.current) {
+        const input = codeInputRef.current.querySelector('input');
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }
+    }, 100);
   };
 
   // Handle Enter key navigation - moves focus to next field
@@ -460,7 +533,8 @@ export default function InstallarMaintenance() {
     if (e.key === 'Enter') {
       e.preventDefault();
       e.stopPropagation();
-      // Call the API with current NIC value
+      console.log("[NIC Enter] formStore.nic:", formStore.nic);
+      // Call the API with current NIC value (with hyphens)
       if (formStore.nic && organisation) {
         fetchInstallationDataByNIC(formStore.nic);
       }
@@ -472,6 +546,7 @@ export default function InstallarMaintenance() {
   };
 
   // Reset form to default/empty values (full reset)
+  // After clearing, fetch the next available installation code from the API.
   const resetForm = () => {
     setFormStore({
       status: "Active",
@@ -493,6 +568,37 @@ export default function InstallarMaintenance() {
       accountCode: `22-03-0${code}`,
     });
     setSelectedCityCode("");
+
+    // Fetch next code from API
+    if (organisation) {
+      const apiUrl = apiLinks + "/NewInstallar.php";
+      const formData = new URLSearchParams({
+        code: organisation.code,
+        FLocCod: getLocationNumber || getLocationnumber(),
+      }).toString();
+
+      axios
+        .post(apiUrl, formData)
+        .then((response) => {
+          if (response.data) {
+            let newCode = "";
+            if (Array.isArray(response.data) && response.data.length > 0) {
+              newCode = response.data[0];
+            } else if (typeof response.data === "string") {
+              newCode = response.data;
+            } else {
+              newCode = response.data.code || response.data.FIntCod || "";
+            }
+            if (newCode) {
+              setCode(String(newCode));
+              setMaxCode(String(newCode));
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching next code:", error);
+        });
+    }
   };
 
   // Reset form but keep code, status, and accountCode
@@ -517,6 +623,15 @@ export default function InstallarMaintenance() {
       accountCode: formStore.accountCode, // Keep current accountCode
     });
     setSelectedCityCode("");
+  };
+
+  // Convert display status to API status.
+  // Database returns "A" / "I"; the dropdown shows "Active" / "Non-Active".
+  // This helper normalises everything to the values the API expects.
+  const mapStatusForApi = (status) => {
+    if (status === "Active") return "A";
+    if (status === "Non-Active") return "I";
+    return status || ""; // Already an API value (e.g. "A", "I") or empty
   };
 
   // Resolve the backend city code (FCtyCod) that should be sent on Save.
@@ -548,106 +663,105 @@ export default function InstallarMaintenance() {
     return "";
   };
 
-  
-// Handle Save API
-const handleSave = async () => {
-  if (!organisation) {
-    console.error("Organisation data not available");
-    showToast("Organisation data not available", 'error');
-    return;
-  }
+  // Handle Save API
+  const handleSave = async () => {
+    if (!organisation) {
+      console.error("Organisation data not available");
+      showToast("Organisation data not available", 'error');
+      return;
+    }
 
-  // Validate required fields
-  if (!code) {
-    console.error("Code is required");
-    showToast("Code is required", 'error');
-    return;
-  }
+    // Validate required fields
+    if (!code) {
+      console.error("Code is required");
+      showToast("Code is required", 'error');
+      return;
+    }
 
-  // Log the API URL for debugging
-  console.log("=== API URL ===");
-  console.log("apiLinks:", apiLinks);
-  console.log("Full URL:", apiLinks + "/SaveInstallar.php");
+    // Resolve the city code the same way regardless of whether the record
+    // was loaded via GetInstallar or the city was picked manually.
+    const cityCodeToSend = resolveCityCode();
 
-  setIsSaving(true);
+    if (formStore.city && !cityCodeToSend) {
+      console.error("Could not resolve a city code for:", formStore.city);
+      showToast("Please re-select the City before saving", 'error');
+      return;
+    }
 
-  try {
-    // Try with the correct URL - note the trailing slash might be needed
-    const apiUrl = apiLinks + "/SaveInstallar.php";
-    
-    // Prepare form data for API
-    const payload = {
-      // code: organisation.code,
-      code: "AMRELEC",
-      FUsrId: "sohaib",
-      FIntCod: code,
-      FIntDsc: formStore.description || "",
-      FAdd001: formStore.address || "",
-      FAdd002: formStore.address2 || "",
-      FPhnNum: formStore.phone || "",
-      FMobNum: formStore.mobile || "",
-      FCtyCod: selectedCityCode || "",
-      FInsCod: formStore.accountCode || "",
-      FInsSts: formStore.status || "",
-      FNicNum: formStore.nic || "",
-      FJazNum: formStore.jcNumber || "",
-      FJazNam: formStore.jcName || "",
-      FEspNum: formStore.epNumber || "",
-      FEspNam: formStore.epName || "",
-      FBnkNam: formStore.bank || "",
-      FAccNum: formStore.accountNumber || "",
-      FIntPer: "",
-    };
+    setIsSaving(true);
 
-    // Log the payload for debugging
-    console.log("=== SAVE PAYLOAD ===");
-    console.log("Payload:", payload);
-
-    // Build form data string manually to ensure proper format
-    const formDataString = Object.keys(payload)
-      .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(payload[key]))
-      .join('&');
-    
-    console.log("Form data string:", formDataString);
-
-    // Try with fetch API instead of axios to see if it's an axios-specific issue
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formDataString,
-    });
-
-    const responseText = await response.text();
-    console.log("=== SAVE RESPONSE ===");
-    console.log("Response status:", response.status);
-    console.log("Response text:", responseText);
-
-    // Try to parse response as JSON if possible
-    let responseData;
     try {
-      responseData = JSON.parse(responseText);
-    } catch (e) {
-      responseData = { message: responseText };
-    }
+      const apiUrl = apiLinks + "/SaveInstallar.php";
 
-    if (response.status === 200) {
-      console.log("Save successful:", responseData);
-      showToast("Form saved successfully!", 'success');
-      resetForm();
-    } else {
-      console.error("Save failed with status:", response.status, responseData);
-      showToast(`Save failed: ${response.status} - ${responseData.message || responseText}`, 'error');
+      // Prepare form data for API - matching Postman format.
+      // Same field mapping as before; values are trimmed so manually typed
+      // entries (which can carry leading/trailing spaces or be left
+      // untouched as "") are sent in the same shape as values that came
+      // back from GetInstallar.
+      const payload = {
+        code: organisation.code,
+        // FUsrId: getUserData.user || "",
+        FUsrId: "sohaib" || "",
+        FIntCod: code,
+        FIntDsc: (formStore.description || "").trim(),
+        FAdd001: (formStore.address || "").trim(),
+        FAdd002: (formStore.address2 || "").trim(),
+        FPhnNum: (formStore.phone || "").trim(),
+        FMobNum: (formStore.mobile || "").trim(),
+        FCtyCod: cityCodeToSend || "",
+        FInsCod: formStore.accountCode || "", // FIXED: Use accountCode instead of accountNumber
+        FInsSts: mapStatusForApi(formStore.status),
+        FNicNum: (formStore.nic || "").replace(/-/g, '').trim(), // Remove hyphens for API
+        FJazNum: (formStore.jcNumber || "").trim(),
+        FJazNam: (formStore.jcName || "").trim(),
+        FEspNum: (formStore.epNumber || "").trim(),
+        FEspNam: (formStore.epName || "").trim(),
+        FBnkNam: (formStore.bank || "").trim(),
+        FAccNum: (formStore.accountNumber || "").trim(),
+        FEmlAdd: (formStore.email || "").trim(),
+        FConPer: (formStore.contactPerson || "").trim(),
+        FIntPer: "", // Always send empty string
+      };
+
+      // Log the payload for debugging
+      console.log("Saving payload:", payload);
+
+      const formData = new URLSearchParams(payload).toString();
+
+      const response = await axios.post(apiUrl, formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }
+      });
+
+      console.log("Save response:", response);
+
+      if (response.status === 200) {
+        console.log("Save successful:", response.data);
+        showToast("Form saved successfully!", 'success');
+        resetForm();
+        // 5-second cooldown to prevent duplicate saves
+        setIsCoolingDown(true);
+        setTimeout(() => setIsCoolingDown(false), 5000);
+      } else {
+        console.error("Save failed with status:", response.status, response.data);
+        showToast(`Save failed: ${response.status}`, 'error');
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      
+      // Show more detailed error message
+      let errorMessage = "Error saving data";
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || error.response.data || errorMessage;
+      }
+      showToast(errorMessage, 'error');
+    } finally {
+      setIsSaving(false);
     }
-  } catch (error) {
-    console.error("=== SAVE ERROR ===");
-    console.error("Error:", error);
-    showToast("Error saving data: " + (error.message || 'Unknown error'), 'error');
-  } finally {
-    setIsSaving(false);
-  }
-};
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -668,7 +782,7 @@ const handleSave = async () => {
 
   const handleNew = () => {
     console.log("New button clicked");
-    resetFormKeepCodeAndStatus();
+    resetForm();
   };
 
   return (
@@ -718,6 +832,10 @@ const handleSave = async () => {
                       code={code}
                       setCode={setCode}
                       onKeyDown={(e) => handleKeyDown(e, statusSelectRef)}
+                      onDoubleClick={() => setIsSearchModalOpen(true)}
+                      onCodeChange={handleInstallerCodeChange}
+                      maxCode={maxCode}
+                      onMaxCodeChange={setMaxCode}
                     />
                   </div>
 
@@ -750,10 +868,11 @@ const handleSave = async () => {
                           <input
                             ref={nicInputRef}
                             value={formStore.nic}
-                            onChange={set("nic")}
-                            placeholder="Enter NIC #"
+                            onChange={handleNicChange}
+                            placeholder="Enter NIC # "
                             className="fixed-width-field"
                             onKeyDown={handleNicEnter}
+                            maxLength={15}
                           />
                         </div>
 
@@ -766,6 +885,7 @@ const handleSave = async () => {
                             value={formStore.description}
                             onChange={set("description")}
                             placeholder="Enter Description"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, contactPersonInputRef)}
                           />
                         </div>
@@ -779,6 +899,7 @@ const handleSave = async () => {
                             value={formStore.contactPerson}
                             onChange={set("contactPerson")}
                             placeholder="Enter Contact Person"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, emailInputRef)}
                           />
                         </div>
@@ -792,7 +913,7 @@ const handleSave = async () => {
                             value={formStore.email}
                             onChange={set("email")}
                             placeholder="Enter Email"
-                            type="email"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, address1InputRef)}
                           />
                         </div>
@@ -806,6 +927,7 @@ const handleSave = async () => {
                             value={formStore.address}
                             onChange={set("address")}
                             placeholder="Enter Address 1"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, address2InputRef)}
                           />
                         </div>
@@ -819,6 +941,7 @@ const handleSave = async () => {
                             value={formStore.address2}
                             onChange={set("address2")}
                             placeholder="Enter Address 2"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, phoneInputRef)}
                           />
                         </div>
@@ -835,7 +958,13 @@ const handleSave = async () => {
                               onChange={set("phone")}
                               placeholder="Enter Phone No"
                               className="fixed-width-field"
-                              onKeyDown={(e) => handleKeyDown(e, mobileInputRef)}
+                              maxLength={25}
+                              onKeyDown={(e) => {
+                                if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                  e.preventDefault();
+                                }
+                                handleKeyDown(e, mobileInputRef);
+                              }}
                             />
                           </div>
                           <div className="el-field-row-inner el-field-right">
@@ -848,7 +977,13 @@ const handleSave = async () => {
                               value={formStore.mobile}
                               onChange={set("mobile")}
                               placeholder="Enter Mobile No"
-                              onKeyDown={(e) => handleKeyDown(e, citySelectRef)}
+                              maxLength={11}
+                              onKeyDown={(e) => {
+                                if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                  e.preventDefault();
+                                }
+                                handleKeyDown(e, citySelectRef);
+                              }}
                             />
                           </div>
                         </div>
@@ -896,6 +1031,7 @@ const handleSave = async () => {
                             value={formStore.jcName}
                             onChange={set("jcName")}
                             placeholder="Enter JC Name"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, jcNumberInputRef)}
                           />
                         </div>
@@ -908,6 +1044,7 @@ const handleSave = async () => {
                             onChange={set("jcNumber")}
                             placeholder="Enter JC #"
                             className="fixed-width-field"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, epNameInputRef)}
                           />
                         </div>
@@ -921,6 +1058,7 @@ const handleSave = async () => {
                             value={formStore.epName}
                             onChange={set("epName")}
                             placeholder="Enter EP Name"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, epNumberInputRef)}
                           />
                         </div>
@@ -933,6 +1071,7 @@ const handleSave = async () => {
                             onChange={set("epNumber")}
                             placeholder="Enter EP #"
                             className="fixed-width-field"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, bankInputRef)}
                           />
                         </div>
@@ -944,6 +1083,7 @@ const handleSave = async () => {
                             value={formStore.bank}
                             onChange={set("bank")}
                             placeholder="Enter Bank"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, accountNumberInputRef)}
                           />
                         </div>
@@ -955,6 +1095,7 @@ const handleSave = async () => {
                             value={formStore.accountNumber}
                             onChange={set("accountNumber")}
                             placeholder="Enter A/C #"
+                            maxLength={40}
                             onKeyDown={(e) => handleKeyDown(e, accountCodeInputRef)}
                           />
                         </div>
@@ -974,6 +1115,7 @@ const handleSave = async () => {
                     value={formStore.accountCode}
                     onChange={set("accountCode")}
                     placeholder="Enter A/C Code"
+                    maxLength={40}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -1004,11 +1146,20 @@ const handleSave = async () => {
                 onReturn={handleReturn}
                 onNew={handleNew}
                 saveButtonRef={saveButtonRef}
+                disabled={isSaving || isCoolingDown}
               />
             </form>
           </div>
         </div>
       </div>
+
+      {/* Installer Search Modal */}
+      <InstallerSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={handleModalClose}
+        onSelectInstaller={handleInstallerSelect}
+        apiLinks={apiLinks}
+      />
     </div>
   );
 }

@@ -5,15 +5,17 @@ export default function FormButtons({
   onSave,
   onReturn,
   onNew,
-  saveButtonRef, // Add this prop
+  saveButtonRef,
+  disabled = false,
 }) {
   return (
     <div className="el-form-actions">
       <button
-        ref={saveButtonRef} // Add this ref
+        ref={saveButtonRef}
         type="submit"
         className="el-btn el-btn-save"
         onClick={onSave}
+        disabled={disabled}
       >
         {saveText}
       </button>

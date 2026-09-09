@@ -1,4 +1,4 @@
-import React, { useEffect, forwardRef } from "react";
+import React, { useEffect, forwardRef, useCallback } from "react";
 import axios from "axios";
 
 const InstallationCode = forwardRef(({
@@ -9,7 +9,17 @@ const InstallationCode = forwardRef(({
   getLocationnumber,
   code,
   setCode,
+  onDoubleClick,
+  onCodeChange,
+  maxCode,
+  onMaxCodeChange,
 }, ref) => {
+
+  const padCode = useCallback((val) => {
+    if (!val && val !== 0) return val;
+    const digits = String(val).replace(/\D/g, '');
+    return digits.padStart(3, '0');
+  }, []);
 
   // Fetch installation code
   useEffect(() => {
@@ -32,10 +42,13 @@ const InstallationCode = forwardRef(({
           response.data.length > 0
         ) {
           // API response ka first value
-          const newCode = response.data[0];
+          const newCode = padCode(response.data[0]);
 
           // Parent ki code state update
           setCode(newCode);
+          if (onMaxCodeChange) {
+            onMaxCodeChange(newCode);
+          }
         } else {
           console.warn(
             "Response data structure is not as expected:",
@@ -57,11 +70,23 @@ const InstallationCode = forwardRef(({
     getLocationNumber,
     getLocationnumber,
     setCode,
+    padCode,
+    onMaxCodeChange,
   ]);
 
-  // Manual input change
+  // Manual input change (max 3 characters) — no padding during typing
   const handleCodeChange = (e) => {
-    setCode(e.target.value);
+    const value = e.target.value;
+    if (value.length <= 3) {
+      setCode(value);
+    }
+  };
+
+  // Pad when the user leaves the field
+  const handleBlur = () => {
+    if (code) {
+      setCode(padCode(code));
+    }
   };
 
   // Increase / Decrease
@@ -70,9 +95,20 @@ const InstallationCode = forwardRef(({
 
     if (isNaN(numericCode)) return;
 
-    const newCode = String(numericCode + amount);
+    const newNumericCode = numericCode + amount;
+
+    // Don't increment above maxCode
+    if (amount > 0 && maxCode) {
+      const maxNumeric = parseInt(maxCode, 10);
+      if (!isNaN(maxNumeric) && newNumericCode > maxNumeric) return;
+    }
+
+    const newCode = padCode(String(newNumericCode));
 
     setCode(newCode);
+    if (onCodeChange) {
+      onCodeChange(newCode);
+    }
   };
 
   return (
@@ -80,6 +116,9 @@ const InstallationCode = forwardRef(({
       <input
         value={code}
         onChange={handleCodeChange}
+        onBlur={handleBlur}
+        onFocus={(e) => e.target.select()}
+        onDoubleClick={onDoubleClick}
         placeholder="Code"
       />
       <div className="el-stepper">
