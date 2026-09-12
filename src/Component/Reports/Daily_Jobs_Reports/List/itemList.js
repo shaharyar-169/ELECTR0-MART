@@ -46,13 +46,18 @@ export default function ItemList() {
   const [Capacityselectdata, setCapacityselectdata] = useState("");
   const [capacityselectdatavalue, setcapacityselectdatavalue] = useState("");
   const [tableData, setTableData] = useState([]);
-  console.log("Tbaledata", tableData);
+  
   const [GetCapacity, setGetCapacity] = useState([]);
 
   const [Categoryselectdata, setCategoryselectdata] = useState("");
   const [categoryselectdatavalue, setcategoryselectdatavalue] = useState("");
 
   const [GetCategory, setGetCategory] = useState([]);
+
+  // -------- NEW: Design state (same pattern as Company/Category) --------
+  const [Designselectdata, setDesignselectdata] = useState("");
+  const [designselectdatavalue, setdesignselectdatavalue] = useState("");
+  const [GetDesign, setGetDesign] = useState([]);
 
   const [Typeselectdata, setTypeselectdata] = useState("");
   const [typeselectdatavalue, settypeselectdatavalue] = useState("");
@@ -71,6 +76,13 @@ export default function ItemList() {
   const [isAscendingdesig, setisAscendingdesig] = useState(true);
   const [isAscendingcontect, setisAscendingcontect] = useState(true);
   const [isAscendingadv, setisAscendingadv] = useState(true);
+
+  console.log("companyselected", Companyselectdata);
+  console.log("categoryseleted", Categoryselectdata);
+  console.log("capacityselected", Capacityselectdata);
+  console.log("typeselected", Typeselectdata);
+  console.log("designselected", Designselectdata);
+
 
   const {
     isSidebarVisible,
@@ -101,19 +113,19 @@ export default function ItemList() {
 
     const formData = new URLSearchParams({
       FItmSts: transectionType,
-
       FCapCod: Capacityselectdata,
       FCtgCod: Categoryselectdata,
       FSchTxt: searchQuery,
       FCmpCod: Companyselectdata,
       FTypCod: Typeselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
+      FDsgCod: Designselectdata,     // ← NEW: Design code sent to ItemList API
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
 
-      // code: 'NASIRTRD',
-      // FLocCod: '001',
-      // FYerDsc: '2025-2025',
+      code: 'AMRELEC',
+      FLocCod: '001',
+      FYerDsc: '2025-2025',
     }).toString();
 
     axios
@@ -265,6 +277,23 @@ export default function ItemList() {
     }
   };
 
+  // -------- NEW: Design keypress → moves focus to Status select --------
+  const handleDesignKeypress = (event, inputId) => {
+    if (event.key === "Enter") {
+      const selectedOption = input1Ref.current.state.selectValue;
+      if (selectedOption && selectedOption.value) {
+        setDesignselectdata(selectedOption.value);
+      }
+      const nextInput = inputId.current;
+
+      if (nextInput) {
+        nextInput.focus();
+      } else {
+        document.getElementById("submitButton").click();
+      }
+    }
+  };
+
   const handleKeyPress = (e, nextInputRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -363,6 +392,35 @@ export default function ItemList() {
   const categoryoptions = GetCategory.map((item) => ({
     value: item.tctgcod,
     label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+  }));
+
+  // -------- NEW: Design options fetched from GetActiveDesign.php --------
+  useEffect(() => {
+    const apiUrl = apiLinks + "/GetActiveDesign.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+    }).toString();
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setGetDesign(response.data);
+        } else {
+          console.warn(
+            "Response data structure is not as expected:",
+            response.data
+          );
+          setGetDesign([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+
+  const designoptions = GetDesign.map((item) => ({
+    value: item.tdsgcod,
+    label: `${item.tdsgcod}-${item.tdsgdsc.trim()}`,
   }));
 
   useEffect(() => {
@@ -1260,30 +1318,6 @@ export default function ItemList() {
 
   let totalEntries = 0;
 
-  // const firstColWidth = {
-  //   width: "15%",
-  // };
-  // const secondColWidth = {
-  //   width: "40%",
-  // };
-  // const thirdColWidth = {
-  //   width: "15.4%",
-  // };
-  // const forthColWidth = {
-  //   width: "18%",
-  // };
-  // const fifthColWidth = {
-  //   width: "10%",
-  // };
-  // const sixthColWidth = {
-  //   width: "20%",
-  // };
-  // const seventhColWidth = {
-  //   width: "10%",
-  // };
-
-
-
   const firstColWidth = {
     width: "135px",
   };
@@ -1578,30 +1612,6 @@ export default function ItemList() {
                   >
                     {item.Category}
                   </td>
-                  {/* <td
-                    className="text-start"
-                    title={item.Capacity}
-                    style={{
-                      ...fifthColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Capacity}
-                  </td>
-                  <td
-                    className="text-start"
-                    title={item.Type}
-                    style={{
-                      ...sixthColWidth,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.Type}
-                  </td> */}
 
                   <td
                     className="text-center"
@@ -1798,7 +1808,7 @@ export default function ItemList() {
                     className="List-select-class "
                     ref={input3Ref}
                     options={typeoptions}
-                    onKeyDown={(e) => handletypeKeypress(e, input11Ref)}
+                    onKeyDown={(e) => handletypeKeypress(e, input4Ref)}
                     id="selectedsale"
                     onChange={(selectedOption) => {
                       if (selectedOption && selectedOption.value) {
@@ -1925,6 +1935,7 @@ export default function ItemList() {
                 </div>
               </div>
 
+              {/* -------- DESIGN dropdown now sits where Status was -------- */}
               <div
                 className="d-flex align-items-center"
                 style={{ marginRight: "21px" }}
@@ -1945,68 +1956,59 @@ export default function ItemList() {
                         fontWeight: "bold",
                       }}
                     >
-                      Status :
+                      Design :
                     </span>
                   </label>
                 </div>
 
-
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    ref={input11Ref}
-                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
-                    id="submitButton"
-                    name="type"
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "4px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    value={transectionType}
-                    onChange={handleTransactionTypeChange}
-                    style={{
-                      width: "300px",
-                      height: "24px",
-                      marginLeft: "5px",
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      paddingLeft: "12px",
+                <div style={{ marginLeft: "3px" }}>
+                  <Select
+                    className="List-select-class "
+                    ref={input4Ref}
+                    options={designoptions}
+                    onKeyDown={(e) => handleDesignKeypress(e, input11Ref)}
+                    id="selectedsaleDesign"
+                    onChange={(selectedOption) => {
+                      if (selectedOption && selectedOption.value) {
+                        const labelPart = selectedOption.label.split("-")[1];
+                        setDesignselectdata(selectedOption.value);
+                        setdesignselectdatavalue({
+                          value: selectedOption.value,
+                          label: labelPart,
+                        });
+                      } else {
+                        setDesignselectdata("");
+                        setdesignselectdatavalue("");
+                      }
                     }}
-                  >
-                    <option value="">All</option>
-                    <option value="A">Active</option>
-                    <option value="N">Not Active</option>
-                  </select>
-
-                  {transectionType !== "" && (
-                    <span
-                      onClick={() => settransectionType("")}
-                      style={{
-                        position: "absolute",
-                        right: "25px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontWeight: "bold",
+                    onInputChange={(inputValue, { action }) => {
+                      if (action === "input-change") {
+                        return inputValue.toUpperCase();
+                      }
+                      return inputValue;
+                    }}
+                    components={{ Option: DropdownOption }}
+                    styles={{
+                      ...customStyles1(!Companyselectdata),
+                      placeholder: (base) => ({
+                        ...base,
+                        textAlign: "left",
+                        marginLeft: "0",
+                        justifyContent: "flex-start",
                         color: fontcolor,
-                        userSelect: "none",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
+                        marginTop: "-5px",
+                      }),
+                    }}
+                    isClearable
+                    placeholder="ALL"
+                  />
                 </div>
               </div>
-
             </div>
           </div>
 
           {/* //////////////// THIRD ROW ///////////////////////// */}
+          {/* Capacity on the left, Status moved here (where Search was) */}
           <div
             className="row"
             style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -2090,8 +2092,106 @@ export default function ItemList() {
                 </div>
               </div>
 
+              {/* -------- STATUS moved here (previously Search position) -------- */}
+              <div
+                className="d-flex align-items-center"
+                style={{ marginRight: "21px" }}
+              >
+                <div
+                  style={{
+                    marginLeft: "10px",
+                    width: "80px",
+                    display: "flex",
+                    justifyContent: "end",
+                  }}
+                >
+                  <label htmlFor="transactionType">
+                    <span
+                      style={{
+                        fontSize: getdatafontsize,
+                        fontFamily: getfontstyle,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Status :
+                    </span>
+                  </label>
+                </div>
+
+
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    ref={input11Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input5Ref)}
+                    id="submitButton"
+                    name="type"
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "4px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    value={transectionType}
+                    onChange={handleTransactionTypeChange}
+                    style={{
+                      width: "300px",
+                      height: "24px",
+                      marginLeft: "5px",
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      paddingLeft: "12px",
+                    }}
+                  >
+                    <option value="">All</option>
+                    <option value="A">Active</option>
+                    <option value="N">Not Active</option>
+                  </select>
+
+                  {transectionType !== "" && (
+                    <span
+                      onClick={() => settransectionType("")}
+                      style={{
+                        position: "absolute",
+                        right: "25px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: fontcolor,
+                        userSelect: "none",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* //////////////// FOURTH ROW ///////////////////////// */}
+          {/* Search moved here (next row), aligned to the right */}
+          <div
+            className="row"
+            style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                margin: "0px",
+                padding: "0px",
+                justifyContent: "end",
+              }}
+            >
               <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
+                <label htmlFor="searchInput" style={{ marginRight: "4px" }}>
                   <span
                     style={{
                       fontSize: getdatafontsize,
@@ -2238,30 +2338,6 @@ export default function ItemList() {
                       ></i>
                     </td>
 
-                    {/* <td
-                      className="border-dark"
-                      style={fifthColWidth}
-                      onClick={() => handleSorting("Capacity")}
-                    >
-                      Capacity{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Capacity")}
-                      ></i>
-                    </td>
-
-                    <td
-                      className="border-dark"
-                      style={sixthColWidth}
-                      onClick={() => handleSorting("Type")}
-                    >
-                      Type{" "}
-                      <i
-                        className="fa-solid fa-caret-down caretIconStyle"
-                        style={getIconStyle("Type")}
-                      ></i>
-                    </td> */}
-
                     <td
                       className="border-dark"
                       style={seventhColWidth}
@@ -2291,7 +2367,7 @@ export default function ItemList() {
                 backgroundColor: textColor,
                 borderBottom: `1px solid ${fontcolor}`,
                 overflowY: "auto",
-                maxHeight: "45vh",
+                maxHeight: "40vh",
                 // width: "100%",
                 wordBreak: "break-word",
               }}
@@ -2353,20 +2429,6 @@ export default function ItemList() {
                 borderRight: `1px solid ${fontcolor}`,
               }}
             ></div>
-            {/* <div
-              style={{
-                ...fifthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...sixthColWidth,
-                background: getcolor,
-                borderRight: `1px solid ${fontcolor}`,
-              }}
-            ></div> */}
             <div
               style={{
                 ...seventhColWidth,
